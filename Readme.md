@@ -28,3 +28,25 @@ To use a specific pack:
 2. Download the corresponding `.tar.gz` file.
 3. Follow the instructions in the [RDA Packs Deployment Guide](https://bot-docs.cloudfabrix.io/beginners_guide/rda_packs/#6-rda-packs-deployment-steps) to upload and deploy the pack.
 
+## Latest Versions of RDA Packs
+
+
+| RDA Pack Name | RDA Pack Version | Description |
+|---------------|------------------|-------------|
+| [Base Pack](https://github.com/cloudfabrix/rda_packs/tree/main/Base%20Pack/5.0.0) | 5.0.0 | This pack contains the artifacts that are common to the inventory collection packs that depend on them: |
+| [Cisco Catalyst Center](https://github.com/cloudfabrix/rda_packs/tree/main/Cisco%20Catalyst%20Center/9.0.1) | 9.0.1 | This pack is designed for inventory collection for Cisco Catalyst Center.   |
+| [Cisco Meraki](https://github.com/cloudfabrix/rda_packs/tree/main/Cisco%20Meraki/9.0.1) | 9.0.1 | Cisco Meraki pack is designed for inventory collection for Meraki using **Meraki-Networks** . |
+| [Cisco vManage](https://github.com/cloudfabrix/rda_packs/tree/main/Cisco%20vManage/9.0.1) | 9.0.1 | Cisco vManage pack is designed for inventory collection for vManage using **query-api** bot. |
+| [Fabrix AIOPs snmp](https://github.com/cloudfabrix/rda_packs/tree/main/Fabrix%20AIOPs%20snmp/8.0.2) | 8.0.2 | Fabrix AIOPs SNMP Pack collects SNMP alerts. |
+| [Fabrix AIOPs syslogs](https://github.com/cloudfabrix/rda_packs/tree/main/Fabrix%20AIOPs%20syslogs/8.0.2) | 8.0.2 | Fabrix AIOPs syslogs Pack collects Syslog alerts. |
+| [Fabrix AIOps Fault Management Base](https://github.com/cloudfabrix/rda_packs/tree/main/Fabrix%20AIOps%20Fault%20Management%20Base/8.0.2) | 8.0.2 | Fabrix AIOps Fault Management Base solution package creates Alerts and Incidents |
+| [Fabrix AIOps Network Performance Management SNMP](https://github.com/cloudfabrix/rda_packs/tree/main/Fabrix%20AIOps%20Network%20Performance%20Management%20SNMP/8.0.2) | 8.0.2 | Fabrix AIOps Network Performance Management SNMP Pack collects SNMP Metrics and displays in the KPI Workbench. |
+| [Fabrix AIOps Network Performance Management Telemetry](https://github.com/cloudfabrix/rda_packs/tree/main/Fabrix%20AIOps%20Network%20Performance%20Management%20Telemetry/8.0.2) | 8.0.2 | Fabrix AIOps Network Performance Management Telemetry Pack collects Telemetry Metrics and displays in the KPI Workbench. |
+| [Fabrix Inventory Collection Base Pack](https://github.com/cloudfabrix/rda_packs/tree/main/Fabrix%20Inventory%20Collection%20Base%20Pack/6.0.0) | 6.0.0 | This pack contains the artifacts that are common to the inventory collection packs that depend on them. |
+| [Linux and Windows Host OS](https://github.com/cloudfabrix/rda_packs/tree/main/Linux%20and%20Windows%20Host%20OS/3.0.0) | 3.0.0 | This pack is designed to do inventory collection for both Linux and Windows hosts using the following bots:   |
+| [Network Device Discovery](https://github.com/cloudfabrix/rda_packs/tree/main/Network%20Device%20Discovery/8.0.2) | 8.0.2 | Network Device Discovery solution package collects inventory data for network devices. |
+| [RDA Dashboard Training](https://github.com/cloudfabrix/rda_packs/tree/main/RDA%20Dashboard%20Training/1.0.0) | 1.0.0 | The RDA Dashboard Training Pack provides a comprehensive, hands-on learning experience for building dynamic dashboards using RDA’s powerful widget library. |
+| [VMWare VeloCloud](https://github.com/cloudfabrix/rda_packs/tree/main/VMWare%20VeloCloud/8.0.0) | 8.0.0 | This pack is designed to collect inventory for VeloCloud. |
+| [VMWare vCenter](https://github.com/cloudfabrix/rda_packs/tree/main/VMWare%20vCenter/9.0.1) | 9.0.1 | This pack is designed for inventory collection for vCenter. |
+| [VMware vROps](https://github.com/cloudfabrix/rda_packs/tree/main/VMware%20vROps/9.0.0) | 9.0.0 | VMware vROps pack is designed for metric collection for VMware vROps.|
+
