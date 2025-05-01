@@ -14,7 +14,7 @@ Following are the key features covered by Fabrix AIOPs SNMP solution package:
 
 ## Prerequisites
 - Fabrix AIOps Fault Management Base pack should be Activated 
-- Alert endpoints , mappings, Correlation and Supression policies configuration. <a href="https://bot-docs.cloudfabrix.io/installation_guides/oia_management" target="_blank">Click here for configuation guide.</a><br>Use SNMP mapping script . <a href="https://github.com/cloudfabrix/rda_packs/tree/main/Fabrix%20AIOps%SNMP/8.0.2/resources" target="_blank">Click here for Snmp mapping script</a><br>NOTE: Refer<br>Alert Endpoints - 4.1.3 [ Note - The alert endpoint name should be `SNMP_Traps` ]<br>Alert Mappings - 4.1.6<br>Correlation Policies - 7.3.2<br>
+- Alert endpoints , mappings, Correlation and Supression policies configuration. <a href="https://bot-docs.cloudfabrix.io/installation_guides/oia_management" target="_blank">Click here for configuation guide.</a><br>Use SNMP mapping script . <a href="https://github.com/cloudfabrix/rda_packs/tree/main/Fabrix%20AIOPs%20snmp/8.0.2/resources" target="_blank">Click here for Snmp mapping script</a><br>NOTE: Refer<br>Alert Endpoints - 4.1.3 [ Note - The alert endpoint name should be `SNMP_Traps` ]<br>Alert Mappings - 4.1.6<br>Correlation Policies - 7.3.2<br>
 - Add `snmp_trap_event_stream` pstream for single tenant and `<customer_tag>_snmp_trap_event_stream` for multi tenant.<br>1.vi default_values.json<br>```{
 	"device_status": "UNMANAGED"
 } ```<br>2.vi enrich.json<br>```{   
