@@ -6,7 +6,7 @@ This pack is designed to automate the systematic monitoring and analysis of asse
 
 ### Feature Summary
 - ML Usecase Guide. <a href="https://bot-docs.cloudfabrix.io/installation_guides/ml_usecase_guide" target="_blank">Click here for Usecase guide.</a>
-- Use Formatting template and Mapping Script.  <a href="https://github.com/cloudfabrix/rda_packs/tree/main/Fabrix%20AIOPs%20Asset%20Correlation%20Regression/9.0.0/resources" target="_blank">Click here for Formatting Template and Mapping Script</a>
+- Use Formatting template and Mapping Script.  <a href="https://github.com/cloudfabrix/rda_packs/blob/main/Fabrix%20AIOps%20Asset%20Correlation%20Regression/9.0.0/resources" target="_blank">Click here for Formatting Template and Mapping Script</a>
 
 
 ### Prerequisites
