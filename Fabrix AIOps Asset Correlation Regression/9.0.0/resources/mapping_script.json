@@ -1,0 +1,126 @@
+[
+    {
+        "from": "resourceId",
+        "to": "assetId"
+    },
+    {
+        "from": "resourceKind",
+        "to": "assetType"
+    },
+    {
+        "from": "resourceId",
+        "to": "componentId"
+    },
+    {
+        "from": "resourceName",
+        "to": "componentName"
+    },
+    {
+        "from": "criticality",
+        "to": "severity",
+        "func": {
+            "map_values": {
+                "critical": "CRITICAL",
+                "immediate": "MAJOR",
+                "warning": "WARNING",
+                "default": "WARNING"
+            }
+        }
+    },
+    {
+        "from": "alertName",
+        "to": "message"
+    },
+    {
+        "from": "startDate",
+        "to": "startDate",
+        "func": {
+            "datetime": {
+                "tzmap": {
+                    "PST": "US/Pacific",
+                    "PDT": "US/Pacific"
+                }
+            }
+        }
+    },
+    {
+        
+        "to": "_tmp_cancelDate",
+        "func": {
+            "evaluate": {
+                "expr": "cancelDate if status != 'Active' and cancelDate != 'Unavailable' else None"
+            },
+            "datetime": {
+                "tzmap": {
+                    "PST": "US/Pacific",
+                    "PDT": "US/Pacific"
+                }
+            }
+        }
+    },
+
+    {
+        "to": "raisedAt",
+        "func": {
+            "evaluate": {
+                "expr": "startDate if status != 'Canceled' else 0"
+            }
+        }
+    },
+    {
+        "to": "clearedAt",
+        "func": {
+            "evaluate": {
+                "expr": "_tmp_cancelDate if status == 'Canceled' else 0"
+            }
+        }
+    },
+    {
+        "from": "resourceName",
+        "to": "assetName"
+    },
+    {
+        "from": "resourceName",
+        "to": "assetIpAddress"
+    },
+    {
+        "from": "alert_customer_id",
+        "to": "customer_id"
+    },
+    {
+        "from": "subType",
+        "to": "alertType",
+        "func": {
+            "split": {
+                "sep": "ALERT_SUBTYPE_"
+            },
+            "valueRef": {
+                "path": "-1"
+            }
+        }
+    },
+    {
+        "from": "type",
+        "to": "alertType"
+    },
+    {
+        "to": "sourceMechanism",
+        "func": {
+            "evaluate": {
+                "expr": "'vROps'"
+            }
+        }
+    },
+    {
+        "from": [
+            "assetId",
+            "alertId"
+        ],
+        "to": "sourceId",
+        "func": {
+            "join": {
+                "sep": "#"
+            }
+        }
+    }
+]

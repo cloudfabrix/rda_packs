@@ -1,0 +1,118 @@
+{
+    "mappings": [
+      {
+        "from": "device_status",
+        "to": "device_status"
+      },
+      {
+        "from": "customer_tag",
+        "to": "customer_tag"
+      },
+      {
+        "from": "rda_gw_ep_type",
+        "to": "alert_issue_type"
+      },
+      {
+        "from": "syslog_facility",
+        "to": "syslog_facility"
+      },
+      {
+        "from": "syslog_facility_num",
+        "to": "syslog_facility_num"
+      },
+      {
+        "from": "syslog_severity_num",
+        "to": "syslog_severity_num"
+      },
+      {
+        "to": "sourceMechanism",
+        "func": {
+          "evaluate": {
+            "expr": "'syslog'"
+          }
+        }
+      },
+      {
+        "to": "alertType",
+        "func": {
+          "evaluate": {
+            "expr": "'Syslog'"
+          }
+        }
+      },
+      {
+        "from": "message",
+        "to": "message"
+      },
+      {
+        "from": "rda_gw_client_ip",
+        "to": "assetIpAddress"
+      },
+      {
+        "from": "device_hostname_short",
+        "to": "assetName"
+      },
+      {
+        "to": "assetName",
+        "func": {
+          "evaluate": {
+            "expr": "assetName if assetName else assetIpAddress"
+          }
+        }
+      },
+      {
+        "func": [
+          {
+            "stream_enrich": {
+              "name": "cfx-rdaf-topology-edges",
+              "condition": "device_ip is '$assetIpAddress'",
+              "enriched_columns": "edge_id"
+            }
+          }
+        ]
+      },
+      {
+        "from": "rda_gw_timestamp",
+        "to": "raisedAt",
+        "func": {
+          "datetime": {}
+        }
+      },
+      {
+        "to": "key",
+        "func": {
+          "evaluate": {
+            "expr": "str(rda_gw_seq)"
+          }
+        }
+      },
+      {
+        "from": "syslog_severity",
+        "to": "severity",
+        "func": {
+          "map_values": {
+            "CRITICAL": "CRITICAL",
+            "ERROR": "MAJOR",
+            "ALERT": "MINOR",
+            "EMERGENCY": "CRITICAL",
+            "WARNING": "WARNING",
+            "DEBUG": "NOTIFICATION",
+            "INFORMATIONAL": "INFORMATION",
+            "NOTICE": "NOTIFICATION",
+            "default": "INFORMATION"
+          }
+        }
+      },
+      {
+        "func": {
+          "stream_enrich": {
+            "name": "cfx-rdaf-topology-nodes",
+            "condition": "(device_ip is '$assetIpAddress' and device_object is 'Chassis' and customerTag is '$customerTag')",
+            "enriched_columns": ""
+          }
+        }
+      }
+    ],
+    "keepUnmapped": true
+  }
+  

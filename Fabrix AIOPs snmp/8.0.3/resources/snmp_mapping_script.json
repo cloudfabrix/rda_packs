@@ -1,0 +1,215 @@
+{
+    "mappings": [
+      {
+        "from": "rda_gw_ep_type",
+        "to": "alert_issue_type"
+      },
+      {
+        "from": "message",
+        "to": "message"
+      },
+      {
+        "from": "customer_tag",
+        "to": "customer_tag"
+      },
+      {
+        "from": "ifIndex",
+        "to": "ifIndex",
+        "func": [
+          {
+            "evaluate": {
+              "expr": "str(ifIndex).split('.')[0]"
+            }
+          }
+        ]
+      },
+      {
+        "from": "snmp_trap_name",
+        "to": "snmp_trap_name"
+      },
+      {
+        "to": "snmp_trap_type",
+        "func": [
+          {
+            "evaluate": {
+              "expr": "'linkStatus' if snmp_trap_name == 'linkUp' or snmp_trap_name == 'linkDown' else snmp_trap_name"
+            }
+          }
+        ]
+      },
+      {
+        "from": "snmp_trap_type",
+        "to": "alertType"
+      },
+      {
+        "from": "port_channel_name",
+        "to": "port_channel_name",
+        "func": {
+          "when_null": {
+            "value": ""
+          }
+        }
+      },
+      {
+        "from": "device_int_shortname",
+        "to": "device_int_shortname",
+        "func": {
+          "when_null": {
+            "value": ""
+          }
+        }
+      },
+      {
+        "to": "port_channel_name",
+        "func": [
+          {
+            "evaluate": {
+              "expr": "device_int_shortname if 'Po' in device_int_shortname else port_channel_name"
+            }
+          }
+        ]
+      },
+      {
+        "from": "cdp_device_order",
+        "to": "cdp_device_order"
+      },
+      {
+        "to": "cdp_device_order",
+        "func": [
+          {
+            "evaluate": {
+              "expr": "'9.3.140.19:9.3.140.20' if port_channel_name and 'Po' in port_channel_name else cdp_device_order if cdp_device_order and cdp_device_order != '' else ''"
+            }
+          }
+        ]
+      },
+      {
+        "from": "snmp_trap_oid",
+        "to": "snmp_trap_oid"
+      },
+      {
+        "from": "rda_gw_client_ip",
+        "to": "assetIpAddress"
+      },
+      {
+        "from": "device_int_name",
+        "to": "interface_name"
+      },
+      {
+        "from": "device_ip",
+        "to": "device_ip",
+        "func": {
+          "when_null": {
+            "value": ""
+          }
+        }
+      },
+      {
+        "from": "device_hostname_short",
+        "to": "assetName"
+      },
+      {
+        "to": "state",
+        "func": {
+          "evaluate": {
+            "expr": "'Open'"
+          }
+        }
+      },
+      {
+        "from": "timestamp",
+        "to": "_tmp_triggered_time",
+        "func": {
+          "datetime": {}
+        }
+      },
+      {
+        "to": "raisedAt",
+        "func": [
+          {
+            "evaluate": {
+              "expr": "_tmp_triggered_time if state == 'Open' else 0"
+            }
+          }
+        ]
+      },
+      {
+        "to": "clearedAt",
+        "func": [
+          {
+            "evaluate": {
+              "expr": "_tmp_triggered_time if state == 'Clear' else 0"
+            }
+          }
+        ]
+      },
+      {
+        "from": "severity",
+        "to": "severity",
+        "func": {
+          "map_values": {
+            "Warning": "WARNING",
+            "Major": "MAJOR",
+            "Critical": "CRITICAL",
+            "*": "WARNING"
+          }
+        }
+      },
+      {
+        "func": [
+          {
+            "stream_enrich": {
+              "name": "network_devices_cdp",
+              "condition": "device_ip is '$assetIpAddress' and device_int_name is '$interface_name'",
+              "enriched_columns": "interface_connectivity_key"
+            }
+          }
+        ]
+      },
+      {
+        "func": {
+          "stream_enrich": {
+            "name": "cfx-rdaf-topology-nodes",
+            "condition": "node_id is '$assetIpAddress'",
+            "enriched_columns": ""
+          }
+        }
+      },
+      {
+        "from": "snmp_trap_name",
+        "to": "alarm_class",
+        "func": {
+          "map_values": {
+            "linkDown": "Interface",
+            "linkUp": "Interface",
+            "warmStart": "Device",
+            "coldStart": "Device"
+          }
+        }
+      },
+      {
+        "from": "snmp_trap_name",
+        "to": "alarm_description",
+        "func": {
+          "map_values": {
+            "linkDown": "Interface down",
+            "linkUp": "Interface down (CLEARED)",
+            "warmStart": "Device down",
+            "coldStart": "Device down"
+          }
+        }
+      },
+      {
+        "to": "key",
+        "func": [
+          {
+            "evaluate": {
+              "expr": "device_ip+''+snmp_trap_type+''+ifIndex if ifIndex else device_ip+''+snmp_trap_type"
+            }
+          }
+        ]
+      }
+    ],
+    "keepUnmapped": true
+  }
+  
