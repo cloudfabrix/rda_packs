@@ -1,13 +1,19 @@
 
 ### Overview  
   
-Network Device Discovery solution package collects inventory data for network devices. Following network device vendors are supported out of the box.
+Network Device Discovery solution package collects inventory data for network devices. Following network device vendors are supported out of the box. If needed, additional ones can be added.  
   
 - Cisco  
 - Juniper  
 - Fortinet  
 
 
+This pack is designed for inventory collection for Network Devices using **asset-discovery** extension. Following bots are being called by this pack:
+
+- **collector**
+- **get-collection-files**
+
+  
 ### Feature Summary  
   
 Following are the key features covered by Network Device Discovery solution package:  
@@ -30,7 +36,7 @@ NOTE:
 |------|-------------|  
 | 1    | Activate the solution pack. After the Pack is in `ACTIVATED` status, use `Enable Single Tenant` menu option to enable the pack.  |  
 | 2    | Use `Launch Dashboard` menu option to navigate to the pack's dashboard. Note: For multinent tenant environment, the pack specific dashboards will be available in Customer Ops page.|     
-| 3   | Use `Configure and Manage` ->  `Network Credentials` to create snmp credentials for devices. `snmp-cred`,`device-snmp-v1v2`, and `device-snmp-v3` credential types are supported. snmp access is required. In addition, ssh  credentials of type `device-host-ssh`, and `ssh-cred` can be created if collection using ssh is needed.|   
+| 3   | Use `Configure and Manage` ->  `Network Credentials` to create credentials of type `snmp-cred`,`device-snmp-v1v2`,`device-snmp-v3`,`device-host-ssh`,`ssh-cred`  with the correct values.  |   
 | 4    | Use `Configure and Manage` -> `Network Discovery Targets` to on board Network Devices. Use `Add Devices` or `Import Devices` by Uploading csv file with columns device_ip and discovery_scope. For Example: 10.95.158.10,yes. |  
 | 5    | Under `Configure and Manage` ->  `Run Discovery`  use `Run Access Verification` option to perform the credential check for Network Devices. The verification results can be seen in `Status` -> `Access Verification Status` dashboard page. |  
 | 6    | Use `Configure and Manage` ->  `Run Discovery` to view and/or edit the schedule of the discovery or run the discovery on demand using `Run Discovery` option . Use `Status` -> `Discovery Status` to view the device discovery status. |  

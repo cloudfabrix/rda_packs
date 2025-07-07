@@ -1,4 +1,4 @@
-This pack s designed to do inventory collection for both Linux and Windows hosts using the following bots:  
+This pack is designed for single-tenant deployments and inventory collection for both Linux and Windows hosts using the following bots:  
   
 - **System-info**  
 - **Disks**  

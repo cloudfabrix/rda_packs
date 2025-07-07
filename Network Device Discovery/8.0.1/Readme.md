@@ -1,10 +1,17 @@
 
 ### Overview  
   
-Network Device Discovery solution package collects inventory data for network devices. Following network device vendors are supported.
+Network Device Discovery solution package collects inventory data for network devices. Following network device vendors are supported out of the box. If needed, additional ones can be added.  
+  
 - Cisco  
 - Juniper  
 - Fortinet  
+
+
+This pack is designed for inventory collection for Network Devices using **asset-discovery** extension. Following bots are being called by this pack:
+
+- **collector**
+- **get-collection-files**
 
   
 ### Feature Summary  
