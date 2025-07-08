@@ -1,0 +1,79 @@
+name: Fabrix Inventory Collection Base Pack
+version: 6.0.0
+folder: /collection/base_pack
+published_date: 2025-04-29
+publisher: Fabrix
+label: Base pack for inventory collection packs
+scope: system
+description: 
+  value: ""
+  md: "./description.md"
+type: feature
+launch_dashboard: inventory_collection_main_app
+
+artifacts:
+
+  pstreams:
+    - name: rda_packs_dynamic_groups_and_pages
+      attributes:
+        retention_days: 365
+        unique_keys: ["pack_id","pack_version","customer_tag","dashboard_group_name","dashboard_page_name"]
+        search_case_insensitive: true
+        _settings: {
+        "number_of_shards": 3,
+        "number_of_replicas": 1,
+        "refresh_interval": "30s"}
+
+    - name: cfx_rdaf_topology_nodes
+      attributes:
+        unique_keys: [ "node_id"]
+        default_values: {
+        "iconURL": "Not Available"}
+        search_case_insensitive: true
+        _settings: {
+      "number_of_shards": 3,
+      "number_of_replicas": 1,
+      "refresh_interval": "1s"}
+      remove_on_deactivation: true
+
+    - name: cfx_rdaf_topology_edges
+      attributes:
+        unique_keys: ["left_id","right_id"]
+        search_case_insensitive: true
+        _settings: {
+        "number_of_shards": 3,
+        "number_of_replicas": 1,
+        "refresh_interval": "1s"}
+      remove_on_deactivation: true
+    - name: asset_inventory_collection_status_stream
+      attributes:
+        retention_days: 7
+      remove_on_deactivation: true
+
+  dashboards:
+    - name: inventory_collection_main_app
+      file: ./artifacts/dashboards/inventory_collection_main_app.json
+    
+  #     file: ./artifacts/dashboards/msp_administration.json
+  #   - name: onboarded_customer_list
+  #     file: ./artifacts/dashboards/onboarded_customer_list.json
+  #   - name: devices_placeholder_page
+  #     file: ./artifacts/dashboards/devices_placeholder_page.json
+  #   - name: rda-mgmt-page-credentials-test
+  #     file: ./artifacts/dashboards/rda-mgmt-page-credentials-test.json
+  #   - name: rda-mgmt-page-blueprints-test
+  #     file: ./artifacts/dashboards/rda-mgmt-page-blueprints-test.json
+  
+  stacks:
+    - name: cfx_rdaf_topology
+      file: ./artifacts/stacks/cfx_rdaf_topology.json
+  relationship_maps:
+    - name: rdaf_topology_relationships
+      file: ./artifacts/relationship_maps/rdaf_topology_relationships.json
+      
+  graphdbs:
+    - name: cfx_rdaf_topology
+     
+      
+      
+  

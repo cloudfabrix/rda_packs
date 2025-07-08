@@ -1,0 +1,215 @@
+{
+    "name": "vmware_esxi_vswitches",
+    "description": "VMware vCenter ESXi vSwitches - Analytics",
+    "label": "ESXi vSwitches",
+    "enabled": false,
+    "dashboard_type": "template",
+    "dashboard_style": "auto",
+    "dashboard_folder": "VMware",
+    "live_edit": true,
+    "template_variables": {
+        "CUST_ID": {
+            "contextId": "customerId"
+        },
+        "PROJ_ID": {
+            "contextId": "projectId"
+        },
+        "CUST_TAG": {
+            "contextId": "customerTag"
+        }
+    },
+    "dashboard_filters": {
+        "time_filter": true,
+        "columns_filter": [
+            {
+                "id": "vcenter_address",
+                "label": "vCenter IP",
+                "type": "TEXT"
+            },
+            {
+                "id": "vcenter_name",
+                "label": "vCenter Name",
+                "type": "TEXT"
+            },
+            {
+                "id": "datacenter",
+                "label": "Datacenter",
+                "type": "TEXT"
+            },
+            {
+                "id": "esxi_host",
+                "label": "ESXi Host",
+                "type": "TEXT"
+            },
+            {
+                "id": "vswitch_name",
+                "label": "ESXi vSwitch Name",
+                "type": "TEXT"
+            }
+        ],
+        "default_time_filter_labels": [
+            "Last 1 month"
+        ],
+        "group_filters": [
+            {
+                "stream": "vmware-vcenter-inventory",
+                "extra_filter": "customer_tag is '{{CUST_TAG}}' or customer_tag is empty",
+                "title": "vCenter IP",
+                "group_by": [
+                    "vcenter_address"
+                ],
+                "others_spec": {
+                    "limit": 250
+                },
+                "ts_column": "collection_timestamp",
+                "agg": "value_count",
+                "column": "_id",
+                "type": "int"
+            },
+            {
+                "stream": "vmware-vcenter-inventory",
+                "extra_filter": "customer_tag is '{{CUST_TAG}}' or customer_tag is empty",
+                "title": "vCenter Name",
+                "group_by": [
+                    "vcenter_name"
+                ],
+                "others_spec": {
+                    "limit": 250
+                },
+                "ts_column": "collection_timestamp",
+                "agg": "value_count",
+                "column": "_id",
+                "type": "int"
+            },
+            {
+                "stream": "vmware-vcenter-inventory",
+                "extra_filter": "customer_tag is '{{CUST_TAG}}' or customer_tag is empty",
+                "title": "Datacenter",
+                "group_by": [
+                    "datacenter"
+                ],
+                "others_spec": {
+                    "limit": 250
+                },
+                "ts_column": "collection_timestamp",
+                "agg": "value_count",
+                "column": "_id",
+                "type": "int"
+            },
+            {
+                "stream": "vmware-vcenter-inventory",
+                "extra_filter": "customer_tag is '{{CUST_TAG}}' or customer_tag is empty",
+                "title": "ESXi Host",
+                "group_by": [
+                    "esxi_host"
+                ],
+                "others_spec": {
+                    "limit": 250
+                },
+                "ts_column": "collection_timestamp",
+                "agg": "value_count",
+                "column": "_id",
+                "type": "int"
+            }
+        ]
+    },
+    "dashboard_sections": [
+        {
+            "title": "ESXi vSwitches",
+            "show_filter": true,
+            "widgets": [
+                {
+                    "widget_type": "tabular",
+                    "title": "vSwitch Details",
+                    "stream": "vmware-vcenter-inventory",
+                    "extra_filter": "asset_object = 'vSwitch' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "ts_column": "collection_timestamp",
+                    "sorting": [],
+                    "resizableColumns": false,
+                    "paginated": true,
+                    "virtual_scrolling": false,
+                    "showRowSummary": true,
+                    "max_rows": 200,
+                    "custom_columns": [
+                        {
+                            "id": "node_id_vswitch",
+                            "label": "Node ID",
+                            "expr": "esxi_host+'_'+vswitch_name",
+                            "visible": false
+                        }
+                    ],
+                    "columns": {
+                        "vswitch_name": {
+                            "title": "vSwitch Name",
+                            "key": true
+                        },
+                        "vswitch_type": "vSwitch Type",
+                        "vswitch_pnic": {
+                            "title": "vSwitch pNIC",
+                            "key": true
+                        },
+                        "vswitch_version": "vSwitch Version",
+                        "esxi_host": "ESXi Host",
+                        "datacenter": "Datacenter",
+                        "vcenter_name": "vCenter Name",
+                        "vcenter_address": "vCenter IP",
+                        "collection_timestamp": {
+                            "title": "Collection Timestamp",
+                            "type": "DATETIME"
+                        }
+                    },
+                    "actions0": [
+                        {
+                            "permission": "rda:user_dashboard:view",
+                            "appName": "user-dashboard/vmware_esxi_vswitches_single",
+                            "drillDownLinkField": "vswitch_name",
+                            "identifier": "launch.dashboard.device_view_app",
+                            "selectionType": "SINGLE",
+                            "title": "View Details",
+                            "type": "GO_TO_APP_STATE",
+                            "contextParamList": {
+                                "contextParams": [
+                                    {
+                                        "paramKey": "node_id_vswitch",
+                                        "paramId": "node_id"
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "widget_id": "6619adf7"
+                },
+                {
+                    "widget_type": "tabular",
+                    "title": "Physical Switch Details",
+                    "stream": "vmware-vcenter-inventory",
+                    "extra_filter": "asset_object = 'Switch' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "ts_column": "collection_timestamp",
+                    "sorting": [],
+                    "resizableColumns": false,
+                    "paginated": true,
+                    "virtual_scrolling": false,
+                    "showRowSummary": true,
+                    "max_rows": 200,
+                    "columns": {
+                        "phy_switch_name": "Switch Name",
+                        "phy_switch_ip": "Switch IP",
+                        "phy_switch_model": "Switch Model",
+                        "phy_switch_port": "Switch Port",
+                        "phy_switch_serial": "Switch Serial",
+                        "vswitch_name": "vSwitch Name",
+                        "esxi_host": "ESXi Host",
+                        "vcenter_name": "vCenter Name",
+                        "vcenter_address": "vCenter IP",
+                        "collection_timestamp": {
+                            "title": "Collection Timestamp",
+                            "type": "DATETIME"
+                        }
+                    },
+                    "widget_id": "d4c73603"
+                }
+            ]
+        }
+    ],
+    "saved_time": "2025-06-17T06:47:34.019149"
+}

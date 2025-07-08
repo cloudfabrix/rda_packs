@@ -1,0 +1,428 @@
+{
+    "name": "vmware_virtual_machines",
+    "description": "vCenter Virtual Machines",
+    "label": "VMware vCenter Virtual Machines - Analytics",
+    "enabled": false,
+    "dashboard_type": "template",
+    "dashboard_style": "auto",
+    "dashboard_folder": "VMware",
+    "live_edit": true,
+    "template_variables": {
+        "CUST_ID": {
+            "contextId": "customerId"
+        },
+        "PROJ_ID": {
+            "contextId": "projectId"
+        },
+        "CUST_TAG": {
+            "contextId": "customerTag"
+        }
+    },
+    "dashboard_filters": {
+        "time_filter": true,
+        "default_time_filter_labels": [
+            "Last 1 month"
+        ],
+        "columns_filter": [
+            {
+                "id": "vcenter_address",
+                "label": "vCenter IP",
+                "type": "TEXT"
+            },
+            {
+                "id": "vcenter_name",
+                "label": "vCenter Name",
+                "type": "TEXT"
+            },
+            {
+                "id": "vm_name",
+                "label": "VM Name",
+                "type": "TEXT"
+            },
+            {
+                "id": "vm_tools_status",
+                "label": "VM Tools Status",
+                "type": "TEXT"
+            },
+            {
+                "id": "vm_power_state",
+                "label": "VM Power Status",
+                "type": "TEXT"
+            },
+            {
+                "id": "datacenter",
+                "label": "Datacenter",
+                "type": "TEXT"
+            },
+            {
+                "id": "esxi_host",
+                "label": "ESXi Host",
+                "type": "TEXT"
+            },
+            {
+                "id": "esxi_cluster",
+                "label": "ESXi Cluster",
+                "type": "TEXT"
+            },
+            {
+                "id": "vm_bios_uuid",
+                "label": "VM BIOS UUID",
+                "type": "TEXT"
+            },
+            
+            {
+                "id": "vm_ip_address",
+                "label": "VM IP",
+                "type": "TEXT"
+            },
+            {
+                "id": "vm_guest_os",
+                "label": "VM Guest OS",
+                "type": "TEXT"
+            },
+            {
+                "id": "vm_cpus",
+                "label": "VM vCPUs",
+                "type": "TEXT"
+            },
+            {
+                "id": "vm_memory_mb",
+                "label": "VM Memory (MB)",
+                "type": "TEXT"
+            },
+            {
+                "id": "vm_additional_ips",
+                "label": "VM Additional IPs",
+                "type": "TEXT"
+            },
+            {
+                "id": "vm_nic_mac_address",
+                "label": "VM MAC",
+                "type": "TEXT"
+            },
+            {
+                "id": " vswitch_portgroup",
+                "label": " VM Portgroup",
+                "type": "TEXT"
+            },
+            {
+                "id": "vm_disks",
+                "label": "VM Disks Total",
+                "type": "TEXT"
+            },
+            {
+                "id": "vm_config_path",
+                "label": "VM Config",
+                "type": "TEXT"
+            },
+            {
+                "id": "vm_nics",
+                "label": "VM NIC's Total",
+                "type": "TEXT"
+            },
+            {
+                "id": "datastore_name",
+                "label": "Datastore",
+                "type": "TEXT"
+            },
+            {
+                "id": "vm_vcenter_id",
+                "label": "vCenter VM ID",
+                "type": "TEXT"
+            },
+            {
+                "id": "vm_instance_uuid",
+                "label": "VM Instance UUID",
+                "type": "TEXT"
+            }
+        ],
+        "group_filters": [
+            {
+                "stream": "vmware-vcenter-inventory",
+                "extra_filter": "customer_tag is '{{CUST_TAG}}' or customer_tag is empty",
+                "title": "vCenter IP",
+                "group_by": [
+                    "vcenter_address"
+                ],
+                "ts_column": "collection_timestamp",
+                "agg": "cardinality",
+                "limit": 150,
+                "column": "vcenter_address",
+                "type": "int"
+            },
+            {
+                "stream": "vmware-vcenter-inventory",
+                "extra_filter": "customer_tag is '{{CUST_TAG}}' or customer_tag is empty",
+                "title": "vCenter Name",
+                "group_by": [
+                    "vcenter_name"
+                ],
+                "ts_column": "collection_timestamp",
+                "limit": 150,
+                "agg": "cardinality",
+                "column": "vcenter_name",
+                "type": "int"
+            },
+            {
+                "stream": "vmware-vcenter-inventory",
+                "extra_filter": "customer_tag is '{{CUST_TAG}}' or customer_tag is empty",
+                "title": "Datacenter",
+                "group_by": [
+                    "datacenter"
+                ],
+                "ts_column": "collection_timestamp",
+                "limit": 250,
+                "agg": "cardinality",
+                "column": "datacenter",
+                "type": "int"
+            },
+            {
+                "stream": "vmware-vcenter-inventory",
+                "extra_filter": "customer_tag is '{{CUST_TAG}}' or customer_tag is empty",
+                "title": "ESXi Cluster",
+                "group_by": [
+                    "esxi_cluster"
+                ],
+                "ts_column": "collection_timestamp",
+                "limit": 250,
+                "agg": "cardinality",
+                "column": "esxi_cluster",
+                "type": "int"
+            }
+        ]
+    },
+    "dashboard_sections": [
+        {
+            "title": "Virtual Machines",
+            "show_filter": true,
+            "widgets": [
+                {
+                    "widget_type": "pie_chart",
+                    "title": "VM by Guest OS",
+                    "stream": "vmware-vcenter-inventory",
+                    "ts_column": "collection_timestamp",
+                    "extra_filter": "asset_object = 'VirtualMachine' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "others_spec": {
+                        "limit": 25
+                    },
+                    "column": "_id",
+                    "agg": "value_count",
+                    "group_by": [
+                        "vm_guest_os"
+                    ],
+                    "type": "str",
+                    "min_width": 4,
+                    "height": 4,
+                    "max_width": 4,
+                    "widget_id": "a6c6d3cf"
+                },
+                {
+                    "widget_type": "pie_chart",
+                    "title": "VM by Guest OS Type",
+                    "stream": "vmware-vcenter-inventory",
+                    "ts_column": "collection_timestamp",
+                    "extra_filter": "asset_object = 'VirtualMachine' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "column": "_id",
+                    "agg": "value_count",
+                    "group_by": [
+                        "vm_guest_os_type"
+                    ],
+                    "type": "str",
+                    "min_width": 4,
+                    "height": 4,
+                    "max_width": 4,
+                    "widget_id": "a338dae5"
+                },
+                {
+                    "widget_type": "pie_chart",
+                    "title": "VM by HW Version",
+                    "stream": "vmware-vcenter-inventory",
+                    "ts_column": "collection_timestamp",
+                    "extra_filter": "asset_object = 'VirtualMachine' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "column": "_id",
+                    "agg": "value_count",
+                    "group_by": [
+                        "vm_hw_version"
+                    ],
+                    "type": "str",
+                    "min_width": 4,
+                    "height": 4,
+                    "max_width": 5,
+                    "widget_id": "fb5ab713"
+                },
+                {
+                    "widget_type": "pie_chart",
+                    "title": "VM by Tools Status",
+                    "stream": "vmware-vcenter-inventory",
+                    "ts_column": "collection_timestamp",
+                    "extra_filter": "asset_object = 'VirtualMachine' and vm_tools_status != '' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "column": "_id",
+                    "agg": "value_count",
+                    "group_by": [
+                        "vm_tools_status"
+                    ],
+                    "style": {
+                        "color-map": {
+                            "guestToolsRunning": [
+                                "#00BB00",
+                                "#ffffff"
+                            ],
+                            "guestToolsNotRunning": [
+                                "#BB0000",
+                                "#ffffff"
+                            ]
+                        }
+                    },
+                    "type": "str",
+                    "min_width": 6,
+                    "height": 4,
+                    "max_width": 6,
+                    "widget_id": "165f6d9b"
+                },
+                {
+                    "widget_type": "pie_chart",
+                    "title": "VM by Power Status",
+                    "stream": "vmware-vcenter-inventory",
+                    "ts_column": "collection_timestamp",
+                    "extra_filter": "asset_object = 'VirtualMachine' and vm_tools_status != '' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "column": "_id",
+                    "agg": "value_count",
+                    "group_by": [
+                        "vm_power_state"
+                    ],
+                    "style": {
+                        "color-map": {
+                            "poweredOn": [
+                                "#00BB00",
+                                "#ffffff"
+                            ],
+                            "poweredOff": [
+                                "#BB0000",
+                                "#ffffff"
+                            ]
+                        }
+                    },
+                    "type": "str",
+                    "min_width": 6,
+                    "height": 4,
+                    "max_width": 6,
+                    "widget_id": "c757595c"
+                },
+                {
+                    "widget_type": "tabular",
+                    "title": "vCenter VM Details",
+                    "stream": "vmware-vcenter-inventory",
+                    "extra_filter": "asset_object = 'VirtualMachine' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "ts_column": "collection_timestamp",
+                    "sorting": [],
+                    "resizableColumns": false,
+                    "paginated": true,
+                    "virtual_scrolling": false,
+                    "showRowSummary": true,
+                    "max_rows": 200,
+                    "custom_columns": [
+                        {
+                            "id": "node_id_vm",
+                            "label": "Node ID",
+                            "expr": "vcenter_address+'_'+vm_name+'_'+vm_instance_uuid",
+                            "visible": false
+                        }
+                    ],
+                    "columns": {
+                        "vm_name": {
+                            "title": "VM Name",
+                            "key": true
+                        },
+                        "vm_ip_address": "VM IP",
+                        "vcenter_name": "vCenter Name",
+                        "vm_guest_os": "VM Guest OS",
+                        "vm_power_state": {
+                            "title": "VM Power Status",
+                            "htmlTemplateForRow": "<span class='badge' style='background-color: {{ '{{ row.vm_power_state_color }}' }};'>{{ '{{ row.vm_power_state }}' }}</span>"
+                        },
+                        "vm_power_state_color": {
+                            "type": "COLOR-MAP",
+                            "source-column": "vm_power_state",
+                            "color-map": {
+                                "poweredOn": "#00BB00",
+                                "poweredOff": "#BB0000"
+                            }
+                        },
+                        "vm_cpus": "VM vCPUs",
+                        "vm_memory_mb": "VM Memory (MB)",
+                        "vm_additional_ips": {
+                            "title": "VM Additional IPs",
+                            "formatter": "truncate"
+                        },
+                        "vm_nic_mac_address": {
+                            "title": "VM MAC",
+                            "formatter": "truncate"
+                        },
+                        "vswitch_portgroup": {
+                            "title": "VM Portgroup",
+                            "formatter": "truncate"
+                        },
+                        "vm_tools_status": {
+                            "title": "VM Tools Status",
+                            "htmlTemplateForRow": "<span class='badge' style='background-color: {{ '{{ row.vm_tools_status_color }}' }};'>{{ '{{ row.vm_tools_status }}' }}</span>"
+                        },
+                        "vm_tools_status_color": {
+                            "type": "COLOR-MAP",
+                            "source-column": "vm_tools_status",
+                            "color-map": {
+                                "guestToolsRunning": "#00BB00",
+                                "guestToolsNotRunning": "#BB0000",
+                                "": "#00000000"
+                            }
+                        },
+                        "vm_disks": "VM Disks Total",
+                        "vm_nics": "VM NIC's Total",
+                        "vm_config_path": {
+                            "title": "VM Config",
+                            "formatter": "truncate"
+                        },
+                        "datastore_name": "Datastore",
+                        "vm_bios_uuid": "BIOS UUID",
+                        "datacenter": "Datacenter",
+                        "esxi_cluster": "ESXi Cluster",
+                        "esxi_host": "ESXi Host",
+                        "vm_vcenter_id": "vCenter VM ID",
+                        "vm_instance_uuid": {
+                            "title": "VM Instance UUID",
+                            "key": true
+                        },
+                        "vcenter_address": {
+                            "title": "vCenter IP",
+                            "key": true
+                        },
+                        "collection_timestamp": {
+                            "title": "Collection Timestamp",
+                            "type": "DATETIME"
+                        }
+                    },
+                    "actions": [
+                        {
+                            "permission": "rda:user_dashboard:view",
+                            "appName": "user-dashboard/vmware_virtual_machines_detailed_view",
+                            "drillDownLinkField": "vm_name",
+                            "identifier": "launch.dashboard.device_view_app",
+                            "selectionType": "SINGLE",
+                            "title": "View Details",
+                            "type": "GO_TO_APP_STATE",
+                            "contextParamList": {
+                                "contextParams": [
+                                    {
+                                        "paramKey": "node_id_vm",
+                                        "paramId": "node_id"
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "widget_id": "a4012eb1"
+                }
+            ]
+        }
+    ],
+    "saved_time": "2025-06-18T04:03:46.065374"
+}

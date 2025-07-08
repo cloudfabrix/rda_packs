@@ -1,0 +1,124 @@
+name: Fabrix AIOPs snmp
+version: 8.0.2
+folder: /collection/network/fabrix_aiops_snmp
+published_date: 2025-05-01
+publisher: CloudFabrix
+label: Fabrix AIOPs snmp
+scope: system
+description: 
+  value: ""
+  ##html: "./description.html"
+  md: "./description.md"
+
+type: collection
+requires:
+  - name: Network Device Discovery 
+    version: ">=8.0.2"
+    auto_install_requires: true
+  - name: Fabrix AIOps Fault Management Base 
+    version: ">=8.0.2"
+    auto_install_requires: true
+
+ 
+artifacts:
+  credentials:
+    - name: restclient
+      type: restclient
+  
+
+  pstreams:
+
+    - name: snmp_trap_event_stream_all
+      index_name: "snmp_trap_event_stream_*"
+      autocreate: true
+  
+   
+  pipelines:
+    - name: snmp_trap_generic_raise_alerts
+      version: 2024.07.23.1
+      folder: FaultManagementPack
+      file: ./artifacts/pipelines/snmp_trap_generic_raise_alerts.txt
+    
+customer_level:
+  launch_locations:
+
+  ##- pstream_name: rda_packs_dynamic_groups_and_pages
+  ##  dashboard_group_name: groupAlerts
+  ##  dashboard_group_label: Alerts
+  ##  dashboard_group_icon: ""
+  ##  dashboard_page_name: customer_oia_alerts_fault
+  ##  dashboard_page_label: Alerts
+  ##  dashboard_page_icon: "stack.svg"
+    - pstream_name: rda_packs_dynamic_groups_and_pages
+      dashboard_group_name: groupData
+      dashboard_group_label: Events
+      dashboard_group_icon: "topology.svg"
+      dashboard_page_name: device_SNMP_Traps_from_alerts_fault
+      dashboard_page_label: SNMP_Traps
+      dashboard_page_icon: "topology.svg"
+    - pstream_name: rda_packs_dynamic_groups_and_pages
+      dashboard_group_name: groupData
+      dashboard_group_label: Events
+      dashboard_group_icon: "topology.svg"
+      dashboard_page_name: customer_SNMP_Traps
+      dashboard_page_label: SNMP_Traps
+      dashboard_page_icon: "topology.svg"
+  
+
+
+
+  artifacts:
+    
+    datasets:
+      ## - name: alert_endpoint_details
+      ##   folder: FaultManagementPack
+      ##   data_file: ./data/alert_endpoint_details.csv
+      - name: snmp_trap_alert_rules_dict
+        folder: FaultManagementPack
+        data_file: ./data/snmp_trap_alert_rules_dict.csv
+    blueprints:
+      - name: snmp_fault_management
+        file: ./artifacts/blueprints/snmp_fault_management.yaml
+
+
+single_tenant:
+  launch_dashboard: network_discovery_main_app 
+  launch_locations:
+
+  ##- pstream_name: network_pack_dynamic_groups_and_pages
+  ##  dashboard_group_name: groupAlerts
+  ##  dashboard_group_label: Alerts
+  ##  dashboard_group_icon: "alert.svg"
+  ##  dashboard_page_name: customer_oia_alerts_fault
+  ##  dashboard_page_label: Alerts
+  ##  dashboard_page_icon: "stack.svg"
+    - pstream_name: rda_packs_dynamic_groups_and_pages
+      dashboard_group_name: groupData
+      dashboard_group_label: Events
+      dashboard_group_icon: "trace.svg"
+      dashboard_page_name: device_SNMP_Traps_from_alerts_fault
+      dashboard_page_label: SNMP_Traps
+      dashboard_page_icon: "topology.svg"
+    - pstream_name: rda_packs_dynamic_groups_and_pages
+      dashboard_group_name: groupData
+      dashboard_group_label: Events
+      dashboard_group_icon: "trace.svg"
+      dashboard_page_name: customer_SNMP_Traps
+      dashboard_page_label: SNMP_Traps
+      dashboard_page_icon: "topology.svg"
+  
+  
+  artifacts:
+    
+    datasets:
+      ## - name: alert_endpoint_details
+      ##   folder: FaultManagementPack
+      ##   data_file: ./data/alert_endpoint_details.csv
+      - name: snmp_trap_alert_rules_dict
+        folder: FaultManagementPack
+        data_file: ./data/snmp_trap_alert_rules_dict.csv
+    
+    blueprints:
+    - name: snmp_fault_management_single_tenant
+      file: ./artifacts/blueprints/snmp_fault_management_single_tenant.yaml
+ 

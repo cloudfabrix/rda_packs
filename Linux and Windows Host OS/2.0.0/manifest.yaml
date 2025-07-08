@@ -1,0 +1,220 @@
+name: Linux and Windows Host OS
+label: Host OS Inventory Collection for Linux and Windows
+scope: system
+# Pack version needs to be conforming to <major>.<minor>.<micro> etc versioning.
+# More detailed spec for versioning: https://packaging.python.org/en/latest/specifications/version-specifiers/
+version: 2.0.0
+folder: /collection/host_os_inventory_collection
+published_date: 2025-01-30
+publisher: CloudFabrix
+# Description of the package. Supports HTML/markdown/plain text
+# Either can provide description as an inline string in this file
+# or have description.html and description.md and give corresponding file paths instead.
+# If description is provided by multiple ways, the order of precedence is description.md > description.html > description.value
+description: 
+  #value: "Host OS inventory collection for single tenant deployments."
+  md: "./description.md"
+
+# Type could be collection/feature
+type: collection
+
+launch_dashboard: host_os_main_app
+
+# Other packs that this solution requires to be deployed
+requires:
+  - name: Base Pack
+    version: ">=5.0.0"
+
+#variables:
+  # site_name:
+  #   type: string
+  #   description: "Worker Group Name"
+  #   default: "rda-site-01"
+
+artifacts:
+  
+  pstreams:
+    - name: host-os-service-inventory
+      attributes:
+        retention_days: 365
+        unique_keys: [ "unique_id"]
+        search_case_insensitive: true
+        _settings: {
+        "number_of_shards": 3,
+        "number_of_replicas": 1,
+        "refresh_interval": "30s"}
+    
+    - name: host-os-system-inventory
+      attributes:
+        retention_days: 365
+        unique_keys: ["unique_id"]
+        search_case_insensitive: true
+        _settings: {
+        "number_of_shards": 3,
+        "number_of_replicas": 1,
+        "refresh_interval": "30s"}
+  
+    - name: host-os-netstat-inventory
+      attributes:
+        retention_days: 365
+        unique_keys: [ "unique_id"]
+        search_case_insensitive: true
+        _settings: {
+        "number_of_shards": 3,
+        "number_of_replicas": 1,
+        "refresh_interval": "30s"}
+        
+
+    
+    - name: host_os_asset_inventory_collection_status_stream
+    - name: host_os_access_verification_status
+      attributes:
+        unique_keys: ["asset_id"]
+
+    - name: linux_windows_on_boarded_hosts
+      attributes:
+        retention_days: 365
+        unique_keys: ["ip_address"] 
+        search_case_insensitive: true
+        _settings: {
+          "number_of_shards": 3,
+          "number_of_replicas": 1,
+          "refresh_interval": "30s"}
+
+   
+  
+  pipelines:
+    
+    - name: linux_inventory_and_topology_using_ssh
+      version: 2024.09.25.1
+      file: ./artifacts/pipelines/linux_inventory_and_topology_using_ssh.txt
+      folder: HostOSInventory
+    
+    - name: linux_ondemand_inventory_and_topology_using_ssh
+      version: 2024.09.25.1
+      file: ./artifacts/pipelines/linux_ondemand_discovery_topology_using_ssh.txt
+      folder: HostOSInventory
+      
+    - name: windows_inventory_and_topology_using_winrm
+      version: 2024.09.25.1
+      file: ./artifacts/pipelines/windows_inventory_and_topology_using_winrm.txt
+      folder: HostOSInventory
+
+    - name: windows_ondemand_inventory_and_topology_using_winrm
+      version: 2024.09.25.1
+      file: ./artifacts/pipelines/windows_ondemand_inventory_and_topology_using_winrm.txt
+      folder: HostOSInventory     
+
+    - name: host_os_import_linux_windows_hosts
+      version: 2024.09.25.1
+      file: ./artifacts/pipelines/host_os_import_linux_windows_hosts.txt
+      folder: HostOSInventory   
+
+    - name: host_os_access_verification
+      version: 2024.09.25.1
+      file: ./artifacts/pipelines/host_os_access_verification.txt
+      folder: HostOSInventory      
+
+    - name: linux_inner_inventory_and_topology_using_ssh
+      version: 2024.09.25.1
+      file: ./artifacts/pipelines/linux_inner_inventory_and_topology_using_ssh.txt
+      folder: HostOSInventory 
+
+    - name: windows_inner_inventory_and_topology_using_winrm
+      version: 2024.09.25.1
+      file: ./artifacts/pipelines/windows_inner_inventory_and_topology_using_winrm.txt
+      folder: HostOSInventory 
+
+  dashboards:
+    - name: host_os_asset_navigator
+      file: ./artifacts/dashboards/host_os_asset_navigator.json      
+    - name: host_os_details_view_pack
+      file: ./artifacts/dashboards/host_os_details_view_pack.json    
+    - name: host_os_inventory
+      file: ./artifacts/dashboards/host_os_inventory.json   
+    - name: host_os_collection_and_access_status
+      file: ./artifacts/dashboards/host_os_collection_and_access_status.json 
+    - name: host_os_configure_and_manage
+      file: ./artifacts/dashboards/host_os_configure_and_manage.json   
+    - name: host_os_main_app
+      file: ./artifacts/dashboards/host_os_main_app.json 
+    - name: host_os_topology
+      file: ./artifacts/dashboards/host_os_topology.json 
+
+  stacks:
+    - name: host_os
+      file: ./artifacts/stacks/host_os_stack_pstream.json
+
+
+customer_level:
+
+  launch_locations:
+  - pstream_name: rda_packs_dynamic_groups_and_pages
+    dashboard_group_name: groupDiscovery
+    dashboard_group_label: Onboarding
+    dashboard_group_icon: "asset.svg"
+    dashboard_page_name: host_os_collection_and_access_status
+    dashboard_page_label: Host OS Status
+    dashboard_page_icon: "asset.svg"
+  - pstream_name: rda_packs_dynamic_groups_and_pages
+    dashboard_group_name: groupDiscovery
+    dashboard_group_label: Onboarding
+    dashboard_group_icon: "asset.svg"
+    dashboard_page_name: host_os_configure_and_manage
+    dashboard_page_label: "Host OS Configure and Manage"
+    dashboard_page_icon: "asset.svg"
+  - pstream_name: rda_packs_dynamic_groups_and_pages
+    dashboard_group_name: groupInventory
+    dashboard_group_label: Inventory
+    dashboard_group_icon: ""
+    dashboard_page_name: host_os_inventory
+    dashboard_page_label: Host OS Assets
+    dashboard_page_icon: "asset.svg"
+  - pstream_name: rda_packs_dynamic_groups_and_pages
+    dashboard_group_name: groupTopo
+    dashboard_group_label: Topology
+    dashboard_group_icon: ""
+    dashboard_page_name: host_os_asset_navigator
+    dashboard_page_label: Host OS Asset Navigator
+    dashboard_page_icon: "asset.svg" 
+  - pstream_name: rda_packs_dynamic_groups_and_pages
+    dashboard_group_name: groupTopo
+    dashboard_group_label: Topology
+    dashboard_group_icon: ""
+    dashboard_page_name: host_os_topology
+    dashboard_page_label: Host OS Topology
+    dashboard_page_icon: "asset.svg"   
+  artifacts:
+    # credentials:
+    #   - name: linux-inventory
+    #     type: linux-inventory
+    #     add_to_default_site: true
+    #     data: {"host": ".*","username":"changeme","password":"changeme", customerTag:  $PKG_CONTEXT_CUSTOMER_TAG, customerId:  $PKG_CONTEXT_CUSTOMER_ID}
+
+    #   - name: windows-inventory
+    #     type: windows-inventory  
+    #     add_to_default_site: true
+    #     data: {"host": ".*","username":"changeme","password":"changeme", customerTag:  $PKG_CONTEXT_CUSTOMER_TAG, customerId:  $PKG_CONTEXT_CUSTOMER_ID}
+        
+    blueprints:
+      - name: host_os_service_blueprint
+        file: ./artifacts/blueprints/host_os_service_blueprint.yaml
+
+single_tenant:
+
+  launch_dashboard: host_os_main_app
+  artifacts:
+    # credentials:
+    #   - name: linux-inventory
+    #     type: linux-inventory
+    #     add_to_default_site: true
+    #     data: {"host": ".*","username":"changeme","password":"changeme"}
+
+    #   - name: windows-inventory
+    #     type: windows-inventory  
+    #     add_to_default_site: true
+    #     data: {"host": ".*","username":"changeme","password":"changeme"}
+    blueprints:
+      - name: host_os_service_blueprint
+        file: ./artifacts/blueprints/host_os_service_blueprint_single_tenant.yaml
+  

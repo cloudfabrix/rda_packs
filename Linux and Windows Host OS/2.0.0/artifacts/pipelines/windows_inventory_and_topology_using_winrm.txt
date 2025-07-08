@@ -1,0 +1,81 @@
+%% stream = no and limit = 0
+
+%% import_src_type = "windows-inventory"
+%%template_type="jinja"
+
+%%start_inline_object name="context_dynamic_form" and type="data" and format="json"
+{
+    "formFieldList": [
+        {
+            "fieldId": "customer_tag",
+            "label": "Tag of the customer",
+            "required": false,
+            "dataType": "string"
+        }
+    ]
+}
+%%end_inline_object
+{% if customer_tag %} 
+      {% set customer_id = customer_id %}
+      {% set customer_tag = customer_tag %}
+      {% set customerTag = customer_tag %}
+   {% elif customerTag %} 
+      {% set customer_id = customer_id %}
+      {% set customer_tag = customerTag %}
+   {% else %}
+      {% set customer_id = '' %}
+      {% set customer_tag = '' %}
+   {% endif %}   
+## Windows Server OS Inventory Collection
+## @c:new-block
+## --> @dm:empty
+## --> @dm:addrow windows_src_name = 'windows-inventory'
+## --> @dm:save name = 'temp-windows_inventory_source_info'
+## Query for windows hosts that have successfully passed the access verification check
+@c:new-block
+    --> @dm:empty
+    
+   {% if customer_tag %} 
+      --> #dm:query-persistent-stream access_verification_status = 'Success' and host_type is 'windows' and customer_tag is '{{customer_tag}}'
+                  with-input name = "host_os_access_verification_status" & limit = "0"
+    {% else %}
+      --> #dm:query-persistent-stream access_verification_status = 'Success' and host_type is 'windows' and customer_tag is empty
+                  with-input name = "host_os_access_verification_status" & limit = "0"
+    {% endif %}            
+    --> @dm:save name = "temp-windows_inventory_source_info"
+    --> *exec:if-shape num_rows = 0
+       --> @dm:empty
+       --> @dm:addrow collection_status = "Skipped"
+       --> @dm:eval reason = "'No windows host with successful access verification found. Check access verification status for windows hosts. Make sure access check status is Success.'"
+       --> @dm:eval collection_timestamp = 'time_now_as_isoformat()'
+       --> @dm:eval bot_source_name = "''"
+       --> @dm:eval bot_source_type = "'windows_os'"
+       --> @dm:eval bot_name = "''"
+       --> @dm:eval customer_id =  "'$customer_id'"
+       --> @dm:eval customer_tag =  "'$customer_tag'"
+       --> @rn:write-stream name = 'host_os_asset_inventory_collection_status_stream'
+       --> @dm:recall name = "temp-windows_inventory_source_info"
+       --> @dm:skip-pipeline-if-shape row_count = 0
+    --> @exec:end-if
+    --> *exec:if-shape num_rows > 0
+       --> *dm:filter * get host_type as 'type', asset_id as 'ip_address', bot_source_name as 'windows_src_name', port,customer_tag,customer_id
+       --> @dm:eval discovery_scope = "'yes'"
+       --> @dm:map attr = 'ip_address' & func = 'strip'
+       --> @dm:map attr = 'type' & func = 'strip'
+       --> @dm:map attr = 'port' & func = 'strip'
+       --> @dm:map attr = 'type' & func = 'lower'
+       --> @dm:map attr = 'discovery_scope' & func = 'strip'
+       --> @dm:map attr = 'discovery_scope' & func = 'lower'
+       --> @dm:map attr = 'windows_src_name' & func = 'strip'
+
+       --> @dm:save name = 'temp-windows_inventory_source_info'
+    ## --> @dm:save name = 'temp-windows_inventory_ip_list'
+    --> @exec:end-if
+
+--> @c:new-block
+    --> @dm:recall name = 'temp-windows_inventory_source_info'
+    --> @dm:skip-block-if-shape row_count = 0
+    --> @exec:run-pipeline name="windows_inner_inventory_and_topology_using_winrm"
+    --> @dm:skip-block-if-shape row_count = 0
+    --> @dm:save name="temp-windows-discovery-pipeline-output"
+

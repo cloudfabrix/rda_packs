@@ -1,0 +1,1021 @@
+{
+    "name": "host_os_inventory",
+    "description": "Host OS System Inventory",
+    "label": "Host OS System Inventory",
+    "enabled": false,
+    "live_edit": true,
+    "dashboard_type": "template",
+    "version": "24.08.01.1",
+    "dashboard_style": "auto",
+    "dashboard_folder": "HostOSInventory",
+    "template_variables": {
+        "CUST_ID": {
+            "contextId": "customerId"
+        },
+        "PROJ_ID": {
+            "contextId": "projectId"
+        },
+        "CUST_TAG": {
+            "contextId": "customerTag"
+        }
+    },
+    "dashboard_filters": {
+        "extra_filter": "customer_tag is '{{CUST_TAG}}' or customer_tag is empty",
+        "time_filter": true,
+        "columns_filter": [
+            {
+                "id": "host_os_ip",
+                "label": "Host IP",
+                "type": "TEXT"
+            },
+            {
+                "id": "Hostname",
+                "label": "hostname",
+                "type": "TEXT"
+            },
+            {
+                "id": "host_os_vendor",
+                "label": "Host OS Vendor",
+                "type": "TEXT"
+            },
+            {
+                "id": "host_os_version",
+                "label": "Host OS Version",
+                "type": "TEXT"
+            },
+            {
+                "id": "host_machine_type",
+                "label": "Host Machine Type",
+                "type": "TEXT"
+            },
+            {
+                "id": "host_machine_vendor",
+                "label": "Host Machine Vendor",
+                "type": "TEXT"
+            },
+            {
+                "id": "vm_name",
+                "label": "VM Name",
+                "type": "TEXT"
+            },
+            {
+                "id": "esxi_host",
+                "label": "ESXi Host",
+                "type": "TEXT"
+            },
+            {
+                "id": "vcenter_name",
+                "label": "vCenter Name",
+                "type": "TEXT"
+            },
+            {
+                "id": "vcenter_address",
+                "label": "vCenter IP",
+                "type": "TEXT"
+            },
+            {
+                "id": "customer",
+                "label": "Customer",
+                "type": "TEXT"
+            }
+        ],
+        "default_time_filter_labels": [
+            "Last 1 month"
+        ],
+        "group_filters": [
+            {
+                "stream": "host-os-system-inventory",
+                "extra_filter": "asset_object = 'System' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                "title": "HostName",
+                "group_by": [
+                    "hostname"
+                ],
+                "ts_column": "collection_timestamp",
+                "agg": "value_count",
+                "column": "_id",
+                "type": "int"
+            },
+            {
+                "stream": "host-os-system-inventory",
+                "extra_filter": "asset_object = 'System' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                "title": "Host OS IP",
+                "group_by": [
+                    "host_os_ip"
+                ],
+                "ts_column": "collection_timestamp",
+                "agg": "value_count",
+                "column": "_id",
+                "type": "int"
+            },
+            {
+                "stream": "host-os-system-inventory",
+                "extra_filter": "asset_object = 'System' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                "title": "Host Machine Type",
+                "group_by": [
+                    "host_machine_type"
+                ],
+                "ts_column": "collection_timestamp",
+                "agg": "value_count",
+                "column": "_id",
+                "type": "int"
+            },
+            {
+                "stream": "host-os-system-inventory",
+                "extra_filter": "asset_object = 'System' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                "title": "Host Machine Vendor",
+                "group_by": [
+                    "host_machine_vendor"
+                ],
+                "ts_column": "collection_timestamp",
+                "agg": "value_count",
+                "column": "_id",
+                "type": "int"
+            },
+            {
+                "stream": "host-os-system-inventory",
+                "extra_filter": "asset_object = 'System' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                "title": "Host OS Vendor",
+                "group_by": [
+                    "host_os_vendor"
+                ],
+                "ts_column": "collection_timestamp",
+                "agg": "value_count",
+                "column": "_id",
+                "type": "int"
+            },
+            {
+                "stream": "host-os-system-inventory",
+                "extra_filter": "asset_object = 'System' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                "title": "Host CPU Vendor",
+                "group_by": [
+                    "host_cpu_vendor"
+                ],
+                "ts_column": "collection_timestamp",
+                "agg": "value_count",
+                "column": "_id",
+                "type": "int"
+            }
+        ]
+    },
+    "dashboard_sections": [
+        {
+            "title": "Hosts",
+            "show_filter": true,
+            "scope_filter": "asset_object = 'System' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+            "widgets": [
+                {
+                    "widget_type": "pie_chart",
+                    "title": "Hosts by Machine Type",
+                    "stream": "host-os-system-inventory",
+                    "ts_column": "collection_timestamp",
+                    "extra_filter": "",
+                    "column": "_id",
+                    "agg": "value_count",
+                    "group_by": [
+                        "host_machine_type"
+                    ],
+                    "type": "str",
+                    "min_width": 4,
+                    "height": 4,
+                    "max_width": 4,
+                    "widget_id": "4063716e"
+                },
+                {
+                    "widget_type": "pie_chart",
+                    "title": "Hosts by Machine Vendor",
+                    "stream": "host-os-system-inventory",
+                    "ts_column": "collection_timestamp",
+                    "extra_filter": "host_machine_vendor != ''",
+                    "column": "_id",
+                    "limit": 25,
+                    "agg": "value_count",
+                    "group_by": [
+                        "host_machine_vendor"
+                    ],
+                    "type": "str",
+                    "min_width": 4,
+                    "height": 4,
+                    "max_width": 4,
+                    "widget_id": "f5b27d6d"
+                },
+                {
+                    "widget_type": "pie_chart",
+                    "title": "Hosts by OS Vendor",
+                    "stream": "host-os-system-inventory",
+                    "ts_column": "collection_timestamp",
+                    "extra_filter": "",
+                    "column": "_id",
+                    "agg": "value_count",
+                    "group_by": [
+                        "host_os_vendor"
+                    ],
+                    "type": "str",
+                    "min_width": 4,
+                    "height": 4,
+                    "max_width": 5,
+                    "widget_id": "a97d897a"
+                },
+                {
+                    "widget_type": "tabular",
+                    "title": "Host OS Details",
+                    "stream": "host-os-system-inventory",
+                    "extra_filter": "",
+                    "ts_column": "collection_timestamp",
+                    "sorting": [],
+                    "resizableColumns": false,
+                    "paginated": true,
+                    "virtual_scrolling": false,
+                    "showRowSummary": true,
+                    "max_rows": 200,
+                    "columns": {
+                        "hostname": {
+                            "title": "Hostname",
+                            "key": true
+                        },
+                        "host_os_ip": {
+                            "title": "Host IP",
+                            "key": true
+                        },
+                        "host_os_version": "Host OS Version",
+                        "host_os_kernel": "Host OS Kernel",
+                        "host_cpus": "Host CPUs",
+                        "host_cpu_vendor": "Host CPU Vendor",
+                        "host_cpu_model": "Host CPU Model",
+                        "host_memory_gb": "Host Memory (GB)",
+                        "host_machine_type": "Host Machine Type",
+                        "host_machine_vendor": "Host Machine Vendor",
+                        "host_machine_model": "Host Machine Model",
+                        "host_bios_uuid": "Host BIOS UUID",
+                        "host_machine_serial": "Host Machine Serial",
+                        "vm_name": "VM Name",
+                        "esxi_host": "ESXi Host",
+                        "esxi_cluster": "ESXi Cluster",
+                        "vcenter_name": "vCenter Name",
+                        "vcenter_address": "vCenter IP",
+                        "collection_timestamp": {
+                            "title": "Collection Timestamp",
+                            "type": "DATETIME"
+                        }
+                    },
+                    "actions": [
+                        {
+                            "permission": "rda:user_dashboard:view",
+                            "appName": "user-dashboard/host_os_details_view_pack",
+                            "drillDownLinkField": "host_os_ip",
+                            "identifier": "launch.dashboard.device_view_app",
+                            "selectionType": "SINGLE",
+                            "contextParamList": {
+                                "contextParams": [
+                                    {
+                                        "paramKey": "unique_id",
+                                        "paramId": "node_id"
+                                    },
+                                    {
+                                        "paramKey": "host_os_ip",
+                                        "paramId": "tags_host_ip"
+                                    },
+                                    {
+                                        "paramKey": "customer_tag",
+                                        "paramId": "customer_tag"
+                                    }
+                                ]
+                            },
+                            "title": "View Details",
+                            "type": "GO_TO_APP_STATE"
+                        }
+                    ],
+                    "widget_id": "d1d386bc"
+                }
+            ]
+        },
+        {
+            "title": "Network",
+            "show_filter": true,
+            "widgets": [
+                {
+                    "widget_type": "pie_chart",
+                    "title": "Hosts by NIC MAC",
+                    "stream": "host-os-system-inventory",
+                    "ts_column": "collection_timestamp",
+                    "extra_filter": "asset_object = 'Network' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "column": "_id",
+                    "agg": "value_count",
+                    "group_by": [
+                        "host_os_nic_mac"
+                    ],
+                    "type": "str",
+                    "min_width": 4,
+                    "height": 4,
+                    "max_width": 4,
+                    "widget_id": "dd74a4f1"
+                },
+                {
+                    "widget_type": "pie_chart",
+                    "title": "Hosts by NIC name",
+                    "stream": "host-os-system-inventory",
+                    "extra_filter": "asset_object = 'Network' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "ts_column": "collection_timestamp",
+                    "column": "_id",
+                    "limit": 25,
+                    "agg": "value_count",
+                    "group_by": [
+                        "host_os_nic_name"
+                    ],
+                    "type": "str",
+                    "min_width": 4,
+                    "height": 4,
+                    "max_width": 4,
+                    "widget_id": "6df2a7ca"
+                },
+                {
+                    "widget_type": "pie_chart",
+                    "title": "Hosts by NIC IP",
+                    "stream": "host-os-system-inventory",
+                    "ts_column": "collection_timestamp",
+                    "extra_filter": "asset_object = 'Network' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "column": "_id",
+                    "agg": "value_count",
+                    "group_by": [
+                        "host_os_nic_ip"
+                    ],
+                    "type": "str",
+                    "min_width": 4,
+                    "height": 4,
+                    "max_width": 5,
+                    "widget_id": "3ad34100"
+                },
+                {
+                    "widget_type": "tabular",
+                    "title": "Host OS Newtork Details",
+                    "extra_filter": "asset_object = 'Network' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "stream": "host-os-system-inventory",
+                    "ts_column": "collection_timestamp",
+                    "sorting": [],
+                    "resizableColumns": false,
+                    "paginated": true,
+                    "virtual_scrolling": false,
+                    "showRowSummary": true,
+                    "max_rows": 200,
+                    "columns": {
+                        "hostname": {
+                            "title": "Hostname",
+                            "key": true
+                        },
+                        "host_os_ip": {
+                            "title": "Host IP",
+                            "key": true
+                        },
+                        "host_os_version": "OS Version",
+                        "host_os_vendor": "OS Vendor",
+                        "host_machine_type": "Machine Type",
+                        "host_machine_vendor": "Machine Vendor",
+                        "host_os_nic_name": "NIC Name",
+                        "host_os_nic_ip": "NIC IP",
+                        "host_os_nic_mac": "MAC Address",
+                        "host_os_nic_mtu": "MTU",
+                        "collection_timestamp": {
+                            "title": "Collection Timestamp",
+                            "type": "DATETIME"
+                        }
+                    },
+                    "custom_columns": [
+                        {
+                            "id": "new_unique_id",
+                            "label": "New Unique ID",
+                            "expr": "hostname + '_' + host_os_ip + '_' + host_bios_uuid",
+                            "visible": false
+                        }
+                    ],
+                    "actions": [
+                        {
+                            "permission": "rda:user_dashboard:view",
+                            "appName": "user-dashboard/host_os_details_view_pack",
+                            "drillDownLinkField": "host_os_ip",
+                            "identifier": "launch.dashboard.device_view_app",
+                            "selectionType": "SINGLE",
+                            "contextParamList": {
+                                "contextParams": [
+                                    {
+                                        "paramKey": "new_unique_id",
+                                        "paramId": "node_id"
+                                    },
+                                    {
+                                        "paramKey": "host_os_ip",
+                                        "paramId": "tags_host_ip"
+                                    },
+                                    {
+                                        "paramKey": "host_os_node_id",
+                                        "paramId": "host_os_node_id"
+                                    }
+                                ]
+                            },
+                            "title": "View Details",
+                            "type": "GO_TO_APP_STATE"
+                        }
+                    ],
+                    "widget_id": "2d398b90"
+                }
+            ]
+        },
+        {
+            "title": "Disks",
+            "show_filter": true,
+            "widgets": [
+                {
+                    "widget_type": "pie_chart",
+                    "title": "Hosts by Disk Model",
+                    "stream": "host-os-system-inventory",
+                    "ts_column": "collection_timestamp",
+                    "extra_filter": "asset_object = 'Disk' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "column": "_id",
+                    "agg": "value_count",
+                    "group_by": [
+                        "host_os_disk_model"
+                    ],
+                    "type": "str",
+                    "min_width": 4,
+                    "height": 4,
+                    "max_width": 4,
+                    "widget_id": "b1cd7d21"
+                },
+                {
+                    "widget_type": "pie_chart",
+                    "title": "Hosts by Disk State",
+                    "stream": "host-os-system-inventory",
+                    "ts_column": "collection_timestamp",
+                    "extra_filter": "asset_object = 'Disk' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "column": "_id",
+                    "limit": 25,
+                    "agg": "value_count",
+                    "group_by": [
+                        "host_os_disk_state"
+                    ],
+                    "type": "str",
+                    "min_width": 4,
+                    "height": 4,
+                    "max_width": 4,
+                    "widget_id": "3abd6922"
+                },
+                {
+                    "widget_type": "pie_chart",
+                    "title": "Hosts by Disk Size",
+                    "stream": "host-os-system-inventory",
+                    "ts_column": "collection_timestamp",
+                    "extra_filter": "asset_object = 'Disk' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "column": "_id",
+                    "agg": "value_count",
+                    "group_by": [
+                        "host_os_disk_size_gb"
+                    ],
+                    "type": "str",
+                    "min_width": 4,
+                    "height": 4,
+                    "max_width": 5,
+                    "widget_id": "3dbed741"
+                },
+                {
+                    "widget_type": "tabular",
+                    "title": "Host OS Disk Details",
+                    "stream": "host-os-system-inventory",
+                    "extra_filter": "asset_object = 'Disk' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "ts_column": "collection_timestamp",
+                    "sorting": [],
+                    "resizableColumns": false,
+                    "paginated": true,
+                    "virtual_scrolling": false,
+                    "showRowSummary": true,
+                    "max_rows": 200,
+                    "columns": {
+                        "hostname": {
+                            "title": "Hostname",
+                            "key": true
+                        },
+                        "host_os_ip": {
+                            "title": "Host IP",
+                            "key": true
+                        },
+                        "host_os_version": "OS Version",
+                        "host_os_vendor": "OS Vendor",
+                        "host_machine_type": "Machine Type",
+                        "host_machine_vendor": "Machine Vendor",
+                        "host_os_disk_vendor": "Disk Vendor",
+                        "host_os_disk_size_gb": "Disk Size (GB)",
+                        "host_os_disk_model": "Disk Model",
+                        "host_os_disk_state": "Disk State",
+                        "collection_timestamp": {
+                            "title": "Collection Timestamp",
+                            "type": "DATETIME"
+                        }
+                    },
+                    "custom_columns": [
+                        {
+                            "id": "new_unique_id",
+                            "label": "New Unique ID",
+                            "expr": "hostname + '_' + host_os_ip + '_' + host_bios_uuid",
+                            "visible": false
+                        }
+                    ],
+                    "actions": [
+                        {
+                            "permission": "rda:user_dashboard:view",
+                            "appName": "user-dashboard/host_os_details_view_pack",
+                            "drillDownLinkField": "host_os_ip",
+                            "identifier": "launch.dashboard.device_view_app",
+                            "selectionType": "SINGLE",
+                            "title": "View Details",
+                            "type": "GO_TO_APP_STATE",
+                            "contextParamList": {
+                                "contextParams": [
+                                    {
+                                        "paramKey": "new_unique_id",
+                                        "paramId": "node_id"
+                                    },
+                                    {
+                                        "paramKey": "host_os_ip",
+                                        "paramId": "tags_host_ip"
+                                    },
+                                    {
+                                        "paramKey": "host_os_node_id",
+                                        "paramId": "host_os_node_id"
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "widget_id": "60edad5a"
+                },
+                {
+                    "widget_type": "tabular",
+                    "title": "Host OS Filesystem Details",
+                    "stream": "host-os-system-inventory",
+                    "extra_filter": "asset_object = 'Filesystem' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "ts_column": "collection_timestamp",
+                    "sorting": [],
+                    "resizableColumns": false,
+                    "paginated": true,
+                    "virtual_scrolling": false,
+                    "showRowSummary": true,
+                    "max_rows": 200,
+                    "columns": {
+                        "hostname": {
+                            "title": "Hostname",
+                            "key": true
+                        },
+                        "host_os_ip": {
+                            "title": "Host IP",
+                            "key": true
+                        },
+                        "host_os_version": "OS Version",
+                        "host_os_vendor": "OS Vendor",
+                        "host_machine_type": "Machine Type",
+                        "host_machine_vendor": "Machine Vendor",
+                        "host_os_disk_mount": "Mountpoint",
+                        "host_os_fs_type": "Filesystem",
+                        "host_os_fs_size": "Total Size (GB)",
+                        "host_os_fs_used": "Used (GB)",
+                        "host_os_fs_available": "Available (GB)",
+                        "host_os_fs_used_perc": "USed (%)",
+                        "collection_timestamp": {
+                            "title": "Collection Timestamp",
+                            "type": "DATETIME"
+                        }
+                    },
+                    "custom_columns": [
+                        {
+                            "id": "new_unique_id",
+                            "label": "New Unique ID",
+                            "expr": "hostname + '_' + host_os_ip + '_' + host_bios_uuid",
+                            "visible": false
+                        }
+                    ],
+                    "actions": [
+                        {
+                            "permission": "rda:user_dashboard:view",
+                            "appName": "user-dashboard/host_os_details_view_pack",
+                            "drillDownLinkField": "host_os_ip",
+                            "identifier": "launch.dashboard.device_view_app",
+                            "selectionType": "SINGLE",
+                            "title": "View Details",
+                            "type": "GO_TO_APP_STATE",
+                            "contextParamList": {
+                                "contextParams": [
+                                    {
+                                        "paramKey": "new_unique_id",
+                                        "paramId": "node_id"
+                                    },
+                                    {
+                                        "paramKey": "host_os_ip",
+                                        "paramId": "tags_host_ip"
+                                    },
+                                    {
+                                        "paramKey": "host_os_node_id",
+                                        "paramId": "host_os_node_id"
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "widget_id": "c47cac1a"
+                }
+            ]
+        },
+        {
+            "title": "Services",
+            "scope_filter": "",
+            "show_filter": true,
+            "widgets": [
+                {
+                    "widget_type": "pie_chart",
+                    "title": "Hosts by Service Status",
+                    "stream": "host-os-service-inventory",
+                    "ts_column": "collection_timestamp",
+                    "extra_filter": "asset_object == 'Service' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "column": "_id",
+                    "limit": 25,
+                    "agg": "value_count",
+                    "group_by": [
+                        "host_os_service_status"
+                    ],
+                    "type": "str",
+                    "min_width": 4,
+                    "height": 4,
+                    "max_width": 4,
+                    "widget_id": "d79ab1ed"
+                },
+                {
+                    "widget_type": "pie_chart",
+                    "title": "Hosts by Service State",
+                    "stream": "host-os-service-inventory",
+                    "ts_column": "collection_timestamp",
+                    "extra_filter": "asset_object == 'Service' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "column": "_id",
+                    "agg": "value_count",
+                    "group_by": [
+                        "host_os_service_state"
+                    ],
+                    "type": "str",
+                    "min_width": 4,
+                    "height": 4,
+                    "max_width": 5,
+                    "widget_id": "6783fc84"
+                },
+                {
+                    "widget_type": "pie_chart",
+                    "title": "Hosts by Service Mode",
+                    "stream": "host-os-service-inventory",
+                    "ts_column": "collection_timestamp",
+                    "extra_filter": "asset_object == 'Service' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "column": "_id",
+                    "agg": "value_count",
+                    "group_by": [
+                        "host_os_service_mode"
+                    ],
+                    "type": "str",
+                    "min_width": 4,
+                    "height": 4,
+                    "max_width": 4,
+                    "widget_id": "bd17dfcd"
+                },
+                {
+                    "widget_type": "tabular",
+                    "title": "Service Details",
+                    "stream": "host-os-service-inventory",
+                    "extra_filter": "asset_object == 'Service' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "ts_column": "collection_timestamp",
+                    "sorting": [],
+                    "resizableColumns": false,
+                    "paginated": true,
+                    "virtual_scrolling": false,
+                    "showRowSummary": true,
+                    "max_rows": 200,
+                    "columns": {
+                        "hostname": {
+                            "title": "Hostname",
+                            "key": true
+                        },
+                        "host_os_ip": {
+                            "title": "Host IP",
+                            "key": true
+                        },
+                        "host_os_version": "Host OS Version",
+                        "host_machine_type": "Host Machine Type",
+                        "host_machine_vendor": "Host Machine Vendor",
+                        "host_os_service_status": "Service Status",
+                        "host_os_service_name": "Service Name",
+                        "host_os_service_description": "Service Description",
+                        "host_os_service_state": "Service State",
+                        "host_os_service_mode": "Service Mode",
+                        "host_os_service_pid": "Service Pid",
+                        "collection_timestamp": {
+                            "title": "Collection Timestamp",
+                            "type": "DATETIME"
+                        }
+                    },
+                    "custom_columns": [
+                        {
+                            "id": "new_unique_id",
+                            "label": "New Unique ID",
+                            "expr": "hostname + '_' + host_os_ip + '_' + host_bios_uuid",
+                            "visible": false
+                        }
+                    ],
+                    "actions": [
+                        {
+                            "permission": "rda:user_dashboard:view",
+                            "appName": "user-dashboard/host_os_details_view_pack",
+                            "drillDownLinkField": "host_os_ip",
+                            "identifier": "launch.dashboard.device_view_app",
+                            "selectionType": "SINGLE",
+                            "title": "View Details",
+                            "type": "GO_TO_APP_STATE",
+                            "contextParamList": {
+                                "contextParams": [
+                                    {
+                                        "paramKey": "new_unique_id",
+                                        "paramId": "node_id"
+                                    },
+                                    {
+                                        "paramKey": "host_os_ip",
+                                        "paramId": "tags_host_ip"
+                                    },
+                                    {
+                                        "paramKey": "host_os_node_id",
+                                        "paramId": "host_os_node_id"
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "widget_id": "0362d25c"
+                }
+            ]
+        },
+        {
+            "title": "Application Connections",
+            "scope_filter": "",
+            "show_filter": true,
+            "widgets": [
+                {
+                    "widget_type": "pie_chart",
+                    "title": "Hosts by Client IP",
+                    "stream": "host-os-netstat-inventory",
+                    "ts_column": "collection_timestamp",
+                    "extra_filter": "asset_object == 'NetstatClientServer' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "column": "client_ip_address",
+                    "limit": 25,
+                    "agg": "value_count",
+                    "group_by": [
+                        "client_ip_address"
+                    ],
+                    "type": "str",
+                    "min_width": 4,
+                    "height": 4,
+                    "max_width": 4,
+                    "widget_id": "4616ad9b"
+                },
+                {
+                    "widget_type": "pie_chart",
+                    "title": "Hosts by Connection Protocol",
+                    "stream": "host-os-netstat-inventory",
+                    "ts_column": "collection_timestamp",
+                    "extra_filter": "asset_object == 'NetstatClientServer' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "column": "connection_protocol",
+                    "agg": "value_count",
+                    "group_by": [
+                        "connection_protocol"
+                    ],
+                    "type": "str",
+                    "min_width": 4,
+                    "height": 4,
+                    "max_width": 4,
+                    "widget_id": "6a9ee8a0"
+                },
+                {
+                    "widget_type": "pie_chart",
+                    "title": "Hosts by Connection Flow",
+                    "stream": "host-os-netstat-inventory",
+                    "ts_column": "collection_timestamp",
+                    "extra_filter": "asset_object == 'NetstatClientServer' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "column": "connection_flow",
+                    "agg": "value_count",
+                    "group_by": [
+                        "connection_flow"
+                    ],
+                    "type": "str",
+                    "min_width": 4,
+                    "height": 4,
+                    "max_width": 5,
+                    "widget_id": "7ca30890"
+                },
+                {
+                    "widget_type": "tabular",
+                    "title": "Netstats Details",
+                    "stream": "host-os-netstat-inventory",
+                    "extra_filter": "asset_object == 'NetstatClientServer' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "ts_column": "collection_timestamp",
+                    "sorting": [],
+                    "resizableColumns": false,
+                    "paginated": true,
+                    "virtual_scrolling": false,
+                    "showRowSummary": true,
+                    "max_rows": 200,
+                    "columns": {
+                        "hostname": {
+                            "title": "Hostname",
+                            "key": true
+                        },
+                        "host_os_ip": {
+                            "title": "Host IP",
+                            "key": true
+                        },
+                        "host_os_version": "Host OS Version",
+                        "host_machine_type": "Host Machine Type",
+                        "host_machine_vendor": "Host Machine Vendor",
+                        "host_os_process_name": "Process Name",
+                        "host_os_process_pid": "Process ID",
+                        "server_ip_address": "Server IP",
+                        "server_port": "Server Port",
+                        "client_ip_address": "Client IP",
+                        "client_port": "Client Port",
+                        "connection_flow": "Connection Flow",
+                        "connection_protocol": "Connection Protocol",
+                        "connection_state": "Connection State",
+                        "collection_timestamp": {
+                            "title": "Collection Timestamp",
+                            "type": "DATETIME"
+                        }
+                    },
+                    "custom_columns": [
+                        {
+                            "id": "new_unique_id",
+                            "label": "New Unique ID",
+                            "expr": "hostname + '_' + host_os_ip + '_' + host_bios_uuid",
+                            "visible": false
+                        }
+                    ],
+                    "actions": [
+                        {
+                            "permission": "rda:user_dashboard:view",
+                            "appName": "user-dashboard/host_os_details_view_pack",
+                            "drillDownLinkField": "host_os_ip",
+                            "identifier": "launch.dashboard.device_view_app",
+                            "selectionType": "SINGLE",
+                            "title": "View Details",
+                            "type": "GO_TO_APP_STATE",
+                            "contextParamList": {
+                                "contextParams": [
+                                    {
+                                        "paramKey": "new_unique_id",
+                                        "paramId": "node_id"
+                                    },
+                                    {
+                                        "paramKey": "host_os_ip",
+                                        "paramId": "tags_host_ip"
+                                    },
+                                    {
+                                        "paramKey": "host_os_node_id",
+                                        "paramId": "host_os_node_id"
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "widget_id": "17191501"
+                }
+            ]
+        },
+        {
+            "title": "Applications",
+            "show_filter": true,
+            "scope_filter": "",
+            "widgets": [
+                {
+                    "widget_type": "pie_chart",
+                    "title": "Hosts by Application Architecture",
+                    "stream": "host-os-system-inventory",
+                    "ts_column": "collection_timestamp",
+                    "extra_filter": "asset_object = 'Software' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "column": "host_os_app_arch",
+                    "agg": "value_count",
+                    "group_by": [
+                        "host_os_app_arch"
+                    ],
+                    "type": "str",
+                    "min_width": 4,
+                    "height": 4,
+                    "max_width": 4,
+                    "widget_id": "dfdbddf1"
+                },
+                {
+                    "widget_type": "pie_chart",
+                    "title": "Hosts by Application  Vendor",
+                    "stream": "host-os-system-inventory",
+                    "ts_column": "collection_timestamp",
+                    "extra_filter": "asset_object = 'Software' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "column": "host_os_app_vendor",
+                    "limit": 25,
+                    "agg": "value_count",
+                    "group_by": [
+                        "host_os_app_vendor"
+                    ],
+                    "type": "str",
+                    "min_width": 4,
+                    "height": 4,
+                    "max_width": 4,
+                    "widget_id": "f599cfa0"
+                },
+                {
+                    "widget_type": "pie_chart",
+                    "title": "Hosts by Application Name",
+                    "stream": "host-os-system-inventory",
+                    "ts_column": "collection_timestamp",
+                    "extra_filter": "asset_object = 'Software' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "column": "host_os_app_name",
+                    "agg": "value_count",
+                    "group_by": [
+                        "host_os_app_name"
+                    ],
+                    "type": "str",
+                    "min_width": 4,
+                    "height": 4,
+                    "max_width": 5,
+                    "widget_id": "12eec174"
+                },
+                {
+                    "widget_type": "tabular",
+                    "title": "Application Details",
+                    "stream": "host-os-system-inventory",
+                    "extra_filter": "asset_object = 'Software' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "ts_column": "collection_timestamp",
+                    "sorting": [],
+                    "resizableColumns": false,
+                    "paginated": true,
+                    "virtual_scrolling": false,
+                    "showRowSummary": true,
+                    "max_rows": 200,
+                    "columns": {
+                        "hostname": {
+                            "title": "Hostname",
+                            "key": true
+                        },
+                        "host_os_ip": {
+                            "title": "Host IP",
+                            "key": true
+                        },
+                        "host_os_version": "Host OS Version",
+                        "host_machine_type": "Host Machine Type",
+                        "host_machine_vendor": "Host Machine Vendor",
+                        "host_os_app_name": "Application Name",
+                        "host_os_app_arch": "Application Arch",
+                        "host_os_app_version": "Application Version",
+                        "host_os_app_vendor": "Application Vendor",
+                        "host_os_app_package": "Application Package Name",
+                        "host_os_app_install_date": "Application Install Date",
+                        "host_os_app_group": "Application Group",
+                        "collection_timestamp": {
+                            "title": "Collection Timestamp",
+                            "type": "DATETIME"
+                        }
+                    },
+                    "custom_columns": [
+                        {
+                            "id": "new_unique_id",
+                            "label": "New Unique ID",
+                            "expr": "hostname + '_' + host_os_ip + '_' + host_bios_uuid",
+                            "visible": false
+                        }
+                    ],
+                    "actions": [
+                        {
+                            "permission": "rda:user_dashboard:view",
+                            "appName": "user-dashboard/host_os_details_view_pack",
+                            "drillDownLinkField": "host_os_ip",
+                            "identifier": "launch.dashboard.device_view_app",
+                            "selectionType": "SINGLE",
+                            "title": "View Details",
+                            "type": "GO_TO_APP_STATE",
+                            "contextParamList": {
+                                "contextParams": [
+                                    {
+                                        "paramKey": "new_unique_id",
+                                        "paramId": "node_id"
+                                    },
+                                    {
+                                        "paramKey": "host_os_ip",
+                                        "paramId": "tags_host_ip"
+                                    },
+                                    {
+                                        "paramKey": "host_os_node_id",
+                                        "paramId": "host_os_node_id"
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "widget_id": "c3845964"
+                }
+            ]
+        }
+    ],
+    "saved_time": "2025-01-31T23:01:27.994617"
+}

@@ -1,0 +1,290 @@
+%% stream = no and limit = 0
+
+%% import_src_type = "velocloud-orchestrator"
+
+## @dm:empty
+## --> @dm:addrow id=16
+## --> @dm:save name="temp-id"
+@exec:get-input
+    --> @dm:eval key="'key'"
+    --> @dm:to-type columns="enterprise_id" and type="int"
+    --> @dm:rename-columns id="enterprise_id"
+    --> @dm:save name="temp-id"
+    --> @dm:save name='id-stuff'
+    --> @dm:save name="temp-input"
+
+## --> @c:data-loop dataset="temp-input" and columns="customerTag"
+## --> @dm:recall name="vco_template"
+## --> *dm:filter vco_cred startswith "$customerTag"
+## --> @dm:skip-pipeline-if-shape row_count="0"
+## --> @dm:to-type columns="enterprise_id" and type="int"
+## --> @dm:rename-columns id="enterprise_id"
+## --> @dm:eval key="'key'"
+## --> @dm:enrich dict="temp-input" and src_key_cols="key" and dict_key_cols="key" and enrich_cols="customerTag,customerId,projectId"
+## --> @dm:save name="temp-id"
+## --> @dm:save name="test_input"
+## --> @c:new-block
+## --> @exec:run-pipeline name="vco_import_source"
+## ######################################### Fetch customers ######################################
+--> @c:data-loop dataset="temp-id" and columns="id,vco_cred,customerTag"
+    --> @$vco_cred:read url="/monitoring/getEnterpriseEdgeLinkStatus" and payload='{"id":1}'
+    ##--> @dm:recall name="vco_getEnterpriseEdgeLinkStatus"
+    --> @dm:eval source="'customer'"
+    --> @dm:drop-null-columns empty_is_null="yes"
+    --> @dm:copy-columns from="displayName" and to="unique_id"
+    --> @dm:save name="temp-vco-customer"
+    --> @dm:save name="vco-customer"
+    --> *exec:if-condition collection_status != 'Success'
+       --> *dm:safe-filter * get source_ip as 'source_ip',collection_status,collection_timestamp,reason,customer_id,customer_tag
+       --> @dm:map to = 'collection_timestamp' & func = 'time_now'
+       --> @dm:eval bot_source_name = "'$vco_cred'"
+       --> @dm:eval customerTag = "'$customerTag'"
+       --> @dm:eval bot_source_type = "'velocloud-orchestrator'"
+       --> @dm:eval bot_name = "'EnterpriseEdgeLinkStatus'"
+       --> @dm:save name="temp-packs_vco_inventory_collection_status" & append = 'yes'
+       --> @rn:write-stream name = 'vco-inventory-collection-status-stream'
+    --> @exec:end-if
+    --> *exec:if-condition collection_status = 'Success'
+       --> @dm:eval vco_name = "'$vco_cred'"
+       --> @dm:dedup columns = 'source_ip'
+       --> @dm:eval customerTag = "'$customerTag'"
+       ## --> *dm:safe-filter * get source_ip as 'asset_ip',collection_status,collection_timestamp,reason,customer_id,customer_tag
+       --> @dm:map attr = 'collection_timestamp' & func = 'ts_to_datetimestr' & unit = 'ms'
+       --> @dm:eval bot_source_name = "'$vco_cred'"
+       --> @dm:eval bot_source_type ="'velocloud-orchestrator'"
+       --> @dm:eval bot_name = "'EnterpriseEdgeLinkStatus'"
+       --> @dm:save name="temp-packs_vco_inventory_collection_status" & append = 'yes'
+       --> @rn:write-stream name = 'vco-inventory-collection-status-stream'
+    --> @exec:end-if
+
+## ######################### Fetch Edges ##############################
+--> @c:data-loop dataset="temp-id" and columns="id,vco_cred,customerTag"
+    --> @$vco_cred:read url="/enterprise/getEnterpriseEdges" and payload='{"enterpriseId":$id,"with":["recentLinks"]}'
+    ##--> @dm:recall name="vco_getEnterpriseEdges"
+    --> @dm:save name="temp-edges"
+    --> *exec:if-condition collection_status != 'Success'
+       --> *dm:safe-filter * get source_ip as 'source_ip',collection_status,collection_timestamp,reason,customer_id,customer_tag
+       --> @dm:map to = 'collection_timestamp' & func = 'time_now'
+       --> @dm:eval bot_source_name = "'$vco_cred'"
+       --> @dm:eval bot_source_type = "'velocloud-orchestrator'"
+       --> @dm:eval customerTag = "'$customerTag'"
+       --> @dm:eval bot_name = "'EnterpriseEdges'"
+       --> @dm:save name="temp-packs_vco_inventory_collection_status" & append = 'yes'
+       --> @rn:write-stream name = 'vco-inventory-collection-status-stream'
+    --> @exec:end-if
+    --> *exec:if-condition collection_status = 'Success'
+       --> @dm:eval vco_name = "'$vco_cred'"
+       --> @dm:dedup columns = 'source_ip'
+       ## --> *dm:safe-filter * get source_ip as 'asset_ip',collection_status,collection_timestamp,reason,customer_id,customer_tag
+       --> @dm:map attr = 'collection_timestamp' & func = 'ts_to_datetimestr' & unit = 'ms'
+       --> @dm:eval bot_source_name = "'$vco_cred'"
+       --> @dm:eval customerTag = "'$customerTag'"
+       --> @dm:eval bot_source_type ="'velocloud-orchestrator'"
+       --> @dm:eval bot_name = "'EnterpriseEdges'"
+       --> @dm:save name="temp-packs_vco_inventory_collection_status" & append = 'yes'
+       --> @rn:write-stream name = 'vco-inventory-collection-status-stream'
+    --> @exec:end-if
+
+## ############################## Get enterprise proxy id  #####################
+--> @c:data-loop dataset="temp-id" and columns="id,vco_cred,customerTag"
+    --> @$vco_cred:read url="/enterpriseProxy/getEnterpriseProxy" and payload='{"enterpriseId":$id}'
+    ##--> @dm:recall name="vco_getEnterpriseProxy"
+    --> @dm:manipulate-string to="vco_cred" and value="'$vco_cred'" and func="eval"
+    --> @dm:eval customerTag = "'$customerTag'"
+    --> @dm:save name="temp-enterpriseproxy-id"
+    --> *exec:if-condition collection_status != 'Success'
+       --> *dm:safe-filter * get source_ip as 'source_ip',collection_status,collection_timestamp,reason,customer_id,customer_tag
+       --> @dm:map to = 'collection_timestamp' & func = 'time_now'
+       --> @dm:eval bot_source_name = "'$vco_cred'"
+       --> @dm:eval customerTag = "'$customerTag'"
+       --> @dm:eval bot_source_type = "'velocloud-orchestrator'"
+       --> @dm:eval bot_name = "'EnterpriseProxy'"
+       --> @dm:save name="temp-packs_vco_inventory_collection_status" & append = 'yes'
+       --> @rn:write-stream name = 'vco-inventory-collection-status-stream'
+    --> @exec:end-if
+    --> *exec:if-condition collection_status = 'Success'
+       --> @dm:eval vco_name = "'$vco_cred'"
+       --> @dm:eval customerTag = "'$customerTag'"
+       --> @dm:dedup columns = 'source_ip'
+       ## --> *dm:safe-filter * get source_ip as 'asset_ip',collection_status,collection_timestamp,reason,customer_id,customer_tag
+       --> @dm:map attr = 'collection_timestamp' & func = 'ts_to_datetimestr' & unit = 'ms'
+       --> @dm:eval bot_source_name = "'$vco_cred'"
+       --> @dm:eval bot_source_type ="'velocloud-orchestrator'"
+       --> @dm:eval bot_name = "'EnterpriseProxy'"
+       --> @dm:save name="temp-packs_vco_inventory_collection_status" & append = 'yes'
+       --> @rn:write-stream name = 'vco-inventory-collection-status-stream'
+    --> @exec:end-if
+
+## #################### Gateways ###############################
+--> @c:data-loop dataset="temp-enterpriseproxy-id" and columns="networkId,id,vco_cred,customerTag"
+    --> @$vco_cred:read url="/enterpriseProxy/getEnterpriseProxyGateways" and payload='{"enterpriseProxyId":$id}'
+    ##--> @dm:recall name="vco_getEnterpriseProxyGateways"
+    --> @dm:manipulate-string to="vco_cred" and value="'$vco_cred'" and func="eval"
+    --> @dm:eval customerTag = "'$customerTag'"
+    --> @dm:save name="temp-proxy-gateways"
+    --> *exec:if-condition collection_status != 'Success'
+       --> *dm:safe-filter * get source_ip as 'source_ip',collection_status,collection_timestamp,reason,customer_id,customer_tag
+       --> @dm:map to = 'collection_timestamp' & func = 'time_now'
+       --> @dm:eval bot_source_name = "'$vco_cred'"
+       --> @dm:eval customerTag = "'$customerTag'"
+       --> @dm:eval bot_source_type = "'velocloud-orchestrator'"
+       --> @dm:eval bot_name = "'EnterpriseProxyGateways'"
+       --> @dm:save name="temp-packs_vco_inventory_collection_status" & append = 'yes'
+       --> @rn:write-stream name = 'vco-inventory-collection-status-stream'
+    --> @exec:end-if
+    --> *exec:if-condition collection_status = 'Success'
+       --> @dm:eval vco_name = "'$vco_cred'"
+       --> @dm:dedup columns = 'source_ip'
+       ## --> *dm:safe-filter * get source_ip as 'asset_ip',collection_status,collection_timestamp,reason,customer_id,customer_tag
+       --> @dm:map attr = 'collection_timestamp' & func = 'ts_to_datetimestr' & unit = 'ms'
+       --> @dm:eval bot_source_name = "'$vco_cred'"
+       --> @dm:eval customerTag = "'$customerTag'"
+       --> @dm:eval bot_source_type ="'velocloud-orchestrator'"
+       --> @dm:eval bot_name = "'EnterpriseProxyGateways'"
+       --> @dm:save name="temp-packs_vco_inventory_collection_status" & append = 'yes'
+       --> @rn:write-stream name = 'vco-inventory-collection-status-stream'
+    --> @exec:end-if
+
+## ############### Fetch GW Edge link  ########################################
+--> @c:data-loop dataset="temp-proxy-gateways" and columns="name,id,vco_cred,customerTag"
+    --> @$vco_cred:read url="/gateway/getGatewayEdgeAssignments" and payload='{"gatewayId":$id}'
+    ##--> @dm:recall name="vco_getGatewayEdgeAssignments"
+    --> @dm:eval name="'$name'" & gateway_id="'$id'" & source="'GatewayEdgeLinGatewayEdgeLink'"
+    --> @dm:save name="temp-gw-s-$loop_index"
+    --> *exec:if-condition collection_status != 'Success'
+       --> *dm:safe-filter * get source_ip as 'source_ip',collection_status,collection_timestamp,reason,customer_id,customer_tag
+       --> @dm:map to = 'collection_timestamp' & func = 'time_now'
+       --> @dm:eval bot_source_name = "'$vco_cred'"
+       --> @dm:eval customerTag = "'$customerTag'"
+       --> @dm:eval bot_source_type = "'velocloud-orchestrator'"
+       --> @dm:eval bot_name = "'GatewayEdgeLinGatewayEdgeLink'"
+       --> @dm:save name="temp-packs_vco_inventory_collection_status" & append = 'yes'
+       --> @rn:write-stream name = 'vco-inventory-collection-status-stream'
+    --> @exec:end-if
+    --> *exec:if-condition collection_status = 'Success'
+       --> @dm:eval vco_name = "'$vco_cred'"
+       --> @dm:eval customerTag = "'$customerTag'"
+       --> @dm:dedup columns = 'source_ip'
+       ## --> *dm:safe-filter * get source_ip as 'asset_ip',collection_status,collection_timestamp,reason,customer_id,customer_tag
+       --> @dm:map attr = 'collection_timestamp' & func = 'ts_to_datetimestr' & unit = 'ms'
+       --> @dm:eval bot_source_name = "'$vco_cred'"
+       --> @dm:eval bot_source_type ="'velocloud-orchestrator'"
+       --> @dm:eval bot_name = "'GatewayEdgeLinGatewayEdgeLink'"
+       --> @dm:save name="temp-packs_vco_inventory_collection_status" & append = 'yes'
+       --> @rn:write-stream name = 'vco-inventory-collection-status-stream'
+    --> @exec:end-if
+
+--> @c:new-block
+    --> @dm:concat names="temp-gw-s-.*"
+    --> @dm:save name="temp-GatewayEdgeLink"
+    --> @dm:save name="gatewaylink"
+
+--> @c:new-block
+    --> @dm:recall name="temp-edges"
+    --> @dm:copy-columns from = 'systemUpSince' and to = 'systemUpSince_seconds'
+    --> @dm:copy-columns from = 'serviceUpSince' and to = 'serviceUpSince_seconds'
+    --> @dm:change-time-format columns = 'systemUpSince_seconds,serviceUpSince_seconds' and from_format = 'datetimestr' and to_format = 's'
+    --> @dm:eval systemUpSince_days="round((time_now_as_seconds() - systemUpSince_seconds)/86400)"
+    --> @dm:eval serviceUpSince_days="round((time_now_as_seconds() -serviceUpSince_seconds)/86400) if serviceUpSince_seconds else 0"
+    --> @dm:selectcolumns exclude = "systemUpSince_seconds|serviceUpSince_seconds|systemUpSince_sample"
+    --> @dm:eval systemUpSince_days_category = "'<30' if (systemUpSince_days > 0 and systemUpSince_days < 30) else '30-100' if (systemUpSince_days >= 30 and systemUpSince_days <= 100) else '>100'"
+    --> @dm:eval serviceUpSince_days_category = "'<30' if (serviceUpSince_days> 0 and serviceUpSince_days< 30) else '30-100' if (serviceUpSince_days >= 30 and serviceUpSince_days <= 100) else '>100'"
+    --> @dm:replace-data columns = 'factorySoftwareVersion' and expr = '"5\.0\.0"'
+            and replace = '5.0.0'
+    --> @dm:fixnull columns = 'customInfo,softwareVersion' and value = 'Not Available' and apply_for_empty="yes"
+    --> @dm:to-type columns = 'isHub' and  type = 'str'
+    --> @dm:save name = 'temp_demo1'
+    --> @dm:save name='demo1'
+
+--> @c:new-block
+    --> @dm:recall name="temp-proxy-gateways"
+    --> @dm:eval source="'gateway'"
+    --> @dm:dedup columns="name"
+    --> @dm:dropnull columns = 'gatewayState'
+    --> @dm:copy-columns from = 'gatewayState,ipAddress,softwareVersion,id,name' and to = 'gateway_state,gateway_ip,gateway_softwareVersion,gateway_id,gateway_name'
+    --> @dm:eval utilization="round(utilization,2) if utilization is not None else None"
+    --> @dm:eval utilizationDetail_cpu="round(utilizationDetail_cpu,2) if utilizationDetail_cpu is not None else None"
+    --> @dm:eval utilizationDetail_load="round(utilizationDetail_load,2) if utilizationDetail_load is not None else None"
+    --> @dm:eval utilizationDetail_memory="round(utilizationDetail_memory,2) if utilizationDetail_memory is not None else None"
+    --> @dm:eval utilizationDetail_overall="round(utilizationDetail_overall,2) if utilizationDetail_overall is not None else None"
+    --> @dm:fixnull columns = 'gateway_state'  & value = 'Not Available'
+    --> @dm:save name="temp-vco-gateways"
+
+--> @c:new-block
+    --> @dm:recall name = 'temp_demo1'
+    --> @dm:copy-columns from="name" and to="edgeName"
+    --> @dm:enrich dict="temp-GatewayEdgeLink" and dict_key_cols="siteId" and src_key_cols="siteId" and enrich_cols="gateway_id,name" and enrich_cols_as="gateway_id,gateway_name"
+    --> @dm:rename-columns edge_id="id"
+    --> @dm:to-type columns="gateway_id" and type="int"
+    --> @dm:enrich dict="temp-vco-gateways" and dict_key_cols="id" and src_key_cols="gateway_id" and enrich_cols="gatewayState,ipAddress,softwareVersion" and enrich_cols_as="gateway_state,gateway_ip,gateway_softwareVersion"
+    --> @dm:selectcolumns exclude="^id$"
+    --> @dm:eval source="'edge'"
+    --> @dm:add-missing-columns columns="edge_id"
+    --> @dm:copy-columns from="edge_id" and to="edge_id_str"
+    --> @dm:to-type columns="edge_id_str" and type="str"
+    --> @dm:manipulate-string from="edge_id_str,name" and to="unique_id" and func="concat_columns"
+    --> @dm:selectcolumns exclude="edge_id_str"
+    --> @dm:fixnull columns = 'gateway_state'  & value = 'Not Available'
+    --> @dm:save name="temp-vco-edges"
+    ## Get Edge count
+    --> @dm:groupby columns="gateway_id"
+    --> @dm:selectcolumns include="gateway_id|edge_id"
+    --> @dm:rename-columns edge_count="edge_id"
+    --> @dm:save name="temp-edge-count"
+    --> @dm:recall name="temp-vco-gateways"
+    --> @dm:enrich dict="temp-edge-count" and dict_key_cols="gateway_id" and src_key_cols="gateway_id" and enrich_cols="edge_count"
+    --> @dm:fixnull columns="edge_count" and value=0
+    --> @dm:copy-columns from="gateway_id" and to="gateway_id_str"
+    --> @dm:to-type columns="gateway_id_str" and type="str"
+    --> @dm:manipulate-string from="gateway_id_str,gateway_ip" and to="unique_id" and func="concat_columns"
+    --> @dm:selectcolumns exclude="gateway_id_str"
+    --> @dm:save name="temp-vco-gateways"
+
+## --> @c:new-block
+## --> @dm:empty
+## --> @dm:addrow name="vco_1"
+## --> #dm:pstream-delete-data-by-query source is 'edge'
+--> @c:data-loop dataset="temp-id" and columns="customerId,projectId,customerTag"
+    --> @dm:empty
+    --> @dm:addrow key="key"
+    --> @dm:eval collection_timestamp= "time_now_as_isoformat()"
+    --> @dm:map from = 'collection_timestamp' & to = 'ingestion_id' & func = 'md5'
+    --> @dm:eval customerTag="'$customerTag'"
+    --> @dm:save name="temp-ingestion-id"
+
+--> @c:data-loop dataset="temp-id" and columns="customerId,projectId,customerTag"
+    --> @dm:concat names = 'temp-vco-edges|temp-vco-gateways|temp-vco-customer'
+    --> @dm:rename-columns edge_ip = 'recentLinks_ipAddress'
+    --> @dm:manipulate-string to="key" and func="eval" and value="'key'"
+    --> @dm:enrich dict="temp-ingestion-id" and src_key_cols="key" and dict_key_cols="key" and enrich_cols="ingestion_id"
+    --> @dm:eval customerId = "'$customerId'" and projectId = "'$projectId'" and  customerTag = "'$customerTag'"
+    --> @dm:fixnull columns="activationState" and value="NOT_AVAILABLE"
+    --> @dm:fixnull columns="gateway_state" and value="NOT_AVAILABLE"
+    --> @rn:write-stream name = "vco_1"
+
+## --> @c:data-loop dataset="temp-id" and columns="customerId,projectId,customerTag"
+## --> @dm:recall name="temp-vco-edges"
+## --> @dm:eval customerId = "'$customerId'" and projectId = "'$projectId'" and  customerTag = "'$customerTag'"
+## --> @dm:selectcolumns include="edgeState|recentLinks_ipAddress|edge_id|name|source_ip|gateway_ip|gateway_id|softwareVersion|customerId|projectId|customerTag|serialNumber|modelNumber"
+## --> @dm:rename-columns edge_ip = 'recentLinks_ipAddress'
+## --> @rn:write-stream name="vco_edge_status"
+## Delete old data from stream
+## --> @c:data-loop dataset="temp-ingestion-id" and columns="ingestion_id,customerTag"
+## --> @dm:empty
+## --> @dm:addrow name="vco_1" and conflicts="proceed"
+## --> #dm:pstream-delete-data-by-query ingestion_id != '$ingestion_id' and customerTag=='$customerTag'
+## Running Gateway and Edges Topology pipeline
+--> @c:new-block
+    --> @dm:recall name="temp-id"
+    --> @exec:run-pipeline name="vco_gateway_and_edges_topology" & ignore_failures = "no"
+
+## creating the dataset for stream enrichment
+--> @c:new-block
+    --> @dm:empty
+    --> @dm:addrow name = "vco_1" and limit = 0
+    --> #dm:query-persistent-stream edgeName is not Empty
+    --> @dm:dedup columns = "edgeName"
+    --> @dm:eval device_status = "'MANAGED'"
+    --> @dm:eval edgeName = "edgeName.lower()"
+    --> @dm:save name="vco_inventory"
+

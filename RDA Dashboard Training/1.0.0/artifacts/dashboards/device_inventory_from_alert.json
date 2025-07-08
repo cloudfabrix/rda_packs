@@ -1,0 +1,721 @@
+{
+    "name": "device_inventory_from_alert",
+    "label": "Inventory",
+    "description": "Device Inventory",
+    "dashboard_folder": "MSP",
+    "version": "24.12.2.2",
+    "enabled": false,
+    "stream": "training_cisco_devices_inventory",
+    "dashboard_type": "template",
+    "template_variables": {
+        "CUST_ID": {
+            "contextId": "customerId"
+        },
+        "PROJ_ID": {
+            "contextId": "projectId"
+        },
+        "CUST_TAG": {
+            "contextId": "customerTag"
+        },
+        "SERIAL_NUM": {
+            "contextId": "parent_sn"
+        },
+        "DEVICE_SERIAL_NUM": {
+            "contextId": "device_serial_number"
+        },
+        "DEVICE_IP": {
+            "contextId": "a_asset_ip_address"
+        }
+    },
+    "dashboard_filters": {
+        "time_filter": true,
+        "extra_filter0": "(a_asset_ip_address is '{{DEVICE_IP}}' or a_asset_name is '{{DEVICE_IP}}') ",
+        "default_time_filter_labels1": [
+            "Last 12 months"
+        ],
+        "columns_filter": [
+            {
+                "id": "device_ip",
+                "label": "IP Address",
+                "type": "TEXT"
+            },
+            {
+                "id": "device_int_name",
+                "label": "Interface Name",
+                "type": "TEXT"
+            },
+            {
+                "id": "device_interface_status",
+                "label": "Operational Status",
+                "type": "TEXT"
+            },
+            {
+                "id": "device_interface_admin_status",
+                "label": "Admin Status",
+                "type": "TEXT"
+            },
+            {
+                "id": "device_int_in_octets",
+                "label": "ifHCInOctets",
+                "type": "TEXT"
+            },
+            {
+                "id": "device_int_out_octets",
+                "label": "ifHCOutOctets",
+                "type": "TEXT"
+            },
+            {
+                "id": "timestamp",
+                "label": "Timestamp",
+                "type": "DATETIME"
+            },
+            {
+                "id": "delta",
+                "label": "Last Polled",
+                "type": "HUMANIZE_TIME_DELTA"
+            },
+            {
+                "id": "customerId",
+                "label": "Customer ID",
+                "type": "TEXT"
+            },
+            {
+                "id": "projectId",
+                "label": "Project ID",
+                "type": "TEXT"
+            },
+            {
+                "id": "customerTag",
+                "label": "Customer",
+                "type": "TEXT"
+            },
+            {
+                "id": "device_ip",
+                "label": "Device IP",
+                "type": "TEXT"
+            },
+            {
+                "id": "device_hostname",
+                "label": "Device Hostname",
+                "type": "TEXT"
+            },
+            {
+                "id": "device_model",
+                "label": "Device Model",
+                "type": "TEXT"
+            },
+            {
+                "id": "device_serial_number",
+                "label": "Device Serial Number",
+                "type": "TEXT"
+            },
+            {
+                "id": "device_vendor",
+                "label": "Device Vendor",
+                "type": "TEXT"
+            },
+            {
+                "id": "device_int_name",
+                "label": "Device Interface Name",
+                "type": "TEXT"
+            },
+            {
+                "id": "device_int_shortname",
+                "label": "Device Interface Short Name",
+                "type": "TEXT"
+            },
+            {
+                "id": "CLLI_code",
+                "label": "CLLI Code",
+                "type": "TEXT"
+            },
+            {
+                "id": "remote_device_ip",
+                "label": "Remote Device IP",
+                "type": "TEXT"
+            },
+            {
+                "id": "remote_device_id",
+                "label": "Remote Device ID",
+                "type": "TEXT"
+            },
+            {
+                "id": "remote_device_int_name",
+                "label": "Remote Interface Name",
+                "type": "TEXT"
+            },
+            {
+                "id": "remote_device_capabilities",
+                "label": "Remote Device Capabilities",
+                "type": "TEXT"
+            }
+        ],
+        "group_filters": []
+    },
+    "dashboard_sections": [
+        {
+            "title": "Device View",
+            "context_filter": "device_ip in ['10.95.158.251','10.95.158.1','10.95.158.9', '10.95.158.83','10.95.158.82','10.95.158.81','10.95.158.254','10.95.158.10','10.95.131.56','10.95.131.55']",
+            "show_filter": true,
+            "widgets": [
+                {
+                    "widget_type": "label",
+                    "max_width": 12,
+                    "height": 0.5,
+                    "min_width": 12,
+                    "label": "<div style='text-align:center;width:100%;'><h1><a style='text-decoration:none;color:#0066ff;' target='_blank'> Device Inventory</a></h1></div>",
+                    "widget_id": "33317e49"
+                },
+                {
+                    "title": "Asset Summary",
+                    "widget_type": "summary",
+                    "max_width": 6,
+                    "height": 5,
+                    "min_width": 6,
+                    "stream": "training_cisco_devices_inventory",
+                    "duration_hours": 10800,
+                    "ts_column": "timestamp",
+                    "extra_filter": "(device_ip is '{{DEVICE_IP}}' or parent_sn in '{{SERIAL_NUM}}') and device_equip_type contains 'chassis'",
+                    "extra_filter1": "device_ip in '{{DEVICE_IP}}'",
+                    "columns": {
+                        "device_model": "Product ID",
+                        "device_equip_type": "Equipment Type",
+                        "device_vendor": "Vendor",
+                        "device_ip": "IP Address",
+                        "device_hostname": "Hostname",
+                        "parent_sn": "Parent Serial Number"
+                    },
+                    "widget_id": "7gsoG2q9"
+                },
+                {
+                    "title": "Asset Additional Details",
+                    "widget_type": "summary",
+                    "max_width": 6,
+                    "height": 5,
+                    "min_width": 6,
+                    "stream": "training_cisco_devices_inventory",
+                    "ts_column": "timestamp",
+                    "duration_hours": 1080,
+                    "extra_filter": "(device_ip is '{{DEVICE_IP}}' or parent_sn in '{{SERIAL_NUM}}') and device_equip_type contains 'chassis'",
+                    "columns": {
+                        "CLLI_code": "CLLI Code",
+                        "device_location": "Location",
+                        "device_fw_version": "FW Version",
+                        "device_eq_description": "Description"
+                    },
+                    "widget_id": "46n6VnMU"
+                },
+                {
+                    "title": "Asset Hierarchy",
+                    "widget_type": "device_tree_view",
+                    "max_width": 6,
+                    "height": 6,
+                    "min_width": 6,
+                    "stream": "training_cisco_devices_inventory",
+                    "extra_filter1": "(parent_sn in '{{SERIAL_NUM}}') or (parent_sn in '{{DEVICE_SERIAL_NUM}}')",
+                    "extra_filter": "(parent_sn is '{{DEVICE_SERIAL_NUM}}')",
+                    "ts_column": "timestamp",
+                    "duration_hours": 1080,
+                    "widget_id": "dx2kDMEu"
+                },
+                {
+                    "title": "Asset Ops View",
+                    "widget_type": "device_ops_view",
+                    "max_width": 6,
+                    "height": 6,
+                    "min_width": 6,
+                    "stream": "training_cisco_devices_inventory",
+                    "extra_filter": "(parent_sn in '{{SERIAL_NUM}}')",
+                    "ts_column": "timestamp",
+                    "duration_hours": 1080,
+                    "widget_id": "e717577f"
+                },
+                {
+                    "title": "ICMP Access",
+                    "widget_type": "timeseries",
+                    "gap_interval": "join",
+                    "isDownsamplingDisabled": true,
+                    "stream": "access_check_icmp",
+                    "ts_column": "timestamp",
+                    "duration_hours": 10800,
+                    "max_width": 12,
+                    "height": 3,
+                    "min_width": 12,
+                    "chartProperties": {
+                        "yAxisLabel": "Count",
+                        "xAxisLabel": "Timestamp",
+                        "legendLocation": "bottom"
+                    },
+                    "group_by": [
+                        "source_ip"
+                    ],
+                    "interval": "15Min",
+                    "extra_filter": "source_ip is '{{DEVICE_IP}}'",
+                    "series_spec": [
+                        {
+                            "column": "metric_value",
+                            "agg": "max",
+                            "type": "int"
+                        }
+                    ],
+                    "widget_id": "17a93f8e"
+                },
+                {
+                    "title": "SNMP Access",
+                    "widget_type": "timeseries",
+                    "gap_interval": "join",
+                    "isDownsamplingDisabled": true,
+                    "stream": "access_check_snmp",
+                    "ts_column": "timestamp",
+                    "duration_hours": 10800,
+                    "max_width": 12,
+                    "height": 3,
+                    "min_width": 12,
+                    "chartProperties": {
+                        "yAxisLabel": "Count",
+                        "xAxisLabel": "Timestamp",
+                        "legendLocation": "bottom"
+                    },
+                    "interval": "16Min",
+                    "group_by": [
+                        "target_ip"
+                    ],
+                    "extra_filter": "target_ip is '{{DEVICE_IP}}'",
+                    "series_spec": [
+                        {
+                            "column": "metric_value",
+                            "agg": "max",
+                            "type": "int"
+                        }
+                    ],
+                    "widget_id": "02e51e51"
+                },
+                {
+                    "title": "Interface Status",
+                    "widget_type": "tabular",
+                    "stream": "training_cisco_devices_inventory",
+                    "extra_filter": "device_object contains 'interface' and device_interface_type contains 'PHYSICAL_PORT' and device_ip is '{{DEVICE_IP}}'",
+                    "max_width": 12,
+                    "height": 8,
+                    "duration_hours": 10800,
+                    "sorting": [
+                        {
+                            "device_int_name": "desc"
+                        }
+                    ],
+                    "min_width": 12,
+                    "remote_searchable": true,
+                    "remote_searchable_cols": [
+                        "device_ip",
+                        "device_hostname",
+                        "device_int_name",
+                        "device_interface_type"
+                    ],
+                    "columns": {
+                        "device_ip": {
+                            "title": "IP Address",
+                            "visible": false
+                        },
+                        "device_hostname": "Hostname",
+                        "device_int_name": {
+                            "title": "Interface Name",
+                            "key": true
+                        },
+                        "device_interface_type": {
+                            "title": "Interface Type",
+                            "key": false
+                        },
+                        "device_interface_status_color": {
+                            "type": "COLOR-MAP",
+                            "source-column": "device_interface_status",
+                            "color-map": {
+                                "Up": "#008000",
+                                "Down": "#FF0000",
+                                "up": "#008000",
+                                "down": "#FF0000"
+                            }
+                        },
+                        "device_interface_admin_status_color": {
+                            "type": "COLOR-MAP",
+                            "source-column": "device_interface_admin_status",
+                            "color-map": {
+                                "Up": "#008000",
+                                "Down": "#FF0000",
+                                "up": "#008000",
+                                "down": "#FF0000"
+                            }
+                        },
+                        "device_interface_status": {
+                            "title": "Operational Status",
+                            "htmlTemplateForRow": "{% raw %}<span class='badge' style='background-color: {{ row.device_interface_status_color }}' > {{ row.device_interface_status }} </span>{% endraw %}"
+                        },
+                        "device_interface_admin_status": {
+                            "title": "Admin Status",
+                            "htmlTemplateForRow": "{% raw %}<span class='badge' style='background-color: {{ row.device_interface_admin_status_color}}' > {{ row.device_interface_admin_status }} </span>{% endraw %}"
+                        },
+                        "device_int_in_octets": "ifHCInOctets",
+                        "device_int_out_octets": "ifHCOutOctets",
+                        "if_last_change": "Interface Up/Down (Days)",
+                        "timestamp": {
+                            "title": "Timestamp",
+                            "type": "DATETIME",
+                            "visible": false
+                        },
+                        "delta": {
+                            "title": "Last Polled",
+                            "type": "HUMANIZE_TIME_DELTA",
+                            "source-column": "timestamp"
+                        }
+                    },
+                    "actions": [
+                        {
+                            "permission": "rda:user_dashboard:view",
+                            "appName": "user-dashboard/device_interface_drilldown_new",
+                            "drillDownLinkField": "device_int_name",
+                            "identifier": "launch.dashboard.device_interface_drilldown",
+                            "selectionType": "SINGLE",
+                            "title": "View Details",
+                            "type": "GO_TO_APP_STATE"
+                        }
+                    ],
+                    "widget_id": "94a3fc11"
+                },
+                {
+                    "title": "Neighbors",
+                    "context_filter": "device_ip is in ['10.95.158.251','10.95.158.1','10.95.158.9']",
+                    "widget_type": "tabular",
+                    "max_width": 12,
+                    "height": 8,
+                    "min_width": 12,
+                    "stream": "training_cisco_devices_inventory",
+                    "extra_filter": "(device_ip is '{{DEVICE_IP}}' or device_serial_number in '{{SERIAL_NUM}}') and remote_device_int_name not equals 'Not Available'",
+                    "ts_column": "timestamp",
+                    "duration_hours": 1080,
+                    "remote_searchable": true,
+                    "remote_searchable_cols": [
+                        "device_ip",
+                        "device_hostname",
+                        "device_model",
+                        "device_serial_number",
+                        "device_vendor",
+                        "device_int_name",
+                        "remote_device_ip"
+                    ],
+                    "columns": {
+                        "customerId": {
+                            "title": "Customer ID",
+                            "type": "TEXT",
+                            "visible": false
+                        },
+                        "projectId": {
+                            "title": "Project ID",
+                            "type": "TEXT",
+                            "key": true,
+                            "visible": false
+                        },
+                        "customerTag": {
+                            "title": "Customer",
+                            "type": "TEXT"
+                        },
+                        "device_ip": "Device IP",
+                        "device_hostname": "Device Hostname",
+                        "device_model": "Device Model",
+                        "device_serial_number": "Device Serial Number",
+                        "device_vendor": "Device Vendor",
+                        "device_int_name": "Device Interface Name",
+                        "device_int_shortname": "Device Interface Short Name",
+                        "CLLI_code": "CLLI Code",
+                        "remote_device_ip": "Remote Device IP",
+                        "remote_device_id": "Remote Device ID",
+                        "remote_device_int_name": "Remote Interface Name",
+                        "remote_device_capabilities": {
+                            "title": "Remote Device Capabilities",
+                            "type": "TEXT",
+                            "visible": false
+                        },
+                        "timestamp": {
+                            "title": "Timestamp",
+                            "type": "DATETIME"
+                        }
+                    },
+                    "widget_id": "oMjorREi"
+                }
+            ]
+        },
+        {
+            "title": "Device View",
+            "context_filter": "device_ip not in ['10.95.158.251','10.95.158.1','10.95.158.9', '10.95.158.83','10.95.158.82','10.95.158.81','10.95.158.254','10.95.158.10','10.95.131.56','10.95.131.55']",
+            "show_filter": true,
+            "widgets": [
+                {
+                    "widget_type": "label",
+                    "max_width": 12,
+                    "height": 0.5,
+                    "min_width": 12,
+                    "label": "<div style='text-align:center;width:100%;'><h1><a style='text-decoration:none;color:#0066ff;' target='_blank'> Device Inventory</a></h1></div>",
+                    "widget_id": "401d9d45"
+                },
+                {
+                    "title": "Asset Summary",
+                    "widget_type": "summary",
+                    "max_width": 6,
+                    "height": 5,
+                    "min_width": 6,
+                    "stream": "training_cisco_devices_inventory",
+                    "duration_hours": 10800,
+                    "ts_column": "timestamp",
+                    "extra_filter": "(device_ip is '{{DEVICE_IP}}' or parent_sn in '{{SERIAL_NUM}}') and device_equip_type contains 'chassis'",
+                    "extra_filter1": "device_ip in '{{DEVICE_IP}}'",
+                    "columns": {
+                        "device_model": "Product ID",
+                        "device_equip_type": "Equipment Type",
+                        "device_vendor": "Vendor",
+                        "device_ip": "IP Address",
+                        "device_hostname": "Hostname",
+                        "parent_sn": "Parent Serial Number"
+                    },
+                    "widget_id": "ce9a8763"
+                },
+                {
+                    "title": "Asset Additional Details",
+                    "widget_type": "summary",
+                    "max_width": 6,
+                    "height": 5,
+                    "min_width": 6,
+                    "stream": "training_cisco_devices_inventory",
+                    "ts_column": "timestamp",
+                    "duration_hours": 1080,
+                    "extra_filter": "(device_ip is '{{DEVICE_IP}}' or parent_sn in '{{SERIAL_NUM}}') and device_equip_type contains 'chassis'",
+                    "columns": {
+                        "CLLI_code": "CLLI Code",
+                        "device_location": "Location",
+                        "device_fw_version": "FW Version",
+                        "device_eq_description": "Description"
+                    },
+                    "widget_id": "8d963f93"
+                },
+                {
+                    "title": "Asset Hierarchy",
+                    "widget_type1": "device_tree_view",
+                    "max_width": 6,
+                    "height": 6,
+                    "min_width": 6,
+                    "stream": "training_cisco_devices_inventory",
+                    "extra_filter1": "(parent_sn in '{{SERIAL_NUM}}') or (parent_sn in '{{DEVICE_SERIAL_NUM}}')",
+                    "extra_filter": "(parent_sn is '{{DEVICE_SERIAL_NUM}}')",
+                    "ts_column": "timestamp",
+                    "duration_hours": 1080,
+                    "widget_id": "7ff155f5"
+                },
+                {
+                    "title": "Asset Ops View",
+                    "widget_type1": "device_ops_view",
+                    "max_width": 6,
+                    "height": 6,
+                    "min_width": 6,
+                    "stream": "training_cisco_devices_inventory",
+                    "extra_filter": "(parent_sn in '{{SERIAL_NUM}}')",
+                    "ts_column": "timestamp",
+                    "duration_hours": 1080,
+                    "widget_id": "6ea16c04"
+                },
+                {
+                    "title": "ICMP Access",
+                    "widget_type": "timeseries",
+                    "gap_interval": "keep",
+                    "stream": "training_snmp_stats_external",
+                    "ts_column": "timestamp",
+                    "max_width": 12,
+                    "height": 3,
+                    "min_width": 12,
+                    "chartProperties": {
+                        "yAxisLabel": "Count",
+                        "xAxisLabel": "Timestamp",
+                        "legendLocation": "bottom"
+                    },
+                    "interval": "5m",
+                    "extra_filter": "ipAddress is '{{DEVICE_IP}}'",
+                    "series_spec": [
+                        {
+                            "column": "ICMPPing",
+                            "agg": "max",
+                            "type": "int"
+                        }
+                    ],
+                    "widget_id": "19d38b75"
+                },
+                {
+                    "title": "SNMP Access",
+                    "widget_type": "timeseries",
+                    "gap_interval": "keep",
+                    "stream": "training_snmp_stats_external",
+                    "ts_column": "timestamp",
+                    "max_width": 12,
+                    "height": 3,
+                    "min_width": 12,
+                    "chartProperties": {
+                        "yAxisLabel": "Count",
+                        "xAxisLabel": "Timestamp",
+                        "legendLocation": "bottom"
+                    },
+                    "interval": "5m",
+                    "extra_filter": "ipAddress is '{{DEVICE_IP}}'",
+                    "series_spec": [
+                        {
+                            "column": "SNMPPing",
+                            "agg": "max",
+                            "type": "int"
+                        }
+                    ],
+                    "widget_id": "73968bd5"
+                },
+                {
+                    "title": "Interface Status",
+                    "widget_type": "tabular",
+                    "stream": "training_cisco_devices_inventory",
+                    "extra_filter": "device_object contains 'interface' and device_interface_type contains 'PHYSICAL_PORT' and device_ip is '{{DEVICE_IP}}'",
+                    "max_width": 12,
+                    "height": 8,
+                    "duration_hours": 10800,
+                    "min_width": 12,
+                    "remote_searchable": true,
+                    "remote_searchable_cols": [
+                        "device_ip",
+                        "device_hostname",
+                        "device_int_name",
+                        "device_interface_type"
+                    ],
+                    "columns": {
+                        "device_ip": {
+                            "title": "IP Address",
+                            "visible": false
+                        },
+                        "device_hostname": "Hostname",
+                        "device_int_name": {
+                            "title": "Interface Name",
+                            "key": true
+                        },
+                        "device_interface_type": {
+                            "title": "Interface Type",
+                            "key": false
+                        },
+                        "device_interface_status_color": {
+                            "type": "COLOR-MAP",
+                            "source-column": "device_interface_status",
+                            "color-map": {
+                                "Up": "#008000",
+                                "Down": "#FF0000",
+                                "up": "#008000",
+                                "down": "#FF0000"
+                            }
+                        },
+                        "device_interface_admin_status_color": {
+                            "type": "COLOR-MAP",
+                            "source-column": "device_interface_admin_status",
+                            "color-map": {
+                                "Up": "#008000",
+                                "Down": "#FF0000",
+                                "up": "#008000",
+                                "down": "#FF0000"
+                            }
+                        },
+                        "device_interface_status": {
+                            "title": "Operational Status",
+                            "htmlTemplateForRow": "{% raw %}<span class='badge' style='background-color: {{ row.device_interface_status_color }}' > {{ row.device_interface_status }} </span>{% endraw %}"
+                        },
+                        "device_interface_admin_status": {
+                            "title": "Admin Status",
+                            "htmlTemplateForRow": "{% raw %}<span class='badge' style='background-color: {{ row.device_interface_admin_status_color}}' > {{ row.device_interface_admin_status }} </span>{% endraw %}"
+                        },
+                        "device_int_in_octets": "ifHCInOctets",
+                        "device_int_out_octets": "ifHCOutOctets",
+                        "if_last_change": "Interface Up/Down (Days)",
+                        "timestamp": {
+                            "title": "Timestamp",
+                            "type": "DATETIME",
+                            "visible": false
+                        },
+                        "delta": {
+                            "title": "Last Polled",
+                            "type": "HUMANIZE_TIME_DELTA",
+                            "source-column": "timestamp"
+                        }
+                    },
+                    "actions": [
+                        {
+                            "permission": "rda:user_dashboard:view",
+                            "appName": "user-dashboard/device_interface_drilldown_new",
+                            "drillDownLinkField": "device_int_name",
+                            "identifier": "launch.dashboard.device_interface_drilldown",
+                            "selectionType": "SINGLE",
+                            "title": "View Details",
+                            "type": "GO_TO_APP_STATE"
+                        }
+                    ],
+                    "widget_id": "c1c5939c"
+                },
+                {
+                    "title": "Neighbors",
+                    "context_filter": "device_ip is in ['10.95.158.251','10.95.158.1','10.95.158.9']",
+                    "widget_type": "tabular",
+                    "max_width": 12,
+                    "height": 8,
+                    "min_width": 12,
+                    "stream": "training_cisco_devices_inventory",
+                    "extra_filter": "(device_ip is '{{DEVICE_IP}}' or device_serial_number in '{{SERIAL_NUM}}') and remote_device_int_name not equals 'Not Available'",
+                    "ts_column": "timestamp",
+                    "duration_hours": 1080,
+                    "remote_searchable": true,
+                    "remote_searchable_cols": [
+                        "device_ip",
+                        "device_hostname",
+                        "device_model",
+                        "device_serial_number",
+                        "device_vendor",
+                        "device_int_name",
+                        "remote_device_ip"
+                    ],
+                    "columns": {
+                        "customerId": {
+                            "title": "Customer ID",
+                            "type": "TEXT",
+                            "visible": false
+                        },
+                        "projectId": {
+                            "title": "Project ID",
+                            "type": "TEXT",
+                            "key": true,
+                            "visible": false
+                        },
+                        "customerTag": {
+                            "title": "Customer",
+                            "type": "TEXT"
+                        },
+                        "device_ip": "Device IP",
+                        "device_hostname": "Device Hostname",
+                        "device_model": "Device Model",
+                        "device_serial_number": "Device Serial Number",
+                        "device_vendor": "Device Vendor",
+                        "device_int_name": "Device Interface Name",
+                        "device_int_shortname": "Device Interface Short Name",
+                        "CLLI_code": "CLLI Code",
+                        "remote_device_ip": "Remote Device IP",
+                        "remote_device_id": "Remote Device ID",
+                        "remote_device_int_name": "Remote Interface Name",
+                        "remote_device_capabilities": {
+                            "title": "Remote Device Capabilities",
+                            "type": "TEXT",
+                            "visible": false
+                        },
+                        "timestamp": {
+                            "title": "Timestamp",
+                            "type": "DATETIME"
+                        }
+                    },
+                    "widget_id": "77dee2c4"
+                }
+            ]
+        }
+    ],
+    "saved_time": "2025-03-21T13:33:26.697487"
+}

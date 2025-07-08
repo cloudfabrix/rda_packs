@@ -1,0 +1,67 @@
+%% stream = no and limit = 0
+@exec:get-input
+    --> @dm:save name="temp-id"
+    --> @dm:save name="temp-input"
+## --> @dm:save name="temp-input"
+## --> @dm:save name="input-dataset"
+## gateway_and_edges_topology
+--> @c:new-block
+    --> @dm:empty
+    --> #dm:query-persistent-stream * with-input name = "vco_1" & limit = "0"
+    --> *dm:filter source is "gateway"
+    --> @dm:dedup columns ="customerId,projectId,customerTag,gateway_ip"
+    --> @dm:selectcolumns exclude="_RDA_Id|count_|^timestamp$"
+    --> @dm:eval node_type="'Gateway'"
+    --> @dm:copy-columns from ="gateway_name" and to="node_label"
+    --> @dm:copy-columns from ="gateway_ip" and to="node_id"
+    --> @dm:eval node_id = "gateway_ip+'_CHASSIS'"
+    --> @dm:eval iconURL="'Network'"
+    --> @dm:save name="temp-gateway-nodes"
+--> @c:new-block
+    --> @dm:empty
+    --> #dm:query-persistent-stream * with-input name = "vco_1" & limit = "0"
+    --> *dm:filter source is "edge"
+    --> @dm:selectcolumns exclude="_RDA_Id|count_|^timestamp$"
+    ## --> @dm:dedup columns="edge_id,customerId,customerTag,projectId"
+    --> @dm:eval node_type="'Edge'"
+    --> @dm:copy-columns from ="name" and to="node_label"
+    --> @dm:copy-columns from ="name" and to="node_id"
+    --> @dm:eval iconURL="'Device'"
+    
+    --> @dm:save name="temp-edge-nodes"
+--> @c:new-block
+    --> @dm:concat names="temp-gateway-nodes|temp-edge-nodes"
+    --> @dm:change-time-format columns="collection_timestamp" and from_format="ms" and to_format="%Y-%m-%dT%H:%M:%S.%f"
+    --> @dm:selectcolumns exclude="description"
+    --> @dm:dedup columns="node_id"
+    --> @dm:to-type columns ="node_id" and type="str"
+    --> @dm:eval layer = "'Network'"
+    --> @dm:save name="Nodes"
+    --> @rn:write-stream name='cfx_rdaf_topology_nodes'
+    --> @graph:insert-nodes dbname = 'cfx_rdaf_topology' & collection = 'cfx_rdaf_topology_nodes' & key_column = 'node_id'
+--> @c:new-block
+    --> @dm:recall name="Nodes"
+    --> *dm:filter node_type="Edge"
+    --> @dm:dedup columns="name"
+    --> @dm:add-missing-columns columns="edge_role"
+    --> @dm:selectcolumns include="gateway_id|gateway_name|gateway_ip|edge_id|source|projectId|customerTag|customerId|name|edge_role"
+    --> @dm:eval left_node_type= "'Gateway'"
+    --> @dm:copy-columns from ="gateway_name" and to="left_label"
+    --> @dm:copy-columns from ="gateway_ip" and to="left_id"
+    --> @dm:eval left_id = "gateway_ip+'_CHASSIS'"
+    --> @dm:eval right_node_type= "'Edge'"
+    --> @dm:copy-columns from ="name" and to="right_id"
+    --> @dm:copy-columns from ="name" and to="right_label"
+    --> @dm:selectcolumns exclude="gateway_id|gateway_name|gateway_ip|edge_id|name"
+    --> @dm:eval relation_type = "'connected-to'"
+    --> @dm:save name="temp-edges"
+    --> @dm:dedup columns="left_id,right_id"
+    ## --> @dm:eval link_type = "''"
+    --> @dm:copy-columns from="edge_role" and to="link_type"
+    --> @dm:map to="edge_id" and func="evaluate" and expr="f'{left_id}#{right_id}' if left_id < right_id else f'{right_id}#{left_id}'"
+    --> @rn:write-stream name="cfx_rdaf_topology_edges"
+    --> @graph:insert-edges dbname = 'cfx_rdaf_topology' & nodes_collection = 'cfx_rdaf_topology_nodes' & edges_collection = 'cfx_rdaf_topology_edges' & left_id = 'left_id' & right_id = 'right_id'
+--> @c:new-block
+    --> @dm:empty
+    --> @dm:addrow name = "cfx_rdaf_topology_nodes" and limit = "0"
+    --> #dm:pstream-delete-data-by-query node_type is "Edge" and collection_timestamp is before -3 days

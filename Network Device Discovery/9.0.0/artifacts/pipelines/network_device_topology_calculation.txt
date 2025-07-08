@@ -1,0 +1,122 @@
+%% stream = no and limit = 0
+%%template_type="jinja"
+%%start_inline_object name="context_dynamic_form" and type="data" and format="json"
+{
+    "formFieldList": [
+        {
+            "fieldId": "customer_tag",
+            "label": "Tag of the customer",
+            "required": false,
+            "dataType": "string"
+        }
+    ]
+}
+%%end_inline_object
+-->@c:new-block
+-->@dm:empty
+    --> @dm:save name = "temp-customer-context"
+
+
+   {% if customer_tag %} 
+      {% set customer_id = customer_id %}
+      {% set customer_tag = customer_tag %}
+      {% set customerTag = customer_tag %}
+   {% elif customerTag %} 
+      {% set customer_id = customer_id %}
+      {% set customer_tag = customerTag %}
+   {% else %}
+      {% set customer_id = '' %}
+      {% set customer_tag = '' %}
+   {% endif %}  
+
+-->@c:new-block
+--> @dm:empty
+    
+
+    {% if customer_tag %}
+    --> #dm:query-persistent-stream device_equip_type in ["CHASSIS","Chassis","chassis"] and (customer_tag is '{{customer_tag}}') with-input name = "network_device_inventory" & limit = "0"
+    
+    {% else %}
+    --> #dm:query-persistent-stream device_equip_type in ["CHASSIS","Chassis","chassis"] and (customer_tag is empty) with-input name = "network_device_inventory" & limit = "0"
+            
+    {% endif %}
+    --> @dm:selectcolumns exclude="_RDA_Id|count_"
+    --> @dm:dedup columns ="parent_sn"
+    --> @dm:eval-multi-proc node_type="'CHASSIS'" and
+            device_status="'MANAGED'" and
+            source="'CHASSIS'" and
+            device_hostname_short = "device_hostname.split('.')[0]"
+    --> @dm:copy-columns from ="device_hostname_short" and to="node_label"
+    --> @dm:copy-columns from ="device_ip" and to="node_id"
+    --> @dm:eval layer = "'Network'"
+    --> @dm:eval node_id = "device_ip+'_CHASSIS'"
+    --> @dm:eval deviceFamily = "device_model"
+    ## --> @dm:eval serialNumber = "device_serial_number"
+    --> @dm:eval iconURL="'Router'"
+    --> @dm:save name="temp-chassis-nodes"
+
+## Getting cdp data and creating the nodes datasets where remote device is unmanaged
+--> @c:new-block
+    --> @dm:empty
+     {% if customer_tag %}
+    --> #dm:query-persistent-stream device_object in ['LLDP','CDP'] and (customer_tag is '{{customer_tag}}') with-input name = "network_devices_cdp" & limit = "0"
+
+     {% else %}       
+      --> #dm:query-persistent-stream device_object in ['LLDP','CDP'] and (customer_tag is empty) with-input name = "network_devices_cdp" & limit = "0"     
+    {% endif %}
+    --> @dm:eval remote_hostname_short = "remote_device_id.split('.')[0]"
+    --> @dm:save name = "temp-cdp-nodes"
+
+--> @c:new-block
+    --> @dm:recall name="temp-chassis-nodes" and return_empty = "yes"
+    --> @dm:selectcolumns exclude = "target_x|target_y"
+    --> @dm:save name="temp-rdaf_topology_nodes"
+    --> @rn:write-stream name='cfx_rdaf_topology_nodes'
+    --> @graph:insert-nodes dbname = 'cfx_rdaf_topology' & collection = 'cfx_rdaf_topology_nodes' & key_column = 'node_id'
+
+--> @c:new-block
+    --> @dm:empty
+    {% if customer_tag %}
+    --> #dm:query-persistent-stream device_object in ['LLDP','CDP'] and remote_device_id is not "Not Available" and (customer_tag is '{{customer_tag}}') with-input name = "network_devices_cdp" & limit = "0"
+    
+    {% else %} 
+    --> #dm:query-persistent-stream device_object in ['LLDP','CDP'] and remote_device_id is not "Not Available" and (customer_tag is empty) with-input name = "network_devices_cdp" & limit = "0"           
+    {% endif %}
+    --> @dm:eval remote_hostname_short = "remote_device_id.split('.')[0]"
+    --> @dm:eval node_id = "str(remote_hostname_short)+'_CHASSIS' if remote_device_ip == 'Not Available' else str(remote_device_ip)+'_CHASSIS'"
+    --> @dm:eval link_type=device_object
+    --> @dm:eval showAttrs="'^link_type$'"
+    --> @dm:eval direction = "'NO_DIRECTION'"
+    --> @dm:eval relation_type = "'connected-to'"
+    --> @dm:save name = "temp-cdp-edges"
+    --> @dm:enrich dict="temp-chassis-nodes" and src_key_cols="remote_hostname_short" and dict_key_cols="device_hostname_short" and enrich_cols="node_id,node_label,node_type" and enrich_cols_as = "left_id,left_label,left_node_type"
+    --> @dm:enrich dict="temp-chassis-nodes" and src_key_cols="device_ip" and dict_key_cols="device_ip" and enrich_cols="node_id,node_label,node_type" and enrich_cols_as = "right_id,right_label,right_node_type"
+    --> @dm:selectcolumns exclude="node_id|node_label|device_status|device_hostname_short|left_node_id|left_node_label|right_node_id|right_node_label"
+    --> @dm:eval showAttrs="'^link_type$'"
+    --> @dm:eval direction = "'NO_DIRECTION'"
+    --> @dm:eval relation_type = "'connected-to'"
+    --> @dm:dedup columns="left_id,right_id"
+    --> @dm:fixnull columns ="left_id,right_id"
+    --> @dm:map to="edge_id" and func="evaluate" and expr="f'{left_id}#{right_id}' if left_id < right_id else f'{right_id}#{left_id}'"
+    --> *dm:filter left_id is not Empty
+    --> *dm:filter left_id != right_id
+    --> @dm:save name="temp-rdaf-topology-edges"
+    --> @rn:write-stream name='cfx_rdaf_topology_edges'
+    --> @graph:insert-edges dbname = 'cfx_rdaf_topology' & nodes_collection = 'cfx_rdaf_topology_nodes' & edges_collection = 'cfx_rdaf_topology_edges' & left_id = 'left_id' & right_id = 'right_id'
+
+
+--> @c:new-block
+    --> @dm:empty
+    {% if customer_tag %}
+    --> #dm:query-persistent-stream device_object is "Chassis" and device_equip_type is "CHASSIS" and (customer_tag is '{{customer_tag}}') with-input name = "network_device_inventory" & limit = "0"
+   --> @dm:eval-multi-proc device_hostname_short = "device_hostname.split('.')[0]" and device_status = "'MANAGED'"
+   --> @dm:copy-columns from = "node_id" and to = "node_id" and func = "upper"
+    --> @dm:save name = "{{customer_tag}}_chassis_inventory"
+    {% else %}  
+   --> #dm:query-persistent-stream device_object is "Chassis" and device_equip_type is "CHASSIS" and (customer_tag is empty) with-input name = "network_device_inventory" & limit = "0"          
+   
+    --> @dm:eval-multi-proc device_hostname_short = "device_hostname.split('.')[0]" and device_status = "'MANAGED'"
+    --> @dm:copy-columns from = "node_id" and to = "node_id" and func = "upper"
+
+    --> @dm:save name = "chassis_inventory"
+     {% endif %}

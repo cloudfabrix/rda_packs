@@ -1,0 +1,168 @@
+
+%% stream = no and limit = 0
+%%template_type="jinja"
+%%start_inline_object name="context_dynamic_form" and type="data" and format="json"
+{
+    "formFieldList": [
+        {
+            "fieldId": "customer_tag",
+            "label": "Tag of the customer",
+            "required": false,
+            "dataType": "string"
+        }
+    ]
+}
+%%end_inline_object
+@dm:empty
+    --> @dm:save name = "temp-customer-context"
+
+
+   {% if customer_tag %}
+      {% set customer_id = customer_id %}
+      {% set customer_tag = customer_tag %}
+      {% set customerTag = customer_tag %}
+   {% elif customerTag %}
+      {% set customer_id = customer_id %}
+      {% set customer_tag = customerTag %}
+   {% else %}
+      {% set customer_id = '' %}
+      {% set customer_tag = '' %}
+   {% endif %}
+
+
+
+--> @dm:empty
+    --> @dm:save name = 'temp-variable-dataset'
+    --> @dm:save name = 'temp-variable-dataset-interim'
+    --> @dm:save name = 'temp-meraki-sources'
+
+--> @c:new-block
+    --> @exec:get-input
+    --> @dm:selectcolumns include = "Others"
+    ## --> @dm:skip-pipeline-if-shape column_count = 0
+    --> @dm:explode-json column="Others"
+    --> @dm:rename-columns ml_src_name = 'name'
+    --> @dm:save name = 'temp-variable-dataset'
+
+
+
+--> @c:new-block
+    --> @dm:recall name = 'temp-variable-dataset'
+    --> *exec:if-shape num_rows = 0
+       --> @dm:empty
+       {% if customer_tag %}
+        ## --> #dm:query-persistent-stream type contains 'cisco-meraki' and customerTag contains '{{customer_tag}}' with-input name = 'rda_secrets_meta' and limit= 0
+       {% else %}
+        ## --> #dm:query-persistent-stream type contains 'cisco-meraki' and customerTag is empty with-input name = 'rda_secrets_meta' and limit= 0
+       {% endif %}
+       --> @dm:rename-columns ml_src_name = 'name'
+       --> @dm:save name = 'temp-meraki-sources'
+       --> @dm:recall name = 'temp-variable-dataset-interim'
+      --> @exec:end-if   
+
+
+
+##Add customer context to the dataset
+--> @c:new-block
+    --> @dm:recall name = 'temp-variable-dataset'
+    --> @dm:eval customer_id =  "'{{ customer_id }}'"
+    --> @dm:eval customer_tag =  "'{{ customer_tag }}'"
+   --> @dm:save name = 'temp-variable-dataset'
+
+
+
+
+
+
+## Collecting selected metrics
+--> @c:new-block
+    --> @dm:empty
+    --> @dm:addrow name='oia-selected-metrics' and limit=0 and max_rows=10000
+    --> #dm:query-persistent-stream
+    --> @dm:save name='temp-oia-selected-metrics'
+    ## Saving only de duped asset_ids from selected metrics
+    --> @dm:dedup columns='asset_id'
+    --> @dm:save name='temp-oia-selected-metrics-assetid'
+
+## Collecting all metrics data for the selected asset_id
+--> @c:data-loop dataset="temp-oia-selected-metrics-assetid" & columns="asset_id"
+    --> @dm:empty
+    --> @dm:addrow name='oia-metrics-data' and limit=0 and max_rows=10000
+    --> #dm:query-persistent-stream asset_id is '$asset_id' and metric_timestamp is after -1 week
+    ## 1. Metric correlation for all metrics per asset_id
+    --> @dm:eval-multi-proc value = "round(value, 0)"
+    --> @dm:change-time-format columns='metric_timestamp' &
+            from_format='ms' &            to_format='%Y-%m-%dT%H:%M:%S'
+    --> @dm:metric-correlator metric_label='metric_id' & timestamp_column='metric_timestamp' & value_column='value' & correlation_threshold=0.9
+    ## Checking if there are any correlations
+    --> *exec:if-shape num_rows>0
+       ## Getting Unique metrics from correlated metrics
+       --> @dm:eval output="str(Metric1) + ',' + str(Metric2)"
+       --> @dm:explode column='output' and sep=','
+       --> @dm:selectcolumns include='output'
+       --> @dm:dedup columns='output'
+       --> @dm:add-missing-columns columns="asset_id" and value="$asset_id"
+        --> @dm:eval customer_id =  "'{{ customer_id }}'" and customer_tag =  "'{{ customer_tag }}'"
+    
+       --> @dm:save name='temp-metric-correlation-output' and append='yes'
+        
+       --> @rn:write-stream name='oia-metric-correlation-output'
+    --> @exec:end-if
+    ## If Metric Correlation output is empty adding any one metric per asset for regression
+    --> *exec:if-shape num_rows=0
+       --> @dm:recall-query name = 'temp-oia-selected-metrics-assetid' and query="asset_id is '$asset_id'"
+       --> @dm:selectcolumns include='asset_id|metric_id'
+       --> @dm:dropnull columns='asset_id'
+       --> @dm:eval output='metric_id'
+        --> @dm:eval customer_id =  "'{{ customer_id }}'" and customer_tag =  "'{{ customer_tag }}'"
+
+       --> @dm:save name='temp-metric-correlation-output' and append='yes'
+
+       --> @rn:write-stream name='oia-metric-correlation-output'
+    --> @exec:end-if
+
+--> @c:new-block
+    --> @dm:recall name='temp-metric-correlation-output'
+    --> @dm:save name='metric-correlation-output'
+
+## Regression
+--> @c:data-loop columns = 'output,asset_id' &
+        dataset = 'metric-correlation-output'
+    --> @dm:empty
+    --> @dm:addrow name='oia-metrics-data' and limit=0
+    --> #dm:query-persistent-stream asset_id is '$asset_id' and metric_id is '$output' and metric_timestamp is after -1 week
+    --> @cfxml:regression ts_column='metric_timestamp' &
+            value_column='value' &            agg_func='mean' &            action='train' &            frequency='1H' &            prediction_duration='1H' &            skip_errors='yes' & job_name="$asset_id-$output"
+    --> @dm:add-missing-columns columns='anomalies_type,anomaly_score,anomalies,predicted,baseline,upperBound,lowerBound,timestamp,anomalies_severity'
+    --> @dm:eval anomalies_type = "'upper' if anomalies_type == 1 else 'lower' if anomalies_type == -1 else None"
+    --> @dm:add-missing-columns columns="asset_id" and value="$asset_id"
+    --> @dm:add-missing-columns columns="metric_id" and value="$output"
+    --> @dm:enrich dict='temp-oia-selected-metrics' and
+            src_key_cols='metric_id,asset_id' and            dict_key_cols='metric_id,asset_id' and            enrich_cols='metric_label,metric_source,unit,asset_name'
+    --> @dm:change-time-format columns='timestamp' &
+            from_format='datetimestr' &            to_format='%Y-%m-%dT%H:%M:%S'
+    --> @dm:add-missing-columns columns='stream_name' and value='oia-ml-metrics-regression-output'
+    --> @dm:map from='asset_id,metric_label' and to='marker_message' and func='join' and sep=' - '
+    ## sending the regression output to stream for chart consumption
+     --> @dm:eval customer_id =  "'{{ customer_id }}'" and customer_tag =  "'{{ customer_tag }}'"
+    
+
+    --> @rn:write-stream name='oia-ml-metrics-regression-output'
+    --> *dm:filter anomalies_type is 'upper' and anomalies_severity is 'High'
+    --> @dm:eval anomaly_score = "round(anomalies/upperBound,2) if upperBound and anomalies_type == 'upper' else round(lowerBound/anomalies,2) if anomalies and anomalies_type == 'lower' else 0"
+    --> @dm:resample-timeseries ts_column='timestamp' and
+            value_column='anomaly_score' and            interval='1H' and agg='max'
+    ## Enriching and eval columns again as resample-timeseries bot filters all the columns
+    --> @dm:add-missing-columns columns="asset_id" and value="$asset_id"
+    --> @dm:add-missing-columns columns="metric_id" and value="$output"
+    --> @dm:enrich dict='temp-oia-selected-metrics' and
+            src_key_cols='metric_id,asset_id' and            dict_key_cols='metric_id,asset_id' and            enrich_cols='metric_label,metric_source,unit,asset_name'
+    --> @dm:change-time-format columns='timestamp' &
+            from_format='datetimestr' &            to_format='%Y-%m-%dT%H:00:00'
+    --> @dm:fixnull columns='anomaly_score' and value=0
+    --> @dm:to-type columns='anomaly_score' and type='float'
+    --> *dm:filter anomaly_score is greater than 0
+    --> @dm:eval anomaly_score = "round(anomaly_score,2)"
+     --> @dm:eval customer_id =  "'{{ customer_id }}'" and customer_tag = "'{{ customer_tag }}'"
+
+    --> @rn:write-stream name='oia-ml-metrics-meta-output'

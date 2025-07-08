@@ -1,0 +1,399 @@
+{
+    "name": "metrics_ml_config",
+    "label": "ML Metrics Configuration",
+    "description": "Configure Metrics for ML Analysis",
+    "enabled": true,
+    "dashboard_folder": "ML",
+    "live_edit": true,
+    "dashboard_style": "auto",
+    "dashboard_type": "template",
+    "template_variables": {
+        "CUST_ID": {
+            "contextId": "customerId"
+        },
+        "PROJ_ID": {
+            "contextId": "projectId"
+        },
+        "CUST_TAG": {
+            "contextId": "customerTag"
+        }
+    },
+    "dashboard_filters": {
+        "time_filter": true,
+        "columns_filter": [
+            {
+                "id": "asset_id",
+                "label": "Device",
+                "type": "TEXT"
+            },
+            {
+                "id": "metric_name",
+                "label": "Metric Name",
+                "type": "TEXT"
+            },
+            {
+                "id": "metric_source",
+                "label": "Metric Source",
+                "type": "TEXT"
+            },
+            {
+                "id": "static_upper_threshold",
+                "label": "Static Upper Threshold",
+                "type": "DOUBLE"
+            },
+            {
+                "id": "variance",
+                "label": "Variance",
+                "type": "DOUBLE"
+            }
+        ],
+        "group_filters": [
+            {
+                "stream": "ml-variance-metrics-list",
+                "extra_filter": "customer_tag is '{{CUST_TAG}}' or customer_tag is empty",
+                "title": "Metric Source",
+                "duration_hours": 1000,
+                "group_by": [
+                    "metric_source"
+                ],
+                "ts_column": "timestamp",
+                "agg": "cardinality",
+                "column": "_RDA_Id",
+                "type": "int"
+            },
+            {
+                "stream": "ml-variance-metrics-list",
+                "extra_filter": "customer_tag is '{{CUST_TAG}}' or customer_tag is empty",
+                "title": "Metric",
+                "duration_hours": 1000,
+                "group_by": [
+                    "metric_name"
+                ],
+                "ts_column": "timestamp",
+                "agg": "cardinality",
+                "column": "_RDA_Id",
+                "type": "int"
+            },
+            {
+                "stream": "ml-variance-metrics-list",
+                "extra_filter": "customer_tag is '{{CUST_TAG}}' or customer_tag is empty",
+                "title": "User Selected",
+                "duration_hours": 1000,
+                "group_by": [
+                    "user_selected"
+                ],
+                "ts_column": "timestamp",
+                "agg": "cardinality",
+                "column": "_RDA_Id",
+                "type": "int"
+            },
+            {
+                "stream": "ml-variance-metrics-list",
+                "extra_filter": "customer_tag is '{{CUST_TAG}}' or customer_tag is empty",
+                "title": "Statistically Selected",
+                "duration_hours": 1000,
+                "group_by": [
+                    "statistically_selected"
+                ],
+                "ts_column": "timestamp",
+                "agg": "cardinality",
+                "column": "_RDA_Id",
+                "type": "int"
+            }
+        ]
+    },
+    "dashboard_sections": [
+        {
+            "title": "Metrics Configuration",
+            "show_filter": true,
+            "widgets": [
+                {
+                    "title": "Devices",
+                    "widget_type": "custom_counter",
+                    "formatter": "DescriptiveCountFormatter",
+                    "stream": "ml-variance-metrics-list",
+                    "extra_filter": "customer_tag is '{{CUST_TAG}}' or customer_tag is empty",
+                    "ts_column": "timestamp",
+                    "duration_hours": 1000,
+                    "max_width": 6,
+                    "min_width": 6,
+                    "column": "asset_id",
+                    "agg": "cardinality",
+                    "type": "int",
+                    "widget_id": "02be1e20"
+                },
+                {
+                    "title": "Metrics",
+                    "widget_type": "custom_counter",
+                    "formatter": "DescriptiveCountFormatter",
+                    "stream": "ml-variance-metrics-list",
+                    "extra_filter": "customer_tag is '{{CUST_TAG}}' or customer_tag is empty",
+                    "ts_column": "timestamp",
+                    "max_width": 6,
+                    "min_width": 6,
+                    "duration_hours": 1000,
+                    "column": "metric_id",
+                    "agg": "cardinality",
+                    "type": "int",
+                    "widget_id": "529fd1c2"
+                },
+                {
+                    "title": "Metrics",
+                    "widget_type": "tabular",
+                    "min_width": 8,
+                    "height": 12,
+                    "max_width": 12,
+                    "stream": "ml-variance-metrics-list",
+                    "extra_filter": "customer_tag is '{{CUST_TAG}}' or customer_tag is empty",
+                    "timestamp": "timestamp",
+                    "paginated": true,
+                    "timebased": false,
+                    "resizableColumns": true,
+                    "remote_searchable": true,
+                    "remote_searchable_cols": [
+                        "asset_id",
+                        "asset_name",
+                        "metric_id",
+                        "metric_name"
+                    ],
+                    "columns": {
+                        "metric_source": {
+                            "title": "Metric Source"
+                        },
+                        "metric_id": {
+                            "title": "Metric ID",
+                            "key": true
+                        },
+                        "metric_name": {
+                            "title": "Metric Name"
+                        },
+                        "asset_id": {
+                            "title": "Device IP",
+                            "key": true
+                        },
+                        "asset_name": "Device Name",
+                        "variance": "Variance",
+                        "user_selected_color": {
+                            "type": "COLOR-MAP",
+                            "source-column": "user_selected",
+                            "color-map": {
+                                "Yes": "#4CAF50",
+                                "No": "#B71C1C"
+                            }
+                        },
+                        "user_selected": {
+                            "title": "User Selected",
+                            "htmlTemplateForRow": "<span class='badge' style='background-color: {{'{{ row.user_selected_color }}'}}' > {{'{{ row.user_selected }}'}} </span>"
+                        },
+                        "statistically_selected_color": {
+                            "type": "COLOR-MAP",
+                            "source-column": "statistically_selected",
+                            "color-map": {
+                                "Yes": "#4CAF50",
+                                "No": "#B71C1C"
+                            }
+                        },
+                        "statistically_selected": {
+                            "title": "Statistically Selected",
+                            "htmlTemplateForRow": "<span class='badge' style='background-color: {{'{{ row.statistically_selected_color }}'}}' > {{'{{ row.statistically_selected }}'}} </span>"
+                        },
+                        "static_upper_threshold": "Static Upper Threshold"
+                    },
+                    "actions": [
+                        {
+                            "permission": "rda:github:view",
+                            "title": "Select Metric",
+                            "type": "POPUP_FORM",
+                            "selectionType": "SINGLE",
+                            "identifier": "saas-service-action:userdashboard-add-yaml",
+                            "api-endpoint": {
+                                "service-name": "saas-reports",
+                                "methodName": "getForm",
+                                "stringified-params": true,
+                                "parse-output": false,
+                                "params": [
+                                    {
+                                        "formId": "rda.saas.dynamic.form",
+                                        "formDefinition": {
+                                            "id": "rda.saas.dynamic.form",
+                                            "refreshRequired": true,
+                                            "formFieldList": [
+                                                {
+                                                    "help": "Are you sure you want to select the metric?",
+                                                    "dataType": "string",
+                                                    "controlType": "LABEL",
+                                                    "required": false,
+                                                    "editable": false,
+                                                    "label": "Are you sure you want to select the metric?",
+                                                    "hidden": false,
+                                                    "fieldId": "name"
+                                                },
+                                                {
+                                                    "help": "User Selected Metric",
+                                                    "required": false,
+                                                    "editable": true,
+                                                    "label": "Select Metric",
+                                                    "hidden": true,
+                                                    "fieldId": "user_selected",
+                                                    "dataType": "boolean",
+                                                    "controlType": "BOOLEAN_FIELD",
+                                                    "defaultValue": "Yes",
+                                                    "controlPropertyList": [
+                                                        {
+                                                            "attribute": "layout-group-id",
+                                                            "value": "Features"
+                                                        },
+                                                        {
+                                                            "attribute": "layout-percent",
+                                                            "value": "25"
+                                                        }
+                                                    ]
+                                                }
+                                            ]
+                                        },
+                                        "actions": [
+                                            {
+                                                "type": "UPDATE_PSTREAM",
+                                                "pstreamName": "ml-variance-metrics-list",
+                                                "operation": "UPDATE",
+                                                "cfxql_query": "metric_id is '{{'{{metric_id}}'}}' and asset_id is '{{'{{asset_id}}'}}'"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            },
+                            "actionCondition": {
+                                "actionControl": "SHOW_IF",
+                                "conditionalField": [
+                                    {
+                                        "conditionType": "NOT_EQUAL",
+                                        "conditionValue": "Yes",
+                                        "fieldId": "user_selected"
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "permission": "rda:github:view",
+                            "title": "Unselect Metric",
+                            "type": "POPUP_FORM",
+                            "selectionType": "SINGLE",
+                            "identifier": "saas-service-action:userdashboard-add-yaml",
+                            "api-endpoint": {
+                                "service-name": "saas-reports",
+                                "methodName": "getForm",
+                                "stringified-params": true,
+                                "parse-output": false,
+                                "params": [
+                                    {
+                                        "formId": "rda.saas.dynamic.form",
+                                        "formDefinition": {
+                                            "id": "rda.saas.dynamic.form",
+                                            "refreshRequired": true,
+                                            "formFieldList": [
+                                                {
+                                                    "help": "Are you sure you want to unselect the metric?",
+                                                    "dataType": "string",
+                                                    "controlType": "LABEL",
+                                                    "required": false,
+                                                    "editable": false,
+                                                    "label": "Are you sure you want to unselect the metric?",
+                                                    "hidden": false,
+                                                    "fieldId": "name"
+                                                },
+                                                {
+                                                    "help": "User Selected Metric",
+                                                    "required": false,
+                                                    "editable": true,
+                                                    "label": "Select Metric",
+                                                    "hidden": true,
+                                                    "fieldId": "user_selected",
+                                                    "dataType": "boolean",
+                                                    "controlType": "BOOLEAN_FIELD",
+                                                    "defaultValue": "No",
+                                                    "controlPropertyList": [
+                                                        {
+                                                            "attribute": "layout-group-id",
+                                                            "value": "Features"
+                                                        },
+                                                        {
+                                                            "attribute": "layout-percent",
+                                                            "value": "25"
+                                                        }
+                                                    ]
+                                                }
+                                            ]
+                                        },
+                                        "actions": [
+                                            {
+                                                "type": "UPDATE_PSTREAM",
+                                                "pstreamName": "ml-variance-metrics-list",
+                                                "operation": "UPDATE",
+                                                "cfxql_query": "metric_id is '{{'{{metric_id}}'}}' and asset_id is '{{'{{asset_id}}'}}'"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            },
+                            "actionCondition": {
+                                "actionControl": "SHOW_IF",
+                                "conditionalField": [
+                                    {
+                                        "conditionType": "EQUAL",
+                                        "conditionValue": "Yes",
+                                        "fieldId": "user_selected"
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "permission": "rda:github:view",
+                            "title": "Configure Threshold",
+                            "type": "POPUP_FORM",
+                            "selectionType": "SINGLE",
+                            "identifier": "saas-service-action:userdashboard-add-yaml",
+                            "api-endpoint": {
+                                "service-name": "saas-reports",
+                                "methodName": "getForm",
+                                "stringified-params": true,
+                                "parse-output": false,
+                                "params": [
+                                    {
+                                        "formId": "rda.saas.dynamic.form",
+                                        "formDefinition": {
+                                            "id": "rda.saas.dynamic.form",
+                                            "refreshRequired": true,
+                                            "formFieldList": [
+                                                {
+                                                    "help": "Static threshold above which an alert will be created for live anomalies",
+                                                    "dataType": "FLOAT",
+                                                    "controlType": "FLOAT",
+                                                    "required": false,
+                                                    "editable": true,
+                                                    "label": "Static Upper Threshold",
+                                                    "hidden": false,
+                                                    "fieldId": "static_upper_threshold",
+                                                    "defaultValue": null
+                                                }
+                                            ]
+                                        },
+                                        "actions": [
+                                            {
+                                                "type": "UPDATE_PSTREAM",
+                                                "pstreamName": "ml-variance-metrics-list",
+                                                "operation": "UPDATE",
+                                                "cfxql_query": "metric_id is '{{'{{metric_id}}'}}' and asset_id is '{{'{{asset_id}}'}}'"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "widget_id": "99bcf6e3"
+                }
+            ]
+        }
+    ],
+    "saved_time": "2025-05-19T05:48:13.060068"
+}

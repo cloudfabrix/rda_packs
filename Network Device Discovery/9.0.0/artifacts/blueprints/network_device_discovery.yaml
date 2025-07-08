@@ -1,0 +1,35 @@
+name: network_device_discovery
+id: network_device_discovery
+version: 20240802
+category: NetworkDevicePack
+comment: Network Device Asset Inventory
+enabled: true
+type: Service
+provider: CloudFabrix Software, Inc.
+attrs: {}
+run_context:
+    customer_tag: $PKG_CONTEXT_CUSTOMER_TAG
+    customer_id: $PKG_CONTEXT_CUSTOMER_ID
+scheduled_pipelines:
+    -   name: access_verification_main_pipeline
+        label: Access Verification pipeline
+        version: '*'
+        site: ${PKG_CONTEXT_CUSTOMER_TAG}-.*
+        site_type: regex
+        instances: 1
+        cron_expression: 0 0 * * *
+    -   name: ondemand_discovery_main
+        label: Network Device Discovery
+        version: '*'
+        site: ${PKG_CONTEXT_CUSTOMER_TAG}-.*
+        site_type: regex
+        instances: 1
+        cron_expression: 5 0 * * * 
+    -   name: network_device_topology_calculation
+        label: Access Verification pipeline
+        version: '*'
+        site: ${PKG_CONTEXT_CUSTOMER_TAG}-.*
+        site_type: regex
+        instances: 1
+        cron_expression: 35 0 * * * 
+saved_time: '2024-12-19T16:04:09.986245'

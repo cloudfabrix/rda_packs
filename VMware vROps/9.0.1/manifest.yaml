@@ -1,0 +1,157 @@
+name: VMware vROps
+label: VMware vROps
+scope: system
+# Pack version needs to be conforming to <major>.<minor>.<micro> etc versioning.
+# More detailed spec for versioning: https://packaging.python.org/en/latest/specifications/version-specifiers/
+version: 9.0.1
+folder: /collection/vrops_system
+published_date: 2025-06-01
+publisher: Fabrix.ai
+# Description of the package. Supports HTML/markdown/plain text
+# Either can provide description as an inline string in this file
+# or have description.html and description.md and give corresponding file paths instead.
+# If description is provided by multiple ways, the order of precedence is description.md > description.html > description.value
+
+description: 
+#  value: "vCenter Inventory collection"
+   md: "./description.md"
+type: collection
+#Other packs that this solution requires to be deployed
+requires:
+  - name: Fabrix Inventory Collection Base Pack
+    version: ">=6.0.0"
+
+artifacts:
+
+  pstreams:
+
+    - name: vrops_metrics_timeseries
+      attributes:
+        retention_days: 7
+      autocreate: true
+
+    - name: vrops_on_boarded_devices
+      attributes:
+        retention_days: 365
+        unique_keys: ["name"]
+      autocreate: true
+
+    - name: vrops_access_verification_status
+      attributes:
+        retention_days: 365
+        unique_keys: ["vrops_src_name"]
+      autocreate: true
+
+#    - name: vrops-asset-inventory-collection-status-stream
+#      attributes:
+#        retention_days: 7
+#        unique_keys: ["bot_name"]
+#      autocreate: true
+
+  dashboards:
+    - name: vrops_metric_dash
+      file: ./artifacts/dashboards/vrops_metric_dash.json
+
+    - name: vrops_collection_and_access_status
+      file: ./artifacts/dashboards/vrops_collection_and_access_status.json
+
+    - name: vrops_configure_and_manage
+      file: ./artifacts/dashboards/vrops_configure_and_manage.json
+
+    - name: vrops_main_app
+      file: ./artifacts/dashboards/vrops_main_app.json
+
+
+  pipelines:
+    - name: vrops_metrics_collection
+      version: 2024.03.19.2
+      file: ./artifacts/pipelines/vrops_metrics_collection.txt
+      folder: VropsSystemPack
+
+    - name: vrops_metric_collection_rules
+      version: 2024.03.19.2
+      file: ./artifacts/pipelines/vrops_metric_collection_rules.txt
+      folder: VropsSystemPack
+
+    - name: vrops_import_device
+      version: 2024.03.19.2
+      file: ./artifacts/pipelines/vrops_import_device.txt
+      folder: VropsSystemPack
+
+    - name: vrops_access_verification
+      version: 2024.03.19.2
+      file: ./artifacts/pipelines/vrops_access_verification.txt
+      folder: VropsSystemPack
+
+
+customer_level:
+  launch_locations:
+  - pstream_name: rda_packs_dynamic_groups_and_pages
+    dashboard_group_name: groupInventory
+    dashboard_group_label: Inventory
+    dashboard_group_icon: ""
+    dashboard_page_name: vrops_metric_dash
+    dashboard_page_label: vROps Metrics
+    dashboard_page_icon: "overall.svg"
+
+  - pstream_name: rda_packs_dynamic_groups_and_pages
+    dashboard_group_name: groupDiscovery
+    dashboard_group_label: Device Onboarding
+    dashboard_group_icon: ""
+    dashboard_page_name: vrops_collection_and_access_status
+    dashboard_page_label: vROps collection and Access status
+    dashboard_page_icon: "license.svg"
+
+  - pstream_name: rda_packs_dynamic_groups_and_pages
+    dashboard_group_name: groupDiscovery
+    dashboard_group_label: Device Onboarding
+    dashboard_group_icon: ""
+    dashboard_page_name: vrops_configure_and_manage
+    dashboard_page_label: vROps Configure and manage
+    dashboard_page_icon: "incident.svg"
+
+  artifacts:
+    blueprints:
+    - name: vrops_service_multi_tenant
+      file: ./artifacts/blueprints/vrops_service_multi_tenant.yaml
+
+
+single_tenant:
+  launch_dashboard: vrops_main_app
+  launch_locations:
+  - pstream_name: rda_packs_dynamic_groups_and_pages
+    dashboard_group_name: groupInventory
+    dashboard_group_label: Inventory
+    dashboard_group_icon: ""
+    dashboard_page_name: vrops_metric_dash
+    dashboard_page_label: vROps Metrics
+    dashboard_page_icon: "overall.svg"
+
+  - pstream_name: rda_packs_dynamic_groups_and_pages
+    dashboard_group_name: groupDiscovery
+    dashboard_group_label: Device Onboarding
+    dashboard_group_icon: ""
+    dashboard_page_name: vrops_collection_and_access_status
+    dashboard_page_label: vROps collection and Access status
+    dashboard_page_icon: "license.svg"
+
+  - pstream_name: rda_packs_dynamic_groups_and_pages
+    dashboard_group_name: groupDiscovery
+    dashboard_group_label: Device Onboarding
+    dashboard_group_icon: ""
+    dashboard_page_name: vrops_configure_and_manage
+    dashboard_page_label: vROps Configure and manage
+    dashboard_page_icon: "incident.svg"
+
+  artifacts:
+
+    blueprints:
+      - name: vrops_service_single_tenant
+        file: ./artifacts/blueprints/vrops_service_single_tenant.yaml
+
+
+
+
+
+
+

@@ -1,0 +1,182 @@
+{
+    "name": "incident-details-diagnostics",
+    "label": "Incident Diagnostics Tools",
+    "description": "OIA Diagnostics Tools in Incident",
+    "version": "25.3.19.1",
+    "enabled": true,
+    "exportable": false,
+    "dashboard_style": "auto",
+    "status_poller":
+    {},
+    "dashboard_type": "template",
+    "template_variables":
+    {
+        "PROJECT_ID":
+        {
+            "default": null,
+            "contextId": "projectid"
+        },
+        "INCIDENT_ID":
+        {
+            "default": null,
+            "contextId": "incidentid"
+        }
+    },
+    "dashboard_filters":
+    {
+        "time_filter": false,
+        "columns_filter":
+        []
+    },
+    "dashboard_sections":
+    [
+        {
+            "title": "Diagnostics Tools",
+            "show_filter": false,
+            "projects":
+            [],
+            "widgets":
+            [
+                {
+                    "title": "Diagnostic Tools",
+                    "widget_type": "tabular",
+                    "min_width": 6,
+                    "height": 6,
+                    "max_width": 6,
+                    "paginated": true,
+                    "refreshRequired": true,
+                    "timebased": false,
+                    "max_rows": 100,
+                    "api-endpoint":
+                    {
+                        "service-name": "cfxdimensions-app-irm_service",
+                        "namespace": "io.cfx.dimensions.app",
+                        "version": "*",
+                        "methodName": "invokeAppApi:getApplicableToolsDetails",
+                        "stringified-params": true,
+                        "parse-output": true,
+                        "params":
+                        [
+                            {
+                                "type": "diagnostics",
+                                "projectId": "{{PROJECT_ID}}"
+                            }
+                        ]
+                    },
+                    "widget_id": "network_tools"
+                },
+                {
+                    "title": "Tools Run History",
+                    "widget_type": "tabular",
+                    "stream": "oia-incident-job-metadata",
+                    "reportId1": "com.cfx.alert.trail",
+                    "ts_column": "lastupdatetime",
+                    "extra_filter": "roomid is '{{PROJECT_ID}}' and incidentid is '{{INCIDENT_ID}}' and jobtype is 'diagnostics' ",
+                    "min_width": 6,
+                    "height": 6,
+                    "max_width": 6,
+                    "paginated": true,
+                    "refreshOptions": {
+                        "refreshType": "Periodic",
+                        "refreshInterval": 30000
+                    },
+                    "resizableColumns": false,
+                    "remote_searchable": true,
+                    "remote_searchable_cols": [
+                        "jobid",
+                        "status",
+                        "toollabel",
+                        "toolasset",
+                        "toolstatus"
+                    ],
+                    "sorting": [
+                        {
+                            "lastupdatetime": "desc"
+                        }
+                    ],
+                    "refreshRequired": true,
+                    "timebased": false,
+                    "max_rows": 50,
+                    "columns": {
+                        "toollabel": {
+                            "title": "Tool Label",
+                            "visible": true
+                        },
+                        "toolasset": {
+                            "title": "Asset",
+                            "visible": true
+                        },
+                        "completedtime": {
+                            "title": "Task Completion Time",
+                            "visible": true,
+                            "type": "DATETIME"
+                        },
+                        "toolstatus": {
+                            "title": "Execution Status",
+                            "visible": true
+                        },
+                        "toolattributes": {
+                            "title": "Output",
+                            "type": "JSON",
+                            "visible": true,
+                            "htmlTemplateForRow": "<cfx-more-info-menu></cfx-more-info-menu>"
+                        },
+                        "jobid": {
+                            "title": "Job Id",
+                            "key": true,
+                            "visible": false
+                        }
+                    },
+                    "actions": [
+                        {
+                            "title": "View Traces",
+                            "type": "POPUP_REPORT",
+                            "selectionType": "SINGLE",
+                            "permission": "oia:incident:view",
+                            "identifier": "cfx.irm.view.group.logs",
+                            "drillDownLinkField": "jobid",
+                            "drillDownContext": "jobid",
+                            "destinationContext": "jobid",
+                            "displayLabelColumnId": "Job ID",
+                            "api-endpoint": {
+                                "service-name": "saas-reports",
+                                "methodName": "getReport",
+                                "stringified-params": false,
+                                "parse-output": false,
+                                "params": [
+                                    {
+                                        "reportId": "rda.saas.worker.traces"
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "title": "View Logs",
+                            "type": "POPUP_REPORT",
+                            "selectionType": "SINGLE",
+                            "permission": "oia:incident:view",
+                            "identifier": "cfx.irm.view.group.debuglogs",
+                            "drillDownLinkField": "jobid",
+                            "drillDownContext": "jobid",
+                            "destinationContext": "jobid",
+                            "displayLabelColumnId": "Job ID",
+                            "api-endpoint": {
+                                "service-name": "saas-reports",
+                                "methodName": "getReport",
+                                "stringified-params": false,
+                                "parse-output": false,
+                                "params": [
+                                    {
+                                        "reportId": "rda.saas.worker.logs"
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "widget_id": "tools_history"
+                }
+            ]
+        }
+    ],
+    "saved_time": "2025-02-19T12:00:00.106673"
+}

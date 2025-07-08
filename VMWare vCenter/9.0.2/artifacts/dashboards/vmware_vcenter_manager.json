@@ -1,0 +1,343 @@
+{
+    "name": "vmware_vcenter_manager",
+    "description": "VMware vCenter Manager - Analytics",
+    "label": "vCenter Manager",
+    "enabled": false,
+    "dashboard_type": "template",
+    "dashboard_style": "auto",
+    "dashboard_folder": "VMware",
+    "template_variables": {
+        "CUST_ID": {
+            "contextId": "customerId"
+        },
+        "PROJ_ID": {
+            "contextId": "projectId"
+        },
+        "CUST_TAG": {
+            "contextId": "customerTag"
+        }
+    },
+    "live_edit": true,
+    "dashboard_filters": {
+        "time_filter": true,
+        "columns_filter": [
+            {
+                "id": "vcenter_address",
+                "label": "vCenter IP",
+                "type": "TEXT"
+            },
+            {
+                "id": "vcenter_name",
+                "label": "vCenter Name",
+                "type": "TEXT"
+            },
+            {
+                "id": "vcenter_full_version",
+                "label": "vCenter Version",
+                "type": "TEXT"
+            },
+            {
+                "id": "vcenter_os_type",
+                "label": "vCenter OS Type",
+                "type": "TEXT"
+            },
+            {
+                "id": "vcenter_uuid",
+                "label": "vCenter UUID",
+                "type": "TEXT"
+            },
+            {
+                "id": "num_of_hosts",
+                "label": "Total ESXi Host's",
+                "type": "DOUBLE"
+            },
+            {
+                "id": "num_of_datastores",
+                "label": "Total DataStore's",
+                "type": "DOUBLE"
+            },
+            {
+                "id": "num_of_networks",
+                "label": "Total Networks",
+                "type": "DOUBLE"
+            },
+            {
+                "id": "num_of_vms",
+                "label": "Total VM's",
+                "type": "DOUBLE"
+            },
+            {
+                "id": "memory_capacity_gb",
+                "label": "Total Memory (GB)",
+                "type": "DOUBLE"
+            },
+            {
+                "id": "storage_capacity_gb",
+                "label": "Total Storage (GB)",
+                "type": "DOUBLE"
+            }
+        ],
+        "default_time_filter_labels": [
+            "Last 1 month"
+        ],
+        "group_filters": [
+            {
+                "stream": "vmware-vcenter-inventory",
+                "extra_filter": "customer_tag is '{{CUST_TAG}}' or customer_tag is empty",
+                "title": "vCenter IP",
+                "group_by": [
+                    "vcenter_address"
+                ],
+                "ts_column": "collection_timestamp",
+                "agg": "value_count",
+                "column": "_id",
+                "type": "int"
+            },
+            {
+                "stream": "vmware-vcenter-inventory",
+                "extra_filter": "customer_tag is '{{CUST_TAG}}' or customer_tag is empty",
+                "title": "vCenter Name",
+                "group_by": [
+                    "vcenter_name"
+                ],
+                "ts_column": "collection_timestamp",
+                "agg": "value_count",
+                "column": "_id",
+                "type": "int"
+            },
+            {
+                "stream": "vmware-vcenter-inventory",
+                "extra_filter": "customer_tag is '{{CUST_TAG}}' or customer_tag is empty",
+                "title": "vCenter Version",
+                "group_by": [
+                    "vcenter_short_version"
+                ],
+                "ts_column": "collection_timestamp",
+                "agg": "value_count",
+                "column": "_id",
+                "type": "int"
+            }
+        ]
+    },
+    "dashboard_sections": [
+        {
+            "title": "vCenter Manager",
+            "show_filter": true,
+            "widgets": [
+                {
+                    "title": "vCenter Count",
+                    "widget_type": "custom_counter",
+                    "stream": "vmware-vcenter-inventory",
+                    "extra_filter": "asset_object = 'vCenter' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "ts_column": "collection_timestamp",
+                    "group_by": [
+                        "vcenter_name"
+                    ],
+                    "min_width": 2,
+                    "height": 3,
+                    "max_width": 2.5,
+                    "column": "vcenter_name",
+                    "agg": "cardinality",
+                    "type": "int",
+                    "widget_id": "de4e139e"
+                },
+                {
+                    "title": "Total ESXi Host's",
+                    "widget_type": "custom_counter",
+                    "stream": "vmware-vcenter-inventory",
+                    "extra_filter": "asset_object = 'vCenter' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "ts_column": "collection_timestamp",
+                    "group_by": [
+                        "num_of_hosts"
+                    ],
+                    "min_width": 2,
+                    "height": 3,
+                    "max_width": 2.5,
+                    "column": "num_of_hosts",
+                    "agg": "sum",
+                    "type": "int",
+                    "widget_id": "264c7a67"
+                },
+                {
+                    "title": "Total DataStore's",
+                    "widget_type": "custom_counter",
+                    "stream": "vmware-vcenter-inventory",
+                    "extra_filter": "asset_object = 'vCenter' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "ts_column": "collection_timestamp",
+                    "group_by": [
+                        "num_of_datastores"
+                    ],
+                    "min_width": 2,
+                    "height": 3,
+                    "max_width": 2.5,
+                    "column": "num_of_datastores",
+                    "agg": "sum",
+                    "type": "int",
+                    "widget_id": "0e86af55"
+                },
+                {
+                    "title": "Total Network's",
+                    "widget_type": "custom_counter",
+                    "stream": "vmware-vcenter-inventory",
+                    "extra_filter": "asset_object = 'vCenter' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "ts_column": "collection_timestamp",
+                    "group_by": [
+                        "num_of_networks"
+                    ],
+                    "min_width": 2,
+                    "height": 3,
+                    "max_width": 2.5,
+                    "column": "num_of_networks",
+                    "agg": "sum",
+                    "type": "int",
+                    "widget_id": "8aa4a73e"
+                },
+                {
+                    "title": "Total VM's",
+                    "widget_type": "custom_counter",
+                    "stream": "vmware-vcenter-inventory",
+                    "extra_filter": "asset_object = 'vCenter' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "ts_column": "collection_timestamp",
+                    "group_by": [
+                        "num_of_vms"
+                    ],
+                    "min_width": 2,
+                    "height": 3,
+                    "max_width": 2.5,
+                    "column": "num_of_vms",
+                    "agg": "sum",
+                    "type": "int",
+                    "widget_id": "f47bf476"
+                },
+                {
+                    "title": "Total Memory (GB)",
+                    "widget_type": "custom_counter",
+                    "stream": "vmware-vcenter-inventory",
+                    "extra_filter": "asset_object = 'vCenter' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "ts_column": "collection_timestamp",
+                    "group_by": [
+                        "memory_capacity_gb"
+                    ],
+                    "min_width": 3,
+                    "height": 3,
+                    "max_width": 3,
+                    "column": "memory_capacity_gb",
+                    "agg": "sum",
+                    "type": "int",
+                    "widget_id": "eb1f0ce6"
+                },
+                {
+                    "title": "Total Storage (GB)",
+                    "widget_type": "custom_counter",
+                    "stream": "vmware-vcenter-inventory",
+                    "extra_filter": "asset_object = 'vCenter' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "ts_column": "collection_timestamp",
+                    "group_by": [
+                        "storage_capacity_gb"
+                    ],
+                    "min_width": 3,
+                    "height": 3,
+                    "max_width": 3,
+                    "column": "storage_capacity_gb",
+                    "agg": "sum",
+                    "type": "int",
+                    "widget_id": "70f954fd"
+                },
+                {
+                    "widget_type": "pie_chart",
+                    "title": "vCenter by OS",
+                    "stream": "vmware-vcenter-inventory",
+                    "extra_filter": "asset_object = 'vCenter' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "ts_column": "collection_timestamp",
+                    "column": "_id",
+                    "agg": "value_count",
+                    "group_by": [
+                        "vcenter_os_type"
+                    ],
+                    "type": "str",
+                    "min_width": 3,
+                    "height": 3,
+                    "max_width": 3,
+                    "widget_id": "3f46acaa"
+                },
+                {
+                    "widget_type": "pie_chart",
+                    "title": "vCenter by Version",
+                    "stream": "vmware-vcenter-inventory",
+                    "extra_filter": "asset_object = 'vCenter' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "ts_column": "collection_timestamp",
+                    "column": "_id",
+                    "agg": "value_count",
+                    "group_by": [
+                        "vcenter_short_version"
+                    ],
+                    "type": "str",
+                    "min_width": 3,
+                    "height": 3,
+                    "max_width": 3,
+                    "widget_id": "c57879fd"
+                },
+                {
+                    "widget_type": "tabular",
+                    "title": "VMware vCenter Details",
+                    "stream": "vmware-vcenter-inventory",
+                    "extra_filter": "asset_object = 'vCenter' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "ts_column": "collection_timestamp",
+                    "sorting": [],
+                    "custom_columns": [
+                        {
+                            "id": "vcenter_node_id",
+                            "label": "Node ID",
+                            "expr": "vcenter_address+'_'+vcenter_uuid",
+                            "visible": false
+                        }
+                    ],
+                    "columns": {
+                        "vcenter_name": "vCenter Name",
+                        "vcenter_address": {
+                            "title": "vCenter IP",
+                            "key": true
+                        },
+                        "vcenter_full_version": "vCenter Version",
+                        "vcenter_os_type": "vCenter OS Type",
+                        "vcenter_uuid": {
+                            "title": "vCenter UUID",
+                            "key": true
+                        },
+                        "num_of_hosts": "Total ESXi Host's",
+                        "num_of_datastores": "Total DataStore's",
+                        "num_of_networks": "Total Networks",
+                        "num_of_vms": "Total VM's",
+                        "memory_capacity_gb": "Total Memory (GB)",
+                        "storage_capacity_gb": "Total Storage (GB)",
+                        "collection_timestamp": {
+                            "title": "Collection Timestamp",
+                            "type": "DATETIME"
+                        }
+                    },
+                    "actions": [
+                        {
+                            "permission": "rda:user_dashboard:view",
+                            "appName": "user-dashboard/vmware_vcenter_manager_detailed_view",
+                            "drillDownLinkField": "vcenter_address",
+                            "identifier": "launch.dashboard.device_view_app",
+                            "selectionType": "SINGLE",
+                            "title": "View Details",
+                            "type": "GO_TO_APP_STATE",
+                            "contextParamList": {
+                                "contextParams": [
+                                    {
+                                        "paramKey": "vcenter_node_id",
+                                        "paramId": "node_id"
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "widget_id": "61dfc0b8"
+                }
+            ]
+        }
+    ],
+    "saved_time": "2025-06-16T04:03:19.099692"
+}

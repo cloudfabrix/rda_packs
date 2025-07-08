@@ -1,0 +1,355 @@
+{
+    "name": "vmware_esxi_datastores",
+    "description": "VMware vCenter ESXi Datastores - Analytics",
+    "label": "ESXi Datastores",
+    "enabled": false,
+    "dashboard_type": "template",
+    "dashboard_style": "auto",
+    "dashboard_folder": "VMware",
+    "live_edit": true,
+    "template_variables": {
+        "CUST_ID": {
+            "contextId": "customerId"
+        },
+        "PROJ_ID": {
+            "contextId": "projectId"
+        },
+        "CUST_TAG": {
+            "contextId": "customerTag"
+        }
+    },
+    "dashboard_filters": {
+        "time_filter": true,
+        "columns_filter": [
+            {
+                "id": "vcenter_address",
+                "label": "vCenter IP",
+                "type": "TEXT"
+            },
+            {
+                "id": "vcenter_name",
+                "label": "vCenter Name",
+                "type": "TEXT"
+            },
+            {
+                "id": "datacenter",
+                "label": "Datacenter",
+                "type": "TEXT"
+            },
+            {
+                "id": "datastore_name",
+                "label": "Datastore Name",
+                "type": "TEXT"
+            },
+            {
+                "id": "datastore_type",
+                "label": "Datastore Type",
+                "type": "TEXT"
+            },
+            {
+                "id": "datastore_ssd_status",
+                "label": "Datastore SSD Status",
+                "type": "TEXT"
+            },
+            {
+                "id": "datastore_total_gb",
+                "label": "Datastore Total Size (GB)",
+                "type": "TEXT"
+            },
+            {
+                "id": "datastore_free_gb",
+                "label": "Datastore Free Size (GB)",
+                "type": "TEXT"
+            },
+            {
+                "id": "datastore_provisioned_gb",
+                "label": "Datastore Provisioned Size (GB)",
+                "type": "TEXT"
+            },
+            {
+                "id": "datastore_overprovisioned_pct",
+                "label": "Over Provision %",
+                "type": "TEXT"
+            },
+            {
+                "id": "all_vms_capacity_gb",
+                "label": "Total VM's Capacity(GB)",
+                "type": "TEXT"
+            },
+            {
+                "id": "powered_off_vms_capacity_gb",
+                "label": "Power Off VM's Capacity (GB)",
+                "type": "TEXT"
+            },
+            {
+                "id": "powered_on_vms_capacity_gb",
+                "label": "Power On VM's Capacity (GB)",
+                "type": "TEXT"
+            },
+            {
+                "id": "datastore_hosts",
+                "label": "Datastore Connected Hosts",
+                "type": "TEXT"
+            }
+        ],
+        "default_time_filter_labels": [
+            "Last 1 month"
+        ],
+        "group_filters": [
+            {
+                "stream": "vmware-vcenter-inventory",
+                "extra_filter": "customer_tag is '{{CUST_TAG}}' or customer_tag is empty",
+                "title": "vCenter IP",
+                "group_by": [
+                    "vcenter_address"
+                ],
+                "ts_column": "collection_timestamp",
+                "agg": "cardinality",
+                "limit": 150,
+                "column": "vcenter_address",
+                "type": "int"
+            },
+            {
+                "stream": "vmware-vcenter-inventory",
+                "extra_filter": "customer_tag is '{{CUST_TAG}}' or customer_tag is empty",
+                "title": "vCenter Name",
+                "group_by": [
+                    "vcenter_name"
+                ],
+                "ts_column": "collection_timestamp",
+                "limit": 150,
+                "agg": "cardinality",
+                "column": "vcenter_name",
+                "type": "int"
+            },
+            {
+                "stream": "vmware-vcenter-inventory",
+                "extra_filter": "customer_tag is '{{CUST_TAG}}' or customer_tag is empty",
+                "title": "Datacenter",
+                "group_by": [
+                    "datacenter"
+                ],
+                "ts_column": "collection_timestamp",
+                "limit": 250,
+                "agg": "cardinality",
+                "column": "datacenter",
+                "type": "int"
+            }
+        ]
+    },
+    "dashboard_sections": [
+        {
+            "title": "ESXi Datastores",
+            "show_filter": true,
+            "widgets": [
+                {
+                    "widget_type": "pie_chart",
+                    "title": "Datastore by Type",
+                    "stream": "vmware-vcenter-inventory",
+                    "ts_column": "collection_timestamp",
+                    "extra_filter": "asset_object = 'Datastore' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "column": "datastore_uuid",
+                    "agg": "cardinality",
+                    "group_by": [
+                        "datastore_type"
+                    ],
+                    "type": "str",
+                    "min_width": 3,
+                    "height": 4,
+                    "max_width": 3,
+                    "widget_id": "d83ecb9f"
+                },
+                {
+                    "widget_type": "pie_chart",
+                    "title": "Datastore by SSD Status",
+                    "stream": "vmware-vcenter-inventory",
+                    "ts_column": "collection_timestamp",
+                    "extra_filter": "asset_object = 'Datastore' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "column": "datastore_uuid",
+                    "agg": "cardinality",
+                    "group_by": [
+                        "datastore_ssd_status"
+                    ],
+                    "type": "str",
+                    "min_width": 3,
+                    "height": 4,
+                    "max_width": 3,
+                    "widget_id": "299ebae1"
+                },
+                {
+                    "title": "DataStore Total Capacity(GB)",
+                    "widget_type": "custom_counter",
+                    "extra_filter": "asset_object = 'Datastore' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "stream": "vmware-vcenter-inventory",
+                    "ts_column": "collection_timestamp",
+                    "group_by": [
+                        "datastore_total_gb"
+                    ],
+                    "min_width": 3,
+                    "height": 4,
+                    "max_width": 3,
+                    "column": "datastore_total_gb",
+                    "agg": "sum",
+                    "type": "int",
+                    "widget_id": "de4e139e"
+                },
+                {
+                    "title": "DataStore Free Capacity(GB)",
+                    "widget_type": "custom_counter",
+                    "extra_filter": "asset_object = 'Datastore' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "stream": "vmware-vcenter-inventory",
+                    "ts_column": "collection_timestamp",
+                    "group_by": [
+                        "datastore_free_gb"
+                    ],
+                    "min_width": 3,
+                    "height": 4,
+                    "max_width": 3,
+                    "column": "datastore_free_gb",
+                    "agg": "sum",
+                    "type": "int",
+                    "widget_id": "9950ba8a"
+                },
+                {
+                    "title": "DataStore Provisioned Capacity(GB)",
+                    "widget_type": "custom_counter",
+                    "extra_filter": "asset_object = 'Datastore' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "stream": "vmware-vcenter-inventory",
+                    "ts_column": "collection_timestamp",
+                    "group_by": [
+                        "datastore_provisioned_gb"
+                    ],
+                    "min_width": 3,
+                    "height": 4,
+                    "max_width": 3,
+                    "column": "datastore_provisioned_gb",
+                    "agg": "sum",
+                    "type": "int",
+                    "widget_id": "52d289f3"
+                },
+                {
+                    "title": "Total VM's Capacity(GB)",
+                    "widget_type": "custom_counter",
+                    "extra_filter": "asset_object = 'Datastore' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "stream": "vmware-vcenter-inventory",
+                    "ts_column": "collection_timestamp",
+                    "group_by": [
+                        "all_vms_capacity_gb"
+                    ],
+                    "min_width": 3,
+                    "height": 4,
+                    "max_width": 3,
+                    "column": "all_vms_capacity_gb",
+                    "agg": "sum",
+                    "type": "int",
+                    "widget_id": "576ea041"
+                },
+                {
+                    "title": "Power Off VM's Capacity(GB)",
+                    "widget_type": "custom_counter",
+                    "extra_filter": "asset_object = 'Datastore' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "stream": "vmware-vcenter-inventory",
+                    "ts_column": "collection_timestamp",
+                    "group_by": [
+                        "powered_off_vms_capacity_gb"
+                    ],
+                    "min_width": 3,
+                    "height": 4,
+                    "max_width": 3,
+                    "column": "powered_off_vms_capacity_gb",
+                    "agg": "sum",
+                    "type": "int",
+                    "widget_id": "35f1d539"
+                },
+                {
+                    "title": "Power On VM's Capacity(GB)",
+                    "widget_type": "custom_counter",
+                    "extra_filter": "asset_object = 'Datastore' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "stream": "vmware-vcenter-inventory",
+                    "ts_column": "collection_timestamp",
+                    "group_by": [
+                        "powered_on_vms_capacity_gb"
+                    ],
+                    "min_width": 3,
+                    "height": 4,
+                    "max_width": 3,
+                    "column": "powered_on_vms_capacity_gb",
+                    "agg": "sum",
+                    "type": "int",
+                    "widget_id": "1f2ad328"
+                },
+                {
+                    "widget_type": "tabular",
+                    "title": "ESXi Datastore Details",
+                    "stream": "vmware-vcenter-inventory",
+                    "extra_filter": "asset_object = 'Datastore' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "ts_column": "collection_timestamp",
+                    "sorting": [],
+                    "resizableColumns": false,
+                    "paginated": true,
+                    "virtual_scrolling": false,
+                    "showRowSummary": true,
+                    "max_rows": 200,
+                    "custom_columns": [
+                        {
+                            "id": "node_id_datastore",
+                            "label": "Node ID",
+                            "expr": "vcenter_address+'_'+datacenter+'_'+datastore_host_path",
+                            "visible": false
+                        }
+                    ],
+                    "columns": {
+                        "datastore_name": {
+                            "title": "Datastore Name",
+                            "key": true
+                        },
+                        "datastore_total_gb": "Datastore Total Size (GB)",
+                        "datastore_free_gb": "Datastore Free Size (GB)",
+                        "datastore_provisioned_gb": "Datastore Provisioned Size (GB)",
+                        "datastore_type": "Datastore Type",
+                        "datastore_ssd_status": "Datastore SSD Status",
+                        "datastore_overprovisioned_pct": "Over Provision %",
+                        "all_vms_capacity_gb": "Total VM's Capacity(GB)",
+                        "powered_off_vms_capacity_gb": "Power Off VM's Capacity (GB)",
+                        "powered_on_vms_capacity_gb": "Power On VM's Capacity (GB)",
+                        "datastore_hosts": "Datastore Connected Hosts",
+                        "datacenter": "Datacenter",
+                        "vcenter_name": {
+                            "title": "vCenter Name",
+                            "key": true
+                        },
+                        "vcenter_address": {
+                            "title": "vCenter IP",
+                            "key": true
+                        },
+                        "collection_timestamp": {
+                            "title": "Collection Timestamp",
+                            "type": "DATETIME"
+                        }
+                    },
+                    "actions": [
+                        {
+                            "permission": "rda:user_dashboard:view",
+                            "appName": "user-dashboard/vmware_esxi_datastores_detailed_view",
+                            "drillDownLinkField": "datastore_name",
+                            "identifier": "launch.dashboard.device_view_app",
+                            "selectionType": "SINGLE",
+                            "title": "View Details",
+                            "type": "GO_TO_APP_STATE",
+                            "contextParamList": {
+                                "contextParams": [
+                                    {
+                                        "paramKey": "node_id_datastore",
+                                        "paramId": "node_id"
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "widget_id": "eaaf20a0"
+                }
+            ]
+        }
+    ],
+    "saved_time": "2025-06-17T07:23:28.139621"
+}

@@ -1,0 +1,7 @@
+%% stream = no and limit = 0
+
+@c:new-block
+    --> @dm:empty
+    --> @dm:addrow metric_filter="(key matches '((mem|cpu|net)\|usage_average)' or key is 'diskspace|used')" and metric_source="vRops"
+    --> @dm:save name='oia-metric_selection_rules'
+

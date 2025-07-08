@@ -1,0 +1,629 @@
+%% stream = no and limit = 0
+
+## %% import_src_type = "asset-discovery"
+@c:new-block
+    --> @dm:empty
+    --> @exec:get-input
+    --> @dm:eval customer_id = "customer_id if customer_id else 'single_tenant'"
+    --> @dm:copy-columns from="customer_id" and to="org_id"
+    --> @dm:save name = "temp-discovery-results"
+    --> @dm:dedup columns = 'target'
+    --> @dm:save name="temp-customer-context-dict"
+
+## --> @dm:save name="test-customer-context-dict"
+--> @c:new-block
+    --> @dm:recall name = "temp-customer-context-dict" and return_empty = "yes"
+    --> @dm:selectcolumns include = "jobid|collection_timestamp|target|collection_status|reason|customer_id|customer_tag"
+    --> *dm:filter collection_status = 'Success'
+    --> @dm:skip-block-if-shape row_count=0
+    --> @dm:rename-columns target_ip ="target"
+    --> @dm:eval discovery_status ="'Processing Cisco devices..'"
+    --> @dm:eval logs ="'Successfully collected devices'"
+    --> @dm:map from = 'jobid,discovery_status,logs,target_ip' &  to = "unique_id" & func = "join" & sep = "_"
+    --> @rn:write-stream name= "discovery_logs"
+
+--> @c:new-block
+    --> @dm:recall name = "temp-discovery-results" and return_empty = "yes"
+    --> @dm:enrich-conditional dict is 'temp-discovery-results' and condition is 'target == "$target_ip"' and enrich_cols = "target"
+    --> *dm:filter target is not empty
+    --> @dm:selectcolumns exclude = "^vendor$"
+    ## --> @dm:eval path = "'inventory_collection/outputs/'+jobid+'/'+target_ip+'.json'"
+    --> @asset-discovery:get-collection-files path_column = "path" &
+            groups="base,system,entityPhysical,interfaces,entAliasMappingTable,cdpGlobal,ipAddrTable,cdpCache,cli_show_ether_channel_summary,management-target,snmpEngineDetails,lldpRemTable,base.credential-id,ipNetToMediaTable,dot1dTpFdbTablemacprocess"
+    --> @dm:selectcolumns include = "asset_ip|groupname|output|path"
+    --> @dm:explode-json column='output'
+    --> @dm:selectcolumns include = "target|data|groupname|asset_ip|path"
+    --> @dm:save name = "temp-group-data"
+
+--> @c:new-block
+
+--> @c:simple-loop loop_var= "base,system,entityPhysical,interfaces,entAliasMappingTable,cdpGlobal,ipAddrTable,cdpCache,cli_show_ether_channel_summary,management-target,snmpEngineDetails,lldpRemTable,base.credential-id,ipNetToMediaTable,dot1dTpFdbTablemacprocess"
+    --> @dm:recall name = "temp-group-data" and return_empty = "yes"
+    --> *dm:filter groupname is "$loop_var"
+    --> @dm:explode-json column = 'data'
+    ## --> @dm:save name = "temp-dff"
+    --> @dm:save name="temp-Group-$loop_var"
+
+--> @c:new-block
+    --> @dm:recall name= "temp-discovery-results" and return_empty = "yes"
+    ## --> @dm:enrich dict="temp-group-data" & src_key_cols="target" & dict_key_cols="target" & enrich_cols="path"
+    --> @dm:dedup columns = 'target'
+    ## --> @dm:eval customer_id = "customer_id if customer_id else 'single_tenant'"
+    --> @dm:copy-columns from="customer_id" and to="org_id"
+    --> @dm:save name = "temp-entity-analysis-data"
+
+## --> @dm:save name = "test-entity-analysis-data"
+## create device_ops_view,device_view and poe_summary json files
+## --> @c:data-loop columns="ec_zip_file_loc_pipeinput,org_id" and dataset="temp-discovery-results"
+## --> @files:ec-entity-analysis input_zipfile_path= "$ec_zip_file_loc_pipeinput" and output_path = "data/customers/$org_id/ingestion/device_data" and device_ops_view = True and device_view = True and poe_summary = True
+##--> @c:data-loop columns="path,customer_id" and dataset="temp-entity-analysis-data"
+##    --> @files:ec-entity-analysis input_asset_path= "$path" and output_path = "data/customers/$customer_id/ingestion/device_data" and device_ops_view = True and device_view = True and poe_summary = True
+
+--> @dm:recall name="temp-entity-analysis-data"
+    --> @asset-discovery:entity-analysis path_column= "path" and output_path = "data/customers/{{row.customer_id}}/ingestion/device_data" and device_ops_view = True and device_view = True and poe_summary = True
+
+
+## temp-ifindex-entPhysicalIndex DATASET: Create 'ifIndex' & 'entPhysicalIndex' mapping columns by reading entAliasMappingTable group
+--> @c:new-block
+    --> @dm:set-tracing-context __block__="entity-alias-mapping"
+    --> @dm:recall name="temp-Group-entAliasMappingTable" and return_empty = "yes"
+    --> @dm:add-missing-columns columns="data"
+    --> *dm:filter data is not "[]"
+    --> @dm:skip-block-if-shape row_count='0'
+    --> @dm:skip-block-if-shape column_count=1
+    --> @dm:add-missing-columns columns="if_index,entPhysicalIndex,entAliasMappingIdentifier"
+    --> @dm:eval-multi-proc if_index=" entAliasMappingIdentifier[entAliasMappingIdentifier.rfind('.') + 1: len(entAliasMappingIdentifier)] if entAliasMappingIdentifier else None" and _max_procs=4
+    --> *dm:filter if_index is not None
+    --> @dm:selectcolumns include="target|if_index|entPhysicalIndex"
+    --> @dm:to-type columns="entPhysicalIndex" and type="int"
+    --> @dm:to-type columns="if_index" and type="int"
+    --> @dm:save name="temp-ifindex-entPhysicalIndex"
+
+--> @c:new-block
+    --> @dm:recall name="temp-Group-entityPhysical" and return_empty = "yes"
+    --> @dm:add-missing-columns columns="data"
+    --> *dm:filter data is not "[]"
+    --> @dm:skip-block-if-shape row_count='0'
+    --> @dm:skip-block-if-shape column_count=1
+    --> *dm:filter entPhysicalClassEnumeratedLabel in ["Port","port","PORT"]
+    --> @dm:to-type columns="entPhysicalIndex" and type="int"
+    --> @dm:enrich dict="temp-ifindex-entPhysicalIndex" and src_key_cols="target,entPhysicalIndex" and dict_key_cols="target,entPhysicalIndex" and enrich_cols="if_index" & return_empty_dict = 'yes' & return_empty_cols = 'yes'
+    --> @dm:add-missing-columns columns="if_index"
+    --> @dm:to-type columns="if_index" and type="int"
+    --> @dm:dedup columns = "entPhysicalDescr,if_index"
+    --> @dm:save name="temp-entityPhysical_logical_data"
+
+## --> @c:new-block
+## --> @dm:empty
+## --> @dm:save name="temp-interface"
+## --> @dm:save name="temp-additional-ip-device"
+## --> @dm:save name="temp-cisco_device_chassis_dict"
+## --> @dm:save name = 'temp-cisco_device_port_channel_dict'
+## --> @dm:save name = "temp-interfaces-counts"
+## Read interfaces data
+--> @c:new-block
+    --> @dm:recall name="temp-Group-interfaces" and return_empty = "yes"
+    --> @dm:skip-block-if-shape row_count='0'
+    --> @dm:skip-block-if-shape column_count=1
+    --> @dm:to-type columns="ifIndex" and type="int"
+    --> @dm:enrich dict="temp-entityPhysical_logical_data" and src_key_cols="target,ifIndex" and dict_key_cols="target,if_index" and enrich_cols="entPhysicalDescr,entPhysicalContainedIn,entPhysicalClass,entPhysicalName,entPhysicalSoftwareRev,entPhysicalSerialNum,entPhysicalModelName,entPhysicalVendorName,entPhysicalClassEnumeratedLabel,entPhysicalAlias,entPhysicalIndex" & return_empty_dict = 'yes' & return_empty_cols = 'yes'
+    --> @dm:to-type columns="ifIndex" and type="int"
+    ## --> @dm:to-type columns="entPhysicalIndex" and type="int"
+    --> @dm:eval type="'PORT_CHANNEL' if ifDescr and ifDescr.startswith('Port-channel') else 'PHYSICAL_PORT' if entPhysicalIndex else 'LOGICAL_PORT'"
+    --> @dm:dedup columns = "ifDescr,target"
+    --> @dm:save name="temp-interface"
+
+## Read Port Channel Inventory
+## temp-cli_show_ether_channel_summary DATASET: Port Channel Name
+--> @c:new-block
+    --> @dm:set-tracing-context __block__="port-channel-interfaces"
+    --> @dm:recall name="temp-Group-cli_show_ether_channel_summary" and return_empty = "yes"
+    --> @dm:fixcolumns
+    --> *dm:filter data is not null
+    --> @dm:skip-block-if-shape row_count='0'
+    --> @dm:save name ="temp-Group-cli_show_ether_channel_summary"
+    --> @dm:metadata
+    --> *dm:filter column is 'groupname'
+    --> @dm:skip-block-if-shape row_count='0'
+    --> @dm:recall name ="temp-Group-cli_show_ether_channel_summary" and return_empty = "yes"
+    --> *dm:filter groupname is not empty
+    --> @dm:selectcolumns exclude = '^data$'
+    --> @dm:grok column = 'Port_channel' & pattern = "%{DATA:port_channel_name}\("
+    --> @dm:map attr = 'Ports' & func = 'replace' & oldvalue = ' ' & newvalue = ','
+    --> @dm:map attr = 'Ports' & func = 'replace' & oldvalue = ',,' & newvalue = ','
+    --> @dm:explode column = 'Ports'
+    --> @dm:grok column = 'Ports' & pattern = "%{DATA:device_int_shortname}\("
+    --> @dm:save name = 'temp-cisco_device_port_channel_dict'
+
+## Read cdp data
+--> @c:new-block
+    --> @dm:set-tracing-context __block__="parse-cdp-cache"
+    --> @dm:recall name="temp-Group-cdpCache" and return_empty = "yes"
+    --> @dm:add-missing-columns columns="data"
+    --> @dm:to-type columns = 'data' & type = 'str'
+    --> *dm:filter data is not "[]"
+    --> @dm:skip-block-if-shape row_count= 0
+    --> @dm:skip-block-if-shape column_count=1
+    --> @dm:to-type columns = 'cdpCacheIfIndex' & type = 'int'
+    --> @dm:save name="temp-cdp"
+
+## Enrich interface with cdp data
+--> @c:new-block
+    --> @dm:recall name="temp-cdp" and return_empty="yes"
+    --> *exec:if-shape num_rows > 0
+       --> @dm:recall name="temp-interface" and return_empty = "yes"
+       --> @dm:add-missing-columns columns="target"
+       --> @dm:enrich dict="temp-cdp" and dict_key_cols="target,cdpCacheIfIndex" and src_key_cols="target,ifIndex" and enrich_cols="cdpCacheAddress,cdpCacheDevicePort,cdpCacheDeviceId,cdpCachePlatform,cdpCacheCapabilitiesEnumeratedLabel" & return_empty_dict = 'yes' & return_empty_cols = 'yes'
+       --> @dm:to-type columns="cdpCacheIfIndex" and type="int"
+       --> @dm:to-type columns="ifIndex" and type="int"
+       --> @dm:save name="temp-interface"
+    --> @exec:end-if
+    --> *exec:if-shape num_rows = 0
+       --> @dm:recall name="temp-interface" and return_empty = "yes"
+       --> @dm:add-missing-columns columns="target"
+       --> @dm:to-type columns="ifIndex" and type="int"
+       --> @dm:save name="temp-interface"
+    --> @exec:end-if
+
+## Port Chassis SN
+--> @c:new-block
+    --> @dm:set-tracing-context __block__="get-port-chassis-sr"
+    --> @dm:recall name="temp-Group-entityPhysical" and return_empty = "yes"
+    --> @dm:skip-block-if-shape row_count='0'
+    --> @dm:skip-block-if-shape column_count=1
+    --> *dm:filter entPhysicalClassEnumeratedLabel in ["chassis","Chassis","CHASSIS"]
+    --> @dm:rename-columns chassis_phyindex="entPhysicalIndex" & chassis_containedin="entPhysicalContainedIn"
+    --> @dm:selectcolumns include="chassis_phyindex|entPhysicalClassEnumeratedLabel|entPhysicalSerialNum|target|entPhysicalName"
+    --> @dm:to-type columns="chassis_phyindex" and type="int"
+    --> @dm:save name="temp-chassis"
+    --> @dm:recall name="temp-Group-entityPhysical" and return_empty = "yes"
+    --> @dm:skip-block-if-shape row_count='0'
+    --> @dm:skip-block-if-shape column_count=1
+    --> @dm:build-hierarchy entity_key_column = "entPhysicalIndex" and relation_key_column = "entPhysicalContainedIn" and hierarchy_end_key_column="entPhysicalClassEnumeratedLabel" and hierarchy_end_value="Chassis" and include_column_to_primary_key="target"
+    --> @dm:copy-columns from="hierarchy" and to="chassis_phyindex" and func="split" and value="-"
+    --> @dm:eval-multi-proc chassis_phyindex="chassis_phyindex[-1] if hierarchy else None" and _max_procs=4
+    --> *dm:filter entPhysicalClassEnumeratedLabel in ["Port","PORT","port"]
+    --> @dm:rename-columns port_phyindex="entPhysicalIndex"
+    --> @dm:to-type columns="chassis_phyindex" and type="int"
+    --> @dm:selectcolumns include="port_phyindex|chassis_phyindex|target"
+    --> @dm:enrich dict="temp-chassis" and src_key_cols="chassis_phyindex,target" and dict_key_cols="chassis_phyindex,target" and enrich_cols="entPhysicalSerialNum" & return_empty_dict = 'yes' & return_empty_cols = 'yes'
+    --> @dm:selectcolumns include="port_phyindex|entPhysicalSerialNum|entPhysicalClassEnumeratedLabel|target"
+    --> @dm:rename-columns chassis_sn="entPhysicalSerialNum"
+    --> @dm:to-type columns="port_phyindex" and type="int"
+    --> @dm:gc
+    --> @dm:save name="temp-port-chassis-sr"
+
+## --> @c:new-block
+## --> @dm:empty
+## --> @dm:addrow dummy = '10.1.1.1'
+## --> @dm:save name ="temp-ifindex-entPhysicalIndex" and append="yes"
+--> @c:new-block
+    --> @dm:set-tracing-context __block__="merge-port-chassis-sr-to-if"
+    --> @dm:recall name="temp-ifindex-entPhysicalIndex" and return_empty = "yes"
+    --> @dm:skip-block-if-shape row_count='1'
+    --> @dm:selectcolumns exclude="dummy"
+    --> @dm:recall name="temp-ifindex-entPhysicalIndex" and return_empty = "yes"
+    --> @dm:skip-block-if-shape row_count='0'
+    --> @dm:skip-block-if-shape column_count=1
+    --> @dm:recall name="temp-interface" and return_empty = "yes"
+    --> @dm:enrich dict="temp-port-chassis-sr" and src_key_cols="entPhysicalIndex,target" and dict_key_cols="port_phyindex,target" and enrich_cols="chassis_sn" & return_empty_dict = 'yes' & return_empty_cols = 'yes'
+    ## --> @dm:to-type columns="port_phyindex" and type="int"
+    --> @dm:to-type columns="entPhysicalIndex" and type="int"
+    --> @dm:gc
+    --> @dm:save name="temp-interface"
+
+## device_additional_ips: Read 'ipAddrTable' group & create comma separated list of ipAdEntAddr based on target and merge it with temp-df
+--> @c:new-block
+    --> @dm:set-tracing-context __block__="merge device_additional_ips"
+    --> @dm:recall name="temp-Group-ipAddrTable" and return_empty = "yes"
+    --> @dm:add-missing-columns columns="data"
+    --> *dm:filter data is not "[]"
+    --> @dm:skip-block-if-shape row_count=0
+    --> @dm:skip-block-if-shape column_count=1
+    --> @dm:fixnull columns="ipAdEntAddr" and value=''
+    --> @dm:to-type columns="ipAdEntIfIndex" and type="str"
+    --> @dm:implode key_columns = "target,ipAdEntIfIndex" and merge_columns="ipAdEntAddr"
+    --> @dm:to-type columns="ipAdEntIfIndex" and type="int"
+    --> @dm:save name="temp-additional-ip"
+    --> @dm:recall name="temp-interface" and return_empty = "yes"
+    --> @dm:enrich dict="temp-additional-ip" and src_key_cols="target,ifIndex" and dict_key_cols="target,ipAdEntIfIndex" and enrich_cols="ipAdEntAddr" and enrich_cols_as="device_additional_ips" & return_empty_dict = 'yes' & return_empty_cols = 'yes'
+    --> @dm:save name="temp-interface"
+
+## device_additional_ips: Read 'ipAddrTable' group & create comma separated list of ipAdEntAddr based on target and merge it with temp-df
+--> @c:new-block
+    --> @dm:set-tracing-context __block__="merge device_additional_ips"
+    --> @dm:recall name="temp-Group-ipAddrTable" and return_empty = "yes"
+    --> @dm:add-missing-columns columns="data"
+    --> *dm:filter data is not "[]"
+    --> @dm:skip-block-if-shape row_count=0
+    --> @dm:skip-block-if-shape column_count=1
+    --> @dm:fixnull columns="ipAdEntAddr" and value=''
+    --> @dm:implode key_columns = "target" and merge_columns="ipAdEntAddr"
+    --> @dm:save name="temp-additional-ip-device"
+
+## mgmt_ip: create mgmt_ip list by reading management-target group & merge with temp-df
+## ip_address: Merge temp-df with management-target group & map mgmt ip to ip_address
+--> @c:new-block
+    --> @dm:set-tracing-context __block__=" map mgmt ip to ip_address"
+    --> @dm:recall name="temp-Group-management-target" and return_empty = "yes"
+    --> @dm:skip-block-if-shape row_count=0
+    --> @dm:skip-block-if-shape column_count=1
+    --> @dm:sort columns="data,target"
+    --> @dm:save name="temp-mgmt"
+    --> @dm:implode key_columns="target" and merge_columns="data"
+    --> @dm:save name="temp-mgmt-list"
+    --> @dm:recall name="temp-interface" and return_empty = "yes"
+    --> @dm:enrich dict="temp-mgmt-list" and src_key_cols="target" and dict_key_cols="target" and enrich_cols="data" and enrich_cols_as="mgmt_ip" & return_empty_dict = 'yes' & return_empty_cols = 'yes'
+    --> @dm:enrich dict="temp-mgmt" and src_key_cols="target" and dict_key_cols="target" and enrich_cols="data" and enrich_cols_as="target_ip" & return_empty_dict = 'yes' & return_empty_cols = 'yes'
+    --> @dm:selectcolumns exclude="^data$"
+    --> @dm:save name="temp-interface"
+
+--> @c:new-block
+    --> @dm:recall name = 'temp-Group-system' and return_empty = "yes"
+    --> @dm:add-missing-columns columns="data"
+    --> *dm:filter data is not "[]"
+    --> @dm:skip-block-if-shape row_count='0'
+    --> @dm:skip-block-if-shape column_count=1
+    --> @dm:save name="temp-Group-system"
+    --> @dm:selectcolumns exclude ='^sysObjectID$|^systemVendorSubID$'
+    --> @dm:save name = "temp-system-info"
+    --> *dm:filter * get sysContact as 'device_contact',sysLocation as 'device_location',sysName as 'device_hostname',target as 'device_ip'
+    --> @dm:save name="temp-system-updated-info"
+    ## --> @c:new-block
+    ## --> @dm:recall name="temp-Group-entityPhysical.data"
+    ## --> @dm:add-missing-columns columns="data"
+    ## --> *dm:filter data is not "[]"
+    ## --> @dm:skip-block-if-shape row_count='0'
+    ## --> @dm:skip-block-if-shape column_count=1
+    ## --> *dm:filter entPhysicalClassEnumeratedLabel in [ "Chassis","chassis","CHASSIS" ]
+    ## --> @dm:save name = "temp-ent-info"
+    ## PARENT ROWS: Create Parent Chassis row based on unique Equipment Type(entPhysicalClassEnumeratedLabel) by reading entityPhysical group
+    --> @dm:recall name="temp-Group-entityPhysical" and return_empty = "yes"
+    --> @dm:add-missing-columns columns="data"
+    --> *dm:filter data is "[]"
+    --> @dm:add-missing-columns columns="entPhysicalClassEnumeratedLabel"
+    --> *dm:filter entPhysicalClassEnumeratedLabel is null
+    --> @dm:eval entPhysicalClassEnumeratedLabel ="'Chassis'"
+    --> @dm:save name="temp-empty-dataset-ent"
+
+--> @c:new-block
+    --> @dm:set-tracing-context __block__="create-parent-chassis"
+    --> @dm:recall name="temp-Group-entityPhysical" and return_empty = "yes"
+    --> @dm:add-missing-columns columns="data"
+    --> *dm:filter data is not "[]"
+    --> @dm:save name = "temp-dataset-ent"
+
+--> @c:new-block
+    --> @dm:concat names = "temp-empty-dataset-ent|temp-dataset-ent" and return_empty = "yes"
+    --> @dm:save name="temp-entityPhysical-data"
+
+--> @c:new-block
+    --> @dm:set-tracing-context __block__="create-parent-chassis"
+    --> @dm:recall name="temp-entityPhysical-data" and return_empty = "yes"
+    ## --> *dm:filter data is not "[]"
+    --> @dm:skip-block-if-shape row_count='0'
+    --> @dm:skip-block-if-shape column_count=1
+    --> @dm:add-missing-columns columns="entPhysicalClassEnumeratedLabel,entPhysicalDescr,entPhysicalMfgName,entPhysicalModelName,entPhysicalSerialNum,target,entPhysicalName"
+    --> @dm:copy-columns from="entPhysicalSerialNum,entPhysicalClassEnumeratedLabel,entPhysicalName" and to="entPhysicalSerialNum,entPhysicalClassEnumeratedLabel,entPhysicalName" and func="strip"
+    --> @dm:manipulate-string from="entPhysicalClassEnumeratedLabel" and func="upper" and to = "entPhysicalClassEnumeratedLabel"
+    --> @dm:eval entPhysicalSerialNum="entPhysicalName if entPhysicalClassEnumeratedLabel in ['FAN'] else entPhysicalSerialNum"
+    --> @dm:save name="temp-deleteme1"
+    ## --> @dm:eval entPhysicalSerialNum ="target+'_sn' if not entPhysicalSerialNum else  entPhysicalSerialNum"
+    --> @dm:eval entPhysicalSerialNum ="target+'_sn' if entPhysicalSerialNum in ['',None,'N/A'] else  entPhysicalSerialNum"
+    --> @dm:manipulate-string from="entPhysicalSerialNum" and func="upper" and to="SN"
+    --> *dm:filter SN notin ['BUILTIN', 'N/A']
+    --> @dm:save name="temp-Group-entityPhysical"
+    ## --> @dm:eval e_class="entPhysicalClassEnumeratedLabel if entPhysicalClassEnumeratedLabel else entPhysicalName if entPhysicalName else None"
+    ## --> @cfxaia:conditional-statement condition_column="entPhysicalClassEnumeratedLabel" and return_if="entPhysicalClassEnumeratedLabel" and to_column="e_class"
+    --> @dm:eval e_class = "entPhysicalClassEnumeratedLabel if entPhysicalClassEnumeratedLabel else None"
+    ## --> @cfxaia:conditional-statement condition_column="entPhysicalName" and return_if="entPhysicalName" and to_column="e_class" and replace_if_null="yes"
+    --> @dm:eval e_class = "entPhysicalName if e_class is None else e_class"
+    --> *dm:filter e_class in ["Chassis","chassis","CHASSIS"] and entPhysicalSerialNum is not null
+    --> @dm:dedup columns="entPhysicalClassEnumeratedLabel,target"
+    --> @dm:copy-columns from="entPhysicalSerialNum,entPhysicalModelName" and to="parent_sn,parent_pid"
+    --> @dm:manipulate-string to="parent_rows" and func="eval" and value="'yes'"
+    --> @dm:save name="temp-device-row"
+
+## CHILD ROWS: Create child rows whose Equipment Type is in ["CHASSIS","MODULE","POWERSUPPLY"] by reading entityPhysical group
+--> @c:new-block
+    --> @dm:set-tracing-context __block__="create-child-rows"
+    --> @dm:recall name="temp-Group-entityPhysical" and return_empty = "yes"
+    --> @dm:skip-block-if-shape row_count='0'
+    --> @dm:skip-block-if-shape column_count=1
+    ## --> *dm:filter entPhysicalClassEnumeratedLabel in ["CHASSIS","MODULE","POWERSUPPLY","FAN"] and entPhysicalSerialNum is not null
+    --> *dm:filter entPhysicalClassEnumeratedLabel in ["MODULE","POWERSUPPLY","FAN"] and entPhysicalSerialNum is not null
+    --> @dm:enrich dict="temp-device-row" and src_key_cols="target" and dict_key_cols="target" and enrich_cols="parent_sn,parent_pid" & return_empty_dict = 'yes' & return_empty_cols = 'yes'
+    --> *dm:filter parent_sn is not null
+    --> @dm:save name="temp-child-rows"
+
+--> @c:data-loop columns="org_id" and dataset="temp-discovery-results"
+    --> @dm:concat names="^temp-device-row$|^temp-child-rows$" and return_empty = "yes"
+    --> @dm:eval org_id="'$org_id'"
+    --> @dm:save name="temp-ent-info"
+
+--> @c:new-block
+    --> @dm:recall name="temp-Group-base" and return_empty = "yes"
+    --> @dm:add-missing-columns columns="data"
+    --> *dm:filter data is not "[]"
+    --> @dm:skip-block-if-shape row_count='0'
+    --> @dm:skip-block-if-shape column_count=1
+    --> *dm:filter sysDescr contains "Cisco"
+    --> @dm:grok column = "sysDescr" and pattern = "%{GREEDYDATA:cisco_description}Software \(%{DATA:model}\)"
+    --> @dm:map attr = "model" and func = "upper"
+    --> @dm:selectcolumns exclude = "cisco_description|meta_grok_message"
+    --> @dm:manipulate-string from="sysDescr" and to="version" and func="match" and value= "^(?:.*?,\s+)?Version\s+([\d.()A-Za-z]+)"
+    ## --> @dm:manipulate-string from="sysDescr" and func = "split" and value="Version" and to ="version"
+    ## --> @dm:eval version= "version[1].split(',')[0].split('[')[0].split()[0] if sysDescr else None"
+    --> @dm:save name="temp-base"
+    --> *dm:filter * get target as 'device_ip',sysDescr as 'device_version_summary',systemManagerIP as 'device_mgmt_ip',systemVendorOS as 'device_fw_type',version as 'device_fw_version',systemVendorName as 'systemVendorName'
+    --> @dm:save name = 'temp-base-updated-info'
+
+--> @c:new-block
+    --> @dm:recall name = 'temp-ent-info' and return_empty = "yes"
+    --> @dm:add-missing-columns columns="entPhysicalClassEnumeratedLabel,entPhysicalDescr,entPhysicalMfgName,entPhysicalModelName,entPhysicalSerialNum,target"
+    --> *dm:filter * get entPhysicalClassEnumeratedLabel as 'device_equip_type',entPhysicalDescr as 'device_eq_description',entPhysicalModelName as 'device_model',entPhysicalSerialNum as 'device_serial_number',target as 'device_ip',parent_sn as 'parent_sn',parent_pid,org_id as 'org_id'
+    --> @dm:enrich dict = 'temp-base-updated-info' & src_key_cols = 'device_ip' & dict_key_cols = 'device_ip' & enrich_cols = 'device_version_summary,device_mgmt_ip,device_fw_type,device_fw_version,systemVendorName' & return_empty_dict = 'yes' & return_empty_cols = 'yes'
+    --> @dm:copy-columns from = "systemVendorName,device_version_summary" and to = "lower_systemVendorName,lower_device_version_summary" and func = "lower"
+    ## --> @cfxaia:conditional-statement condition_column="lower_systemVendorName" and check_value="yes" and value="cisco" and operator="contains" and return_if="Cisco" and return_else="systemVendorName" and to_column = "device_vendor"
+    --> @dm:eval device_vendor = "'Cisco' if 'cisco' in lower_systemVendorName else systemVendorName"
+    --> @dm:fixnull-regex apply_for_empty="yes" and value="Not Available"
+    --> @dm:eval device_vendor="device_vendor if device_vendor else 'Cisco' if 'cisco' in lower_device_version_summary else None"
+    --> @dm:selectcolumns exclude = "lower_systemVendorName|lower_device_version_summary"
+    --> @dm:enrich dict = 'temp-system-updated-info' & src_key_cols = 'device_ip' & dict_key_cols = 'device_ip' & enrich_cols = 'device_contact,device_location,device_hostname' & return_empty_dict = 'yes' & return_empty_cols = 'yes'
+    --> @dm:add-missing-columns columns= "device_contact,device_location,device_hostname,device_version_summary,device_mgmt_ip,device_fw_type,device_fw_version"
+    ## --> @dm:map from = 'device_ip,device_serial_number' &  to = "unique_id" & func = "join" & sep = "_"
+    --> @dm:map from = 'device_hostname,device_serial_number' &  to = "unique_id" & func = "join" & sep = "_"
+    --> @dm:fixnull-regex columns=".*" and value="Not Available" and apply_for_empty="yes"
+    --> @dm:eval device_object = "'Chassis'"
+    --> @dm:manipulate-string from = "device_hostname" and to = "CLLI_code" and func = "substring" and upper_limit = 8
+    --> @dm:eval collection_timestamp = "time_now_as_isoformat()"
+    --> @dm:enrich dict="temp-Group-base.credential-id" and src_key_cols="device_ip" and dict_key_cols="target" and enrich_cols="data" and enrich_cols_as="credential_id" & return_empty_dict = 'yes' & return_empty_cols = 'yes'
+    --> @dm:enrich dict="temp-additional-ip-device" and src_key_cols="device_ip" and dict_key_cols="target" and enrich_cols="ipAdEntAddr" and enrich_cols_as="device_additional_ips" & return_empty_dict = 'yes' & return_empty_cols = 'yes'
+    --> @dm:save name = 'temp-ent-info'
+
+--> @c:new-block
+    --> @dm:recall name ="temp-ent-info" and return_empty = "yes"
+    --> *dm:filter device_model is not 'Not Available'
+    --> @dm:save name = 'temp-ent-info-a'
+
+--> @c:data-loop dataset = "temp-base"  and columns = "target,model"
+    --> @dm:recall name ="temp-ent-info" and return_empty = "yes"
+    --> *dm:filter device_model is 'Not Available' and device_ip is '$target'
+    --> @dm:eval device_model = "'$model'"
+    --> @dm:save name = 'temp-ent-info-b' and append = "yes"
+
+--> @c:new-block
+    --> @dm:concat names = "temp-ent-info-a|temp-ent-info-b" and return_empty = "yes"
+    --> @dm:save name = "temp-ent-info"
+
+## Adding ports counts to chassis
+--> @c:new-block
+    --> @dm:set-tracing-context __block__="interface parsing"
+    --> @dm:recall name="temp-Group-interfaces" and return_empty = "yes"
+    --> @dm:skip-block-if-shape row_count='0'
+    --> @dm:skip-block-if-shape column_count=1
+    --> @dm:dedup columns="target,ifIndex"
+    --> @dm:eval ifType="str(int(ifType)).strip() if ifType else ifType"
+    --> *dm:filter ifType in ["6","62", "6.0", "62.0"]
+    --> @dm:save name="temp-interfaces-ds"
+    --> @dm:to-type columns = "ifOperStatus" and type = "int"
+    --> @dm:eval down="'eth_down' if (ifOperStatus==2 and ifAdminStatusEnumeratedLabel=='up') else 'eth_up'"
+    --> @dm:eval admin_status = "'admin_down' if (ifAdminStatus==2) else 'admin_up'"
+    --> @dm:to-type columns = "ifOperStatus" and type = "int"
+    --> @dm:to-type columns="ifType,ifOperStatus,down,admin_status" and type="str"
+    --> @dm:implode key_columns="target" and
+            merge_columns="ifType,ifOperStatus,down,admin_status,ifName" and dedup_merge_values="no"
+    --> @dm:eval total_eth_count="len(ifType.split(','))" &
+            up_eth_count="ifOperStatus.split(',').count('1')" &            down_eth_count="total_eth_count-up_eth_count" &            admin_down_count="admin_status.split(',').count('admin_down')"
+    --> @dm:selectcolumns include="total_eth_count|up_eth_count|down_eth_count|admin_down_count|target"
+    --> @dm:save name="temp-interfaces-counts"
+    --> @dm:recall name="temp-ent-info" and return_empty = "yes"
+    --> @dm:enrich dict="temp-interfaces-counts" and src_key_cols="target" and dict_key_cols="target" and enrich_cols="total_eth_count,up_eth_count,down_eth_count,admin_down_count" and enrich_cols_as="total_eth_ports,up_eth_ports,down_eth_ports,admin_down_eth_ports" & return_empty_dict = 'yes' & return_empty_cols = 'yes'
+    --> @dm:save name = 'temp-cisco_device_chassis_dict'
+
+--> @c:new-block
+    --> @dm:set-tracing-context __block__=" map source_ip"
+    --> @dm:recall name="temp-interface" and return_empty = "yes"
+    --> @dm:add-missing-columns columns="target_ip,cdpCacheIfIndex,cdpCacheAddress,cdpCacheDevicePort,cdpCachePlatform,cdpCacheDeviceId,cdpGlobalDeviceId,cdpCacheCapabilitiesEnumeratedLabel,"
+    ## --> @cfxaia:conditional-statement condition_column = "target_ip" and return_if = "target_ip" and return_else = "target" and to_column = "ip_address"
+    --> @dm:eval ip_address = "target_ip if target_ip else target"
+    --> @dm:selectcolumns exclude="target-ip|if_index"
+    --> @dm:save name="temp-interface"
+    --> @dm:add-missing-columns columns="chassis_sn"
+    --> *dm:filter * get target as 'device_ip',ifAlias as 'device_int_alias',ifDescr as 'device_int_name',ifIndex as 'device_int_index',ifName as 'device_int_shortname',ifOperStatusEnumeratedLabel as 'device_interface_status',ifAdminStatusEnumeratedLabel as 'device_interface_admin_status',type as 'device_interface_type',cdpCacheIfIndex as 'remote_device_int_index',cdpCacheAddress as 'remote_device_ip',cdpCacheDevicePort as 'remote_device_int_name',cdpCacheDeviceId as 'remote_device_id',cdpCachePlatform as 'remote_device_model',cdpCacheCapabilitiesEnumeratedLabel as 'remote_device_capabilities', ifHCInOctets as 'device_int_in_octets' , ifHCOutOctets as 'device_int_out_octets',ifType,ifLastChange as 'if_last_change',device_additional_ips, ifSpeed as 'device_int_speed'
+    --> @dm:enrich dict = "temp-Group-snmpEngineDetails" and src_key_cols = "device_ip" and dict_key_cols = "target" and enrich_cols = "snmpEngineTime" & return_empty_dict = 'yes' & return_empty_cols = 'yes'
+    --> @dm:add-missing-columns columns = "snmpEngineTime"
+    --> @dm:rename-columns snmp_uptime = "snmpEngineTime"
+    ## --> @dm:eval vlan_name="'vlan'+str(vlan_id).strip('.0') if vlan_id is not None and vlan_id!='None' else 'Not Available'"
+    --> @dm:to-type columns="snmp_uptime,if_last_change" and type="int"
+    --> @dm:manipulate-string from="snmp_uptime" and to="sys_uptime" and func="eval" and value="snmp_uptime*100"
+    --> @dm:fixnull columns="sys_uptime" and value=0 and apply_for_empty="yes"
+    --> @dm:fixnull columns="if_last_change" and value=0 and apply_for_empty="yes"
+    --> @dm:manipulate-string to="round_up" and func="eval" and value="(sys_uptime - if_last_change)/8640000"
+    --> @dm:manipulate-string to="round_up" and func="eval" and value="round_up.round(1)"
+    ## --> @cfxaia:conditional-statement condition_column="sys_uptime" and to_column="flag1" and return_if="yes" and return_else="no" and check_value="yes" and value="0" and operator=">"
+    --> @dm:eval flag1 = "'yes' if sys_uptime > 0 else 'no'"
+    ## --> @cfxaia:conditional-statement condition_column="if_last_change" and to_column="flag2" and return_if="yes" and return_else="no" and check_value="yes" and value="0" and operator=">"
+    --> @dm:to-type columns="if_last_change" and type="int"
+    --> @dm:eval flag2 = "'yes' if if_last_change > 0 else 'no'"
+    ## --> @cfxaia:conditional-statement condition_column="flag1,flag2" and check_value="yes" and operator="=" and value="yes,yes" and return_if="round_up" and to_column="round_up"
+    --> @dm:eval round_up = "round_up if flag1 == 'yes' and flag2 == 'yes' else 0"
+    --> @dm:copy-columns from="round_up" and to="if_last_change"
+    --> @dm:eval if_last_change="int(if_last_change) if if_last_change else 0"
+    --> @dm:selectcolumns exclude="flag|target|round_up"
+    --> @dm:to-type columns="if_last_change" and type="int"
+    ## --> @cfxaia:conditional-statement condition_column="if_last_change" and operator=">" and check_value="yes" and value="120" and return_if=">120" and to_column="if_chng_days"
+    --> @dm:eval if_chng_days = "'>120' if if_last_change > 120 else if_last_change"
+    ## --> @cfxaia:conditional-statement condition_column="if_last_change" and operator="<" and check_value="yes" and value="60" and return_if="<60" and to_column="if_chng_days" and replace_if_null="true"
+    --> @dm:eval if_chng_days = "'<60' if if_last_change > 0 and if_last_change < 60 else if_last_change"
+    ## --> @cfxaia:conditional-statement condition_column="if_last_change" and return_if="60-120" and to_column="if_chng_days" and replace_if_null="true"
+    --> @dm:eval if_chng_days = "'60-120' if if_last_change  > 60  else if_last_change"
+    --> @dm:eval if_change_since = "int(time_now_as_ms())-if_last_change*24*60*60*1000 if if_last_change is not None else None"
+    --> @dm:enrich dict = 'temp-cisco_device_chassis_dict' & src_key_cols = 'device_ip' & dict_key_cols = 'device_ip' & enrich_cols = 'device_eq_description,device_mgmt_ip,device_fw_version,device_fw_type,device_model,device_vendor,device_hostname,device_contact,device_location,device_version_summary,device_serial_number,CLLI_code' & return_empty_dict = 'yes' & return_empty_cols = 'yes'
+    ## Some times, remote_device_id comes as HOSTNAME(SERIAL_NUMBER)
+    --> @dm:map from="remote_device_id" and to="remote_device_name" and func="match" and expr="([^(]+)\(?.*"
+    --> @dm:fixnull columns="remote_device_name" and value=""
+    ## Following lines check if the remote_device_id is actually a known chassis in cisco_device_chassis_dict.
+    ## If it is not, then remove the everything after the .
+    ## Because, sometimes, remote_device_id comes as FQDN, but the sysname does not contain the FQDN.
+    --> @dm:copy-columns to="old_device_hostname" and from="device_hostname"
+    ## --> @dm:enrich dict="cisco_device_chassis_dict" and src_key_cols="remote_device_name" and dict_key_cols="device_hostname" and enrich_cols="device_hostname" and enrich_cols_as="remote_hostname_from_chassis"
+    --> @dm:enrich dict="temp-system-info" and src_key_cols="remote_device_name" and dict_key_cols="sysName" and enrich_cols="sysName" and enrich_cols_as="remote_hostname_from_chassis" & return_empty_dict = 'yes' & return_empty_cols = 'yes'
+    --> @dm:fixnull columns="remote_hostname_from_chassis" and value="NOTFOUND" and apply_for_empty="yes"
+    --> @dm:copy-columns to="device_hostname" and from="old_device_hostname"
+    --> @dm:eval remote_device_name="remote_device_name.split('.')[0] if remote_hostname_from_chassis == 'NOTFOUND' else remote_device_name"
+    ## Setup some dummy hostnames just incase local or remote hostnames are not setup properly.
+    --> @dm:eval device_hostname="device_hostname if device_hostname else 'LOCAL_UNKNOWN'"
+    --> @dm:eval remote_device_name="remote_device_name if remote_device_name else 'REMOTE_UNKNOWN'"
+    ## Create cdp_device_order for enriching the events for correlation purposes
+    --> @dm:eval cdp_device_order = "':'.join(sorted([device_hostname, remote_device_name]))"
+    --> @dm:selectcolumns exclude="device_version_summary"
+    --> @dm:to-type columns = "ifType" & type = "int"
+    --> @dm:enrich dict = "ifTypeLabel_dict" & src_key_cols = "ifType" & dict_key_cols = "ifType" & enrich_cols = "ifTypeLabel" & return_empty_dict = 'yes' & return_empty_cols = 'yes'
+    --> @dm:save name = 'temp-cisco_device_interface_data'
+    --> @dm:map from = "device_ip,device_int_name" & to = "unique_id" & func = "join" & sep = "_"
+    --> @dm:fixnull-regex columns=".*" and value="Not Available" and apply_for_empty="yes"
+    --> @dm:eval device_object = "'Interface'"
+    --> @dm:eval collection_timestamp = "time_now_as_isoformat()"
+    --> @dm:save name = 'temp-cisco_device_interface_data' and append="yes"
+    ## -->  @rn:write-stream     name = '_cisco_devices_inventory'
+    --> @dm:eval link_type="'cdp'"
+    --> *dm:filter remote_device_int_name is not empty get device_ip,device_int_name,device_int_shortname,remote_device_ip,remote_device_int_name,remote_device_id,remote_device_capabilities,device_hostname,device_model,device_vendor,device_serial_number,CLLI_code,collection_timestamp
+    --> @dm:eval remote_device_capabilities = "'' if remote_device_capabilities == 'Not Available' else remote_device_capabilities"
+    --> @dm:manipulate-string from="remote_device_capabilities" and func="join" and value="," and to="remote_device_capabilities"
+    --> @dm:eval cdp_device_order = "':'.join(sorted([device_hostname, remote_device_id]))"
+    --> @dm:map from = "remote_device_id,remote_device_int_name,device_ip,device_int_name" & to = "unique_id" & func = "join" & sep = "_"
+    --> @dm:fixnull columns="remote_device_capabilities" and value="Not Available" and apply_for_empty="yes"
+    --> @dm:eval device_object = "'CDP'"
+    --> @dm:save name = 'temp-cisco_device_interface_cdp_dict'
+
+## #########################################
+## Process Arp data & Mac data
+## #########################################
+--> @c:new-block
+    --> @dm:empty
+    --> @dm:save name="temp-arp-ds"
+    --> @dm:save name="temp-mac-ds"
+
+--> @c:new-block
+    --> @dm:recall name="temp-Group-ipNetToMediaTable" and return_empty = "yes"
+    --> @dm:add-missing-columns columns="data"
+    --> *dm:filter data is  "[]"
+    --> @dm:skip-block-if-shape row_count=0
+    --> @dm:skip-block-if-shape column_count=1
+    --> @dm:fixcolumns
+    --> @dm:rename-columns mac_addr="ipNetToMediaPhysAddress" and  target = "device_ip"
+    --> @dm:copy-columns from="ipNetToMediaNetAddress" and to="host_addr"
+    --> @dm:manipulate-string from="mac_addr,host_addr" and to="unique_id" and func="concat_columns"
+    --> @dm:manipulate-string to="device_object" and value="'arp'" and func="eval"
+    --> @dm:save name="temp-arp-ds"
+
+## ##############################################
+## Process Mac
+## #############################################
+--> @c:new-block
+    --> @dm:recall name="temp-Group-dot1dTpFdbTablemacprocess" and return_empty = "yes"
+    --> @dm:add-missing-columns columns="data"
+    --> @dm:to-type columns = "data" & type = "str"
+    --> *dm:filter data is not "[]"
+    --> @dm:skip-block-if-shape row_count=0
+    --> @dm:skip-block-if-shape column_count=1
+    --> @dm:fixcolumns
+    --> @dm:rename-columns mac_addr="dot1dTpFdbAddress" and  target = "device_ip"
+    --> @dm:manipulate-string from="mac_addr,target" and to="unique_id" and func="concat_columns"
+    --> @dm:manipulate-string to="device_object" and value="'mac'" and func="eval"
+    --> @dm:to-type columns="dot1dTpFdbPort" and type="int"
+    --> @dm:rename-columns mac_port="dot1dTpFdbPort"
+    --> @dm:save name="temp-mac-ds"
+
+## --> @c:data-loop columns="discovery_enabled,customer_tag,customer_id" and dataset="temp-discovery-results"
+--> @c:new-block
+    --> @dm:concat names="temp-arp-ds|temp-mac-ds" and return_empty = "yes"
+    --> @dm:skip-block-if-shape row_count=0
+    --> @dm:skip-block-if-shape column_count=1
+    --> @dm:eval collection_timestamp = "time_now_as_isoformat()"
+    --> @dm:enrich dict="temp-customer-context-dict" and src_key_cols="target" and dict_key_cols="target" and enrich_cols="discovery_enabled,customer_tag,customer_id"
+    ## --> @dm:manipulate-string to="customer_id" and value='"$customer_id"' and func="eval"
+    ## --> @dm:manipulate-string to="project_id" and value='"$project_id"' and func="eval"
+    ## --> @dm:manipulate-string to="customer_tag" and value='"$customer_tag"' and func="eval"
+    ## --> @dm:manipulate-string to="discovery_enabled" and value='"$discovery_enabled"' and func="eval"
+    --> @dm:save name="temp-arp-mac" and append="yes"
+    --> @rn:write-stream name = 'network_device_inventory'
+
+## --> @c:data-loop columns="discovery_enabled,customer_tag,customer_id" and dataset="temp-discovery-results"
+--> @c:new-block
+    --> @dm:recall name = 'temp-Group-lldpRemTable' and return_empty = "yes"
+    --> @dm:add-missing-columns columns="data"
+    --> *dm:filter data is not "[]"
+    --> @dm:skip-block-if-shape row_count='0'
+    --> @dm:skip-block-if-shape column_count=1
+    --> @dm:rename-columns remote_device_int_name="lldpRemPortId" and
+            device_ip="target" and
+            remote_device_id="lldpRemSysName" and
+            remote_device_descr="lldpRemPortDesc"
+    --> @dm:eval device_object = "'LLDP'"
+    --> @dm:enrich dict = 'temp-cisco_device_chassis_dict' & src_key_cols = 'device_ip' & dict_key_cols = 'device_ip' & enrich_cols = 'device_eq_description,device_mgmt_ip,device_fw_version,device_fw_type,device_model,device_vendor,device_hostname,device_contact,device_location,device_version_summary,device_serial_number,CLLI_code' & return_empty_dict = 'yes' & return_empty_cols = 'yes'
+    --> @dm:add-missing-columns columns="remote_device_ip,remote_device_model,remote_device_capabilities,remote_device_int_index"
+    --> @dm:fixnull-regex columns=".*" and value="Not Available" and apply_for_empty="yes"
+    --> @dm:eval collection_timestamp = "time_now_as_isoformat()"
+    --> @dm:map from = "device_ip,remote_device_id" & to = "unique_id" & func = "join" & sep = "_"
+    --> @dm:selectcolumns exclude="lldp.*"
+    ## --> @dm:manipulate-string to="customer_id" and value='"$customer_id"' and func="eval"
+    ## --> @dm:manipulate-string to="project_id" and value='"$project_id"' and func="eval"
+    ## --> @dm:manipulate-string to="customer_tag" and value='"$customer_tag"' and func="eval"
+    ## --> @dm:manipulate-string to="discovery_enabled" and value='"$discovery_enabled"' and func="eval"
+    --> @dm:enrich dict="temp-customer-context-dict" and src_key_cols="device_ip" and dict_key_cols="target" and enrich_cols="discovery_enabled,customer_tag,customer_id"
+    --> @dm:save name = 'temp-cisco_device_lldp_data' and append="yes"
+    --> @rn:write-stream name = 'network_devices_cdp'
+
+## --> @c:data-loop columns="discovery_enabled,customer_tag,customer_id" and dataset="temp-discovery-results"
+--> @c:new-block
+    --> @dm:recall name="temp-cisco_device_chassis_dict" and return_empty = "yes"
+    ## --> @dm:manipulate-string to="customer_id" and value='"$customer_id"' and func="eval"
+    ## --> @dm:manipulate-string to="project_id" and value='"$project_id"' and func="eval"
+    ## --> @dm:manipulate-string to="customer_tag" and value='"$customer_tag"' and func="eval"
+    ## --> @dm:manipulate-string to="discovery_enabled" and value='"$discovery_enabled"' and func="eval"
+    --> @dm:enrich dict="temp-customer-context-dict" and src_key_cols="target" and dict_key_cols="target" and enrich_cols="discovery_enabled,customer_tag,customer_id"
+    --> @dm:eval node_id = "device_ip+'_'+device_object"
+    --> @dm:save name="temp-cisco_device_chassis_dict"
+
+## --> @rn:write-stream name = 'network_device_inventory'
+--> @c:new-block
+    --> @dm:recall name="temp-cisco_device_chassis_dict" and return_empty = "yes"
+    --> @dm:dedup columns=unique_id
+    --> @rn:write-stream name = 'network_device_inventory'
+
+## --> @c:data-loop columns="discovery_enabled,customer_tag,customer_id" and dataset="temp-discovery-results"
+--> @c:new-block
+    --> @dm:recall name="temp-cisco_device_interface_data" and return_empty = "yes"
+    ## --> @dm:manipulate-string to="customer_id" and value='"$customer_id"' and func="eval"
+    ## --> @dm:manipulate-string to="project_id" and value='"$project_id"' and func="eval"
+    ## --> @dm:manipulate-string to="customer_tag" and value='"$customer_tag"' and func="eval"
+    ## --> @dm:manipulate-string to="discovery_enabled" and value='"$discovery_enabled"' and func="eval"
+    --> @dm:enrich dict="temp-customer-context-dict" and src_key_cols="device_ip" and dict_key_cols="target" and enrich_cols="discovery_enabled,customer_tag,customer_id"
+    --> @dm:save name="temp-cisco_device_interface_data" and append="yes"
+    --> @rn:write-stream name = 'network_device_interfaces'
+
+## --> @c:data-loop columns="discovery_enabled,customer_tag,customer_id" and dataset="temp-discovery-results"
+--> @c:new-block
+    --> @dm:recall name="temp-cisco_device_interface_cdp_dict" and return_empty = "yes"
+    --> @dm:enrich dict="temp-customer-context-dict" and src_key_cols="device_ip" and dict_key_cols="target" and enrich_cols="discovery_enabled,customer_tag,customer_id"
+    ## --> @dm:manipulate-string to="customer_id" and value='"$customer_id"' and func="eval"
+    ## --> @dm:manipulate-string to="project_id" and value='"$project_id"' and func="eval"
+    ## --> @dm:manipulate-string to="customer_tag" and value='"$customer_tag"' and func="eval"
+    ## --> @dm:manipulate-string to="discovery_enabled" and value='"$discovery_enabled"' and func="eval"
+    --> @dm:map to="interface_connectivity_key" and func="evaluate" and expr="f'{device_ip}#{device_int_name}-{remote_device_ip}#{remote_device_int_name}' if device_ip < remote_device_ip  else f'{remote_device_ip}#{remote_device_int_name}-{device_ip}#{device_int_name}'"
+    --> @dm:save name="temp-cisco_device_interface_cdp_dict" and append="yes"
+    --> @rn:write-stream name = 'network_devices_cdp'
+
+--> @c:new-block
+    --> @dm:recall name = "temp-customer-context-dict" and return_empty = "yes"
+    --> @dm:selectcolumns include = "jobid|collection_timestamp|target|collection_status|reason|customer_id|customer_tag"
+    --> *dm:filter collection_status = 'Success'
+    --> @dm:skip-block-if-shape row_count=0
+    --> @dm:rename-columns target_ip ="target"
+    --> @dm:eval discovery_status ="'Successfully completed processing of Cisco devices.'"
+    --> @dm:eval logs ="'Successfully collected devices'"
+    --> @dm:map from = 'jobid,discovery_status,logs,target_ip' &  to = "unique_id" & func = "join" & sep = "_"
+    --> @rn:write-stream name= "discovery_logs"
+

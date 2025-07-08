@@ -1,0 +1,94 @@
+{
+  "name": "customer_access_status_failed_devices",
+  "description": "Customer Access Status",
+  "label": "Failed Devices",
+  "context_label_id": "ip_address",
+  "enabled": false,
+  "dashboard_type": "template",
+  "dashboard_folder": "MultiNetworkPack",
+  "template_variables": {
+      "PROJ_ID": {
+          "contextId": "project_id"
+      },
+      "PROJ_ID_SINGLE": {
+          "contextId": "project_id"
+      },
+      "DEVICE_IP": {
+          "contextId": "ip_address"
+      },
+      "NETWORK_NAME": {
+        "contextId": "network_name"
+    }
+  },
+  "version": "24.9.6.4",
+  "dashboard_filters": {
+      "time_filter": true,
+      "default_time_filter_labels": [
+          "Last 1 month"
+      ],
+      "extra_filter": "source contains 'failed' and ip_address is '{{DEVICE_IP}}'"
+  },
+  "dashboard_sections": [
+      {
+          "title": "Success",
+          "show_filter": true,
+          "widgets": [
+              {
+                  "title": "Access Details",
+                  "widget_type": "tabular",
+                  "stream": "multi_network_access_verification",
+                  "duration_hours": 1080,
+                  "showRowSummary": true,
+                  "min_width": 12,
+                  "height": 6,
+                  "max_width": 12,
+                  "paginated": true,
+                  "remote_searchable": true,
+                  "remote_searchable_cols": [
+                      "ip_address",
+                      "protocol",
+                      "used_cred",
+                      "collection_status"
+                  ],
+                  "max_rows": 50,
+                  "columns": {
+                      "ip_address": {
+                          "title": "IP Address",
+                          "defaultWidth": 150
+                      },
+                      "protocol": {
+                          "title": "Protocol",
+                          "defaultWidth": 150
+                      },
+                      "used_cred": {
+                          "title": "Credential Name",
+                          "defaultWidth": 200
+                      },
+                      "collection_status": {
+                          "title": "Authentication State",
+                          "defaultWidth": 150,
+                          "htmlTemplateForRow": "{% raw %}<span class='badge' style='background-color: {{ row.collection_status_color}}' > {{ row.collection_status }} </span>{% endraw %}"
+                      },
+                      "collection_status_color": {
+                          "type": "COLOR-MAP",
+                          "source-column": "collection_status",
+                          "color-map": {
+                              "Success": "#008000",
+                              "Failed": "#FF0000",
+                              "success": "#008000",
+                              "failed": "#FF0000"
+                          }
+                      },
+                      "reason": {
+                          "title": "Failure Reason",
+                          "defaultWidth": 200
+                      },
+                      "timestamp": "Last Access Check Time"
+                  },
+                  "widget_id": "4c2cfdd7"
+              }
+          ]
+      }
+  ],
+  "saved_time": "2024-12-31T13:39:02.374954"
+}

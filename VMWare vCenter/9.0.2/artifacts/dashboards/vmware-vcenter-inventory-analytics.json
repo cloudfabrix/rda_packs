@@ -1,0 +1,72 @@
+{
+    "name": "vmware-vcenter-inventory-analytics",
+    "label": "VMware vCenter Analytics",
+    "description": "VMware vCenter Inventory and Analytics Dashboard",
+    "version": "2024.03.11.1",
+    "enabled": true,
+    "dashboard_folder": "VMware",
+    "status_poller": {
+        "stream": "cfx_rdaf_topology_nodes",
+        "frequency": 120,
+        "columns": [
+            "collection_timestamp"
+        ],
+        "sorting": [
+            {
+                "collection_timestamp": "desc"
+            }
+        ],
+        "query": "`collection_timestamp` is after '${timestamp}'",
+        "defaults": {
+            "collection_timestamp": "$UTCNOW"
+        },
+        "action": "refresh"
+    },
+    "dashboard_filters": {
+        "time_filter": true,
+        "default_time_filter_labels": [
+            "Last 1 week"
+        ],
+        "columns_filter": []
+    },
+    "dashboard_sections": [],
+    "dashboard_type": "app",
+    "dashboard_pages": [
+        {
+            "name": "vcenter_configure_and_manage",
+            "label": "vCenter Configuration And Status",
+            "icon": "settings.svg"
+        },
+        {
+            "name": "vmware_vcenter_manager",
+            "label": "vCenter Manager",
+            "icon": "cluster.svg"
+        },
+        {
+            "name": "vmware_virtual_machines",
+            "label": "Virtual Machines",
+            "icon": "asset.svg"
+        },
+        {
+            "name": "vmware_esxi_hosts",
+            "label": "ESXi Hosts",
+            "icon": "hardware.svg"
+        },
+        {
+            "name": "vmware_esxi_datastores",
+            "label": "ESXi Datastores",
+            "icon": "asset.svg"
+        },
+        {
+            "name": "vmware_esxi_vswitches",
+            "label": "ESXi vSwitches",
+            "icon": "topology.svg"
+        },
+        {
+            "name": "vmware_asset_discovery_collection_status",
+            "label": "Discovery Status",
+            "icon": "settings.svg"
+        }
+    ],
+    "saved_time": "2025-04-28T09:52:10.538038"
+}

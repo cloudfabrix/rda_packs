@@ -1,0 +1,304 @@
+{
+    "name": "asset_discovery_network_devices",
+    "label": "Asset Inventory Discovery Network Devices",
+    "description": "Asset Inventory Discovery Network Dashboard Devices",
+    "version": "24.12.12.4",
+    "enabled": true,
+    "dashboard_style": "tabbed",
+    "live_edit": true,
+    "dashboard_filters": {
+        "time_filter": true,
+        "default_time_filter_labels": [
+            "Last 1 week"
+        ],
+        "columns_filter": [
+            {
+                "id": "collection_timestamp",
+                "label": "Timestamp",
+                "type": "DATETIME"
+            },
+            {
+                "id": "asset_id",
+                "label": "Device IP",
+                "type": "TEXT"
+            },
+            {
+                "id": "collection_status",
+                "label": "Collection Status",
+                "type": "TEXT"
+            },
+            {
+                "id": "reason",
+                "label": "Error Message",
+                "type": "TEXT"
+            },
+            {
+                "id": "bot_name",
+                "label": "Bot Name",
+                "type": "TEXT"
+            },
+            {
+                "id": "bot_source_type",
+                "label": "Bot Function",
+                "type": "TEXT"
+            },
+            {
+                "id": "bot_soruce_name",
+                "label": "Soruce Bot Name",
+                "type": "TEXT"
+            }
+        ],
+        "group_filters": [
+            {
+                "stream": "asset_inventory_collection_status_stream",
+                "title": "Asset Type",
+                "extra_filter": "bot_type == 'asset-discovery'",
+                "group_by": [
+                    "asset_type"
+                ],
+                "ts_column": "timestamp",
+                "limit": 50,
+                "agg": "cardinality",
+                "column": "target",
+                "type": "int"
+            },
+            {
+                "stream": "asset_inventory_collection_status_stream",
+                "title": "Network Device IP",
+                "extra_filter": "bot_type == 'asset-discovery'",
+                "group_by": [
+                    "target"
+                ],
+                "ts_column": "timestamp",
+                "limit": 50,
+                "agg": "cardinality",
+                "column": "count_",
+                "type": "int"
+            },
+            {
+                "stream": "asset_inventory_collection_status_stream",
+                "title": "Collection Status",
+                "extra_filter": "bot_type == 'asset-discovery'",
+                "group_by": [
+                    "collection_status"
+                ],
+                "ts_column": "timestamp",
+                "agg": "value_count",
+                "column": "count_",
+                "type": "int"
+            }
+        ]
+    },
+    "dashboard_sections": [
+        {
+            "title": "NETWORK",
+            "show_filter": true,
+            "widgets": [
+                {
+                    "widget_type": "label",
+                    "label": "<div style='text-align:center;width:100%;'><h1><a style='text-decoration:none;color:#0066ff;' target='_blank'> Network Devices </a></h1></div>",
+                    "max_width": 12,
+                    "height": 0.1,
+                    "min_width": 12,
+                    "widget_id": "a2e0ffb4"
+                },
+                {
+                    "title": "Total Network Devices",
+                    "widget_type": "counter",
+                    "stream": "asset_inventory_collection_status_stream",
+                    "extra_filter": "bot_type == 'asset-discovery'",
+                    "ts_column": "timestamp",
+                    "column": "target",
+                    "min_width": 2,
+                    "height": 4,
+                    "max_width": 2,
+                    "agg": "cardinality",
+                    "type": "str",
+                    "widget_id": "8f81fe68"
+                },
+                {
+                    "title": "Success (Last 24 hours)",
+                    "widget_type": "counter",
+                    "stream": "asset_inventory_collection_status_stream",
+                    "extra_filter": "bot_type == 'asset-discovery'  and  collection_status is 'Success' and timestamp is after -24 hours",
+                    "limit": 5,
+                    "min_width": 5,
+                    "height": 4,
+                    "max_width": 5,
+                    "style": {
+                        "color-list": [
+                            "#388e3c"
+                        ]
+                    },
+                    "ts_column": "timestamp",
+                    "column": "target",
+                    "agg": "cardinality",
+                    "type": "text",
+                    "widget_id": "ddcac3fa"
+                },
+                {
+                    "title": "Failed (Last 24 hours)",
+                    "widget_type": "counter",
+                    "stream": "asset_inventory_collection_status_stream",
+                    "extra_filter": "bot_type == 'asset-discovery' and  collection_status is 'Failed' and timestamp is after -24 hours ",
+                    "limit": 5,
+                    "min_width": 5,
+                    "height": 4,
+                    "max_width": 5,
+                    "style": {
+                        "color-list": [
+                            "#d32f2f"
+                        ]
+                    },
+                    "ts_column": "timestamp",
+                    "column": "target",
+                    "agg": "cardinality",
+                    "type": "text",
+                    "widget_id": "ddcac3flk"
+                },
+                {
+                    "title": "Total Network Success",
+                    "min_width": 2,
+                    "height": 4,
+                    "max_width": 2,
+                    "widget_type": "expression_counter",
+                    "expression": "(success/Total)*100 ",
+                    "extra_filter": "bot_type == 'asset-discovery'",
+                    "unit": "%",
+                    "stream": "asset_inventory_collection_status_stream",
+                    "ts_column": "timestamp",
+                    "segments": [
+                        {
+                            "variable": "Total",
+                            "stream": "asset_inventory_collection_status_stream",
+                            "ts_column": "timestamp",
+                            "column": "target",
+                            "duration_hours0": 9600,
+                            "agg": "cardinality",
+                            "type": "int"
+                        },
+                        {
+                            "variable": "success",
+                            "stream": "asset_inventory_collection_status_stream",
+                            "ts_column": "timestamp",
+                            "extra_filter": "collection_status is 'Success'",
+                            "column": "target",
+                            "duration_hours0": 9600,
+                            "agg": "cardinality",
+                            "type": "int"
+                        }
+                    ],
+                    "widget_id": "c29afdc1"
+                },
+                {
+                    "title": "Total Network Failed",
+                    "min_width": 2,
+                    "height": 4,
+                    "max_width": 2,
+                    "widget_type": "expression_counter",
+                    "expression": "(Failed/Total)*100 ",
+                    "extra_filter": "bot_type == 'asset-discovery'",
+                    "unit": "%",
+                    "stream": "asset_inventory_collection_status_stream",
+                    "ts_column": "timestamp",
+                    "segments": [
+                        {
+                            "variable": "Total",
+                            "stream": "asset_inventory_collection_status_stream",
+                            "ts_column": "timestamp",
+                            "column": "target",
+                            "duration_hours0": 9600,
+                            "agg": "cardinality",
+                            "type": "int"
+                        },
+                        {
+                            "variable": "Failed",
+                            "stream": "asset_inventory_collection_status_stream",
+                            "ts_column": "timestamp",
+                            "extra_filter": "collection_status is 'Failed'",
+                            "column": "target",
+                            "duration_hours0": 9600,
+                            "agg": "cardinality",
+                            "type": "int"
+                        }
+                    ],
+                    "widget_id": "5738f5c5"
+                },
+                {
+                    "title": "Collection Status",
+                    "widget_type": "timeseries",
+                    "stream": "asset_inventory_collection_status_stream",
+                    "extra_filter": "bot_type == 'asset-discovery' and collection_status in ['Success', 'Failed']",
+                    "max_width": 8,
+                    "height": 4,
+                    "min_width": 8,
+                    "ts_column": "timestamp",
+                    "interval": "day",
+                    "interval_type": "calendar",
+                    "group_by": [
+                        "collection_status"
+                    ],
+                    "chartProperties": {
+                        "xAxisLabel": "Discovery Status",
+                        "yAxisLabel": "Last 1 week",
+                        "legendLocation": "bottom"
+                    },
+                    "style": {
+                        "color-map": {
+                            "Success": [
+                                "#388e3c",
+                                "#ffffff"
+                            ],
+                            "Failed": [
+                                "#d32f2f",
+                                "#ffffff"
+                            ]
+                        }
+                    },
+                    "series_spec": [
+                        {
+                            "column": "count_",
+                            "agg": "sum",
+                            "type": "int"
+                        }
+                    ],
+                    "widget_id": "33e6cce6"
+                },
+                {
+                    "widget_type": "tabular",
+                    "title": "Network Device Details",
+                    "stream": "asset_inventory_collection_status_stream",
+                    "extra_filter": "bot_type == 'asset-discovery' and collection_status in ['Failed','Success']",
+                    "ts_column": "timestamp",
+                    "column": "target",
+                    "agg": "cardinality",
+                    "columns": {
+                        "target": "Device IP",
+                        "asset_type": "Asset Type",
+                        "log_event_count": "Event Count",
+                        "collection_status": {
+                            "title": "Discovery Status",
+                            "htmlTemplateForRow": "<span class='badge' style='background-color: {{ row.collection_status_color }}' > {{ row.collection_status }} </span>"
+                        },
+                        "collection_status_color": {
+                            "type": "COLOR-MAP",
+                            "source-column": "collection_status",
+                            "color-map": {
+                                "Success": "#00BB00",
+                                "Failed": "#BB0000"
+                            }
+                        },
+                        "reason": "Message",
+                        "timestamp": "Timestamp"
+                    },
+                    "type": "str",
+                    "min_width": 12,
+                    "height": 8,
+                    "max_width": 12,
+                    "widget_id": "4b267fce"
+                }
+            ]
+        }
+    ],
+    "saved_time": "2025-05-14T08:09:39.630143"
+}

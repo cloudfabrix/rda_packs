@@ -1,0 +1,21 @@
+name: syslog_fault_management
+id: syslog_fault_management
+version: 20240516
+category: FaultManagementPack
+comment: Fault Management
+enabled: true
+type: Service
+provider: CloudFabrix Software, Inc.
+attrs: {}
+run_context:
+    customer_tag: $PKG_CONTEXT_CUSTOMER_TAG
+    customer_id: $PKG_CONTEXT_CUSTOMER_ID
+scheduled_pipelines:
+     -  name: syslog_generic_raise_alerts
+        label: Syslog generic raise alerts 
+        version: '*'
+        site: .*
+        site_type: regex
+        instances: 1
+        cron_expression:  0 0 * * *            
+saved_time: '2024-03-01T07: 14: 16.390898'

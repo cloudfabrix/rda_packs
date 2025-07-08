@@ -1,0 +1,313 @@
+{
+    "name": "multi_network_collection_and_access_status",
+    "label": "Network Collection status",
+    "description": "Network collection and access verification status",
+    "dashboard_folder": "MultiNetworkPack",
+    "version": "1.0.3",
+    "enabled": false,
+    "live_edit": true,
+    "dashboard_type": "template",
+    "template_variables": {
+        "CUST_ID": {
+            "contextId": "customerId"
+        },
+        "PROJ_ID": {
+            "contextId": "projectId"
+        },
+        "CUST_TAG": {
+            "contextId": "customerTag"
+        },
+        "NETWORK_NAME": {
+            "contextId": "network_name"
+        }
+    },
+    "dashboard_filters": {
+        "time_filter": true,
+        "default_time_filter_labels": [
+            "Last 1 month"
+        ],
+        "extra_filter0": "(source not in ['failed_devices']) ",
+        "group_filters": [
+            {
+                "stream": "multi_network_access_verification",
+                "extra_filter": "network_name is '{{NETWORK_NAME}}'",
+                "title": "Protocol",
+                "group_by": [
+                    "protocol"
+                ],
+                "ts_column": "timestamp",
+                "agg": "value_count",
+                "column": "_id",
+                "type": "str"
+            },
+            {
+                "stream": "multi_network_access_verification",
+                "extra_filter": "network_name is '{{NETWORK_NAME}}'",
+                "title": "Credential Name",
+                "group_by": [
+                    "used_cred"
+                ],
+                "ts_column": "timestamp",
+                "agg": "value_count",
+                "column": "_id",
+                "type": "str"
+            },
+            {
+                "stream": "multi_network_access_verification",
+                "extra_filter": "network_name is '{{NETWORK_NAME}}'",
+                "title": "Authentication State",
+                "group_by": [
+                    "auth_state"
+                ],
+                "ts_column": "timestamp",
+                "agg": "value_count",
+                "column": "_id",
+                "type": "str"
+            }
+        ],
+        "columns_filter": [
+            {
+                "id": "protocol",
+                "label": "Protocol",
+                "type": "TEXT"
+            },
+            {
+                "id": "ip_address",
+                "label": "IP Address",
+                "type": "TEXT"
+            },
+            {
+                "id": "used_cred",
+                "label": "Credential Name",
+                "type": "TEXT"
+            },
+            {
+                "id": "comment",
+                "label": "Information",
+                "type": "TEXT"
+            },
+            {
+                "id": "timestamp",
+                "label": "Last Access Check Time",
+                "type": "DATETIME"
+            },
+            {
+                "id": "auth_state",
+                "label": "Authentication State",
+                "type": "TEXT"
+            }
+        ]
+    },
+    "dashboard_sections": [
+        {
+            "title": "Access Verification Status",
+            "show_filter": true,
+            "widgets": [
+                {
+                    "widget_type": "pie_chart",
+                    "title": "Access Check by Status",
+                    "stream": "multi_network_access_verification",
+                    "extra_filter": "(customer_tag is '{{CUST_TAG}}' or customer_tag is empty) and network_name is '{{NETWORK_NAME}}'",
+                    "ts_column": "timestamp",
+                    "column": "_id",
+                    "min_width": 6,
+                    "height": 4,
+                    "agg": "value_count",
+                    "group_by": [
+                        "auth_state"
+                    ],
+                    "style": {
+                        "color-map": {
+                            "Success": [
+                                "#008000",
+                                "#ffffff"
+                            ],
+                            "Failed": [
+                                "#FF0000",
+                                "#ffffff"
+                            ]
+                        }
+                    },
+                    "type": "str",
+                    "widget_id": "66dc2d8e"
+                },
+                {
+                    "widget_type": "pie_chart",
+                    "title": "Access Check by Protocol",
+                    "extra_filter": "(customer_tag is '{{CUST_TAG}}' or customer_tag is empty) and network_name is  '{{NETWORK_NAME}}'",
+                    "stream": "multi_network_access_verification",
+                    "ts_column": "timestamp",
+                    "column": "_id",
+                    "agg": "value_count",
+                    "min_width": 6,
+                    "height": 4,
+                    "group_by": [
+                        "protocol"
+                    ],
+                    "type": "str",
+                    "widget_id": "a07b4356"
+                },
+                {
+                    "title": "Access Status",
+                    "widget_type": "tabular",
+                    "extra_filter": "(customer_tag is '{{CUST_TAG}}' or customer_tag is empty) and network_name is  '{{NETWORK_NAME}}'",
+                    "stream": "multi_network_access_verification",
+                    "duration_hours": 1080,
+                    "showRowSummary": true,
+                    "min_width": 12,
+                    "height": 6,
+                    "max_width": 12,
+                    "sorting": [
+                        {
+                            "auth_state": "desc"
+                        }
+                    ],
+                    "paginated": true,
+                    "remote_searchable": true,
+                    "remote_searchable_cols": [
+                        "ip_address",
+                        "protocol",
+                        "used_cred",
+                        "auth_state"
+                    ],
+                    "max_rows": 50,
+                    "columns": {
+                        "ip_address": {
+                            "title": "IP Address",
+                            "defaultWidth": 150,
+                            "key": true
+                        },
+                        "protocol": {
+                            "title": "Protocol",
+                            "defaultWidth": 150
+                        },
+                        "used_cred": {
+                            "title": "Credential Name",
+                            "defaultWidth": 200
+                        },
+                        "reason": {
+                            "title": "Failure Reason",
+                            "defaultWidth": 200
+                        },
+                        "auth_state": {
+                            "title": "Authentication State",
+                            "defaultWidth": 150,
+                            "htmlTemplateForRow": "{% raw %}<span class='badge' style='background-color: {{ row.auth_state_color}}' > {{ row.auth_state }} </span>{% endraw %}"
+                        },
+                        "auth_state_color": {
+                            "type": "COLOR-MAP",
+                            "source-column": "auth_state",
+                            "color-map": {
+                                "Success": "#008000",
+                                "Failed": "#FF0000",
+                                "success": "#008000",
+                                "failed": "#FF0000"
+                            }
+                        },
+                        "timestamp": {
+                            "title": "Verification Time",
+                            "type": "DATETIME",
+                            "visible": true
+                        }
+                    },
+                    "actions": [
+                        {
+                            "permission": "rda:github:view",
+                            "title": "Access Verification",
+                            "type": "POPUP_FORM",
+                            "selectionType": "NONE",
+                            "identifier": "saas-service-action:userdashboard-add-yaml",
+                            "api-endpoint": {
+                                "service-name": "saas-reports",
+                                "methodName": "getForm",
+                                "stringified-params": true,
+                                "parse-output": false,
+                                "params": [
+                                    {
+                                        "formId": "rda.saas.dynamic.form",
+                                        "formActionList": {
+                                            "formActions": [
+                                                {
+                                                    "identifier": "Submit",
+                                                    "actionLabel": "Run"
+                                                }
+                                            ]
+                                        },
+                                        "formDefinition": {
+                                            "id": "rda.saas.dynamic.form",
+                                            "refreshRequired": true,
+                                            "formFieldList": [
+                                                {
+                                                    "help": "Do you want to Run the Access Check?",
+                                                    "dataType": "string",
+                                                    "controlType": "LABEL",
+                                                    "required": false,
+                                                    "editable": false,
+                                                    "label": "Do you want to Run the Access Check?",
+                                                    "hidden": false,
+                                                    "fieldId": "note"
+                                                },
+                                                {
+                                                    "help": "Select network devices for which you want to run discovery",
+                                                    "dataType": "string",
+                                                    "required": true,
+                                                    "editable": true,
+                                                    "label": "Network Devices",
+                                                    "hidden": false,
+                                                    "fieldId": "Others",
+                                                    "controlType": "SELECTOR_TABLE",
+                                                    "controlPropertyList": [
+                                                        {
+                                                            "attribute": "column-key",
+                                                            "value": "device_ip"
+                                                        },
+                                                        {
+                                                            "attribute": "selection",
+                                                            "value": "MULTIPLE"
+                                                        }
+                                                    ],
+                                                    "widget": {
+                                                        "title": "Device Details",
+                                                        "timebased": false,
+                                                        "max_width": 12,
+                                                        "height": 8,
+                                                        "min_width": 12,
+                                                        "extra_filter": "(customer_tag contains '{{CUST_TAG}}' or customer_tag is empty) and network_name is '{{NETWORK_NAME}}'",
+                                                        "stream": "multi_discovery",
+                                                        "ts_column": "timestamp",
+                                                        "sorting": [],
+                                                        "columns": {
+                                                            "device_ip": {
+                                                                "title": "IP Address",
+                                                                "key": true
+                                                            },
+                                                            "discovery_scope": {
+                                                                "title": "discovery Scope",
+                                                                "key": true,
+                                                                "visible": false
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            ]
+                                        },
+                                        "actions": [
+                                            {
+                                                "type": "RUN_PIPELINE",
+                                                "pipelineName": "multi_access_verification_main_pipeline",
+                                                "isSync": false,
+                                                "workerGroup": "{{CUST_TAG}}.*"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "widget_id": "4c2cfdd7"
+                }
+            ]
+        }
+    ],
+    "saved_time": "2025-05-23T14:26:25.832197"
+}

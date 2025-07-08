@@ -1,0 +1,66 @@
+%% stream = no and limit = 0
+
+@exec:get-input
+    --> @dm:enrich-using-pstream dict='ml-correlated-groups-per-asset' and src_key_cols='asset_id,metric_id' and
+            dict_key_cols='asset_id,metric_id' and enrich_cols='model_name,group' and dedup_dict='no'
+    ## filter out devices for which regression model is not available
+    --> *dm:filter model_name is not null
+    --> @dm:add-missing-columns columns='metric_id,asset_id,model_name,asset_name,metric_name,group'
+    --> @dm:save name='temp-live-metrics'
+
+--> @c:new-block
+    --> @dm:empty
+    --> @exec:define-function name="raise_alerts_from_anomalies"
+       --> @dm:to-type columns='anomaly,static_upper_threshold' and type='float'
+       --> *exec:if-condition static_upper_threshold is not None
+          --> *dm:filter (anomaly is not None and anomaly_type is 1)
+          --> *dm:filter (anomaly is greater than static_upper_threshold)
+          --> @dm:eval anomaly='round(anomaly,2)' and upperBound='round(model_upper_bound,2)'
+          --> @dm:eval message="'Metric ' + metric_name + ' for device ' + asset_id + ' with value ' + str(anomaly) + ' crossed dynamic threshold of ' + str(model_upper_bound) + ' and also the static upper threshold of  ' + str(static_upper_threshold) + ' at time ' + live_timestamp"
+          --> @dm:save name='temp-raise-alerts'
+
+       --> @exec:end-if
+       --> *exec:if-condition static_upper_threshold is None
+          --> *dm:filter anomaly is not None and anomaly_type is 1
+          --> @dm:eval anomaly='round(anomaly,2)' and upperBound='round(model_upper_bound,2)'
+          --> @dm:eval message="'Metric ' + metric_name + ' for device ' + asset_id + ' with value ' + str(anomaly) + ' crossed dynamic threshold of ' + str(model_upper_bound) + ' at time ' + live_timestamp"
+          --> @dm:save name='temp-raise-alerts'
+
+       --> @exec:end-if
+       --> @dm:recall name='temp-raise-alerts'
+       --> @dm:skip-block-if-shape row_count=0
+       --> @dm:eval severity="'MAJOR'" and raisedAt='live_timestamp'
+       --> @dm:change-time-format columns='raisedAt' and from_format='datetimestr' and to_format='ms'
+       --> @dm:apply-template-by-row template_name = 'raise_alerts_from_anomalies' &
+               output_col = 'payload'
+       --> @dm:save name = 'ml-metric-alerts'
+       --> @dm:enrich dict = "customer_details" & src_key_cols = "customer_tag" & dict_key_cols="customer_tag" & enrich_cols = "webhook_url"
+       --> @dm:save name = 'enriched_customer_tag'
+       --> @restclient:write url = '{{ row.webhook_url }}' &
+               envelope="{{ '{{ payload }}' }}" &
+               batch_size = 1
+    --> @exec:end-function
+
+--> @c:data-loop columns='metric_id,asset_id,model_name,asset_name,metric_name,group' and dataset='temp-live-metrics'
+    --> @dm:recall-query name='temp-live-metrics' and query="metric_id is '$metric_id' and asset_id is '$asset_id'"
+    --> @cfxml:regression ts_column='metric_timestamp' and value_column='value' and action='predict' and
+            live_data_label='$asset_id' and frequency='1H' and agg_func='mean' and job_name='$model_name' and skip_errors='yes'
+    --> @dm:selectcolumns exclude='^static'
+    --> @dm:add-missing-columns columns='live_timestamp,anomaly_type'
+    --> @dm:add-missing-columns columns='metric_id' and value='$metric_id'
+    --> @dm:add-missing-columns columns='asset_name' and value='$asset_name'
+    --> @dm:add-missing-columns columns='metric_name' and value='$metric_name'
+    --> @dm:add-missing-columns columns='group' and value='$group'
+    --> @dm:add-missing-columns columns='asset_id' and value='$asset_id'
+    --> @dm:enrich-using-pstream dict='ml-variance-metrics-list' and src_key_cols='asset_id,metric_id' and
+            dict_key_cols='asset_id,metric_id' and enrich_cols='static_upper_threshold,customer_id,customer_tag'
+    --> @dm:add-missing-columns columns='static_upper_threshold'
+    --> @dm:rename-columns job_name='jobName'
+    --> @dm:eval baseline="None if baseline == '' else baseline" and
+            anomaly="None if anomaly == '' else anomaly"
+    --> @dm:eval baseline="baseline if anomaly is None else None"
+    --> @dm:change-time-format columns='live_timestamp' and from_format='datetimestr' and to_format='%Y-%m-%dT%H:%M:%S'
+    --> @rn:write-stream name="ml-metrics-regression-live-output"
+    --> @dm:save name='temp-live-output'
+    --> @exec:call-function name='raise_alerts_from_anomalies'
+    --> @dm:recall name='temp-live-output'

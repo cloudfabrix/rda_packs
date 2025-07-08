@@ -1,0 +1,132 @@
+%% stream = no and limit = 0
+
+## get high variance metrics list
+@dm:empty
+    --> @dm:addrow name='ml-variance-metrics-list' and limit=0
+    --> #dm:query-persistent-stream *
+    --> @dm:add-missing-columns columns='static_upper_threshold'
+    --> @dm:eval statistically_selected="'Yes' if variance > 100 else 'No'"
+    --> @dm:save name='temp-metrics-variance'
+    --> @rn:write-stream name='ml-variance-metrics-list'
+    --> *dm:filter statistically_selected is 'Yes' or user_selected is 'Yes'
+    --> @dm:skip-pipeline-if-shape row_count=0
+    --> @dm:save name='temp-variance-selected-metrics'
+
+--> @c:new-block
+    --> @dm:recall name='assets-by-correlation-group' and return_empty='yes'
+    --> @dm:save name='temp-assets-by-correlation-group'
+
+## uncomment below block to run regression for all assets irrespective of correlation
+## --> @c:new-block
+## --> @dm:empty
+## --> @dm:save name='temp-assets-by-correlation-group'
+## create list of correlated as well as non correlated assets with model_name
+--> @c:new-block
+    --> @dm:recall name='temp-assets-by-correlation-group'
+    --> @dm:concat-input-dataset names='^temp-variance-selected-metrics$'
+    --> @dm:dedup columns='asset_id,metric_id' and keep='first'
+    --> @dm:add-missing-columns columns='group'
+    --> @dm:eval group="'No Group' if group is None else int(group)"
+    --> @dm:eval model_name="'-'.join([metric_id,'group',str(group)]) if group != 'No Group' else '-'.join([metric_id,asset_id])"
+    --> @dm:save name='temp-all'
+    --> *dm:filter group is 'No Group'
+    --> @dm:save name='temp-uncorrelated-assets'
+    --> @dm:recall name='temp-all'
+    --> *dm:filter group is not 'No Group'
+    --> @dm:implode key_columns='group,metric_id' and merge_columns='asset_id' and
+            keep_columns='metric_id,model_name,metric_name,unit,metric_source,customer_tag,customer_id'
+    --> @dm:concat-input-dataset names='^temp-uncorrelated-assets$'
+    --> @dm:eval group="group if group == 'No Group' else 'Group-'+str(group)"
+    --> @dm:save name='temp-correlation-groups'
+    --> @dm:save name='correlation-groups'
+
+## function to query resampled metrics data
+--> @c:new-block
+    --> @dm:empty
+    --> @exec:define-function name = "query-data"
+       --> @exec:set-variable name='group'
+       --> #dm:query-persistent-stream metric_id is '{{row.metric_id}}' and asset_id in {{row.asset_id}}
+       --> @dm:add-missing-columns columns='group' and value="{{v.group.row.group}}"
+       --> @dm:add-missing-columns columns='model_name' and value="{{v.group.row.model_name}}"
+       --> @exec:return-function
+    --> @exec:end-function
+
+## function to delete live data for a model after retraining
+--> @c:new-block
+    --> @dm:empty
+    --> @exec:define-function name = "delete-live-data"
+       --> @dm:add-missing-columns columns='key' and value='1'
+       --> @dm:implode key_columns='key' and merge_columns='model_name'
+       --> @dm:eval model_name="model_name.split(',')"
+       --> @dm:eval name="'ml-metrics-regression-live-output'" and conflicts="'proceed'" and timeout='500'
+       --> #dm:pstream-delete-data-by-query job_name in {{row.model_name}}
+       --> @exec:return-function
+    --> @exec:end-function
+
+## create empty dataset after processing each batch
+--> @c:new-block
+    --> @dm:empty
+    --> @exec:define-function name = "empty"
+       --> @dm:empty
+       --> @dm:save name='temp-resampled-metrics'
+    --> @exec:end-function
+
+## delete old correlations while retraining
+--> @c:new-block
+    --> @dm:empty
+    --> @dm:addrow name="ml-correlated-assets" and conflicts="'proceed'" and timeout='500'
+    --> #dm:pstream-delete-data-by-query *
+
+## delete old correlations while retraining
+--> @c:new-block
+    --> @dm:empty
+    --> @dm:addrow name="ml-correlated-groups-per-asset" and conflicts="'proceed'" and timeout='500'
+    --> #dm:pstream-delete-data-by-query *
+
+## run regression parallely for multiple metrics in batches
+--> @c:new-block
+    --> @dm:recall name='temp-correlation-groups'
+    --> @dm:eval asset_id="asset_id.split(',')" and name="'ml-resampled-metrics'" and limit="0" and max_rows="10000"
+    ## pass 10 metrics at a time for regression
+    --> @exec:for-loop num_rows=10
+       --> @exec:for-loop num_rows=1
+          --> @exec:call-function name='query-data'
+          --> @dm:save name='temp-resampled-metrics' and append='yes'
+       --> @exec:end-loop
+       --> @dm:recall name='temp-resampled-metrics'
+       --> @cfxml:regression-multi-proc ts_column='metric_timestamp' & value_column='value' & agg_func='mean' &
+               frequency='1H' &
+               prediction_duration='7D' &
+               groupby='model_name' &
+               job_name_column='model_name' &
+               skip_errors='yes' &
+               keep_columns='model_name,group,metric_id,unit,metric_name,metric_source'
+       --> @dm:add-missing-columns columns='timestamp,model_name,group,metric_id,metric_name'
+       --> @dm:enrich dict='temp-correlation-groups' and src_key_cols='group,metric_id' and
+               dict_key_cols='group,metric_id' and enrich_cols='asset_id,customer_tag,customer_id'
+       --> @dm:eval-multi-proc asset_id="model_name.split('-')[1] if group=='No Group' else asset_id"
+       --> @dm:eval-multi-proc group_label="' - '.join([metric_name,group]) if group != 'No Group' else group"
+       --> @dm:change-time-format columns='timestamp' and from_format='datetimestr' and to_format='%Y-%m-%dT%H:%M:%S'
+       ## write regression output and anomalies in chunks
+       --> @exec:for-loop num_rows=10000
+          --> @rn:write-stream name="ml-metrics-regression-train-output"
+          --> *dm:safe-filter anomalies is not None
+          --> @dm:to-type columns='asset_id' and type='str'
+          --> @dm:explode column='asset_id' and sep=','
+          --> @rn:write-stream name="ml-metrics-regression-anomalies"
+       --> @exec:end-loop
+       --> @dm:dedup columns='model_name'
+       --> @dm:save name='temp-regression-models'
+       --> *exec:if-shape num_rows > 0
+          --> @exec:call-function name='delete-live-data'
+       --> @exec:end-if
+       --> @dm:recall name='temp-regression-models'
+       --> @dm:selectcolumns include='^group$|^group_label$|^asset_id$|^metric_id$|^model_name$|^metric_name$|^unit$|^metric_source$|^accuracy$|^anomalies_count$|^anomalies_percent$|^seasonality$|^overall_trend$|^customer_id$|^customer_tag$'
+       --> @rn:write-stream name="ml-correlated-assets"
+       --> @dm:to-type columns='asset_id' and type='str'
+       --> @dm:explode column='asset_id' and sep=','
+       --> @dm:enrich dict='temp-metrics-variance' and src_key_cols='asset_id,metric_id' and dict_key_cols='asset_id,metric_id' and enrich_cols='asset_name,static_upper_threshold,user_selected,statistically_selected'
+       --> @rn:write-stream name="ml-correlated-groups-per-asset"
+       --> @exec:call-function name='empty'
+    --> @exec:end-loop
+

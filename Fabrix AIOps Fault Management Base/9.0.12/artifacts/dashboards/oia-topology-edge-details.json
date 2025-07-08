@@ -1,0 +1,84 @@
+{
+    "name": "oia-topology-edge-details",
+    "label": "Edge Details for Topology with alerts",
+    "description": "Edge Details for Topology with alerts",
+    "version": "25.7.4",
+    "enabled": true,
+    "exportable": false,
+    "dashboard_style": "auto",
+    "dashboard_type": "template",
+    "template_variables": {
+        "INCIDENT_CREATED_TIME": {
+            "contextId": "i_created_ts",
+            "default": "2025-07-04T09:39:36.265000"
+        },
+        "PROJECT_ID": {
+            "default": null,
+            "contextId": "projectid"
+        },
+        "INCIDENT_ID": {
+            "default": null,
+            "contextId": "incidentid"
+        },
+        "LEFT_ID": {
+            "default": null,
+            "contextId": "source"
+        },
+        "RIGHT_ID": {
+            "default": null,
+            "contextId": "target"
+        },
+        "EDGE_TYPE": {
+            "default": null,
+            "contextId": "edgeType"
+        },
+        "displayAttributes": {
+            "default": null,
+            "contextId": "displayAttributes"
+        }
+    },
+    "custom_context": {
+        "alert-context": true
+    },
+    "dashboard_filters": {
+        "time_filter": false,
+        "default_time_range": {
+            "from_time": "{{INCIDENT_CREATED_TIME}}",
+            "from_time_delta_hours": -0.5,
+            "to_time": "{{INCIDENT_CREATED_TIME}}",
+            "to_time_delta_hours": 0.5,
+            "label": "Time Range"
+        },
+        "columns_filter": [],
+        "extra_filter": "a_source_systemname is not-in 'Alert Group' and a_correlation_status not-in 'AGGREGATE' and project_id is '{{PROJECT_ID}}'"
+    },
+    "import": [
+        {
+            "from": "oia-alerts-os",
+            "as": "alerts"
+        }
+    ],
+    "dashboard_sections": [
+        {
+            "title": "Edge Details",
+            "show_filter": true,
+            "widgets": [
+                {
+                    "widget_type": "label",
+                    "label": "attachment://edge_details",
+                    "max_width": 12,
+                    "height": 1.25,
+                    "min_width": 12,
+                    "widget_id": "182229d8"
+                }
+            ]
+        }
+    ],
+    "saved_time": "2025-07-04T05:03:41.380180",
+    "attachments": [
+        {
+            "name": "edge_details",
+            "value": "{% set left_label_value = (displayAttributes | selectattr('key', 'equalto', 'left_label') | first).value %}\r\n{% set right_label_value = (displayAttributes | selectattr('key', 'equalto', 'right_label') | first).value %}\r\n<v-container class='d-flex flex-column align-center justify-center' style='height: 100%;'>\r\n  <div class=\"d-flex align-center justify-space-between\" style=\"width: 100%; max-width: 400px;\">\r\n    \r\n    <span\r\n      class=\"text-caption text-grey\"\r\n      style=\"\r\n        max-width: 100px;\r\n        display: -webkit-box;\r\n        -webkit-line-clamp: 2;\r\n        -webkit-box-orient: vertical;\r\n        overflow: hidden;\r\n        text-overflow: ellipsis;\r\n      \"\r\n    >\r\n      {{left_label_value}}\r\n    </span>\r\n\r\n    <div\r\n      style=\"\r\n        flex: 1;\r\n        height: 2px;\r\n        background-color: #ccc;\r\n        margin: 0 8px;\r\n      \"\r\n    ></div>\r\n\r\n    <span\r\n      class=\"text-caption text-grey\"\r\n      style=\"\r\n        max-width: 100px;\r\n        display: -webkit-box;\r\n        -webkit-line-clamp: 2;\r\n        -webkit-box-orient: vertical;\r\n        overflow: hidden;\r\n        text-overflow: ellipsis;\r\n      \"\r\n    >\r\n      {{right_label_value}}\r\n    </span>\r\n\r\n  </div>\r\n\r\n  <div class=\"mt-1 text-center\">\r\n    <span class=\"text-subtitle-1\">{{EDGE_TYPE}}</span>\r\n  </div>\r\n</v-container>\r\n\r\n"
+        }
+    ]
+}

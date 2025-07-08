@@ -1,0 +1,97 @@
+
+##This pipeline needs customer_id or customerTag in context to run
+%% stream = no and limit = 0
+%%template_type="jinja"
+
+
+%%start_inline_object name="context_dynamic_form" and type="data" and format="json"
+{
+    "formFieldList": [
+        {
+            "fieldId": "customer_tag",
+            "label": "Tag of the customer",
+            "required": false,
+            "dataType": "string"
+        }
+    ]
+}
+%%end_inline_object
+-->@dm:empty
+    --> @dm:save name = "temp-customer-context"
+
+
+
+   {% if customer_tag %}
+      {% set customer_id = customer_id %}
+      {% set customer_tag = customer_tag %}
+      {% set customerTag = customer_tag %}
+   {% elif customerTag %}
+      {% set customer_id = customer_id %}
+      {% set customer_tag = customerTag %}
+   {% else %}
+      {% set customer_id = '' %}
+      {% set customer_tag = '' %}
+   {% endif %}
+
+
+
+--> @dm:empty
+    --> @dm:save name = 'temp-variable-dataset'
+    --> @dm:save name = 'temp-variable-dataset-interim'
+    --> @dm:save name = 'temp-vcenter-sources'
+
+
+
+
+
+
+
+
+
+
+
+## get all the devices
+-->@dm:empty
+    --> @dm:addrow name='mobility_device_mappings' and limit=0
+    --> #dm:query-persistent-stream
+    --> @dm:save name='temp-devices'
+
+## get list of all unique metric ids
+--> @c:new-block
+    --> @dm:empty
+    --> @dm:addrow name='mobility_new_kpi_list' and limit=0  and aggs='cardinality:KPI_Name' and
+            groupby='KPI_Name,schema' and max_aggregation_groups='10000'
+    --> #dm:query-persistent-stream
+    --> @dm:save name='temp-kpi-list'
+
+## dataset with metrics for each device
+--> @c:data-loop columns='KPI_Name,schema' and dataset='temp-kpi-list'
+    --> @dm:recall name='temp-devices'
+    --> @dm:add-missing-columns columns='KPI_Name' and value='$KPI_Name'
+    --> @dm:add-missing-columns columns='schema' and value='$schema'
+    --> @dm:save name='temp-devices-kpi-list' and append='yes'
+
+--> @c:new-block
+    --> @dm:recall name='temp-devices-kpi-list'
+    --> @dm:implode key_columns='device,schema' and merge_columns='KPI_Name' and merge_sep=',value_count:'
+    --> @dm:eval KPI_Name_agg="'value_count:' + KPI_Name"
+    --> @dm:save name='temp-devices-kpi-list'
+
+## get data count of each device-metric
+--> @c:data-loop columns='KPI_Name_agg,device,schema' and dataset='temp-devices-kpi-list'
+    --> @dm:empty
+    --> @dm:addrow name='mobility_kpi_metrics_data' and aggs='$KPI_Name_agg' and groupby='device,instance_key,schema'
+    --> #dm:query-persistent-stream device is '$device' and schema is '$schema'
+    --> @dm:save name='temp-bulkstats-available-metrics' and append='yes'
+
+--> @c:new-block
+    --> @dm:recall name='temp-bulkstats-available-metrics'
+    --> @dm:melt id_cols='device,instance_key,schema' and var_col_name='KPI_Name' and value_col_name='count'
+    --> @dm:dropnull columns='count'
+    --> @dm:to-type columns='count' and type='int'
+    --> *dm:filter count>0
+    --> @dm:replace-data columns='variable' and expr='_value_count'
+    --> @dm:rename-columns KPI_Name='variable'
+    --> @dm:eval customer_id =  "'{{ customer_id }}'"
+    --> @dm:eval customer_tag =  "'{{ customer_tag }}'"
+    --> @dm:save name='ml-bulkstats-available-metrics'

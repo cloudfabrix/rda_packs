@@ -1,0 +1,100 @@
+%% template_type="jinja"
+%%start_inline_object name="context_dynamic_form" and type="data" and format="json"
+{
+    "formFieldList": [
+        {
+            "fieldId": "customer_tag",
+            "label": "Tag of the customer",
+            "required": false,
+            "dataType": "string"
+        }
+    ]
+}
+%%end_inline_object
+
+ {% if customer_tag %} 
+      {% set customer_id = customer_id %}
+      {% set customer_tag = customer_tag %}
+      {% set customerTag = customer_tag %}
+   {% elif customerTag %} 
+      {% set customer_id = customer_id %}
+      {% set customer_tag = customerTag %}
+   {% else %}
+      {% set customer_id = '' %}
+      {% set customer_tag = '' %}
+   {% endif %}  
+
+   
+--> @dm:empty
+{% if customer_tag %}  
+    --> #dm:query-persistent-stream device_object in ['Interface'] and (customer_tag is '{{customer_tag}}') with-input name = "network_device_interfaces" & limit = "0"
+    {% else %} 
+        --> #dm:query-persistent-stream device_object in ['Interface'] and (customer_tag is empty) with-input name = "network_device_interfaces" & limit = "0"
+{% endif %} 
+    --> @dm:add-missing-columns columns="device_int_index,remote_device_int_index"
+    --> @dm:to-type columns = 'device_int_index,remote_device_int_index' & type = 'str'
+    --> @dm:eval device_int_index = "device_int_index.split('.')[0] if '.' in device_int_index else device_int_index"
+    --> @dm:eval remote_device_int_index = "remote_device_int_index.split('.')[0] if '.' in remote_device_int_index else remote_device_int_index"
+    --> @dm:save name="temp-cisco_device_interface_data"
+
+
+## -->@c:new-block
+## --> @dm:empty
+## --> @dm:addrow alertEndpointName = 'SNMP_Traps' and project_id = "036a524a-5593-11f0-8844-0242ac140006" and webhookURL = "https://10.95.126.50:443/webhooks/hookid/8848161b-5132-470d-943a-cc9d5bd4a838"
+## --> @dm:save name="temp-alert_endpoint_details"
+
+--> @c:new-block
+{% if customer_tag %}  
+
+--> @dm:query-persistent-stream-from-bookmark name = "snmp_trap_event_stream_all" & bookmark = "snmp_trap_event_stream_all_bkmrk" and query="customerTag is '{{ customer_tag }}'"
+{% else %}   
+--> @dm:query-persistent-stream-from-bookmark name = "snmp_trap_event_stream_all" & bookmark = "snmp_trap_event_stream_all_bkmrk" 
+
+{% endif %}
+##--> @rn:read-stream name="snmp_trap_event_stream" and group="snmp_trap_event_stream_all_group"
+    ## -->@dm:empty
+    ## --> #dm:query-persistent-stream timestamp is after -5min with-input name ="snmp_trap_event_stream_all" and limit=0
+    --> @dm:save name = "temp-snmp_data"
+    {% if customer_tag %}
+    --> @dm:recall name="{{ customer_tag }}_snmp_trap_endpoint_details" & cache_refresh_seconds = 120
+    {% else %} 
+    --> @dm:recall name="snmp_trap_endpoint_details" & cache_refresh_seconds = 120
+
+    {% endif %}
+    --> @dm:manipulate-string from = "alertEndpointName" and func = "strip" and to = "alertEndpointName"
+    --> *dm:filter alertEndpointName is 'SNMP_Traps' and webhookURL is not Empty
+    --> @dm:save name = "temp-webhook-url-details"
+    ## Enrich SNMP data with the webhook URLs from the alert endpoint details
+    --> @dm:recall name = "temp-snmp_data"
+    --> @dm:enrich dict = "temp-webhook-url-details" & src_key_cols = "projectId" & dict_key_cols="project_id" & enrich_cols = "webhookURL"
+    ## If condition to proceed with further processing
+    --> *exec:if-condition webhookURL is not Empty and device_status is "MANAGED"
+    --> @dm:add-missing-columns columns = 'mappingStatus' & value = 'found'
+    --> @dm:eval-multi-proc execution_step = "'source_event'"
+    --> *dm:filter mappingStatus is 'found'
+    --> @dm:eval execution_step = "'mapping_filter'"
+    --> @dm:rename-columns snmp_trap_mib = 'snmpTrapMIB' & snmp_trap_name = 'snmpTrapName' & snmp_trap_description = 'snmpTrapDescription' & snmp_trap_oid = 'snmpTrapOID'
+-->@dm:selectcolumns exclude = "^device_ip$"
+    --> @dm:enrich dict = "temp-cisco_device_interface_data" & src_key_cols = "rda_gw_client_ip" & dict_key_cols="device_ip" & enrich_cols = "device_int_name,device_int_index,device_interface_status,device_int_alias,device_int_shortname,remote_device_int_index,remote_device_ip,remote_device_int_name,remote_device_id,remote_device_model,cdp_device_order"
+     {% if customer_tag %} 
+    --> @dm:enrich-using-rule-dict dict = "{{ customer_tag }}_snmp_trap_alert_rules_dict" & enrich_columns = "action,reason,state,severity"
+    {% else %}  
+    --> @dm:enrich-using-rule-dict dict = "snmp_trap_alert_rules_dict" & enrich_columns = "action,reason,state,severity"
+    {% endif %} 
+    
+    --> @dm:eval-multi-proc execution_step = "'alert_rule_enrichment'" and timestamp="utcnow().isoformat()"
+    --> @dm:map to = 'snmp_trap_timestamp' and from = 'rda_gw_timestamp'
+    -->@rn:write-stream name = "snmp_trap_stream"
+    --> @dm:to-json output_column is payload
+    --> @dm:save name = "temp-url"
+   
+# Process each row for webhookURL and send the data
+{% raw %}
+{% for row in rows %}
+    {% if row.webhookURL %}
+        
+        --> @restclient:write url = "{{ row.webhookURL }}" & envelope is "{{'{{payload}}'}}" & batch_size = 1
+    {% endif %}
+{% endfor %}
+{% endraw %}
+  --> @exec:end-if

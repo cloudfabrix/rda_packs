@@ -1,0 +1,197 @@
+{
+    "name": "oia-topology-node-details",
+    "label": "Node Details for Topology with alerts",
+    "description": "Node Details for Topology with alerts",
+    "version": "25.5.20",
+    "enabled": true,
+    "exportable": false,
+    "dashboard_style": "auto",
+    "dashboard_folder": "AlertIncidentPack",
+    "dashboard_type": "template",
+    "template_variables": {
+        "INCIDENT_CREATED_TIME": {
+            "contextId": "i_created_ts",
+            "default": "2024-04-10T09:39:36.265000"
+        },
+        "PROJECT_ID": {
+            "default": null,
+            "contextId": "projectid"
+        },
+        "INCIDENT_ID": {
+            "default": null,
+            "contextId": "incidentid"
+        },
+        "NODE_ID": {
+            "default": null,
+            "contextId": "node_id"
+        },
+        "NODE_TYPE": {
+            "default": null,
+            "contextId": "type"
+        },
+        "NODE_LABEL": {
+            "default": null,
+            "contextId": "label"
+        },
+        "htmlLabel": {
+            "contextId": "htmlLabel"
+        },
+        "iconURL": {
+            "contextId": "iconURL"
+        },
+        "NODE_LAYER": {
+            "contextId": "layer"
+        }
+    },
+    "custom_context": {
+        "alert-context": true
+    },
+    "dashboard_filters": {
+        "time_filter": false,
+        "default_time_range": {
+            "from_time": "{{INCIDENT_CREATED_TIME}}",
+            "from_time_delta_hours": -0.5,
+            "to_time": "{{INCIDENT_CREATED_TIME}}",
+            "to_time_delta_hours": 0.5,
+            "label": "Time Range"
+        },
+        "columns_filter": [],
+        "extra_filter": "a_source_systemname is not-in 'Alert Group' and a_correlation_status not-in 'AGGREGATE' and project_id is '{{PROJECT_ID}}'"
+    },
+    "import": [
+        {
+            "from": "oia-alerts-os",
+            "as": "alerts"
+        }
+    ],
+    "dashboard_sections": [
+        {
+            "title": "alerts",
+            "show_filter": true,
+            "widgets": [
+                {
+                    "widget_type": "label",
+                    "label": "attachment://node_details_label",
+                    "max_width": 12,
+                    "height": 2.1,
+                    "min_width": 12,
+                    "widget_id": "182229d8"
+                },
+                {
+                    "title": "Correlated Alerts",
+                    "widget_type": "tabular",
+                    "max_width": 12,
+                    "height": 4,
+                    "min_width": 12,
+                    "sorting": [
+                        {
+                            "a_raised_ts": "desc"
+                        }
+                    ],
+                    "stream": "oia-alerts-stream",
+                    "extra_filter": "((a_incident_id is '{{INCIDENT_ID}}') or (a_incident_id is '{{A_INCIDENT_ID}}')) and a_source_systemname is not 'Alert Group' and a_correlation_status not-in 'AGGREGATE' and a_en_node_id is '{{NODE_ID}}'",
+                    "query": "*",
+                    "duration_hours": 2160,
+                    "columns": {
+                        "a_alert_type": {
+                            "title": "Alert Type",
+                            "type": "GROUPED",
+                            "group": {
+                                "a_source_systemname": "Source",
+                                "a_message": "Message",
+                                "a_asset_ip_address": "Asset IP Address",
+                                "a_status": "Status",
+                                "a_asset_name": "Asset Name"
+                            },
+                            "color-column": "state_color"
+                        },
+                        "state_color": {
+                            "type": "COLOR-MAP",
+                            "source-column": "a_status",
+                            "color-map": {
+                                "ACTIVE": "#dd0000",
+                                "CLEAR": "#00dd00",
+                                "CLEARED": "#00dd00"
+                            }
+                        },
+                        "a_raised_ts": {
+                            "title": "Raised At",
+                            "type": "DATETIME"
+                        },
+                        "a_severity": "Severity"
+                    },
+                    "severity_columns": [
+                        "a_severity"
+                    ],
+                    "widget_id": "94a3fc14"
+                },
+                {
+                    "title": "Related Alerts",
+                    "widget_type": "tabular",
+                    "max_width": 12,
+                    "height": 6,
+                    "min_width": 12,
+                    "sorting": [
+                        {
+                            "a_raised_ts": "desc"
+                        }
+                    ],
+                    "stream": "oia-alerts-stream",
+                    "extra_filter": "((a_incident_id is not '{{INCIDENT_ID}}') or (a_incident_id is not '{{A_INCIDENT_ID}}')) and a_source_systemname is not 'Alert Group' and a_correlation_status not-in 'AGGREGATE' and a_en_node_id is not '{{NODE_ID}}'",
+                    "query": "*",
+                    "duration_hours": 2160,
+                    "columns": {
+                        "a_alert_type": {
+                            "title": "Alert Type",
+                            "type": "GROUPED",
+                            "group": {
+                                "a_source_systemname": "Source",
+                                "a_message": "Message",
+                                "a_asset_ip_address": "Asset IP Address",
+                                "a_status": "Status",
+                                "a_asset_name": "Asset Name"
+                            },
+                            "color-column": "state_color"
+                        },
+                        "state_color": {
+                            "type": "COLOR-MAP",
+                            "source-column": "a_status",
+                            "color-map": {
+                                "ACTIVE": "#dd0000",
+                                "CLEAR": "#00dd00",
+                                "CLEARED": "#00dd00"
+                            }
+                        },
+                        "a_raised_ts": {
+                            "title": "Raised At",
+                            "type": "DATETIME"
+                        },
+                        "a_severity": "Severity"
+                    },
+                    "severity_columns": [
+                        "a_severity"
+                    ],
+                    "widget_id": "94a3fc15"
+                }
+            ]
+        }
+    ],
+    "custom_widgets": {
+        "node_details_widget": {
+            "artifacts": {
+                "main": {
+                    "attachment": "node_details_widget.html",
+                    "content_type": "text/html",
+                    "is_template": true
+                }
+            }
+        }
+    },
+    "saved_time": "2025-06-17T05:42:37.758653",
+    "attachments": [
+        {
+            "name": "node_details_label",
+            "value": "<div class=\"h-100 w-100 d-flex justify-center align-center\" style=\"background-color: rgb(var(--v-theme-cfxbackground))\">\n    <div class=\"d-flex align-center px-4\" style=\"min-width: 230px\">\n        <div class=\"mr-3\" style=\"height: 50px; width: 50px;padding: 6px; background-color: white; border-radius: 50%\">\n            <img height=\"100%\" width=\"100%\" src=\"{{iconURL}}\" />\n        </div>\n        <div class=\"d-flex flex-column\">\n            <p style=\"font-size: 12px;font-weight: 700;\">{{NODE_LABEL}}</p>\n            <p style=\"font-weight: bold\">{{NODE_LAYER}}</p>\n            <p>{{NODE_TYPE}}</p>\n        </div>\n    </div>\n    {% if htmlLabel %}\n        <hr class=\"v-divider v-divider--vertical\" aria-orientation=\"vertical\" role=\"separator\">\n        <div class=\"w-100 ml-6\" style=\"font-size: 12px\">\n            {{ htmlLabel }}\n        </div>\n    {% endif %}\n</div>"
+        }
+    ]
+}

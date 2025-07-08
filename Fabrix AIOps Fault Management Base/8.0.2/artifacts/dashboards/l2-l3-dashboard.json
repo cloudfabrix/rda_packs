@@ -1,0 +1,56 @@
+{
+    "name": "l2-l3-dashboard",
+    "label": "L2/L3 Dashboard",
+    "description": "Dashboard L2/L3 Users",
+    "version": "22.10.7.1",
+    "enabled": true,
+    "status_poller": {
+        "stream": "oia-incidents-stream",
+        "frequency": 30,
+        "columns": [
+            "timestamp"
+        ],
+        "sorting": [
+            {
+                "timestamp": "desc"
+            }
+        ],
+        "query": "timestamp is after '$timestamp'",
+        "defaults": {
+            "timestamp": "$UTCNOW"
+        },
+        "action": "refresh"
+    },
+    "dashboard_filters": {
+        "time_filter": true,
+        "columns_filter": []
+    },
+    "dashboard_sections": [
+        {
+            "title": "L2-L3  Dashboard"
+        }
+    ],
+    "dashboard_type": "app",
+    "dashboard_pages": [
+        {
+            "name": "oia-my-incidents",
+            "label": "My Queue",
+            "icon": "incident.svg"
+        },
+        {
+            "name": "oia-incidents",
+            "label": "Incidents",
+            "icon": "incident.svg"
+        },
+        {
+            "name": "oia-alerts-os",
+            "label": "Alerts",
+            "icon": "status.svg"
+        },
+        {
+            "name": "incident-collaboration",
+            "label": "Collaboration",
+            "icon": "team.svg"
+        }
+    ]
+}

@@ -1,0 +1,109 @@
+%% stream = no and limit = 0
+
+## get high variance metrics list
+@dm:empty
+    --> @dm:addrow name='ml-bulkstats-metrics-variance' and limit=0 and max_rows=5000
+    --> #dm:query-persistent-stream *
+    --> @dm:add-missing-columns columns='static_upper_threshold,static_lower_threshold,upper_anomaly_alert,lower_anomaly_alert,customer_tag,customer_id'
+    --> @dm:eval statistically_selected="'Yes' if variance > 100 else 'No'"
+    --> @dm:save name='temp-metrics-variance'
+    --> @rn:write-stream name='ml-bulkstats-metrics-variance' and direct_to_opensearch="yes"
+    --> *dm:filter statistically_selected is 'Yes' or user_selected is 'Yes'
+    --> @dm:skip-pipeline-if-shape row_count=0
+    --> @dm:save name='temp-selected-metrics'
+
+## skipping correlation
+--> @c:new-block
+    --> @dm:empty
+    --> @dm:save name='temp-assets-by-correlation-group'
+
+## create list of correlated as well as non correlated assets with model_name
+--> @c:new-block
+    --> @dm:recall name='temp-assets-by-correlation-group'
+    --> @dm:concat-input-dataset names='^temp-selected-metrics$'
+    --> @dm:dedup columns='device,instance_key,KPI_Name,schema' and keep='first'
+    --> @dm:add-missing-columns columns='group'
+    --> @dm:eval group="'No Group' if group is None else int(group)"
+    --> @dm:eval model_name="'%'.join([KPI_Name,'group',str(group)]) if group != 'No Group' else '%'.join([KPI_Name,device,instance_key,schema])"
+    --> @dm:save name='temp-all'
+    --> *dm:filter group is 'No Group'
+    --> @dm:save name='temp-uncorrelated-assets'
+    --> @dm:recall name='temp-all'
+    --> *dm:filter group is not 'No Group'
+    --> @dm:implode key_columns='group,KPI_Name' and merge_columns='device,instance_key' and keep_columns='KPI_Name,model_name,schema,customer_id,customer_tag'
+    --> @dm:concat-input-dataset names='^temp-uncorrelated-assets$'
+    --> @dm:eval group="group if group == 'No Group' else 'Group-'+str(group)"
+    --> @dm:eval KPI_Name_cols="KPI_Name + '_avg'"
+    --> @dm:implode key_columns='group,model_name' and merge_columns='KPI_Name_cols' and merge_sep='$|^' and keep_columns='device,instance_key,KPI_Name,schema,customer_id,customer_tag'
+    --> @dm:eval select_cols="'^timestamp$|^device$|^instance_key$|^schema$|^customer_id$|^customer_tag$|^' + KPI_Name_cols"
+    --> @dm:save name='temp-correlation-groups'
+
+## function to query resampled metrics data
+--> @c:new-block
+    --> @dm:empty
+    --> @exec:define-function name = "query-data"
+       --> @exec:set-variable name='group'
+       --> #dm:query-persistent-stream device in {{row.device}} and instance_key in {{row.instance_key}} and schema is '{{row.schema}}'
+       --> @dm:selectcolumns include="{{v.group.row.select_cols}}"
+       --> @dm:melt id_cols='device,instance_key,schema,timestamp'
+       --> @dm:rename-columns KPI_Name='variable'
+       --> @dm:add-missing-columns columns='group' and value="{{v.group.row.group}}"
+       --> @dm:add-missing-columns columns='model_name' and value="{{v.group.row.model_name}}"
+       --> @exec:return-function
+    --> @exec:end-function
+
+## create empty dataset after processing each batch
+--> @c:new-block
+    --> @dm:empty
+    --> @exec:define-function name = "empty"
+       --> @dm:empty
+       --> @dm:save name='temp-resampled-metrics'
+    --> @exec:end-function
+
+## run regression parallely for multiple metrics in batches
+--> @c:new-block
+    --> @dm:recall name='temp-correlation-groups'
+    --> @dm:eval device="device.split(',')" and instance_key="instance_key.split(',')" and name="'ml-bulkstats-resampled-metrics'" and limit="0" and max_rows="10000"
+    ## pass 10 metrics at a time for regression
+    --> @exec:for-loop num_rows=10
+       --> @exec:for-loop num_rows=1
+          --> @exec:call-function name='query-data'
+          --> @dm:save name='temp-resampled-metrics' and append='yes'
+       --> @exec:end-loop
+       --> @dm:recall name='temp-resampled-metrics'
+       --> @cfxml:regression-multi-proc ts_column='timestamp' & value_column='value' & agg_func='mean' &
+               frequency='1H' &
+               prediction_duration='7D' &
+               groupby='model_name' &
+               job_name_column='model_name' &
+               skip_errors='yes' &
+               keep_columns='model_name,group'
+       --> @dm:add-missing-columns columns='timestamp,model_name,group'
+       --> @dm:eval-multi-proc KPI_Name="model_name.split('%')[0]"
+       --> @dm:enrich dict='temp-correlation-groups' and src_key_cols='group,KPI_Name' and
+               dict_key_cols='group,KPI_Name' and enrich_cols='device,instance_key,schema,customer_tag,customer_id'
+       --> @dm:eval-multi-proc device="model_name.split('%')[1] if group=='No Group' else device" and
+               instance_key="model_name.split('%')[2] if group=='No Group' else instance_key" and
+               schema="model_name.split('%')[3] if group=='No Group' else schema" and
+               group_label="' - '.join([KPI_Name,group]) if group != 'No Group' else group"
+       --> @dm:change-time-format columns='timestamp' and from_format='datetimestr' and to_format='%Y-%m-%dT%H:%M:%S'
+       ## write regression output and anomalies in chunks
+       --> @exec:for-loop num_rows=10000
+          --> @rn:write-stream name="ml-bulkstats-metrics-regression-train-output"and direct_to_opensearch="yes"
+          --> *dm:safe-filter anomalies is not None
+          --> @dm:to-type columns='device,instance_key' and type='str'
+          --> @dm:explode column='device' and sep=','
+          --> @dm:explode column='instance_key' and sep=','
+          --> @rn:write-stream name="ml-bulkstats-metrics-regression-anomalies" and direct_to_opensearch="yes"
+       --> @exec:end-loop
+       ## to add: delete live data function
+       --> @dm:selectcolumns include='^group$|^group_label$|^schema$|^device$|^instance_key$|^KPI_Name$|^model_name$|^accuracy$|^anomalies_count$|^anomalies_percent$|^seasonality$|^overall_trend$|^customer_id$|^customer_tag$'
+       --> @rn:write-stream name="ml-bulkstats-correlated-devices" and direct_to_opensearch="yes"
+       --> @dm:to-type columns='device,instance_key' and type='str'
+       --> @dm:explode column='device' and sep=','
+       --> @dm:explode column='instance_key' and sep=','
+       --> @dm:enrich dict='temp-metrics-variance' and src_key_cols='device,instance_key,KPI_Name,schema' and dict_key_cols='device,instance_key,KPI_Name,schema' and enrich_cols='static_upper_threshold,user_selected,statistically_selected,static_lower_threshold,upper_anomaly_alert,lower_anomaly_alert'
+       --> @rn:write-stream name="ml-bulkstats-correlated-devices-per-group" and direct_to_opensearch="yes"
+       --> @exec:call-function name='empty'
+    --> @exec:end-loop
+

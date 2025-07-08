@@ -1,0 +1,115 @@
+%% stream = no and limit = 0
+
+%% import_src_type = "linux-inventory"
+%%template_type="jinja"
+
+%%start_inline_object name="context_dynamic_form" and type="data" and format="json"
+{
+    "formFieldList": [
+        {
+            "fieldId": "customer_tag",
+            "label": "Tag of the customer",
+            "required": false,
+            "dataType": "string"
+        }
+    ]
+}
+%%end_inline_object
+{% if customer_tag %} 
+      {% set customer_id = customer_id %}
+      {% set customer_tag = customer_tag %}
+      {% set customerTag = customer_tag %}
+   {% elif customerTag %} 
+      {% set customer_id = customer_id %}
+      {% set customer_tag = customerTag %}
+   {% else %}
+      {% set customer_id = '' %}
+      {% set customer_tag = '' %}
+   {% endif %}   
+
+@c:new-block
+    --> @exec:get-input
+    --> @dm:selectcolumns include = "Others"
+    --> @dm:skip-pipeline-if-shape column_count = 0
+    --> @dm:explode-json column="Others"
+    --> @dm:rename-columns linux_src_name = "credential"
+    --> @dm:eval discovery_scope = "'yes'"
+    --> @dm:eval customer_id =  "'{{customer_id}}'"
+    --> @dm:eval customer_tag =  "'{{customer_tag}}'"
+    --> @dm:save name="temp-selected-linux-hosts"
+
+## Initialized the dataset as empty
+--> @c:new-block
+    --> @dm:empty
+    --> @dm:save name ="temp-linux-secrets"
+    --> @dm:save name = "temp-unique-linux-src-names"
+    --> @dm:save name = "temp-linux-credentials-not-defined"
+    --> @dm:save name = "temp-linux-credentials-list-not-defined"
+    --> @dm:save name = 'temp-linux_inventory_ip_list'
+
+## get the secrets list
+--> @c:new-block
+    --> @dm:empty
+    {% if customer_tag %} 
+         --> #dm:query-persistent-stream type is 'linux-inventory' and (customerTag contains '{{customer_tag}}') with-input name = 'rda_secrets_meta' and limit= 0
+      {% else %}
+         --> #dm:query-persistent-stream type is 'linux-inventory' and (customerTag is empty) with-input name = 'rda_secrets_meta' and limit= 0
+      {% endif %}  
+    
+    --> @dm:save name = "temp-linux-secrets"
+
+## --> @dm:skip-pipeline-if-shape row_count = 0
+## dedup the credentials
+--> @c:new-block
+    --> @dm:recall name = "temp-selected-linux-hosts"
+    --> @dm:dedup columns="linux_src_name"
+    --> @dm:save name="temp-unique-linux-src-names"
+
+## Check if credentials are defined
+--> @c:data-loop name = "linux-credentials-exits" & dataset = 'temp-unique-linux-src-names' & columns = 'linux_src_name,ip_address,port,customer_tag,customer_id'
+    --> @dm:recall name = "temp-linux-secrets"
+    --> *dm:safe-filter name is '$linux_src_name'
+    --> *exec:if-shape num_rows is 0
+       --> @dm:empty
+       --> @dm:addrow bot_source_type = "linux_os"
+       --> @dm:eval bot_source_name = "'$linux_src_name'"
+       --> @dm:eval bot_name = "''"
+       --> @dm:eval collection_timestamp = "time_now_as_isoformat()"
+       --> @dm:eval reason = "'credential not defined'"
+       --> @dm:eval collection_status = "'Failed'"
+       --> @dm:eval asset_id = "'$ip_address'"
+       --> @dm:eval customer_id =  "'$customer_id'"
+       --> @dm:eval customer_tag =  "'$customer_tag'"
+       --> @dm:save name = "temp-linux-credentials-not-defined" & append = "yes"
+       --> @rn:write-stream name = 'host_os_asset_inventory_collection_status_stream'
+    --> @exec:end-if
+
+## get comma separated list of ip_adresses for which credentials are not defined
+--> @c:new-block
+    --> @dm:recall name = "temp-linux-credentials-not-defined"
+    --> *exec:if-shape num_rows is 0
+       --> @dm:recall name = "temp-selected-linux-hosts"
+       --> @dm:save name = 'temp-linux_inventory_ip_list'
+    --> @exec:end-if
+    --> *exec:if-shape num_rows > 0
+       --> @dm:eval key="'key'"
+       --> @dm:eval bot_source_name_updated = "'\''+(bot_source_name)+'\''"
+       --> @dm:implode key_columns = "key" & merge_columns="bot_source_name_updated,bot_source_name"
+       --> @dm:save name = "temp-linux-credentials-list-not-defined"
+    --> @exec:end-if
+
+## Filter out the ip addresses for which credentials exist
+--> @c:new-block
+
+--> @c:data-loop dataset = 'temp-linux-credentials-list-not-defined' & columns = 'bot_source_name,bot_source_name_updated'
+    --> @dm:recall name = "temp-selected-linux-hosts"
+    --> @dm:skip-block-if-shape row_count = 0
+    --> *dm:safe-filter linux_src_name not in [$bot_source_name_updated]
+    --> @dm:save name = 'temp-linux_inventory_ip_list'
+
+--> @c:new-block
+    --> @dm:recall name = 'temp-linux_inventory_ip_list'
+    --> @dm:skip-block-if-shape row_count = 0
+    --> @exec:run-pipeline name="linux_inner_inventory_and_topology_using_ssh"
+    --> @dm:skip-block-if-shape row_count = 0
+    --> @dm:save name="temp-linux-discovery-pipeline-output"

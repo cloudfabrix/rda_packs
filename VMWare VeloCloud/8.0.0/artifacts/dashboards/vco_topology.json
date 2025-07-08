@@ -1,0 +1,427 @@
+{
+    "name": "vco_topology",
+    "label": "VCO Asset Navigator",
+    "description": "VCO Asset Navigator",
+    "dashboard_folder": "VMWare",
+    "version": "23.4.14.1",
+    "enabled": true,
+    "live_edit": true,
+    "short_label": "Stack",
+    "context_label_id": "stack_name",
+    "dashboard_type": "template",
+    "dashboard_style": "tabbed",
+    "dashboard_filters": {
+        "time_filter": true,
+        "default_time_filter_labels": []
+    },
+    "template_variables": {
+        "NODE_ID": {
+            "contextId": [
+                "navigatorSelectionContexts",
+                "secondaryListSelection",
+                "node_id"
+            ]
+        },
+        "CUST_ID": {
+            "contextId": "customerId"
+        },
+        "PROJ_ID": {
+            "contextId": "projectId"
+        },
+        "CUST_TAG": {
+            "contextId": "tag1"
+        }
+    },
+    "dashboard_sections": [
+        {
+            "title": "Node Details",
+            "widgets": [
+                {
+                    "title": "Topology View",
+                    "widget_type": "topology",
+                    "extra_filter": "(source_ip contains 'vco') and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "register_search_endpoints": true,
+                    "reportId": "rda.saas.stack.view.topo",
+                    "has_more_data_flag": false,
+                    "expand_all": true,
+                    "limit_to_node_types": [
+                        "Edge",
+                        "Gateway"
+                    ],
+                    "stack_type": "dynamic",
+                    "stack_definition": {
+                        "name": "vco",
+                        "description": "",
+                        "saved_time": "2023-09-12T21:08:31.418255",
+                        "is_dynamic": true,
+                        "hierarchical": true,
+                        "dynamic_nodes": {
+                            "column_name": "node_type",
+                            "stream": "cfx_rdaf_topology_nodes",
+                            "query0": "node_type is 'Gateway'"
+                        },
+                        "dynamic_relationships": {
+                            "stream": "cfx_rdaf_topology_edges",
+                            "edges_collection": "cfx_rdaf_topology_edges",
+                            "query": "source is 'edge'"
+                        }
+                    },
+                    "nodes_report": {
+                        "group_filters": [
+                            {
+                                "stream": "cfx_rdaf_topology_nodes",
+                                "query": "(customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                                "title": "Family",
+                                "duration_hours": 10000,
+                                "group_by": [
+                                    "edgeState"
+                                ],
+                                "ts_column": "timestamp",
+                                "agg": "value_count",
+                                "column": "node_id",
+                                "type": "str"
+                            },
+                            {
+                                "stream": "cfx_rdaf_topology_nodes",
+                                "query": "(customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                                "title": "Node Types",
+                                "duration_hours": 10000,
+                                "group_by": [
+                                    "node_type"
+                                ],
+                                "ts_column": "timestamp",
+                                "agg": "value_count",
+                                "column": "node_id",
+                                "type": "str"
+                            }
+                        ],
+                        "reportMetaData": {
+                            "sorting": true,
+                            "filtering": true,
+                            "title": "Nodes",
+                            "remote_searchable": false,
+                            "color_map": {
+                                "OFFLINE": "#B71C1C",
+                                "NEVER_ACTIVATED": "#E53935",
+                                "CONNECTED": "#4CAF50",
+                                "ACTIVATED": "#4CAF50",
+                                "PENDING": "#ffd54f",
+                                "REACTIVATION_PENDING": "#ffd54f"
+                            },
+                            "actions": [
+                                {
+                                    "permission": "rda:user_dashboard:view",
+                                    "appName": "user-dashboard/vco_inventory",
+                                    "drillDownLinkField": "node_label",
+                                    "identifier": "launch.dashboard.vco_inventory",
+                                    "selectionType": "SINGLE",
+                                    "title": "Device Details",
+                                    "contextParamList": {
+                                        "contextParams": [
+                                            {
+                                                "paramKey": "customerId",
+                                                "paramId": "customerId"
+                                            },
+                                            {
+                                                "paramKey": "customerTag",
+                                                "paramId": "customerTag"
+                                            },
+                                            {
+                                                "paramKey": "node_type",
+                                                "paramId": "node_type"
+                                            },
+                                            {
+                                                "paramKey": "serialNumber",
+                                                "paramId": "serialNumber"
+                                            },
+                                            {
+                                                "paramKey": "node_id",
+                                                "paramId": "node_id"
+                                            },
+                                            {
+                                                "paramKey": "edge_ip",
+                                                "paramId": "edge_ip"
+                                            },
+                                            {
+                                                "paramKey": "edge_id",
+                                                "paramId": "edge_id"
+                                            }
+                                        ]
+                                    },
+                                    "type": "GO_TO_APP_STATE"
+                                }
+                            ],
+                            "reportColumnDefinitionList": [
+                                {
+                                    "identifier": "node_label",
+                                    "title": "Name",
+                                    "key": false
+                                },
+                                {
+                                    "identifier": "name",
+                                    "hidden": true,
+                                    "key": false
+                                },
+                                {
+                                    "identifier": "node_type",
+                                    "title": "Type",
+                                    "key": false
+                                },
+                                {
+                                    "identifier": "serialNumber",
+                                    "key": false,
+                                    "title": "Serial Number"
+                                },
+                                {
+                                    "identifier": "deviceFamily",
+                                    "key": false,
+                                    "title": "Device Family"
+                                },
+                                {
+                                    "identifier": "node_id",
+                                    "key": true,
+                                    "hidden": true
+                                },
+                                {
+                                    "identifier": "org_id",
+                                    "key": true,
+                                    "hidden": true
+                                }
+                            ]
+                        }
+                    },
+                    "nodes_asset_report": {
+                        "dashboardId": "Node Details",
+                        "reportId": "dynamic_v2_tabular_report_0_1",
+                        "ignore_context_filter": true
+                    },
+                    "edges_report": {
+                        "reportId": "rda.saas.topology.edges.report",
+                        "group_filters": [
+                            {
+                                "title": "Relations",
+                                "group_by": [
+                                    "relation_type"
+                                ]
+                            },
+                            {
+                                "title": "Links",
+                                "group_by": [
+                                    "link_type"
+                                ]
+                            }
+                        ],
+                        "reportMetaData": {
+                            "sorting": true,
+                            "filtering": true,
+                            "title": "Edges",
+                            "reportColumnDefinitionList": [
+                                {
+                                    "hidden": false,
+                                    "id": "left_id",
+                                    "identifier": "left_id",
+                                    "key": false,
+                                    "title": "Left Id",
+                                    "type": "TEXT",
+                                    "visible": false
+                                },
+                                {
+                                    "hidden": false,
+                                    "id": "left_label",
+                                    "identifier": "left_label",
+                                    "key": false,
+                                    "title": "Source",
+                                    "type": "TEXT",
+                                    "visible": true
+                                },
+                                {
+                                    "hidden": false,
+                                    "id": "right_id",
+                                    "identifier": "right_id",
+                                    "key": false,
+                                    "title": "Right Id",
+                                    "type": "TEXT",
+                                    "visible": false
+                                },
+                                {
+                                    "hidden": false,
+                                    "id": "right_label",
+                                    "identifier": "right_label",
+                                    "key": false,
+                                    "title": "Destination",
+                                    "type": "TEXT",
+                                    "visible": true
+                                },
+                                {
+                                    "hidden": false,
+                                    "id": "link_type",
+                                    "identifier": "link_type",
+                                    "key": false,
+                                    "title": "Link",
+                                    "type": "TEXT",
+                                    "visible": true
+                                },
+                                {
+                                    "hidden": false,
+                                    "id": "relation_type",
+                                    "identifier": "relation_type",
+                                    "key": false,
+                                    "title": "Relation",
+                                    "type": "TEXT",
+                                    "visible": true
+                                }
+                            ],
+                            "actions": []
+                        }
+                    },
+                    "height": 12,
+                    "min_wdith": 12,
+                    "widget_id": "182287d8"
+                },
+                {
+                    "title": "Inventory Details",
+                    "widget_type": "tabular",
+                    "stream": "cfx_rdaf_topology_nodes",
+                    "extra_filter": "(source_ip contains 'vco') and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "height": 10,
+                    "min_wdith": 12,
+                    "widget_id": "56347327",
+                    "paginated": true,
+                    "duration_hours": 10000,
+                    "max_rows": 50,
+                    "ts_column": "timestamp",
+                    "remote_searchable": true,
+                    "virtual_scrolling": true,
+                    "context_filter": "customerRole is 'admin'",
+                    "showRowSummary": true,
+                    "group_filters": [
+                        {
+                            "stream": "cfx_rdaf_topology_nodes",
+                            "title": "Edge State",
+                            "duration_hours": 10000,
+                            "group_by": [
+                                "edgeState"
+                            ],
+                            "ts_column": "timestamp",
+                            "agg": "value_count",
+                            "column": "node_id",
+                            "type": "str"
+                        },
+                        {
+                            "stream": "cfx_rdaf_topology_nodes",
+                            "title": "Node Types",
+                            "duration_hours": 10000,
+                            "group_by": [
+                                "name",
+                                "node_type",
+                                "node_id"
+                            ],
+                            "ts_column": "timestamp",
+                            "agg": "value_count",
+                            "column": "node_id",
+                            "type": "str"
+                        }
+                    ],
+                    "remote_searchable_cols": [
+                        "name",
+                        "node_label",
+                        "node_id",
+                        "serialNumber"
+                    ],
+                    "custom_columns": [
+                        {
+                            "id": "isInUIView",
+                            "label": "In UI View",
+                            "expr1": "'yes' if str(_row.node_id) in {{IN_UI_VIEW_NODES}} else 'no'",
+                            "expr": "str(_row.node_id) in {{IN_UI_VIEW_NODES}}",
+                            "hidden": true,
+                            "key": false,
+                            "visible": false,
+                            "sortable": false,
+                            "filterable": false
+                        },
+                        {
+                            "id": "org_id",
+                            "label": "org id",
+                            "expr1": "'single_tenant'",
+                            "expr": "customer_id if customer_id != None else 'single_tenant",
+                            "key": true,
+                            "visible": false,
+                            "sortable": false
+                        }
+                    ],
+                    "columns": {
+                        "node_label": {
+                            "title": "Name",
+                            "key": true
+                        },
+                        "name": {
+                            "hidden": true,
+                            "key": true
+                        },
+                        "node_type": {
+                            "hidden": true,
+                            "key": true
+                        },
+                        "serialNumber": {
+                            "key": true,
+                            "title": "Serial Number"
+                        },
+                        "deviceFamily": {
+                            "key": false,
+                            "title": "Device Family"
+                        },
+                        "node_id": {
+                            "key": true,
+                            "hidden": true
+                        }
+                    },
+                    "actions": [
+                        {
+                            "permission": "rda:user_dashboard:view",
+                            "appName": "user-dashboard/vco_inventory",
+                            "drillDownLinkField": "node_label",
+                            "identifier": "launch.dashboard.vco_inventory",
+                            "selectionType": "SINGLE",
+                            "title": "Inventory Details",
+                            "contextParamList": {
+                                "contextParams": [
+                                    {
+                                        "paramKey": "customerId",
+                                        "paramId": "customerId"
+                                    },
+                                    {
+                                        "paramKey": "customerTag",
+                                        "paramId": "customerTag"
+                                    },
+                                    {
+                                        "paramKey": "node_type",
+                                        "paramId": "node_type"
+                                    },
+                                    {
+                                        "paramKey": "serialNumber",
+                                        "paramId": "serialNumber"
+                                    },
+                                    {
+                                        "paramKey": "node_id",
+                                        "paramId": "node_id"
+                                    },
+                                    {
+                                        "paramKey": "edge_ip",
+                                        "paramId": "edge_ip"
+                                    },
+                                    {
+                                        "paramKey": "edge_id",
+                                        "paramId": "edge_id"
+                                    }
+                                ]
+                            },
+                            "type": "GO_TO_APP_STATE"
+                        }
+                    ]
+                }
+            ]
+        }
+    ],
+    "saved_time": "2025-03-24T15:14:27.606750"
+}

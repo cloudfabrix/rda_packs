@@ -1,0 +1,71 @@
+{
+    "name": "inventory_collection_main_app",
+    "label": "Inventory Collection Main App",
+    "description": "Inventory Collection Main App",
+    "version": "25.04.27",
+    "dashboard_folder": "InventoryCollection",
+    "enabled": true,
+    "custom_context": {
+        "rda-dashboard-live-edit": true
+    },
+    "dashboard_filters": {
+        "time_filter": true,
+        "columns_filter": []
+    },
+    "dashboard_generator": {
+        "attachment": "add_pages_for_activated_collection_packs"
+    },
+    "dashboard_sections": [],
+    "dashboard_type": "app",
+    "dashboard_groups": {
+        "groupAlerts": {
+            "icon": "alert.svg",
+            "label": "Alerts and Incidents"
+        },
+        "groupPolicies": {
+            "icon": "alert.svg",
+            "label": "Policies"
+        },
+        "groupMetrics": {
+            "icon": "topology.svg",
+            "label": "Metrics"
+        },
+        "groupData": {
+            "icon": "overall.svg",
+            "label": "Events"
+        },
+        "groupAssetNavigator": {
+            "icon": "activities.svg",
+            "label": "Asset Navigator"
+        },
+        "groupTopo": {
+            "icon": "topology.svg",
+            "label": "Topology"
+        },
+        "groupInventory": {
+            "icon": "hardware.svg",
+            "label": "Inventory"
+        },
+        "groupStatus": {
+            "icon": "history.svg",
+            "label": "Status"
+        },
+        "groupConfigure": {
+            "icon": "settings.svg",
+            "label": "Configure and Manage"
+        }
+    },
+    "dashboard_pages": [
+        {
+            "name": "solution_base_pack_ops_overview_page",
+            "label": "Overview",
+            "icon": "settings.svg"
+        }
+    ],
+    "attachments": [
+        {
+            "name": "add_pages_for_activated_collection_packs",
+            "value": "{%- set existing_groups = dashboard[\"dashboard_groups\"] -%}\n{%- set d_pages = [] -%}\n{%- set d_groups = [] -%}\n\n{%- set dlist = engine.query_stream_data(stream=\"rda_packs_dynamic_groups_and_pages\", cfxql_query=\"customer_tag is empty\") or [] -%}\n\n{%- if dlist -%}\n    {# Filter the pages list into a new variable #}\n    {%- set filtered_pages = dashboard[\"dashboard_pages\"]\n        | rejectattr(\"name\", \"equalto\", \"solution_base_pack_ops_overview_page\")\n        | list -%}\n    \n    {# Clear and repopulate dashboard_pages #}\n    {%- set _ = dashboard[\"dashboard_pages\"].clear() -%}\n    {%- for p in filtered_pages -%}\n        {%- set _ = dashboard[\"dashboard_pages\"].append(p) -%}\n    {%- endfor -%}\n    \n    {# Process the dlist to populate dashboard groups and pages #}\n    {%- for i in dlist -%}\n        {%- set page_name = i[\"dashboard_page_name\"] -%}\n\n        {# Skip certain known pages and those starting with 'multi' #}\n        {%- if page_name != \"device_SNMP_Traps_from_alerts_fault\"\n              and page_name != \"device_syslog_from_alert_fault\"\n              and page_name != \"device_alerts_from_alert_fault\"\n           and page_name != \"device_incidents_from_alerts\"\n           and not page_name.startswith(\"multi\") -%}\n\n            {%- set dgroup_ = {\n                \"g_name\": i[\"dashboard_group_name\"],\n                \"g_label\": i[\"dashboard_group_label\"],\n                \"g_icon\": i[\"dashboard_group_icon\"]\n            } -%}\n            {{ d_groups.append(dgroup_) }}\n\n            {%- set dpage_ = {\n                \"name\": i[\"dashboard_page_name\"],\n                \"label\": i[\"dashboard_page_label\"],\n                \"icon\": i[\"dashboard_page_icon\"],\n                \"group\": i[\"dashboard_page_group\"]\n            } -%}\n            {{ d_pages.append(dpage_) }}\n\n        {%- endif -%}\n    {%- endfor -%}\n\n    {# Update dashboard groups #}\n    {%- for group in d_groups -%}\n        {%- if group.g_name not in existing_groups | map(attribute='g_name') | list -%}\n            {%- set _ = dashboard[\"dashboard_groups\"].update({\n                group.g_name: {\n                    \"icon\": group.g_icon,\n                    \"label\": group.g_label\n                }\n            }) -%}\n        {%- endif -%}\n    {%- endfor -%}\n\n    {# Update dashboard pages #}\n    {%- for page in d_pages -%}\n        {%- set _ = dashboard[\"dashboard_pages\"].append({\n            \"name\": page.name,\n            \"label\": page.label,\n            \"icon\": page.icon,\n            \"group\": page.group\n        }) -%}\n    {%- endfor -%}\n\n{%- endif -%}\n"
+        }
+    ]
+}

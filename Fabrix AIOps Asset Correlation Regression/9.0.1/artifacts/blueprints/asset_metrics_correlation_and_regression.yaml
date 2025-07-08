@@ -1,0 +1,103 @@
+name: Asset Metrics Correlation and Regression
+id: asset_metrics_correlation
+version: '2022_12_13_1'
+category: ML
+comment: Blueprint for Asset Metrics Correlation and Regression
+enabled: true
+type: Service
+provider: CloudFabrix Software Inc.
+attrs: {}
+action_pipelines:
+
+    -   name: ml-metrics-selection-rules
+        label: Selection Rules
+        version: '*'
+        form: {}
+        site: rda.*
+        site_type: regex
+        instances: 1
+        scaling_policy:
+            min_instances: 0
+            max_instances: 1
+    -   name: ml-metrics-variance
+        label: Variance Analysis
+        version: '*'
+        form: {}
+        site: rda.*
+        site_type: regex
+        instances: 1
+        scaling_policy:
+            min_instances: 0
+            max_instances: 1
+    -   name: ml-metrics-resampling
+        label: Resampling
+        version: '*'
+        form: {}
+        site: rda.*
+        site_type: regex
+        instances: 1
+        scaling_policy:
+            min_instances: 0
+            max_instances: 1
+    -   name: ml-metrics-correlation
+        label: Correlation
+        version: '*'
+        form: {}
+        site: rda.*
+        site_type: regex
+        instances: 1
+        scaling_policy:
+            min_instances: 0
+            max_instances: 1
+    -   name: ml-metrics-regression
+        label: Regression
+        version: '*'
+        form: {}
+        site: rda.*
+        site_type: regex
+        instances: 1
+        scaling_policy:
+            min_instances: 0
+            max_instances: 1
+scheduled_pipelines:
+    -   name: ml-metrics-variance
+        label: Variance Analysis
+        version: '*'
+        form: {}
+        site: rda.*
+        site_type: regex
+        cron_expression: 0 */12 * * *
+    -   name: ml-metrics-hourly-resampling
+        label: Resampling
+        version: '*'
+        form: {}
+        site: rda.*
+        site_type: regex
+        cron_expression: 0 * * * *
+    -   name: ml-metrics-correlation
+        label: Correlation
+        version: '*'
+        form: {}
+        site: rda.*
+        site_type: regex
+        cron_expression: 0 2 * * *
+    -   name: ml-metrics-regression
+        label: Regression
+        version: '*'
+        form: {}
+        site: rda.*
+        site_type: regex
+        cron_expression: 0 4 * * *
+service_pipelines:
+    -   name: ml-metrics-live-prediction-parent
+        label: Live Anomaly Detection
+        version: '*'
+        form: {}
+        site: rda.*
+        site_type: regex
+        instances: 0
+        scaling_policy:
+            min_instances: 0
+            max_instances: 1
+dashboard_type: dashboard
+saved_time: '2025-05-13T16:26:13.630252'

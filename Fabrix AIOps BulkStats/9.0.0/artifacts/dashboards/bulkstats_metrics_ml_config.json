@@ -1,0 +1,742 @@
+{
+    "name": "bulkstats_metrics_ml_config",
+    "label": "Bulkstats ML Metrics Configuration",
+    "description": "Configure Bulkstats Metrics for ML Analysis",
+    "enabled": true,
+    "dashboard_folder": "ML",
+    "live_edit": true,
+    "dashboard_style": "auto",
+    "dashboard_type": "template",
+    "template_variables": {
+        "CUST_ID": {
+            "contextId": "customerId"
+        },
+        "PROJ_ID": {
+            "contextId": "projectId"
+        },
+        "CUST_TAG": {
+            "contextId": "customerTag"
+        }
+    },
+    "dashboard_filters": {
+        "time_filter": true,
+        "columns_filter": [
+            {
+                "id": "device",
+                "label": "Device",
+                "type": "TEXT"
+            },
+            {
+                "id": "KPI_Name",
+                "label": "Metric Name",
+                "type": "TEXT"
+            },
+            {
+                "id": "static_upper_threshold",
+                "label": "Static Upper Threshold",
+                "type": "DOUBLE"
+            },
+            {
+                "id": "variance",
+                "label": "Variance",
+                "type": "DOUBLE"
+            },
+            {
+                "id": "upper_anomaly_alert",
+                "label": "Upper Anomalies for Alert",
+                "type": "TEXT"
+            },
+            {
+                "id": "lower_anomaly_alert",
+                "label": "Lower Anomalies for Alert",
+                "type": "TEXT"
+            }
+        ],
+        "group_filters": [
+            {
+                "stream": "ml-bulkstats-metrics-variance",
+                "extra_filter": "customer_tag is '{{CUST_TAG}}' or customer_tag is empty",
+                "title": "KPI",
+                "duration_hours": 1000,
+                "group_by": [
+                    "KPI_Name"
+                ],
+                "ts_column": "timestamp",
+                "agg": "cardinality",
+                "column": "_RDA_Id",
+                "type": "int"
+            },
+            {
+                "stream": "ml-bulkstats-metrics-variance",
+                "extra_filter": "customer_tag is '{{CUST_TAG}}' or customer_tag is empty",
+                "title": "User Selected",
+                "duration_hours": 1000,
+                "group_by": [
+                    "user_selected"
+                ],
+                "ts_column": "timestamp",
+                "agg": "cardinality",
+                "column": "_RDA_Id",
+                "type": "int"
+            },
+            {
+                "stream": "ml-bulkstats-metrics-variance",
+                "extra_filter": "customer_tag is '{{CUST_TAG}}' or customer_tag is empty",
+                "title": "Statistically Selected",
+                "duration_hours": 1000,
+                "group_by": [
+                    "statistically_selected"
+                ],
+                "ts_column": "timestamp",
+                "agg": "cardinality",
+                "column": "_RDA_Id",
+                "type": "int"
+            }
+        ]
+    },
+    "dashboard_sections": [
+        {
+            "title": "Metrics Configuration",
+            "show_filter": true,
+            "widgets": [
+                {
+                    "title": "Devices",
+                    "widget_type": "custom_counter",
+                    "formatter": "DescriptiveCountFormatter",
+                    "stream": "ml-bulkstats-metrics-variance",
+                    "extra_filter": "customer_tag is '{{CUST_TAG}}' or customer_tag is empty",
+                    "ts_column": "timestamp",
+                    "duration_hours": 1000,
+                    "max_width": 4,
+                    "min_width": 4,
+                    "column": "device",
+                    "agg": "cardinality",
+                    "type": "int",
+                    "widget_id": "02be1e20"
+                },
+                {
+                    "title": "Instance Keys",
+                    "widget_type": "custom_counter",
+                    "formatter": "DescriptiveCountFormatter",
+                    "stream": "ml-bulkstats-metrics-variance",
+                    "extra_filter": "customer_tag is '{{CUST_TAG}}' or customer_tag is empty",
+                    "ts_column": "timestamp",
+                    "duration_hours": 1000,
+                    "max_width": 4,
+                    "min_width": 4,
+                    "column": "instance_key",
+                    "agg": "cardinality",
+                    "type": "int",
+                    "widget_id": "643a2c51"
+                },
+                {
+                    "title": "Metrics",
+                    "widget_type": "custom_counter",
+                    "formatter": "DescriptiveCountFormatter",
+                    "stream": "ml-bulkstats-metrics-variance",
+                    "extra_filter": "customer_tag is '{{CUST_TAG}}' or customer_tag is empty",
+                    "ts_column": "timestamp",
+                    "max_width": 4,
+                    "min_width": 4,
+                    "duration_hours": 1000,
+                    "column": "KPI_Name",
+                    "agg": "cardinality",
+                    "type": "int",
+                    "widget_id": "2e051962"
+                },
+                {
+                    "title": "Metrics",
+                    "widget_type": "tabular",
+                    "min_width": 8,
+                    "height": 12,
+                    "max_width": 12,
+                    "stream": "ml-bulkstats-metrics-variance",
+                    "extra_filter": "customer_tag is '{{CUST_TAG}}' or customer_tag is empty",
+                    "timestamp": "timestamp",
+                    "paginated": true,
+                    "timebased": false,
+                    "resizableColumns": true,
+                    "remote_searchable": true,
+                    "remote_searchable_cols": [
+                        "device",
+                        "instance_key",
+                        "KPI_Name"
+                    ],
+                    "columns": {
+                        "schema": {
+                            "title": "Schema",
+                            "key": true
+                        },
+                        "instance_key": {
+                            "title": "Instance Key",
+                            "key": true
+                        },
+                        "device": {
+                            "title": "Device",
+                            "key": true
+                        },
+                        "KPI_Name": {
+                            "title": "KPI Name",
+                            "key": true
+                        },
+                        "variance": "Variance",
+                        "user_selected_color": {
+                            "type": "COLOR-MAP",
+                            "source-column": "user_selected",
+                            "color-map": {
+                                "Yes": "#4CAF50",
+                                "No": "#B71C1C"
+                            }
+                        },
+                        "user_selected": {
+                            "title": "User Selected",
+                            "htmlTemplateForRow": "<span class='badge' style='background-color: {{'{{ row.user_selected_color }}'}}' > {{'{{ row.user_selected }}'}} </span>"
+                        },
+                        "statistically_selected_color": {
+                            "type": "COLOR-MAP",
+                            "source-column": "statistically_selected",
+                            "color-map": {
+                                "Yes": "#4CAF50",
+                                "No": "#B71C1C"
+                            }
+                        },
+                        "statistically_selected": {
+                            "title": "Statistically Selected",
+                            "htmlTemplateForRow": "<span class='badge' style='background-color: {{'{{ row.statistically_selected_color }}'}}' > {{'{{ row.statistically_selected }}'}} </span>"
+                        },
+                        "upper_anomaly_alert_color": {
+                            "type": "COLOR-MAP",
+                            "source-column": "upper_anomaly_alert",
+                            "color-map": {
+                                "Yes": "#4CAF50",
+                                "No": "#B71C1C"
+                            }
+                        },
+                        "upper_anomaly_alert": {
+                            "title": "Alert for Upper Anomaly",
+                            "htmlTemplateForRow": "<span class='badge' style='background-color: {{'{{ row.upper_anomaly_alert_color }}'}}' > {{'{{ row.upper_anomaly_alert }}'}} </span>"
+                        },
+                        "lower_anomaly_alert_color": {
+                            "type": "COLOR-MAP",
+                            "source-column": "lower_anomaly_alert",
+                            "color-map": {
+                                "Yes": "#4CAF50",
+                                "No": "#B71C1C"
+                            }
+                        },
+                        "lower_anomaly_alert": {
+                            "title": "Alert for Lower Anomaly",
+                            "htmlTemplateForRow": "<span class='badge' style='background-color: {{'{{ row.lower_anomaly_alert_color }}'}}' > {{'{{ row.lower_anomaly_alert }}'}} </span>"
+                        },
+                        "static_upper_threshold": {
+                            "title": "Static Upper Threshold",
+                            "type": "NUMERIC",
+                            "key": true
+                        },
+                        "static_lower_threshold": {
+                            "title": "Static Lower Threshold",
+                            "type": "NUMERIC",
+                            "key": true
+                        }
+                    },
+                    "actions": [
+                        {
+                            "permission": "rda:github:view",
+                            "title": "Select Metric",
+                            "type": "POPUP_FORM",
+                            "selectionType": "SINGLE",
+                            "identifier": "saas-service-action:userdashboard-add-yaml",
+                            "api-endpoint": {
+                                "service-name": "saas-reports",
+                                "methodName": "getForm",
+                                "stringified-params": true,
+                                "parse-output": false,
+                                "params": [
+                                    {
+                                        "formId": "rda.saas.dynamic.form",
+                                        "formDefinition": {
+                                            "id": "rda.saas.dynamic.form",
+                                            "refreshRequired": true,
+                                            "formFieldList": [
+                                                {
+                                                    "help": "Are you sure you want to select the metric?",
+                                                    "dataType": "string",
+                                                    "controlType": "LABEL",
+                                                    "required": false,
+                                                    "editable": false,
+                                                    "label": "Are you sure you want to select the metric?",
+                                                    "hidden": false,
+                                                    "fieldId": "name"
+                                                },
+                                                {
+                                                    "help": "User Selected Metric",
+                                                    "required": false,
+                                                    "editable": true,
+                                                    "label": "Select Metric",
+                                                    "hidden": true,
+                                                    "fieldId": "user_selected",
+                                                    "dataType": "boolean",
+                                                    "controlType": "BOOLEAN_FIELD",
+                                                    "defaultValue": "Yes",
+                                                    "controlPropertyList": [
+                                                        {
+                                                            "attribute": "layout-group-id",
+                                                            "value": "Features"
+                                                        },
+                                                        {
+                                                            "attribute": "layout-percent",
+                                                            "value": "25"
+                                                        }
+                                                    ]
+                                                }
+                                            ]
+                                        },
+                                        "actions": [
+                                            {
+                                                "type": "UPDATE_PSTREAM",
+                                                "pstreamName": "ml-bulkstats-metrics-variance",
+                                                "operation": "UPDATE",
+                                                "cfxql_query": "KPI_Name is '{{'{{KPI_Name}}'}}' and device is '{{'{{device}}'}}' and instance_key is '{{'{{instance_key}}'}}' and schema is '{{'{{schema}}'}}'"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            },
+                            "actionCondition": {
+                                "actionControl": "SHOW_IF",
+                                "conditionalField": [
+                                    {
+                                        "conditionType": "NOT_EQUAL",
+                                        "conditionValue": "Yes",
+                                        "fieldId": "user_selected"
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "permission": "rda:github:view",
+                            "title": "Unselect Metric",
+                            "type": "POPUP_FORM",
+                            "selectionType": "SINGLE",
+                            "identifier": "saas-service-action:userdashboard-add-yaml",
+                            "api-endpoint": {
+                                "service-name": "saas-reports",
+                                "methodName": "getForm",
+                                "stringified-params": true,
+                                "parse-output": false,
+                                "params": [
+                                    {
+                                        "formId": "rda.saas.dynamic.form",
+                                        "formDefinition": {
+                                            "id": "rda.saas.dynamic.form",
+                                            "refreshRequired": true,
+                                            "formFieldList": [
+                                                {
+                                                    "help": "Are you sure you want to unselect the metric?",
+                                                    "dataType": "string",
+                                                    "controlType": "LABEL",
+                                                    "required": false,
+                                                    "editable": false,
+                                                    "label": "Are you sure you want to unselect the metric?",
+                                                    "hidden": false,
+                                                    "fieldId": "name"
+                                                },
+                                                {
+                                                    "help": "User Selected Metric",
+                                                    "required": false,
+                                                    "editable": true,
+                                                    "label": "Select Metric",
+                                                    "hidden": true,
+                                                    "fieldId": "user_selected",
+                                                    "dataType": "boolean",
+                                                    "controlType": "BOOLEAN_FIELD",
+                                                    "defaultValue": "No",
+                                                    "controlPropertyList": [
+                                                        {
+                                                            "attribute": "layout-group-id",
+                                                            "value": "Features"
+                                                        },
+                                                        {
+                                                            "attribute": "layout-percent",
+                                                            "value": "25"
+                                                        }
+                                                    ]
+                                                }
+                                            ]
+                                        },
+                                        "actions": [
+                                            {
+                                                "type": "UPDATE_PSTREAM",
+                                                "pstreamName": "ml-bulkstats-metrics-variance",
+                                                "operation": "UPDATE",
+                                                "cfxql_query": "KPI_Name is '{{'{{KPI_Name}}'}}' and device is '{{'{{device}}'}}' and instance_key is '{{'{{instance_key}}'}}' and schema is '{{'{{schema}}'}}'"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            },
+                            "actionCondition": {
+                                "actionControl": "SHOW_IF",
+                                "conditionalField": [
+                                    {
+                                        "conditionType": "EQUAL",
+                                        "conditionValue": "Yes",
+                                        "fieldId": "user_selected"
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "permission": "rda:github:view",
+                            "title": "Select Upper Anomalies for Alerts",
+                            "type": "POPUP_FORM",
+                            "selectionType": "SINGLE",
+                            "identifier": "saas-service-action:userdashboard-add-yaml",
+                            "api-endpoint": {
+                                "service-name": "saas-reports",
+                                "methodName": "getForm",
+                                "stringified-params": true,
+                                "parse-output": false,
+                                "params": [
+                                    {
+                                        "formId": "rda.saas.dynamic.form",
+                                        "formDefinition": {
+                                            "id": "rda.saas.dynamic.form",
+                                            "refreshRequired": true,
+                                            "formFieldList": [
+                                                {
+                                                    "help": "Are you sure you want to select upper anomalies for raising alerts?",
+                                                    "dataType": "string",
+                                                    "controlType": "LABEL",
+                                                    "required": false,
+                                                    "editable": false,
+                                                    "label": "Are you sure you want to select upper anomalies for raising alerts?",
+                                                    "hidden": false,
+                                                    "fieldId": "name"
+                                                },
+                                                {
+                                                    "help": "Upper Anomaly for Alerts",
+                                                    "required": false,
+                                                    "editable": true,
+                                                    "label": "Select Upper Anomaly for Alerts",
+                                                    "hidden": true,
+                                                    "fieldId": "upper_anomaly_alert",
+                                                    "dataType": "boolean",
+                                                    "controlType": "BOOLEAN_FIELD",
+                                                    "defaultValue": "Yes",
+                                                    "controlPropertyList": [
+                                                        {
+                                                            "attribute": "layout-group-id",
+                                                            "value": "Features"
+                                                        },
+                                                        {
+                                                            "attribute": "layout-percent",
+                                                            "value": "25"
+                                                        }
+                                                    ]
+                                                }
+                                            ]
+                                        },
+                                        "actions": [
+                                            {
+                                                "type": "UPDATE_PSTREAM",
+                                                "pstreamName": "ml-bulkstats-metrics-variance",
+                                                "operation": "UPDATE",
+                                                "cfxql_query": "KPI_Name is '{{'{{KPI_Name}}'}}' and device is '{{'{{device}}'}}' and instance_key is '{{'{{instance_key}}'}}' and schema is '{{'{{schema}}'}}'"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            },
+                            "actionCondition": {
+                                "actionControl": "SHOW_IF",
+                                "conditionalField": [
+                                    {
+                                        "conditionType": "NOT_EQUAL",
+                                        "conditionValue": "Yes",
+                                        "fieldId": "upper_anomaly_alert"
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "permission": "rda:github:view",
+                            "title": "Ignore Upper Anomalies for Alerts",
+                            "type": "POPUP_FORM",
+                            "selectionType": "SINGLE",
+                            "identifier": "saas-service-action:userdashboard-add-yaml",
+                            "api-endpoint": {
+                                "service-name": "saas-reports",
+                                "methodName": "getForm",
+                                "stringified-params": true,
+                                "parse-output": false,
+                                "params": [
+                                    {
+                                        "formId": "rda.saas.dynamic.form",
+                                        "formDefinition": {
+                                            "id": "rda.saas.dynamic.form",
+                                            "refreshRequired": true,
+                                            "formFieldList": [
+                                                {
+                                                    "help": "Are you sure you want to ignore upper anomalies for raising alerts?",
+                                                    "dataType": "string",
+                                                    "controlType": "LABEL",
+                                                    "required": false,
+                                                    "editable": false,
+                                                    "label": "Are you sure you want to ignore upper anomalies for raising alerts?",
+                                                    "hidden": false,
+                                                    "fieldId": "name"
+                                                },
+                                                {
+                                                    "help": "Upper Anomaly for Alerts",
+                                                    "required": false,
+                                                    "editable": true,
+                                                    "label": "Select Upper Anomaly for Alerts",
+                                                    "hidden": true,
+                                                    "fieldId": "upper_anomaly_alert",
+                                                    "dataType": "boolean",
+                                                    "controlType": "BOOLEAN_FIELD",
+                                                    "defaultValue": "No",
+                                                    "controlPropertyList": [
+                                                        {
+                                                            "attribute": "layout-group-id",
+                                                            "value": "Features"
+                                                        },
+                                                        {
+                                                            "attribute": "layout-percent",
+                                                            "value": "25"
+                                                        }
+                                                    ]
+                                                }
+                                            ]
+                                        },
+                                        "actions": [
+                                            {
+                                                "type": "UPDATE_PSTREAM",
+                                                "pstreamName": "ml-bulkstats-metrics-variance",
+                                                "operation": "UPDATE",
+                                                "cfxql_query": "KPI_Name is '{{'{{KPI_Name}}'}}' and device is '{{'{{device}}'}}' and instance_key is '{{'{{instance_key}}'}}' and schema is '{{'{{schema}}'}}'"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            },
+                            "actionCondition": {
+                                "actionControl": "SHOW_IF",
+                                "conditionalField": [
+                                    {
+                                        "conditionType": "EQUAL",
+                                        "conditionValue": "Yes",
+                                        "fieldId": "upper_anomaly_alert"
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "permission": "rda:github:view",
+                            "title": "Select Lower Anomalies for Alerts",
+                            "type": "POPUP_FORM",
+                            "selectionType": "SINGLE",
+                            "identifier": "saas-service-action:userdashboard-add-yaml",
+                            "api-endpoint": {
+                                "service-name": "saas-reports",
+                                "methodName": "getForm",
+                                "stringified-params": true,
+                                "parse-output": false,
+                                "params": [
+                                    {
+                                        "formId": "rda.saas.dynamic.form",
+                                        "formDefinition": {
+                                            "id": "rda.saas.dynamic.form",
+                                            "refreshRequired": true,
+                                            "formFieldList": [
+                                                {
+                                                    "help": "Are you sure you want to select lower anomalies for raising alerts?",
+                                                    "dataType": "string",
+                                                    "controlType": "LABEL",
+                                                    "required": false,
+                                                    "editable": false,
+                                                    "label": "Are you sure you want to select lower anomalies for raising alerts?",
+                                                    "hidden": false,
+                                                    "fieldId": "name"
+                                                },
+                                                {
+                                                    "help": "Lower Anomaly for Alerts",
+                                                    "required": false,
+                                                    "editable": true,
+                                                    "label": "Select Lower Anomaly for Alerts",
+                                                    "hidden": true,
+                                                    "fieldId": "lower_anomaly_alert",
+                                                    "dataType": "boolean",
+                                                    "controlType": "BOOLEAN_FIELD",
+                                                    "defaultValue": "Yes",
+                                                    "controlPropertyList": [
+                                                        {
+                                                            "attribute": "layout-group-id",
+                                                            "value": "Features"
+                                                        },
+                                                        {
+                                                            "attribute": "layout-percent",
+                                                            "value": "25"
+                                                        }
+                                                    ]
+                                                }
+                                            ]
+                                        },
+                                        "actions": [
+                                            {
+                                                "type": "UPDATE_PSTREAM",
+                                                "pstreamName": "ml-bulkstats-metrics-variance",
+                                                "operation": "UPDATE",
+                                                "cfxql_query": "KPI_Name is '{{'{{KPI_Name}}'}}' and device is '{{'{{device}}'}}' and instance_key is '{{'{{instance_key}}'}}' and schema is '{{'{{schema}}'}}'"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            },
+                            "actionCondition": {
+                                "actionControl": "SHOW_IF",
+                                "conditionalField": [
+                                    {
+                                        "conditionType": "NOT_EQUAL",
+                                        "conditionValue": "Yes",
+                                        "fieldId": "lower_anomaly_alert"
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "permission": "rda:github:view",
+                            "title": "Ignore Lower Anomalies for Alerts",
+                            "type": "POPUP_FORM",
+                            "selectionType": "SINGLE",
+                            "identifier": "saas-service-action:userdashboard-add-yaml",
+                            "api-endpoint": {
+                                "service-name": "saas-reports",
+                                "methodName": "getForm",
+                                "stringified-params": true,
+                                "parse-output": false,
+                                "params": [
+                                    {
+                                        "formId": "rda.saas.dynamic.form",
+                                        "formDefinition": {
+                                            "id": "rda.saas.dynamic.form",
+                                            "refreshRequired": true,
+                                            "formFieldList": [
+                                                {
+                                                    "help": "Are you sure you want to ignore lower anomalies for raising alerts?",
+                                                    "dataType": "string",
+                                                    "controlType": "LABEL",
+                                                    "required": false,
+                                                    "editable": false,
+                                                    "label": "Are you sure you want to ignore lower anomalies for raising alerts?",
+                                                    "hidden": false,
+                                                    "fieldId": "name"
+                                                },
+                                                {
+                                                    "help": "Lower Anomaly for Alerts",
+                                                    "required": false,
+                                                    "editable": true,
+                                                    "label": "Select Lower Anomaly for Alerts",
+                                                    "hidden": true,
+                                                    "fieldId": "lower_anomaly_alert",
+                                                    "dataType": "boolean",
+                                                    "controlType": "BOOLEAN_FIELD",
+                                                    "defaultValue": "No",
+                                                    "controlPropertyList": [
+                                                        {
+                                                            "attribute": "layout-group-id",
+                                                            "value": "Features"
+                                                        },
+                                                        {
+                                                            "attribute": "layout-percent",
+                                                            "value": "25"
+                                                        }
+                                                    ]
+                                                }
+                                            ]
+                                        },
+                                        "actions": [
+                                            {
+                                                "type": "UPDATE_PSTREAM",
+                                                "pstreamName": "ml-bulkstats-metrics-variance",
+                                                "operation": "UPDATE",
+                                                "cfxql_query": "KPI_Name is '{{'{{KPI_Name}}'}}' and device is '{{'{{device}}'}}' and instance_key is '{{'{{instance_key}}'}}' and schema is '{{'{{schema}}'}}'"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            },
+                            "actionCondition": {
+                                "actionControl": "SHOW_IF",
+                                "conditionalField": [
+                                    {
+                                        "conditionType": "EQUAL",
+                                        "conditionValue": "Yes",
+                                        "fieldId": "lower_anomaly_alert"
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "permission": "rda:github:view",
+                            "title": "Configure Static Thresholds",
+                            "type": "POPUP_FORM",
+                            "selectionType": "SINGLE",
+                            "identifier": "saas-service-action:userdashboard-add-yaml",
+                            "api-endpoint": {
+                                "service-name": "saas-reports",
+                                "methodName": "getForm",
+                                "stringified-params": true,
+                                "parse-output": false,
+                                "params": [
+                                    {
+                                        "formId": "rda.saas.dynamic.form",
+                                        "formDefinition": {
+                                            "id": "rda.saas.dynamic.form",
+                                            "refreshRequired": true,
+                                            "formFieldList": [
+                                                {
+                                                    "help": "Static threshold above which an alert will be created for live anomalies",
+                                                    "dataType": "FLOAT",
+                                                    "controlType": "FLOAT",
+                                                    "required": false,
+                                                    "editable": true,
+                                                    "label": "Static Upper Threshold",
+                                                    "hidden": false,
+                                                    "fieldId": "static_upper_threshold",
+                                                    "defaultValue": null
+                                                },
+                                                {
+                                                    "help": "Static threshold below which an alert will be created for live anomalies",
+                                                    "dataType": "FLOAT",
+                                                    "controlType": "FLOAT",
+                                                    "required": false,
+                                                    "editable": true,
+                                                    "label": "Static Lower Threshold",
+                                                    "hidden": false,
+                                                    "fieldId": "static_lower_threshold",
+                                                    "defaultValue": null
+                                                }
+                                            ]
+                                        },
+                                        "actions": [
+                                            {
+                                                "type": "UPDATE_PSTREAM",
+                                                "pstreamName": "ml-bulkstats-metrics-variance",
+                                                "operation": "UPDATE",
+                                                "cfxql_query": "KPI_Name is '{{'{{KPI_Name}}'}}' and device is '{{'{{device}}'}}' and instance_key is '{{'{{instance_key}}'}}' and schema is '{{'{{schema}}'}}'"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "widget_id": "99bcf6e3"
+                }
+            ]
+        }
+    ],
+    "saved_time": "2025-06-24T07:44:52.645422"
+}

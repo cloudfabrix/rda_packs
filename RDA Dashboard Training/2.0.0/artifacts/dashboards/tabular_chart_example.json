@@ -1,0 +1,194 @@
+{
+    "name": "tabular_chart_example",
+    "label": "Tabular Chart",
+    "description": "Tabular Chart example",
+    "version": "10.12.24.1",
+    "enabled": true,
+    "showTitle": true,
+    "dashboard_style": "auto",
+    "live_edit": true,
+    "status_poller": {},
+    "dashboard_type": "dashboard",
+    "dashboard_pages": [],
+    "dashboard_generator": {
+        "attachment": "widget_code_generator"
+    },
+    "dashboard_filters": {
+        "time_filter": true,
+        "default_time_filter_labels": [
+            "All Time"
+        ],
+        "columns_filter": [],
+        "group_filters": []
+    },
+    "dashboard_sections": [
+        {
+            "title": "Tabular Chart",
+            "show_filter": true,
+            "widgets": [
+                {
+                    "title": "Summary Chart",
+                    "widget_type": "summary",
+                    "duration_hours": 24000,
+                    "stream": "sample-ecommerce-data",
+                    "query": "",
+                    "min_width": 6,
+                    "height": 4,
+                    "max_width": 6,
+                    "paginated": true,
+                    "max_rows": 100,
+                    "columns": {
+                        "customer_full_name": "Customer name",
+                        "geoip.city_name": "Customer city",
+                        "customer_id": "Customer ID",
+                        "order_id": "Order ID",
+                        "user": "user",
+                        "timestamp": "Timestamp"
+                    },
+                    "widget_id": "1051a855"
+                },
+                {
+                    "widget_type": "tabular",
+                    "title": "Simple Tabular Chart ",
+                    "stream": "sample-ecommerce-data",
+                    "duration_hours": 24000,
+                    "extra_filter": "geoip.city_name is not empty",
+                    "min_width": 6,
+                    "height": 8,
+                    "max_width": 6,
+                    "paginated": true,
+                    "remote_searchable": true,
+                    "remote_searchable_cols": [
+                        "customer_full_name",
+                        "geoip.city_name"
+                    ],
+                    "max_rows": 50,
+                    "sorting": [
+                        {
+                            "timestamp": "desc"
+                        }
+                    ],
+                    "columns": {
+                        "customer_full_name": "Customer name",
+                        "geoip.city_name": "Customer city",
+                        "customer_id": "Customer ID",
+                        "order_id": "Order ID",
+                        "user": "user",
+                        "timestamp": "Timestamp"
+                    },
+                    "widget_id": "94a3fc11"
+                },
+                {
+                    "title": "Tabular chart with truncate columns & color badging",
+                    "widget_type": "tabular",
+                    "duration_hours": 24000,
+                    "stream": "sample-ecommerce-data",
+                    "extra_filter": "geoip.city_name is not empty",
+                    "min_width": 6,
+                    "height": 8,
+                    "max_width": 6,
+                    "columns": {
+                        "customer_full_name": {
+                            "title": "Name",
+                            "formatter": "truncate"
+                        },
+                        "city_color": {
+                            "type": "COLOR-MAP",
+                            "source-column": "geoip.city_name",
+                            "color-map": {
+                                "Abu Dhabi": "#ef476f",
+                                "Los Angeles": "#ffd166",
+                                "New York": "#06d6a0",
+                                "Istanbul": "#118ab2",
+                                "Marrakesh": "#073b4c",
+                                "Bogotu00e1": "#82E0AA",
+                                "Cairo": "#85C1E9",
+                                "Birmingham": "#D2B4DE",
+                                "Monte Carlo": "#EDBB99",
+                                "Dubai": "#A9CCE3",
+                                "Cannes": "#F4D03F"
+                            }
+                        },
+                        "geoip.city_name": {
+                            "title": "City",
+                            "htmlTemplateForRow": "<span class='badge' style='background-color: {{ row.city_color }}' > {{ row.geoip.city_name }} </span>"
+                        }
+                    },
+                    "widget_id": "e15a03fa"
+                },
+                {
+                    "widget_type": "tabular",
+                    "title": "Tabular with  resizableColumns Example ",
+                    "stream": "sample-ecommerce-data",
+                    "duration_hours": 24000,
+                    "extra_filter": "geoip.city_name is not empty",
+                    "min_width": 6,
+                    "height": 8,
+                    "max_width": 6,
+                    "paginated": true,
+                    "resizableColumns": true,
+                    "remote_searchable": true,
+                    "remote_searchable_cols": [
+                        "customer_full_name",
+                        "geoip.city_name"
+                    ],
+                    "max_rows": 50,
+                    "sorting": [
+                        {
+                            "timestamp": "desc"
+                        }
+                    ],
+                    "columns": {
+                        "customer_full_name": "Customer Name",
+                        "geoip.city_name": "Customer City",
+                        "customer_id": "Customer ID",
+                        "order_id": "Order ID",
+                        "user": "user",
+                        "timestamp": "Timestamp"
+                    },
+                    "widget_id": "a67f82b0"
+                },
+                {
+                    "widget_type": "tabular",
+                    "title": "virtual_scrolling and showRowSummary",
+                    "stream": "sample-ecommerce-data",
+                    "duration_hours": 24000,
+                    "extra_filter": "geoip.city_name is not empty",
+                    "min_width": 6,
+                    "height": 8,
+                    "max_width": 12,
+                    "paginated": true,
+                    "virtual_scrolling": true,
+                    "showRowSummary": true,
+                    "remote_searchable": true,
+                    "remote_searchable_cols": [
+                        "customer_full_name",
+                        "geoip.city_name"
+                    ],
+                    "max_rows": 50,
+                    "sorting": [
+                        {
+                            "timestamp": "desc"
+                        }
+                    ],
+                    "columns": {
+                        "customer_full_name": "Customer name",
+                        "geoip.city_name": "Customer city",
+                        "customer_id": "Customer ID",
+                        "order_id": "Order ID",
+                        "user": "user",
+                        "timestamp": "Timestamp"
+                    },
+                    "widget_id": "8179ee46"
+                }
+            ]
+        }
+    ],
+    "saved_time": "2025-06-30T08:02:09.841871",
+    "attachments": [
+        {
+            "name": "widget_code_generator",
+            "value": "{%- set widgets =  dashboard[\"dashboard_sections\"][0][\"widgets\"] -%}\r\n{%- set new_widgets =  [] -%}\r\n{%- set ns =  namespace(count=0) -%}\r\n\r\n{%- for w in widgets -%}\r\n    {%- if w.get(\"widget_type\") -%}\r\n        {%-\r\n            set nw = {\r\n                \"title\": \"JSON\",\r\n                \"widget_group\": \"g\"+str(ns.count),\r\n                \"min_width\": w.get(\"min_width\", 6),\r\n                \"max_width\": w.get(\"max_width\", 6),\r\n                \"height\": w.get(\"height\", 4),\r\n                \"widget_type\": \"codeblock\",\r\n                \"content\": json_dumps_indent(w, 2),\r\n                \"lang\": \"json\",\r\n                \"widget_id\": w.get(\"widget_id\", str(ns.count)) + \"_code\"\r\n            }\r\n        -%}\r\n        {%- set _ = w.update({\"widget_group\":  \"g\"+str(ns.count) }) -%}\r\n        {%- set _ = new_widgets.append(nw) -%}\r\n        {%- set ns.count = ns.count + 1 -%}\r\n    {%- endif -%}\r\n{%- endfor -%}\r\n\r\n{%- set _ = widgets.extend(new_widgets) -%}"
+        }
+    ]
+}

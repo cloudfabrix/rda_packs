@@ -1,0 +1,59 @@
+%% stream = no and limit = 0
+%% template_type="jinja"
+
+%% import_src_type = "cfxai_regression,restclient"
+%%start_inline_object name="context_dynamic_form" and type="data" and format="json"
+{
+    "formFieldList": [
+        {
+            "fieldId": "customer_tag",
+            "label": "Tag of the customer",
+            "required": false,
+            "dataType": "string"
+        }
+    ]
+}
+%%end_inline_object
+{% if customer_tag %}
+   {% set customer_id = customer_id %}
+   {% set customer_tag = customer_tag %}
+   {% set customerTag = customer_tag %}
+{% elif customerTag %}
+   {% set customer_id = customer_id %}
+   {% set customer_tag = customerTag %}
+{% else %}
+
+{% endif %}
+
+
+-->@c:new-block
+    {% if customer_tag  %}
+        -->@dm:recall name="{{customer_tag}}_customer_details"
+        -->@dm:eval key = "'key'"
+        -->@dm:eval customer_tag = "'{{customer_tag}}'"
+        -->@dm:save name="{{customer_tag}}_updated_customer_details"
+    {% else %}
+        -->@dm:recall name="customer_details"
+        -->@dm:eval key = "'key'"
+        -->@dm:eval customer_tag = "''"
+        -->@dm:save name="updated_customer_details"
+    {% endif %}
+
+
+
+--> @dm:query-persistent-stream-from-bookmark name='ml-bulkstats-resampled-metrics' and bookmark='ml-bulkstats-metrics-prediction' and query='timestamp is after -1 hour' and max_rows=10000
+ -->@dm:eval key = "'key'"
+
+
+  {% if customer_tag  %}
+      --> @dm:enrich dict	 = "{{customer_tag}}_updated_customer_details" and src_key_cols = "key" and dict_key_cols	="key" and enrich_cols	="webhook_url"
+      -->@dm:save name="{{customer_tag}}_updated_metric"
+   {% else %}
+      --> @dm:enrich dict	 = "updated_customer_details" and src_key_cols = "key" and dict_key_cols = "key" and enrich_cols = "webhook_url"
+      -->@dm:save name="updated_metric"
+   {% endif %}
+
+
+    --> @exec:run-pipeline name='ml-bulkstats-metrics-prediction-child'
+    --> @dm:sleep seconds=3600
+

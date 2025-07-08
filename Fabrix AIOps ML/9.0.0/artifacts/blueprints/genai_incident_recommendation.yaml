@@ -1,0 +1,20 @@
+name: GenAI Incident Recommendation
+id: ml_oia
+version: '2024_07_18_1'
+category: GenAI
+comment: Generate Recommendations for Incidents
+enabled: false
+type: Service
+provider: CloudFabrix Software, Inc.
+attrs: {}
+service_pipelines:
+    -   name: genai-incident-recommendation-parent
+        label: GenAI Incident Recommendation
+        version: '*'
+        site: .*
+        site_type: regex
+        instances: 1
+        scaling_policy:
+            min_instances: 1
+            max_instances: 1
+saved_time: '2025-05-19T12:28:41.470543'

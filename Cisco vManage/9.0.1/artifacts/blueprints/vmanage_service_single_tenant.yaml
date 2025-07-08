@@ -1,0 +1,39 @@
+name: vmanage_service_single_tenant
+id: vmanage_service_blueprint
+version: '2024_12_17'
+category: vManage
+comment: vManage Inventory Collection
+enabled: true
+type: Service
+auto_deploy: false
+provider: CloudFabrix Software Inc.
+attrs: {
+
+}
+run_context: {
+
+}
+scheduled_pipelines:
+
+    -   name: vmanage_access_verification_status
+        label: vManage Access Verification Status
+        version: '*'
+        site: .*
+        cron_expression: 0 4 * * *
+        site_type: regex
+        instances: 1
+        scaling_policy:
+            min_instances: 1
+            max_instances: 1
+
+    -   name: vmanage_inv_collection
+        label: vManage Inventory Data
+        version: '*'
+        site: .*
+        cron_expression: 0 3 * * *
+        site_type: regex
+        instances: 1
+        scaling_policy:
+            min_instances: 1
+            max_instances: 1
+saved_time: '2024-12-18T22:36:27.767940'

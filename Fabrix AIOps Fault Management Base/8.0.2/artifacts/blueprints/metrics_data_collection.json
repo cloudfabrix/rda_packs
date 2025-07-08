@@ -1,0 +1,50 @@
+{
+    "name": "Metric Data Collection for IRM",
+    "id": "81a1a2321",
+    "version": "2023_01_25_1",
+    "category": "Metric Data Collection",
+    "comment": "Blueprint for Metric Data Collection",
+    "enabled": false,
+    "type": "Service",
+    "provider": "CloudFabrix Software Inc.",
+    "attrs": {},
+    "action_pipelines": [
+      {
+        "name": "metric-list-dataset",
+        "label": "Creates Metric Lists datasets",
+        "version": "*",
+        "form": {},
+        "site": "rda.*",
+        "site_type": "regex",
+        "instances": 1,
+        "scaling_policy": {
+          "min_instances": 0,
+          "max_instances": 1
+        }
+      },
+      {
+        "name": "metric_collection_rules",
+        "label": "Metric collection rules",
+        "version": "*",
+        "form": {},
+        "site": "rda.*",
+        "site_type": "regex",
+        "instances": 1,
+        "scaling_policy": {
+          "min_instances": 0,
+          "max_instances": 1
+        }
+      }
+    ],
+    "scheduled_pipelines": [
+      {
+        "name": "metric_data_collection",
+        "label": "Live Data Collection",
+        "version": "*",
+        "site_type": "regex",
+        "site": "rda.*",
+        "cron_expression": "0 * * * *"
+      }
+    ],
+    "dashboard_type": "dashboard"
+  }

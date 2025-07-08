@@ -1,0 +1,98 @@
+{
+    "name": "customer_discovery_runs_details_success",
+    "label": "Success",
+    "description": "onboarded_devices: Insights",
+    "dashboard_folder": "MultiNetworkPack",
+    "version": "1.0.4",
+    "enabled": false,
+    "live_edi0t": true,
+    "dashboard_type": "template",
+    "template_variables": {
+        "CUST_ID": {
+            "contextId": "customerId"
+        },
+        "PROJ_ID": {
+            "contextId": "project_id"
+        },
+        "PROJ_ID_SINGLE": {
+            "contextId": "project_id"
+        },
+        "CUST_TAG": {
+            "contextId": "customerTag"
+        },
+        "JOB_ID": {
+            "contextId": "jobid"
+        },
+        "NETWORK_NAME": {
+            "contextId": "network_name"
+        }
+    },
+    "dashboard_filters": {
+        "time_filter": true,
+        "extra_filter0": "source contains 'Run Details' and ingestion_id is '{{FILENAME}}' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+        "default_time_filter_labels0": [
+            "Last 1 month"
+        ],
+        "columns_filter": [
+            {
+                "id": "timestamp",
+                "label": "Timestamp",
+                "type": "DATETIME"
+            }
+        ],
+        "group_filters": []
+    },
+    "dashboard_sections": [
+        {
+            "title": "Onboarded Devices",
+            "show_filter": true,
+            "widgets": [
+                {
+                    "title": "Discovery Details",
+                    "widget_type": "tabular",
+                    "stream": "asset_inventory_collection_status_stream",
+                    "extra_filter": "(jobname contains '{{CUST_TAG}}' or jobname does not contains '{{CUST_TAG}}') and collection_status is 'Success' and target_type is 'DEVICE' and type_ is 'device_status' and jobid is '{{JOB_ID}}' and is_duplicate is 'false'",
+                    "duration_hours": 1080,
+                    "height": 4,
+                    "max_width": 12,
+                    "min_width": 12,
+                    "columns": {
+                        "asset_ip": "IP Address",
+                        "collection_status": {
+                            "title": "Collection Status",
+                            "type": "DATETIME",
+                            "visible": true
+                        },
+                        "collection_start_time": {
+                            "title": "Collection Start Time",
+                            "type": "DATETIME",
+                            "visible": false
+                        },
+                        "collection_timestamp": {
+                            "title": "Collection End Time",
+                            "type": "DATETIME",
+                            "visible": true
+                        },
+                        "jobname": {
+                            "title": "Jobname",
+                            "type": "TEXT",
+                            "hidden": true
+                        },
+                        "jobid": {
+                            "title": "Job Id",
+                            "type": "TEXT",
+                            "hidden": true
+                        },
+                        "is_duplicate": {
+                            "title": "Duplicates",
+                            "type": "TEXT",
+                            "hidden": true
+                        }
+                    },
+                    "widget_id": "b2c8d81c"
+                }
+            ]
+        }
+    ],
+    "saved_time": "2025-02-27T11:02:40.793670"
+}

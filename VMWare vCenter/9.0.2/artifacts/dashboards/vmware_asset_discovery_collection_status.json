@@ -1,0 +1,219 @@
+{
+    "name": "vmware_asset_discovery_collection_status",
+    "label": "VMware Asset Inventory Discovery Collection Status",
+    "description": "VMware Asset Inventory Discovery Collection Status Dashboard",
+    "version": "24.03.08.1",
+    "enabled": false,
+    "dashboard_style": "tabbed",
+    "dashboard_type": "template",
+    "dashboard_folder": "Asset_Discovery",
+    "live_edit": true,
+    "template_variables": {
+        "CUST_ID": {
+            "contextId": "customerId"
+        },
+        "PROJ_ID": {
+            "contextId": "projectId"
+        },
+        "CUST_TAG": {
+            "contextId": "customerTag"
+        }
+    },
+    "dashboard_filters": {
+        "time_filter": true,
+        "default_time_filter_labels": [
+            "Last 1 week"
+        ],
+        "columns_filter": [
+            {
+                "id": "asset_id",
+                "label": "vCenter IP",
+                "type": "TEXT"
+            },
+            {
+                "id": "discovery_status",
+                "label": "Discovery Status",
+                "type": "TEXT"
+            },
+            {
+                "id": "bot_name",
+                "label": "Bot Name",
+                "type": "TEXT"
+            },
+            {
+                "id": "bot_source_type",
+                "label": "Source Bot Type",
+                "type": "TEXT"
+            },
+            {
+                "id": "bot_source_name",
+                "label": "Source Bot Name",
+                "type": "TEXT"
+            },
+            {
+                "id": "reason",
+                "label": "Message",
+                "type": "TEXT"
+            }
+        ],
+        "group_filters": [
+            {
+                "stream": "asset_inventory_collection_status_stream",
+                "extra_filter": "bot_source_type is 'vmware_vcenter' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                "title": "Bot Source Type",
+                "group_by": [
+                    "bot_source_type"
+                ],
+                "ts_column": "collection_timestamp",
+                "limit": 50,
+                "agg": "value_count",
+                "column": "bot_source_type",
+                "type": "int"
+            },
+            {
+                "stream": "asset_inventory_collection_status_stream",
+                "extra_filter": "bot_source_type is 'vmware_vcenter' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                "title": "Bot Source Name",
+                "group_by": [
+                    "bot_source_name"
+                ],
+                "ts_column": "collection_timestamp",
+                "limit": 50,
+                "agg": "value_count",
+                "column": "bot_name",
+                "type": "int"
+            },
+            {
+                "stream": "asset_inventory_collection_status_stream",
+                "extra_filter": "bot_source_type is 'vmware_vcenter' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                "title": "Bot Name",
+                "group_by": [
+                    "bot_name"
+                ],
+                "ts_column": "collection_timestamp",
+                "limit": 50,
+                "agg": "value_count",
+                "column": "bot_name",
+                "type": "int"
+            },
+            {
+                "stream": "asset_inventory_collection_status_stream",
+                "extra_filter": "bot_source_type is 'vmware_vcenter' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                "title": "Collection Status",
+                "group_by": [
+                    "collection_status"
+                ],
+                "ts_column": "collection_timestamp",
+                "agg": "value_count",
+                "column": "collection_status",
+                "type": "int"
+            },
+            {
+                "stream": "asset_inventory_collection_status_stream",
+                "title": "Reason",
+                "extra_filter": "reason is not empty and bot_source_type is 'vmware_vcenter' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                "group_by": [
+                    "reason"
+                ],
+                "limit": 50,
+                "ts_column": "collection_timestamp",
+                "agg": "value_count",
+                "column": "reason",
+                "type": "int"
+            }
+        ]
+    },
+    "dashboard_sections": [
+        {
+            "title": "Discovery Status",
+            "show_filter": true,
+            "scope_filter": "bot_source_type is 'vmware_vcenter'",
+            "widgets": [
+                {
+                    "title": "vCenter's",
+                    "widget_type": "custom_counter",
+                    "stream": "asset_inventory_collection_status_stream",
+                    "extra_filter": "customer_tag is '{{CUST_TAG}}' or customer_tag is empty and bot_source_type is 'vmware_vcenter'",
+                    "ts_column": "timestamp",
+                    "column": "asset_id",
+                    "min_width": 3,
+                    "height": 4,
+                    "max_width": 4,
+                    "agg": "cardinality",
+                    "type": "str",
+                    "widget_id": "8f81fe68"
+                },
+                {
+                    "widget_type": "pie_chart",
+                    "title": "Bot Name",
+                    "stream": "asset_inventory_collection_status_stream",
+                    "extra_filter": "collection_status in ['Failed','Success'] and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty) and bot_source_type is 'vmware_vcenter'",
+                    "ts_column": "timestamp",
+                    "min_width": 3,
+                    "height": 4,
+                    "max_width": 4,
+                    "style": {
+                        "color-map": {
+                            "Success": "#00BB00",
+                            "Failed": "#BB0000"
+                        }
+                    },
+                    "group_by": [
+                        "bot_name"
+                    ],
+                    "column": "asset_id",
+                    "agg": "value_count",
+                    "type": "str",
+                    "widget_id": "74f6c74a"
+                },
+                {
+                    "widget_type": "pie_chart",
+                    "title": "Bot Collection Status",
+                    "stream": "asset_inventory_collection_status_stream",
+                    "extra_filter": "collection_status in ['Failed','Success'] and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty) and bot_source_type is 'vmware_vcenter'",
+                    "ts_column": "timestamp",
+                    "min_width": 3,
+                    "height": 4,
+                    "max_width": 4,
+                    "style": {
+                        "color-map": {
+                            "Success": "#00BB00",
+                            "Failed": "#BB0000"
+                        }
+                    },
+                    "group_by": [
+                        "collection_status"
+                    ],
+                    "column": "asset_id",
+                    "agg": "value_count",
+                    "type": "str",
+                    "widget_id": "cec46511"
+                },
+                {
+                    "widget_type": "tabular",
+                    "title": "Discovery Details",
+                    "stream": "asset_inventory_collection_status_stream",
+                    "extra_filter": "customer_tag is '{{CUST_TAG}}' or customer_tag is empty and bot_source_type is 'vmware_vcenter'",
+                    "ts_column": "timestamp",
+                    "column": "asset_id",
+                    "agg": "value_count",
+                    "columns": {
+                        "asset_id": "vCenter IP",
+                        "bot_name": "Bot Name",
+                        "bot_source_name": "Bot Source Name",
+                        "bot_source_type": "Bot Source Type",
+                        "collection_status": "Discovery Status",
+                        "reason": "Message",
+                        "collection_timestamp": "Timestamp"
+                    },
+                    "type": "int",
+                    "min_width": 12,
+                    "height": 8,
+                    "max_width": 12,
+                    "widget_id": "4b267fce"
+                }
+            ]
+        }
+    ],
+    "saved_time": "2025-06-17T07:08:40.693644"
+}

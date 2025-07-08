@@ -1,0 +1,87 @@
+%% template_type="jinja"
+%%start_inline_object name="context_dynamic_form" and type="data" and format="json"
+{
+    "formFieldList": [
+        {
+            "fieldId": "customer_tag",
+            "label": "Tag of the customer",
+            "required": false,
+            "dataType": "string"
+        }
+    ]
+}
+%%end_inline_object
+
+ {% if customer_tag %} 
+      {% set customer_id = customer_id %}
+      {% set customer_tag = customer_tag %}
+      {% set customerTag = customer_tag %}
+   {% elif customerTag %} 
+      {% set customer_id = customer_id %}
+      {% set customer_tag = customerTag %}
+   {% else %}
+      {% set customer_id = '' %}
+      {% set customer_tag = '' %}
+   {% endif %}  
+
+## --> @dm:empty
+## --> @dm:addrow alertEndpointName = 'Syslog' and project_id = "${PKG_CONTEXT_ENDPOINT_Syslog_PROJECT_ID}" and webhookURL = "${PKG_CONTEXT_ENDPOINT_Syslog_URL}"
+## --> @dm:save name="temp-alert_endpoint_details"
+
+--> @c:new-block
+{% if customer_tag %}  
+--> @dm:query-persistent-stream-from-bookmark name = "syslog_udp_event_stream_all"  & bookmark = "syslog_udp_event_stream_all_bkmrk" and query="customerTag is '{{ customer_tag }}'"
+{% else %} 
+ --> @dm:query-persistent-stream-from-bookmark name = "syslog_udp_event_stream_all"  & bookmark = "syslog_udp_event_stream_all_bkmrk" and query="customer_tag is empty"   
+{% endif %}
+    --> @dm:rename-columns message="Message"
+    --> @dm:grok column = 'message' & pattern = "<%{INT:priority}>%{NUMBER:event_number}:\s*\S+:\s*\S+ +\d+ %{DATA:time}:\s*%%{DATA:syslog_code}:\s*%{GREEDYDATA:log_message}"
+    {% if customer_tag %}
+    --> @dm:enrich-using-rule-dict dict = "{{ customer_tag }}_syslog_alert_rules_dict" & enrich_columns = "action,state,severity,raise_code,alarm_class,grok,key_eval"  and cache="yes" and cache_refresh_seconds=3600
+    {% else %} 
+    --> @dm:enrich-using-rule-dict dict = "syslog_alert_rules_dict" & enrich_columns = "action,state,severity,raise_code,alarm_class,grok,key_eval"  and cache="yes" and cache_refresh_seconds=3600
+    {% endif %}
+    --> @rn:write-stream name="syslog_stream"
+    --> @dm:add-missing-columns columns="priority" and value=0
+    --> @dm:eval syslog_severity_num="int(priority) % 8 if priority else 8"
+    --> @dm:add-missing-columns columns="syslog_severity"
+    --> *exec:if-condition syslog_severity is empty
+       --> @dm:enrich dict="syslog-severities" and src_key_cols="syslog_severity_num" and dict_key_cols="serverity_num" and enrich_cols="syslog_severity"
+    --> @exec:end-if
+    --> *dm:filter action is 'KEEP'
+    --> *dm:filter time is not empty
+    --> @dm:grok column="log_message" and pattern_column="grok" and _skip_errors="yes"
+    --> @dm:add-missing-columns columns="key_eval,rda_gw_client_ip"
+    --> @dm:eval key="eval(key_eval) if key_eval else f'{rda_gw_client_ip}_{syslog_code}'"
+    --> @dm:eval alert_correlation_key="f'{rda_gw_client_ip}_{syslog_code}'"
+    --> @dm:selectcolumns exclude = "_RDA_Id|count_"
+    ##--> @dm:enrich dict = "temp-alert_endpoint_details" & src_key_cols = "customerTag,projectId" & dict_key_cols="customer_tag,project_id" & enrich_cols = "webhookURL,alertEndpointName"
+    {% if customer_tag  %}
+    --> @dm:enrich-conditional dict = "{{customer_tag}}_syslog_endpoint_details" & enrich_cols = "webhookURL,alertEndpointName" and condition = "alertEndpointName is 'Syslog' and project_id is '$projectId'"
+    {% else %} 
+    --> @dm:enrich-conditional dict = "syslog_endpoint_details" & enrich_cols = "webhookURL,alertEndpointName" and condition = "alertEndpointName is 'Syslog' and project_id is '$projectId'"
+
+    {% endif %}
+    --> @dm:manipulate-string from  = "alertEndpointName" and func = "strip" and to = "alertEndpointName"
+   --> *exec:if-condition device_status is "MANAGED" and webhookURL is not empty and alertEndpointName is 'Syslog'
+    --> @dm:selectcolumns exclude = "alertEndpointName"
+    --> @dm:to-json output_column = 'syslog_payload'
+    --> @dm:save name="temp-syslogs-payload"
+     --> @dm:recall name="temp-syslogs-payload"
+
+
+# Process each row for webhookURL and send the data
+{% raw %}
+{% for row in rows %}
+    {% if row.webhookURL %}
+          --> @restclient:write url  = '{{ row.webhookURL }}' & envelope is "{{'{{syslog_payload}}'}}" & batch_size = 1
+    {% endif %}
+{% endfor %}
+{% endraw %}
+    --> @exec:end-if
+
+
+
+
+    
+

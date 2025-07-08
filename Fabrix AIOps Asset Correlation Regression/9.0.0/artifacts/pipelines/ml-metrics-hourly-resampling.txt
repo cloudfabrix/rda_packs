@@ -1,0 +1,25 @@
+%% stream = no and limit = 0
+
+## select high variance metrics and write resampled data to a stream to be consumed for correlation and regression
+@dm:empty
+    --> @dm:addrow name='ml-variance-metrics-list' and limit=0
+    --> #dm:query-persistent-stream *
+    --> @dm:save name='temp-metrics-variance'
+    --> @dm:eval statistically_selected="'Yes' if variance > 100 else 'No'"
+    --> @rn:write-stream name='ml-variance-metrics-list'
+    --> *dm:filter statistically_selected is 'Yes' or user_selected is 'Yes'
+    --> @dm:skip-pipeline-if-shape row_count=0
+    --> @dm:save name='temp-variance-selected-metrics'
+
+## collect asset metrics which has high variance and resample to 1H interval
+--> @c:data-loop dataset = "temp-variance-selected-metrics" and columns = 'metric_id,metric_source'
+    --> @dm:query-persistent-stream-iterate-by-time name='oia-metrics-data' and max_aggregation_groups='20000' and
+            query="metric_source is '$metric_source' and metric_id is '$metric_id' and metric_timestamp is after -1 hour" and
+            interval='1h' and timestamp_column='metric_timestamp' and aggs='avg:value' and
+            groupby='asset_id,metric_id,metric_source,asset_name,metric_name,unit' and include_time_intervals='yes'
+    --> @dm:enrich dict='temp-metrics-variance' and src_key_cols='asset_id,metric_id,metric_source' and
+            dict_key_cols='asset_id,metric_id,metric_source' and enrich_cols='variance,customer_id,customer_tag'
+    --> @dm:rename-columns value='value_avg' and metric_timestamp='from_interval'
+    --> @dm:selectcolumns include="^metric_id$|^metric_name$|^unit$|^metric_source$|^asset_id$|^asset_name$|^metric_timestamp$|^value$|^variance$|^customer_id$|^customer_tag$"
+    --> @rn:write-stream name='ml-resampled-metrics'
+

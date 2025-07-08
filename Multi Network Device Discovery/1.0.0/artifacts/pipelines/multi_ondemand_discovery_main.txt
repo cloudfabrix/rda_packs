@@ -1,0 +1,129 @@
+%%template_type="jinja"
+
+##%% import_src_type = "asset-discovery"
+%%start_inline_object name="context_dynamic_form" and type="data" and format="json"
+{
+    "formFieldList": [
+        {
+            "fieldId": "customer_tag",
+            "label": "Tag of the customer",
+            "required": false,
+            "dataType": "string"
+        }
+    ]
+}
+%%end_inline_object
+
+@dm:empty
+    --> @dm:save name = "temp-customer-context"
+
+
+   {% if customer_tag %} 
+      {% set customer_id = customer_id %}
+      {% set customer_tag = customer_tag %}
+      {% set customerTag = customer_tag %}
+      {% set network_name = network_name %}
+   {% elif customerTag %} 
+      {% set customer_id = customer_id %}
+      {% set customer_tag = customerTag %}
+   {% else %}
+      {% set customer_id = '' %}
+      {% set customer_tag = '' %}
+   {% endif %}   
+
+## -->@c:new-block
+##     --> @dm:empty
+##     --> @dm:save name = "temp-discovery"
+##     --> @dm:save name = "temp-discovery-ondemand"
+##     --> @dm:save name = "temp-main_discovery_result"
+##     --> @dm:save name = "temp-discovery-ondemand-data"
+##     --> @dm:save name = "temp-ondemand-discovery"
+##     --> @dm:save name = "temp-discovery-data"
+
+--> @c:flex-block
+    --> @dm:empty
+    --> @exec:define-function name = 'test-func'
+       --> @exec:run-pipeline name="multi_juniper_discovery_main_pipeline"
+       --> @exec:run-pipeline name="multi_cisco_discovery_main_pipeline"
+       ## --> @exec:run-pipeline name="multi_vyatta_discovery_main_pipeline"
+       --> @exec:run-pipeline name="multi_fortinet_discovery_main_pipeline"
+       ## --> @exec:run-pipeline name="multi_viptela_discovery_main_pipeline"
+       --> @exec:run-pipeline name="multi_discovery_main_pipeline"
+       --> @exec:run-pipeline name = "multi_other_vendors_discovery_main_pipeline"
+    --> @exec:end-function
+
+
+
+## ondemand execution
+--> @c:new-block
+    --> @exec:get-input
+    ##--> @dm:save name = "ondemand-inp-ui-data"
+    --> @dm:save name = "temp-discovery-ondemand-data"
+    ## explode others and enrich the discovery_scope
+    --> @dm:selectcolumns include = "Others|customer_tag|customer_id|network_name"
+    ## --> @dm:eval Others = 'Others.replace("\'", "\"")'
+    --> @dm:explode-json column="Others"
+    --> @dm:eval key ="'key'"
+     -->  @dm:add-missing-columns     columns = "customer_tag,customer_id,network_name" 
+    --> *dm:filter device_ip is not empty
+    --> @dm:map attr = "device_ip" & func = 'strip'
+    --> @dm:save name = "temp-discovery-ondemand"
+
+## ondemand discovery
+--> @c:new-block
+    --> @dm:recall name = "temp-discovery-ondemand-data" and return_empty = "yes"
+    --> @dm:skip-block-if-shape row_count = 0
+    --> @dm:recall name = "temp-discovery-ondemand" and return_empty = "yes"
+    --> @dm:eval current_time ='int(time_now_as_ms())'
+    
+    --> @dm:eval ondemand_discovery ="'yes'"
+    --> @dm:eval pipeline_name="'discovery_main_pipeline'"
+    --> @dm:rename-columns discovery_enabled = "discovery_scope"
+    --> @dm:save name="temp-ondemand-discovery"
+
+    ##--> @c:data-loop dataset="temp-creds" and columns="name"
+    ##--> @dm:recall name="temp-ondemand-discovery"
+    ## --> @dm:skip-block-if-shape row_count = 0
+    ##-->@dm:eval name = "'$name'"
+    ## --> @dm:save name="temp-discovery-data" & append = "yes"
+    ##--> @dm:enrich dict = "temp-creds" & src_key_cols = "key" & dict_key_cols="key" & enrich_cols = "name"
+
+    ##--> @c:new-block
+    ##--> @dm:recall name="temp-discovery-data"
+    ##--> @dm:save name="main_discovery_result-ondemand1"
+    --> @exec:run-pipeline-multi-proc name="multi_discovery_main_pipeline" 
+    --> @dm:save name="temp-run_discovery-result"
+   
+    
+## scheduled execution
+--> @c:new-block
+    --> @dm:recall name = "temp-discovery-ondemand-data" and return_empty = "yes"
+    --> @dm:skip-block-if-shape row_count > 0
+    --> @dm:empty
+     {% if customer_tag %}
+        --> #dm:query-persistent-stream auth_state = 'Success' and (customer_tag is '{{customer_tag}}') and (network_name is '{{network_name}}')
+            with-input name = "multi_network_access_verification" & limit = "0"
+       {% else %}
+        --> #dm:query-persistent-stream auth_state = 'Success' and (customer_tag is empty or customer_tag is 'None') and (network_name is '{{network_name}}')
+            with-input name = "multi_network_access_verification" & limit = "0"
+      {% endif %}  
+    --> @dm:selectcolumns exclude= "limit|index|name"
+    --> @dm:add-missing-columns columns = "customer_tag,customer_id,network_name"
+    --> @dm:selectcolumns include="discovery_scope|key|ip_address|collection_timestamp|customer_tag|customer_id|used_cred|network_name"
+    --> @dm:rename-columns device_ip  = "ip_address"
+    --> @dm:selectcolumns exclude= "limit|index|name|^discovery_scope1$|^discovery_scope2$"
+    --> *dm:filter discovery_scope == 'yes'
+    --> @dm:rename-columns discovery_enabled = "discovery_scope" & name = "used_cred"
+    --> @dm:eval pipeline_name="'discovery_main_pipeline'"
+    --> @dm:save name="temp-customer-details"
+    --> @dm:selectcolumns exclude= "count_|_RDA_Id|timestamp|key"
+      --> @dm:eval key ="'key'"
+       ## --> @dm:enrich dict = "temp-creds" & src_key_cols = "key" & dict_key_cols="key" & enrich_cols = "name"
+
+    --> @dm:save name = "temp-discovery"
+    ##--> @dm:save name="main_discovery_mlt_sch"
+    ## --> @exec:run-pipeline-by-row-multi-proc pipeline_col="pipeline_name" and save_output="yes"
+    --> @exec:run-pipeline-multi-proc name="multi_discovery_main_pipeline"
+    ##--> @dm:save name="main_discovery_result_mlt"
+    --> @dm:save name="temp-run_discovery-result"
+

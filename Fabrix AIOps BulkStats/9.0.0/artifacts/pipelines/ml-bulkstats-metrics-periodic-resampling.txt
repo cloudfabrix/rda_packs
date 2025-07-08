@@ -1,0 +1,20 @@
+%% stream = no and limit = 0
+
+@dm:recall name='ml-bulkstats-available-metrics'
+    --> @dm:implode key_columns='device,instance_key' and merge_columns='KPI_Name' and merge_sep=',avg:' and keep_columns='schema,customer_id,customer_tag'
+    --> @dm:eval KPI_Name_agg="'avg:' + KPI_Name"
+    --> @dm:to-type columns='instance_key' and type='str'
+    --> @dm:implode key_columns='KPI_Name_agg' and merge_columns='device,instance_key' and merge_sep=',' and keep_columns='schema,customer_id,customer_tag'
+    --> @dm:eval device_list="device.split(',')" and instance_key_list="instance_key.split(',')"
+    --> @dm:to-type columns='device_list,instance_key_list' and type='str'
+    --> @dm:save name='temp-metrics'
+
+--> @c:data-loop columns='KPI_Name_agg,device_list,instance_key_list,schema,customer_id,customer_tag' and dataset='temp-metrics'
+    --> @dm:query-persistent-stream-iterate-by-time name='mobility_kpi_metrics_data' and max_aggregation_groups='20000' and
+            query="device in $device_list and instance_key in $instance_key_list and schema is '$schema' and timestamp is after -1 hour" and
+            interval='1h' and timestamp_column='timestamp' and aggs='$KPI_Name_agg' and
+            groupby='device,instance_key,schema' and include_time_intervals='yes' and chunk_size='5000'
+    --> @dm:copy-columns from='from_interval' and to='timestamp'
+    --> @dm:eval customer_tag="'$customer_tag'" and customer_id="'$customer_id'"
+    --> @rn:write-stream name='ml-bulkstats-resampled-metrics' and direct_to_opensearch="yes"
+

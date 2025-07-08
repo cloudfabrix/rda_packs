@@ -1,0 +1,135 @@
+{
+    "name": "network_discovery_targets",
+    "label": "Network Device Discovery Targets",
+    "description": "Network Asset Discovery Targets",
+    "version": "24.9.20.1",
+    "enabled": false,
+    "dashboard_style": "tabbed",
+    "dashboard_folder": "NetworkDevicePack",
+    "status_poller": {},
+    "dashboard_filters": {
+        "time_filter": true,
+        "default_time_filter_non_removable": false,
+        "show_default_time_filter": true,
+        "additional_datetime_column_filters": [
+           
+        ],
+        "columns_filter": [
+           
+        ],
+        "default_time_filter_labels": [
+            "All Time"
+        ],
+        "group_filters": []
+    },
+    "dashboard_sections": [
+        {
+            "title": "Hosts and Targets",
+            "show_filter": true,
+
+            "widgets": [
+                {
+                    "title": "Hosts and Targets",
+                    "widget_type": "tabular",
+                    "stream": "rda_datasets_meta",
+                    "duration_hours": 87600,
+                    "extra_filter": "name in ['discovery']",
+                    "refreshOptions": {
+                        "refreshType": "Periodic",
+                        "refreshInterval": 30000
+                    },
+                    "ts_column": "saved_time",
+                    "min_width": 12,
+                    "height": 12,
+                    "max_width": 12,
+                    "paginated": true,
+                    "showRowSummary": true,
+                    "max_rows": 50,
+                    "columns": {
+                        "folder": {
+                            "title": "Folder",
+                            "key": true
+                        },
+                        "name": {
+                            "title": "Name",
+                            "key": true
+                        },
+                        "num_rows": {
+                            "title": "Entries"
+                        },
+                        "timestamp": {
+                            "title": "When",
+                            "type": "HUMANIZE_TIME_DELTA",
+                            "source-column": "saved_time",
+                            "sortable": false
+                        }
+                    },
+                    "actions": [
+                        {
+                            "permission": "rda:dataset:view",
+                            "title": "View Discovery Targets",
+                            "type": "POPUP_REPORT",
+                            "selectionType": "SINGLE",
+                            "displayLabelColumnId": "name",
+                            "drillDownLinkField": "name",
+                            "identifier": "saas-service-action:dataset-view-metadata",
+                            "paginated": true,
+                            "api-endpoint": {
+                                "service-name": "saas-reports",
+                                "methodName": "getReport",
+                                "stringified-params": false,
+                                "parse-output": false,
+                                "params": [
+                                    {
+                                        "reportId": "rda.saas.dataset.head100"
+                                    }
+                                ]
+                            }
+                        },
+                        
+                        {
+                            "permission": "rda:dataset:view",
+                            "title": "Manage Discovery Targets",
+                            "type": "POPUP_REPORT",
+                            "selectionType": "SINGLE",
+                            "identifier": "saas-service-action:dataset-manage-data",
+                            "paginated": true,
+                            "api-endpoint": {
+                                "service-name": "saas-reports",
+                                "methodName": "getReport",
+                                "stringified-params": false,
+                                "parse-output": false,
+                                "params": [
+                                    {
+                                        "reportId": "rda.saas.dataset.data.table"
+                                    }
+                                ]
+                            }
+                        },
+                        
+                        {
+                            "permission": "rda:dataset:view",
+                            "title": "Export",
+                            "type": "POPUP_FORM",
+                            "selectionType": "SINGLE",
+                            "identifier": "saas-service-action:dataset-export",
+                            "api-endpoint": {
+                                "service-name": "saas-reports",
+                                "methodName": "getForm",
+                                "stringified-params": false,
+                                "parse-output": false,
+                                "params": [
+                                    {
+                                        "formId": "rda.saas.dataset.export"
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "widget_id": "94a3fc11"
+                }
+            ]
+        }
+    ],
+    "saved_time": "2023-10-10T14:21:47.867822"
+}

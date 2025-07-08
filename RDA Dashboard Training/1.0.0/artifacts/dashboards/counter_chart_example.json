@@ -1,0 +1,204 @@
+{
+    "name": "counter_chart_example",
+    "label": "Counter Chart",
+    "description": "Cunter Chart example",
+    "version": "10.12.24.1",
+    "enabled": true,
+    "showTitle": true,
+    "dashboard_generator": {
+        "attachment": "widget_code_generator"
+    },
+    "dashboard_style": "auto",
+    "live_edit": true,
+    "status_poller": {},
+    "dashboard_type": "dashboard",
+    "dashboard_pages": [],
+    "dashboard_filters": {
+        "time_filter": true,
+        "default_time_filter_labels": [
+            "All Time"
+        ],
+        "columns_filter": [],
+        "group_filters": []
+    },
+    "dashboard_sections": [
+        {
+            "title": "Counter Chart",
+            "show_filter": true,
+            "widgets": [
+                {
+                    "title": "Custom Counter Example",
+                    "widget_type": "custom_counter",
+                    "min_width": 6,
+                    "duration_hours": 24000,
+                    "max_width": 6,
+                    "formatter1": "DescriptiveCountFormatter",
+                    "stream": "main_enhanced",
+                    "ts_column": "timestamp",
+                    "column": "ID",
+                    "style": {
+                        "color-list": [
+                            "#0000FF"
+                        ]
+                    },
+                    "agg": "value_count",
+                    "type": "int",
+                    "widget_id": "f790023c"
+                },
+                {
+                    "title": "Expression Counter Example",
+                    "widget_type": "expression_counter",
+                    "min_width": 6,
+                    "duration_hours": 24000,
+                    "max_width": 6,
+                    "color": "#8e24aa",
+                    "expression": "((input+output)) * 100",
+                    "unit": "%",
+                    "segments": [
+                        {
+                            "variable": "output",
+                            "duration_hours": 24000,
+                            "stream": "main_enhanced",
+                            "ts_column": "timestamp",
+                            "group_by": [
+                                "city"
+                            ],
+                            "column": "count_",
+                            "agg": "cardinality",
+                            "type": "int"
+                        },
+                        {
+                            "variable": "input",
+                            "stream": "main_enhanced",
+                            "ts_column": "timestamp",
+                            "duration_hours": 24000,
+                            "group_by": [
+                                "name"
+                            ],
+                            "column": "count",
+                            "agg": "value_count",
+                            "type": "int"
+                        }
+                    ],
+                    "widget_id": "da05b722"
+                },
+                {
+                    "title": "Group Counter Chart Example",
+                    "widget_type": "counter",
+                    "min_width": 12,
+                    "duration_hours": 24000,
+                    "max_width": 12,
+                    "stream": "main_enhanced",
+                    "ts_column": "timestamp",
+                    "style": {
+                        "color-map": {
+                            "Austin": "#388e3c",
+                            "San Francisco": "#8e24aa",
+                            "Hyderabad": "#d32f2f",
+                            "Portland": "#8BC34A"
+                        }
+                    },
+                    "sparkline": {
+                        "interval": "1d"
+                    },
+                    "group_by": [
+                        "city"
+                    ],
+                    "total_counter": {
+                        "show": true,
+                        "label": "Total Count",
+                        "location": "right",
+                        "color": "#0096FF"
+                    },
+                    "column": "count_",
+                    "agg": "sum",
+                    "type": "int",
+                    "widget_id": "2812e30a"
+                },
+                {
+                    "title": "Group Counter Chart Using Trend",
+                    "widget_type": "counter",
+                    "min_width": 6,
+                    "duration_hours": 24000,
+                    "max_width": 6,
+                    "stream": "main_enhanced",
+                    "ts_column": "timestamp",
+                    "style": {
+                        "color-map": {
+                            "Austin": "#388e3c",
+                            "San Francisco": "#8e24aa",
+                            "Hyderabad": "#d32f2f",
+                            "Portland": "#8BC34A"
+                        }
+                    },
+                    "sparkline": {
+                        "interval": "1s",
+                        "trend": {
+                            "data_points": "first_last",
+                            "show_difference": "percentage",
+                            "styles": {
+                                "showArrow": false,
+                                "color": {
+                                    "up": "blue",
+                                    "down": "green"
+                                }
+                            }
+                        }
+                    },
+                    "group_by": [
+                        "city"
+                    ],
+                    "total_counter": {
+                        "show": true,
+                        "label": "Total Count",
+                        "location": "right",
+                        "color": "#0096FF"
+                    },
+                    "column": "count_",
+                    "agg": "sum",
+                    "type": "int",
+                    "widget_id": "bb176e85"
+                },
+                {
+                    "widget_type": "counter",
+                    "title": "Group Counter with formatter using Trend",
+                    "stream": "main_enhanced",
+                    "duration_hours": 24000,
+                    "formatter": "DescriptiveCountFormatter",
+                    "ts_column": "timestamp",
+                    "min_width": 6,
+                    "max_width": 6,
+                    "height": 6,
+                    "group_by": [
+                        "severity"
+                    ],
+                    "sparkline": {
+                        "interval": "1s",
+                        "trend": {
+                            "data_points": "first_last",
+                            "show_difference": "value",
+                            "styles": {
+                                "showArrow": false,
+                                "color": {
+                                    "up": "blue",
+                                    "down": "green"
+                                }
+                            }
+                        }
+                    },
+                    "column": "count_",
+                    "agg": "sum",
+                    "type": "int",
+                    "widget_id": "1989665b"
+                }
+            ]
+        }
+    ],
+    "saved_time": "2025-03-14T19:45:14.256909",
+    "attachments": [
+        {
+            "name": "widget_code_generator",
+            "value": "{%- set widgets =  dashboard[\"dashboard_sections\"][0][\"widgets\"] -%}\r\n{%- set new_widgets =  [] -%}\r\n{%- set ns =  namespace(count=0) -%}\r\n\r\n{%- for w in widgets -%}\r\n    {%- if w.get(\"widget_type\") -%}\r\n        {%-\r\n            set nw = {\r\n                \"title\": \"JSON\",\r\n                \"widget_group\": \"g\"+str(ns.count),\r\n                \"min_width\": w.get(\"min_width\", 6),\r\n                \"max_width\": w.get(\"max_width\", 6),\r\n                \"height\": w.get(\"height\", 4),\r\n                \"widget_type\": \"codeblock\",\r\n                \"content\": json_dumps_indent(w, 2),\r\n                \"lang\": \"json\",\r\n                \"widget_id\": w.get(\"widget_id\", str(ns.count)) + \"_code\"\r\n            }\r\n        -%}\r\n        {%- set _ = w.update({\"widget_group\":  \"g\"+str(ns.count) }) -%}\r\n        {%- set _ = new_widgets.append(nw) -%}\r\n        {%- set ns.count = ns.count + 1 -%}\r\n    {%- endif -%}\r\n{%- endfor -%}\r\n\r\n{%- set _ = widgets.extend(new_widgets) -%}"
+        }
+    ]
+}

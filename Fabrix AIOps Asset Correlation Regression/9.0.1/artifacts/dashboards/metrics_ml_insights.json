@@ -1,0 +1,328 @@
+{
+    "name": "metrics_ml_insights",
+    "label": "Metrics ML Insights",
+    "description": "Dashboard for ML Insights on Metrics",
+    "dashboard_folder": "ML",
+    "enabled": true,
+    "dashboard_type": "template",
+    "template_variables": {
+        "CUST_ID": {
+            "contextId": "customerId"
+        },
+        "PROJ_ID": {
+            "contextId": "projectId"
+        },
+        "CUST_TAG": {
+            "contextId": "customerTag"
+        }
+    },
+    "dashboard_filters": {
+        "time_filter": true,
+        "default_time_filter_labels": [
+            "Last 1 month"
+        ],
+        "show_default_time_filter": true,
+        "columns_filter": [
+            {
+                "id": "asset_id",
+                "label": "Device",
+                "type": "TEXT"
+            },
+            {
+                "id": "metric_name",
+                "label": "Metric Name",
+                "type": "TEXT"
+            },
+            {
+                "id": "metric_source",
+                "label": "Metric Source",
+                "type": "TEXT"
+            },
+            {
+                "id": "accuracy",
+                "label": "Accuracy",
+                "type": "DOUBLE"
+            },
+            {
+                "id": "anomalies_percent",
+                "label": "Anomalies Percent",
+                "type": "DOUBLE"
+            },
+            {
+                "id": "group_label",
+                "label": "Correlation Group",
+                "type": "TEXT"
+            }
+        ],
+        "group_filters": [
+            {
+                "stream": "ml-correlated-groups-per-asset",
+                "extra_filter": "customer_tag is '{{CUST_TAG}}' or customer_tag is empty",
+                "title": "Metric Source",
+                "duration_hours": 1000,
+                "group_by": [
+                    "metric_source"
+                ],
+                "ts_column": "timestamp",
+                "agg": "cardinality",
+                "column": "asset_id",
+                "type": "int"
+            },
+            {
+                "stream": "ml-correlated-groups-per-asset",
+                "extra_filter": "customer_tag is '{{CUST_TAG}}' or customer_tag is empty",
+                "title": "Metric",
+                "duration_hours": 1000,
+                "group_by": [
+                    "metric_name"
+                ],
+                "ts_column": "timestamp",
+                "agg": "cardinality",
+                "column": "asset_id",
+                "type": "int"
+            },
+            {
+                "stream": "ml-correlated-groups-per-asset",
+                "extra_filter": "customer_tag is '{{CUST_TAG}}' or customer_tag is empty",
+                "title": "Correlation Group",
+                "duration_hours": 1000,
+                "group_by": [
+                    "group_label"
+                ],
+                "ts_column": "timestamp",
+                "agg": "cardinality",
+                "column": "asset_id",
+                "type": "int"
+            }
+        ]
+    },
+    "dashboard_sections": [
+        {
+            "title": "Summary",
+            "show_filter": true,
+            "widgets": [
+                {
+                    "title": "Devices",
+                    "widget_type": "custom_counter",
+                    "formatter": "DescriptiveCountFormatter",
+                    "stream": "ml-correlated-groups-per-asset",
+                    "extra_filter": "customer_tag is '{{CUST_TAG}}' or customer_tag is empty",
+                    "ts_column": "timestamp",
+                    "duration_hours": 1000,
+                    "min_width": 4,
+                    "max_width": 4,
+                    "height": 3,
+                    "column": "asset_id",
+                    "agg": "cardinality",
+                    "type": "int",
+                    "widget_id": "02be1e20"
+                },
+                {
+                    "title": "Metrics",
+                    "widget_type": "custom_counter",
+                    "formatter": "DescriptiveCountFormatter",
+                    "stream": "ml-correlated-assets",
+                    "extra_filter": "customer_tag is '{{CUST_TAG}}' or customer_tag is empty",
+                    "ts_column": "timestamp",
+                    "duration_hours": 1000,
+                    "min_width": 4,
+                    "max_width": 4,
+                    "height": 3,
+                    "column": "metric_name",
+                    "agg": "cardinality",
+                    "type": "int",
+                    "widget_id": "609c299a"
+                },
+                {
+                    "title": "Correlation Groups",
+                    "widget_type": "custom_counter",
+                    "formatter": "DescriptiveCountFormatter",
+                    "stream": "ml-correlated-assets",
+                    "ts_column": "timestamp",
+                    "duration_hours": 1000,
+                    "extra_filter": "group_label is not 'No Group' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "group_by": [
+                        "group_label"
+                    ],
+                    "min_width": 4,
+                    "max_width": 4,
+                    "height": 3,
+                    "column": "group_label",
+                    "agg": "cardinality",
+                    "type": "int",
+                    "widget_id": "6f3f60dd"
+                },
+                {
+                    "title": "Devices with Increasing Trend",
+                    "widget_type": "counter",
+                    "formatter": "DescriptiveCountFormatter",
+                    "extra_filter": "overall_trend is 'Increasing' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "stream": "ml-correlated-groups-per-asset",
+                    "ts_column": "timestamp",
+                    "group_by": [
+                        "metric_name"
+                    ],
+                    "min_width": 4,
+                    "max_width": 6,
+                    "height": 4,
+                    "duration_hours": 1000,
+                    "column": "asset_id",
+                    "agg": "cardinality",
+                    "type": "int",
+                    "widget_id": "0fd5187b"
+                },
+                {
+                    "title": "Devices with Decreasing Trend",
+                    "widget_type": "counter",
+                    "formatter": "DescriptiveCountFormatter",
+                    "extra_filter": "overall_trend is 'Decreasing' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "stream": "ml-correlated-groups-per-asset",
+                    "ts_column": "timestamp",
+                    "group_by": [
+                        "metric_name"
+                    ],
+                    "min_width": 4,
+                    "max_width": 6,
+                    "height": 4,
+                    "duration_hours": 1000,
+                    "column": "asset_id",
+                    "agg": "cardinality",
+                    "type": "int",
+                    "widget_id": "07416b61"
+                },
+                {
+                    "title": "Anomalies",
+                    "widget_type": "bar_chart",
+                    "stream": "ml-correlated-assets",
+                    "extra_filter": "customer_tag is '{{CUST_TAG}}' or customer_tag is empty",
+                    "min_width": 6,
+                    "max_width": 6,
+                    "height": 6,
+                    "ts_column": "timestamp",
+                    "chartProperties": {
+                        "yAxisLabel": "Anomalies Count",
+                        "xAxisLabel": "Metric",
+                        "stacked": true,
+                        "legendLocation": "none",
+                        "orientation": "vertical"
+                    },
+                    "duration_hours": 10000,
+                    "group_by": [
+                        "metric_name"
+                    ],
+                    "column": "anomalies_count",
+                    "agg": "sum",
+                    "type": "int",
+                    "widget_id": "f4786acb"
+                },
+                {
+                    "title": "Overall Accuracy",
+                    "widget_type": "bar_chart",
+                    "stream": "ml-correlated-assets",
+                    "extra_filter": "customer_tag is '{{CUST_TAG}}' or customer_tag is empty",
+                    "min_width": 6,
+                    "max_width": 6,
+                    "height": 6,
+                    "ts_column": "timestamp",
+                    "chartProperties": {
+                        "yAxisLabel": "Accuracy",
+                        "xAxisLabel": "Metric",
+                        "stacked": true,
+                        "legendLocation": "none",
+                        "orientation": "vertical"
+                    },
+                    "duration_hours": 10000,
+                    "group_by": [
+                        "metric_name"
+                    ],
+                    "column": "accuracy",
+                    "agg": "avg",
+                    "type": "float",
+                    "widget_id": "6e81eeb8"
+                },
+                {
+                    "title": "Correlation Groups",
+                    "widget_type": "tabular",
+                    "stream": "ml-correlated-groups-per-asset",
+                    "extra_filter": "customer_tag is '{{CUST_TAG}}' or customer_tag is empty",
+                    "min_width": 12,
+                    "height": 8,
+                    "max_width": 12,
+                    "ts_column": "timestamp",
+                    "resizableColumns": true,
+                    "paginated": true,
+                    "duration_hours": 1000,
+                    "remote_searchable": true,
+                    "remote_searchable_cols": [
+                        "asset_id",
+                        "asset_name",
+                        "metric_id",
+                        "metric_name"
+                    ],
+                    "columns": {
+                        "id": {
+                            "title": "ID",
+                            "type": "FIXED_VALUE",
+                            "value": "user-dashboard-regression_dashboard",
+                            "key": true,
+                            "hidden": true
+                        },
+                        "metric_source": "Metric Source",
+                        "metric_id": {
+                            "title": "Metric ID",
+                            "key": true,
+                            "visible": false
+                        },
+                        "metric_name": {
+                            "title": "Metric Name",
+                            "visible": true,
+                            "key": true
+                        },
+                        "asset_id": {
+                            "title": "Device",
+                            "key": true
+                        },
+                        "asset_name": {
+                            "title": "Device Name",
+                            "key": true
+                        },
+                        "group_label": "Correlation Group",
+                        "group": {
+                            "title": "Correlation Group",
+                            "key": true,
+                            "hidden": true
+                        },
+                        "model_name": {
+                            "title": "Model Name",
+                            "key": true,
+                            "visible": false
+                        },
+                        "unit": {
+                            "title": "Unit",
+                            "key": true,
+                            "hidden": true
+                        },
+                        "seasonality": "Seasonality",
+                        "overall_trend": "Overall Trend",
+                        "accuracy": "Accuracy (%)",
+                        "anomalies_percent": "Anomalies (%)"
+                    },
+                    "actions": [
+                        {
+                            "appName": "user-dashboard",
+                            "permission": "ml:ml-jobs:viewSampledata",
+                            "identifier": "ViewRegressionDashboard",
+                            "selectionType": "SINGLE",
+                            "stateName": "app.featureapp",
+                            "drillDownLinkField": "asset_id",
+                            "title": "View Regression Dashboard",
+                            "type": "GO_TO_APP_STATE"
+                        }
+                    ],
+                    "widget_id": "3d7466a3"
+                }
+            ]
+        }
+    ],
+    "saved_time": "2025-05-18T17:20:08.562578"
+}

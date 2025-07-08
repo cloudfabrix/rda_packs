@@ -1,0 +1,44 @@
+%% stream = no and limit = 0
+
+@dm:empty
+    --> @dm:addrow name='ml-variance-metrics-list' and limit=0
+    --> #dm:query-persistent-stream *
+    --> @dm:eval statistically_selected="'Yes' if variance > 100 else 'No'"
+    --> @rn:write-stream name='ml-variance-metrics-list'
+    --> *dm:filter statistically_selected is 'Yes' or user_selected is 'Yes'
+    --> @dm:add-missing-columns columns='static_upper_threshold'
+    --> @dm:save name='temp-selected-asset-metrics-list'
+    --> @dm:dedup columns='metric_id'
+    --> @dm:skip-pipeline-if-shape row_count=0
+    --> @dm:save name='temp-metrics-list'
+
+## correlation across assets for each metric across assets
+## parsing correlation output such that each row represents an asset belonging to a group
+--> @c:data-loop columns='metric_source,metric_id' and dataset='temp-metrics-list'
+    --> @dm:empty
+    --> @dm:addrow name='ml-resampled-metrics' and limit='0' and max_rows='10000'
+    --> #dm:query-persistent-stream metric_source is '$metric_source' and metric_id is '$metric_id' and
+            variance is greater than 100
+    --> @dm:skip-block-if-shape row_count=0
+    --> @dm:metric-correlator metric_label='asset_id' & timestamp_column='metric_timestamp' &
+            value_column='value' & correlation_threshold=0.7
+    --> @dm:head n=1
+    --> @dm:eval Groups="str(Groups)"
+    --> @dm:eval Groups = "'}@{'.join(Groups.split('}, {'))"
+    --> @dm:explode column='Groups' and sep='@'
+    --> @dm:eval Groups=`Groups.replace('[','').replace(']','').replace('{','').replace('}','').replace("'","")`
+    --> @dm:counter
+    --> @dm:rename-columns group='COUNTER' and asset_id='Groups'
+    --> @dm:to-type columns='group' and type='str'
+    --> @dm:explode column='asset_id' and sep=', '
+    --> @dm:eval metric_id="'$metric_id'" and metric_source="'$metric_source'"
+
+    --> @dm:enrich dict='temp-selected-asset-metrics-list' and src_key_cols='asset_id,metric_id,metric_source' and
+            dict_key_cols='asset_id,metric_id,metric_source' and enrich_cols='unit,metric_name,asset_name,static_upper_threshold,user_selected,statistically_selected,customer_id,customer_tag'
+            
+    --> @dm:selectcolumns include='^group$|^asset_id$|^metric_id$|^model_name$|^metric_name$|^unit$|^metric_source$|^asset_name$|^static_upper_threshold$|^user_selected$|^statistically_selected$|^customer_id$|^customer_tag$'
+    --> @dm:save name='temp-assets-by-correlation-group' and append='yes'
+
+--> @c:new-block
+    --> @dm:recall name='temp-assets-by-correlation-group' and return_empty='yes'
+    --> @dm:save name='assets-by-correlation-group'

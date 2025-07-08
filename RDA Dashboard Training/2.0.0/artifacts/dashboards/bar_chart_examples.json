@@ -1,0 +1,269 @@
+{
+    "name": "bar_chart_examples",
+    "label": "Bar Chart",
+    "description": "Bar chart, multi bar chart, mixed bar chart examples",
+    "version": "26.3.24.3",
+    "enabled": true,
+    "dashboard_style": "auto",
+    "live_edit": true,
+    "showTitle": true,
+    "status_poller": {},
+    "dashboard_generator": {
+        "attachment": "widget_code_generator"
+    },
+    "dashboard_filters": {
+        "time_filter": true,
+        "default_time_filter_labels": [
+            "All Time"
+        ],
+        "columns_filter": [],
+        "group_filters": []
+    },
+    "dashboard_sections": [
+        {
+            "title": "Bar Chart",
+            "show_filter": true,
+            "widgets": [
+                {
+                    "title": "Bar Chart",
+                    "widget_type": "bar_chart",
+                    "stream": "main_enhanced",
+                    "ts_column": "timestamp",
+                    "chartProperties": {
+                        "yAxisLabel": "Same Name people in City",
+                        "xAxisLabel": "Name",
+                        "stacked": true,
+                        "legendLocation": "right",
+                        "orientation": "vertical"
+                    },
+                    "duration_hours": 24000,
+                    "group_by": [
+                        "name"
+                    ],
+                    "column": "count_",
+                    "agg": "value_count",
+                    "type": "int",
+                    "widget_id": "374cf2d4"
+                },
+                {
+                    "title": "Horizontal Bar Chart",
+                    "widget_type": "bar_chart",
+                    "stream": "main_enhanced",
+                    "ts_column": "timestamp",
+                    "chartProperties": {
+                        "yAxisLabel": "Same Name people in City",
+                        "xAxisLabel": "Name",
+                        "stacked": true,
+                        "legendLocation": "right",
+                        "orientation": "horizontal"
+                    },
+                    "duration_hours": 24000,
+                    "group_by": [
+                        "name"
+                    ],
+                    "column": "city",
+                    "agg": "value_count",
+                    "type": "int",
+                    "widget_id": "8bb75f8e"
+                },
+                {
+                    "title": "Stacked Bar Chart",
+                    "widget_type": "multi_bar_chart",
+                    "stream": "main_enhanced",
+                    "ts_column": "timestamp",
+                    "chartProperties": {
+                        "yAxisLabel": "Same Name people in City",
+                        "xAxisLabel": "Name",
+                        "stacked": true,
+                        "legendLocation": "right",
+                        "orientation": "vertical"
+                    },
+                    "duration_hours": 24000,
+                    "group_by": [
+                        "name",
+                        "city"
+                    ],
+                    "column": "count_",
+                    "agg": "value_count",
+                    "type": "int",
+                    "widget_id": "c3679eb4"
+                },
+                {
+                    "title": "Mixed Chart",
+                    "widget_type": "mixed_chart_buckets",
+                    "duration_hours": 24000,
+                    "axis": [
+                        {
+                            "stream": "main_enhanced",
+                            "ts_column": "timestamp",
+                            "chartProperties": {
+                                "yAxisLabel": "Same Name people in City",
+                                "xAxisLabel": "Name",
+                                "stacked": false,
+                                "legendLocation": "right",
+                                "orientation": "vertical"
+                            },
+                            "group_by": [
+                                "city",
+                                "name"
+                            ],
+                            "column": "_RDA_Id",
+                            "agg": "value_count",
+                            "type": "int"
+                        },
+                        {
+                            "stream": "main_enhanced",
+                            "ts_column": "timestamp",
+                            "chartProperties": {
+                                "yAxisLabel": "Number of people in Age group",
+                                "xAxisLabel": "Name"
+                            },
+                            "group_by": [
+                                "count_",
+                                "name"
+                            ],
+                            "group_label": "People in Age group",
+                            "column": "_RDA_Id",
+                            "agg": "value_count",
+                            "type": "int",
+                            "graph_type": "line"
+                        }
+                    ],
+                    "widget_id": "d6c9f4c8"
+                },
+                {
+                    "title": "Multi Bar Chart Format Descending Order Based",
+                    "widget_type": "multi_bar_chart",
+                    "duration_hours": 24000,
+                    "stream": "main_enhanced",
+                    "ts_column": "timestamp",
+                    "group_by": [
+                        "city",
+                        "name"
+                    ],
+                    "formatting": {
+                        "notation": "compact",
+                        "style": "unit",
+                        "unit": "percent"
+                    },
+                    "chartProperties": {
+                        "yAxisLabel": null,
+                        "xAxisLabel": "Name",
+                        "stacked": false,
+                        "legendLocation": "right",
+                        "orientation": "vertical"
+                    },
+                    "descending_order": true,
+                    "others_spec": {
+                        "limit": 6,
+                        "show_others": true,
+                        "label": "Other Names",
+                        "city": {
+                            "largest": false,
+                            "name_based_limit": false
+                        },
+                        "name": {
+                            "largest": false,
+                            "name_based_limit": false
+                        }
+                    },
+                    "column": "donation",
+                    "agg": "sum",
+                    "type": "str",
+                    "widget_id": "8bbfeba8"
+                },
+                {
+                    "title": "Multi Bar Chart Format Name Based",
+                    "widget_type": "multi_bar_chart",
+                    "stream": "main_enhanced",
+                    "duration_hours": 24000,
+                    "ts_column": "timestamp",
+                    "group_by": [
+                        "city",
+                        "name"
+                    ],
+                    "formatting": {
+                        "notation": "compact",
+                        "style": "unit",
+                        "unit": "percent"
+                    },
+                    "chartProperties": {
+                        "yAxisLabel": null,
+                        "xAxisLabel": "Name",
+                        "stacked": false,
+                        "legendLocation": "right",
+                        "orientation": "vertical"
+                    },
+                    "descending_order": false,
+                    "others_spec": {
+                        "limit": 6,
+                        "label": "Other Names",
+                        "show_others": true,
+                        "city": {
+                            "largest": false,
+                            "name_based_limit": true
+                        },
+                        "name": {
+                            "largest": false,
+                            "name_based_limit": true
+                        }
+                    },
+                    "column": "donation",
+                    "agg": "sum",
+                    "type": "str",
+                    "widget_id": "5796ba56"
+                },
+                {
+                    "title": "Multi Bar Chart Format Largest Based",
+                    "widget_type": "multi_bar_chart",
+                    "stream": "main_enhanced",
+                    "duration_hours": 24000,
+                    "ts_column": "timestamp",
+                    "group_by": [
+                        "city",
+                        "name"
+                    ],
+                    "formatting": {
+                        "notation": "compact",
+                        "style": "unit",
+                        "unit": "percent"
+                    },
+                    "chartProperties": {
+                        "yAxisLabel": null,
+                        "xAxisLabel": "Name",
+                        "stacked": false,
+                        "legendLocation": "right",
+                        "orientation": "vertical"
+                    },
+                    "descending_order": false,
+                    "others_spec": {
+                        "limit": 6,
+                        "label": "Other Names",
+                        "show_others": true,
+                        "city": {
+                            "largest": true,
+                            "name_based_limit": false
+                        },
+                        "name": {
+                            "largest": true,
+                            "name_based_limit": false
+                        }
+                    },
+                    "column": "donation",
+                    "agg": "sum",
+                    "type": "str",
+                    "widget_id": "89fd6a48"
+                }
+            ]
+        }
+    ],
+    "dashboard_type": "dashboard",
+    "dashboard_pages": [],
+    "saved_time": "2025-03-14T19:44:07.080430",
+    "attachments": [
+        {
+            "name": "widget_code_generator",
+            "value": "{%- set widgets =  dashboard[\"dashboard_sections\"][0][\"widgets\"] -%}\n{%- set new_widgets =  [] -%}\n{%- set ns =  namespace(count=0) -%}\n\n{%- for w in widgets -%}\n    {%- if w.get(\"widget_type\") -%}\n        {%-\n            set nw = {\n                \"title\": \"JSON\",\n                \"widget_group\": \"g\"+str(ns.count),\n                \"min_width\": w.get(\"min_width\", 6),\n                \"max_width\": w.get(\"max_width\", 6),\n                \"height\": w.get(\"height\", 4),\n                \"widget_type\": \"codeblock\",\n                \"content\": json_dumps_indent(w, 2),\n                \"lang\": \"json\",\n                \"widget_id\": w.get(\"widget_id\", str(ns.count)) + \"_code\"\n            }\n        -%}\n        {%- set _ = w.update({\"widget_group\":  \"g\"+str(ns.count) }) -%}\n        {%- set _ = new_widgets.append(nw) -%}\n        {%- set ns.count = ns.count + 1 -%}\n    {%- endif -%}\n{%- endfor -%}\n\n{%- set _ = widgets.extend(new_widgets) -%}"
+        }
+    ]
+}

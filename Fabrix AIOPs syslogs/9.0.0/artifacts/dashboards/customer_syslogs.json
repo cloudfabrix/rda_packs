@@ -1,0 +1,418 @@
+{
+    "name": "customer_syslogs",
+    "description": "Syslogs",
+    "label": "Customer Syslog Messages",
+    "version": "24.2.28",
+    "enabled": false,
+    "dashboard_type": "template",
+    "dashboard_folder": "FaultSyslogPack",
+    "template_variables": {
+        "CUST_ID": {
+            "contextId": "customer_id"
+        },
+        "PROJ_ID": {
+            "contextId": "projectId"
+        },
+        "CUST_TAG": {
+            "contextId": "customerTag"
+        }
+    },
+    "stream": "syslog_udp_event_stream_all",
+    "dashboard_filters": {
+        "time_filter": true,
+        "extra_filter": "projectId in {{PROJ_ID}} or projectId is empty",
+        "default_time_filter_labels": [
+            "Last 1 month"
+        ],
+        "group_filters": [
+            {
+                "stream": "syslog_udp_event_stream_all",
+                "title": "Severity",
+                "group_by": [
+                    "syslog_severity"
+                ],
+                "ts_column": "timestamp",
+                "agg": "sum",
+                "column": "count_"
+            },
+            {
+                "stream": "syslog_udp_event_stream_all",
+                "title": "Device Vendor",
+                "group_by": [
+                    "device_vendor"
+                ],
+                "ts_column": "timestamp",
+                "agg": "sum",
+                "column": "count_"
+            },
+            {
+                "stream": "syslog_udp_event_stream_all",
+                "title": "Device OS Type",
+                "group_by": [
+                    "device_fw_type"
+                ],
+                "ts_column": "timestamp",
+                "agg": "sum",
+                "column": "count_"
+            },
+            {
+                "stream": "syslog_udp_event_stream_all",
+                "title": "Device Model",
+                "group_by": [
+                    "device_model"
+                ],
+                "ts_column": "timestamp",
+                "agg": "sum",
+                "column": "count_"
+            },
+            {
+                "stream": "syslog_udp_event_stream_all",
+                "title": "Device FW Version",
+                "group_by": [
+                    "device_fw_version"
+                ],
+                "ts_column": "timestamp",
+                "agg": "sum",
+                "column": "count_"
+            },
+            {
+                "stream": "syslog_udp_event_stream_all",
+                "title": "Device Status",
+                "group_by": [
+                    "device_status"
+                ],
+                "ts_column": "timestamp",
+                "agg": "sum",
+                "column": "count_"
+            }
+        ],
+        "columns_filter": [
+            {
+                "id": "cisco_code",
+                "label": "Cisco Code",
+                "type": "TEXT"
+            },
+            {
+                "id": "log_message",
+                "label": "Message",
+                "type": "TEXT"
+            },
+            {
+                "id": "short_description",
+                "label": "Description",
+                "type": "TEXT"
+            },
+            {
+                "id": "syslog_severity",
+                "label": "Severity",
+                "type": "TEXT"
+            },
+            {
+                "id": "device_model",
+                "label": "Device Model",
+                "type": "TEXT"
+            },
+            {
+                "id": "device_vendor",
+                "label": "Device Vendor",
+                "type": "TEXT"
+            },
+            {
+                "id": "device_fw_type",
+                "label": "Device Type",
+                "type": "TEXT"
+            },
+            {
+                "id": "device_fw_version",
+                "label": "FW Version",
+                "type": "TEXT"
+            },
+            {
+                "id": "impact",
+                "label": "Impact",
+                "type": "TEXT"
+            },
+            {
+                "id": "urgency",
+                "label": "Urgency",
+                "type": "TEXT"
+            },
+            {
+                "id": "device_ip",
+                "label": "Ip address",
+                "type": "TEXT"
+            },
+            {
+                "id": "site_code",
+                "label": "Site Code",
+                "type": "TEXT"
+            },
+            {
+                "id": "device_status",
+                "label": "Device Status",
+                "type": "TEXT"
+            }
+        ]
+    },
+    "dashboard_sections": [
+        {
+            "title": "Syslog",
+            "show_filter": true,
+            "widgets": [
+                {
+                    "widget_type": "label",
+                    "max_width": 12,
+                    "height": 0.5,
+                    "min_width": 12,
+                    "label": "<div style='text-align:center;width:100%;'><h1><a style='text-decoration:none;color:#0066ff;' target='_blank'>Customer Syslogs</a></h1></div>",
+                    "widget_id": "33317e49"
+                },
+                {
+                    "widget_type": "pie_chart",
+                    "title": "Messages by Severity",
+                    "stream": "syslog_udp_event_stream_all",
+                    "extra_filter": "projectId in {{PROJ_ID}} or projectId is empty",
+                    "ts_column": "timestamp",
+                    "duration_hours": 1080,
+                    "column": "count_",
+                    "agg": "value_count",
+                    "group_by": [
+                        "syslog_severity"
+                    ],
+                    "style": {
+                        "color-map": {
+                            "ERROR": "#EF5350",
+                            "NOTICE": "#4DD0E1",
+                            "EMERGENCY": "#B71C1C",
+                            "INFORMATIONAL": "#03A9F4",
+                            "WARNING": "#FFD54F",
+                            "ALERT": "#FFA726",
+                            "CRITICAL": "#E53935",
+                            "DEBUG": "#BCAAA4"
+                        }
+                    },
+                    "min_width": 6,
+                    "height": 4,
+                    "max_width": 6,
+                    "widget_id": "6ca7d8b4"
+                },
+                {
+                    "widget_type": "pie_chart",
+                    "title": "Messages by Hosts",
+                    "stream": "syslog_udp_event_stream_all",
+                    "extra_filter": "projectId in {{PROJ_ID}} or projectId is empty",
+                    "ts_column": "timestamp",
+                    "column": "count_",
+                    "agg": "sum",
+                    "group_by": [
+                        "rda_gw_client_ip"
+                    ],
+                    "min_width": 6,
+                    "height": 4,
+                    "max_width": 6,
+                    "widget_id": "b9f668b8"
+                },
+                {
+                    "widget_type": "pie_chart",
+                    "title": "Syslogs by Managed Status",
+                    "stream": "syslog_udp_event_stream_all",
+                    "extra_filter": "projectId in {{PROJ_ID}} or projectId is empty",
+                    "ts_column": "timestamp",
+                    "column": "count_",
+                    "agg": "sum",
+                    "group_by": [
+                        "device_status"
+                    ],
+                    "min_width": 4,
+                    "height": 4,
+                    "max_width": 4,
+                    "widget_id": "8d7afa75"
+                },
+                {
+                    "widget_type": "pie_chart",
+                    "title": "Assets by Managed Status",
+                    "stream": "syslog_udp_event_stream_all",
+                    "extra_filter": "projectId in {{PROJ_ID}} or projectId is empty",
+                    "ts_column": "timestamp",
+                    "column": "rda_gw_client_ip",
+                    "agg": "cardinality",
+                    "group_by": [
+                        "device_status"
+                    ],
+                    "min_width": 4,
+                    "height": 4,
+                    "max_width": 4,
+                    "widget_id": "b226611"
+                },
+                {
+                    "title": "Unmanaged Devices Syslog Count",
+                    "widget_type": "tabular",
+                    "max_width": 12,
+                    "height": 5,
+                    "min_width": 4,
+                    "extra_filter": "device_status contains 'UNMANAGED' and (projectId in {{PROJ_ID}} or projectId is empty)",
+                    "stream": "syslog_udp_event_stream_all",
+                    "ts_column": "timestamp",
+                    "columns": {
+                        "rda_gw_client_ip": "IP Address"
+                    },
+                    "pivot": {
+                        "pivot_type": "advanced",
+                        "group_by": [
+                            "rda_gw_client_ip"
+                        ],
+                        "series": [
+                            {
+                                "column": "count_",
+                                "agg": "value_count",
+                                "type": "int",
+                                "label": "Count"
+                            }
+                        ]
+                    },
+                    "widget_id": "kzaMoAWD"
+                },
+                {
+                    "title": "Syslog Details",
+                    "widget_type": "tabular",
+                    "stream": "syslog_udp_event_stream_all",
+                    "extra_filter": "projectId in {{PROJ_ID}} or projectId is empty",
+                    "duration_hours": 1080,
+                    "resizableColumns": false,
+                    "showRowSummary": false,
+                    "query": "*",
+                    "min_width": 12,
+                    "height": 8,
+                    "max_width": 12,
+                    "paginated": true,
+                    "max_rows": 50,
+                    "remote_searchable": true,
+                    "remote_searchable_cols": [
+                        "rda_gw_client_ip",
+                        "device_status",
+                        "syslog_severity",
+                        "rda_gw_ep_type",
+                        "site_code"
+                    ],
+                    "truncateColumns": [
+                        "reason",
+                        "short_description",
+                        "log_message"
+                    ],
+                    "columns": {
+                        "rda_gw_client_ip": {
+                            "title": "IP Address",
+                            "type": "TEXT",
+                            "key": true
+                        },
+                        "device_hostname": {
+                            "title": "Device Hostname",
+                            "type": "TEXT",
+                            "key": true,
+                            "defaultWidth": 150
+                        },
+                        "raw": {
+                            "title": "Raw Event",
+                            "type": "TEXT",
+                            "key": true,
+                            "defaultWidth": 270,
+                            "formatter": "truncate"
+                        },
+                        "reason": {
+                            "title": "Reason",
+                            "type": "TEXT",
+                            "key": true,
+                            "formatter": "truncate",
+                            "visible": false
+                        },
+                        "log_message": {
+                            "title": "Message",
+                            "type": "TEXT",
+                            "key": true,
+                            "formatter": "truncate",
+                            "visible": false
+                        },
+                        "short_description": {
+                            "title": "Description",
+                            "type": "TEXT",
+                            "key": true,
+                            "formatter": "truncate",
+                            "visible": false
+                        },
+                        "urgency": {
+                            "title": "Urgency",
+                            "type": "TEXT",
+                            "key": true,
+                            "visible": false
+                        },
+                        "device_status": {
+                            "title": "Device Status",
+                            "type": "TEXT",
+                            "key": true,
+                            "visible": true
+                        },
+                        "impact": {
+                            "title": "Impact",
+                            "type": "TEXT",
+                            "key": true,
+                            "visible": false
+                        },
+                        "a_severity_color": {
+                            "title": "Sev_2",
+                            "type": "COLOR-MAP",
+                            "source-column": "syslog_severity",
+                            "color-map": {
+                                "ERROR": "#EF5350",
+                                "NOTICE": "#4DD0E1",
+                                "EMERGENCY": "#B71C1C",
+                                "INFORMATIONAL": "#03A9F4",
+                                "WARNING": "#FFD54F",
+                                "ALERT": "#FFA726",
+                                "CRITICAL": "#E53935",
+                                "DEBUG": "#BCAAA4"
+                            }
+                        },
+                        "syslog_severity": {
+                            "title": "Severity",
+                            "htmlTemplateForRow": "{%raw%}<span class='badge' style='background-color: {{ row.a_severity_color}}' > {{row.syslog_severity}} </span>{%endraw%}",
+                            "defaultWidth": 150
+                        },
+                        "rda_gw_ep_name": {
+                            "title": "Endpoint Name",
+                            "type": "TEXT",
+                            "visible": false
+                        },
+                        "rda_gw_ep_type": "Endpoint Type",
+                        "rda_stream": {
+                            "title": "RDA Stream",
+                            "type": "TEXT",
+                            "visible": false
+                        },
+                        "site_code": "Site Code",
+                        "cisco_code": {
+                            "title": "Cisco Code",
+                            "type": "TEXT",
+                            "key": true,
+                            "visible": false
+                        },
+                        "stream": {
+                            "title": "Stream",
+                            "type": "TEXT",
+                            "visible": false
+                        },
+                        "syslog_severity_num": {
+                            "title": "Severity Number",
+                            "type": "DOUBLE"
+                        },
+                        "timestamp": {
+                            "title": "Timestamp",
+                            "type": "DATETIME"
+                        }
+                    },
+                    "widget_id": "d211804e"
+                }
+            ]
+        }
+    ],
+    "saved_time": "2025-04-25T16:33:06.605211"
+}

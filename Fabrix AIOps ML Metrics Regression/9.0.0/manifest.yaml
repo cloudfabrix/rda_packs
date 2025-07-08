@@ -1,0 +1,162 @@
+name: Fabrix AIOps ML Metrics Regression
+label: Fabrix AIOps ML Metrics Regression
+scope: system
+# Pack version needs to be conforming to <major>.<minor>.<micro> etc versioning.
+# More detailed spec for versioning: https://packaging.python.org/en/latest/specifications/version-specifiers/
+version: 9.0.0
+folder: /collection/ml_metrics_regression
+published_date: 2025-05-27
+publisher: Fabrix.ai
+# Description of the package. Supports HTML/markdown/plain text
+# Either can provide description as an inline string in this file
+# or have description.html and description.md and give corresponding file paths instead.
+# If description is provided by multiple ways, the order of precedence is description.md > description.html > description.value
+
+description: 
+   md: "./description.md"
+
+type: collection
+
+
+#Other packs that this solution requires to be deployed
+requires:
+  - name: Fabrix Inventory Collection Base Pack
+    version: ">=6.0.0"
+  - name: Fabrix AIOps Fault Management Base
+    version: ">=8.0.2"
+
+
+artifacts:
+  credentials:
+    - name: cfxml
+      type: cfxai_regression
+  pstreams:
+    - name: ml-metrics-regression-live-output
+      attributes:
+        unique_keys: ["live_timestamp","job_name","live_data_label"]
+        retention_days: 30
+      autocreate: true
+
+    - name: ml-metrics-regression-anomalies
+      attributes:
+        unique_keys: ["timestamp","job_name"]
+        retention_days: 30
+      autocreate: true
+
+    - name: ml-metrics-regression-train-output
+      attributes:
+        unique_keys: ["timestamp","job_name"]
+        retention_days: 30
+      autocreate: true
+
+    - name: ml-metrics-regression-per-asset
+      attributes:
+        unique_keys: ["metric_id","asset_id"]
+        retention_days: 30
+      autocreate: true
+
+    - name: ml-variance-metrics-list
+      attributes:
+        unique_keys: ["metric_source","metric_id","asset_id"]
+        retention_days: 30
+      autocreate: true
+
+
+  dashboards:
+    - name: metrics_ml_insights
+      file: ./artifacts/dashboards/metrics_ml_insights.json
+      folder: MlPack
+
+    - name: regression_dashboard
+      file: ./artifacts/dashboards/regression_dashboard.json
+      folder: MlPack
+
+    - name: ml_configure_and_manage
+      file: ./artifacts/dashboards/ml_configure_and_manage.json
+      folder: MlPack
+
+
+    - name: ml_pack_app
+      file: ./artifacts/dashboards/ml_pack_app.json
+      folder: MlPack
+
+  pipelines:
+    - name: ml-metrics-selection-rules
+      version: 2024.03.19.1
+      file: ./artifacts/pipelines/ml-metrics-selection-rules.txt
+      folder: MlPack
+      skip_validation: true
+
+    - name: ml-metrics-variance
+      version: 2024.03.19.1
+      file: ./artifacts/pipelines/ml-metrics-variance.txt
+      folder: MlPack
+      skip_validation: true
+      
+    - name: ml-metrics-regression
+      version: 2024.03.19.1
+      file: ./artifacts/pipelines/ml-metrics-regression.txt
+      folder: MlPack
+      skip_validation: true
+
+    - name: ml-metrics-live-prediction-parent
+      version: 2024.03.19.1
+      file: ./artifacts/pipelines/ml-metrics-live-prediction-parent.txt
+      folder: MlPack
+      skip_validation: true
+
+    - name: ml-metrics-live-prediction-child
+      version: 2024.03.19.1
+      file: ./artifacts/pipelines/ml-metrics-live-prediction-child.txt
+      folder: MlPack
+      skip_validation: true
+
+
+customer_level:
+  launch_locations:
+
+  - pstream_name: rda_packs_dynamic_groups_and_pages
+    dashboard_group_name: groupDiscovery
+    dashboard_group_label: Onboarding
+    dashboard_group_icon: "asset.svg"
+    dashboard_page_name: ml_configure_and_manage
+    dashboard_page_label: "ML Configure and Manage"
+    dashboard_page_icon: "settings.svg"
+  - pstream_name: rda_packs_dynamic_groups_and_pages
+    dashboard_group_name: groupInventory
+    dashboard_group_label: Inventory
+    dashboard_group_icon: ""
+    dashboard_page_name: metrics_ml_insights
+    dashboard_page_label: Metrics ML Insights
+    dashboard_page_icon: "cluster.svg"
+
+  artifacts:
+
+    blueprints:
+      - name: ML Metrics Regression Multi Tenant
+        file: ./artifacts/blueprints/ml_regression_multi_tenant.yaml
+
+single_tenant:
+  launch_dashboard: ml_pack_app
+  launch_locations:
+  - pstream_name: rda_packs_dynamic_groups_and_pages
+    dashboard_group_name: groupDiscovery
+    dashboard_group_label: Onboarding
+    dashboard_group_icon: "asset.svg"
+    dashboard_page_name: ml_configure_and_manage
+    dashboard_page_label: ML Configure and Manage
+    dashboard_page_icon: "settings.svg"
+  - pstream_name: rda_packs_dynamic_groups_and_pages
+    dashboard_group_name: groupInventory
+    dashboard_group_label: Inventory
+    dashboard_group_icon: ""
+    dashboard_page_name: metrics_ml_insights
+    dashboard_page_label: Metrics ML Insights
+    dashboard_page_icon: "cluster.svg"
+  artifacts:
+
+    blueprints:
+      - name: ML Metrics Regression Single Tenant
+        file: ./artifacts/blueprints/ml_regression.yaml
+  
+

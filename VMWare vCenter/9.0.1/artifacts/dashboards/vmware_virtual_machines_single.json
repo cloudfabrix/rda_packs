@@ -1,0 +1,73 @@
+{
+    "name": "vmware_virtual_machines_single",
+    "label": "vCenter Virtual Machines",
+    "description": "VMware vCenter Virtual Machines - Analytics",
+    "version": "2024.03.11.2",
+    "enabled": false,
+    "dashboard_folder": "vCenterSystemPack",
+    "context_label_id": "vm_name",
+    "dashboard_type": "template",
+    "dashboard_style": "tabbed",
+    "custom_context0": {
+        "rda-dashboard-live-edit": true
+    },
+    "template_variables": {
+        "VM_NAME": {
+            "contextId": "vm_name"
+        },
+        "VM_INSTANCE_UUID": {
+            "contextId": "vm_instance_uuid"
+        },
+        "VCENTER_ADDRESS": {
+            "contextId": "vcenter_address"
+        },
+        "NODE_ID": {
+            "contextId": "unique_id"
+        },
+        "CUST_ID": {
+            "contextId": "customerId"
+        },
+        "PROJ_ID": {
+            "contextId": "projectId"
+        },
+        "CUST_TAG": {
+            "contextId": "customerTag"
+        }
+    },
+    "dashboard_filters": {
+        "time_filter": true,
+        "default_time_filter_labels": [
+            "Last 12 month"
+        ],
+        "columns_filter": [],
+        "group_filters": []
+    },
+    "dashboard_sections": [
+        {
+            "title": "Topology",
+            "show_filter": true,
+            "widgets": [
+                {
+                    "widget_type": "topology",
+                    "title": "Topology",
+                    "extra_filter": "count >= 1 and stack_name = 'cfx_rdaf_topology'",
+                    "chartProperties": {
+                        "hasToolbar": true,
+                        "shortToolbar": true,
+                        "userZoomingEnabled": true
+                    },
+                    "stack": "cfx_rdaf_topology",
+                    "with_graphdb": true,
+                    "has_more_data_flag": true,
+                    "expand_neighbors": true,
+                    "expand_all": false,
+                    "max_width": 12,
+                    "min_width": 6,
+                    "height": 12,
+                    "widget_id": "9db5a36f"
+                }
+            ]
+        }
+    ],
+    "saved_time": "2024-10-22T18:00:37.675554"
+}

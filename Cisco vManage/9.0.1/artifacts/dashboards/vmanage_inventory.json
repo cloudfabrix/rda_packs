@@ -1,0 +1,1016 @@
+{
+    "name": "vmanage_inventory",
+    "label": "vManage Inventory",
+    "description": "vManage Inventory Collection: Insights",
+    "dashboard_folder": "VmanageInventory",
+    "version": "1.0.1",
+    "live_edit": true,
+    "enabled": false,
+    "template_variables": {
+        "CUST_ID": {
+            "contextId": "customerId"
+        },
+        "PROJ_ID": {
+            "contextId": "projectId"
+        },
+        "CUST_TAG": {
+            "contextId": "customerTag"
+        },
+        "CONFIG_NAME": {
+            "contextId": "config_file_name"
+        }
+    },
+    "stream": "vmanage_inventory_collection_demo",
+    "dashboard_type": "template",
+    "dashboard_filters": {
+        "time_filter": true,
+        "extra_filter": "customer_tag is '{{CUST_TAG}}' or customer_tag is empty",
+        "default_time_filter_labels": [
+            "Last 6 months"
+        ],
+        "columns_filter": [
+            {
+                "id": "timestamp",
+                "label": "Timestamp",
+                "type": "DATETIME"
+            },
+            {
+                "id": "CSR",
+                "label": "CSR",
+                "type": "TEXT"
+            },
+            {
+                "id": "activity",
+                "label": "Activity",
+                "type": "TEXT"
+            },
+            {
+                "id": "activationState",
+                "label": "Activation State",
+                "type": "TEXT"
+            },
+            {
+                "id": "availableVersions",
+                "label": "Available versions",
+                "type": "TEXT"
+            },
+            {
+                "id": "a_asset_ip_address",
+                "label": "IP Address",
+                "type": "TEXT"
+            },
+            {
+                "id": "serviceState",
+                "label": "Service State",
+                "type": "TEXT"
+            },
+            {
+                "id": "parent_sn",
+                "label": "Parent SN",
+                "type": "TEXT"
+            },
+            {
+                "id": "bfdSessions",
+                "label": "Bfd sessions",
+                "type": "TEXT"
+            },
+            {
+                "id": "edgeState",
+                "label": "Edge State",
+                "type": "TEXT"
+            },
+            {
+                "id": "board_serial",
+                "label": "Board Serial",
+                "type": "TEXT"
+            },
+            {
+                "id": "certInstallStatus",
+                "label": "Certificate install status",
+                "type": "TEXT"
+            },
+            {
+                "id": "certificate_validity",
+                "label": "Certificate Validity",
+                "type": "TEXT"
+            },
+            {
+                "id": "chasisNumber",
+                "label": "Chasis number",
+                "type": "TEXT"
+            },
+            {
+                "id": "collection_status",
+                "label": "Collection Status",
+                "type": "TEXT"
+            },
+            {
+                "id": "configOperationMode",
+                "label": "Config operation mode",
+                "type": "TEXT"
+            },
+            {
+                "id": "configStatusMessage",
+                "label": "Config status message",
+                "type": "TEXT"
+            },
+            {
+                "id": "connectedVManages",
+                "label": "Connected vmanages",
+                "type": "TEXT"
+            },
+            {
+                "id": "controlConnections",
+                "label": "Control connections",
+                "type": "TEXT"
+            },
+            {
+                "id": "customerName",
+                "label": "Customer name",
+                "type": "TEXT"
+            },
+            {
+                "id": "customerTag",
+                "label": "Customer tag",
+                "type": "TEXT"
+            },
+            {
+                "id": "defaultVersion",
+                "label": "Default version",
+                "type": "TEXT"
+            },
+            {
+                "id": "deviceIP",
+                "label": "Device IP",
+                "type": "TEXT"
+            },
+            {
+                "id": "attrs_i_alert_sources",
+                "label": "Alert Sources",
+                "type": "TEXT"
+            },
+            {
+                "id": "device_vendor",
+                "label": "Device Vendor",
+                "type": "TEXT"
+            },
+            {
+                "id": "i_priority_label",
+                "label": "Priority Label",
+                "type": "TEXT"
+            },
+            {
+                "id": "device_equip_type",
+                "label": "Equipment Type",
+                "type": "TEXT"
+            },
+            {
+                "id": "deviceId",
+                "label": "Device ID",
+                "type": "TEXT"
+            },
+            {
+                "id": "syslog_severity",
+                "label": "Severity",
+                "type": "TEXT"
+            },
+            {
+                "id": "deviceModel",
+                "label": "Device model",
+                "type": "TEXT"
+            },
+            {
+                "id": "deviceName",
+                "label": "Device name",
+                "type": "TEXT"
+            },
+            {
+                "id": "deviceState",
+                "label": "Device state",
+                "type": "TEXT"
+            },
+            {
+                "id": "device_fw_version",
+                "label": "Device Version",
+                "type": "TEXT"
+            },
+            {
+                "id": "deviceType",
+                "label": "Device type",
+                "type": "TEXT"
+            },
+            {
+                "id": "device_groups",
+                "label": "Device Groups",
+                "type": "TEXT"
+            },
+            {
+                "id": "device_model",
+                "label": "Device Model",
+                "type": "TEXT"
+            },
+            {
+                "id": "gateway_state",
+                "label": "Gateway State",
+                "type": "TEXT"
+            },
+            {
+                "id": "device_os",
+                "label": "Device OS",
+                "type": "TEXT"
+            },
+            {
+                "id": "device_type",
+                "label": "Device Type",
+                "type": "TEXT"
+            },
+            {
+                "id": "draftMode",
+                "label": "Draft mode",
+                "type": "TEXT"
+            },
+            {
+                "id": "expirationDate",
+                "label": "Expiration date",
+                "type": "TEXT"
+            },
+            {
+                "id": "expirationStatus",
+                "label": "Expiration status",
+                "type": "TEXT"
+            },
+            {
+                "id": "globalState",
+                "label": "Global state",
+                "type": "TEXT"
+            },
+            {
+                "id": "host_name",
+                "label": "Host Name",
+                "type": "TEXT"
+            },
+            {
+                "id": "isDeviceGeoData",
+                "label": "Is device geo data",
+                "type": "TEXT"
+            },
+            {
+                "id": "lifeCycleRequired",
+                "label": "Lifecycle required",
+                "type": "TEXT"
+            },
+            {
+                "id": "local_system_ip",
+                "label": "Local System IP",
+                "type": "TEXT"
+            },
+            {
+                "id": "managementSystemIP",
+                "label": "Management system IP",
+                "type": "TEXT"
+            },
+            {
+                "id": "model_sku",
+                "label": "Model Sku",
+                "type": "TEXT"
+            },
+            {
+                "id": "oldSerialNumber_serialNumber",
+                "label": "Old Serialnumber",
+                "type": "TEXT"
+            },
+            {
+                "id": "oldSerialNumber_validity",
+                "label": "Old serialnumber Validity",
+                "type": "TEXT"
+            },
+            {
+                "id": "ompPeers",
+                "label": "Omp peers",
+                "type": "TEXT"
+            },
+            {
+                "id": "org",
+                "label": "Org",
+                "type": "TEXT"
+            },
+            {
+                "id": "organization_name",
+                "label": "Organization Name",
+                "type": "TEXT"
+            },
+            {
+                "id": "personality",
+                "label": "Personality",
+                "type": "TEXT"
+            },
+            {
+                "id": "platform",
+                "label": "Platform",
+                "type": "TEXT"
+            },
+            {
+                "id": "platformFamily",
+                "label": "Platformfamily",
+                "type": "TEXT"
+            },
+            {
+                "id": "policy_template_name",
+                "label": "Policy Template Name",
+                "type": "TEXT"
+            },
+            {
+                "id": "policy_template_version",
+                "label": "Policy Template Version",
+                "type": "TEXT"
+            },
+            {
+                "id": "projectId",
+                "label": "Project id",
+                "type": "TEXT"
+            },
+            {
+                "id": "reachability",
+                "label": "Reachability",
+                "type": "TEXT"
+            },
+            {
+                "id": "region_id",
+                "label": "Region ID",
+                "type": "TEXT"
+            },
+            {
+                "id": "requestTokenID",
+                "label": "Request token ID",
+                "type": "TEXT"
+            },
+            {
+                "id": "resourceGroup",
+                "label": "Resource group",
+                "type": "TEXT"
+            },
+            {
+                "id": "rootCertHash",
+                "label": "Root cert hash",
+                "type": "TEXT"
+            },
+            {
+                "id": "serialNumber",
+                "label": "Serial number",
+                "type": "TEXT"
+            },
+            {
+                "id": "servicePersonality",
+                "label": "Service personality",
+                "type": "TEXT"
+            },
+            {
+                "id": "source",
+                "label": "Source",
+                "type": "TEXT"
+            },
+            {
+                "id": "source_ip",
+                "label": "Source Ip",
+                "type": "TEXT"
+            },
+            {
+                "id": "sp_organization_name",
+                "label": "SP Organization Name",
+                "type": "TEXT"
+            },
+            {
+                "id": "state",
+                "label": "State",
+                "type": "TEXT"
+            },
+            {
+                "id": "state_description",
+                "label": "State Description",
+                "type": "TEXT"
+            },
+            {
+                "id": "state_vedgeList",
+                "label": "State Vedgelist",
+                "type": "TEXT"
+            },
+            {
+                "id": "status",
+                "label": "Status",
+                "type": "TEXT"
+            },
+            {
+                "id": "subjectSerialNumber",
+                "label": "Subject serial number",
+                "type": "TEXT"
+            },
+            {
+                "id": "system_ip",
+                "label": "System IP",
+                "type": "TEXT"
+            },
+            {
+                "id": "tags",
+                "label": "Tags",
+                "type": "TEXT"
+            },
+            {
+                "id": "template",
+                "label": "Template",
+                "type": "TEXT"
+            },
+            {
+                "id": "templateApplyLog",
+                "label": "Template apply log",
+                "type": "TEXT"
+            },
+            {
+                "id": "templateId",
+                "label": "Template ID",
+                "type": "TEXT"
+            },
+            {
+                "id": "templateStatus",
+                "label": "Template status",
+                "type": "TEXT"
+            },
+            {
+                "id": "testbed_mode",
+                "label": "Testbed Mode",
+                "type": "TEXT"
+            },
+            {
+                "id": "timezone",
+                "label": "Timezone",
+                "type": "TEXT"
+            },
+            {
+                "id": "unique_id",
+                "label": "Unique ID",
+                "type": "TEXT"
+            },
+            {
+                "id": "uploadSource",
+                "label": "Upload source",
+                "type": "TEXT"
+            },
+            {
+                "id": "username",
+                "label": "Username",
+                "type": "TEXT"
+            },
+            {
+                "id": "uuid",
+                "label": "Uuid",
+                "type": "TEXT"
+            },
+            {
+                "id": "valid",
+                "label": "Valid",
+                "type": "TEXT"
+            },
+            {
+                "id": "validity",
+                "label": "Validity",
+                "type": "TEXT"
+            },
+            {
+                "id": "vbond",
+                "label": "Vbond",
+                "type": "TEXT"
+            },
+            {
+                "id": "vedgeCertificateState",
+                "label": "Vedge certificate state",
+                "type": "TEXT"
+            },
+            {
+                "id": "version",
+                "label": "Version",
+                "type": "TEXT"
+            },
+            {
+                "id": "vmanageConnectionState",
+                "label": "Vmanage connection state",
+                "type": "TEXT"
+            },
+            {
+                "id": "vmanage_system_ip",
+                "label": "Vmanage System IP",
+                "type": "TEXT"
+            },
+            {
+                "id": "bfdSessionsUp",
+                "label": "Bfdsessionsup",
+                "type": "DOUBLE"
+            },
+            {
+                "id": "collection_timestamp",
+                "label": "Collection Timestamp",
+                "type": "DOUBLE"
+            },
+            {
+                "id": "domain_id",
+                "label": "Domain Id",
+                "type": "DOUBLE"
+            },
+            {
+                "id": "expirationDateLong",
+                "label": "Expiration date long",
+                "type": "DOUBLE"
+            },
+            {
+                "id": "lastExpirationAlarmDate",
+                "label": "Last expiration alarm date",
+                "type": "DOUBLE"
+            },
+            {
+                "id": "lastupdated",
+                "label": "Last updated",
+                "type": "DOUBLE"
+            },
+            {
+                "id": "latitude",
+                "label": "Latitude",
+                "type": "DOUBLE"
+            },
+            {
+                "id": "layoutLevel",
+                "label": "Layout level",
+                "type": "DOUBLE"
+            },
+            {
+                "id": "linux_cpu_count",
+                "label": "Linux Cpu Count",
+                "type": "DOUBLE"
+            },
+            {
+                "id": "longitude",
+                "label": "Longitude",
+                "type": "DOUBLE"
+            },
+            {
+                "id": "max_controllers",
+                "label": "Max Controllers",
+                "type": "DOUBLE"
+            },
+            {
+                "id": "site_id",
+                "label": "Site ID",
+                "type": "DOUBLE"
+            },
+            {
+                "id": "statusOrder",
+                "label": "Status order",
+                "type": "DOUBLE"
+            },
+            {
+                "id": "timeRemainingForExpiration",
+                "label": "Time remaining for expiration",
+                "type": "DOUBLE"
+            },
+            {
+                "id": "total_cpu_count",
+                "label": "Total Cpu Count",
+                "type": "DOUBLE"
+            },
+            {
+                "id": "uptime_date",
+                "label": "Uptime Date",
+                "type": "DOUBLE"
+            }
+        ],
+        "group_filters": [
+            {
+                "stream": "vmanage_inventory_collection_demo",
+                "extra_filter": "customer_tag is '{{CUST_TAG}}' or customer_tag is empty",
+                "title": " Device State",
+                "duration_hours": 1080,
+                "group_by": [
+                    "deviceState"
+                ],
+                "ts_column": "timestamp",
+                "agg": "value_count",
+                "column": "_RDA_Id",
+                "type": "int"
+            },
+            {
+                "stream": "vmanage_inventory_collection_demo",
+                "extra_filter": "customer_tag is '{{CUST_TAG}}' or customer_tag is empty",
+                "title": " Device Type",
+                "duration_hours": 1080,
+                "group_by": [
+                    "deviceType"
+                ],
+                "ts_column": "timestamp",
+                "agg": "value_count",
+                "column": "_RDA_Id",
+                "type": "int"
+            },
+            {
+                "stream": "vmanage_inventory_collection_demo",
+                "extra_filter": "customer_tag is '{{CUST_TAG}}' or customer_tag is empty",
+                "title": "Config operation mode",
+                "duration_hours": 1080,
+                "group_by": [
+                    "configOperationMode"
+                ],
+                "ts_column": "timestamp",
+                "agg": "value_count",
+                "column": "_RDA_Id",
+                "type": "int"
+            }
+        ]
+    },
+    "dashboard_sections": [
+        {
+            "title": "vManage Inventory",
+            "show_filter": true,
+            "widgets": [
+                {
+                    "widget_type": "label",
+                    "max_width": 12,
+                    "height": 0.5,
+                    "min_width": 12,
+                    "label": "<div style='text-align:center;width:100%;'><h1><a style='text-decoration:none;color:#0066ff;' target='_blank'>Customer Cisco Catalyst SDWAN Inventory</a></h1></div>",
+                    "widget_id": "33317e49"
+                },
+                {
+                    "title": "Total Devices",
+                    "widget_type": "custom_counter",
+                    "stream": "vmanage_inventory_collection_demo",
+                    "extra_filter": "customer_tag is '{{CUST_TAG}}' or customer_tag is empty",
+                    "ts_column": "timestamp",
+                    "column": "deviceIP",
+                    "agg": "value_count",
+                    "type": "int",
+                    "min_width": 4,
+                    "height": 4,
+                    "max_width": 4,
+                    "style": {
+                        "color-list": [
+                            "#0000FF"
+                        ]
+                    },
+                    "widget_id": "f5585184"
+                },
+                {
+                    "title": "Device State",
+                    "widget_type": "counter",
+                    "duration_hours": 1080,
+                    "stream": "vmanage_inventory_collection_demo",
+                    "extra_filter": "customer_tag is '{{CUST_TAG}}' or customer_tag is empty",
+                    "ts_column": "timestamp",
+                    "min_width": 4,
+                    "height": 4,
+                    "max_width": 4,
+                    "group_by": [
+                        "deviceState"
+                    ],
+                    "style": {
+                        "color-map": {
+                            "READY": "#4CAF50",
+                            "REACTIVATION_PENDING": " #FF9800"
+                        }
+                    },
+                    "column": "count_",
+                    "agg": "value_count",
+                    "widget_id": "9b046285"
+                },
+                {
+                    "title": "Device Type",
+                    "widget_type": "counter",
+                    "duration_hours": 1080,
+                    "stream": "vmanage_inventory_collection_demo",
+                    "extra_filter": "customer_tag is '{{CUST_TAG}}' or customer_tag is empty",
+                    "ts_column": "timestamp",
+                    "min_width": 4,
+                    "height": 4,
+                    "max_width": 4,
+                    "group_by": [
+                        "deviceType"
+                    ],
+                    "column": "count_",
+                    "agg": "value_count",
+                    "widget_id": "02be001d"
+                },
+                {
+                    "title": "Devices by Life Cycle Required",
+                    "widget_type": "pie_chart",
+                    "stream": "vmanage_inventory_collection_demo",
+                    "extra_filter": "customer_tag is '{{CUST_TAG}}' or customer_tag is empty",
+                    "ts_column": "timestamp",
+                    "duration_hours": 1080,
+                    "min_width": 6,
+                    "height": 4,
+                    "max_width": 6,
+                    "group_by": [
+                        "lifeCycleRequired"
+                    ],
+                    "column": "count_",
+                    "agg": "value_count",
+                    "type": "str",
+                    "widget_id": "f4786acb"
+                },
+                {
+                    "title": "Devices by Operation Mode",
+                    "widget_type": "pie_chart",
+                    "stream": "vmanage_inventory_collection_demo",
+                    "extra_filter": "customer_tag is '{{CUST_TAG}}' or customer_tag is empty",
+                    "ts_column": "timestamp",
+                    "duration_hours": 1080,
+                    "min_width": 6,
+                    "height": 4,
+                    "max_width": 6,
+                    "group_by": [
+                        "configOperationMode"
+                    ],
+                    "column": "count_",
+                    "agg": "value_count",
+                    "type": "str",
+                    "widget_id": "a1136d92"
+                },
+                {
+                    "title": "Devices by Version",
+                    "widget_type": "bar_chart",
+                    "stream": "vmanage_inventory_collection_demo",
+                    "extra_filter": "customer_tag is '{{CUST_TAG}}' or customer_tag is empty",
+                    "ts_column": "timestamp",
+                    "chartProperties": {
+                        "yAxisLabel": "Version",
+                        "xAxisLabel": "Count",
+                        "stacked": true,
+                        "legendLocation": "none",
+                        "orientation": "horizontal"
+                    },
+                    "duration_hours": 1080,
+                    "min_width": 6,
+                    "height": 4,
+                    "max_width": 6,
+                    "group_by": [
+                        "version"
+                    ],
+                    "column": "count_",
+                    "agg": "value_count",
+                    "type": "str",
+                    "widget_id": "42739747"
+                },
+                {
+                    "title": "vManage by Model",
+                    "widget_type": "bar_chart",
+                    "stream": "vmanage_inventory_collection_demo",
+                    "extra_filter": "customer_tag is '{{CUST_TAG}}' or customer_tag is empty",
+                    "ts_column": "timestamp",
+                    "chartProperties": {
+                        "yAxisLabel": "Models",
+                        "xAxisLabel": "Count",
+                        "stacked": true,
+                        "legendLocation": "none",
+                        "orientation": "horizontal"
+                    },
+                    "duration_hours": 1080,
+                    "min_width": 6,
+                    "height": 4,
+                    "max_width": 6,
+                    "group_by": [
+                        "deviceModel"
+                    ],
+                    "column": "count_",
+                    "agg": "value_count",
+                    "type": "str",
+                    "widget_id": "e1911e03"
+                },
+                {
+                    "title": "vManage Details",
+                    "widget_type": "tabular",
+                    "duration_hours": 1080,
+                    "max_width": 12,
+                    "height": 8,
+                    "min_width": 12,
+                    "stream": "vmanage_inventory_collection_demo",
+                    "extra_filter": "customer_tag is '{{CUST_TAG}}' or customer_tag is empty",
+                    "ts_column": "timestamp",
+                    "columns": {
+                        "deviceModel": {
+                            "title": "Device Model",
+                            "type": "TEXT",
+                            "visible": true
+                        },
+                        "deviceIP": {
+                            "title": "Device IP",
+                            "type": "TEXT",
+                            "visible": true
+                        },
+                        "deviceName": {
+                            "title": "Device Name",
+                            "type": "TEXT",
+                            "visible": true
+                        },
+                        "deviceId": {
+                            "title": "Device ID",
+                            "type": "TEXT",
+                            "visible": true
+                        },
+                        "deviceType": {
+                            "title": "Device type",
+                            "type": "TEXT",
+                            "visible": true
+                        },
+                        "chasisNumber": {
+                            "title": "Chasis number",
+                            "type": "TEXT",
+                            "visible": true
+                        },
+                        "serialNumber": {
+                            "title": "Serial number",
+                            "type": "TEXT",
+                            "visible": true
+                        },
+                        "unique_id": {
+                            "title": "Unique ID",
+                            "type": "TEXT",
+                            "visible": false
+                        },
+                        "uuid": {
+                            "title": "Uuid",
+                            "type": "TEXT",
+                            "visible": false
+                        },
+                        "host_name": {
+                            "title": "Host Name",
+                            "type": "TEXT",
+                            "visible": true
+                        },
+                        "vedgeCertificateState": {
+                            "title": "Vedge certificate state",
+                            "type": "TEXT",
+                            "visible": true
+                        },
+                        "configOperationMode": {
+                            "title": "Config operation mode",
+                            "type": "TEXT",
+                            "visible": true
+                        },
+                        "lifeCycleRequired": {
+                            "title": "Lifecycle required",
+                            "type": "TEXT",
+                            "visible": true
+                        },
+                        "resourceGroup": {
+                            "title": "Resource group",
+                            "type": "TEXT",
+                            "visible": true
+                        },
+                        "isDeviceGeoData": {
+                            "title": "Is device geodata",
+                            "type": "TEXT",
+                            "visible": true
+                        },
+                        "reachability": {
+                            "title": "Reachability",
+                            "type": "TEXT",
+                            "visible": true
+                        },
+                        "timezone": {
+                            "title": "Timezone",
+                            "type": "TEXT",
+                            "visible": true
+                        },
+                        "vmanageConnectionState": {
+                            "title": "Vmanage connection state",
+                            "type": "TEXT",
+                            "visible": true
+                        },
+                        "collection_status": {
+                            "title": "Collection Status",
+                            "type": "TEXT",
+                            "visible": true
+                        },
+                        "deviceState": {
+                            "title": "Device State",
+                            "type": "TEXT",
+                            "visible": true
+                        },
+                        "draftMode": {
+                            "title": "Draft Mode",
+                            "type": "TEXT",
+                            "visible": true
+                        },
+                        "managementSystemIP": {
+                            "title": "Management system IP",
+                            "type": "TEXT",
+                            "visible": true
+                        },
+                        "source_ip": {
+                            "title": "Source IP",
+                            "type": "TEXT",
+                            "visible": true
+                        },
+                        "validity": {
+                            "title": "Validity",
+                            "type": "TEXT",
+                            "visible": true
+                        },
+                        "organization_name": {
+                            "title": "Organization Name",
+                            "type": "TEXT",
+                            "visible": false
+                        },
+                        "sp_organization_name": {
+                            "title": "SP Organization Name",
+                            "type": "TEXT",
+                            "visible": true
+                        },
+                        "state_description": {
+                            "title": "State Description",
+                            "type": "TEXT",
+                            "visible": true
+                        },
+                        "status": {
+                            "title": "Status",
+                            "type": "TEXT",
+                            "visible": true
+                        },
+                        "certInstallStatus": {
+                            "title": "Cert install status",
+                            "type": "TEXT",
+                            "visible": true
+                        },
+                        "expirationStatus": {
+                            "title": "Expiration status",
+                            "type": "TEXT",
+                            "visible": true
+                        },
+                        "globalState": {
+                            "title": "Global state",
+                            "type": "TEXT",
+                            "visible": true
+                        },
+                        "state_vedgeList": {
+                            "title": "State Vedgelist",
+                            "type": "TEXT",
+                            "visible": true
+                        },
+                        "collection_timestamp": {
+                            "title": "Collection Timestamp",
+                            "type": "DOUBLE",
+                            "visible": true
+                        },
+                        "lastupdated": {
+                            "title": "Lastupdated",
+                            "type": "DOUBLE",
+                            "visible": true
+                        },
+                        "latitude": {
+                            "title": "Latitude",
+                            "type": "DOUBLE",
+                            "visible": true
+                        },
+                        "layoutLevel": {
+                            "title": "Layoutlevel",
+                            "type": "DOUBLE",
+                            "visible": true
+                        },
+                        "longitude": {
+                            "title": "Longitude",
+                            "type": "DOUBLE",
+                            "visible": true
+                        },
+                        "site_id": {
+                            "title": "Site ID",
+                            "type": "DOUBLE",
+                            "visible": true
+                        },
+                        "total_cpu_count": {
+                            "title": "Total Cpu Count",
+                            "type": "DOUBLE",
+                            "visible": true
+                        },
+                        "uptime_date": {
+                            "title": "Uptime Date",
+                            "type": "DATETIME",
+                            "visible": true
+                        },
+                        "expirationDateLong": {
+                            "title": "Expiration date",
+                            "type": "DATETIME",
+                            "visible": true
+                        },
+                        "lastExpirationAlarmDate": {
+                            "title": "Last expiration alarm date",
+                            "type": "DATETIME",
+                            "visible": true
+                        },
+                        "timestamp": {
+                            "title": "Timestamp",
+                            "type": "DATETIME",
+                            "visible": true
+                        }
+                    },
+                    "widget_id": "b2152d34"
+                }
+            ]
+        }
+    ],
+    "saved_time": "2025-02-11T05:43:53.318107"
+}

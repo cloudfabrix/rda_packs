@@ -1,0 +1,39 @@
+name: VMWare vCenter
+id: vcenter_vmware
+version: 2024021201031903
+category: ITSM
+comment: vCenter
+enabled: true
+type: Scheduled
+provider: CloudFabrix Software, Inc.
+attrs: {
+    customer_id: $PKG_CONTEXT_CUSTOMER_ID,
+    customer_tag: $PKG_CONTEXT_CUSTOMER_TAG
+}
+run_context: {
+    customer_id: $PKG_CONTEXT_CUSTOMER_ID,
+    customer_tag: $PKG_CONTEXT_CUSTOMER_TAG
+}
+scheduled_pipelines:
+
+    -   name: vcenter_access_verification
+        label: vmware vcenter access verification
+        version: '*'
+        site: ${PKG_CONTEXT_CUSTOMER_TAG}-.*
+        site_type: regex
+        cron_expression: 0 0 * * *
+
+    -   name: vcenter_inventory
+        label: vmware vcenter inventory data
+        version: '*'
+        site: ${PKG_CONTEXT_CUSTOMER_TAG}-.*
+        site_type: regex
+        cron_expression: 0 1 * * *
+
+    -   name: vcenter_vmware_topology
+        label: vmware vcenter topology data
+        version: '*'
+        site: ${PKG_CONTEXT_CUSTOMER_TAG}-.*
+        site_type: regex
+        cron_expression: 0 0 * * *
+saved_time: '2024-03-01T07: 14: 16.390898'

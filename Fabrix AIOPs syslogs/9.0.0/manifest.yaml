@@ -1,0 +1,222 @@
+name: Fabrix AIOPs syslogs
+version: 9.0.0
+folder: /collection/network/fabrix_aiops_syslogs
+published_date: 2025-07-07
+publisher: Fabrix.ai
+label: Fabrix AIOPs Syslogs
+scope: system
+description: 
+  value: ""
+  ##html: "./description.html"
+  md: "./description.md"
+
+type: collection
+
+fabric_services:
+ - name: worker
+   version: ">=8.1.0"
+ - name: api-server
+   version: ">=8.1.0"
+ - name: alert-processor
+   version: ">=8.1.0"
+ - name: alert-ingester
+   version: ">=8.1.0"
+ - name: alert-correlator
+   version: ">=8.1.0"
+ - name: cfxdimensions-app-irm_service
+   version: ">=8.1.0"
+ - name: cfxdimensions-app-collaboration
+   version: ">=8.1.0"
+
+requires:
+  - name: Network Device Discovery 
+    version: ">=9.0.0"
+    auto_install_requires: true
+  - name: Fabrix AIOps Fault Management Base 
+    version: ">=9.0.0"
+    auto_install_requires: true
+
+##variables:
+##  deployment_name:
+##    type: string
+##    description: Customer tag
+##    default: ''
+ 
+artifacts:
+  credentials:
+    - name: restclient
+      type: restclient
+  
+
+  pstreams:
+
+    - name: syslog_udp_event_stream_all
+      index_name: "syslog_udp_event_stream_*"
+      autocreate: true
+    - name: syslog_stream
+  pipelines:
+    - name: syslog_generic_raise_alerts
+      version: 2024.07.02.1
+      folder: FaultManagementPack
+      file: ./artifacts/pipelines/syslog_generic_raise_alerts.txt       
+    
+  dashboards:
+    - name: customer_syslogs
+      file: ./artifacts/dashboards/customer_syslogs.json
+    - name: device_syslog_from_alert_fault
+      file: ./artifacts/dashboards/device_syslog_from_alert_fault.json  
+    - name: syslog_configure_and_manage
+      file: ./artifacts/dashboards/syslog_configure_and_manage.json  
+  
+  
+    
+
+  
+  datasets:
+    - name: syslog-severities
+      folder: FaultManagementPack
+      data_file: ./data/syslog-severities.csv
+    - name: syslog_alert_rules_dict
+      folder: FaultManagementPack
+      data_file: ./data/syslog_alert_rules_dict.csv  
+
+customer_level:
+  launch_locations:
+  - pstream_name: rda_packs_dynamic_groups_and_pages
+    dashboard_group_name: groupData
+    dashboard_group_label: Events
+    dashboard_group_icon: "trace.svg"
+    dashboard_page_name: customer_syslogs
+    dashboard_page_label: Syslogs
+    dashboard_page_icon: "topology.svg" 
+  - pstream_name: rda_packs_dynamic_groups_and_pages
+    dashboard_group_name: groupData
+    dashboard_group_label: Events
+    dashboard_group_icon: "trace.svg"
+    dashboard_page_name: device_syslog_from_alert_fault
+    dashboard_page_label: Syslogs
+    dashboard_page_icon: "topology.svg"
+  - pstream_name: rda_packs_dynamic_groups_and_pages
+    dashboard_group_name: groupDiscovery
+    dashboard_group_label: Device Onboarding
+    dashboard_group_icon: "library.svg"
+    dashboard_page_name: syslog_configure_and_manage
+    dashboard_page_label: Syslog Management
+    dashboard_page_icon: "library.svg"
+  
+
+
+
+  artifacts:
+    endpoints:
+   
+      - name: Syslog
+        file: ./artifacts/endpoints/Syslog.json
+          
+    mappings:
+      - name: syslog_mapping
+        file: ./artifacts/mappings/syslog_mapping.json
+
+    datasets:   
+    - name: syslog_endpoint_details
+      folder: FaultManagementPack
+      data_file: ./data/syslog_endpoint_details.csv 
+      substitutevariables: true   
+    - name: syslog_alert_rules_dict
+      folder: FaultManagementPack
+      data_file: ./data/syslog_alert_rules_dict.csv 
+    
+    pstreams:
+      - name: syslog_udp_event_stream
+        index_name: syslog_udp_event_stream_${PKG_CONTEXT_CUSTOMER_TAG}
+        autocreate: true
+        retention_days: 31
+        search_case_insensitive: true
+        attributes:
+          default_values:
+           device_status: UNMANAGED
+          enrich:
+           dict: ${PKG_CONTEXT_CUSTOMER_TAG}_chassis_inventory
+           dict_source: dataset
+           src_key_cols: rda_gw_client_ip
+           dict_key_cols: device_ip
+           enrich_cols: device_status,device_hostname,device_hostname_short,device_vendor,device_fw_type,device_model,device_fw_version,parent_sn,device_serial_number,node_id
+           replace_values: "yes"
+           dict_update_check_seconds: 60
+
+    blueprints:
+      - name: syslog_fault_management
+        file: ./artifacts/blueprints/syslog_fault_management.yaml
+    
+
+single_tenant:
+  launch_dashboard: network_discovery_main_app 
+  launch_locations:
+  - pstream_name: rda_packs_dynamic_groups_and_pages
+    dashboard_group_name: groupData
+    dashboard_group_label: Events
+    dashboard_group_icon: "trace.svg"
+    dashboard_page_name: customer_syslogs
+    dashboard_page_label: Syslogs
+    dashboard_page_icon: "topology.svg"
+  - pstream_name: rda_packs_dynamic_groups_and_pages
+    dashboard_group_name: groupData
+    dashboard_group_label: Events
+    dashboard_group_icon: "trace.svg"
+    dashboard_page_name: device_syslog_from_alert_fault
+    dashboard_page_label: Syslogs
+    dashboard_page_icon: "topology.svg"
+  - pstream_name: rda_packs_dynamic_groups_and_pages
+    dashboard_group_name: groupConfigure
+    dashboard_group_label: Configure and Manage
+    dashboard_group_icon: "library.svg"
+    dashboard_page_name: syslog_configure_and_manage
+    dashboard_page_label: Syslog Management
+    dashboard_page_icon: "library.svg"
+  
+  
+
+  artifacts:
+    pstreams:
+      - name: syslog_udp_event_stream
+        index_name: syslog_udp_event_stream_single
+        autocreate: true
+        retention_days: 31
+        search_case_insensitive: true
+        attributes:
+          default_values:
+           device_status: UNMANAGED
+          enrich:
+           dict: chassis_inventory
+           dict_source: dataset
+           src_key_cols: rda_gw_client_ip
+           dict_key_cols: device_ip
+           enrich_cols: device_status,device_hostname,device_hostname_short,device_vendor,device_fw_type,device_model,device_fw_version,parent_sn,device_serial_number,node_id
+           replace_values: "yes"
+           dict_update_check_seconds: 60
+
+    endpoints:
+    - name: Syslog
+      file: ./artifacts/endpoints/Syslog.json  
+    mappings:
+    - name: syslog_mapping
+      file: ./artifacts/mappings/syslog_mapping.json
+
+
+    datasets:
+    - name: syslog_endpoint_details
+      folder: FaultManagementPack
+      data_file: ./data/syslog_endpoint_details.csv 
+      substitutevariables: true 
+    - name: syslog_alert_rules_dict
+      folder: FaultManagementPack
+      data_file: ./data/syslog_alert_rules_dict.csv
+
+    
+    
+    blueprints:
+    - name: syslog_fault_management_single_tenant
+      file: ./artifacts/blueprints/syslog_fault_management_single_tenant.yaml
+
+
+  

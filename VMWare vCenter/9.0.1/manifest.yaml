@@ -1,0 +1,364 @@
+name: VMWare vCenter
+label: VMware vCenter inventory collection
+scope: system
+# Pack version needs to be conforming to <major>.<minor>.<micro> etc versioning.
+# More detailed spec for versioning: https://packaging.python.org/en/latest/specifications/version-specifiers/
+version: 9.0.1
+folder: /collection/vcenter_multitenant
+published_date: 2025-05-30
+publisher: Fabrix.ai
+# Description of the package. Supports HTML/markdown/plain text
+# Either can provide description as an inline string in this file
+# or have description.html and description.md and give corresponding file paths instead.
+# If description is provided by multiple ways, the order of precedence is description.md > description.html > description.value
+
+description: 
+   md: "./description.md"
+
+type: collection
+#launch_dashboard: Customer_onboarding
+
+#Other packs that this solution requires to be deployed
+requires:
+  - name: Fabrix Inventory Collection Base Pack
+    version: ">=6.0.0"
+
+# variables:
+#   deployment_name:
+#     type: string
+#     description: Example of a variable name
+#     default: "acme"
+
+# run_on_activation:
+#   run_parallel: true
+#   pipelines:
+#     - name: simple_pipeline
+#       version: 2024.03.19.1
+#       timeout: 40
+
+
+
+artifacts:
+  credentials:
+    - name: graph
+      type: graphdb
+
+  pstreams:
+    - name: vcenter_vmware_on_boarded_devices
+      attributes:
+        retention_days: 365
+        unique_keys: ["vcenter_src_name"]
+      autocreate: true
+
+    - name: vmware-vcenter-inventory
+      attributes:
+        unique_keys: ["unique_id"]
+        timestamp0: collection_timestamp
+        retention_days: 5
+        retention_purge_extra_filter: asset_status = 'Purge'
+        search_case_insensitive: true
+        _settings:
+          number_of_shards: 3
+          number_of_replicas: 1
+          refresh_interval: 30s
+        _mappings:
+          properties:
+            cpu_capacity_ghz:
+              type: double
+            cpu_used_ghz:
+              type: double
+            cpu_free_ghz:
+              type: double
+            memory_capacity_gb:
+              type: double
+            memory_free_gb:
+              type: double
+            storage_capacity_gb:
+              type: double
+            storage_used_gb:
+              type: double
+            storage_free_gb:
+              type: double
+            num_of_datastores:
+              type: double
+            num_of_hosts:
+              type: double
+            num_of_networks:
+              type: double
+            num_of_vms:
+              type: double
+            vm_cpus:
+              type: double
+            vm_cpu_sockets:
+              type: double
+            vm_cores_per_socket:
+              type: double
+            vm_cpu_shares:
+              type: double
+            vm_cpu_reservation_mhz:
+              type: double
+            vm_memory_mb:
+              type: double
+            vm_memory_shares:
+              type: double
+            vm_memory_reservation_mb:
+              type: double
+            vm_nics:
+              type: double
+            vm_disks:
+              type: double
+            esxi_host_cpu_sockets:
+              type: double
+            esxi_host_cpu_cores:
+              type: double
+            esxi_host_cpu_threads:
+              type: double
+            esxi_host_memory_bytes:
+              type: double
+            esxi_host_hbas:
+              type: double
+            esxi_host_nics:
+              type: double
+            esxi_host_vms:
+              type: double
+            esxi_host_vcpus_per_core:
+              type: double
+            esxi_host_vcpus:
+              type: double
+            esxi_host_provisioned_memory_gb:
+              type: double
+            esxi_host_cpus:
+              type: double
+            esxi_host_memory_gb:
+              type: double
+            esxi_host_available_memory_gb:
+              type: double
+            esxi_host_overprovision_memory_perc:
+              type: double
+            datastore_total_gb:
+              type: double
+            datastore_free_gb:
+              type: double
+            datastore_provisioned_gb:
+              type: double
+            datastore_overprovisioned_pct:
+              type: double
+            datastore_hosts:
+              type: double
+            datastore_used_gb:
+              type: double
+            all_vms_capacity_gb:
+              type: double
+            powered_on_vms_capacity_gb:
+              type: double
+            powered_off_vms_capacity_gb:
+              type: double
+      autocreate: true
+
+    - name: vcenter_access_verification_status
+      attributes:
+        retention_days: 7
+        unique_keys: ["asset_ip"]
+      autocreate: true
+
+    - name: network-endpoints-identity-stream
+      attributes:
+        retention_days: 3
+        unique_keys: ["unique_id"]
+        search_case_insensitive: true
+        _settings: {
+        "number_of_shards": 3,
+        "number_of_replicas": 1,
+        "refresh_interval": "30s"}
+      autocreate: true
+
+    # - name: rda_packs_dynamic_groups_and_pages
+    #   attributes:
+    #     unique_keys: ["pack_id","pack_version","customer_tag","dashboard_group_name",dashboard_page_name]
+    #     retention_days: 365
+    #     search_case_insensitive: true
+    #     _settings: {
+    #     "number_of_shards": 3,
+    #     "number_of_replicas": 1,
+    #     "refresh_interval": "30s"}
+    #   remove_on_deactivation: false
+    #   #data_file: ./data/data_for_dynamic_groups_and_pages.csv
+  dashboards:
+    - name: vcenter_topology
+      file: ./artifacts/dashboards/vcenter_topology.json
+
+    - name: vmware_vcenter_inventory
+      file: ./artifacts/dashboards/vmware_vcenter_inventory.json
+
+    - name: vcenter_collection_and_access_status
+      file: ./artifacts/dashboards/vcenter_collection_and_access_status.json
+
+    - name: vcenter_configure_and_manage
+      file: ./artifacts/dashboards/vcenter_configure_and_manage.json
+
+    - name: vmware_esxi_datastores_single
+      file: ./artifacts/dashboards/vmware_esxi_datastores_single.json
+      folder: vCenterSystemPack
+
+    - name: vmware_esxi_hosts_single
+      file: ./artifacts/dashboards/vmware_esxi_hosts_single.json
+      folder: vCenterSystemPack
+
+    - name: vmware_vcenter_manager_single
+      file: ./artifacts/dashboards/vmware_vcenter_manager_single.json
+      folder: vCenterSystemPack
+
+    - name: vmware_virtual_machines_single
+      file: ./artifacts/dashboards/vmware_virtual_machines_single.json
+      folder: vCenterSystemPack
+
+    - name: vcenter-topology-details-app-with-graphdb
+      file: ./artifacts/dashboards/topology-details-app-with-graphdb.json
+      folder: vCenterSystemPack
+
+    - name: vmware-vcenter-topology-app-without-graphdb
+      file: ./artifacts/dashboards/vmware-vcenter-topology-app-without-graphdb.json
+      folder: vCenterSystemPack
+
+    - name: vcenter_main_app
+      file: ./artifacts/dashboards/vcenter_main_app.json
+      folder: vCenterSystemPack
+
+
+    # - name: vcenter_msp_organizations
+    #   file: ./artifacts/dashboards/vcenter_msp_organizations.json
+    #   folder: vCenterSystemPack
+  pipelines:
+    - name: vcenter_inventory
+      version: 2024.03.19.1
+      file: ./artifacts/pipelines/vcenter_inventory.txt
+      folder: vCenterSystemPack
+
+    - name: vcenter_access_verification
+      version: 2024.03.19.1
+      file: ./artifacts/pipelines/vcenter_access_verification.txt
+      folder: vCenterSystemPack
+
+    - name: vcenter_vmware_topology
+      version: 2024.03.19.1
+      file: ./artifacts/pipelines/vcenter_vmware_topology.txt
+      folder: vCenterSystemPack
+
+    - name: vmware_import_vcenters
+      version: 2024.03.19.1
+      file: ./artifacts/pipelines/vmware_import_vcenters.txt
+      folder: vCenterSystemPack
+  stacks:
+    - name: vcenter
+      file: ./artifacts/stacks/vcenter.json
+
+
+
+customer_level:
+  # variables:
+  #   c_deployment_name:
+  #     type: string
+  #     description: Example of a variable name
+  #     default: "c_acme"
+  launch_locations:
+  # - pstream_name: rda_packs_dynamic_groups_and_pages
+  #   dashboard_group_name: groupVCenter
+  #   dashboard_group_label: vCenter
+  #   dashboard_group_icon: "asset.svg"
+  #   dashboard_page_name: vcenter_topology
+  #   dashboard_page_label: Topology
+  #   dashboard_page_icon: "asset.svg"
+  # - pstream_name: rda_packs_dynamic_groups_and_pages
+  #   dashboard_group_name: groupVCenter
+  #   dashboard_group_label: vCenter
+  #   dashboard_group_icon: "asset.svg"
+  #   dashboard_page_name: vmware-vcenter-topology-app-without-graphdb
+  #   dashboard_page_label: Asset Navigator
+  #   dashboard_page_icon: "asset.svg"
+  # - pstream_name: rda_packs_dynamic_groups_and_pages
+  #   dashboard_group_name: groupVCenter
+  #   dashboard_group_label: vCenter
+  #   dashboard_group_icon: "asset.svg"
+  #   dashboard_page_name: vmware_vcenter_inventory
+  #   dashboard_page_label: Inventory
+  #   dashboard_page_icon: "asset.svg"
+  - pstream_name: rda_packs_dynamic_groups_and_pages
+    dashboard_group_name: groupDiscovery
+    dashboard_group_label: Onboarding
+    dashboard_group_icon: "asset.svg"
+    dashboard_page_name: vcenter_collection_and_access_status
+    dashboard_page_label: vCenter Status
+    dashboard_page_icon: "asset.svg"
+  - pstream_name: rda_packs_dynamic_groups_and_pages
+    dashboard_group_name: groupDiscovery
+    dashboard_group_label: Onboarding
+    dashboard_group_icon: "asset.svg"
+    dashboard_page_name: vcenter_configure_and_manage
+    dashboard_page_label: "vCenter Configure and Manage"
+    dashboard_page_icon: "asset.svg"
+  - pstream_name: rda_packs_dynamic_groups_and_pages
+    dashboard_group_name: groupInventory
+    dashboard_group_label: Inventory
+    dashboard_group_icon: ""
+    dashboard_page_name: vmware_vcenter_inventory
+    dashboard_page_label: vCenter Assets
+    dashboard_page_icon: "asset.svg"
+  - pstream_name: rda_packs_dynamic_groups_and_pages
+    dashboard_group_name: groupTopo
+    dashboard_group_label: Topology
+    dashboard_group_icon: ""
+    dashboard_page_name: vcenter_topology
+    dashboard_page_label: vCenter Topology
+    dashboard_page_icon: "asset.svg"
+  artifacts:
+    # credentials:
+
+    #   - name: vcenter-1
+    #     type: vmware-vcenter-v2
+    #     add_to_default_site: true
+    #     data: {"host": ".*","user":"changeme","password":"changeme", customerTag:  $PKG_CONTEXT_CUSTOMER_TAG, customerId:  $PKG_CONTEXT_CUSTOMER_ID}
+    blueprints:
+      - name: VMWare vCenter 1
+        file: ./artifacts/blueprints/vcenter_vmware.yaml
+
+single_tenant:
+  # variables:
+  #   s_deployment_name:
+  #     type: string
+  #     description: Example of a variable name
+  #     default: "s_acme"
+  launch_dashboard: vcenter_main_app
+  launch_locations:
+    - pstream_name: rda_packs_dynamic_groups_and_pages
+      dashboard_group_name: groupAssetNavigator
+      dashboard_group_label: Asset Navigator
+      dashboard_group_icon: "asset.svg"
+      dashboard_page_name: vmware-vcenter-topology-app-without-graphdb
+      dashboard_page_label: "vCenter Asset Navigator"
+      dashboard_page_icon: "asset.svg"
+    - pstream_name: rda_packs_dynamic_groups_and_pages
+      dashboard_group_name: groupTopo
+      dashboard_group_label: Topology
+      dashboard_group_icon: ""
+      dashboard_page_name: vcenter_topology
+      dashboard_page_label: vCenter Topology
+      dashboard_page_icon: "asset.svg"
+    - pstream_name: rda_packs_dynamic_groups_and_pages
+      dashboard_group_name: groupInventory
+      dashboard_group_label: Inventory
+      dashboard_group_icon: ""
+      dashboard_page_name: vmware_vcenter_inventory
+      dashboard_page_label: vCenter Assets
+      dashboard_page_icon: "asset.svg"
+  artifacts:
+    # credentials:
+
+    #   - name: vcenter-single-tenant
+    #     type: vmware-vcenter-v2
+    #     add_to_default_site: true
+    #     data: {"host": ".*","user":"changeme","password":"changeme"}
+    blueprints:
+      - name: VMWare vCenter Single Tenant
+        file: ./artifacts/blueprints/vcenter_vmware_single_tenant.yaml
+  
+

@@ -1,0 +1,242 @@
+name: Fabrix AIOps BulkStats
+label: Fabrix AIOps BulkStats
+scope: system
+# Pack version needs to be conforming to <major>.<minor>.<micro> etc versioning.
+# More detailed spec for versioning: https://packaging.python.org/en/latest/specifications/version-specifiers/
+version: 9.0.0
+folder: /collection/fabrix_aiops_bulkstats
+published_date: 2025-06-30
+publisher: Fabrix.ai
+# Description of the package. Supports HTML/markdown/plain text
+# Either can provide description as an inline string in this file
+# or have description.html and description.md and give corresponding file paths instead.
+# If description is provided by multiple ways, the order of precedence is description.md > description.html > description.value
+
+description: 
+   md: "./description.md"
+
+type: collection
+
+fabric_services:
+  - name: api-server
+    version: ">=8.1.0"
+
+#Other packs that this solution requires to be deployed
+requires:
+  - name: Fabrix Inventory Collection Base Pack
+    version: ">=6.0.0"
+
+
+artifacts:
+
+  credentials:
+    - name: cfxml
+      type: cfxai_regression
+
+    - name: restclient
+      type: restclient
+
+  formatting_templates:
+    - name: raise_alerts_from_anomalies_bulkstats
+      file: ./artifacts/formatting_templates/raise_alerts_from_anomalies_bulkstats.txt
+      folder: BulkStatsMlPack
+      version: 2024.03.19.1
+
+  pstreams:
+    - name: ml-bulkstats-resampled-metrics
+      attributes:
+        unique_keys: ["timestamp","device","instanceKey","schema"]
+        retention_days: 31
+      autocreate: true
+
+
+    - name: ml-bulkstats-metrics-variance
+      attributes:
+        unique_keys: ["device","KPI_Name","instanceKey","schema"]
+        retention_days: 31
+      autocreate: true
+
+
+    - name: ml-bulkstats-correlated-devices
+      attributes:
+        unique_keys: ["device","KPI_Name","instanceKey","schema","group"]
+        retention_days: 31
+      autocreate: true
+
+
+    - name: ml-bulkstats-correlated-devices-per-group
+      attributes:
+        unique_keys: ["device","KPI_Name","instanceKey","schema","group"]
+        retention_days: 31
+      autocreate: true
+
+
+    - name: ml-bulkstats-metrics-regression-train-output
+      attributes:
+        unique_keys: ["timestamp","job_name"]
+        retention_days: 31
+      autocreate: true
+
+    - name: ml-bulkstats-metrics-regression-live-output
+      attributes:
+        unique_keys: ["live_timestamp","job_name"]
+        retention_days: 31
+      autocreate: true
+
+
+  dashboards:
+    - name: bulkstats_metrics_ml_insights
+      file: ./artifacts/dashboards/bulkstats_metrics_ml_insights.json
+      folder: BulkStatsMlPack
+
+    - name: bulkstats_regression_dashboard
+      file: ./artifacts/dashboards/bulkstats_regression_dashboard.json
+      folder: BulkStatsMlPack
+
+    - name: bulkstats_ml_metrics_insights_app
+      file: ./artifacts/dashboards/bulkstats_ml_metrics_insights_app.json
+      folder: BulkStatsMlPack
+
+    - name: bulkstats_metrics_ml_config
+      file: ./artifacts/dashboards/bulkstats_metrics_ml_config.json
+      folder: BulkStatsMlPack
+
+    - name: bulkstats_ml_configure_and_manage
+      file: ./artifacts/dashboards/bulkstats_ml_configure_and_manage.json
+      folder: BulkStatsMlPack
+
+  pipelines:
+    - name: ml-bulkstats-available-metrics
+      version: 2024.03.19.1
+      file: ./artifacts/pipelines/ml-bulkstats-available-metrics.txt
+      folder: BulkStatsMlPack
+      skip_validation: true
+
+    - name: ml-bulkstats-metrics-resampling
+      version: 2024.03.19.1
+      file: ./artifacts/pipelines/ml-bulkstats-metrics-resampling.txt
+      folder: BulkStatsMlPack
+      skip_validation: true
+      
+    - name: ml-bulkstats-variance-analysis
+      version: 2024.03.19.1
+      file: ./artifacts/pipelines/ml-bulkstats-variance-analysis.txt
+      folder: BulkStatsMlPack
+      skip_validation: true
+
+    - name: ml-bulkstats-metrics-regression
+      version: 2024.03.19.1
+      file: ./artifacts/pipelines/ml-bulkstats-metrics-regression.txt
+      folder: BulkStatsMlPack
+      skip_validation: true
+
+    - name: ml-bulkstats-metrics-periodic-resampling
+      version: 2024.03.19.1
+      file: ./artifacts/pipelines/ml-bulkstats-metrics-periodic-resampling.txt
+      folder: BulkStatsMlPack
+      skip_validation: true
+
+    - name: ml-bulkstats-metrics-prediction-child
+      version: 2024.03.19.1
+      file: ./artifacts/pipelines/ml-bulkstats-metrics-prediction-child.txt
+      folder: BulkStatsMlPack
+      skip_validation: true
+
+    - name: ml-bulkstats-metrics-prediction-parent
+      version: 2024.03.19.1
+      file: ./artifacts/pipelines/ml-bulkstats-metrics-prediction-parent.txt
+      folder: BulkStatsMlPack
+      skip_validation: true
+
+
+customer_level:
+  launch_locations:
+  - pstream_name: rda_packs_dynamic_groups_and_pages
+    dashboard_group_name: groupDiscovery
+    dashboard_group_label: Onboarding
+    dashboard_group_icon: "asset.svg"
+    dashboard_page_name: bulkstats_ml_configure_and_manage
+    dashboard_page_label: BulkStats ML Configure and Manage
+    dashboard_page_icon: "settings.svg"
+  - pstream_name: rda_packs_dynamic_groups_and_pages
+    dashboard_group_name: groupInventory
+    dashboard_group_label: Inventory
+    dashboard_group_icon: ""
+    dashboard_page_name: bulkstats_metrics_ml_insights
+    dashboard_page_label: BulkStats ML Insights
+    dashboard_page_icon: "cluster.svg"
+  - pstream_name: rda_packs_dynamic_groups_and_pages
+    dashboard_group_name: groupInventory
+    dashboard_group_label: Inventory
+    dashboard_group_icon: ""
+    dashboard_page_name: bulkstats_metrics_ml_config
+    dashboard_page_label: BulkStats ML Configuration
+    dashboard_page_icon: "cluster.svg"
+
+  artifacts:
+
+    blueprints:
+      - name: BulkStats Metrics Correlation and Regression Multi Tenant
+        file: ./artifacts/blueprints/bulkstats_metrics_correlation_and_regression_multi_tenant.yaml
+
+    endpoints:
+      - name: Bulkstats
+        file: ./artifacts/endpoints/bulk_end_corr_regrr.json
+
+    mappings:
+      - name: bulkstats_mapping
+        file: ./artifacts/mappings/bulk_map_corr_regr.json
+
+    datasets:
+      - name: customer_details
+        data_file: ./data/customer_details.csv
+        folder: BulkStatsMlPack
+        substitutevariables: true
+        remove_on_deactivation: true
+
+
+single_tenant:
+  launch_dashboard: bulkstats_ml_metrics_insights_app
+  launch_locations:
+  - pstream_name: rda_packs_dynamic_groups_and_pages
+    dashboard_group_name: groupDiscovery
+    dashboard_group_label: Onboarding
+    dashboard_group_icon: "asset.svg"
+    dashboard_page_name: bulkstats_ml_configure_and_manage
+    dashboard_page_label: BulkStats ML Configure and Manage
+    dashboard_page_icon: "settings.svg"
+  - pstream_name: rda_packs_dynamic_groups_and_pages
+    dashboard_group_name: groupInventory
+    dashboard_group_label: Inventory
+    dashboard_group_icon: ""
+    dashboard_page_name: bulkstats_metrics_ml_insights
+    dashboard_page_label: Insights
+    dashboard_page_icon: "cluster.svg"
+  - pstream_name: rda_packs_dynamic_groups_and_pages
+    dashboard_group_name: groupInventory
+    dashboard_group_label: Inventory
+    dashboard_group_icon: ""
+    dashboard_page_name: bulkstats_metrics_ml_config
+    dashboard_page_label: Configuration
+    dashboard_page_icon: "cluster.svg"
+  artifacts:
+
+    blueprints:
+      - name: BulkStats Metrics Correlation and Regression
+        file: ./artifacts/blueprints/bulkstats_metrics_correlation_and_regression.yaml
+  
+
+    endpoints:
+      - name: Bulkstats
+        file: ./artifacts/endpoints/bulk_end_corr_regrr.json
+
+    mappings:
+      - name: bulkstats_mapping
+        file: ./artifacts/mappings/bulk_map_corr_regr.json
+
+    datasets:
+      - name: customer_details
+        data_file: ./data/customer_details.csv
+        folder: BulkStatsMlPack
+        substitutevariables: true
+        remove_on_deactivation: true

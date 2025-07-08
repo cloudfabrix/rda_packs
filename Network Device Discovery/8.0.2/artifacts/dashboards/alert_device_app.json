@@ -1,0 +1,49 @@
+{
+  "name": "alert_device_app",
+  "label": "Device View",
+  "description": "Device View",
+  "dashboard_folder": "NetworkDevicePack",
+  "context_label_id": "a_asset_name",
+  "version": "24.1.14.2",
+  "debug": true,
+  "enabled": true,
+  "dashboard_filters": {
+      "time_filter": true,
+      "columns_filter": []
+  },
+  "dashboard_sections": [
+      {
+          "title": "Device View"
+      }
+  ],
+  "dashboard_type": "app",
+  "context_enrichment": {
+      "stream": "network_device_inventory",
+      "enrich_columns": [
+          "device_hostname",
+          "parent_sn"
+      ],
+      "query_template": "device_ip = '$a_asset_ip_address'",
+      "defaultValues": {}
+  },
+  "dashboard_groups": {
+      "from_to": {
+          "icon": "alert.svg",
+          "label": "Alerts"
+      },
+      "topo": {
+          "icon": "topology.svg",
+          "label": "Topology"
+      }
+  },
+  "dashboard_pages": [
+      {
+          "name": "topology_geomap_dashboard",
+          "label": "Topology",
+          "group": "topo",
+          "icon": "insights.svg",
+          "context_filter0": "node_type is 'edge'"
+      }
+  ],
+  "saved_time": "2024-08-20T12:08:20.359575"
+}

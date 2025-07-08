@@ -1,0 +1,91 @@
+{
+    "name": "vmanage_asset_navigator",
+    "label": "vManage Asset Navigator",
+    "description": "vManage Asset Navigator",
+    "enabled": true,
+    "live_edit": true,
+    "dashboard_style": "auto",
+    "dashboard_type": "template",
+    "dashboard_folder": "VmanageInventory",
+    "version": "24.08.01.1",
+    "short_label0": "Stack",
+    "context_label_id": "stack_name",
+    "dashboard_filters": {},
+    "template_variables": {
+        "NODE_ID": {
+            "contextId": [
+                "navigatorSelectionContexts",
+                "secondaryListSelection",
+                "node_id"
+            ]
+        },
+        "CUST_TAG": {
+            "contextId": "customerTag"
+        },
+        "CUSTOMER_NAME": {
+            "contextId": "customerName"
+        },
+        "CUSTOMER_ID": {
+            "contextId": "customerId"
+        },
+        "PROJECT_ID": {
+            "contextId": "project_id"
+        }
+    },
+    "navigation_dashboards": {
+        "tree_data": {
+            "column_name": "node_type",
+            "pstream_name": "vmanage_nodes",
+            "cfxql_query": "timestamp is after -12 months and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)"
+        },
+        "tree_detail": {
+            "display_column": "node_label",
+            "selected_columns": {
+                "node_id": "Node Id",
+                "node_label": "Node Name"
+            },
+            "pstream_name": "vmanage_nodes",
+            "cfxql_query": "timestamp is after -12 months and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)"
+        },
+        "showNodeIcon": true,
+        "showSearchBox": false
+    },
+    "dashboard_sections": [
+        {
+            "title": "Node Details",
+            "widgets": [
+                {
+                    "title": "Summary",
+                    "widget_type": "portal_summary",
+                    "reportId": "rda.saas.topology.node_details.report",
+                    "max_width": 4,
+                    "height": 5,
+                    "min_width": 4,
+                    "widget_id": "182229d8"
+                },
+                {
+                    "title": "Edges Summary",
+                    "widget_type": "tabular",
+                    "max_width": 8,
+                    "height": 5,
+                    "min_width": 8,
+                    "stream": "vmanage_edges",
+                    "query": "timestamp is after -12 months and left_id is '{{NODE_ID}}' or right_id is '{{NODE_ID}}' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "widget_id": "dc7103e1"
+                },
+                {
+                    "title": "Topology",
+                    "widget_type": "topology",
+                    "register_search_endpoints": true,
+                    "auto_group": false,
+                    "reportId": "rda.saas.stack.view.topo",
+                    "stack": "vmanage",
+                    "height": 10,
+                    "min_wdith": 12,
+                    "widget_id": "182287d8"
+                }
+            ]
+        }
+    ],
+    "saved_time": "2025-03-17T04:20:12.145211"
+}

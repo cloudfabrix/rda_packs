@@ -1,0 +1,228 @@
+name: RDA Dashboard Training
+version: 1.0.0
+folder: /collection/Widgets/BuildInWidgets
+published_date: 2025-03-25
+publisher: CloudFabrix
+label: RDA Dashboard Training
+scope: system
+description: 
+  value: ""
+  md: "./description.md"
+
+type: collection
+
+# # Other packs that this solution requires to be deployed
+# requires:
+#    - name: Base Pack
+#      version: ">=5.0.0"
+launch_dashboard: Built-in_Widgets
+artifacts:
+  pstreams:
+    - name: training_topology_nodes
+      attributes:
+        source_dataset: "training_topology_nodes"
+        retention_days: ""
+      autocreate: true
+      remove_on_deactivation: true
+    - name: training_topology_edges
+      attributes:
+          source_dataset: "training_topology_edges"
+          retention_days: ""
+      autocreate: true
+      remove_on_deactivation: true
+    - name: main_enhanced
+      attributes:
+          source_dataset: "main_enhanced"
+          retention_days: ""
+      autocreate: true
+      remove_on_deactivation: true
+    - name: training-alerts-stream
+      attributes:
+          source_dataset: "training-alerts-stream"
+          retention_days: ""
+      autocreate: true
+      remove_on_deactivation: true
+    - name: training-incidents-stream
+      attributes:
+          source_dataset: "training-incidents-stream"
+          retention_days: ""
+      autocreate: true
+      remove_on_deactivation: true
+    - name: sample-ecommerce-data
+      attributes:
+        source_dataset: "sample-ecommerce-data"
+        retention_days: ""
+      autocreate: true
+      remove_on_deactivation: true
+    - name: shaded_chart
+      attributes:
+        source_dataset: "shaded_chart"
+        retention_days: ""
+      autocreate: true
+      remove_on_deactivation: true
+    - name: training_cisco_devices_inventory
+      attributes:
+        retention_days: ""
+      autocreate: true
+      data_file: ./data/training_cisco_devices_inventory.csv
+      remove_on_deactivation: true
+    - name: training_snmp_stats
+      attributes:
+        retention_days: ""
+      autocreate: true
+      remove_on_deactivation: true
+    - name: training_snmp_stats_external
+      attributes:
+        retention_days: ""
+      autocreate: true
+      remove_on_deactivation: true
+    - name: training_rdaf_network_device_snmp_metrics
+      attributes:
+        retention_days: ""
+      autocreate: true
+      data_file: ./data/training_rdaf_network_device_snmp_metrics.csv
+      remove_on_deactivation: true
+
+  datasets: 
+    - name: training_topology_nodes
+      data_file: ./data/training_topology_nodes.csv
+      remove_on_deactivation: true
+      folder: BuildInWidgets
+    - name: training_topology_edges
+      data_file: ./data/training_topology_edges.csv
+      remove_on_deactivation: true
+      folder:  BuildInWidgets
+    - name: main_enhanced
+      data_file: ./data/main_enhanced.csv
+      remove_on_deactivation: true
+      folder:  BuildInWidgets
+    - name: training-alerts-stream
+      data_file: ./data/training-alerts-stream.csv
+      folder:  BuildInWidgets
+    - name: training-incidents-stream
+      data_file: ./data/training-incidents-stream.csv
+      folder:  BuildInWidgets
+    - name: sample-ecommerce-data
+      data_file: ./data/sample-ecommerce-data.csv
+      folder:  BuildInWidgets
+      remove_on_deactivation: true
+    - name: shaded_chart
+      data_file: ./data/shaded_chart.csv
+      folder:  BuildInWidgets
+      remove_on_deactivation: true
+
+  
+  dashboards:
+    - name: bar_chart_examples
+      file: ./artifacts/dashboards/bar_chart_examples.json
+      remove_on_deactivation: true
+    - name: bar_chart_main_data
+      file: ./artifacts/dashboards/bar_chart_main_data.json
+      remove_on_deactivation: true
+    - name: code_block_chart_example
+      file: ./artifacts/dashboards/code_block_chart_example.json
+      remove_on_deactivation: true
+    - name: connectivity_chart_example
+      file: ./artifacts/dashboards/connectivity_chart_example.json
+      remove_on_deactivation: true
+    - name: connectivity_chart_stream_data
+      file: ./artifacts/dashboards/connectivity_chart_stream_data.json
+      remove_on_deactivation: true
+    - name: counter_chart_example
+      file: ./artifacts/dashboards/counter_chart_example.json
+      remove_on_deactivation: true
+    - name: counter_chart_stream_data
+      file: ./artifacts/dashboards/counter_chart_stream_data.json
+      remove_on_deactivation: true
+    - name: data_flow_chart_test
+      file: ./artifacts/dashboards/data_flow_chart_test.json
+      remove_on_deactivation: true
+    - name: dataflow_chart_alerts_stream_data
+      file: ./artifacts/dashboards/dataflow_chart_alerts_stream_data.json
+      remove_on_deactivation: true
+    - name: dataflow_chart_incidents_stream_data
+      file: ./artifacts/dashboards/dataflow_chart_incidents_stream_data.json
+      remove_on_deactivation: true
+    - name: edges_stream_data
+      file: ./artifacts/dashboards/edges_stream_data.json
+      remove_on_deactivation: true
+    - name: geomap_edges_chart_stream_data
+      file: ./artifacts/dashboards/geomap_edges_chart_stream_data.json
+      remove_on_deactivation: true
+    - name: geomap_nodes_chart_stream_data
+      file: ./artifacts/dashboards/geomap_nodes_chart_stream_data.json
+      remove_on_deactivation: true
+    - name: Geomap_Sample
+      file: ./artifacts/dashboards/Geomap_Sample.json
+      remove_on_deactivation: true
+    - name: image_chart_example
+      file: ./artifacts/dashboards/image_chart_example.json
+      remove_on_deactivation: true
+    - name: label_chart_data
+      file: ./artifacts/dashboards/label_chart_data.json
+      remove_on_deactivation: true
+    - name: label_chart_main_data
+      file: ./artifacts/dashboards/label_chart_main_data.json
+      remove_on_deactivation: true
+    - name: Multi_widget_support
+      file: ./artifacts/dashboards/Multi_widget_support.json
+      remove_on_deactivation: true
+    - name: nodes_stream_data
+      file: ./artifacts/dashboards/nodes_stream_data.json
+      remove_on_deactivation: true
+    - name: pie_chart_example
+      file: ./artifacts/dashboards/pie_chart_example.json
+      remove_on_deactivation: true
+    - name: pie_chart_stream_data
+      file: ./artifacts/dashboards/pie_chart_stream_data.json
+      remove_on_deactivation: true
+    - name: shaded_chart_example
+      file: ./artifacts/dashboards/shaded_chart_example.json
+      remove_on_deactivation: true
+    - name: shaded_chart_stream_data
+      file: ./artifacts/dashboards/shaded_chart_stream_data.json
+      remove_on_deactivation: true
+    - name: tabular_chart_example
+      file: ./artifacts/dashboards/tabular_chart_example.json
+      remove_on_deactivation: true
+    - name: tabular_chart_stream_data
+      file: ./artifacts/dashboards/tabular_chart_stream_data.json
+      remove_on_deactivation: true
+    - name: timeseries_chart_example
+      file: ./artifacts/dashboards/timeseries_chart_example.json
+      remove_on_deactivation: true
+    - name: timeseries_chart_stream_data
+      file: ./artifacts/dashboards/timeseries_chart_stream_data.json
+      remove_on_deactivation: true
+    - name: training-vcenter-topology-stack
+      file: ./artifacts/dashboards/training-vcenter-topology-stack.json
+      remove_on_deactivation: true
+    - name: Built-in_Widgets
+      file: ./artifacts/dashboards/Built-in_Widgets.json
+      remove_on_deactivation: true
+    - name: code_viewer
+      file: ./artifacts/dashboards/code_viewer.json
+      remove_on_deactivation: true
+    - name: training_drilldown_dashboard
+      file: ./artifacts/dashboards/drilldown_dashboard.json
+      remove_on_deactivation: true
+    - name: training_drilldown_dashboard2
+      file: ./artifacts/dashboards/drilldown_dashboard2.json
+      remove_on_deactivation: true
+    - name: training_node_details_app
+      file: ./artifacts/dashboards/node_details_app.json
+      remove_on_deactivation: true
+    - name: training_device_inventory_from_alert
+      file: ./artifacts/dashboards/device_inventory_from_alert.json
+      remove_on_deactivation: true
+    - name: training_device_alerts_from_alert
+      file: ./artifacts/dashboards/device_alerts_from_alert.json
+      remove_on_deactivation: true
+    - name: training_device_metrics_from_alert
+      file: ./artifacts/dashboards/device_metrics_from_alert.json
+      remove_on_deactivation: true
+
+  stacks:
+    - name: training_adm_topology
+      file: ./artifacts/stacks/training_ADM_topology.json
+      remove_on_deactivation: true

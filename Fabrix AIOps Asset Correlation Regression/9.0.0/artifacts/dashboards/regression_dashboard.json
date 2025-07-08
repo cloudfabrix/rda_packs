@@ -1,0 +1,209 @@
+{
+    "name": "regression_dashboard",
+    "label": "{{ASSET}} - {{METRIC_NAME}}",
+    "description": "Template dashboard for regression and seasonality charts",
+    "dashboard_folder": "ML",
+    "enabled": true,
+    "debug": true,
+    "live_edit": true,
+    "dashboard_type": "template",
+    "context_enrichment": {
+        "stream": "ml-variance-metrics-list",
+        "query_template": "asset_id is '$asset_id' and metric_id is '$metric_id'",
+        "enrich_columns": [
+            "static_upper_threshold"
+        ],
+        "defaultValues": {}
+    },
+    "template_variables": {
+        "MODEL_NAME": {
+            "contextId": "model_name"
+        },
+        "METRIC_ID": {
+            "contextId": "metric_id",
+            "default": "cpu"
+        },
+        "METRIC_NAME": {
+            "contextId": "metric_name",
+            "default": "cpu"
+        },
+        "GROUP": {
+            "contextId": "group",
+            "default": "Group-0"
+        },
+        "ASSET": {
+            "contextId": "asset_id"
+        },
+        "UNIT": {
+            "contextId": "unit",
+            "default": "%"
+        },
+        "STATIC_UPPER_THRESHOLD": {
+            "contextId": "static_upper_threshold",
+            "default": "Not Configured"
+        },
+        "CUST_ID": {
+            "contextId": "customerId"
+        },
+        "PROJ_ID": {
+            "contextId": "projectId"
+        },
+        "CUST_TAG": {
+            "contextId": "customerTag"
+        }
+    },
+    "dashboard_filters": {
+        "time_filter": true,
+        "default_time_filter_labels": [
+            "Last 3 months"
+        ]
+    },
+    "stream_query_mapping": {
+        "oia-metrics-data": {
+            "timestamp": "metric_timestamp"
+        }
+    },
+    "dashboard_sections": [
+        {
+            "title": "Summary",
+            "show_filter": true,
+            "widgets": [
+                {
+                    "widget_type": "label",
+                    "label": "<h3 style='text-align: center;'>Metric: {{METRIC_NAME}}</h3><h3 style='text-align: center;'>Correlation Group: {{GROUP}}</h3><h3 style='text-align: center;'>Static Upper Threshold: {{STATIC_UPPER_THRESHOLD or 'Not Configured'}}</h3>",
+                    "min_width": 12,
+                    "max_width": 12,
+                    "height": 2,
+                    "widget_id": "5ae002f1"
+                },
+                {
+                    "title": "{{METRIC_NAME}} - {{ASSET}}",
+                    "widget_type": "timeseries",
+                    "stream": "oia-metrics-data",
+                    "ts_column": "metric_timestamp",
+                    "max_width": 12,
+                    "height": 6,
+                    "min_width": 12,
+                    "duration_hours": 100000,
+                    "extra_filter": "metric_id is '{{METRIC_ID}}' and asset_id is '{{ASSET}}' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "chartProperties": {
+                        "yAxisLabel": "{{METRIC_NAME}} ({{UNIT}})",
+                        "xAxisLabel": "Time",
+                        "xAxisTickOrientation": "STAGGERED",
+                        "legendLocation": "top",
+                        "isDownsamplingDisabled": true,
+                        "options": {
+                            "elements": {
+                                "line": {
+                                    "borderWidth": 1
+                                },
+                                "point": {
+                                    "radius": 1,
+                                    "hitRadius": 2,
+                                    "hoverRadius": 2
+                                }
+                            }
+                        }
+                    },
+                    "interval": "1H",
+                    "series_spec": [
+                        {
+                            "label": "{{METRIC_NAME}}",
+                            "column": "value",
+                            "agg": "avg",
+                            "type": "float"
+                        }
+                    ],
+                    "widget_id": "c29bb685"
+                },
+                {
+                    "widget_type": "shaded_chart_multisource",
+                    "title": "Forecasting and Anomaly Detection ({{METRIC_NAME}} - {{GROUP}} - {{ASSET}})",
+                    "show-markers": true,
+                    "max_width": 12,
+                    "min_width": 12,
+                    "height": 8,
+                    "chartProperties": {
+                        "yAxisLabel": "{{METRIC_NAME}} ({{UNIT}})",
+                        "xAxisLabel": "Time"
+                    },
+                    "sources": [
+                        {
+                            "type": "train",
+                            "downsample": false,
+                            "stream": "ml-metrics-regression-train-output",
+                            "extra_filter": "job_name is '{{MODEL_NAME}}' and status is 'Success' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                            "stats_stream": "ml-regression-stats",
+                            "ts_column": "timestamp",
+                            "baseline_column": "baseline",
+                            "anomalies_column": "anomalies",
+                            "predicted_column": "predicted",
+                            "upperBound_column": "upperBound",
+                            "lowerBound_column": "lowerBound",
+                            "duration_hours": 1000000,
+                            "synchronized-group": 0
+                        },
+                        {
+                            "type": "predict",
+                            "downsample": false,
+                            "stream": "ml-metrics-regression-live-output",
+                            "extra_filter": "job_name is '{{MODEL_NAME}}' and status is 'Success' and live_data_label is '{{ASSET}}' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                            "ts_column": "live_timestamp",
+                            "baseline_column": "baseline",
+                            "anomalies_column": "anomaly",
+                            "predicted_column": "predicted",
+                            "upperBound_column": "upperBound",
+                            "lowerBound_column": "lowerBound",
+                            "duration_hours": 1000000,
+                            "synchronized-group": 0
+                        }
+                    ],
+                    "widget_id": "7a134625"
+                },
+                {
+                    "title": "Daily Seasonality",
+                    "widget_type": "timeseries",
+                    "stream": "ml-regression-seasonality",
+                    "ts_column": "timestamp",
+                    "max_width": 12,
+                    "height": 8,
+                    "min_width": 12,
+                    "duration_hours": 100000,
+                    "extra_filter": "job_name is '{{MODEL_NAME}}' and seasonality is 'daily'",
+                    "chartProperties": {
+                        "yAxisLabel": "Daily",
+                        "xAxisLabel": "Hour of Day",
+                        "xAxisTickOrientation": "STAGGERED",
+                        "options": {
+                            "scales": {
+                                "xAxes": [
+                                    {
+                                        "time": {
+                                            "displayFormats": {
+                                                "day": "ha",
+                                                "minute": "ha",
+                                                "hour": "ha"
+                                            }
+                                        }
+                                    }
+                                ]
+                            }
+                        },
+                        "legendLocation": "top"
+                    },
+                    "interval": "1H",
+                    "series_spec": [
+                        {
+                            "label": "Daily",
+                            "column": "value",
+                            "agg": "avg",
+                            "type": "float"
+                        }
+                    ],
+                    "widget_id": "606c0d64"
+                }
+            ]
+        }
+    ],
+    "saved_time": "2025-05-19T07:52:21.020567"
+}

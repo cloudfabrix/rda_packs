@@ -1,0 +1,136 @@
+{
+    "name": "vrops_metric_dash",
+    "label": "vROps Metrics Chart",
+    "description": "vROps Metrics Chart example",
+    "version": "10.12.24.1",
+    "enabled": true,
+    "dashboard_style0": "tabbed",
+    "live_edit": true,
+    "status_poller": {},
+    "dashboard_type": "template",
+    "dashboard_pages": [],
+    "template_variables": {
+        "CUST_ID": {
+            "contextId": "customerId"
+        },
+        "PROJ_ID": {
+            "contextId": "projectId"
+        },
+        "CUST_TAG": {
+            "contextId": "customerTag"
+        }
+    },
+    "dashboard_filters": {
+        "time_filter": true,
+        "extra_filter": "customer_tag is '{{CUST_TAG}}' or customer_tag is empty",
+        "default_time_filter_labels": [
+            "Last 12 months"
+        ],
+        "columns_filter": [],
+        "group_filters": []
+    },
+    "dashboard_sections": [
+        {
+            "title": "Timeseries Chart",
+            "show_filter": true,
+            "widgets": [
+                {
+                    "widget_type": "label",
+                    "label": "<div style='text-align:center;width:100%;'><h1><a style='text-decoration:none;color:#0066ff;' target='_blank'> Timeseries Chart </a></h1></div>",
+                    "min_width": 12,
+                    "height": 1,
+                    "max_width": 1,
+                    "widget_id": "69661818"
+                },
+                {
+                    "title": "Memory Usage (%)",
+                    "widget_type": "timeseries",
+                    "stream": "vrops_metrics_timeseries",
+                    "ts_column": "metric_timestamp",
+                    "extra_filter": "metric_id contains 'mem'",
+                    "max_width": 12,
+                    "height": 6,
+                    "min_width": 12,
+                    "chartProperties": {
+                        "yAxisLabel": "Memory Used (%)",
+                        "xAxisLabel": "Metric Source(vRops)",
+                        "legendLocation": "right"
+                    },
+                    "interval": "15min",
+                    "duration_hours": 108880000,
+                    "group_by": [
+                        "metric_source"
+                    ],
+                    "series_spec": [
+                        {
+                            "column": "value",
+                            "label": "Memory Used percent",
+                            "agg": "avg",
+                            "type": "float"
+                        }
+                    ],
+                    "widget_id": "cfd10545"
+                },
+                {
+                    "title": "Disk Usage (%)",
+                    "widget_type": "timeseries",
+                    "stream": "vrops_metrics_timeseries",
+                    "ts_column": "metric_timestamp",
+                    "extra_filter": "metric_id contains 'disk'",
+                    "max_width": 12,
+                    "height": 6,
+                    "min_width": 12,
+                    "chartProperties": {
+                        "yAxisLabel": "Disk Used (%)",
+                        "xAxisLabel": "Metric Source(vRops)",
+                        "legendLocation": "right"
+                    },
+                    "interval": "15Min",
+                    "duration_hours": 108880000,
+                    "group_by": [
+                        "metric_source"
+                    ],
+                    "series_spec": [
+                        {
+                            "column": "value",
+                            "label": "Disk Used percent",
+                            "agg": "avg",
+                            "type": "float"
+                        }
+                    ],
+                    "widget_id": "6f5fc431"
+                },
+                {
+                    "title": "CPU Usage (%)",
+                    "widget_type": "timeseries",
+                    "stream": "vrops_metrics_timeseries",
+                    "ts_column": "metric_timestamp",
+                    "extra_filter": "metric_id contains 'cpu'",
+                    "max_width": 12,
+                    "height": 6,
+                    "min_width": 12,
+                    "chartProperties": {
+                        "yAxisLabel": "CPU Used (%)",
+                        "xAxisLabel": "Metric Source(vRops)",
+                        "legendLocation": "right"
+                    },
+                    "interval": "15Min",
+                    "duration_hours": 108880000,
+                    "group_by": [
+                        "metric_source"
+                    ],
+                    "series_spec": [
+                        {
+                            "column": "value",
+                            "label": "CPU Usage",
+                            "agg": "avg",
+                            "type": "float"
+                        }
+                    ],
+                    "widget_id": "54964a6c"
+                }
+            ]
+        }
+    ],
+    "saved_time": "2025-02-04T07:40:26.627233"
+}

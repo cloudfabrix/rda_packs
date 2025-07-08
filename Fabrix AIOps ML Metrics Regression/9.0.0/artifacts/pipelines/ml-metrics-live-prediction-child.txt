@@ -1,0 +1,27 @@
+%% stream = no and limit = 0
+
+@exec:get-input
+    --> @dm:enrich-using-pstream dict='ml-metrics-regression-per-asset' and src_key_cols='asset_id,metric_id' and
+            dict_key_cols='asset_id,metric_id' and enrich_cols='model_name,customer_tag,customer_id' and dedup_dict='no'
+    --> @dm:add-missing-columns columns='metric_id,asset_id,model_name,asset_name,metric_name'
+    ## filter out devices for which regression model is not available
+    --> *dm:filter model_name is not null
+    --> @dm:save name='temp-live-metrics'
+
+--> @c:data-loop columns='metric_id,asset_id,model_name,asset_name,metric_name,customer_tag,customer_id' and dataset='temp-live-metrics'
+    --> @dm:recall-query name='temp-live-metrics' and query="metric_id is '$metric_id' and asset_id is '$asset_id'"
+    --> @cfxml:regression ts_column='metric_timestamp' and value_column='value' and action='predict' and
+            live_data_label='$asset_id' and frequency='1H' and agg_func='mean' and job_name='$model_name' and skip_errors='yes'
+    --> @dm:add-missing-columns columns = 'customer_tag' and value = '$customer_tag'
+    --> @dm:add-missing-columns columns = 'customer_id' and value = '$customer_id'
+    --> @dm:add-missing-columns columns= 'live_timestamp'
+    --> @dm:add-missing-columns columns = 'metric_id' and value = '$metric_id'
+    --> @dm:add-missing-columns columns = 'asset_name' and value = '$asset_name'
+    --> @dm:add-missing-columns columns = 'metric_name' and value = '$metric_name'
+    --> @dm:add-missing-columns columns = 'jobName'
+    --> @dm:eval job_name='jobName'
+    --> @dm:eval baseline="None if baseline == '' else baseline" and anomaly="None if anomaly == '' else anomaly"
+    --> @dm:eval baseline="baseline if anomaly is None else None"
+    --> @dm:change-time-format columns='live_timestamp' and from_format='datetimestr' and to_format='%Y-%m-%dT%H:%M:%S'
+    --> @rn:write-stream name="ml-metrics-regression-live-output"
+

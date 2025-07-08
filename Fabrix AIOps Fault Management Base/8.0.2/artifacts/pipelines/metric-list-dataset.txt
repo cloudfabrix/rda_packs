@@ -1,0 +1,48 @@
+%% stream = no and limit = 0
+%% import_src_type = "vrops"
+
+## vRops Metric List Pipeline
+@dm:empty
+    --> @dm:save name='oia-vrops-metrics-list'
+
+## vm summary
+--> @c:new-block
+    --> *vrops:vm-summary
+    --> @dm:save name='temp-vm-summary'
+
+## filter metric selection rules
+--> @c:new-block
+    --> @dm:recall name='oia-metric_selection_rules'
+    --> *dm:filter metric_source='vRops'
+    --> @dm:selectcolumns include="^metric_filter$"
+    --> @dm:save name='temp-vrops-metric-selection-rules'
+
+## metrics list
+--> @c:data-loop columns="metric_filter" and dataset='temp-vrops-metric-selection-rules'
+    --> *vrops:metric-list
+    --> *dm:filter ($metric_filter)
+    --> @dm:eval metric_id='key' and metric_name='name'
+    --> @dm:save name='temp-vrops-metrics-list' and append='yes'
+
+## create metrics list for each resource
+--> @c:data-loop columns='metric_id,metric_name,unit' and dataset='temp-vrops-metrics-list'
+    --> @dm:recall name='temp-vm-summary'
+    --> @dm:eval metric_id="'$metric_id'" and metric_label="'$metric_name'" and unit="'$unit'"
+    --> @dm:map from='identifier' and to='resource_id'
+    --> *dm:filter guest_ip_adress is not empty
+    --> @dm:map from='guest_ip_adress' and to='asset_id'
+    --> @dm:map from='name' and to='asset_name'
+    --> @dm:fixnull columns= 'unit' & value = 'Count' & apply_for_empty = 'yes'
+    --> @dm:selectcolumns include='^asset_id$|^asset_name$|^resource_id$|^metric_id$|^metric_label$|^unit$'
+    --> @dm:save name='temp-oia-vrops-metrics-list' and append='yes'
+
+## create empty dataset for vrops metrics list
+--> @c:new-block
+    --> @dm:empty
+    --> @dm:save name='oia-vrops-metrics-list'
+
+## create final metrics list for all resources
+--> @c:new-block
+    --> @dm:recall name='temp-oia-vrops-metrics-list'
+    --> @dm:save name='oia-vrops-metrics-list'
+

@@ -1,0 +1,303 @@
+{
+    "name": "bulkstats_metrics_ml_insights",
+    "label": "Bulkstats Metrics ML Insights",
+    "description": "Dashboard for ML Insights on Bulkstats Metrics",
+    "dashboard_folder": "ML",
+    "enabled": true,
+    "live_edit": true,
+    "dashboard_type": "template",
+    "template_variables": {
+        "CUST_ID": {
+            "contextId": "customerId"
+        },
+        "PROJ_ID": {
+            "contextId": "projectId"
+        },
+        "CUST_TAG": {
+            "contextId": "customerTag"
+        }
+    },
+    "dashboard_filters": {
+        "time_filter": true,
+        "default_time_filter_labels": [
+            "Last 1 month"
+        ],
+        "show_default_time_filter": true,
+        "columns_filter": [
+            {
+                "id": "device",
+                "label": "Device",
+                "type": "TEXT"
+            },
+            {
+                "id": "KPI_Name",
+                "label": "KPI Name",
+                "type": "TEXT"
+            },
+            {
+                "id": "accuracy",
+                "label": "Accuracy",
+                "type": "DOUBLE"
+            },
+            {
+                "id": "anomalies_percent",
+                "label": "Anomalies Percent",
+                "type": "DOUBLE"
+            },
+            {
+                "id": "group_label",
+                "label": "Correlation Group",
+                "type": "TEXT"
+            }
+        ],
+        "group_filters": [
+            {
+                "stream": "ml-bulkstats-correlated-devices-per-group",
+                "extra_filter": "customer_tag is '{{CUST_TAG}}' or customer_tag is empty",
+                "title": "KPI",
+                "duration_hours": 1000,
+                "group_by": [
+                    "KPI_Name"
+                ],
+                "ts_column": "timestamp",
+                "agg": "cardinality",
+                "column": "device",
+                "type": "int"
+            }
+        ]
+    },
+    "dashboard_sections": [
+        {
+            "title": "Summary",
+            "show_filter": true,
+            "widgets": [
+                {
+                    "title": "Devices",
+                    "widget_type": "custom_counter",
+                    "formatter": "DescriptiveCountFormatter",
+                    "stream": "ml-bulkstats-correlated-devices-per-group",
+                    "extra_filter": "customer_tag is '{{CUST_TAG}}' or customer_tag is empty",
+                    "ts_column": "timestamp",
+                    "duration_hours": 1000,
+                    "min_width": 3,
+                    "max_width": 4,
+                    "height": 3,
+                    "column": "device",
+                    "agg": "cardinality",
+                    "type": "int",
+                    "widget_id": "02be1e20"
+                },
+                {
+                    "title": "KPIs",
+                    "widget_type": "custom_counter",
+                    "formatter": "DescriptiveCountFormatter",
+                    "stream": "ml-bulkstats-correlated-devices-per-group",
+                    "extra_filter": "customer_tag is '{{CUST_TAG}}' or customer_tag is empty",
+                    "ts_column": "timestamp",
+                    "duration_hours": 1000,
+                    "min_width": 3,
+                    "max_width": 4,
+                    "height": 3,
+                    "column": "KPI_Name",
+                    "agg": "cardinality",
+                    "type": "int",
+                    "widget_id": "b97a615f"
+                },
+                {
+                    "title": "Instance Keys",
+                    "widget_type": "custom_counter",
+                    "formatter": "DescriptiveCountFormatter",
+                    "stream": "ml-bulkstats-correlated-devices-per-group",
+                    "extra_filter": "customer_tag is '{{CUST_TAG}}' or customer_tag is empty",
+                    "ts_column": "timestamp",
+                    "duration_hours": 1000,
+                    "max_width": 3,
+                    "min_width": 4,
+                    "column": "instance_key",
+                    "agg": "cardinality",
+                    "type": "int",
+                    "widget_id": "e98a7530"
+                },
+                {
+                    "title": "Devices with Increasing Trend",
+                    "widget_type": "counter",
+                    "formatter": "DescriptiveCountFormatter",
+                    "extra_filter": "customer_tag is '{{CUST_TAG}}' or customer_tag is empty",
+                    "stream": "ml-bulkstats-correlated-devices-per-group",
+                    "ts_column": "timestamp",
+                    "group_by": [
+                        "KPI_Name",
+                        "instance_key"
+                    ],
+                    "min_width": 4,
+                    "max_width": 6,
+                    "height": 4,
+                    "duration_hours": 1000,
+                    "column": "device",
+                    "agg": "cardinality",
+                    "type": "int",
+                    "widget_id": "a5e4a48e"
+                },
+                {
+                    "title": "Devices with Decreasing Trend",
+                    "widget_type": "counter",
+                    "formatter": "DescriptiveCountFormatter",
+                    "extra_filter": "customer_tag is '{{CUST_TAG}}' or customer_tag is empty",
+                    "stream": "ml-bulkstats-correlated-devices-per-group",
+                    "ts_column": "timestamp",
+                    "group_by": [
+                        "KPI_Name",
+                        "instance_key"
+                    ],
+                    "min_width": 4,
+                    "max_width": 6,
+                    "height": 4,
+                    "duration_hours": 1000,
+                    "column": "device",
+                    "agg": "cardinality",
+                    "type": "int",
+                    "widget_id": "28c9b844"
+                },
+                {
+                    "title": "Anomalies by Device",
+                    "widget_type": "multi_bar_chart",
+                    "stream": "ml-bulkstats-correlated-devices-per-group",
+                    "extra_filter": "customer_tag is '{{CUST_TAG}}' or customer_tag is empty",
+                    "min_width": 6,
+                    "max_width": 6,
+                    "height": 6,
+                    "ts_column": "timestamp",
+                    "chartProperties": {
+                        "yAxisLabel": "Anomalies Count",
+                        "xAxisLabel": "Device",
+                        "stacked": false,
+                        "legendLocation": "none",
+                        "orientation": "vertical"
+                    },
+                    "duration_hours": 10000,
+                    "group_by": [
+                        "KPI_Name",
+                        "device"
+                    ],
+                    "others_spec": {
+                        "limit": 5,
+                        "show_others": false
+                    },
+                    "column": "anomalies_count",
+                    "agg": "sum",
+                    "type": "int",
+                    "widget_id": "f4786acb"
+                },
+                {
+                    "title": "Overall Accuracy",
+                    "widget_type": "multi_bar_chart",
+                    "stream": "ml-bulkstats-correlated-devices-per-group",
+                    "extra_filter": "customer_tag is '{{CUST_TAG}}' or customer_tag is empty",
+                    "min_width": 6,
+                    "max_width": 6,
+                    "height": 6,
+                    "ts_column": "timestamp",
+                    "chartProperties": {
+                        "yAxisLabel": "Accuracy",
+                        "xAxisLabel": "Device",
+                        "stacked": false,
+                        "legendLocation": "none",
+                        "orientation": "vertical"
+                    },
+                    "duration_hours": 10000,
+                    "group_by": [
+                        "KPI_Name",
+                        "device"
+                    ],
+                    "others_spec": {
+                        "limit": 5,
+                        "show_others": false
+                    },
+                    "column": "accuracy",
+                    "agg": "avg",
+                    "type": "float",
+                    "widget_id": "4f2335e2"
+                },
+                {
+                    "title": "Summary",
+                    "widget_type": "tabular",
+                    "stream": "ml-bulkstats-correlated-devices-per-group",
+                    "extra_filter": "customer_tag is '{{CUST_TAG}}' or customer_tag is empty",
+                    "min_width": 12,
+                    "height": 8,
+                    "max_width": 12,
+                    "ts_column": "timestamp",
+                    "resizableColumns": true,
+                    "paginated": true,
+                    "duration_hours": 1000,
+                    "remote_searchable": true,
+                    "remote_searchable_cols": [
+                        "device",
+                        "instance_key",
+                        "KPI_Name"
+                    ],
+                    "columns": {
+                        "id": {
+                            "title": "ID",
+                            "type": "FIXED_VALUE",
+                            "value": "user-dashboard-bulkstats_regression_dashboard",
+                            "key": true,
+                            "hidden": true
+                        },
+                        "instance_key": {
+                            "title": "Instance Key",
+                            "key": true,
+                            "visible": true
+                        },
+                        "schema": {
+                            "title": "Schema",
+                            "key": true,
+                            "visible": true
+                        },
+                        "device": {
+                            "title": "Device",
+                            "key": true
+                        },
+                        "KPI_Name": {
+                            "title": "KPI",
+                            "visible": true,
+                            "key": true
+                        },
+                        "group_label": {
+                            "title": "Correlation Group",
+                            "hidden": true
+                        },
+                        "group": {
+                            "title": "Correlation Group",
+                            "key": true,
+                            "hidden": true
+                        },
+                        "model_name": {
+                            "title": "Model Name",
+                            "key": true,
+                            "visible": false
+                        },
+                        "seasonality": "Seasonality",
+                        "overall_trend": "Overall Trend",
+                        "accuracy": "Accuracy (%)",
+                        "anomalies_percent": "Anomalies (%)"
+                    },
+                    "actions": [
+                        {
+                            "appName": "user-dashboard",
+                            "permission": "ml:ml-jobs:viewSampledata",
+                            "identifier": "ViewRegressionDashboard",
+                            "selectionType": "SINGLE",
+                            "stateName": "app.featureapp",
+                            "drillDownLinkField": "device",
+                            "title": "View Regression Dashboard",
+                            "type": "GO_TO_APP_STATE"
+                        }
+                    ],
+                    "widget_id": "3d7466a3"
+                }
+            ]
+        }
+    ],
+    "saved_time": "2025-06-24T16:35:07.495811"
+}

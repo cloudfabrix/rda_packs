@@ -1,0 +1,68 @@
+{
+    "name": "vcenter-topology-details-app-with-graphdb",
+    "label": "Components",
+    "description": "Components",
+    "dashboard_folder": "vCenterSystemPack",
+    "version": "23.4.14.1",
+    "enabled": false,
+    "short_label": "Stack",
+    "context_label_id": "stack_name",
+    "dashboard_type": "navigation-dashboard",
+    "dashboard_style": "tabbed",
+    "dashboard_filters": {},
+    "navigation_dashboards": {
+        "tree_data": {
+            "column_name": "node_type",
+            "context_pstream_attr": "nodes_pstream",
+            "context_query_attr": "nodes_query"
+        },
+        "tree_detail": {
+            "context_pstream_attr": "nodes_pstream",
+            "context_query_attr": "nodes_query",
+            "display_column": "node_label"
+        },
+        "showNodeIcon": true,
+        "showSearchBox": false
+    },
+    "dashboard_sections": [
+        {
+            "title": "Node Details",
+            "widgets": [
+                {
+                    "title": "Summary",
+                    "widget_type": "portal_summary",
+                    "reportId": "rda.saas.topology.node_details.report",
+                    "max_width": 4,
+                    "height": 5,
+                    "min_width": 4,
+                    "widget_id": "182229d8"
+                },
+                {
+                    "title": "Relations",
+                    "widget_type": "graphdb",
+                    "relations_map": "Telco",
+                    "max_width": 8,
+                    "height": 12,
+                    "min_width": 8,
+                    "widget_id": "182229d8"
+                }
+            ]
+        },
+        {
+            "title": "Topology",
+            "widgets": [
+                {
+                    "title": "Topology",
+                    "widget_type": "topology",
+                    "register_search_endpoints": true,
+                    "auto_group": false,
+                    "reportId": "rda.saas.stack.view.topo",
+                    "height": 10,
+                    "min_wdith": 12,
+                    "widget_id": "182287d8"
+                }
+            ]
+        }
+    ],
+    "saved_time": "2024-04-23T22:47:31.526216"
+}

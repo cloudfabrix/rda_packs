@@ -1,0 +1,14 @@
+action,raw,reason,rule,rule_id,severity,state
+KEEP,,LINK UP Alert,"cisco_code = ""LINEPROTO-5-UPDOWN"" and raw contains ""changed state to up""",A100,Info,Clear
+KEEP,,LINK DOWN Alert,"cisco_code = ""LINEPROTO-5-UPDOWN"" and raw contains ""changed state to down""",A101,Critical,Open
+KEEP,,ADMIN UP Alert,"raw contains ""ADMIN UP""",A102,Info,Clear
+KEEP,,Memory Allocation Failure,"cisco_code = ""MEM_ECC-2-MALLOC""",A103,Minor,Open
+KEEP,,Power Supply Failure,"cisco_code = ""CI-3-PSFAIL""",A104,Major,Open
+KEEP,,Fan Failure,"cisco_code = ""CI-3-BLOWER""",A107,Major,Open
+KEEP,,Temperature Threshold Crossed,"cisco_code = ""ENVIRONMENTAL-1-ALERT""",A108,Info,Open
+KEEP,,Card Issue / Forced Reload of Linecard,"cisco_code = ""CARD_STATE-4-FORCE_RESET""",A109,Minor,Open
+KEEP,,LINK DOWN Alert,"cisco_code = ""LINK-5-CHANGED"" and raw contains ""changed state to administratively down""",A110,Critical,Open
+KEEP,,LINK UP Alert,"cisco_code = ""LINK-3-UPDOWN"" and raw contains ""changed state to up""",A111,Info,Clear
+DROP,,,*,Z999,,
+KEEP,changed state to down,Interface down,"cisco_code = ""LINK-3-UPDOWN"" and raw does not contains ""changed state to up""",A106,Major,Open
+KEEP,changed state to up,Interface up,"cisco_code = ""LINK-3-UPDOWN"" and raw contains ""changed state to up""",A105,Minor,Clear

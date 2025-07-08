@@ -1,0 +1,218 @@
+name: Fabrix AIOPs snmp
+version: 9.0.0
+folder: /collection/network/fabrix_aiops_snmp
+published_date: 2025-07-07
+publisher: Fabrix.ai
+label: Fabrix AIOPs snmp
+scope: system
+description: 
+  value: ""
+  ##html: "./description.html"
+  md: "./description.md"
+
+type: collection
+
+
+fabric_services:
+ - name: worker
+   version: ">=8.1.0"
+ - name: api-server
+   version: ">=8.1.0"
+ - name: alert-processor
+   version: ">=8.1.0"
+ - name: alert-ingester
+   version: ">=8.1.0"
+ - name: alert-correlator
+   version: ">=8.1.0"
+ - name: cfxdimensions-app-irm_service
+   version: ">=8.1.0"
+ - name: cfxdimensions-app-collaboration
+   version: ">=8.1.0"
+
+requires:
+  - name: Network Device Discovery 
+    version: ">=9.0.0"
+    auto_install_requires: true
+  - name: Fabrix AIOps Fault Management Base 
+    version: ">=9.0.4"
+    auto_install_requires: true
+
+
+
+
+artifacts:
+  credentials:
+    - name: restclient
+      type: restclient
+  
+
+  pstreams:
+
+    - name: snmp_trap_event_stream_all
+      index_name: "snmp_trap_event_stream_*"
+      autocreate: true
+    - name: snmp_trap_stream
+  pipelines:
+    - name: snmp_trap_generic_raise_alerts
+      version: 2025.07.01.1
+      folder: FaultManagementPack
+      file: ./artifacts/pipelines/snmp_trap_generic_raise_alerts.txt
+
+  dashboards:
+    - name: device_SNMP_Traps_from_alerts_fault
+      file: ./artifacts/dashboards/device_SNMP_Traps_from_alerts_fault.json
+    - name: customer_SNMP_Traps
+      file: ./artifacts/dashboards/customer_SNMP_Traps.json
+    - name: snmp_configure_and_manage
+      file: ./artifacts/dashboards/snmp_configure_and_manage.json
+
+  ##endpoints:
+  ##  
+  ##  - name: SNMP_Traps
+  ##    file: ./artifacts/endpoints/SNMP_Traps.json
+  ##    
+  ##mappings:
+  ##  
+  ##  - name: snmp_mapping
+  ##    file: ./artifacts/mappings/snmp_mapping.json
+
+  
+    
+customer_level:
+  launch_locations:
+    - pstream_name: rda_packs_dynamic_groups_and_pages
+      dashboard_group_name: groupData
+      dashboard_group_label: Events
+      dashboard_group_icon: "topology.svg"
+      dashboard_page_name: device_SNMP_Traps_from_alerts_fault
+      dashboard_page_label: SNMP_Traps
+      dashboard_page_icon: "topology.svg"
+    - pstream_name: rda_packs_dynamic_groups_and_pages
+      dashboard_group_name: groupData
+      dashboard_group_label: Events
+      dashboard_group_icon: "topology.svg"
+      dashboard_page_name: customer_SNMP_Traps
+      dashboard_page_label: SNMP_Traps
+      dashboard_page_icon: "topology.svg"
+    - pstream_name: rda_packs_dynamic_groups_and_pages
+      dashboard_group_name: groupDiscovery
+      dashboard_group_label: Device Onboarding
+      dashboard_group_icon: "library.svg"
+      dashboard_page_name: snmp_configure_and_manage
+      dashboard_page_label: SNMP Management
+      dashboard_page_icon: "library.svg"
+  
+
+  
+
+  
+
+  artifacts:
+    endpoints:
+      - name: SNMP_Traps
+        file: ./artifacts/endpoints/SNMP_Traps.json
+      
+    mappings:
+      - name: snmp_mapping
+        file: ./artifacts/mappings/snmp_mapping.json
+    
+    datasets:
+      - name: snmp_trap_endpoint_details
+        folder: FaultManagementPack
+        data_file: ./data/snmp_trap_endpoint_details.csv 
+        substitutevariables: true 
+      - name: snmp_trap_alert_rules_dict
+        folder: FaultManagementPack
+        data_file: ./data/snmp_trap_alert_rules_dict.csv
+    blueprints:
+      - name: snmp_fault_management
+        file: ./artifacts/blueprints/snmp_fault_management.yaml
+
+    
+    
+    pstreams:
+      - name: snmp_trap_event_stream
+        index_name: snmp_trap_event_stream_${PKG_CONTEXT_CUSTOMER_TAG}
+        autocreate: true
+        retention_days: 31
+        search_case_insensitive: true
+        attributes:
+          default_values:
+           device_status: UNMANAGED
+          enrich:
+           dict: ${PKG_CONTEXT_CUSTOMER_TAG}_chassis_inventory
+           dict_source: dataset
+           src_key_cols: rda_gw_client_ip
+           dict_key_cols: device_ip
+           enrich_cols: device_status,device_hostname,device_hostname_short,device_vendor,device_fw_type,device_model,device_fw_version,parent_sn,device_serial_number,node_id
+           replace_values: 'yes'
+           dict_update_check_seconds: 60
+
+single_tenant:
+  launch_dashboard: network_discovery_main_app 
+  launch_locations:
+    - pstream_name: rda_packs_dynamic_groups_and_pages
+      dashboard_group_name: groupData
+      dashboard_group_label: Events
+      dashboard_group_icon: "trace.svg"
+      dashboard_page_name: device_SNMP_Traps_from_alerts_fault
+      dashboard_page_label: SNMP_Traps
+      dashboard_page_icon: "topology.svg"
+    - pstream_name: rda_packs_dynamic_groups_and_pages
+      dashboard_group_name: groupData
+      dashboard_group_label: Events
+      dashboard_group_icon: "trace.svg"
+      dashboard_page_name: customer_SNMP_Traps
+      dashboard_page_label: SNMP_Traps
+      dashboard_page_icon: "topology.svg"
+    - pstream_name: rda_packs_dynamic_groups_and_pages
+      dashboard_group_name: groupConfigure
+      dashboard_group_label: Configure and Manage
+      dashboard_group_icon: "library.svg"
+      dashboard_page_name: snmp_configure_and_manage
+      dashboard_page_label: SNMP Management
+      dashboard_page_icon: "library.svg"
+  
+  
+
+  artifacts:
+    pstreams:
+      - name: snmp_trap_event_stream
+        index_name: snmp_trap_event_stream_single
+        autocreate: true
+        retention_days: 31
+        search_case_insensitive: true
+        attributes:
+          default_values:
+           device_status: UNMANAGED
+          enrich:
+           dict: chassis_inventory
+           dict_source: dataset
+           src_key_cols: rda_gw_client_ip
+           dict_key_cols: device_ip
+           enrich_cols: device_status,device_hostname,device_hostname_short,device_vendor,device_fw_type,device_model,device_fw_version,parent_sn,device_serial_number,node_id
+           replace_values: 'yes'
+           dict_update_check_seconds: 60
+    
+    endpoints:
+      - name: SNMP_Traps
+        file: ./artifacts/endpoints/SNMP_Traps.json
+      
+    mappings:
+      - name: snmp_mapping
+        file: ./artifacts/mappings/snmp_mapping.json
+    
+    datasets:
+      - name: snmp_trap_endpoint_details
+        folder: FaultManagementPack
+        data_file: ./data/snmp_trap_endpoint_details.csv 
+        substitutevariables: true 
+      - name: snmp_trap_alert_rules_dict
+        folder: FaultManagementPack
+        data_file: ./data/snmp_trap_alert_rules_dict.csv
+    
+    
+    blueprints:
+    - name: snmp_fault_management_single_tenant
+      file: ./artifacts/blueprints/snmp_fault_management_single_tenant.yaml
+ 

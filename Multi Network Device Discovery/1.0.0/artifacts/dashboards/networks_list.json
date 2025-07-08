@@ -1,0 +1,251 @@
+{
+    "name": "networks_list",
+    "label": "Multi Networks list",
+    "description": "onboarded_devices: Insights",
+    "dashboard_folder": "MultiNetworkPack",
+    "version": "1.0.4",
+    "enabled": false,
+    "dashboard_type": "template",
+    "template_variables": {
+        "CUST_ID": {
+            "contextId": "customerId"
+        },
+        "PROJ_ID": {
+            "contextId": "project_id"
+        },
+        "CUST_TAG": {
+            "contextId": "customerTag"
+        }
+    },
+    "dashboard_filters": {
+        "time_filter": true,
+        "default_time_filter_labels": [
+            "Last 1 month"
+        ],
+        "columns_filter": [],
+        "group_filters": []
+    },
+    "dashboard_sections": [
+        {
+            "title": "Multi Networks",
+            "show_filters": true,
+            "widgets": [
+                {
+                    "title": "Networks",
+                    "widget_type": "tabular",
+                    "stream": "multi_networks_list",
+                    "filter0": "customer_id = '{{CUST_ID}}' and project_id = '{{PROJ_ID}}'",
+                    "extra_filter": "customer_tag is '{{CUST_TAG}}' or customer_tag is empty or customer_tag is 'None'",
+                    "refreshOptions": {
+                        "refreshType": "Periodic",
+                        "refreshInterval": 30000
+                    },
+                    "remote_searchable": true,
+                    "remote_searchable_cols": [
+                        "network_name"
+                    ],
+                    "ts_column": "timestamp",
+                    "paginated": true,
+                    "height": 10,
+                    "min_wdith": 12,
+                    "columns": {
+                        "network_name": {
+                            "title": "Network Name",
+                            "key": true
+                        },
+                        "customer_tag": {
+                            "title": "customer_tag",
+                            "key": true,
+                            "visible": false
+                        },
+                        "customer_id": {
+                            "title": "customer_id",
+                            "key": true,
+                            "visible": false
+                        },
+                        "timestamp": {
+                            "title": "Timestamp",
+                            "type": "DATETIME"
+                        },
+                        "_RDA_Id": {
+                            "title": "RDA ID",
+                            "key": true,
+                            "visible": false
+                        }
+                    },
+                    "actions": [
+                        {
+                            "permission": "rda:github:view",
+                            "title": "Add Networks",
+                            "type": "POPUP_FORM",
+                            "selectionType": "NONE",
+                            "identifier": "saas-service-action:userdashboard-add-yaml",
+                            "api-endpoint": {
+                                "service-name": "saas-reports",
+                                "methodName": "getForm",
+                                "stringified-params": true,
+                                "parse-output": false,
+                                "params": [
+                                    {
+                                        "formId": "rda.saas.dynamic.form",
+                                        "formActionList": {
+                                            "formActions": [
+                                                {
+                                                    "actionLabel": "Add",
+                                                    "identifier": "Submit"
+                                                },
+                                                {
+                                                    "actionLabel": "Cancel",
+                                                    "identifier": "Cancel"
+                                                }
+                                            ]
+                                        },
+                                        "formDefinition": {
+                                            "id": "rda.saas.dynamic.form",
+                                            "refreshRequired": true,
+                                            "formFieldList": [
+                                                {
+                                                    "help": "Name of network",
+                                                    "dataType": "string",
+                                                    "controlType": "TEXT_FIELD",
+                                                    "required": true,
+                                                    "editable": true,
+                                                    "label": "Network Name",
+                                                    "hidden": false,
+                                                    "fieldId": "network_name"
+                                                },
+                                                {
+                                                    "help": "customer_tag",
+                                                    "dataType": "string",
+                                                    "controlType": "TEXT_FIELD",
+                                                    "required": true,
+                                                    "editable": true,
+                                                    "label": "customer_tag",
+                                                    "hidden": true,
+                                                    "defaultValue": "{{CUST_TAG}}",
+                                                    "fieldId": "customer_tag"
+                                                },
+                                                {
+                                                    "help": "customer_id",
+                                                    "dataType": "string",
+                                                    "controlType": "TEXT_FIELD",
+                                                    "required": true,
+                                                    "editable": true,
+                                                    "label": "customer_id",
+                                                    "hidden": true,
+                                                    "defaultValue": "{{CUST_ID}}",
+                                                    "fieldId": "customer_id"
+                                                }
+                                            ]
+                                        },
+                                        "actions": [
+                                            {
+                                                "type": "UPDATE_PSTREAM",
+                                                "operation": "ADD",
+                                                "pstreamName": "multi_networks_list"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "permission": "rda:github:view",
+                            "title": "Delete Network",
+                            "type": "POPUP_FORM",
+                            "selectionType": "SINGLE",
+                            "identifier": "saas-service-action:userdashboard-add-yaml",
+                            "api-endpoint": {
+                                "service-name": "saas-reports",
+                                "methodName": "getForm",
+                                "stringified-params": true,
+                                "parse-output": false,
+                                "params": [
+                                    {
+                                        "formId": "rda.saas.dynamic.form",
+                                        "formActionList": {
+                                            "formActions": [
+                                                {
+                                                    "identifier": "Submit",
+                                                    "actionLabel": "Delete"
+                                                }
+                                            ]
+                                        },
+                                        "formDefinition": {
+                                            "id": "rda.saas.dynamic.form",
+                                            "refreshRequired": true,
+                                            "formFieldList": [
+                                                {
+                                                    "help": "Readonly field. Name of network to be deleted.",
+                                                    "dataType": "string",
+                                                    "controlType": "TEXT_FIELD",
+                                                    "required": false,
+                                                    "editable": false,
+                                                    "label": "Network Name",
+                                                    "hidden": false,
+                                                    "fieldId": "network_name"
+                                                }
+                                            ]
+                                        },
+                                        "actions": [
+                                            {
+                                                "type": "UPDATE_PSTREAM",
+                                                "pstreamName": "multi_networks_list",
+                                                "operation": "DELETE",
+                                                "cfxql_query": "network_name is '{%raw%}{{network_name}}{%endraw%}'"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "appName": "user-dashboard/network_device_discovery_ops",
+                            "permission": "rda:page:view",
+                            "drillDownLinkField": "network_name",
+                            "identifier": "network_name",
+                            "selectionType": "SINGLE",
+                            "stateName": "app.featureapp",
+                            "title": "Network Device Discovery Ops",
+                            "type": "GO_TO_APP_STATE",
+                            "contextParamList": {
+                                "contextParams": [
+                                    {
+                                        "paramKey": "projectId",
+                                        "paramId": "project_id"
+                                    },
+                                    {
+                                        "paramKey": "customerId",
+                                        "paramId": "customer_id"
+                                    },
+                                    {
+                                        "paramKey": "tag1",
+                                        "paramId": "a_en_customer_tag"
+                                    },
+                                    {
+                                        "paramKey": "tag1",
+                                        "paramId": "attrs_customer_tag"
+                                    },
+                                    {
+                                        "paramKey": "tag1",
+                                        "paramId": "customerTag"
+                                    },
+                                    {
+                                        "paramKey": "tag1",
+                                        "paramId": "customer_tag"
+                                    },
+                                    {
+                                        "paramKey": "network_name",
+                                        "paramId": "network_name"
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "widget_id": "4ed05ae9"
+                }
+            ]
+        }
+    ],
+    "saved_time": "2025-05-20T07:11:15.412746"
+}

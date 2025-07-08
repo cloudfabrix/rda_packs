@@ -1,0 +1,324 @@
+{
+    "name": "incident-details-insights",
+    "label": "Incident Insights",
+    "description": "OIA Insights for Incident",
+    "version": "25.3.21",
+    "enabled": true,
+    "exportable": false,
+    "dashboard_style": "auto",
+    "dashboard_generator": {
+        "attachment": "generator_jinja"
+    },
+    "status_poller": {},
+    "dashboard_type": "template",
+    "template_variables": {
+        "PROJECT_ID": {
+            "default": null,
+            "contextId": "projectid"
+        },
+        "INCIDENT_ID": {
+            "default": null,
+            "contextId": "incidentid"
+        },
+        "I_CLUSTER": {
+            "default": null,
+            "contextId": "i_cluster"
+        }
+    },
+    "dashboard_filters": {
+        "time_filter": false,
+        "columns_filter": []
+    },
+    "import": [
+        {
+            "from": "oia-incidents-os-template",
+            "as": "incidents"
+        }
+    ],
+    "dashboard_sections": [
+        {
+            "title": "Insights",
+            "show_filter": false,
+            "projects": [],
+            "widgets": [
+                {
+                    "title": "Similar Incidents",
+                    "widget_type": "portal_list",
+                    "widget_template": "cfx-oia/recommendation",
+                    "min_width": 12,
+                    "height": 4,
+                    "max_width": 12,
+                    "refreshRequired": false,
+                    "timebased": false,
+                    "exportSupported": false,
+                    "columns": {
+                        "roomid": {
+                            "title": "roomid",
+                            "key": true,
+                            "visible": false
+                        },
+                        "cfxqlFilter": {
+                            "title": "cfxqlFilter",
+                            "key": true,
+                            "visible": false
+                        }
+                    },
+                    "actions": [
+                        {
+                            "id": "show_incidents",
+                            "permission": "oia:incident:view",
+                            "title": "Show Incidents",
+                            "type": "POPUP_FORM",
+                            "paginated": true,
+                            "identifier": "cfx.irm.show.inc",
+                            "selectionType": "SINGLE",
+                            "api-endpoint": {
+                                "service-name": "saas-reports",
+                                "methodName": "getForm",
+                                "stringified-params": true,
+                                "parse-output": false,
+                                "params": [
+                                    {
+                                        "form_id": "rda.saas.dynamic.form",
+                                        "formDefinition": {
+                                            "id": "rda.saas.dynamic.form",
+                                            "refreshRequired": true,
+                                            "submitRequired": false,
+                                            "formFieldList": [
+                                                {
+                                                    "dataType": "string",
+                                                    "controlType": "READ_ONLY_TABLE",
+                                                    "widget": {
+                                                        "extends": "incidents:incident_tabular",
+                                                        "extend_vars": {
+                                                            "incidents_tabular_extra_filter": "$cfxqlFilter"
+                                                        },
+                                                        "timebased": false
+                                                    },
+                                                    "required": false,
+                                                    "editable": false,
+                                                    "label": "Incidents",
+                                                    "hidden": false,
+                                                    "fieldId": "selectedIncidents"
+                                                }
+                                            ]
+                                        }
+                                    }
+                                ]
+                            },
+                            "actionCondition": {
+                                "actionControl": "SHOW_IF",
+                                "conditionalField": [
+                                    {
+                                        "conditionType": "NOT_EQUAL",
+                                        "conditionValue": 0,
+                                        "fieldId": "value"
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "dataResults": [],
+                    "widget_id": "similar_incidents_jinja"
+                },
+                {
+                    "title": "How Similar Incidents are Resolved?",
+                    "widget_type": "portal_list",
+                    "widget_template": "cfx-oia/recommendation",
+                    "min_width": 12,
+                    "height": 4,
+                    "max_width": 12,
+                    "refreshRequired": false,
+                    "timebased": false,
+                    "exportSupported": false,
+                    "columns": {
+                        "roomid": {
+                            "title": "roomid",
+                            "key": true,
+                            "visible": false
+                        },
+                        "cfxqlFilter": {
+                            "title": "cfxqlFilter",
+                            "key": true,
+                            "visible": false
+                        }
+                    },
+                    "actions": [
+                        {
+                            "id": "show_incidents",
+                            "title": "Show Incidents",
+                            "type": "POPUP_REPORT",
+                            "paginated": true,
+                            "identifier": "cfx.irm.show.inc",
+                            "selectionType": "SINGLE",
+                            "api-endpoint": {
+                                "service-name": "saas-reports",
+                                "methodName": "getForm",
+                                "stringified-params": true,
+                                "parse-output": false,
+                                "params": [
+                                    {
+                                        "form_id": "rda.saas.dynamic.form",
+                                        "formDefinition": {
+                                            "id": "rda.saas.dynamic.form",
+                                            "refreshRequired": true,
+                                            "formFieldList": [
+                                                {
+                                                    "dataType": "string",
+                                                    "controlType": "TABULAR",
+                                                    "controlPropertyList": [
+                                                        {
+                                                            "attribute": "column-key",
+                                                            "value": "incident_id"
+                                                        },
+                                                        {
+                                                            "attribute": "column-key",
+                                                            "value": "project_id"
+                                                        },
+                                                        {
+                                                            "attribute": "column-key",
+                                                            "value": "customer_id"
+                                                        },
+                                                        {
+                                                            "attribute": "selection",
+                                                            "value": "NONE"
+                                                        }
+                                                    ],
+                                                    "widget": {
+                                                        "extends": "incidents:incident_tabular",
+                                                        "extend_vars": {
+                                                            "incidents_tabular_extra_filter": "$cfxqlFilter"
+                                                        }
+                                                    },
+                                                    "required": false,
+                                                    "editable": false,
+                                                    "label": "Incidents",
+                                                    "hidden": false,
+                                                    "fieldId": "selectedIncidents"
+                                                }
+                                            ]
+                                        }
+                                    }
+                                ]
+                            },
+                            "actionCondition": {
+                                "actionControl": "SHOW_IF",
+                                "conditionalField": [
+                                    {
+                                        "conditionType": "NOT_EQUAL",
+                                        "conditionValue": 0,
+                                        "fieldId": "value"
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "dataResults": [],
+                    "widget_id": "similar_resolved_jinja"
+                },
+                {
+                    "title": "Who Resolved?",
+                    "widget_type": "portal_list",
+                    "widget_template": "cfx-oia/recommendation",
+                    "min_width": 12,
+                    "height": 4,
+                    "max_width": 12,
+                    "refreshRequired": false,
+                    "timebased": false,
+                    "exportSupported": false,
+                    "columns": {
+                        "roomid": {
+                            "title": "roomid",
+                            "key": true,
+                            "visible": false
+                        },
+                        "cfxqlFilter": {
+                            "title": "cfxqlFilter",
+                            "key": true,
+                            "visible": false
+                        }
+                    },
+                    "actions": [
+                        {
+                            "id": "show_incidents",
+                            "title": "Show Incidents",
+                            "type": "POPUP_REPORT",
+                            "paginated": true,
+                            "identifier": "cfx.irm.show.inc",
+                            "selectionType": "SINGLE",
+                            "api-endpoint": {
+                                "service-name": "saas-reports",
+                                "methodName": "getForm",
+                                "stringified-params": true,
+                                "parse-output": false,
+                                "params": [
+                                    {
+                                        "form_id": "rda.saas.dynamic.form",
+                                        "formDefinition": {
+                                            "id": "rda.saas.dynamic.form",
+                                            "refreshRequired": true,
+                                            "formFieldList": [
+                                                {
+                                                    "dataType": "string",
+                                                    "controlType": "TABULAR",
+                                                    "controlPropertyList": [
+                                                        {
+                                                            "attribute": "column-key",
+                                                            "value": "incident_id"
+                                                        },
+                                                        {
+                                                            "attribute": "column-key",
+                                                            "value": "project_id"
+                                                        },
+                                                        {
+                                                            "attribute": "column-key",
+                                                            "value": "customer_id"
+                                                        },
+                                                        {
+                                                            "attribute": "selection",
+                                                            "value": "NONE"
+                                                        }
+                                                    ],
+                                                    "widget": {
+                                                        "extends": "incidents:incident_tabular",
+                                                        "extend_vars": {
+                                                            "incidents_tabular_extra_filter": "$cfxqlFilter"
+                                                        }
+                                                    },
+                                                    "required": false,
+                                                    "editable": false,
+                                                    "label": "Incidents",
+                                                    "hidden": false,
+                                                    "fieldId": "selectedIncidents"
+                                                }
+                                            ]
+                                        }
+                                    }
+                                ]
+                            },
+                            "actionCondition": {
+                                "actionControl": "SHOW_IF",
+                                "conditionalField": [
+                                    {
+                                        "conditionType": "NOT_EQUAL",
+                                        "conditionValue": 0,
+                                        "fieldId": "value"
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "dataResults": [],
+                    "widget_id": "resolved_by_jinja"
+                }
+            ]
+        }
+    ],
+    "saved_time": "2025-03-21T06:40:43.670687",
+    "attachments": [
+        {
+            "name": "generator_jinja",
+            "value": "{% set ns = namespace() %}\r\n{% set query = \"project_id is '\" + projectid + \"' and incident_id is '\" + incidentid + \"'\" %}\r\n{% set incidentstream = \"oia-incidents-stream\" %}\r\n{% set incident_res = engine.query_stream_data(stream=incidentstream, cfxql_query=query) %}\r\n{% if incident_res is defined and incident_res|length > 0 %}\r\n    {% set incident = incident_res[0] %}\r\n    {% set current_probablity = incident.get(\"i_probability\") %}\r\n    {% set current_probablity = float(0 if (not current_probablity or current_probablity == \"Not Available\") else current_probablity) %}\r\n    {% set cfxql = \"project_id is '\" + projectid + \"' and incident_id is not '\" + incidentid + \"'\" %}\r\n    {% set cluster_value = incident.get(\"i_cluster\") %}\r\n    {% if cluster_value %}\r\n        {% set cfxql = cfxql + \" and i_cluster is '\" + cluster_value + \"' \" %}\r\n    {% endif %}\r\n    {% set experiment_id = incident.get(\"experimentId\") %}\r\n    {% if experiment_id %}\r\n        {% set cfxql = cfxql + \" and experiment_id is '\" + experiment_id + \"' \" %}\r\n    {% endif %}\r\n    {% set x = logger.info(\"cfxql is: \" + cfxql) %}\r\n    {% set sorted_incidents = [] %}\r\n    {% set incidents_in_cluster = engine.query_stream_data(stream=incidentstream, cfxql_query=cfxql) %}\r\n    {% if incidents_in_cluster is defined and incidents_in_cluster|length > 0 %}\r\n        {% for incident_from_cluster in incidents_in_cluster %}\r\n            {% set probability = incident_from_cluster.get(\"i_probability\", 0) %}\r\n            {% set probablity = float(0 if (not probability or probability == \"Not Available\") else probability) %}\r\n            {% set distance = abs(current_probablity - probability) if probability else 0 %}\r\n            {% set x = incident_from_cluster.__setitem__(\"probablity\", probablity) %}\r\n            {% set x = incident_from_cluster.__setitem__(\"distance\", distance) %}\r\n            {% set x = incident_from_cluster.__setitem__(\"i_resolved_by\", incident_from_cluster.get(\"i_resolved_by\", \"Not Available\")) %}\r\n            {% set x = incident_from_cluster.__setitem__(\"i_resolution_code\", incident_from_cluster.get(\"i_resolution_code\", \"Not Available\")) %}\r\n        {% endfor %}\r\n        {% for inc in incidents_in_cluster|sort(attribute=\"distance\") %}\r\n             {% set x = sorted_incidents.append(inc) %}\r\n        {% endfor %}\r\n        {% set total_count = sorted_incidents|length %}\r\n        {% set x = logger.info(\"sorted_incidents: \" + json_dumps(sorted_incidents)) %}\r\n        {% set x = logger.info(\"total_count: \" + str(total_count)) %}\r\n        {% for widget in dashboard[\"dashboard_sections\"][0][\"widgets\"] %}\r\n            {% set data_results = [] %}\r\n            {% set widget_id = widget.get(\"widget_id\") %}\r\n            {% set x = logger.info(\"widget_id is: \" + widget_id) %}\r\n            {% if widget_id == \"similar_incidents_jinja\" %}\r\n                {% set x = logger.info(\"In similar incidents jinja\") %}\r\n                {% set value_groups = { \"Opened\": [ \"Open\", \"ACTIVE\", \"New\", \"Assigned\" ], \"Resolved\": [ \"Resolved\" ] } %}\r\n                {% for key in value_groups %}\r\n                    {% set x = logger.info(\"processing key: \" + key) %}\r\n                    {% set values = value_groups[key] %}\r\n                    {% set x = logger.info(\"values: \" + str(values)) %}\r\n                    {# if isinstance(values, str) #}\r\n                        {# set values = [values] #}\r\n                    {# endif #}\r\n                    {% set x = logger.info(\"final values: \" + str(values)) %}\r\n                    {% set values_str = values|join(\"', '\") %}\r\n                    {% set x = logger.info(\"values_str: \" + values_str) %}\r\n                    {% set values_str = \"['\" + values_str + \"']\" %}\r\n                    {% set x = logger.info(\"final values_str: \" + values_str) %}\r\n                    {% set filtered_inc = [] %}\r\n                    {% set x = logger.info(\"values_str is: \" + values_str) %}\r\n                    {% for inc in sorted_incidents|selectattr(\"i_state\", \"in\", values)  %}\r\n                        {% set x = filtered_inc.append(inc) %}\r\n                    {% endfor %}\r\n                    {% set x = logger.info(\"filtered_inc: \" + json_dumps(filtered_inc)) %}\r\n                    {% set cfxql_temp = cfxql + \" and i_state in \" + values_str %}\r\n                    {% set x = logger.info(\"cfxql_temp is: \" + cfxql_temp) %}\r\n                    {% set data_result = { \"label\":key, \"value\": filtered_inc|length, \"roomid\": projectid, \"cfxqlFilter\": cfxql_temp} %}\r\n                    {% set x = logger.info(\"data_result is: \" + json_dumps(data_result)) %}\r\n                    {% set x = data_results.append(data_result) %}\r\n                {% endfor %}\r\n            {% endif %}\r\n            {% if widget_id == \"similar_resolved_jinja\" %}\r\n                {% set x = logger.info(\"In similar resolved incidents jinja\") %}\r\n                {% if total_count > 0 %}\r\n                    {% set grouping_field = \"i_resolution_code\" %}\r\n                    {% set unique_res_codes = [] %}\r\n                    {% for incident in sorted_incidents %}\r\n                        {% set grouping_value = incident.get(grouping_field) %}\r\n                        {% set grouping_value_orig = incident.get(grouping_field) %}\r\n                        {% if not grouping_value or grouping_value == \"Not Available\" %}\r\n                            {% set grouping_value = \"No Resolution Code\" %}\r\n                        {% endif %}\r\n                        {% set x = incident.__setitem__(grouping_field, grouping_value) %}\r\n                        {% if grouping_value not in unique_res_codes %}\r\n                            {% set x = unique_res_codes.append(grouping_value) %}\r\n                        {% endif %}\r\n                    {% endfor %}\r\n                    {% for key in unique_res_codes %}\r\n                        {% set cfxql_temp = cfxql + \" and '\" + grouping_field + \"' is '\" + key + \"' \" %}\r\n                        {% set filtered_inc = sorted_incidents|selectattr(grouping_field,\"==\",key)|list %}\r\n                        {% set value_num = str( ( ( (filtered_inc|length) * 100)/ total_count)|round) %}\r\n                        {% set data_result = { \"user_name\":key, \"user\":key, \"value\": value_num +\"%\" , \"roomid\": projectid, \"cfxqlFilter\": cfxql_temp} %}\r\n                        {% set x = data_results.append(data_result) %}\r\n                    {% endfor %}\r\n                {% endif %}\r\n            {% endif %}\r\n            {% if widget_id == \"resolved_by_jinja\" %}\r\n                {% set x = logger.info(\"In resolved by jinja template\") %}\r\n                {% if total_count > 0 %}\r\n                    {% set grouping_field = \"i_resolved_by\" %}\r\n                    {% set unique_res_by = [] %}\r\n                    {% for incident in sorted_incidents %}\r\n                        {% set grouping_value = incident.get(grouping_field, \"Empty Resolved User\")%}\r\n                        {% if not grouping_value or grouping_value == \"Not Available\" %}\r\n                            {% set grouping_value = \"Empty Resolved User\" %}\r\n                        {% endif %}\r\n                        {% set x = incident.__setitem__(grouping_field, grouping_value) %}\r\n                        {% if grouping_value not in unique_res_by %}\r\n                            {% set x = unique_res_by.append(grouping_value) %}\r\n                        {% endif %}\r\n                    {% endfor %}\r\n                    {% for key in unique_res_by %}\r\n                        {% set cfxql_temp = cfxql + \" and '\" + grouping_field + \"' is '\" + key + \"' \" %}\r\n                        {% set filtered_inc = sorted_incidents|selectattr(grouping_field,\"==\",key)|list %}\r\n                        {% set value_num = str( ( ( (filtered_inc|length) * 100)/ total_count)|round) %}\r\n                        {% set data_result = { \"user_name\":key, \"user\":key, \"value\": value_num +\"%\" , \"roomid\": projectid, \"cfxqlFilter\": cfxql_temp} %}\r\n                        {% set x = data_results.append(data_result) %}\r\n                    {% endfor %}\r\n                {% endif %}\r\n            {% endif %}\r\n            {% if data_results %}\r\n\t            {% set x = widget.__setitem__(\"dataResults\", data_results) %}\r\n    \t        {% set x = logger.info(\"Final widget is: \" + json_dumps(widget)) %}\r\n    \t    {% endif %}\r\n        {% endfor %}\r\n    {% endif %}\r\n{% else %}\r\n  {% set x = logger.warning(\"Can not find incident details hence can not show analytic widgets for incident: \" + incidentid) %}\r\n{% endif %}\r\n{% set x = logger.info(\"Finished jinja generator for incidents insights dashboard: \\n\" + json_dumps(dashboard)) %}\r\n"
+        }
+    ]
+}

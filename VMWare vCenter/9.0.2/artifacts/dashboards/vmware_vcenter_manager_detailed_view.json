@@ -1,0 +1,171 @@
+{
+    "name": "vmware_vcenter_manager_detailed_view",
+    "description": "VMware vCenter Manager - Analytics",
+    "label": "vCenter Manager",
+    "enabled": false,
+    "dashboard_type": "template",
+    "context_label_id": "vcenter_address",
+    "dashboard_style": "tabbed",
+    "dashboard_folder": "VMware",
+    "live_edit": true,
+    "template_variables": {
+        "NODE_ID": {
+            "contextId": "unique_id"
+        },
+        "VCENTER_ADDRESS": {
+            "contextId": "vcenter_address"
+        },
+        "VCENTER_UUID": {
+            "contextId": "vcenter_uuid"
+        },
+        "CUST_ID": {
+            "contextId": "customerId"
+        },
+        "PROJ_ID": {
+            "contextId": "projectId"
+        },
+        "CUST_TAG": {
+            "contextId": "customerTag"
+        }
+    },
+    "dashboard_filters": {
+        "time_filter": true,
+        "columns_filter": [
+            {
+                "id": "vcenter_address",
+                "label": "vCenter IP",
+                "type": "TEXT"
+            },
+            {
+                "id": "vcenter_name",
+                "label": "vCenter Name",
+                "type": "TEXT"
+            },
+            {
+                "id": "customer",
+                "label": "Customer Name",
+                "type": "TEXT"
+            },
+            {
+                "id": "platform",
+                "label": "Platform",
+                "type": "TEXT"
+            },
+            {
+                "id": "location",
+                "label": "Location",
+                "type": "TEXT"
+            }
+        ],
+        "default_time_filter_labels": [
+            "Last 1 month"
+        ],
+        "group_filters": [
+            {
+                "stream": "vmware-vcenter-inventory",
+                "title": "vCenter IP",
+                "group_by": [
+                    "vcenter_address"
+                ],
+                "ts_column": "collection_timestamp",
+                "agg": "value_count",
+                "column": "_id",
+                "type": "int"
+            },
+            {
+                "stream": "vmware-vcenter-inventory",
+                "title": "vCenter Name",
+                "group_by": [
+                    "vcenter_name"
+                ],
+                "ts_column": "collection_timestamp",
+                "agg": "value_count",
+                "column": "_id",
+                "type": "int"
+            },
+            {
+                "stream": "vmware-vcenter-inventory",
+                "title": "vCenter Version",
+                "group_by": [
+                    "vcenter_short_version"
+                ],
+                "ts_column": "collection_timestamp",
+                "agg": "value_count",
+                "column": "_id",
+                "type": "int"
+            }
+        ]
+    },
+    "dashboard_sections": [
+        {
+            "title": "Topology",
+            "show_filter": false,
+            "widgets": [
+                {
+                    "widget_type": "topology",
+                    "title": "Topology",
+                    "extra_filter": "count >= 1 and stack_name = 'cfx_rdaf_topology'",
+                    "chartProperties": {
+                        "hasToolbar": true,
+                        "shortToolbar": false,
+                        "userZoomingEnabled": true
+                    },
+                    "stack": "cfx_rdaf_topology",
+                    "with_graphdb": true,
+                    "has_more_data_flag": true,
+                    "expand_neighbors": true,
+                    "max_width": 12,
+                    "min_width": 6,
+                    "height": 12,
+                    "widget_id": "9db5a36f"
+                }
+            ]
+        },
+        {
+            "title": "Discovery Status",
+            "show_filter": true,
+            "widgets": [
+                {
+                    "title": "Sucess/Failed Bots",
+                    "widget_type": "tabular",
+                    "stream": "asset_inventory_collection_status_stream",
+                    "extra_filter": "asset_id is '{{VCENTER_ADDRESS}}' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "min_width": 12,
+                    "height": 6,
+                    "max_width": 12,
+                    "paginated": true,
+                    "remote_searchable": true,
+                    "max_rows": 100,
+                    "duration_hours": 1080000,
+                    "sorting": [
+                        {
+                            "timestamp": "desc"
+                        }
+                    ],
+                    "columns": {
+                        "asset_id": "Device IP",
+                        "collection_status": {
+                            "title": "Collection Status",
+                            "htmlTemplateForRow": "{%raw%}<span class='badge' style='background-color: {{ row.collection_status_color }}' > {{ row.collection_status }} </span>{%endraw%}"
+                        },
+                        "collection_status_color": {
+                            "type": "COLOR-MAP",
+                            "source-column": "collection_status",
+                            "color-map": {
+                                "Success": "#00BB00",
+                                "Failed": "#BB0000"
+                            }
+                        },
+                        "reason": "Message",
+                        "bot_name": "Bot Name",
+                        "bot_source_type": "Bot Source Type",
+                        "bot_source_name": "Bot Source Name",
+                        "collection_timestamp": "Collection Timestamp"
+                    },
+                    "widget_id": "94a3fc11"
+                }
+            ]
+        }
+    ],
+    "saved_time": "2025-06-18T09:15:03.671236"
+}

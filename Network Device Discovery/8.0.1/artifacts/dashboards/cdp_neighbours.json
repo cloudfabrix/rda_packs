@@ -1,0 +1,181 @@
+{
+    "name": "cdp_neighbours",
+    "label": "Neighbours",
+    "description": "Device Inventory",
+    "dashboard_folder": "NetworkDevicePack",
+    "version": "24.12.2.2",
+    "enabled": false,
+    "stream": "network_device_inventory",
+    "dashboard_type": "template",
+    "template_variables": {
+        "SERIAL_NUM": {
+            "contextId": "device_serial_number"
+        },
+        "DEVICE_IP": {
+            "contextId": "a_asset_ip_address"
+        }
+    },
+    "dashboard_filters": {
+        "time_filter": true,
+        "extra_filter0": "(a_asset_ip_address is '{{DEVICE_IP}}' or a_asset_name is '{{DEVICE_IP}}') ",
+        "extra_filter": "(device_object is 'CDP' and remote_device_id not equals 'Not Available') ",
+        "default_time_filter_labels": [
+            "Last 1 month"
+        ],
+        "columns_filter": [
+            {
+                "id": "device_ip",
+                "label": "IP Address",
+                "type": "TEXT"
+            },
+            {
+                "id": "device_int_name",
+                "label": "Interface Name",
+                "type": "TEXT"
+            },
+            {
+                "id": "device_interface_status",
+                "label": "Operational Status",
+                "type": "TEXT"
+            },
+            {
+                "id": "device_interface_admin_status",
+                "label": "Admin Status",
+                "type": "TEXT"
+            },
+            {
+                "id": "device_int_in_octets",
+                "label": "ifHCInOctets",
+                "type": "TEXT"
+            },
+            {
+                "id": "device_int_out_octets",
+                "label": "ifHCOutOctets",
+                "type": "TEXT"
+            },
+            {
+                "id": "timestamp",
+                "label": "Timestamp",
+                "type": "DATETIME"
+            },
+            {
+                "id": "delta",
+                "label": "Last Polled",
+                "type": "HUMANIZE_TIME_DELTA"
+            },
+            {
+                "id": "device_ip",
+                "label": "Device IP",
+                "type": "TEXT"
+            },
+            {
+                "id": "device_hostname",
+                "label": "Device Hostname",
+                "type": "TEXT"
+            },
+            {
+                "id": "device_model",
+                "label": "Device Model",
+                "type": "TEXT"
+            },
+            {
+                "id": "device_serial_number",
+                "label": "Device Serial Number",
+                "type": "TEXT"
+            },
+            {
+                "id": "device_vendor",
+                "label": "Device Vendor",
+                "type": "TEXT"
+            },
+            {
+                "id": "device_int_name",
+                "label": "Device Interface Name",
+                "type": "TEXT"
+            },
+            {
+                "id": "device_int_shortname",
+                "label": "Device Interface Short Name",
+                "type": "TEXT"
+            },
+            {
+                "id": "CLLI_code",
+                "label": "CLLI Code",
+                "type": "TEXT"
+            },
+            {
+                "id": "remote_device_ip",
+                "label": "Remote Device IP",
+                "type": "TEXT"
+            },
+            {
+                "id": "remote_device_id",
+                "label": "Remote Device ID",
+                "type": "TEXT"
+            },
+            {
+                "id": "remote_device_int_name",
+                "label": "Remote Interface Name",
+                "type": "TEXT"
+            },
+            {
+                "id": "remote_device_capabilities",
+                "label": "Remote Device Capabilities",
+                "type": "TEXT"
+            }
+        ],
+        "group_filters": []
+    },
+    "dashboard_sections": [
+        {
+            "title": "Device View",
+            "show_filter": true,
+            "widgets": [
+                
+                {
+                    "widget_type": "tabular",
+                    "title": "CDP Neighbors",
+                    "stream": "network_devices_cdp",
+                    "extra_filter": "device_object contains 'CDP'",
+                    "ts_column": "collection_timestamp",
+                    "resizableColumns": false,
+                    "paginated": true,
+                    "virtual_scrolling": false,
+                    "showRowSummary": true,
+                    "max_rows": 200,
+                    "remote_searchable": true,
+                    "remote_searchable_cols": [
+                        "device_ip",
+                        "device_hostname",
+                        "device_int_name",
+                        "remote_device_ip",
+                        "remote_device_int_name",
+                        "device_vendor",
+                        "device_model",
+                        "remote_device_id",
+                        "device_serial_number"
+                    ],
+                    "columns": {
+                        "device_ip": "Device IP",
+                        "device_hostname": "Hostname",
+                        "device_int_name": "Local Interface",
+                        "remote_device_ip": "Remote IP Address",
+                        "remote_device_int_name": "Remote Interface ",
+                        "remote_device_model": "Remote Device Model",
+                        "remote_device_capabilities": "Remote Device Capabilities",
+                        "remote_device_id": "Remote Device Id",
+                        "device_vendor": "Device Vendor",
+                        "device_model": "Device Model",
+                        "device_serial_number": "Device Serial",
+                        "collection_timestamp": {
+                            "title": "Collection Timestamp",
+                            "type": "DATETIME"
+                        }
+                    },
+                    "widget_id": "eae082b3"
+                }
+            ]
+        }
+    ],
+    "saved_time": "2024-10-16T11:19:29.302754"
+}

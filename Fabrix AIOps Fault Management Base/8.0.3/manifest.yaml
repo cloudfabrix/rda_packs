@@ -1,0 +1,286 @@
+name: Fabrix AIOps Fault Management Base
+version: 8.0.3
+folder: /collection/Fabrix_AIOps_Fault_Management_Base
+published_date: 2025-05-29
+publisher: Fabrix.ai
+label: Fabrix AIOps Fault Management Base
+scope: system
+description: 
+  value: ""
+  md: "./description.md"
+
+type: collection
+
+##launch_dashboard: oia-alerts-incidents-app
+
+
+artifacts:
+  credentials:
+    - name: oia
+      type: oia
+  
+   
+  blueprints:
+  - file: ./artifacts/blueprints/oia_stream_merger.json
+    name: OIA Source Stream Merger
+  - file: ./artifacts/blueprints/metrics_data_collection.json
+    name: Metric Data Collection for IRM
+  
+  pipelines:
+    - name: irm-stream-missing-columns-update
+      folder: AlertIncidentPack
+      version: 2025.04.17.2
+      file: ./artifacts/pipelines/irm-stream-missing-columns-update.txt
+      skip_validation: true
+    - name: metric_collection_rules
+      folder: AlertIncidentPack
+      version: 2025.04.17.2
+      file: ./artifacts/pipelines/metric_collection_rules.txt
+      skip_validation: true
+    - name: metric_data_collection
+      folder: AlertIncidentPack
+      version: 2025.04.17.2
+      file: ./artifacts/pipelines/metric_data_collection.txt
+      skip_validation: true
+    - name: metric-list-dataset
+      folder: AlertIncidentPack
+      version: 2025.04.17.2
+      file: ./artifacts/pipelines/metric-list-dataset.txt
+      skip_validation: true
+    - name: oia-sources-streams-merge
+      folder: AlertIncidentPack
+      version: 2025.04.17.2
+      file: ./artifacts/pipelines/oia-sources-streams-merge.txt
+      skip_validation: true
+    
+  dashboards:
+  - file: ./artifacts/dashboards/alert-details-app.json
+    folder: AlertIncidentPack
+    name: alert-details-app
+  - file: ./artifacts/dashboards/alert-details-v2.json
+    folder: AlertIncidentPack
+    name: alert-details-v2
+  - file: ./artifacts/dashboards/alert-group-details-app.json
+    folder: AlertIncidentPack
+    name: alert-group-details-app
+  - file: ./artifacts/dashboards/alert-trail.json
+    folder: AlertIncidentPack
+    name: alert-trail
+  - file: ./artifacts/dashboards/event-tracking-details.json
+    folder: AlertIncidentPack
+    name: event-tracking-details
+  - file: ./artifacts/dashboards/exec-dashboard_page_kpi.json 
+    folder: AlertIncidentPack
+    name: exec-dashboard_page_kpi
+  - file: ./artifacts/dashboards/incident-collaboration.json
+    folder: AlertIncidentPack
+    name: incident-collaboration
+  - file: ./artifacts/dashboards/incident-details-alerts.json
+    folder: AlertIncidentPack
+    name: incident-details-alerts
+  - file: ./artifacts/dashboards/incident-details-app.json
+    folder: AlertIncidentPack
+    name: incident-details-app
+  - file: ./artifacts/dashboards/incident-details-collaboration.json
+    folder: AlertIncidentPack
+    name: incident-details-collaboration
+  - file: ./artifacts/dashboards/incident-details-diagnostics.json
+    folder: AlertIncidentPack
+    name: incident-details-diagnostics
+  - file: ./artifacts/dashboards/incident-details-insights.json
+    folder: AlertIncidentPack
+    name: incident-details-insights
+  - file: ./artifacts/dashboards/incident-details-logs.json
+    folder: AlertIncidentPack
+    name: incident-details-logs
+  - file: ./artifacts/dashboards/incident-details-metrics.json
+    folder: AlertIncidentPack
+    name: incident-details-metrics
+  - file: ./artifacts/dashboards/incident-details-rca.json
+    folder: AlertIncidentPack
+    name: incident-details-rca
+  - file: ./artifacts/dashboards/incident-details-recommendation.json
+    folder: AlertIncidentPack
+    name: incident-details-recommendation
+  - file: ./artifacts/dashboards/incident-details-remediation.json
+    folder: AlertIncidentPack
+    name: incident-details-remediation
+  - file: ./artifacts/dashboards/incident-details-topology.json
+    folder: AlertIncidentPack
+    name: incident-details-topology
+  - file: ./artifacts/dashboards/incident-topology.json
+    folder: AlertIncidentPack
+    name: incident-topology
+  - file: ./artifacts/dashboards/incidents-with-external-tickets.json
+    folder: AlertIncidentPack
+    name: incidents-with-external-tickets
+  - file: ./artifacts/dashboards/incidents.json
+    folder: AlertIncidentPack
+    name: incidents
+  - file: ./artifacts/dashboards/l1-dashboard.json
+    folder: AlertIncidentPack
+    name: l1-dashboard
+  - file: ./artifacts/dashboards/l1-service-health.json
+    folder: AlertIncidentPack
+    name: l1-service-health
+  - file: ./artifacts/dashboards/l2-l3-analytics.json
+    folder: AlertIncidentPack
+    name: l2-l3-analytics
+  - file: ./artifacts/dashboards/l2-l3-dashboard.json
+    folder: AlertIncidentPack
+    name: l2-l3-dashboard
+  - file: ./artifacts/dashboards/l2-l3-incidents.json
+    folder: AlertIncidentPack
+    name: l2-l3-incidents
+  - file: ./artifacts/dashboards/l2-l3-metric-analysis.json
+    folder: AlertIncidentPack
+    name: l2-l3-metric-analysis
+  - file: ./artifacts/dashboards/l2-l3-service-health.json
+    folder: AlertIncidentPack
+    name: l2-l3-service-health
+  - file: ./artifacts/dashboards/new_alert_analytics.json
+    folder: AlertIncidentPack
+    name: new_alert_analytics
+  - file: ./artifacts/dashboards/oia-alert-analytics-os.json
+    folder: AlertIncidentPack
+    name: oia-alert-analytics-os
+  - file: ./artifacts/dashboards/oia-alert-group-view-alerts-os.json
+    folder: AlertIncidentPack
+    name: oia-alert-group-view-alerts-os
+  - file: ./artifacts/dashboards/oia-alert-group-view-details-os-v2.json
+    folder: AlertIncidentPack
+    name: oia-alert-group-view-details-os-v2
+  - file: ./artifacts/dashboards/oia-alert-group-view-details-os.json
+    folder: AlertIncidentPack
+    name: oia-alert-group-view-details-os
+  - file: ./artifacts/dashboards/oia-alert-groups-os.json
+    folder: AlertIncidentPack
+    name: oia-alert-groups-os
+  - file: ./artifacts/dashboards/oia-alert-groups-policy-os.json
+    folder: AlertIncidentPack
+    name: oia-alert-groups-policy-os
+  - file: ./artifacts/dashboards/oia-alert-policies.json
+    folder: AlertIncidentPack
+    name: oia-alert-policies
+  - file: ./artifacts/dashboards/oia-alert-tracking-os.json
+    folder: AlertIncidentPack
+    name: oia-alert-tracking-os
+  - file: ./artifacts/dashboards/oia-alerts-incidents-app.json
+    folder: AlertIncidentPack
+    name: oia-alerts-incidents-app
+  - file: ./artifacts/dashboards/oia-alerts-os.json
+    folder: AlertIncidentPack
+    name: oia-alerts-os
+  - file: ./artifacts/dashboards/oia-alerts-war-room-app.json
+    folder: AlertIncidentPack
+    name: oia-alerts-war-room-app
+  - file: ./artifacts/dashboards/oia-alerts-war-room-customer-view.json
+    folder: AlertIncidentPack
+    name: oia-alerts-war-room-customer-view
+  - file: ./artifacts/dashboards/oia-event-tracking-os.json
+    folder: AlertIncidentPack
+    name: oia-event-tracking-os
+  - file: ./artifacts/dashboards/oia-event-tracking-view-alerts.json
+    folder: AlertIncidentPack
+    name: oia-event-tracking-view-alerts
+  - file: ./artifacts/dashboards/oia-incidents-analytics-app.json
+    folder: AlertIncidentPack
+    name: oia-incidents-analytics-app
+  - file: ./artifacts/dashboards/oia-incidents-os-template.json
+    folder: AlertIncidentPack
+    name: oia-incidents-os-template
+  - file: ./artifacts/dashboards/oia-incidents-war-room-app.json
+    folder: AlertIncidentPack
+    name: oia-incidents-war-room-app
+  - file: ./artifacts/dashboards/oia-incidents-war-room-customer-view.json
+    folder: AlertIncidentPack
+    name: oia-incidents-war-room-customer-view
+  - file: ./artifacts/dashboards/oia-incidents.json
+    folder: AlertIncidentPack
+    name: oia-incidents
+  - file: ./artifacts/dashboards/oia-logs-war-room-app.json
+    folder: AlertIncidentPack
+    name: oia-logs-war-room-app
+  - file: ./artifacts/dashboards/oia-logs-war-room-customer-view.json
+    folder: AlertIncidentPack
+    name: oia-logs-war-room-customer-view
+  - file: ./artifacts/dashboards/oia-mapping-endpoint.json
+    folder: AlertIncidentPack
+    name: oia-mapping-endpoint
+  - file: ./artifacts/dashboards/oia-my-incidents.json
+    folder: AlertIncidentPack
+    name: oia-my-incidents
+  - file: ./artifacts/dashboards/oia-user-incidents.json
+    folder: AlertIncidentPack
+    name: oia-user-incidents
+  - file: ./artifacts/dashboards/oia-view-alerts-policy-os.json
+    folder: AlertIncidentPack
+    name: oia-view-alerts-policy-os
+  - file: ./artifacts/dashboards/oia-war-room.json
+    folder: AlertIncidentPack
+    name: oia-war-room
+  - file: ./artifacts/dashboards/rca-regression-dashboard.json
+    folder: AlertIncidentPack
+    name: rca-regression-dashboard
+  - file: ./artifacts/dashboards/related-alerts.json
+    folder: AlertIncidentPack
+    name: related-alerts
+  - file: ./artifacts/dashboards/tracking-event-details-app.json
+    folder: AlertIncidentPack
+    name: tracking-event-details-app
+  - file: ./artifacts/dashboards/view-delta.json
+    folder: AlertIncidentPack
+    name: view-delta
+  - file: ./artifacts/dashboards/customer_oia_alerts_fault.json
+    folder: AlertIncidentPack
+    name: customer_oia_alerts_fault    
+  - file: ./artifacts/dashboards/device_alerts_from_alert_fault.json
+    folder: AlertIncidentPack
+    name: device_alerts_from_alert_fault
+    
+
+customer_level:
+  launch_locations:
+  - pstream_name: rda_packs_dynamic_groups_and_pages
+    dashboard_group_name: groupAlerts
+    dashboard_group_label: Alerts
+    dashboard_group_icon: "stack.svg"
+    dashboard_page_name: customer_oia_alerts_fault
+    dashboard_page_label: Alerts
+    dashboard_page_icon: "stack.svg"
+    
+  - pstream_name: rda_packs_dynamic_groups_and_pages
+    dashboard_group_name: groupAlerts
+    dashboard_group_label: Alerts
+    dashboard_group_icon: "stack.svg"
+    dashboard_page_name: device_alerts_from_alert_fault
+    dashboard_page_label: Alerts
+    dashboard_page_icon: "stack.svg"
+
+single_tenant:
+  launch_locations:
+  - pstream_name: rda_packs_dynamic_groups_and_pages
+    dashboard_group_name: groupAlerts
+    dashboard_group_label: Alerts
+    dashboard_group_icon: "stack.svg"
+    dashboard_page_name: customer_oia_alerts_fault
+    dashboard_page_label: Alerts
+    dashboard_page_icon: "stack.svg"
+    
+  - pstream_name: rda_packs_dynamic_groups_and_pages
+    dashboard_group_name: groupAlerts
+    dashboard_group_label: Alerts
+    dashboard_group_icon: "stack.svg"
+    dashboard_page_name: device_alerts_from_alert_fault
+    dashboard_page_label: Alerts
+    dashboard_page_icon: "stack.svg"
+
+  
+
+  
+  
+  
+  
+  
+  
+  

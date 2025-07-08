@@ -1,0 +1,41 @@
+name: vmanage_service
+id: vmanage_service_blueprint
+version: '2024_12_17'
+category: vManage
+comment: vManage Inventory Collection
+enabled: true
+type: Service
+auto_deploy: false
+provider: CloudFabrix Software Inc.
+attrs: {
+    customer_id: $PKG_CONTEXT_CUSTOMER_ID,
+    customer_tag: $PKG_CONTEXT_CUSTOMER_TAG
+}
+run_context: {
+    customer_id: $PKG_CONTEXT_CUSTOMER_ID,
+    customer_tag: $PKG_CONTEXT_CUSTOMER_TAG
+}
+scheduled_pipelines:
+
+    -   name: vmanage_access_verification_status
+        label: vManage Access Verification Status
+        version: '*'
+        site: ${PKG_CONTEXT_CUSTOMER_TAG}-.*
+        cron_expression: 0 4 * * *
+        site_type: regex
+        instances: 1
+        scaling_policy:
+            min_instances: 1
+            max_instances: 1
+
+    -   name: vmanage_inv_collection
+        label: vManage Inventory Data
+        version: '*'
+        site: ${PKG_CONTEXT_CUSTOMER_TAG}-.*
+        cron_expression: 0 3 * * *
+        site_type: regex
+        instances: 1
+        scaling_policy:
+            min_instances: 1
+            max_instances: 1
+saved_time: '2024-12-18T22:36:27.767940'

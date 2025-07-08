@@ -1,0 +1,47 @@
+
+### Overview  
+  
+Multi Network Device Discovery solution package supports mutli networks and collects inventory data for network devices. Following network device vendors are supported out of the box. If needed, additional ones can be added.  
+  
+- Cisco  
+- Juniper  
+- Fortinet  
+
+
+This pack is designed for inventory collection for Network Devices using **asset-discovery** extension. Following bots are being called by this pack:
+
+- **collector**
+- **get-collection-files**
+
+  
+### Feature Summary  
+  
+Following are the key features covered by Multi Network Device Discovery solution package:  
+  
+- Multi Network Device Discovery using SNMP and SSH for a given list of seed devices. The device IPs can be provided as single IPs, command-separated, and/or ranges.
+- Access verification checks for devices on demand for selected devices.
+- Run discovery on demand for selected devices.
+- Dashboards to see the statuses of access verification checks and discovery runs.
+- Dashboards to visualize the inventory data collected for devices along with the drill downs to view assets and asset hierarchy.
+- CDP/LLDP topology. 
+
+NOTE: 
+- KPI Workbench related functionality will be available upon activation on Network Performance Management pack. 
+- Alerts and Events functionality will be available upon activation Fabrix AIOPs SNMP and Fabrix AIOPs syslogs packs.
+
+
+### Quick Start Guide  
+   
+| Step | Description |  
+|------|-------------|  
+| 1    | Activate the solution pack. After the Pack is in `ACTIVATED` status, use `Enable Single Tenant` menu option to enable the pack.  |  
+| 2    | Use `Launch Dashboard` menu option to navigate to the `Multi Network Discovery` dashboard. Note: For multinent tenant environment, the pack specific dashboards will be available in Customer Ops page.|  
+| 3    |  Add Networks in `Multi Network Discovery` dashboard using the `Add Networks` action button. Click on  `Network Device Discovery Ops` action button to navigate to Network Discovery and Inventory pages.   |   
+| 4    | Use `Configure and Manage` ->  `Network Credentials` to create credentials of type `snmp-cred`,`device-snmp-v1v2`,`device-snmp-v3`,`device-host-ssh`,`ssh-cred`  with the correct values. NOTE: Append the `Network name` to credential name while creating.<br>Example: `snmp-<network_name>` |   
+| 5    | Use `Configure and Manage` -> `Network Discovery Targets` to onboard Network Devices. Use `Add Devices` or `Import Devices` by Uploading csv file with columns device_ip and discovery_scope. For Example: 10.95.158.10,yes. |  
+| 6    | Under `Status` ->  `Run Access Verification` option to perform the credential check for Network Devices and view the verification results. |  
+| 7    | Use `Configure and Manage` ->  `Run Discovery` to run the discovery on demand using `Run Discovery` option and to view the device discovery status. |  
+| 8    | After the collection completes successfully, use the pages under `Inventory` to view the inventory details. |   
+| 9    | Use `Configure and Manage` ->  `Run Discovery` to run the Topology on demand using `Run Topology` option. |  
+| 10    | Use `Topology` and `Asset Navigator` to view topology. |
+   

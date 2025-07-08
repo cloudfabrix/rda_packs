@@ -1,0 +1,48 @@
+name: vrops_service_blueprint
+id: vrops_service_blueprint
+version: '2024_12_17'
+category: vROps
+comment: vROps Metric Collection
+enabled: true
+type: Service
+auto_deploy: false
+provider: CloudFabrix Software Inc.
+attrs: {
+
+}
+run_context: {
+
+}
+scheduled_pipelines:
+    -   name: vrops_metrics_collection
+        label: vROps Metrics Data
+        version: '*'
+        site: .*
+        cron_expression: 0 3 * * *
+        site_type: regex
+        instances: 1
+        scaling_policy:
+            min_instances: 1
+            max_instances: 1
+    -   name: vrops_metric_collection_rules
+        label: vROps Metric Collection Rules
+        version: '*'
+        site: .*
+        cron_expression: 0 3 * * *
+        site_type: regex
+        instances: 1
+        scaling_policy:
+            min_instances: 1
+            max_instances: 1
+    -   name: vrops_access_verification
+        label: vROps Access Verification
+        version: '*'
+        site: .*
+        cron_expression: 0 3 * * *
+        site_type: regex
+        instances: 1
+        scaling_policy:
+            min_instances: 1
+            max_instances: 1
+saved_time: '2024-12-18T22:36:27.767940'
+

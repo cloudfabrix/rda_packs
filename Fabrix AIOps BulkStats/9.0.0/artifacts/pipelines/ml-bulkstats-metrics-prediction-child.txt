@@ -1,0 +1,83 @@
+%% stream = no and limit = 0
+
+@exec:get-input
+    --> @dm:selectcolumns exclude='^_RDA_Id$|^count_$|^from_interval$|^to_interval$'
+    --> @dm:melt id_cols='device,instanceKey,schema,timestamp'
+    --> @dm:replace-data columns='variable' and expr='_avg'
+    --> @dm:rename-columns KPI_Name='variable'
+    --> @dm:enrich-using-pstream dict='ml-bulkstats-correlated-devices-per-group' and src_key_cols='KPI_Name,device,instanceKey,schema' and
+            dict_key_cols='KPI_Name,device,instanceKey,schema' and enrich_cols='model_name,group' and dedup_dict='no'
+    ## filter out devices for which regression model is not available
+    --> *dm:filter model_name is not null
+    --> @dm:add-missing-columns columns='KPI_Name,device,instanceKey,schema,model_name,group'
+    --> @dm:save name='temp-live-metrics'
+
+--> @c:new-block
+    --> @dm:empty
+    --> @exec:define-function name="raise_alerts_from_anomalies"
+       --> *dm:filter anomaly is not None
+       --> @dm:to-type columns='anomaly,static_upper_threshold,static_lower_threshold' and type='float'
+       --> *dm:filter (lower_anomaly_alert is 'Yes' and anomaly_type is -1) or (upper_anomaly_alert is 'Yes' and anomaly_type is 1)
+       ## alerts for upper anomalies
+       --> *exec:if-condition static_upper_threshold is not None
+          --> *dm:filter (anomaly_type is 1 and anomaly is greater than static_upper_threshold)
+          --> @dm:eval anomaly='round(anomaly,2)' and upperBound='round(model_upper_bound,2)'
+          --> @dm:eval message="'KPI ' + KPI_Name + ' for device ' + device + ' instanceKey ' + instanceKey + ' with value ' + str(anomaly) + ' crossed dynamic threshold of ' + str(model_upper_bound) + ' and also the static upper threshold of ' + str(static_upper_threshold) + ' at time ' + live_timestamp"
+          --> @dm:save name='temp-raise-alerts'
+       --> @exec:end-if
+       --> *exec:if-condition static_upper_threshold is None
+          --> *dm:filter anomaly_type is 1
+          --> @dm:eval anomaly='round(anomaly,2)' and upperBound='round(model_upper_bound,2)'
+          --> @dm:eval message="'KPI ' + KPI_Name + ' for device ' + device + ' instanceKey ' + instanceKey + ' with value ' + str(anomaly) + ' crossed dynamic threshold of ' + str(model_upper_bound) + ' at time ' + live_timestamp"
+          --> @dm:save name='temp-raise-alerts'
+       --> @exec:end-if
+       ## alerts for lower anomalies
+       --> *exec:if-condition static_lower_threshold is not None
+          --> *dm:filter (anomaly_type is -1 and anomaly is less than static_lower_threshold)
+          --> @dm:eval anomaly='round(anomaly,2)' and lowerBound='round(model_lower_bound,2)'
+          --> @dm:eval message="'KPI ' + KPI_Name + ' for device ' + device + ' instanceKey ' + instanceKey + ' with value ' + str(anomaly) + ' dropped below dynamic threshold of ' + str(model_lower_bound) + ' and also the static lower threshold of ' + str(static_lower_threshold) + ' at time ' + live_timestamp"
+          --> @dm:save name='temp-raise-alerts'
+       --> @exec:end-if
+       --> *exec:if-condition static_lower_threshold is None
+          --> *dm:filter anomaly_type is -1
+          --> @dm:eval anomaly='round(anomaly,2)' and lowerBound='round(model_lower_bound,2)'
+          --> @dm:eval message="'KPI ' + KPI_Name + ' for device ' + device + ' instanceKey ' + instanceKey + ' with value ' + str(anomaly) + ' dropped below dynamic threshold of ' + str(model_lower_bound) + ' at time ' + live_timestamp"
+          --> @dm:save name='temp-raise-alerts'
+       --> @exec:end-if
+       ## push to webhook
+       --> @dm:recall name='temp-raise-alerts'
+       --> @dm:skip-block-if-shape row_count=0
+       --> @dm:eval severity="'MAJOR'" and raisedAt='live_timestamp'
+       --> @dm:change-time-format columns='raisedAt' and from_format='datetimestr' and to_format='ms'
+       --> @dm:apply-template-by-row template_name = 'raise_alerts_from_anomalies_bulkstats' &
+               output_col = 'payload'
+       --> @rn:write-stream name='ml-metrics-alerts'
+       --> @restclient:write url = '{{ row.webhook_url }}' &
+               envelope="{{ '{{ payload }}' }}" &
+               batch_size = 1
+    --> @exec:end-function
+
+--> @c:data-loop columns='device,instanceKey,schema,KPI_Name,model_name,group' and dataset='temp-live-metrics'
+    --> @dm:recall-query name='temp-live-metrics' and query="device is '$device' and instanceKey is '$instanceKey' and schema is '$schema' and KPI_Name is '$KPI_Name'"
+    --> @cfxml:regression ts_column='timestamp' and value_column='value' and action='predict' and
+            frequency='1H' and agg_func='mean' and job_name='$model_name' and skip_errors='yes'
+    --> @dm:selectcolumns exclude='^static'
+    --> @dm:add-missing-columns columns='live_timestamp,anomaly_type'
+    --> @dm:add-missing-columns columns='KPI_Name' and value='$KPI_Name'
+    --> @dm:add-missing-columns columns='device' and value='$device'
+    --> @dm:add-missing-columns columns='instanceKey' and value='$instanceKey'
+    --> @dm:add-missing-columns columns='group' and value='$group'
+    --> @dm:add-missing-columns columns='schema' and value='$schema'
+    --> @dm:enrich-using-pstream dict='ml-bulkstats-metrics-variance' and src_key_cols='KPI_Name,device,instanceKey,schema' and
+            dict_key_cols='KPI_Name,device,instanceKey,schema' and enrich_cols='static_upper_threshold,static_lower_threshold,lower_anomaly_alert,upper_anomaly_alert,customer_tag,customer_id,webhook_url'
+    --> @dm:add-missing-columns columns='static_upper_threshold,static_lower_threshold,lower_anomaly_alert,upper_anomaly_alert'
+    --> @dm:rename-columns job_name='jobName'
+    --> @dm:eval baseline="None if baseline == '' else baseline" and
+            anomaly="None if anomaly == '' else anomaly"
+    --> @dm:eval baseline="baseline if anomaly is None else None"
+    --> @dm:change-time-format columns='live_timestamp' and from_format='datetimestr' and to_format='%Y-%m-%dT%H:%M:%S'
+    --> @rn:write-stream name="ml-bulkstats-metrics-regression-live-output"
+    --> @dm:save name='temp-live-output'
+    --> @exec:call-function name='raise_alerts_from_anomalies'
+    --> @dm:recall name='temp-live-output'
+

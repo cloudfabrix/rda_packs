@@ -1,0 +1,392 @@
+##This pipeline needs customer_id or customerTag in context to run
+%% stream = no and limit = 0
+%%template_type="jinja"
+
+%% import_src_type = "cisco_vmanage"
+
+
+%%start_inline_object name="context_dynamic_form" and type="data" and format="json"
+{
+    "formFieldList": [
+        {
+            "fieldId": "customer_tag",
+            "label": "Tag of the customer",
+            "required": false,
+            "dataType": "string"
+        }
+    ]
+}
+%%end_inline_object
+
+@dm:empty
+    --> @dm:save name = "temp-customer-context"
+
+{% set row = "" %}
+
+   {% if customer_tag %}
+      {% set customer_id = customer_id %}
+      {% set customer_tag = customer_tag %}
+      {% set customerTag = customer_tag %}
+   {% elif customerTag %}
+      {% set customer_id = customer_id %}
+      {% set customer_tag = customerTag %}
+   {% else %}
+      {% set customer_id = '' %}
+      {% set customer_tag = '' %}
+   {% endif %}
+
+--> @dm:empty
+    --> @dm:save name = 'temp-variable-dataset'
+    --> @dm:save name = 'temp-variable-dataset-interim'
+    --> @dm:save name = 'temp-vmanage-sources'
+  
+
+--> @dm:empty
+    --> @dm:save name = 'temp-variable-dataset'
+
+--> @c:new-block
+    --> @exec:get-input
+    --> @dm:selectcolumns include = "Others"
+    ## --> @dm:skip-pipeline-if-shape column_count = 0
+    --> @dm:explode-json column="Others"
+    --> @dm:rename-columns vmanage_src_name = 'name'
+    --> @dm:save name = 'temp-variable-dataset'
+
+
+
+
+--> @c:new-block
+    --> @dm:recall name = 'temp-variable-dataset'
+    --> *exec:if-shape num_rows = 0
+       --> @dm:empty
+      {% if customer_tag %}
+         --> #dm:query-persistent-stream type contains 'cisco_vmanage' and (customerTag contains '{{customer_tag}}' ) with-input name = 'rda_secrets_meta' and limit= 0
+      {% else %}
+         --> #dm:query-persistent-stream type contains 'cisco_vmanage' and ( customerTag is empty) with-input name = 'rda_secrets_meta' and limit= 0
+      {% endif %}
+       --> @dm:save name = 'temp-vmanage-sources'
+       --> @dm:recall name = 'temp-vmanage-sources'
+
+
+       --> @exec:for-loop num_rows = 1
+          --> #dm:query-persistent-stream vmanage_src_name contains '{%-raw-%}{{row["name"]}}{%-endraw-%}' and discovery_scope = 'yes' with-input name = 'vmanage_on_boarded_devices' and limit= 0
+          --> @dm:save name = 'temp-variable-dataset-interim' & append='yes' & return_appended_dataset = 'yes'
+       --> @exec:end-loop
+
+  --> @dm:recall name = 'temp-variable-dataset-interim'
+
+
+
+       --> *exec:if-shape num_rows = 0
+         --> @dm:recall name = 'temp-vmanage-sources'
+         -->@dm:eval  discovery_scope = "'yes'"
+         --> @dm:rename-columns vmanage_src_name = 'name'
+         --> @dm:save name = 'temp-variable-dataset'
+         --> @dm:skip-pipeline-if-shape row_count = 0
+      --> @exec:end-if
+
+
+
+       --> *exec:if-shape num_rows > 0
+         ##-->@dm:eval  discovery_scope = "'yes'"
+         --> @dm:rename-columns vmanage_src_name = 'name'
+         --> @dm:save name = 'temp-variable-dataset'
+      --> @exec:end-if
+    --> @exec:end-if
+
+
+
+
+##Add customer context to the dataset
+--> @c:new-block
+    --> @dm:recall name = 'temp-variable-dataset'
+    --> @dm:eval customer_id =  "'{{ customer_id }}'"
+    --> @dm:eval customer_tag =  "'{{ customer_tag }}'"
+   --> @dm:save name = 'temp-variable-dataset'
+
+
+
+
+
+
+
+## get controllers data
+--> @c:data-loop dataset='temp-variable-dataset' & columns = 'vmanage_src_name,customer_id,customer_tag'
+--> @$vmanage_src_name:query-api path="system/device/controllers" and continue_on_failure="yes"
+ ##--> @dm:recall name="Vmanage_controllers"
+  --> @dm:eval customer_id = "'$customer_id'"
+       --> @dm:eval customer_tag = "'$customer_tag'"
+  --> @dm:eval source ="'vmanage_inv'" and collection_type="'controller'"
+    --> @dm:save name="temp-controllers"
+--> @dm:save name="test_controllers"
+
+
+    --> *exec:if-condition collection_status != 'Success'
+      --> *dm:safe-filter * get source_ip as 'asset_ip',collection_status,collection_timestamp,reason,customer_id,customer_tag
+       --> @dm:map to = 'collection_timestamp' & func = 'time_now'
+       --> @dm:eval bot_source_name = "'$vmanage_src_name'"
+       --> @dm:eval bot_source_type = "'vManage'"
+       --> @dm:eval bot_name = "'controller'"
+       --> @dm:save name="temp-packs_asset_inventory_collection_status" & append = 'yes'
+       --> @rn:write-stream name = 'vmanage-asset-inventory-collection-status-stream'
+    --> @exec:end-if
+
+  --> *exec:if-condition collection_status = 'Success'
+       --> @dm:eval vmanage_name = "'$vmanage_src_name'"
+       --> @dm:dedup columns = 'source_ip'
+      # --> *dm:safe-filter * get source_ip as 'asset_ip',collection_status,collection_timestamp,reason,customer_id,customer_tag
+       --> @dm:map attr = 'collection_timestamp' & func = 'ts_to_datetimestr' & unit = 'ms'
+       --> @dm:eval bot_source_name = "'$vmanage_src_name'"
+       --> @dm:eval bot_source_type = "'vManage'"
+       --> @dm:eval bot_name = "'controller'"
+
+    --> @dm:save name="temp-packs_asset_inventory_collection_status" & append = 'yes'
+    --> @rn:write-stream name = 'vmanage-asset-inventory-collection-status-stream'
+  --> @exec:end-if
+
+
+
+
+## get vedges data
+--> @c:data-loop dataset='temp-variable-dataset' & columns = 'vmanage_src_name,customer_id,customer_tag'
+--> @$vmanage_src_name:query-api path="system/device/vedges" and continue_on_failure="yes"
+##--> @dm:recall name="Vmanage_vedges"
+  --> @dm:eval customer_id = "'$customer_id'"
+       --> @dm:eval customer_tag = "'$customer_tag'"
+--> @dm:eval source ="'vmanage_inv'" and collection_type="'vedge'"
+    --> @dm:save name="temp-vedges"
+    --> @dm:save name="test_vedges"
+
+--> *exec:if-condition collection_status != 'Success'
+      --> *dm:safe-filter * get source_ip as 'asset_ip',collection_status,collection_timestamp,reason,customer_id,customer_tag
+       --> @dm:map to = 'collection_timestamp' & func = 'time_now'
+       --> @dm:eval bot_source_name = "'$vmanage_src_name'"
+       --> @dm:eval bot_source_type = "'vManage'"
+       --> @dm:eval bot_name = "'vedges'"
+       --> @dm:save name="temp-packs_asset_inventory_collection_status" & append = 'yes'
+       --> @rn:write-stream name = 'vmanage-asset-inventory-collection-status-stream'
+    --> @exec:end-if
+
+
+ --> *exec:if-condition collection_status = 'Success'
+       --> @dm:eval vmanage_name = "'$vmanage_src_name'"
+       --> @dm:dedup columns = 'source_ip'
+      # --> *dm:safe-filter * get source_ip as 'asset_ip',collection_status,collection_timestamp,reason,customer_id,customer_tag
+       --> @dm:map attr = 'collection_timestamp' & func = 'ts_to_datetimestr' & unit = 'ms'
+       --> @dm:eval bot_source_name = "'$vmanage_src_name'"
+       --> @dm:eval bot_source_type = "'vManage'"
+       --> @dm:eval bot_name = "'vedges'"
+       --> @dm:eval source ="'vmanage_inv'" and collection_type="'controller'"
+
+    --> @dm:save name="temp-packs_asset_inventory_collection_status" & append = 'yes'
+    --> @rn:write-stream name = 'vmanage-asset-inventory-collection-status-stream'
+  --> @exec:end-if
+
+
+
+
+
+## get devices data
+--> @c:data-loop dataset='temp-variable-dataset' & columns = 'vmanage_src_name,customer_id,customer_tag'
+--> @$vmanage_src_name:query-api path="device" and continue_on_failure="yes"
+##--> @dm:recall name="Vmanage_devices"
+  --> @dm:eval customer_id = "'$customer_id'"
+       --> @dm:eval customer_tag = "'$customer_tag'"
+    --> @dm:save name="temp-devices"
+    --> @dm:save name="test_devices"
+
+--> *exec:if-condition collection_status != 'Success'
+      --> *dm:safe-filter * get source_ip as 'asset_ip',collection_status,collection_timestamp,reason,customer_id,customer_tag
+       --> @dm:map to = 'collection_timestamp' & func = 'time_now'
+       --> @dm:eval bot_source_name = "'$vmanage_src_name'"
+       --> @dm:eval bot_source_type = "'vManage'"
+       --> @dm:eval bot_name = "'devices'"
+       --> @dm:save name="temp-packs_asset_inventory_collection_status" & append = 'yes'
+       --> @rn:write-stream name = 'vmanage-asset-inventory-collection-status-stream'
+    --> @exec:end-if
+
+
+ --> *exec:if-condition collection_status = 'Success'
+       --> @dm:eval vmanage_name = "'$vmanage_src_name'"
+       --> @dm:dedup columns = 'source_ip'
+      # --> *dm:safe-filter * get source_ip as 'asset_ip',collection_status,collection_timestamp,reason,customer_id,customer_tag
+       --> @dm:map attr = 'collection_timestamp' & func = 'ts_to_datetimestr' & unit = 'ms'
+       --> @dm:eval bot_source_name = "'$vmanage_src_name'"
+       --> @dm:eval bot_source_type = "'vManage'"
+       --> @dm:eval bot_name = "'devices'"
+
+    --> @dm:save name="temp-packs_asset_inventory_collection_status" & append = 'yes'
+    --> @rn:write-stream name = 'vmanage-asset-inventory-collection-status-stream'
+  --> @exec:end-if
+
+
+
+
+
+
+## enrich devices data with controllers
+--> @c:new-block
+    --> @dm:recall name="temp-controllers"
+    --> @dm:enrich dict="temp-devices" and src_key_cols	="deviceIP,host-name" and dict_key_cols	="deviceId,host-name" and enrich_cols="board-serial,certificate-validity,connectedVManages,controlConnections,device-groups,device-model,device-os,device-type,isDeviceGeoData,latitude,layoutLevel,linux_cpu_count,longitude,max-controllers,ompPeers,platform,state_description,status,statusOrder,testbed_mode,timezone,total_cpu_count"
+    --> @dm:save name="temp-controllers"
+
+## enrich devices data with vedges
+--> @c:new-block
+    --> @dm:recall name="temp-vedges"
+    --> @dm:enrich dict="temp-devices" and src_key_cols	="deviceIP,host-name" and dict_key_cols	="deviceId,host-name" and enrich_cols="board-serial,certificate-validity,connectedVManages,controlConnections,device-groups,device-model,device-os,device-type,isDeviceGeoData,latitude,layoutLevel,linux_cpu_count,longitude,max-controllers,ompPeers,platform,state_description,status,statusOrder,testbed_mode,timezone,total_cpu_count,bfdSessionsUp,bfdSessions"
+    --> @dm:save name="temp-vedges"
+
+## concat vedges and controllers dataset to create devices dataset
+--> @c:new-block
+    --> @dm:concat names="^temp-controllers$|^temp-vedges$"
+    --> @dm:save name="temp-devices"
+
+--> @c:data-loop dataset ="temp-variable-dataset" and columns="customer_tag,customer_id"
+    --> @dm:recall name="temp-devices"
+    --> @dm:save name="test_devices_final"
+    --> @dm:eval source="'Vmanage_inv'"
+    --> @dm:eval customer_tag ="'$customer_tag'" and customer_id ="'$customer_id'"
+    --> @dm:fixnull columns="chasisNumber,deviceIP,deviceModel,ncsDeviceName" and value="Not Available" and apply_for_empty	="yes"
+    --> @dm:manipulate-string from="chasisNumber,deviceIP,deviceModel,serialNumber" and to="unique_id" and func="concat_columns"
+    --> @dm:rename-columns deviceName=ncsDeviceName
+    --> @dm:fixcolumns
+    --> @dm:selectcolumns exclude="deviceCSR|CSRDetail|deviceEnterpriseCertificate"
+    ## --> @dm:change-time-format columns = 'timeRemainingForExpiration,uptime_date' and from_format = 'ms' and to_format = '%Y%m%'
+    --> @dm:selectcolumns exclude="device_type|device_type|device_id|^id$|^tags$|^availableVersions$|^defaultVersion$|^system_ip$|^local_system_ip$|^device_model$|^model_sku$|^expirationDateLong$|^requestTokenID$|^uuid$"
+    --> @dm:save name="Vmanage_result"
+    --> @rn:write-stream name= "vmanage_inventory_collection_demo"
+
+-->@dm:sleep seconds = 10
+
+
+## Get device details
+--> @c:data-loop dataset='temp-variable-dataset' & columns = 'vmanage_src_name,customer_id,customer_tag'
+    --> @$vmanage_src_name:query-api path="device" and continue_on_failure="yes"
+    ##--> @dm:recall name="vManage_devices_new"
+    --> *dm:filter collection_status="Success"
+    --> @dm:eval customer_tag ="'$customer_tag'" and customer_id ="'$customer_id'"
+    --> @dm:skip-pipeline-if-shape row_count=0
+-->@dm:eval vmanage_src_name = "'$vmanage_src_name'"
+    --> @dm:save name="temp-devices" and append ="yes"
+    --> @dm:save name="temp-variable-dataset" and append ="yes"
+
+--> *exec:if-condition collection_status != 'Success'
+      --> *dm:safe-filter * get source_ip as 'asset_ip',collection_status,collection_timestamp,reason,customer_id,customer_tag
+       --> @dm:map to = 'collection_timestamp' & func = 'time_now'
+       --> @dm:eval bot_source_name = "'$vmanage_src_name'"
+       --> @dm:eval bot_source_type = "'vManage'"
+           
+       --> @dm:eval bot_name = "'devices'"
+       --> @dm:save name="temp-packs_asset_inventory_collection_status" & append = 'yes'
+       --> @rn:write-stream name = 'vmanage-asset-inventory-collection-status-stream'
+    --> @exec:end-if
+
+
+ --> *exec:if-condition collection_status = 'Success'
+       --> @dm:eval vmanage_name = "'$vmanage_src_name'"
+       --> @dm:dedup columns = 'source_ip'
+      # --> *dm:safe-filter * get source_ip as 'asset_ip',collection_status,collection_timestamp,reason,customer_id,customer_tag
+       --> @dm:map attr = 'collection_timestamp' & func = 'ts_to_datetimestr' & unit = 'ms'
+       --> @dm:eval bot_source_name = "'$vmanage_src_name'"
+       --> @dm:eval bot_source_type = "'vManage'"
+
+       --> @dm:eval bot_name = "'devices'"
+
+    --> @dm:save name="temp-packs_asset_inventory_collection_status" & append = 'yes'
+    --> @rn:write-stream name = 'vmanage-asset-inventory-collection-status-stream'
+  --> @exec:end-if
+
+
+
+
+## Get synced sessions of each device
+--> @c:data-loop dataset ="temp-variable-dataset" and columns="deviceId,vmanage_src_name,customer_id,customer_tag"
+    --> @$vmanage_src_name:query-api path ="/device/bfd/synced/sessions" and deviceId="$deviceId" and continue_on_failure="yes"
+    ##--> @dm:recall name="vManage_synced_sessions_new"
+    --> *dm:filter collection_status="Success"
+    --> @dm:eval customer_tag ="'$customer_tag'" and customer_id ="'$customer_id'"
+    --> @dm:save name="temp-synced_sessions" and append ="yes"
+--> *exec:if-condition collection_status != 'Success'
+      --> *dm:safe-filter * get source_ip as 'asset_ip',collection_status,collection_timestamp,reason,customer_id,customer_tag
+       --> @dm:map to = 'collection_timestamp' & func = 'time_now'
+       --> @dm:eval bot_source_name = "'$vmanage_src_name'"
+       --> @dm:eval bot_source_type = "'vManage'"
+       --> @dm:eval bot_name = "'sessions'"
+       --> @dm:save name="temp-packs_asset_inventory_collection_status" & append = 'yes'
+       --> @rn:write-stream name = 'vmanage-asset-inventory-collection-status-stream'
+    --> @exec:end-if
+
+
+ --> *exec:if-condition collection_status = 'Success'
+       --> @dm:eval vmanage_name = "'$vmanage_src_name'"
+       --> @dm:dedup columns = 'source_ip'
+      # --> *dm:safe-filter * get source_ip as 'asset_ip',collection_status,collection_timestamp,reason,customer_id,customer_tag
+       --> @dm:map attr = 'collection_timestamp' & func = 'ts_to_datetimestr' & unit = 'ms'
+       --> @dm:eval bot_source_name = "'$vmanage_src_name'"
+       --> @dm:eval bot_source_type = "'vManage'"
+           
+       --> @dm:eval bot_name = "'sessions'"
+
+    --> @dm:save name="temp-packs_asset_inventory_collection_status" & append = 'yes'
+    --> @rn:write-stream name = 'vmanage-asset-inventory-collection-status-stream'
+  --> @exec:end-if
+
+--> @c:data-loop dataset='temp-variable-dataset' & columns = 'vmanage_src_name,customer_id,customer_tag'
+    --> @dm:recall name="temp-synced_sessions"
+ --> @dm:eval customer_tag ="'$customer_tag'" and customer_id ="'$customer_id'"
+    --> @dm:skip-pipeline-if-shape row_count=0
+    --> @dm:fixcolumns
+    --> @dm:selectcolumns exclude="reason"
+
+    --> @dm:save name="temp-synced-sessions" and append ="yes"
+
+--> @c:new-block
+    --> @dm:recall name="temp-synced-sessions"
+--> @dm:rename-columns  src_system_ip = vmanage_system_ip and dst_system_ip =system_ip and prototype = proto
+    --> @dm:copy-columns from ="src_ip" and to="node_id"
+    --> @dm:copy-columns from ="src_ip" and to="node_label"
+    --> @dm:to-type columns ="node_id" and type="str"
+    --> @dm:dedup columns="node_id"
+    --> @dm:eval node_type="'Nodes'"
+    --> @dm:eval iconURL="'Router'"
+    --> @dm:rename-columns  transport_type = src_transport_type
+    --> @dm:selectcolumns include="src_|node|source_ip|iconURL|customer_tag|customer_id"
+    --> @dm:rename-columns IP = src_ip  and system_ip = src_system_ip and port = src_port
+    --> @dm:save name="temp-scr-nodes"
+
+--> @c:new-block
+    --> @dm:recall name="temp-synced-sessions"
+    --> @dm:rename-columns  src_system_ip = vmanage_system_ip and dst_system_ip =system_ip and prototype = proto
+    --> @dm:copy-columns from ="dst_ip" and to="node_id"
+    --> @dm:copy-columns from ="dst_ip" and to="node_label"
+    --> @dm:to-type columns ="node_id" and type="str"
+    --> @dm:dedup columns="node_id"
+    --> @dm:eval node_type="'Nodes'"
+    --> @dm:eval iconURL="'Router'"
+    --> @dm:rename-columns transport_type = dst_transport_type
+    --> @dm:selectcolumns include="dst_|node|source_ip|iconURL|customer_tag|customer_id"
+    --> @dm:rename-columns IP = dst_ip  and system_ip = dst_system_ip and port = dst_port
+    --> @dm:save name="temp-dst-nodes"
+
+--> @c:new-block
+    --> @dm:concat names="temp-dst-nodes|temp-scr-nodes"
+    --> @dm:dedup columns="node_id"
+    --> @dm:save name="temp-nodes"
+    --> @dm:save name="vManage_nodes"
+    --> @rn:write-stream name= "vmanage_nodes"
+
+--> @c:new-block
+    --> @dm:recall name="temp-synced-sessions"
+    --> @dm:copy-columns from ="src_ip" and to="left_label"
+    --> @dm:copy-columns from ="dst_ip" and to="right_label"
+    --> @dm:eval left_node_type= "'Source Node'"
+    --> @dm:eval right_node_type= "'Destination Node'"
+    --> @dm:eval left_id= "src_ip"
+    --> @dm:eval right_id= "dst_ip"
+    --> @dm:eval relation_type = "'connected-to'"
+    --> @dm:save name="Test_data"
+    --> @dm:dedup columns="left_id,right_id,vdevice_dataKey"
+    --> @dm:eval edge_id="src_ip+'>'+dst_ip"
+    --> @dm:eval link_type ="edge_id"
+    --> @dm:save name="temp-edges"
+    --> @rn:write-stream name= "vmanage_edges"

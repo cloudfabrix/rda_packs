@@ -1,0 +1,66 @@
+{
+    "name": "training_nigtingale_chart_examples",
+    "label": "Apache Echarts: Nightingale Chart Examples",
+    "description": "Apache Echarts: Nightingale Chart Examples",
+    "dashboard_folder": "Training",
+    "version": "1.0.0",
+    "enabled": false,
+    "stream": "training_oia_alerts_stream_custom_widgets",
+    "dashboard_type": "dashboard",
+    "default_storyboard0": "Training",
+    "use_storyboard": false,
+    "live_edit": true,
+    "dashboard_filters": {
+        "time_filter": true,
+        "default_time_filter_labels": [
+            "Last 12 months"
+        ]
+    },
+    "dashboard_sections": [
+        {
+            "title": "Nightingale Charts",
+            "show_filter": true,
+            "widgets": [
+                {
+                    "title": "Alerts and Incidents Analytics: Alerts By Severity",
+                    "widget_type": "custom_widget",
+                    "widget_implementation": "training_custom_widgets_examples/nightingale_chart",
+                    "fixed_variables": {
+                        "stream": "training_1_oia_alerts_stream_custom_widgets",
+                        "column_name": "a_severity",
+                        "my_agg": "sum%3Acount_%3Acount__sum",
+                        "my_offset": "0&limit=100"
+                    },
+                    "height": 8,
+                    "min_width": 12,
+                    "max_width": 12,
+                    "widget_id": "f2dd0ffd2e"
+                }
+            ]
+        }
+    ],
+    "custom_widgets": {
+        "nightingale_chart": {
+            "artifacts": {
+                "main": {
+                    "attachment": "nightingale_chart.html",
+                    "content_type": "text/html",
+                    "is_template": true
+                }
+            }
+        }
+    },
+    "saved_time": "2025-06-30T07:21:19.427079",
+    "attachments": [
+        {
+            "name": "nightingale_chart.html",
+            "value": "\n<head>\n  <meta charset=\"UTF-8\" />\n  <title>Nightingale Chart</title>\n  <style>\n    html, body {\n      margin: 0;\n      padding: 0;\n      width: 100vw;\n      height: 100vh;\n      background: #101F2A;\n      overflow: hidden;\n      font-family: Arial, sans-serif;\n    }\n    #chart {\n      width: 800px;\n      height: 500px;\n      margin: 40px auto;\n      background: transparent;\n    }\n  </style>\n</head>\n<body>\n  <div id=\"chart\"></div>\n  <script src=\"https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js\"></script>\n  <script>\n    // Initialize ECharts\n    const chartDom = document.getElementById('chart');\n    const myChart = echarts.init(chartDom);\n\n    // We'll only keep these severities\n    const desiredSeverities = ['CRITICAL', 'WARNING', 'MAJOR', 'CLEAR', 'MINOR'];\n\n    // Function to update & render the chart\n    function updateChart(dataArray) {\n      const option = {\n        backgroundColor: 'transparent',\n        title: {\n          text: 'Nightingale Chart',\n          left: 'center',\n          top: '2%',\n          textStyle: {\n            color: '#ffffff',\n            fontSize: 20,\n            fontWeight: 'bold'\n          }\n        },\n        tooltip: {\n          trigger: 'item',\n          formatter: '{a} <br/>{b}: {c} ({d}%)',\n          backgroundColor: 'rgba(50,50,50,0.7)',\n          textStyle: { color: '#ffffff' }\n        },\n        legend: {\n          orient: 'horizontal',\n          bottom: '5%',\n          left: 'center',\n          textStyle: {\n            color: '#ffffff',\n            fontSize: 12\n          }\n        },\n        series: [\n          {\n            name: 'Aggregated Severity',\n            type: 'pie',\n            radius: [10, 110],\n            center: ['50%', '50%'],\n            roseType: 'area',\n            itemStyle: {\n              borderRadius: 8\n            },\n            avoidLabelOverlap: true,\n            labelLayout: {\n              hideOverlap: true,\n            },\n            label: {\n              color: '#ffffff',\n              fontSize: 12,\n              formatter: '{b}\\n{c}'\n            },\n            labelLine: {\n              length: 15,\n              length2: 10,\n              lineStyle: {\n                color: '#ffffff'\n              }\n            },\n            data: dataArray\n          }\n        ]\n      };\n\n      myChart.setOption(option);\n    }\n\n    // Build the API URL to retrieve all severities\n    const apiUrl = '/api/v2/pstreams/pstream/{{stream}}/data'\n      + '?cfxql_query=*'          // match all (since restricted CFXQL doesn't allow OR/IN)\n      + '&group_by={{column_name}}'\n      + '&aggs={{my_agg}}'\n      + '&offset={{my_offset}}';\n\n    fetch(apiUrl, { headers: { 'accept': 'application/json' } })\n      .then(response => {\n        if (!response.ok) {\n          throw new Error('Network response was not ok: ' + response.statusText);\n        }\n        return response.json();\n      })\n      .then(data => {\n        let chartData = [];\n        if (data && data.pstream_data && data.pstream_data.length > 0) {\n          chartData = data.pstream_data\n            // 1) Filter out undesired severities\n            .filter(row => desiredSeverities.includes(row.a_severity))\n            // 2) Map to ECharts format\n            .map(row => ({\n              name: row.a_severity,\n              value: Number(row.count__sum) || 0\n            }));\n        }\n        // Render the chart with our filtered data\n        updateChart(chartData);\n      })\n      .catch(error => {\n        console.error('Error fetching data:', error);\n      });\n\n    // Make the chart responsive\n    window.addEventListener('resize', () => {\n      myChart.resize();\n    });\n  </script>\n</body>\n"
+        }
+    ],
+    "storyboards": [
+        {
+            "name": "Training",
+            "value": "{\n    \"stage\": {\n        \"size\": {\n            \"width\": 1920,\n            \"height\": 1080\n        },\n        \"background\": {\n            \"fill\": null,\n            \"src\": \"/assets/img/backgrounds/bgr_23.png\",\n            \"gradient\": null\n        },\n        \"theme\": \"dark\",\n        \"autoFitByDefault\": true\n    },\n    \"widgets\": [\n        {\n            \"widget_id\": \"f2dd0ffd2e\",\n            \"layoutConfig\": {\n                \"rotation\": 0,\n                \"width\": 793.79,\n                \"height\": 631.3,\n                \"scaleX\": 1,\n                \"scaleY\": 1,\n                \"fill\": \"#FFFFFF00\",\n                \"opacity\": 1,\n                \"name\": \"widget-4\",\n                \"draggable\": true,\n                \"x\": 588.7103901313437,\n                \"y\": 294.5592296165246,\n                \"id\": \"cfx-eab74b8b-743f-419d-81da-daef4c1d44e5\",\n                \"offsetX\": 0,\n                \"offsetY\": 0,\n                \"skewX\": 0,\n                \"skewY\": 0\n            }\n        }\n    ],\n    \"shapes\": [],\n    \"lines\": [],\n    \"sbBookmarkList\": []\n}"
+        }
+    ]
+}

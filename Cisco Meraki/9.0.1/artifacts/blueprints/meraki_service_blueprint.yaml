@@ -1,0 +1,37 @@
+name: meraki_service_blueprint
+id: meraki_service_blueprint
+version: '2024_12_17'
+category: Meraki
+comment: Cisco Meraki Inventory Collection
+enabled: true
+type: Service
+auto_deploy: false
+provider: CloudFabrix Software Inc.
+attrs: {}
+run_context:
+    customer_tag: $PKG_CONTEXT_CUSTOMER_TAG
+    customer_id: $PKG_CONTEXT_CUSTOMER_ID
+scheduled_pipelines:
+    -   name: meraki_inv_collection
+        label: Meraki Inventory Data
+        version: '*'
+        site: ${PKG_CONTEXT_CUSTOMER_TAG}-.*
+        cron_expression: 0 3 * * *
+        site_type: regex
+        instances: 1
+        scaling_policy:
+            min_instances: 1
+            max_instances: 1
+    -   name: meraki_access_verification_status
+        label: Meraki Access Verification Status
+        version: '*'
+        site: ${PKG_CONTEXT_CUSTOMER_TAG}-.*
+        cron_expression: 0 2 * * *
+        site_type: regex
+        instances: 1
+        scaling_policy:
+            min_instances: 1
+            max_instances: 1
+    
+saved_time: '2024-12-18T22:36:27.767940'
+

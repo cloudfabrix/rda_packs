@@ -1,0 +1,256 @@
+%% stream = no and limit = 0
+
+%% import_src_type = "linux-inventory,windows-inventory"
+%%template_type="jinja"
+
+%%start_inline_object name="context_dynamic_form" and type="data" and format="json"
+{
+    "formFieldList": [
+        {
+            "fieldId": "customer_tag",
+            "label": "Tag of the customer",
+            "required": false,
+            "dataType": "string"
+        }
+    ]
+}
+%%end_inline_object
+{% if customer_tag %} 
+      {% set customer_id = customer_id %}
+      {% set customer_tag = customer_tag %}
+      {% set customerTag = customer_tag %}
+   {% elif customerTag %} 
+      {% set customer_id = customer_id %}
+      {% set customer_tag = customerTag %}
+   {% else %}
+      {% set customer_id = '' %}
+      {% set customer_tag = '' %}
+   {% endif %}   
+@c:new-block
+    --> @exec:get-input
+    --> @dm:save name="temp-user-input"
+
+--> @c:new-block
+    --> @dm:recall name="temp-user-input"
+    --> *exec:if-shape num_rows = 0
+       ## get all the hosts with discover_scope = yes
+       --> @dm:empty
+       {% if customer_tag %} 
+            --> #dm:query-persistent-stream discovery_scope is 'yes' and customer_tag is '{{customer_tag}}' with-input name = "linux_windows_on_boarded_hosts" & limit = "0"
+       {% else %} 
+            --> #dm:query-persistent-stream discovery_scope is 'yes' and (customer_tag is empty or customer_tag is 'None') with-input name = "linux_windows_on_boarded_hosts" & limit = "0"
+       {% endif %} 
+       
+       --> @dm:save name = "temp-hosts"
+       --> @dm:skip-pipeline-if-shape row_count = 0
+    --> @exec:end-if
+
+--> @c:new-block
+    --> @dm:recall name="temp-user-input"
+    --> *exec:if-shape num_rows > 0
+       --> @dm:selectcolumns include = "Others"
+       --> @dm:skip-pipeline-if-shape column_count = 0
+       --> @dm:explode-json column="Others"
+       --> @dm:eval discovery_scope = "'yes'"
+       --> @dm:save name="temp-hosts"
+    --> @exec:end-if
+
+--> @c:new-block
+    --> @dm:recall name="temp-hosts"
+    --> @dm:map attr = 'ip_address' & func = 'strip'
+    --> @dm:map attr = 'type' & func = 'strip'
+    --> @dm:map attr = 'port' & func = 'strip'
+    --> @dm:map attr = 'type' & func = 'lower'
+    --> @dm:map attr = 'discovery_scope' & func = 'strip'
+    --> @dm:map attr = 'discovery_scope' & func = 'lower'
+    --> @dm:map attr = 'credential' & func = 'strip'
+    --> @dm:eval customer_id =  "'{{customer_id}}'"
+    --> @dm:eval customer_tag =  "'{{customer_tag}}'"
+    --> @dm:save name = 'temp-inventory_ip_list'
+    --> @dm:save name = 'temp-inventory_source_info'
+
+--> @c:new-block
+    --> @dm:empty
+    --> @dm:save name = "temp-unique-credential-names"
+    --> @dm:save name = "temp-credentials-not-defined"
+    --> @dm:save name = "temp-credentials-list-not-defined"
+    --> @dm:save name = "temp-host_os_access_verification_status"
+    --> @dm:save name = 'temp-linux_inventory_source_info'
+    --> @dm:save name = 'temp-linux_inventory_ip_list'
+    --> @dm:save name = 'temp-windows_inventory_source_info'
+    --> @dm:save name = 'temp-windows_inventory_ip_list'
+
+## get the secrets list
+--> @c:new-block
+    --> @dm:empty
+    {% if customer_tag %} 
+         --> #dm:query-persistent-stream type in ["linux-inventory","windows-inventory"] and (customerTag contains '{{customer_tag}}') with-input name = 'rda_secrets_meta' and limit= 0
+      {% else %}
+         --> #dm:query-persistent-stream type in ["linux-inventory","windows-inventory"] and (customerTag is empty) with-input name = 'rda_secrets_meta' and limit= 0
+      {% endif %}    
+    
+    --> @dm:save name = "temp-secrets"
+    --> @dm:skip-pipeline-if-shape row_count = 0
+
+## get the list of unique credential names
+--> @c:new-block
+    --> @dm:recall name = "temp-inventory_source_info"
+    --> @dm:dedup columns="credential"
+    --> @dm:save name="temp-unique-credential-names"
+
+## Check if credentials are defined
+--> @c:data-loop name = "credentials-exits" & dataset = 'temp-unique-credential-names' & columns = 'credential,ip_address,port,type,customer_tag,customer_id'
+    --> @dm:recall name = "temp-secrets"
+    --> *dm:safe-filter name is '$credential'
+    --> *exec:if-shape num_rows is 0
+       --> @dm:empty
+       --> @dm:addrow reason = "credential not defined"
+       --> @dm:eval bot_source_name = "'$credential'"
+       --> @dm:eval bot_name = "''"
+       --> @dm:eval access_verification_timestamp = "time_now_as_isoformat()"
+       ##--> @dm:eval asset_id = "'$ip_address'"
+       --> @dm:eval access_verification_status = "'Failed'"
+       --> @dm:eval bot_source_type = "'$type'"
+       --> @dm:eval host_type = "'$type'"
+       --> @dm:eval port = "'$port'"
+       --> @dm:map attr="bot_source_type" and func = "concat" and suffix = "_os"
+       --> @dm:eval customer_id =  "'$customer_id'"
+       --> @dm:eval customer_tag =  "'$customer_tag'"
+       --> @dm:save name = "temp-credentials-not-defined" & append = "yes"
+       --> @rn:write-stream name = 'host_os_access_verification_status'
+    --> @exec:end-if
+
+## get comma separated list of ip_adresses for which credentials are not defined
+--> @c:new-block
+    --> @dm:recall name = "temp-credentials-not-defined"
+    --> *exec:if-shape num_rows is 0
+       --> @dm:recall name = "temp-inventory_source_info"
+       --> @dm:save name = 'temp-inventory_ip_list'
+    --> @exec:end-if
+    --> *exec:if-shape num_rows > 0
+       --> @dm:eval key="'key'"
+       --> @dm:eval bot_source_name_updated = "'\''+(bot_source_name)+'\''"
+       --> @dm:implode key_columns = "key" & merge_columns="bot_source_name_updated,bot_source_name"
+       --> @dm:save name = "temp-credentials-list-not-defined"
+    --> @exec:end-if
+
+## Filter out the ip addresses for which credentials exist
+--> @c:new-block
+
+--> @c:data-loop dataset = 'temp-credentials-list-not-defined' & columns = 'bot_source_name,bot_source_name_updated'
+    --> @dm:recall name = "temp-inventory_source_info"
+    --> @dm:skip-block-if-shape row_count = 0
+    --> *dm:safe-filter credential not in [$bot_source_name_updated]
+    
+    --> @dm:save name = 'temp-inventory_ip_list'
+
+## Get the linux hosts
+--> @c:new-block
+    --> @dm:recall name = 'temp-inventory_ip_list'
+    --> @dm:skip-block-if-shape row_count = 0
+    --> *dm:safe-filter type is 'linux'
+    --> @dm:skip-block-if-shape row_count = 0
+    --> @dm:rename-columns linux_src_name = "credential"
+    --> @dm:map attr = 'ip_address' & func = 'strip'
+    --> @dm:map attr = 'type' & func = 'strip'
+    --> @dm:map attr = 'port' & func = 'strip'
+    --> @dm:map attr = 'type' & func = 'lower'
+    --> @dm:map attr = 'discovery_scope' & func = 'strip'
+    --> @dm:map attr = 'discovery_scope' & func = 'lower'
+    --> @dm:save name = 'temp-linux_inventory_source_info'
+    --> @dm:save name = 'temp-linux_inventory_ip_list'
+
+## Get the windows hosts
+--> @c:new-block
+    --> @dm:recall name = 'temp-inventory_ip_list'
+    --> @dm:skip-block-if-shape row_count = 0
+    --> *dm:safe-filter type is 'windows'
+    --> @dm:skip-block-if-shape row_count = 0
+    --> @dm:rename-columns windows_src_name = "credential"
+    --> @dm:map attr = 'ip_address' & func = 'strip'
+    --> @dm:map attr = 'type' & func = 'strip'
+    --> @dm:map attr = 'port' & func = 'strip'
+    --> @dm:map attr = 'type' & func = 'lower'
+    --> @dm:map attr = 'discovery_scope' & func = 'strip'
+    --> @dm:map attr = 'discovery_scope' & func = 'lower'
+    --> @dm:map attr = 'windows_src_name' & func = 'strip'
+    --> @dm:save name = 'temp-windows_inventory_source_info'
+    --> @dm:save name = 'temp-windows_inventory_ip_list'
+
+## ##
+## Linux OS Access Verification
+--> @c:data-loop name = "linux-system-details" & dataset = 'temp-linux_inventory_source_info' & columns = 'linux_src_name,port,customer_tag,customer_id'
+    --> @dm:recall name = 'temp-linux_inventory_ip_list'
+    --> @dm:skip-block-if-shape row_count = 0
+    --> *dm:safe-filter ip_address is not Empty & linux_src_name is '$linux_src_name'
+    --> @dm:skip-block-if-shape row_count = 0
+    --> @$linux_src_name:system-info column_name='ip_address' & concurrent_discovery = '100' & connect_timeout = "120" & cli_timeout = "100"
+    --> *exec:if-condition collection_status != 'Success'
+       --> *dm:safe-filter * get source_ip as 'asset_id',collection_status as 'access_verification_status',collection_timestamp as 'access_verification_timestamp',reason
+       --> @dm:map attr = 'access_verification_timestamp' & func = 'ts_to_datetimestr' & unit = 'ms'
+       --> @dm:eval bot_source_name = "'$linux_src_name'"
+       --> @dm:eval bot_source_type = "'linux_os'"
+       --> @dm:eval bot_name = "'system-info'"
+       --> @dm:eval host_type = "'linux'"
+       --> @dm:eval port = "'$port'"
+       --> @dm:eval customer_id = "'$customer_id'"
+       --> @dm:eval customer_tag = "'$customer_tag'"
+       --> @dm:save name = "temp-host_os_access_verification_status" & append = "yes"
+       --> @rn:write-stream name = 'host_os_access_verification_status'
+    --> @exec:end-if
+    --> *exec:if-condition collection_status = 'Success'
+       --> @dm:dedup columns = 'source_ip'
+       --> *dm:safe-filter * get source_ip as 'asset_id',collection_status as 'access_verification_status',collection_timestamp as 'access_verification_timestamp',reason
+       --> @dm:map attr = 'access_verification_timestamp' & func = 'ts_to_datetimestr' & unit = 'ms'
+       --> @dm:eval bot_source_name = "'$linux_src_name'"
+       --> @dm:eval bot_source_type = "'linux_os'"
+       --> @dm:eval bot_name = "'system-info'"
+       --> @dm:eval host_type = "'linux'"
+       --> @dm:eval port = "'$port'"
+       --> @dm:eval customer_id = "'$customer_id'"
+       --> @dm:eval customer_tag = "'$customer_tag'"
+       --> @dm:save name = "temp-host_os_access_verification_status" & append = "yes"
+       --> @rn:write-stream name = 'host_os_access_verification_status'
+    --> @exec:end-if
+
+## ##
+## Windows OS Access Verifaction
+--> @c:data-loop name = "windows-system-details" & dataset = 'temp-windows_inventory_source_info' & columns = 'windows_src_name,port,customer_tag,customer_id'
+    --> @dm:recall name = 'temp-windows_inventory_ip_list'
+    --> @dm:skip-block-if-shape row_count = 0
+    --> *dm:safe-filter ip_address is not Empty & windows_src_name = '$windows_src_name'
+    --> @dm:skip-block-if-shape row_count = 0
+    --> @$windows_src_name:system-info column_name='ip_address' & concurrent_discovery = '100' & connect_timeout = "120" & cli_timeout = "100"
+    --> *exec:if-condition collection_status != 'Success'
+       --> *dm:safe-filter * get source_ip as 'asset_id',collection_status as 'access_verification_status',collection_timestamp as 'access_verification_timestamp',reason
+       --> @dm:map attr = 'access_verification_timestamp' & func = 'ts_to_datetimestr' & unit = 'ms'
+       --> @dm:eval bot_source_name = "'$windows_src_name'"
+       --> @dm:eval bot_source_type = "'windows_os'"
+       --> @dm:eval bot_name = "'system-info'"
+       --> @dm:eval host_type = "'windows'"
+       --> @dm:to-type columns = 'reason' & type = 'str'
+       --> @dm:eval port = "'$port'"
+       --> @dm:eval customer_id = "'$customer_id'"
+       --> @dm:eval customer_tag = "'$customer_tag'"
+       --> @dm:eval access_verification_timestamp = "access_verification_timestamp if access_verification_timestamp else time_now_as_isoformat()"
+       --> @dm:save name = "temp-host_os_access_verification_status" & append = "yes"
+       --> @rn:write-stream name = 'host_os_access_verification_status'
+    --> @exec:end-if
+    --> *exec:if-condition collection_status = 'Success'
+       --> @dm:dedup columns = 'source_ip'
+       --> *dm:safe-filter * get source_ip as 'asset_id',collection_status as 'access_verification_status',collection_timestamp as 'access_verification_timestamp',reason
+       --> @dm:map attr = 'access_verification_timestamp' & func = 'ts_to_datetimestr' & unit = 'ms'
+       --> @dm:eval bot_source_name = "'$windows_src_name'"
+       --> @dm:eval bot_source_type = "'windows_os'"
+       --> @dm:eval bot_name = "'system-info'"
+       --> @dm:eval host_type = "'windows'"
+       --> @dm:eval port = "'$port'"
+       --> @dm:eval customer_id = "'$customer_id'"
+       --> @dm:eval customer_tag = "'$customer_tag'"
+       --> @dm:save name = "temp-host_os_access_verification_status" & append = "yes"
+       --> @rn:write-stream name = 'host_os_access_verification_status'
+    --> @exec:end-if
+
+--> @c:new-block
+    --> @dm:recall name = "temp-host_os_access_verification_status"
+

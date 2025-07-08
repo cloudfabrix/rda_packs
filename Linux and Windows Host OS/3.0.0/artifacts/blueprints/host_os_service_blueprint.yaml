@@ -1,0 +1,50 @@
+name: host_os_service_blueprint
+id: host_os_service_blueprint
+version: '2024_09_18'
+category: Host OS
+comment: Hot OS Inventory Collection
+enabled: true
+type: Service
+auto_deploy: false
+provider: CloudFabrix Software Inc.
+attrs: {
+    customer_id: $PKG_CONTEXT_CUSTOMER_ID,
+    customer_tag: $PKG_CONTEXT_CUSTOMER_TAG
+}
+run_context: {
+    customer_id: $PKG_CONTEXT_CUSTOMER_ID,
+    customer_tag: $PKG_CONTEXT_CUSTOMER_TAG
+}
+scheduled_pipelines:
+    -   name: linux_inventory_and_topology_using_ssh
+        label: Host OS Linux Inventory Data
+        version: '*'
+        site: ${PKG_CONTEXT_CUSTOMER_TAG}-.*
+        cron_expression: '0 3 * * *'
+        site_type: regex
+        instances: 1
+        scaling_policy:
+            min_instances: 1
+            max_instances: 1
+    -   name: windows_inventory_and_topology_using_winrm
+        label: Host OS Windows Inventory Data
+        version: '*'
+        site: ${PKG_CONTEXT_CUSTOMER_TAG}-.*
+        cron_expression: '0 5 * * *'
+        site_type: regex
+        instances: 1
+        scaling_policy:
+            min_instances: 1
+            max_instances: 1
+
+    -   name: host_os_access_verification
+        label: Host OS Access Verification
+        version: '*'
+        site: ${PKG_CONTEXT_CUSTOMER_TAG}-.*
+        cron_expression: '0 0 * * *'
+        site_type: regex
+        instances: 1
+        scaling_policy:
+            min_instances: 1
+            max_instances: 1
+

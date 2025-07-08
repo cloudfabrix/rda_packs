@@ -1,0 +1,74 @@
+{
+    "name": "code_block_chart_example",
+    "label": "Code Block Chart",
+    "description": "Code Block Chart example",
+    "version": "10.12.24.2",
+    "enabled": true,
+    "dashboard_style": "auto",
+    "live_edit": true,
+    "status_poller": {},
+    "dashboard_type": "dashboard",
+    "dashboard_pages": [],
+    "showTitle": true,
+    "dashboard_generator": {
+        "attachment": "widget_code_generator"
+    },
+    "dashboard_filters": {
+        "time_filter": true,
+        "default_time_filter_labels": [
+            "All Time"
+        ],
+        "columns_filter": [],
+        "group_filters": []
+    },
+    "dashboard_sections": [
+        {
+            "title": "Code Block Chart",
+            "show_filter": true,
+            "widgets": [
+                {
+                    "widget_type": "codeblock",
+                    "title": "Code Block: Data from Content",
+                    "max_width": 12,
+                    "min_width": 12,
+                    "content": "Welcome to Fabrix.ai ( CloudFabrix )",
+                    "widget_id": "b923938b"
+                },
+                {
+                    "widget_type": "codeblock",
+                    "title": "Code Block: Data from Stream",
+                    "stream": "main_enhanced",
+                    "max_width": 12,
+                    "min_width": 12,
+                    "lang": "json",
+                    "widget_id": "458d45e9"
+                },
+                {
+                    "widget_type": "codeblock",
+                    "title": "Code Block: Data from Minio",
+                    "max_width": 12,
+                    "min_width": 12,
+                    "minio_object_path": "bundle_to_pack/converted_bundles.json",
+                    "widget_id": "56e4a0ad"
+                },
+                {
+                    "widget_type": "codeblock",
+                    "title": "Code Block: Data from Stream using Filter",
+                    "duration_hours": 1080,
+                    "max_width": 12,
+                    "min_width": 12,
+                    "extra_filter": "city is not None GET city",
+                    "stream": "main_enhanced",
+                    "widget_id": "8e690f72"
+                }
+            ]
+        }
+    ],
+    "saved_time": "2025-03-14T20:08:35.019227",
+    "attachments": [
+        {
+            "name": "widget_code_generator",
+            "value": "{%- set widgets =  dashboard[\"dashboard_sections\"][0][\"widgets\"] -%}\r\n{%- set new_widgets =  [] -%}\r\n{%- set ns =  namespace(count=0) -%}\r\n\r\n{%- for w in widgets -%}\r\n\r\n    {%-\r\n        set nw = {\r\n            \"title\": \"JSON\",\r\n            \"widget_group\": \"g\"+str(ns.count),\r\n            \"widget_type\": \"custom_widget\",\r\n            \"widget_implementation\": \"code_viewer/code_viewer_widget\",\r\n            \"min_width\": w.get(\"min_width\", 6),\r\n            \"max_width\": w.get(\"max_width\", 6),\r\n            \"height\": w.get(\"height\", 4),\r\n            \"widget_id\": w.get(\"widget_id\", str(ns.count)) + \"_code\",\r\n            \"fixed_variables\": {\r\n                \"codeSnippet\": json_dumps_indent(w, 2),\r\n                \"lang\": \"json\"\r\n            }\r\n        }\r\n    -%}\r\n    {%- set _ = w.update({\"widget_group\":  \"g\"+str(ns.count) }) -%}\r\n    {%- set _ = new_widgets.append(nw) -%}\r\n    {%- set ns.count = ns.count + 1 -%}\r\n{%- endfor -%}\r\n\r\n{%- set _ = widgets.extend(new_widgets) -%}"
+        }
+    ]
+}

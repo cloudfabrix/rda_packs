@@ -1,0 +1,195 @@
+##This pipeline needs customer_id or customerTag in context to run
+%% stream = no and limit = 0
+%%template_type="jinja"
+
+ %% import_src_type = "cisco-meraki"
+
+%%start_inline_object name="context_dynamic_form" and type="data" and format="json"
+{
+    "formFieldList": [
+        {
+            "fieldId": "customer_tag",
+            "label": "Tag of the customer",
+            "required": false,
+            "dataType": "string"
+        }
+    ]
+}
+%%end_inline_object
+@dm:empty
+    --> @dm:save name = "temp-customer-context"
+
+{% set row = "" %}
+
+   {% if customer_tag %}
+      {% set customer_id = customer_id %}
+      {% set customer_tag = customer_tag %}
+      {% set customerTag = customer_tag %}
+   {% elif customerTag %}
+      {% set customer_id = customer_id %}
+      {% set customer_tag = customerTag %}
+   {% else %}
+      {% set customer_id = '' %}
+      {% set customer_tag = '' %}
+   {% endif %}
+
+
+
+--> @dm:empty
+    --> @dm:save name = 'temp-variable-dataset'
+    --> @dm:save name = 'temp-variable-dataset-interim'
+    --> @dm:save name = 'temp-meraki-sources'
+
+--> @c:new-block
+    --> @exec:get-input
+    --> @dm:selectcolumns include = "Others"
+    ## --> @dm:skip-pipeline-if-shape column_count = 0
+    --> @dm:explode-json column="Others"
+    --> @dm:rename-columns meraki_src_name = 'name'
+    --> @dm:save name = 'temp-variable-dataset'
+
+
+
+--> @c:new-block
+    --> @dm:recall name = 'temp-variable-dataset'
+    --> *exec:if-shape num_rows = 0
+       --> @dm:empty
+       
+       {% if customer_tag %} 
+         --> #dm:query-persistent-stream type contains 'cisco-meraki' and customerTag contains '{{customer_tag}}' with-input name = 'rda_secrets_meta' and limit= 0
+       {% else %}
+         --> #dm:query-persistent-stream type contains 'cisco-meraki' and customerTag is empty with-input name = 'rda_secrets_meta' and limit= 0
+       {% endif %}  
+       --> @dm:rename-columns meraki_src_name = 'name'
+       --> @dm:save name = 'temp-meraki-sources'
+       ##--> @exec:for-loop num_rows = 1
+       ##{% if customer_tag %} 
+         
+       ##   --> #dm:query-persistent-stream bot_source_name is '{%-raw-%}{{row["meraki_src_name"]}}{%-endraw-%}'' and  collection_status = 'Success' and customer_tag is '{{customer_tag}}' with-input name = 'meraki_access_verification_status' and limit= 0
+       ##{% else %}    
+       ##   --> #dm:query-persistent-stream bot_source_name is '{%-raw-%}{{row["meraki_src_name"]}}{%-endraw-%}'' and  collection_status = 'Success' and customer_tag is empty with-input name = 'meraki_access_verification_status' and limit= 0
+       ##{% endif %}   
+       ##  --> @dm:save name = 'temp-meraki-form-input' and append = 'yes'
+      ## --> @exec:end-loop
+       ##--> @dm:recall name = 'temp-meraki-form-input'
+       --> @exec:for-loop num_rows = 1
+          ##--> #dm:query-persistent-stream meraki_src_name contains {{'{{row.bot_source_name}}'}} and discovery_scope = 'yes' and customer_tag is '{{customer_tag}}' with-input name = 'meraki_on_boarded_devices' and limit= 0
+          {% if customer_tag %} 
+            --> #dm:query-persistent-stream meraki_src_name is '{%-raw-%}{{row["meraki_src_name"]}}{%-endraw-%}'  and customer_tag is '{{customer_tag}}' with-input name = 'meraki_on_boarded_devices' and limit= 0
+          {% else %}    
+            --> #dm:query-persistent-stream meraki_src_name is '{%-raw-%}{{row["meraki_src_name"]}}{%-endraw-%}'  and customer_tag is empty with-input name = 'meraki_on_boarded_devices' and limit= 0
+          {% endif %}   
+          --> @dm:save name = 'temp-variable-dataset-interim' & append='yes' & return_appended_dataset = 'yes'
+          -->@dm:save name = 'variable-dataset-meraki'
+       --> @exec:end-loop
+       --> @dm:recall name = 'temp-variable-dataset-interim'
+       --> *exec:if-shape num_rows = 0    
+         --> @dm:recall name = 'temp-meraki-sources'
+         -->@dm:eval  discovery_scope = "'yes'"
+         --> @dm:save name = 'temp-variable-dataset'
+       --> @exec:end-if
+      
+       --> *exec:if-shape num_rows > 0     
+        --> *dm:safe-filter discovery_scope == 'yes' 
+         ##-->@dm:eval  discovery_scope = "'yes'"
+         ##--> @dm:rename-columns meraki_src_name = 'name'
+         --> @dm:save name = 'temp-variable-dataset'
+      --> @exec:end-if
+    
+    --> @exec:end-if
+
+
+
+
+##Add customer context to the dataset
+--> @c:new-block
+    --> @dm:recall name = 'temp-variable-dataset'
+    --> @dm:eval customer_id =  "'{{ customer_id }}'"
+    --> @dm:eval customer_tag =  "'{{ customer_tag }}'"
+   --> @dm:save name = 'temp-variable-dataset'
+
+   ##--> @dm:save name = 'test_variable-dataset'
+
+
+--> @c:data-loop dataset='temp-variable-dataset' & columns = 'meraki_src_name,customer_id,customer_tag'
+-->*$meraki_src_name:networks
+  -->@dm:eval unique_id="id" and device_object="'Networks'"
+  --> @dm:eval customer_id = "'$customer_id'"
+       --> @dm:eval customer_tag = "'$customer_tag'"
+   --> *exec:if-condition collection_status != 'Success'
+        --> @dm:eval bot_source_name = "'$meraki_src_name'"
+       --> @dm:eval bot_source_type = "'meraki'"
+       --> @dm:eval bot_name = "'networks'"
+       --> @dm:save name="temp-packs_asset_inventory_collection_status" & append = 'yes'
+       --> @rn:write-stream name = 'asset_inventory_collection_status_stream'
+    --> @exec:end-if
+    --> *exec:if-condition collection_status = 'Success'
+      --> @dm:eval bot_source_name = "'$meraki_src_name'"
+       --> @dm:eval bot_source_type = "'meraki'"
+       --> @dm:eval bot_name = "'networks'"
+       --> @dm:save name="temp-packs_asset_inventory_collection_status" & append = 'yes'
+       --> @rn:write-stream name = 'asset_inventory_collection_status_stream'
+    --> @exec:end-if
+-->@dm:save name="temp-networks"
+-->@rn:write-stream name="meraki_inventory_collection"
+
+
+
+
+
+--> @c:data-loop dataset='temp-variable-dataset' & columns = 'meraki_src_name,customer_id,customer_tag'
+-->*$meraki_src_name:network-devices
+-->@dm:eval unique_id="serial" and device_object="'Access_Points'"
+##--> *dm:filter lanIp is not empty
+##-->@dm:eval ip_addr="lanIp"
+--> @dm:eval ip_addr="lanIp if lanIp else wan1Ip if wan1Ip else wan2Ip if wan2Ip else None"
+--> @dm:eval customer_id = "'$customer_id'"
+--> @dm:eval customer_tag = "'$customer_tag'"
+
+--> *exec:if-condition collection_status != 'Success'
+        --> @dm:eval bot_source_name = "'$meraki_src_name'"
+       --> @dm:eval bot_source_type = "'meraki'"
+       --> @dm:eval bot_name = "'network-devices'"
+       --> @dm:save name="temp-packs_asset_inventory_collection_status" & append = 'yes'
+       --> @rn:write-stream name = 'asset_inventory_collection_status_stream'
+    --> @exec:end-if
+    --> *exec:if-condition collection_status = 'Success'
+      --> @dm:eval bot_source_name = "'$meraki_src_name'"
+       --> @dm:eval bot_source_type = "'meraki'"
+       --> @dm:eval bot_name = "'network-devices'"
+       --> @dm:save name="temp-packs_asset_inventory_collection_status" & append = 'yes'
+       --> @rn:write-stream name = 'asset_inventory_collection_status_stream'
+    --> @exec:end-if
+
+-->@dm:save name="temp-networks-dev"
+-->@rn:write-stream name="meraki_inventory_collection"
+
+
+--> @c:data-loop dataset='temp-variable-dataset' & columns = 'meraki_src_name,customer_id,customer_tag'
+-->*$meraki_src_name:network-clients
+-->@dm:eval  device_object="'Endpoints'"
+--> @dm:eval customer_id = "'$customer_id'"
+--> @dm:eval customer_tag = "'$customer_tag'"
+
+--> *exec:if-condition collection_status != 'Success'
+        --> @dm:eval bot_source_name = "'$meraki_src_name'"
+       --> @dm:eval bot_source_type = "'meraki'"
+       --> @dm:eval bot_name = "'network-clients'"
+       --> @dm:save name="temp-packs_asset_inventory_collection_status" & append = 'yes'
+       --> @rn:write-stream name = 'asset_inventory_collection_status_stream'
+    --> @exec:end-if
+    --> *exec:if-condition collection_status = 'Success'
+      --> @dm:eval bot_source_name = "'$meraki_src_name'"
+       --> @dm:eval bot_source_type = "'meraki'"
+       --> @dm:eval bot_name = "'network-clients'"
+       --> @dm:save name="temp-packs_asset_inventory_collection_status" & append = 'yes'
+       --> @rn:write-stream name = 'asset_inventory_collection_status_stream'
+    --> @exec:end-if
+
+
+
+-->@dm:enrich dict="temp-networks-dev" and src_key_cols="serial" and dict_key_cols="serial" and enrich_cols="ip_addr"
+-->@dm:manipulate-string from="id,vlan,serial" and to="unique_id" and func="concat_columns"
+-->@rn:write-stream name="meraki_inventory_collection"
+-->@dm:save name="temp-networks-client"
+

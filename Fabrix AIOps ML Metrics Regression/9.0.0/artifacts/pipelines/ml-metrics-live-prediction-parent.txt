@@ -1,0 +1,21 @@
+%% stream = no and limit = 0
+
+
+%% import_src_type = "cfxai_regression"
+
+@c:bookmark-loop bookmark = "metrics-live-regression" & initial_value="NONE"
+    --> @dm:empty
+    --> @dm:addrow bookmark='$bookmark'
+    --> @dm:eval bookmark="to_datetime(time_now_as_seconds()-3600,unit='s') if bookmark=='NONE' else bookmark"
+    --> @dm:eval name="'oia-metrics-data'" and limit='0'
+    ##--> #dm:query-persistent-stream metric_timestamp is after -6 hours
+    --> #dm:query-persistent-stream metric_timestamp is after '{{row.bookmark}}'
+    --> @exec:run-pipeline name='ml-metrics-live-prediction-child'
+    --> *exec:if-shape num_rows>0
+       --> @dm:save_bookmark name = "metrics-live-regression" &
+               value_column = "live_timestamp" &
+               value_type = "timestamp" &
+               value_func = "max"
+    --> @exec:end-if
+    --> @dm:sleep seconds=3600
+

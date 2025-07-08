@@ -1,0 +1,189 @@
+name: Cisco vManage
+label: Cisco vManage Inventory
+scope: system
+# Pack version needs to be conforming to <major>.<minor>.<micro> etc versioning.
+# More detailed spec for versioning: https://packaging.python.org/en/latest/specifications/version-specifiers/
+version: 9.0.1
+folder: /collection/vmanage_inventory_pack
+published_date: 2025-02-06
+publisher: Cloudfabrix
+# Description of the package. Supports HTML/markdown/plain text
+# Either can provide description as an inline string in this file
+# or have description.html and description.md and give corresponding file paths instead.
+# If description is provided by multiple ways, the order of precedence is description.md > description.html > description.value
+
+description: 
+#  value: "vCenter Inventory collection"
+   md: "./description.md"
+# Type could be collection/feature
+type: collection
+# Other packs that this solution requires to be deployed
+#launch_dashboard: "vmanage_pack_app"
+
+requires:
+  - name: Fabrix Inventory Collection Base Pack
+    version: ">=6.0.0"
+
+artifacts:
+
+  pstreams:
+
+    - name: vmanage_inventory_collection_demo
+      attributes:
+        unique_keys: ["unique_id"]
+      autocreate: true
+
+    - name: vmanage_on_boarded_devices
+      attributes:
+        retention_days: 365
+        unique_keys: ["name"]
+      autocreate: true
+
+    - name: vmanage_access_verification_status
+      attributes:
+        retention_days: 7
+        unique_keys: ["asset_ip"]
+      autocreate: true
+
+    - name: vmanage_nodes
+      attributes:
+        retention_days: 7
+        unique_keys: [ "node_id"]
+      autocreate: true
+
+    - name: vmanage_edges
+      attributes:
+        retention_days: 7
+        unique_keys: [ "left_id","right_id","vdevice_dataKey"]
+      autocreate: true
+
+
+  dashboards:
+
+    - name: vmanage_pack_app
+      file: ./artifacts/dashboards/vmanage_pack_app.json
+      folder: VmanagePack
+
+    - name: vmanage_inventory
+      file: ./artifacts/dashboards/vmanage_inventory.json
+      folder: VmanagePack
+
+    - name: vmanage_configure_and_manage
+      file: ./artifacts/dashboards/vmanage_configure_and_manage.json
+      folder: VmanagePack
+
+    - name: vmanage_collection_and_access_status
+      file: ./artifacts/dashboards/vmanage_collection_and_access_status.json
+      folder: VmanagePack
+
+    - name: vmanage_topology
+      file: ./artifacts/dashboards/vmanage_topology.json
+      folder: VmanagePack
+        
+    - name: vmanage_asset_navigator
+      file: ./artifacts/dashboards/vmanage_asset_navigator.json
+      folder: VmanagePack
+
+  pipelines:
+    - name: vmanage_import_devices
+      version: 2024.03.19.1
+      file: ./artifacts/pipelines/vmanage_import_devices.txt
+      folder: VmanagePack
+
+    - name: vmanage_inv_collection
+      version: 2024.03.19.1
+      file: ./artifacts/pipelines/vmanage_inv_collection.txt
+      folder: VmanagePack
+
+    - name: vmanage_access_verification_status
+      version: 2024.03.19.1
+      file: ./artifacts/pipelines/vmanage_access_verification_status.txt
+      folder: VmanagePack
+
+
+
+  stacks:
+    - name: vmanage
+      file: ./artifacts/stacks/vmanage.json
+
+
+
+customer_level:
+
+  launch_locations:
+  - pstream_name: rda_packs_dynamic_groups_and_pages
+    dashboard_group_name: groupDiscovery
+    dashboard_group_label: Onboarding
+    dashboard_group_icon: "insights.svg"
+    dashboard_page_name: vmanage_collection_and_access_status
+    dashboard_page_label: vManage Status
+    dashboard_page_icon: "insights.svg"
+  - pstream_name: rda_packs_dynamic_groups_and_pages
+    dashboard_group_name: groupDiscovery
+    dashboard_group_label: Onboarding
+    dashboard_group_icon: "insights.svg"
+    dashboard_page_name: vmanage_configure_and_manage
+    dashboard_page_label: "vManage Configure and Manage"
+    dashboard_page_icon: "insights.svg"
+  - pstream_name: rda_packs_dynamic_groups_and_pages
+    dashboard_group_name: groupInventory
+    dashboard_group_label: Inventory
+    dashboard_group_icon: ""
+    dashboard_page_name: vmanage_inventory
+    dashboard_page_label: vManage Inventory
+    dashboard_page_icon: "insights.svg"
+  - pstream_name: rda_packs_dynamic_groups_and_pages
+    dashboard_group_name: groupTopo
+    dashboard_group_label: Topology
+    dashboard_group_icon: ""
+    dashboard_page_name: vmanage_asset_navigator
+    dashboard_page_label: vManage Asset Navigator
+    dashboard_page_icon: "insights.svg"
+    
+  - pstream_name: rda_packs_dynamic_groups_and_pages
+    dashboard_group_name: groupTopo
+    dashboard_group_label: Topology
+    dashboard_group_icon: ""
+    dashboard_page_name: vmanage_topology
+    dashboard_page_label: vManage Topology
+    dashboard_page_icon: "insights.svg"
+
+
+  artifacts:
+
+
+    blueprints:
+      - name: VManage Service
+        file: ./artifacts/blueprints/vmanage_service.yaml
+
+single_tenant:
+  launch_locations:
+
+  - pstream_name: rda_packs_dynamic_groups_and_pages
+    dashboard_group_name: groupInventory
+    dashboard_group_label: Inventory
+    dashboard_group_icon: ""
+    dashboard_page_name: vmanage_inventory
+    dashboard_page_label: vManage Inventory
+    dashboard_page_icon: "insights.svg"
+  - pstream_name: rda_packs_dynamic_groups_and_pages
+    dashboard_group_name: groupTopo
+    dashboard_group_label: Topology
+    dashboard_group_icon: ""
+    dashboard_page_name: vmanage_asset_navigator
+    dashboard_page_label: vManage Asset Navigator
+    dashboard_page_icon: "insights.svg"
+  - pstream_name: rda_packs_dynamic_groups_and_pages
+    dashboard_group_name: groupTopo
+    dashboard_group_label: Topology
+    dashboard_group_icon: ""
+    dashboard_page_name: vmanage_topology
+    dashboard_page_label: vManage Topology
+    dashboard_page_icon: "insights.svg"
+  launch_dashboard: vmanage_pack_app
+  artifacts:
+        
+    blueprints:
+      - name: VManage Service Single Tenant
+        file: ./artifacts/blueprints/vmanage_service_single_tenant.yaml
+

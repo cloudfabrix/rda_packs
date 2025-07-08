@@ -1,0 +1,618 @@
+{
+    "name": "meraki_inventory",
+    "label": "Meraki Inventory",
+    "description": "meraki_inventory_collection: Insights",
+    "dashboard_folder": "MerakiInventory",
+    "version": "01.03.2025",
+    "enabled": false,
+    "stream": "meraki_inventory_collection",
+    "dashboard_type": "template",
+    "live_edit": true,
+    "template_variables": {
+        "CUST_ID": {
+            "contextId": "customerId"
+        },
+        "PROJ_ID": {
+            "contextId": "projectId"
+        },
+        "CUST_TAG": {
+            "contextId": "customerTag"
+        }
+    },
+    "dashboard_filters": {
+        "time_filter": true,
+        "extra_filter": "(customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+        "columns_filter": [
+            {
+                "id": "timestamp",
+                "label": "Timestamp",
+                "type": "DATETIME"
+            },
+            {
+                "id": "adaptivePolicyGroup",
+                "label": "Adaptivepolicygroup",
+                "type": "TEXT"
+            },
+            {
+                "id": "address",
+                "label": "Address",
+                "type": "TEXT"
+            },
+            {
+                "id": "description",
+                "label": "Description",
+                "type": "TEXT"
+            },
+            {
+                "id": "device_object",
+                "label": "Device Object",
+                "type": "TEXT"
+            },
+            {
+                "id": "dhcpHostname",
+                "label": "Dhcphostname",
+                "type": "TEXT"
+            },
+            {
+                "id": "enrollmentString",
+                "label": "Enrollmentstring",
+                "type": "TEXT"
+            },
+            {
+                "id": "firmware",
+                "label": "Firmware",
+                "type": "TEXT"
+            },
+            {
+                "id": "floorPlanId",
+                "label": "Floorplanid",
+                "type": "TEXT"
+            },
+            {
+                "id": "id",
+                "label": "Id",
+                "type": "TEXT"
+            },
+            {
+                "id": "ip",
+                "label": "Ip",
+                "type": "TEXT"
+            },
+            {
+                "id": "isBoundToConfigTemplate",
+                "label": "Isboundtoconfigtemplate",
+                "type": "TEXT"
+            },
+            {
+                "id": "isVirtual",
+                "label": "Isvirtual",
+                "type": "TEXT"
+            },
+            {
+                "id": "lanIp",
+                "label": "Lanip",
+                "type": "TEXT"
+            },
+            {
+                "id": "mac",
+                "label": "Mac",
+                "type": "TEXT"
+            },
+            {
+                "id": "mdnsName",
+                "label": "Mdnsname",
+                "type": "TEXT"
+            },
+            {
+                "id": "model",
+                "label": "Model",
+                "type": "TEXT"
+            },
+            {
+                "id": "name",
+                "label": "Name",
+                "type": "TEXT"
+            },
+            {
+                "id": "namedVlan",
+                "label": "Namedvlan",
+                "type": "TEXT"
+            },
+            {
+                "id": "networkId",
+                "label": "Networkid",
+                "type": "TEXT"
+            },
+            {
+                "id": "networkName",
+                "label": "Networkname",
+                "type": "TEXT"
+            },
+            {
+                "id": "notes",
+                "label": "Notes",
+                "type": "TEXT"
+            },
+            {
+                "id": "orgId",
+                "label": "Orgid",
+                "type": "TEXT"
+            },
+            {
+                "id": "orgName",
+                "label": "Orgname",
+                "type": "TEXT"
+            },
+            {
+                "id": "organizationId",
+                "label": "Organizationid",
+                "type": "TEXT"
+            },
+            {
+                "id": "productTypes_0",
+                "label": "Producttypes 0",
+                "type": "TEXT"
+            },
+            {
+                "id": "productTypes_1",
+                "label": "Producttypes 1",
+                "type": "TEXT"
+            },
+            {
+                "id": "serial",
+                "label": "Serial",
+                "type": "TEXT"
+            },
+            {
+                "id": "switchport",
+                "label": "Switchport",
+                "type": "TEXT"
+            },
+            {
+                "id": "tags_0",
+                "label": "Tags 0",
+                "type": "TEXT"
+            },
+            {
+                "id": "timeZone",
+                "label": "Timezone",
+                "type": "TEXT"
+            },
+            {
+                "id": "unique_id",
+                "label": "Unique Id",
+                "type": "TEXT"
+            },
+            {
+                "id": "url",
+                "label": "Url",
+                "type": "TEXT"
+            },
+            {
+                "id": "user",
+                "label": "User",
+                "type": "TEXT"
+            },
+            {
+                "id": "vlan",
+                "label": "Vlan",
+                "type": "TEXT"
+            },
+            {
+                "id": "wan1Ip",
+                "label": "Wan1Ip",
+                "type": "TEXT"
+            },
+            {
+                "id": "wan2Ip",
+                "label": "Wan2Ip",
+                "type": "TEXT"
+            },
+            {
+                "id": "lat",
+                "label": "Lat",
+                "type": "DOUBLE"
+            },
+            {
+                "id": "lng",
+                "label": "Lng",
+                "type": "DOUBLE"
+            },
+            {
+                "id": "usage-recv",
+                "label": "Usage Recv",
+                "type": "DOUBLE"
+            },
+            {
+                "id": "usage-sent",
+                "label": "Usage Sent",
+                "type": "DOUBLE"
+            },
+            {
+                "id": "usage_recv",
+                "label": "Usage Recv",
+                "type": "DOUBLE"
+            },
+            {
+                "id": "usage_sent",
+                "label": "Usage Sent",
+                "type": "DOUBLE"
+            }
+        ],
+        "group_filters": [
+            {
+                "stream": "meraki_inventory_collection",
+                "extra_filter": "(customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                "title": "Network ID",
+                "duration_hours": 1080,
+                "limit": 200,
+                "group_by": [
+                    "networkId"
+                ],
+                "ts_column": "timestamp",
+                "agg": "sum",
+                "column": "count_",
+                "type": "int"
+            },
+            {
+                "stream": "meraki_inventory_collection",
+                "extra_filter": "(customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                "title": "Network Name",
+                "duration_hours": 1080,
+                "limit": 200,
+                "group_by": [
+                    "networkName"
+                ],
+                "ts_column": "timestamp",
+                "agg": "sum",
+                "column": "count_",
+                "type": "int"
+            },
+            {
+                "stream": "meraki_inventory_collection",
+                "extra_filter": "(customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                "title": "ip_addr",
+                "duration_hours": 1080,
+                "limit": 200,
+                "group_by": [
+                    "serial"
+                ],
+                "ts_column": "timestamp",
+                "agg": "sum",
+                "column": "count_",
+                "type": "int"
+            },
+            {
+                "stream": "meraki_inventory_collection",
+                "extra_filter": "(customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                "title": "Vlan",
+                "duration_hours": 1080,
+                "limit": 200,
+                "group_by": [
+                    "vlan"
+                ],
+                "ts_column": "timestamp",
+                "agg": "sum",
+                "column": "count_",
+                "type": "int"
+            },
+            {
+                "stream": "meraki_inventory_collection",
+                "extra_filter": "(customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                "title": "Users",
+                "duration_hours": 1080,
+                "limit": 200,
+                "group_by": [
+                    "user"
+                ],
+                "ts_column": "timestamp",
+                "agg": "sum",
+                "column": "count_",
+                "type": "int"
+            },
+            {
+                "stream": "meraki_inventory_collection",
+                "extra_filter": "(customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                "title": "Description",
+                "duration_hours": 1080,
+                "limit": 200,
+                "group_by": [
+                    "description"
+                ],
+                "ts_column": "timestamp",
+                "agg": "sum",
+                "column": "count_",
+                "type": "int"
+            },
+            {
+                "stream": "meraki_inventory_collection",
+                "extra_filter": "(customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                "title": "DHCP Hostname",
+                "duration_hours": 1080,
+                "limit": 200,
+                "group_by": [
+                    "dhcpHostname"
+                ],
+                "ts_column": "timestamp",
+                "agg": "sum",
+                "column": "count_",
+                "type": "int"
+            }
+        ]
+    },
+    "dashboard_sections": [
+        {
+            "title": "Meraki",
+            "show_filter": true,
+            "widgets": [
+                {
+                    "widget_type": "pie_chart",
+                    "title": "Clients by Network Name",
+                    "duration_hours": 1080,
+                    "stream": "meraki_inventory_collection",
+                    "ts_column": "timestamp",
+                    "column": "count_",
+                    "agg": "sum",
+                    "extra_filter": "device_object =='Endpoints' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "group_by": [
+                        "networkName"
+                    ],
+                    "type": "int",
+                    "min_width": 4,
+                    "height": 4,
+                    "max_width": 6,
+                    "widget_id": "cccb9fc9"
+                },
+                {
+                    "widget_type": "pie_chart",
+                    "title": "Clients by Access Points",
+                    "extra_filter": "device_object =='Endpoints' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "duration_hours": 1080,
+                    "stream": "meraki_inventory_collection",
+                    "ts_column": "timestamp",
+                    "column": "count_",
+                    "agg": "sum",
+                    "group_by": [
+                        "ip_addr"
+                    ],
+                    "type": "int",
+                    "min_width": 4,
+                    "height": 4,
+                    "max_width": 6,
+                    "widget_id": "1ee7eada"
+                },
+                {
+                    "widget_type": "pie_chart",
+                    "title": "Clients by Access Point",
+                    "duration_hours": 1080,
+                    "extra_filter": "device_object =='Endpoints' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "stream": "meraki_inventory_collection",
+                    "ts_column": "timestamp",
+                    "column": "count_",
+                    "agg": "sum",
+                    "group_by": [
+                        "user"
+                    ],
+                    "type": "int",
+                    "min_width": 4,
+                    "height": 4,
+                    "max_width": 6,
+                    "widget_id": "e7157ac2"
+                },
+                {
+                    "widget_type": "pie_chart",
+                    "title": "Clients by Description",
+                    "duration_hours": 1080,
+                    "extra_filter": "device_object =='Endpoints' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "stream": "meraki_inventory_collection",
+                    "ts_column": "timestamp",
+                    "column": "count_",
+                    "agg": "sum",
+                    "group_by": [
+                        "description"
+                    ],
+                    "type": "int",
+                    "min_width": 6,
+                    "height": 4,
+                    "max_width": 6,
+                    "widget_id": "1f9c931c"
+                },
+                {
+                    "widget_type": "pie_chart",
+                    "title": "Clients by DHCP Hostname",
+                    "extra_filter": "device_object =='Endpoints' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "duration_hours": 1080,
+                    "stream": "meraki_inventory_collection",
+                    "ts_column": "timestamp",
+                    "column": "count_",
+                    "agg": "sum",
+                    "group_by": [
+                        "dhcpHostname"
+                    ],
+                    "type": "int",
+                    "min_width": 6,
+                    "height": 4,
+                    "max_width": 6,
+                    "widget_id": "23437a0b"
+                },
+                {
+                    "widget_type1": "topology",
+                    "title": "Topology",
+                    "extra_filter": "count >= 1 and stack_name = 'meraki_topology' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "chartProperties": {
+                        "hasToolbar": true,
+                        "shortToolbar": true,
+                        "userZoomingEnabled": true
+                    },
+                    "stack": "meraki_topology",
+                    "with_graphdb": true,
+                    "has_more_data_flag": true,
+                    "expand_neighbors": true,
+                    "max_width": 12,
+                    "min_width": 6,
+                    "height": 12,
+                    "widget_id": "9db5a36f"
+                },
+                {
+                    "title": "Clients by Access Point",
+                    "widget_type": "tabular",
+                    "duration_hours": 1080,
+                    "stream": "meraki_inventory_collection",
+                    "min_width": 12,
+                    "extra_filter": "device_object =='Endpoints' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "height": 6,
+                    "max_width": 12,
+                    "columns": {
+                        "ip_addr": "IP"
+                    },
+                    "pivot": {
+                        "pivot_type": "advanced",
+                        "group_by": [
+                            "ip_addr"
+                        ],
+                        "series": [
+                            {
+                                "column": "user",
+                                "agg": "value_count",
+                                "type": "str",
+                                "label": "User Count"
+                            }
+                        ]
+                    },
+                    "widget_id": "33271c28"
+                },
+                {
+                    "title": "Inventory Details",
+                    "widget_type": "tabular",
+                    "duration_hours": 1080,
+                    "max_width": 12,
+                    "height": 8,
+                    "min_width": 12,
+                    "stream": "meraki_inventory_collection",
+                    "extra_filter": "(customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "ts_column": "timestamp",
+                    "columns": {
+                        "unique_id": {
+                            "title": "Unique Id",
+                            "type": "TEXT",
+                            "hidden": false
+                        },
+                        "mac": {
+                            "title": "Mac",
+                            "type": "TEXT",
+                            "hidden": false
+                        },
+                        "lanIp": "lanIp",
+                        "id": {
+                            "title": "ID",
+                            "type": "TEXT",
+                            "hidden": false
+                        },
+                        "ip": {
+                            "title": "IP",
+                            "type": "TEXT",
+                            "hidden": false
+                        },
+                        "description": {
+                            "title": "Description",
+                            "type": "TEXT",
+                            "hidden": false
+                        },
+                        "mdnsName": {
+                            "title": "Mdnsname",
+                            "type": "TEXT",
+                            "hidden": false
+                        },
+                        "dhcpHostname": {
+                            "title": "Dhcphostname",
+                            "type": "TEXT",
+                            "hidden": false
+                        },
+                        "user": {
+                            "title": "User",
+                            "type": "TEXT",
+                            "hidden": false
+                        },
+                        "vlan": {
+                            "title": "Vlan",
+                            "type": "TEXT",
+                            "hidden": false
+                        },
+                        "serial": {
+                            "title": "Serial",
+                            "type": "TEXT",
+                            "hidden": false
+                        },
+                        "device_object": {
+                            "title": "Device Object",
+                            "type": "TEXT",
+                            "hidden": false
+                        },
+                        "networkId": {
+                            "title": "Networkid",
+                            "type": "TEXT",
+                            "hidden": false
+                        },
+                        "networkName": {
+                            "title": "Networkname",
+                            "type": "TEXT",
+                            "hidden": false
+                        },
+                        "orgId": {
+                            "title": "Orgid",
+                            "type": "TEXT",
+                            "hidden": false
+                        },
+                        "orgName": {
+                            "title": "Orgname",
+                            "type": "TEXT",
+                            "hidden": false
+                        },
+                        "adaptivePolicyGroup": {
+                            "title": "Adaptivepolicygroup",
+                            "type": "TEXT",
+                            "hidden": false
+                        },
+                        "namedVlan": {
+                            "title": "Namedvlan",
+                            "type": "TEXT",
+                            "hidden": false
+                        },
+                        "switchport": {
+                            "title": "Switchport",
+                            "type": "TEXT",
+                            "hidden": false
+                        },
+                        "usage-recv": {
+                            "title": "Usage Recv",
+                            "type": "DOUBLE",
+                            "hidden": false
+                        },
+                        "usage-sent": {
+                            "title": "Usage Sent",
+                            "type": "DOUBLE",
+                            "hidden": false
+                        },
+                        "usage_recv": {
+                            "title": "Usage Recv",
+                            "type": "DOUBLE",
+                            "hidden": false
+                        },
+                        "usage_sent": {
+                            "title": "Usage Sent",
+                            "type": "DOUBLE",
+                            "hidden": false
+                        },
+                        "timestamp": {
+                            "title": "Timestamp",
+                            "type": "DATETIME",
+                            "hidden": false
+                        }
+                    },
+                    "widget_id": "54798324"
+                }
+            ]
+        }
+    ],
+    "saved_time": "2025-01-28T22:13:22.476425"
+}

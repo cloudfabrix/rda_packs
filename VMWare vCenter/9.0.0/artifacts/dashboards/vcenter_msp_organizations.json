@@ -1,0 +1,152 @@
+{
+    "name": "vcenter_msp_organizations",
+    "label": "List of Customers",
+    "description": "Customers List",
+    "version": "2024.03.16",
+    "enabled": false,
+    "live_edit": true,
+    "dashboard_style": "auto",
+    "dashboard_type": "template",
+    "template_variables": {
+        "PROJ_ID": {
+            "contextId": "project_id"
+        },
+        "CUST_TAG": {
+            "contextId": "tag1"
+        }
+    },
+    "stream": "rda_system_organizations",
+    "dashboard_filters": {
+        "time_filter": true,
+        "default_time_filter_labels": [
+            "Last 12 months"
+        ],
+        "default_time_filter_non_removable": true,
+        "columns_filter": [
+            {
+                "id": "customerId",
+                "label": "ID",
+                "type": "TEXT"
+            },
+            {
+                "id": "customer_tag",
+                "label": "Customer",
+                "type": "TEXT"
+            },
+            {
+                "id": "tag1",
+                "label": "Customer Label",
+                "type": "TEXT"
+            },
+            {
+                "id": "projectId",
+                "label": "Project ID",
+                "type": "TEXT"
+            },
+            {
+                "id": "inventory",
+                "label": "Total Devices",
+                "type": "DOUBLE"
+            },
+            {
+                "id": "id",
+                "label": "ID",
+                "type": "FIXED_VALUE"
+            }
+        ]
+    },
+    "dashboard_sections": [
+        {
+            "title": "Customers",
+            "show_filter": true,
+            "widgets": [
+                {
+                    "widget_type": "label",
+                    "max_width": 12,
+                    "height": 0.5,
+                    "min_width": 12,
+                    "label": "<div style='text-align:center;width:100%;'><h1><a style='text-decoration:none;color:#0066ff;' target='_blank'>List of Customers</a></h1></div>",
+                    "widget_id": "33317e49"
+                },
+                {
+                    "title": "Customers",
+                    "widget_type": "tabular",
+                    "ts_column": "createdAt",
+                    "stream": "rda_system_organizations",
+                    "max_width": 12,
+                    "height": 12,
+                    "min_width": 12,
+                    "remote_searchable": true,
+                    "remote_searchable_cols": [
+                        "tag1"
+                    ],
+                    "columns": {
+                        "customerId": {
+                            "title": "ID",
+                            "type": "TEXT",
+                            "key": true,
+                            "visible": false
+                        },
+                        "tag1": {
+                            "title": "Customer",
+                            "type": "TEXT",
+                            "key": true,
+                            "visible": true
+                        },
+                        "customer_tag": {
+                            "title": "Customer Tag",
+                            "type": "TEXT",
+                            "key": true,
+                            "visible": false
+                        },
+                        "projectId": {
+                            "title": "Project ID",
+                            "type": "TEXT",
+                            "key": true,
+                            "visible": false
+                        },
+                        "createdAt": {
+                            "title": "Timestamp",
+                            "type": "DATETIME",
+                            "visible": false
+                        }
+                    },
+                    "actions": [
+                        {
+                            "appName": "user-dashboard/vcenter_main_app",
+                            "permission": "aia:page:view",
+                            "contextParamList": {
+                                "contextParams": [
+                                    {
+                                        "paramKey": "projectId",
+                                        "paramId": "project_id"
+                                    },
+                                    {
+                                        "paramKey": "customerId",
+                                        "paramId": "customer_id"
+                                    },
+                                    {
+                                        "paramKey": "tag1",
+                                        "paramId": "a_en_customer_tag"
+                                    },
+                                    {
+                                        "paramKey": "tag1",
+                                        "paramId": "attrs_customer_tag"
+                                    }
+                                ]
+                            },
+                            "drillDownLinkField": "tag1",
+                            "identifier": "tag1",
+                            "selectionType": "SINGLE",
+                            "stateName": "app.featureapp",
+                            "title": "View Details",
+                            "type": "GO_TO_APP_STATE"
+                        }
+                    ],
+                    "widget_id": "79ae514e"
+                }
+            ]
+        }
+    ],
+    "saved_time": "2024-12-24T10:29:44.727291"
+}

@@ -1,0 +1,93 @@
+name: Fabrix AIOps Network Performance Management Telemetry
+version: 8.0.3
+folder: /collection/network/fabrix_aiops_network_performance_management_telemetry
+published_date: 2025-05-29
+publisher: Fabrix.ai
+label: Fabrix AIOps Network Performance Management Telemetry
+scope: system
+description:
+  value: ""
+  md: ./description.md
+type: collection
+requires:
+  - name: Network Device Discovery
+    version: ">=8.0.3"
+    auto_install_requires: true
+  
+
+artifacts:
+  pstreams:
+    - name: rdaf_network_device_telemetry_metrics
+      attributes:
+        retention_days: 2
+        search_case_insensitive: true
+        messaging_platform_settings:
+          platform: kafka-external
+          source-format: telegraf
+          kafka-params:
+            topics:
+              - telemetry_metrics
+            auto.offset.reset: latest
+            consumer_poll_timeout: 1
+            batch_max_size: 1000
+            batch_max_time_seconds: 2
+        _mappings:
+          properties:
+            timestamp:
+              type: date
+            m_cpu_usage:
+              type: long
+            m_memory_usage:
+              type: long
+            m_temperature_status_value:
+              type: long
+            m_temperature_threshold:
+              type: long
+            m_temperature_last_shutdown:
+              type: long
+            m_temperature_state:
+              type: long
+            m_supply_state:
+              type: long
+            m_supply_source:
+              type: long
+            m_fan_state:
+              type: long
+            m_voltage_status_value:
+              type: long
+            m_voltage_state:
+              type: long
+      #remove_on_deactivation: false
+  dashboards:
+    - name: kpi-workbench-telemetry
+      file: ./artifacts/dashboards/kpi-workbench-telemetry.json
+    - name: preview_kpi_telemetry_dashboard
+      file: ./artifacts/dashboards/preview_kpi_telemetry_dashboard.json
+    
+
+
+
+customer_level:  
+  launch_locations:
+
+  - pstream_name: rda_packs_dynamic_groups_and_pages
+    dashboard_group_name: groupMetrics 
+    dashboard_group_label: Metrics
+    dashboard_group_icon: "insights.svg"
+    dashboard_page_name: kpi-workbench-telemetry
+    dashboard_page_label: "Telemetry Workbench"
+    dashboard_page_icon: "insights.svg"
+ 
+single_tenant:
+  launch_dashboard: network_discovery_main_app  
+  launch_locations:
+
+  - pstream_name: rda_packs_dynamic_groups_and_pages
+    dashboard_group_name: groupMetrics 
+    dashboard_group_label: Metrics
+    dashboard_group_icon: "insights.svg"
+    dashboard_page_name: kpi-workbench-telemetry
+    dashboard_page_label: "Telemetry Workbench"
+    dashboard_page_icon: "insights.svg"
+    
+          

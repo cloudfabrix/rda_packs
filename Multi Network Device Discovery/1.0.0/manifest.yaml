@@ -1,0 +1,336 @@
+name: Multi Network Device Discovery
+version: 1.0.0
+folder: /collection/network/Multi_Network_Device_Discovery
+published_date: 2025-06-10
+publisher: Fabrix.ai
+label: Multi Network Device Discovery
+scope: system
+description: 
+  value: ""
+  md: "./description.md"
+
+type: collection
+
+# Other packs that this solution requires to be deployed
+requires:
+   - name: Fabrix Inventory Collection Base Pack
+     version: ">=7.0.0"
+
+artifacts:
+  credentials:
+    - name: asset-discovery
+      type: asset-discovery
+    ##- name: diagnostictools
+      ##type: diagnostictools
+    - name: graph
+      type: graphdb
+    
+
+  pstreams:
+    
+    - name: multi_network_device_interfaces
+      attributes:
+        unique_keys: [ "unique_id","customer_tag","network_name"]
+      autocreate: true
+    - name: multi_network_device_inventory
+      attributes:
+        unique_keys: [ "unique_id","customer_tag","network_name"]
+      autocreate: true
+    - name: multi_network_devices_cdp
+      attributes:
+        unique_keys: [ "unique_id","customer_tag","network_name"]
+      autocreate: true
+    - name: multi_network_access_verification
+      attributes:
+        unique_keys: [ "ip_address","protocol","customer_tag","network_name"]
+      autocreate: true
+    - name: multi_discovery_logs
+      attributes:
+        unique_keys: [ "unique_id","customer_tag","network_name"]
+      autocreate: true
+    - name: multi_networks_list
+      attributes:
+        unique_keys: [ "network_name","customer_tag","network_name"]
+      autocreate: true
+    - name: multi_discovery
+      attributes:
+        unique_keys: ["device_ip","customer_tag","network_name"]
+        retention_days: 60
+        search_case_insensitive: true
+        _settings: 
+          "number_of_shards": 3
+          "number_of_replicas": 1
+          "refresh_interval": "30s"
+    
+    ##- name: asset_inventory_collection_status_stream
+    
+
+  datasets: 
+    - name: ifTypeLabel_dict
+      data_file: ./data/ifTypeLabel_dict.csv
+      folder: MultiNetworkPack
+
+  pipelines:
+    - name: multi_access_verification_main_pipeline
+      folder: MultiNetworkPack
+      version: 2025.05.19.2
+      file: ./artifacts/pipelines/multi_access_verification_main_pipeline.txt
+    - name: multi_cisco_discovery_main_pipeline
+      folder: MultiNetworkPack
+      version: 2025.05.19.2
+      file: ./artifacts/pipelines/multi_cisco_discovery_main_pipeline.txt
+    - name: multi_discovery_main_pipeline
+      folder: MultiNetworkPack
+      version: 2025.05.19.2
+      file: ./artifacts/pipelines/multi_discovery_main_pipeline.txt
+    - name: multi_fortinet_discovery_main_pipeline
+      folder: MultiNetworkPack
+      version: 2025.05.19.2
+      file: ./artifacts/pipelines/multi_fortinet_discovery_main_pipeline.txt
+    - name: multi_juniper_discovery_main_pipeline
+      folder: MultiNetworkPack
+      version: 2025.05.19.2
+      file: ./artifacts/pipelines/multi_juniper_discovery_main_pipeline.txt
+    - name: multi_ondemand_discovery_main
+      folder: MultiNetworkPack
+      version: 2025.05.19.2
+      file: ./artifacts/pipelines/multi_ondemand_discovery_main.txt
+    - name: multi_network_device_topology_calculation
+      folder: MultiNetworkPack
+      version: 2025.05.19.2
+      file: ./artifacts/pipelines/multi_network_device_topology_calculation.txt
+    - name: multi_import-customer-devices
+      folder: MultiNetworkPack
+      version: 2024.05.22.2
+      file: ./artifacts/pipelines/multi_import-customer-devices.txt
+    - name: multi_other_vendors_discovery_main_pipeline
+      folder: MultiNetworkPack
+      version: 2024.05.22.2
+      file: ./artifacts/pipelines/multi_other_vendors_discovery_main_pipeline.txt
+
+  dashboards:
+    - name: multi_network_device
+      file: ./artifacts/dashboards/multi_network_device.json
+    - name: multi_alert_device_app
+      file: ./artifacts/dashboards/multi_alert_device_app.json
+    - name: multi_customer_access_status_failed_devices
+      file: ./artifacts/dashboards/multi_customer_access_status_failed_devices.json
+    - name: multi_customer_access_status
+      file: ./artifacts/dashboards/multi_customer_access_status.json
+    - name: multi_customer_asset_navigator
+      file: ./artifacts/dashboards/multi_customer_asset_navigator.json
+    - name: multi_customer_discovery_runs_details_failed
+      file: ./artifacts/dashboards/multi_customer_discovery_runs_details_failed.json
+    - name: multi_customer_discovery_runs_details_success
+      file: ./artifacts/dashboards/multi_customer_discovery_runs_details_success.json
+    - name: multi_customer_discovery_runs
+      file: ./artifacts/dashboards/multi_customer_discovery_runs.json
+    - name: multi_customer_discovery
+      file: ./artifacts/dashboards/multi_customer_discovery.json
+    ##- name: multi_customer_kpi_workbench
+    ##  file: ./artifacts/dashboards/multi_customer_kpi_workbench.json
+    - name: multi_node_details_app
+      file: ./artifacts/dashboards/multi_node_details_app.json
+    - name: multi_customer_topology
+      file: ./artifacts/dashboards/multi_customer_topology.json
+    - name: multi_network_assets_inventory
+      file: ./artifacts/dashboards/multi_network_assets_inventory.json
+    - name: multi_topology_geomap_dashboard
+      file: ./artifacts/dashboards/multi_topology_geomap_dashboard.json
+    - name: multi_device_inventory_from_alerts
+      file: ./artifacts/dashboards/multi_device_inventory_from_alerts.json
+    ##- name: multi_device_syslog_from_alert_fault
+    ##  file: ./artifacts/dashboards/multi_device_syslog_from_alert_fault.json
+    ##- name: multi_device_SNMP_Traps_from_alerts_fault
+    ##  file: ./artifacts/dashboards/multi_device_SNMP_Traps_from_alerts_fault.json
+    ##- name: multi_customer_oia_alerts_fault
+    ##  file: ./artifacts/dashboards/multi_customer_oia_alerts_fault.json
+    ##- name: multi_customer_SNMP_Traps
+    ##  file: ./artifacts/dashboards/multi_customer_SNMP_Traps.json
+    ##- name: multi_customer_syslogs
+    ##  file: ./artifacts/dashboards/multi_customer_syslogs.json
+    ##- name: multi_device_alerts_from_alert_fault
+    ##  file: ./artifacts/dashboards/multi_device_alerts_from_alert_fault.json
+    - name: multi_logs
+      file: ./artifacts/dashboards/multi_logs.json
+    - name: multi_cdp_neighbours
+      file: ./artifacts/dashboards/multi_cdp_neighbours.json
+    - name: multi_device_inventory_from_alert_deleteme
+      file: ./artifacts/dashboards/multi_device_inventory_from_alert_deleteme.json
+    ##- name: multi_kpi-workbench
+    ##  file: ./artifacts/dashboards/multi_kpi-workbench.json
+    ##- name: multi_kpi-workbench-telemetry
+    ##  file: ./artifacts/dashboards/multi_kpi-workbench-telemetry.json
+    ##- name: multi_preview_kpi_dashboard
+    ##  file: ./artifacts/dashboards/multi_preview_kpi_dashboard.json
+    ##- name: multi_preview_kpi_telemetry_dashboard
+    ##  file: ./artifacts/dashboards/multi_preview_kpi_telemetry_dashboard.json
+    - name: multi_preview_topology_dashboard
+      file: ./artifacts/dashboards/multi_preview_topology_dashboard.json
+    ##- name: multi_topology-workbench
+    ##  file: ./artifacts/dashboards/multi_topology-workbench.json
+    - name: multi_network_inventory
+      file: ./artifacts/dashboards/multi_network_inventory.json
+    - name: multi_network_collection_and_access_status
+      file: ./artifacts/dashboards/multi_network_collection_and_access_status.json
+    - name: multi_network_configure_and_manage
+      file: ./artifacts/dashboards/multi_network_configure_and_manage.json
+    - name: network_device_discovery_ops
+      file: ./artifacts/dashboards/multi_network_device_discovery_ops.json
+    - name: networks_list
+      file: ./artifacts/dashboards/networks_list.json
+    - name: network_main_app
+      file: ./artifacts/dashboards/network_main_app.json
+    - name: multi_customer_discovery_runs_details_duplicates
+      file: ./artifacts/dashboards/multi_customer_discovery_runs_details_duplicates.json
+    - name: multi_customer_discovery_runs_details_total_devices
+      file: ./artifacts/dashboards/multi_customer_discovery_runs_details_total_devices.json
+
+customer_level:
+  
+  launch_locations:
+  ##- pstream_name: rda_packs_dynamic_groups_and_pages
+  ##  dashboard_group_name: groupDiscovery
+  ##  dashboard_group_label: Device Onboarding
+  ##  dashboard_group_icon: "asset.svg"
+  ##  dashboard_page_name: multi_network_collection_and_access_status
+  ##  dashboard_page_label: "Network Status"
+  ##  dashboard_page_icon: "asset.svg"
+  - pstream_name: rda_packs_dynamic_groups_and_pages
+    dashboard_group_name: groupDiscovery
+    dashboard_group_label: Device Onboarding
+    dashboard_group_icon: "asset.svg"
+    dashboard_page_name: multi_network_configure_and_manage
+    dashboard_page_label: "Network Configure and Manage"
+    dashboard_page_icon: "asset.svg"
+
+  - pstream_name: rda_packs_dynamic_groups_and_pages
+    dashboard_group_name: groupTopo
+    dashboard_group_label: Topology
+    dashboard_group_icon: "topology.svg"
+    dashboard_page_name: multi_customer_asset_navigator
+    dashboard_page_label: Network Asset Navigator
+    dashboard_page_icon: "topology.svg"
+
+  - pstream_name: rda_packs_dynamic_groups_and_pages
+    dashboard_group_name: groupTopo
+    dashboard_group_label: Topology
+    dashboard_group_icon: "topology.svg"
+    dashboard_page_name: multi_customer_topology
+    dashboard_page_label: Network Topology
+    dashboard_page_icon: "topology.svg"
+
+  - pstream_name: rda_packs_dynamic_groups_and_pages
+    dashboard_group_name: groupDiscovery
+    dashboard_group_label: Device Onboarding
+    dashboard_group_icon: "diagnostic.svg"
+    dashboard_page_name: multi_customer_discovery_runs
+    dashboard_page_label: Network Discovery Runs
+    dashboard_page_icon: "diagnostic.svg"
+
+  - pstream_name: rda_packs_dynamic_groups_and_pages
+    dashboard_group_name: groupDiscovery
+    dashboard_group_label: Device Onboarding
+    dashboard_group_icon: "hardware.svg"
+    dashboard_page_name: multi_network_collection_and_access_status
+    dashboard_page_label: Network Access Check
+    dashboard_page_icon: "hardware.svg"
+
+  - pstream_name: rda_packs_dynamic_groups_and_pages
+    dashboard_group_name: groupDiscovery
+    dashboard_group_label: Device Onboarding
+    dashboard_group_icon: "hardware.svg"
+    dashboard_page_name: multi_customer_discovery
+    dashboard_page_label: Network Devices Onboarding
+    dashboard_page_icon: "hardware.svg"
+
+  - pstream_name: rda_packs_dynamic_groups_and_pages
+    dashboard_group_name: groupInventory
+    dashboard_group_label: Inventory
+    dashboard_group_icon: "hardware.svg"
+    dashboard_page_name: multi_network_assets_inventory
+    dashboard_page_label: Network Assets
+    dashboard_page_icon: "hardware.svg"
+
+  - pstream_name: rda_packs_dynamic_groups_and_pages
+    dashboard_group_name: groupInventory
+    dashboard_group_label: Inventory
+    dashboard_group_icon: "hardware.svg"
+    dashboard_page_name: multi_network_device
+    dashboard_page_label: Network Devices
+    dashboard_page_icon: "hardware.svg" 
+
+  - pstream_name: rda_packs_dynamic_groups_and_pages
+    dashboard_group_name: groupNetwork
+    dashboard_group_label: Multi Network Discovery
+    dashboard_group_icon: "library.svg"
+    dashboard_page_name: networks_list
+    dashboard_page_label: Multi Networks 
+    dashboard_page_icon: "library.svg" 
+
+  ##artifacts:
+##
+  ##  blueprints:
+  ##      - name: network_device_discovery
+  ##        file: ./artifacts/blueprints/network_device_discovery.yaml
+
+single_tenant:
+  launch_dashboard: network_main_app
+  launch_locations:
+    - pstream_name: rda_packs_dynamic_groups_and_pages
+      dashboard_group_name: groupAssetNavigator
+      dashboard_group_label: Asset Navigator
+      dashboard_group_icon: "asset.svg"
+      dashboard_page_name: multi_customer_asset_navigator
+      dashboard_page_label: "Network Asset Navigator"
+      dashboard_page_icon: "asset.svg"
+    - pstream_name: rda_packs_dynamic_groups_and_pages
+      dashboard_group_name: groupTopo
+      dashboard_group_label: Topology
+      dashboard_group_icon: "topology.svg"
+      dashboard_page_name: multi_customer_topology
+      dashboard_page_label: Network Topology
+      dashboard_page_icon: "asset.svg"
+    - pstream_name: rda_packs_dynamic_groups_and_pages
+      dashboard_group_name: groupInventory
+      dashboard_group_label: Inventory
+      dashboard_group_icon: "asset.svg"
+      dashboard_page_name: multi_network_assets_inventory
+      dashboard_page_label: Network Assets
+      dashboard_page_icon: "asset.svg"
+    - pstream_name: rda_packs_dynamic_groups_and_pages
+      dashboard_group_name: groupInventory
+      dashboard_group_label: Inventory
+      dashboard_group_icon: "asset.svg"
+      dashboard_page_name: multi_network_device
+      dashboard_page_label: Network Devices
+      dashboard_page_icon: "asset.svg"
+    - pstream_name: rda_packs_dynamic_groups_and_pages
+      dashboard_group_name: groupStatus
+      dashboard_group_label: Status
+      dashboard_group_icon: "library.svg"
+      dashboard_page_name: multi_network_collection_and_access_status
+      dashboard_page_label: Network access status
+      dashboard_page_icon: "library.svg" 
+    - pstream_name: rda_packs_dynamic_groups_and_pages
+      dashboard_group_name: groupConfigure
+      dashboard_group_label: Configure and Manage
+      dashboard_group_icon: "library.svg"
+      dashboard_page_name: multi_network_configure_and_manage
+      dashboard_page_label: Network Configure and Manage
+      dashboard_page_icon: "library.svg"
+    - pstream_name: rda_packs_dynamic_groups_and_pages
+      dashboard_group_name: groupNetwork
+      dashboard_group_label: Multi Network Discovery
+      dashboard_group_icon: "library.svg"
+      dashboard_page_name: networks_list
+      dashboard_page_label: Multi Networks 
+      dashboard_page_icon: "library.svg"
+  ##artifacts:
+  ##  
+  ##  blueprints:
+  ##    - name: Network Device Discovery
+  ##      file: ./artifacts/blueprints/network_device_discovery_single_tenant.yaml
+   
+     
+        

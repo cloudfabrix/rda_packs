@@ -1,0 +1,134 @@
+name: Fabrix AIOPs syslogs
+version: 8.0.2
+folder: /collection/network/fabrix_aiops_syslogs
+published_date: 2025-04-29
+publisher: CloudFabrix
+label: Fabrix AIOPs Syslogs
+scope: system
+description: 
+  value: ""
+  ##html: "./description.html"
+  md: "./description.md"
+
+type: collection
+requires:
+  - name: Network Device Discovery 
+    version: ">=8.0.2"
+    auto_install_requires: true
+  - name: Fabrix AIOps Fault Management Base 
+    version: ">=8.0.2"
+    auto_install_requires: true
+
+ 
+artifacts:
+  credentials:
+    - name: restclient
+      type: restclient
+  
+
+  pstreams:
+
+    - name: syslog_udp_event_stream_all
+      index_name: "syslog_udp_event_stream_*"
+      autocreate: true
+    
+   
+  pipelines:
+    - name: syslog_generic_raise_alerts
+      version: 2024.07.23.1
+      folder: FaultManagementPack
+      file: ./artifacts/pipelines/syslog_generic_raise_alerts.txt
+    
+customer_level:
+  launch_locations:
+
+  ##- pstream_name: rda_packs_dynamic_groups_and_pages
+  ##  dashboard_group_name: groupAlerts
+  ##  dashboard_group_label: Alerts
+  ##  dashboard_group_icon: ""
+  ##  dashboard_page_name: customer_oia_alerts_fault
+  ##  dashboard_page_label: Alerts
+  ##  dashboard_page_icon: "stack.svg"
+
+  - pstream_name: rda_packs_dynamic_groups_and_pages
+    dashboard_group_name: groupData
+    dashboard_group_label: Events
+    dashboard_group_icon: "trace.svg"
+    dashboard_page_name: customer_syslogs
+    dashboard_page_label: Syslogs
+    dashboard_page_icon: "topology.svg" 
+  - pstream_name: rda_packs_dynamic_groups_and_pages
+    dashboard_group_name: groupData
+    dashboard_group_label: Events
+    dashboard_group_icon: "trace.svg"
+    dashboard_page_name: device_syslog_from_alert_fault
+    dashboard_page_label: Syslogs
+    dashboard_page_icon: "topology.svg"
+  
+
+
+
+  artifacts:
+    
+      
+    ##datasets:
+      ## - name: alert_endpoint_details
+      ##   folder: FaultManagementPack
+      ##   data_file: ./data/alert_endpoint_details.csv
+      
+    blueprints:
+      - name: syslog_fault_management
+        file: ./artifacts/blueprints/syslog_fault_management.yaml
+
+
+single_tenant:
+  launch_dashboard: network_discovery_main_app 
+  launch_locations:
+
+  ##- pstream_name: network_pack_dynamic_groups_and_pages
+  ##  dashboard_group_name: groupAlerts
+  ##  dashboard_group_label: Alerts
+  ##  dashboard_group_icon: "alert.svg"
+  ##  dashboard_page_name: customer_oia_alerts_fault
+  ##  dashboard_page_label: Alerts
+  ##  dashboard_page_icon: "stack.svg"
+
+  - pstream_name: rda_packs_dynamic_groups_and_pages
+    dashboard_group_name: groupData
+    dashboard_group_label: Events
+    dashboard_group_icon: "trace.svg"
+    dashboard_page_name: customer_syslogs
+    dashboard_page_label: Syslogs
+    dashboard_page_icon: "topology.svg"
+  - pstream_name: rda_packs_dynamic_groups_and_pages
+    dashboard_group_name: groupData
+    dashboard_group_label: Events
+    dashboard_group_icon: "trace.svg"
+    dashboard_page_name: device_syslog_from_alert_fault
+    dashboard_page_label: Syslogs
+    dashboard_page_icon: "topology.svg"
+
+  artifacts:
+    ##pstreams:
+      ##- name: syslog_udp_event_stream
+      ##  index_name: syslog_udp_event_stream_single
+      ##  autocreate: true
+      ##  retention_days: 31
+      ##  search_case_insensitive: true
+      ##  attributes:
+      ##    default_values:
+      ##     device_status: UNMANAGED
+      ##    enrich:
+      ##     dict: chassis_inventory
+      ##     dict_source: dataset
+      ##     src_key_cols: rda_gw_client_ip
+      ##     dict_key_cols: device_ip
+      ##     enrich_cols: device_status,device_hostname,device_hostname_short,device_vendor,device_fw_type,device_model,device_fw_version,parent_sn,device_serial_number
+      ##     replace_values: 'yes'
+      ##     dict_update_check_seconds: 60
+    blueprints:
+    - name: syslog_fault_management_single_tenant
+      file: ./artifacts/blueprints/syslog_fault_management_single_tenant.yaml
+
+
+  

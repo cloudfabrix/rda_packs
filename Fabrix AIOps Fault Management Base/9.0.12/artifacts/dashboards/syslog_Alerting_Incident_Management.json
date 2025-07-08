@@ -1,0 +1,1677 @@
+{
+    "name": "syslog_Alerting_Incident_Management",
+    "label": "Syslog-Based Alerting and Incident Management",
+    "description": "Network Analytics",
+    "showTitle": true,
+    "version": "23.3.30.2",
+    "enabled": true,
+    "stream": "oia-alerts-stream",
+    "debug": true,
+    "dashboard_style": "auto",
+    "dashboard_type": "template",
+    "use_storyboard": true,
+    "default_storyboard": "Network Analytics",
+    "live_edit": true,
+    "template_variables": {
+        "CUST_TAG": {
+            "contextId": "customerTag"
+        },
+        "PROJ_ID": {
+            "contextId": "projectId"
+        }
+    },
+    "dashboard_filters": {
+        "time_filter": true,
+        "default_time_filter_labels0": [
+            "All Time"
+        ]
+    },
+    "dashboard_sections": [
+        {
+            "title": "common_objects",
+            "show_filter": false,
+            "widgets": [
+                {
+                    "title": "Rectangle: White, Round Corners 2px",
+                    "widget_type": "label",
+                    "label": "<div style='border-radius: 20px; background: #33AD3300; border: 2px solid white; padding: 10px; width: 100%; height: 100%;'>&#8645;</div>",
+                    "widget_id": "rr-2s"
+                },
+                {
+                    "title": "Total Devices",
+                    "widget_type": "label",
+                    "label": "attachment://trapCounts",
+                    "stream": "cfx_rdaf_topology_nodes",
+                    "extra_filter": "org_id in {{PROJ_ID}} or org_id is 'single_tenant'",
+                    "ts_column": "timestamp",
+                    "advanced": true,
+                    "duration_hours": 1000000,
+                    "fixed_variables": {
+                        "count_label": "DROP"
+                    },
+                    "segments": [
+                        {
+                            "variable": "total_traps",
+                            "stream": "syslog_stream",
+                            "extra_filter": "action is 'DROP'",
+                            "duration_hours": 1000000,
+                            "ts_column": "timestamp",
+                            "column": "count_",
+                            "agg": "sum"
+                        }
+                    ],
+                    "min_width": 2.4,
+                    "height": 2.6,
+                    "max_width": 2.4,
+                    "widget_id": "DROP"
+                },
+                {
+                    "title": "Total Devices",
+                    "widget_type": "label",
+                    "label": "attachment://trapCounts",
+                    "stream": "cfx_rdaf_topology_nodes",
+                    "extra_filter": "org_id in {{PROJ_ID}} or org_id is 'single_tenant'",
+                    "ts_column": "timestamp",
+                    "advanced": true,
+                    "duration_hours": 1000000,
+                    "fixed_variables": {
+                        "count_label": "KEEP"
+                    },
+                    "segments": [
+                        {
+                            "variable": "total_traps",
+                            "stream": "syslog_stream",
+                            "extra_filter": "action is 'KEEP'",
+                            "duration_hours": 1000000,
+                            "ts_column": "timestamp",
+                            "column": "count_",
+                            "agg": "sum"
+                        }
+                    ],
+                    "min_width": 2.4,
+                    "height": 2.6,
+                    "max_width": 2.4,
+                    "widget_id": "KEEP"
+                },
+                {
+                    "widget_type": "custom_counter",
+                    "title": "Messages by DROP status",
+                    "stream": "syslog_stream",
+                    "extra_filter": "action is 'DROP'",
+                    "ts_column": "timestamp",
+                    "duration_hours": 1080,
+                    "column": "count_",
+                    "agg": "value_count",
+                    "group_by": [
+                        "action"
+                    ],
+                    "style1": {
+                        "color-map": {
+                            "ERROR": "#EF5350",
+                            "NOTICE": "#4DD0E1",
+                            "EMERGENCY": "#B71C1C",
+                            "INFORMATIONAL": "#03A9F4",
+                            "WARNING": "#FFD54F",
+                            "ALERT": "#FFA726",
+                            "CRITICAL": "#E53935",
+                            "DEBUG": "#BCAAA4"
+                        }
+                    },
+                    "min_width": 6,
+                    "height": 4,
+                    "max_width": 6,
+                    "widget_id": "571882ed"
+                },
+                {
+                    "widget_type": "custom_counter",
+                    "title": "Messages by KEEP status",
+                    "stream": "syslog_stream",
+                    "extra_filter": "action is 'KEEP'",
+                    "ts_column": "timestamp",
+                    "duration_hours": 1080,
+                    "column": "count_",
+                    "agg": "value_count",
+                    "group_by": [
+                        "action"
+                    ],
+                    "style1": {
+                        "color-map": {
+                            "ERROR": "#EF5350",
+                            "NOTICE": "#4DD0E1",
+                            "EMERGENCY": "#B71C1C",
+                            "INFORMATIONAL": "#03A9F4",
+                            "WARNING": "#FFD54F",
+                            "ALERT": "#FFA726",
+                            "CRITICAL": "#E53935",
+                            "DEBUG": "#BCAAA4"
+                        }
+                    },
+                    "min_width": 6,
+                    "height": 4,
+                    "max_width": 6,
+                    "widget_id": "f3345c37"
+                },
+                {
+                    "title": "Total Devices",
+                    "widget_type": "label",
+                    "label": "attachment://trapCounts",
+                    "stream": "cfx_rdaf_topology_nodes",
+                    "ts_column": "timestamp",
+                    "advanced": true,
+                    "duration_hours": 1000000,
+                    "fixed_variables": {
+                        "count_label": "Total Devices"
+                    },
+                    "segments": [
+                        {
+                            "variable": "total_traps",
+                            "stream": "cfx_rdaf_topology_nodes",
+                            "extra_filter": "org_id in {{PROJ_ID}} or org_id is 'single_tenant'",
+                            "duration_hours": 1000000,
+                            "ts_column": "timestamp",
+                            "column": "count_",
+                            "agg": "sum"
+                        }
+                    ],
+                    "min_width": 2.4,
+                    "height": 2.6,
+                    "max_width": 2.4,
+                    "widget_id": "total_devices"
+                },
+                {
+                    "title": "Total Devices",
+                    "widget_type1": "custom_counter",
+                    "duration_hours": 1080,
+                    "stream": "cfx_rdaf_topology_nodes",
+                    "extra_filter": "org_id in {{PROJ_ID}} or org_id is 'single_tenant'",
+                    "extra_filter0": "device_name is not empty",
+                    "ts_column": "timestamp",
+                    "column": "count_",
+                    "agg": "value_count",
+                    "type": "int",
+                    "min_width": 3,
+                    "height": 4,
+                    "max_width": 3,
+                    "widget_id": "f5585184",
+                    "style": {
+                        "color-list": [
+                            "#FFFFFF"
+                        ]
+                    }
+                },
+                {
+                    "title": "Rectangle: White, Round Corners 1px solid",
+                    "widget_type": "label",
+                    "label": "<div style='border-radius: 20px; background: #33AD3300; border: 1px solid #777777; padding: 10px; width: 100%; height: 100%;'></div>",
+                    "widget_id": "rr-1d"
+                },
+                {
+                    "title": "Rectangle: White, Round Corners 1px Dotted",
+                    "widget_type": "label",
+                    "label": "<div style='border-radius: 20px; background: #33AD3300; border: 2px dotted white; padding: 10px; width: 100%; height: 100%;'></div>",
+                    "widget_id": "rrd-1d"
+                }
+            ]
+        },
+        {
+            "title": "time_based_counts",
+            "show_filter": false,
+            "widgets": [
+                {
+                    "title": "White Line",
+                    "widget_type": "label",
+                    "advanced": false,
+                    "label": "<div style='width:100%; height: 2px; background-color: white;'></div>",
+                    "min_width": 2.4,
+                    "height": 1,
+                    "max_width": 2.4,
+                    "widget_id": "about"
+                },
+                {
+                    "title": "Syslog UDP Count",
+                    "widget_type": "label",
+                    "label": "attachment://totalCounts",
+                    "stream": "syslog_stream",
+                    "extra_filter0": "projectId in {{PROJ_ID}}",
+                    "ts_column": "timestamp",
+                    "advanced": true,
+                    "duration_hours": 1000000,
+                    "fixed_variables": {
+                        "count_label": "SysLogs"
+                    },
+                    "segments": [
+                        {
+                            "variable": "total_events",
+                            "stream": "syslog_stream",
+                            "duration_hours": 1000000,
+                            "extra_filter": "projectId in {{PROJ_ID}}",
+                            "ts_column": "timestamp",
+                            "column": "count_",
+                            "agg": "sum"
+                        }
+                    ],
+                    "min_width": 2.4,
+                    "height": 2.6,
+                    "max_width": 2.4,
+                    "widget_id": "ccafbb82"
+                },
+                {
+                    "title": "SNMP Trap Count",
+                    "widget_type": "label",
+                    "label": "attachment://trapCounts",
+                    "stream": "snmp_trap_stream",
+                    "ts_column": "timestamp",
+                    "advanced": true,
+                    "duration_hours": 1000000,
+                    "fixed_variables": {
+                        "count_label": "Traps"
+                    },
+                    "segments": [
+                        {
+                            "variable": "total_traps",
+                            "stream": "snmp_trap_stream",
+                            "extra_filter": "projectId in {{PROJ_ID}}",
+                            "duration_hours": 1000000,
+                            "ts_column": "timestamp",
+                            "column": "count_",
+                            "agg": "sum"
+                        }
+                    ],
+                    "min_width": 2.4,
+                    "height": 2.6,
+                    "max_width": 2.4,
+                    "widget_id": "8585f05c"
+                },
+                {
+                    "title": "SNMP Traps Processed",
+                    "widget_type": "label",
+                    "label": "attachment://trapCounts",
+                    "stream": "snmp_trap_stream",
+                    "ts_column": "timestamp",
+                    "advanced": true,
+                    "duration_hours": 1000000,
+                    "fixed_variables": {
+                        "count_label": "Traps"
+                    },
+                    "segments": [
+                        {
+                            "variable": "total_traps",
+                            "stream": "snmp_trap_stream",
+                            "extra_filter": "action is 'KEEP' and projectId in {{PROJ_ID}}",
+                            "duration_hours": 1000000,
+                            "ts_column": "timestamp",
+                            "column": "count_",
+                            "agg": "sum"
+                        }
+                    ],
+                    "min_width": 2.4,
+                    "height": 2.6,
+                    "max_width": 2.4,
+                    "widget_id": "ca6ce461"
+                },
+                {
+                    "title": "SNMP Trap Dropped Count",
+                    "widget_type": "label",
+                    "label": "attachment://trapDropCounts",
+                    "stream": "snmp_trap_stream",
+                    "ts_column": "timestamp",
+                    "advanced": true,
+                    "duration_hours": 1000000,
+                    "fixed_variables": {
+                        "count_label": "Traps"
+                    },
+                    "segments": [
+                        {
+                            "variable": "total_traps",
+                            "stream": "snmp_trap_stream",
+                            "extra_filter": "projectId in {{PROJ_ID}}",
+                            "duration_hours": 1000000,
+                            "ts_column": "timestamp",
+                            "column": "count_",
+                            "agg": "sum"
+                        },
+                        {
+                            "variable": "processed_traps",
+                            "stream": "snmp_trap_stream",
+                            "extra_filter": "action is 'KEEP' and projectId in {{PROJ_ID}}",
+                            "duration_hours": 1000000,
+                            "ts_column": "timestamp",
+                            "column": "count_",
+                            "agg": "sum"
+                        }
+                    ],
+                    "min_width": 2.4,
+                    "height": 2.6,
+                    "max_width": 2.4,
+                    "widget_id": "81e9470d"
+                },
+                {
+                    "title": "Filtered Events",
+                    "widget_type": "label",
+                    "label": "attachment://filteredEvents",
+                    "stream": "syslog_stream",
+                    "ts_column": "timestamp",
+                    "advanced": true,
+                    "duration_hours": 1000000,
+                    "extra_filter": "action is not 'KEEP' and projectId in {{PROJ_ID}}",
+                    "fixed_variables": {
+                        "count_label": "SysLogs"
+                    },
+                    "segments": [
+                        {
+                            "variable": "filtered_events",
+                            "stream": "syslog_stream",
+                            "duration_hours": 1000000,
+                            "extra_filter": "action is not 'KEEP' and projectId in {{PROJ_ID}}",
+                            "ts_column": "timestamp",
+                            "column": "count_",
+                            "agg": "sum"
+                        }
+                    ],
+                    "min_width": 2.4,
+                    "height": 2.6,
+                    "max_width": 2.4,
+                    "widget_id": "ccafbb83"
+                },
+                {
+                    "title": "Processed Events",
+                    "widget_type": "label",
+                    "label": "attachment://processedEvents",
+                    "stream": "syslog_stream",
+                    "ts_column": "timestamp",
+                    "advanced": true,
+                    "duration_hours": 1000000,
+                    "extra_filter": "action is 'KEEP' and projectId in {{PROJ_ID}}",
+                    "fixed_variables": {
+                        "count_label": "SysLogs"
+                    },
+                    "segments": [
+                        {
+                            "variable": "processed_events",
+                            "stream": "syslog_stream",
+                            "duration_hours": 1000000,
+                            "extra_filter": "action is 'KEEP' and projectId in {{PROJ_ID}}",
+                            "ts_column": "timestamp",
+                            "column": "count_",
+                            "agg": "sum"
+                        }
+                    ],
+                    "min_width": 2.4,
+                    "height": 2.6,
+                    "max_width": 2.4,
+                    "widget_id": "ccafbb84"
+                },
+                {
+                    "title": "Alerts Ingested",
+                    "widget_type": "label",
+                    "label": "attachment://alertsIngested",
+                    "stream": "oia-alerts-stream",
+                    "ts_column": "timestamp",
+                    "uses_reporting_engine": true,
+                    "advanced": true,
+                    "duration_hours": 1000000,
+                    "fixed_variables": {
+                        "count_label": "AlertsIngested"
+                    },
+                    "segments1": [
+                        {
+                            "variable": "ta_alertsWithRepeatCountMoreThanOne",
+                            "stream": "oia-alerts-stream",
+                            "extra_filter": "a_source_systemname is not-in 'Alert Group' and a_correlation_status not-in 'AGGREGATE' and a_repeat_count greaterthan 1 and (project_id in {{PROJ_ID}})",
+                            "ts_column": "a_updated_ts",
+                            "group_by": [
+                                "a_id"
+                            ],
+                            "column": "a_id",
+                            "agg": "value_count",
+                            "type": "str"
+                        },
+                        {
+                            "variable": "ta_totalRepeatCount",
+                            "stream": "oia-alerts-stream",
+                            "extra_filter": "a_source_systemname is not-in 'Alert Group' and a_correlation_status not-in 'AGGREGATE' and a_repeat_count greaterthan 1 and (project_id in {{PROJ_ID}})",
+                            "ts_column": "a_updated_ts",
+                            "column": "a_repeat_count",
+                            "agg": "sum",
+                            "type": "int"
+                        },
+                        {
+                            "variable": "ta_totalAlerts",
+                            "stream": "oia-alerts-stream",
+                            "extra_filter": "a_source_systemname is not-in 'Alert Group' and a_correlation_status not-in 'AGGREGATE' and (project_id in {{PROJ_ID}})",
+                            "ts_column": "a_updated_ts",
+                            "group_by": [
+                                "a_id"
+                            ],
+                            "column": "a_id",
+                            "agg": "value_count",
+                            "type": "str"
+                        }
+                    ],
+                    "min_width": 2.4,
+                    "height": 2.6,
+                    "max_width": 2.4,
+                    "widget_id": "ccafbb85"
+                },
+                {
+                    "title": "Alerts Deduped",
+                    "widget_type": "label",
+                    "label": "attachment://alertsDeduped",
+                    "stream": "oia-alerts-stream",
+                    "expression1": "de_totalRepeatCount - de_alertsWithRepeatCountMoreThanOne",
+                    "ts_column": "timestamp",
+                    "advanced": true,
+                    "uses_reporting_engine": true,
+                    "duration_hours": 1000000,
+                    "fixed_variables": {
+                        "count_label": "Alerts Ingested"
+                    },
+                    "segments1": [
+                        {
+                            "variable": "de_totalRepeatCount",
+                            "stream": "oia-alerts-stream",
+                            "duration_hours": 1000000,
+                            "extra_filter": "a_source_systemname is not-in 'Alert Group' and a_correlation_status not-in 'AGGREGATE' and  a_repeat_count > 1 and (project_id in {{PROJ_ID}})",
+                            "ts_column": "a_updated_ts",
+                            "column": "a_repeat_count",
+                            "agg": "sum",
+                            "type": "int"
+                        },
+                        {
+                            "variable": "de_alertsWithRepeatCountMoreThanOne",
+                            "stream": "oia-alerts-stream",
+                            "duration_hours": 1000000,
+                            "extra_filter": "a_source_systemname is not-in 'Alert Group' and a_correlation_status not-in 'AGGREGATE' and  a_repeat_count > 1 and (project_id in {{PROJ_ID}})",
+                            "ts_column": "a_updated_ts",
+                            "group_by": [
+                                "a_id"
+                            ],
+                            "column": "a_id",
+                            "agg": "value_count",
+                            "type": "int"
+                        }
+                    ],
+                    "min_width": 2.4,
+                    "height": 2.6,
+                    "max_width": 2.4,
+                    "widget_id": "ccafbb86"
+                },
+                {
+                    "title": "Alerts Correlated",
+                    "widget_type": "label",
+                    "label": "attachment://alertsCorrelated",
+                    "stream": "oia-alerts-stream",
+                    "ts_column": "timestamp",
+                    "advanced": true,
+                    "duration_hours": 1000000,
+                    "fixed_variables": {
+                        "count_label": "Alerts Correlated"
+                    },
+                    "segments": [
+                        {
+                            "variable": "alerts_correlated",
+                            "stream": "oia-alerts-stream",
+                            "duration_hours": 1000000,
+                            "extra_filter": "a_source_systemname is not-in 'Alert Group' and a_correlation_status not-in 'AGGREGATE' and  a_correlation_status in ['CORRELATED', 'CORRELATING'] and (project_id in {{PROJ_ID}})",
+                            "ts_column": "a_updated_ts",
+                            "column": "a_id",
+                            "agg": "value_count"
+                        }
+                    ],
+                    "min_width": 2.4,
+                    "height": 2.6,
+                    "max_width": 2.4,
+                    "widget_id": "f4243dd1"
+                },
+                {
+                    "title": "Noise Reduction 1",
+                    "widget_type": "label",
+                    "label": "attachment://noisereduction1",
+                    "stream": "oia-alerts-stream",
+                    "ts_column": "a_updated_ts",
+                    "advanced": true,
+                    "segments": [
+                        {
+                            "variable": "ta_alertsWithRepeatCountMoreThanOne",
+                            "stream": "oia-alerts-stream",
+                            "extra_filter": "a_source_systemname is not-in 'Alert Group' and a_correlation_status not-in 'AGGREGATE' and a_repeat_count greaterthan 1 and (project_id in {{PROJ_ID}})",
+                            "ts_column": "a_updated_ts",
+                            "duration_hours": 100000,
+                            "column": "count_",
+                            "agg": "sum"
+                        },
+                        {
+                            "variable": "ta_totalRepeatCount",
+                            "stream": "oia-alerts-stream",
+                            "extra_filter": "a_source_systemname is not-in 'Alert Group' and a_correlation_status not-in 'AGGREGATE' and a_repeat_count greaterthan 1 and (project_id in {{PROJ_ID}})",
+                            "ts_column": "a_updated_ts",
+                            "duration_hours": 100000,
+                            "column": "a_repeat_count",
+                            "agg": "sum"
+                        },
+                        {
+                            "variable": "ta_totalAlerts",
+                            "stream": "oia-alerts-stream",
+                            "extra_filter": "a_source_systemname is not-in 'Alert Group' and a_correlation_status not-in 'AGGREGATE' and (project_id in {{PROJ_ID}})",
+                            "ts_column": "a_updated_ts",
+                            "duration_hours": 100000,
+                            "column": "count_",
+                            "agg": "sum"
+                        },
+                        {
+                            "variable": "totalIncidents",
+                            "stream": "oia-alerts-stream",
+                            "extra_filter": "a_source_systemname is not-in 'Alert Group' and a_correlation_status not-in 'AGGREGATE' and a_correlation_status in ['ACTIVE', 'CORRELATING', 'CORRELATED', 'CLEARED'] and (project_id in {{PROJ_ID}})",
+                            "ts_column": "a_updated_ts",
+                            "duration_hours": 100000,
+                            "column": "a_incident_id",
+                            "agg": "cardinality"
+                        }
+                    ],
+                    "min_width": 2.4,
+                    "height": 2.6,
+                    "max_width": 2.4,
+                    "type": "str",
+                    "widget_id": "02be1e24"
+                },
+                {
+                    "title": "Noise Reduction",
+                    "widget_type1": "label",
+                    "label": "attachment://noisereduction1",
+                    "stream": "oia-alerts-stream",
+                    "ts_column": "timestamp",
+                    "advanced": true,
+                    "uses_reporting_engine": true,
+                    "duration_hours": 1000000,
+                    "fixed_variables": {
+                        "count_label": "Noise Reduction"
+                    },
+                    "expression1": "((ta_totalAlerts + ta_totalRepeatCount-ta_alertsWithRepeatCountMoreThanOne - totalIncidents ) / (ta_totalAlerts + ta_totalRepeatCount-ta_alertsWithRepeatCountMoreThanOne))*100  if (ta_totalAlerts + ta_totalRepeatCount-ta_alertsWithRepeatCountMoreThanOne) > 0 else 0",
+                    "unit": "%",
+                    "segments1": [
+                        {
+                            "variable": "ta_alertsWithRepeatCountMoreThanOne",
+                            "stream": "oia-alerts-stream",
+                            "extra_filter": "a_repeat_count greaterthan 1 and (project_id in {{PROJ_ID}})",
+                            "ts_column": "a_updated_ts",
+                            "group_by": [
+                                "a_id"
+                            ],
+                            "column": "a_id",
+                            "agg": "value_count",
+                            "type": "str"
+                        },
+                        {
+                            "variable": "ta_totalRepeatCount",
+                            "stream": "oia-alerts-stream",
+                            "extra_filter": "a_repeat_count greaterthan 1 and (project_id in {{PROJ_ID}})",
+                            "ts_column": "a_updated_ts",
+                            "column": "a_repeat_count",
+                            "agg": "sum",
+                            "type": "int"
+                        },
+                        {
+                            "variable": "ta_totalAlerts",
+                            "stream": "oia-alerts-stream",
+                            "extra_filter": "(project_id in {{PROJ_ID}})",
+                            "ts_column": "a_updated_ts",
+                            "group_by": [
+                                "a_id"
+                            ],
+                            "column": "a_id",
+                            "agg": "value_count",
+                            "type": "str"
+                        },
+                        {
+                            "variable": "totalIncidents",
+                            "stream": "oia-alerts-stream",
+                            "extra_filter": "a_correlation_status in ['ACTIVE', 'CORRELATING', 'CORRELATED', 'CLEARED'] and (project_id in {{PROJ_ID}})",
+                            "ts_column": "a_updated_ts",
+                            "group_by": [
+                                "a_incident_id"
+                            ],
+                            "column": "a_incident_id",
+                            "agg": "cardinality",
+                            "type": "str"
+                        }
+                    ],
+                    "segments": [
+                        {
+                            "variable": "ta_totalRepeatCount",
+                            "stream": "oia-alerts-stream",
+                            "extra_filter": "a_repeat_count >= 1 and (project_id in {{PROJ_ID}})",
+                            "ts_column": "a_updated_ts",
+                            "column": "a_repeat_count",
+                            "agg": "sum",
+                            "type": "int"
+                        },
+                        {
+                            "variable": "totalIncidents",
+                            "stream": "oia-incidents-stream",
+                            "extra_filter": "(project_id in {{PROJ_ID}})",
+                            "ts_column": "i_updated_ts",
+                            "column": "count_",
+                            "agg": "sum",
+                            "type": "int"
+                        }
+                    ],
+                    "min_width": 2.4,
+                    "height": 2.6,
+                    "max_width": 2.4,
+                    "type": "str",
+                    "widget_id": "02be1e28"
+                },
+                {
+                    "title": "Total Incidents",
+                    "widget_type": "label",
+                    "label": "attachment://totalIncidents",
+                    "stream": "oia-incidents-stream",
+                    "ts_column": "timestamp",
+                    "advanced": true,
+                    "fixed_variables": {
+                        "count_label": "totalIncidents"
+                    },
+                    "segments": [
+                        {
+                            "variable": "totalIncidents",
+                            "stream": "oia-incidents-stream",
+                            "extra_filter": "project_id in {{PROJ_ID}}",
+                            "duration_hours": 100000,
+                            "ts_column": "timestamp",
+                            "column": "count_",
+                            "agg": "sum"
+                        }
+                    ],
+                    "min_width": 2.4,
+                    "height": 2.6,
+                    "max_width": 2.4,
+                    "widget_id": "6694ae72"
+                },
+                {
+                    "title": "Open Incidents",
+                    "widget_type": "custom_counter",
+                    "stream": "oia-incidents-stream",
+                    "ts_column": "i_updated_ts",
+                    "extra_filter": "i_state not in ['Resolved','Closed'] and (project_id in {{PROJ_ID}})",
+                    "column": "count_",
+                    "agg": "sum",
+                    "style": {
+                        "color-list": [
+                            "#B71C1C"
+                        ]
+                    },
+                    "sparkline": {
+                        "interval": "4h"
+                    },
+                    "max_width": 3,
+                    "height": 4,
+                    "min_width": 3,
+                    "widget_id": "90fc33be"
+                },
+                {
+                    "title": "Resolved Incidents",
+                    "widget_type": "custom_counter",
+                    "stream": "oia-incidents-stream",
+                    "ts_column": "i_updated_ts",
+                    "extra_filter": "i_state in ['Resolved','Closed'] and (project_id in {{PROJ_ID}})",
+                    "column": "count_",
+                    "max_width": 3,
+                    "height": 4,
+                    "min_width": 3,
+                    "agg": "sum",
+                    "type": "str",
+                    "style": {
+                        "color-list": [
+                            "#4CAF50"
+                        ]
+                    },
+                    "sparkline": {
+                        "interval": "4h"
+                    },
+                    "widget_id": "53383e25"
+                },
+                {
+                    "title": "Resolved Incidents",
+                    "widget_type0": "label",
+                    "label": "attachment://totalresolvedIncients",
+                    "stream": "oia-incidents-stream",
+                    "ts_column": "timestamp",
+                    "advanced": true,
+                    "fixed_variables": {
+                        "count_label": "Total Resolved Incidents"
+                    },
+                    "segments": [
+                        {
+                            "variable": "totalresolvedIncients",
+                            "stream": "oia-incidents-stream",
+                            "extra_filter": "i_state in ['Resolved','Closed'] and (project_id in {{PROJ_ID}})",
+                            "duration_hours": 1000000,
+                            "ts_column": "timestamp",
+                            "column": "count_",
+                            "agg": "sum"
+                        }
+                    ],
+                    "min_width": 2.4,
+                    "height": 2.6,
+                    "max_width": 2.4,
+                    "widget_id": "a166631f"
+                },
+                {
+                    "title": "ticketsCreated",
+                    "widget_type0": "label",
+                    "label": "attachment://ticketsCreated",
+                    "stream": "oia-incidents-stream",
+                    "ts_column": "timestamp",
+                    "advanced": true,
+                    "fixed_variables": {
+                        "count_label": "Tickets Created"
+                    },
+                    "segments": [
+                        {
+                            "variable": "ticketsCreated",
+                            "stream": "oia-incidents-stream",
+                            "extra_filter": "i_itsm_ticket_number not in 'Not Available' and (project_id in {{PROJ_ID}})",
+                            "duration_hours": 168,
+                            "ts_column": "timestamp",
+                            "column": "count_",
+                            "agg": "sum"
+                        }
+                    ],
+                    "min_width": 2.4,
+                    "height": 2.6,
+                    "max_width": 2.4,
+                    "widget_id": "9f1fd8ff"
+                },
+                {
+                    "title": "Syslog Drop Codes",
+                    "widget_type": "label",
+                    "label": "attachment://syslog_drop_counts",
+                    "stream": "syslog_stream",
+                    "extra_filter": "projectId in {{PROJ_ID}}",
+                    "ts_column": "timestamp",
+                    "advanced": true,
+                    "uses_reporting_engine": true,
+                    "duration_hours": 1000000,
+                    "fixed_variables": {
+                        "count_label": "Syslog Codes"
+                    },
+                    "min_width": 2.4,
+                    "height": 2.6,
+                    "max_width": 2.4,
+                    "type": "str",
+                    "widget_id": "02be1e2a"
+                },
+                {
+                    "title": "Syslog Processed Codes",
+                    "widget_type": "label",
+                    "label": "attachment://syslog_keep_counts",
+                    "stream": "syslog_stream",
+                    "extra_filter": "projectId in {{PROJ_ID}}",
+                    "ts_column": "timestamp",
+                    "advanced": true,
+                    "uses_reporting_engine": true,
+                    "duration_hours": 1000000,
+                    "fixed_variables": {
+                        "count_label": "Syslog Codes"
+                    },
+                    "min_width": 2.4,
+                    "height": 2.6,
+                    "max_width": 2.4,
+                    "type": "str",
+                    "widget_id": "4b622384"
+                },
+                {
+                    "title": "SNMP Dropped Traps",
+                    "widget_type": "label",
+                    "label": "attachment://trap_drop_counts",
+                    "stream": "snmp_trap_stream",
+                    "extra_filter0": "projectId in {{PROJ_ID}}",
+                    "ts_column": "timestamp",
+                    "advanced": true,
+                    "uses_reporting_engine": true,
+                    "duration_hours": 1000000,
+                    "fixed_variables": {
+                        "count_label": "Dropped Traps"
+                    },
+                    "min_width": 2.4,
+                    "height": 2.6,
+                    "max_width": 2.4,
+                    "type": "str",
+                    "widget_id": "d7a41260"
+                },
+                {
+                    "title": "SNMP Processed Traps",
+                    "widget_type": "label",
+                    "label": "attachment://trap_keep_counts",
+                    "stream": "snmp_trap_stream",
+                    "extra_filter": "projectId in {{PROJ_ID}}",
+                    "ts_column": "timestamp",
+                    "advanced": true,
+                    "uses_reporting_engine": true,
+                    "duration_hours": 1000000,
+                    "fixed_variables": {
+                        "count_label": "Processed Traps"
+                    },
+                    "min_width": 2.4,
+                    "height": 2.6,
+                    "max_width": 2.4,
+                    "type": "str",
+                    "widget_id": "bcc8c4fd"
+                },
+                {
+                    "title": "activeAlerts",
+                    "widget_type": "label",
+                    "label": "attachment://activeAlerts",
+                    "stream": "oia-alerts-stream",
+                    "extra_filter0": "project_id in {{PROJ_ID}}",
+                    "ts_column": "timestamp",
+                    "advanced": true,
+                    "fixed_variables": {
+                        "count_label": "Active"
+                    },
+                    "segments": [
+                        {
+                            "variable": "activeAlerts",
+                            "stream": "oia-alerts-stream",
+                            "extra_filter": "a_source_systemname is not-in 'Alert Group' and a_correlation_status not-in 'AGGREGATE' and a_status in 'ACTIVE' and (project_id in {{PROJ_ID}})",
+                            "duration_hours": 100000,
+                            "ts_column": "timestamp",
+                            "column": "count_",
+                            "agg": "sum"
+                        }
+                    ],
+                    "min_width": 2.4,
+                    "height": 2.6,
+                    "max_width": 2.4,
+                    "widget_id": "0ce9837d"
+                },
+                {
+                    "title": "clearedAlerts",
+                    "widget_type": "label",
+                    "label": "attachment://clearedAlerts",
+                    "stream": "oia-alerts-stream",
+                    "ts_column": "timestamp",
+                    "advanced": true,
+                    "fixed_variables": {
+                        "count_label": "Cleared"
+                    },
+                    "segments": [
+                        {
+                            "variable": "clearedAlerts",
+                            "stream": "oia-alerts-stream",
+                            "extra_filter": "a_source_systemname is not-in 'Alert Group' and a_correlation_status not-in 'AGGREGATE' and a_status in 'CLEARED' and (project_id in {{PROJ_ID}})",
+                            "duration_hours": 100000,
+                            "ts_column": "timestamp",
+                            "column": "count_",
+                            "agg": "sum"
+                        }
+                    ],
+                    "min_width": 2.4,
+                    "height": 2.6,
+                    "max_width": 2.4,
+                    "widget_id": "cc7455ab"
+                },
+                {
+                    "title": "totalOpenIncients",
+                    "widget_type": "label",
+                    "label": "attachment://totalOpenIncients",
+                    "stream": "oia-incidents-stream",
+                    "ts_column": "timestamp",
+                    "advanced": true,
+                    "fixed_variables": {
+                        "count_label": "Total Open Incidents"
+                    },
+                    "segments": [
+                        {
+                            "variable": "totalOpenIncients",
+                            "stream": "oia-incidents-stream",
+                            "extra_filter": "i_state in 'Open' and (project_id in {{PROJ_ID}})",
+                            "duration_hours": 1000000,
+                            "ts_column": "timestamp",
+                            "column": "count_",
+                            "agg": "sum"
+                        }
+                    ],
+                    "min_width": 2.4,
+                    "height": 2.6,
+                    "max_width": 2.4,
+                    "widget_id": "ae722ada"
+                },
+                {
+                    "title": "newtotalresolvedIncients",
+                    "widget_type": "label",
+                    "label": "attachment://totalOpenIncients1",
+                    "stream": "oia-incidents-stream",
+                    "ts_column": "timestamp",
+                    "advanced": true,
+                    "fixed_variables": {
+                        "count_label": "Total Open Incidents"
+                    },
+                    "segments": [
+                        {
+                            "variable": "totalOpenIncients",
+                            "stream": "oia-incidents-stream",
+                            "extra_filter": "i_state in ['Resolved','Closed'] and (project_id in {{PROJ_ID}})",
+                            "duration_hours": 1000000,
+                            "ts_column": "timestamp",
+                            "column": "count_",
+                            "agg": "sum"
+                        }
+                    ],
+                    "min_width": 2.4,
+                    "height": 2.6,
+                    "max_width": 2.4,
+                    "widget_id": "ae722adc"
+                },
+                {
+                    "title": "Dropped Events",
+                    "widget_type": "label",
+                    "label": "attachment://dropped",
+                    "stream": "syslog_stream",
+                    "ts_column": "timestamp",
+                    "advanced": true,
+                    "fixed_variables": {
+                        "count_label": "Dropped"
+                    },
+                    "segments": [
+                        {
+                            "variable": "dropped",
+                            "stream": "syslog_stream",
+                            "extra_filter": "action is 'DROP' and (projectId in {{PROJ_ID}})",
+                            "duration_hours": 1000000,
+                            "ts_column": "timestamp",
+                            "column": "count_",
+                            "agg": "sum"
+                        }
+                    ],
+                    "min_width": 2.4,
+                    "height": 2.6,
+                    "max_width": 2.4,
+                    "widget_id": "79be1454"
+                },
+                {
+                    "title": "Processed Events",
+                    "widget_type": "label",
+                    "label": "attachment://processed",
+                    "stream": "syslog_stream",
+                    "ts_column": "timestamp",
+                    "advanced": true,
+                    "fixed_variables": {
+                        "count_label": "Processed"
+                    },
+                    "segments": [
+                        {
+                            "variable": "processed",
+                            "stream": "syslog_stream",
+                            "extra_filter": "action is 'KEEP' and (projectId in {{PROJ_ID}})",
+                            "duration_hours": 1000000,
+                            "ts_column": "timestamp",
+                            "column": "count_",
+                            "agg": "sum"
+                        }
+                    ],
+                    "min_width": 2.4,
+                    "height": 2.6,
+                    "max_width": 2.4,
+                    "widget_id": "0a52df49"
+                },
+                {
+                    "title": "Total Alerts",
+                    "widget_type": "label",
+                    "label": "attachment://totalAlerts",
+                    "stream": "oia-alerts-stream",
+                    "ts_column": "timestamp",
+                    "advanced": true,
+                    "fixed_variables": {
+                        "count_label": "total Alerts"
+                    },
+                    "segments": [
+                        {
+                            "variable": "totalAlerts",
+                            "stream": "oia-alerts-stream",
+                            "extra_filter1": "a_state in ['ACTIVE','CLEARED'] and (project_id in {{PROJ_ID}})",
+                            "duration_hours": 1000000,
+                            "ts_column": "timestamp",
+                            "column": "count_",
+                            "agg": "sum"
+                        }
+                    ],
+                    "min_width": 2.4,
+                    "height": 2.6,
+                    "max_width": 2.4,
+                    "widget_id": "c6010845"
+                },
+                {
+                    "title": "Last 24hr Alerts",
+                    "widget_type": "label",
+                    "label": "attachment://last24hrAlerts",
+                    "stream": "oia-alerts-stream",
+                    "ts_column": "timestamp",
+                    "advanced": true,
+                    "fixed_variables": {
+                        "count_label": "Last 24Hrs Alerts"
+                    },
+                    "segments": [
+                        {
+                            "variable": "last24hrAlerts",
+                            "stream": "oia-alerts-stream",
+                            "extra_filter": "project_id in {{PROJ_ID}}",
+                            "duration_hours": 24,
+                            "ts_column": "timestamp",
+                            "column": "count_",
+                            "agg": "sum"
+                        }
+                    ],
+                    "min_width": 2.4,
+                    "height": 2.6,
+                    "max_width": 2.4,
+                    "widget_id": "a5ac399d"
+                },
+                {
+                    "title": "Last 7 Days Alerts",
+                    "widget_type": "label",
+                    "label": "attachment://last7dAlerts",
+                    "stream": "oia-alerts-stream",
+                    "extra_filter0": "project_id in {{PROJ_ID}}",
+                    "ts_column": "timestamp",
+                    "advanced": true,
+                    "fixed_variables": {
+                        "count_label": "Last 7D Alerts"
+                    },
+                    "segments": [
+                        {
+                            "variable": "last7dAlerts",
+                            "stream": "oia-alerts-stream",
+                            "extra_filter": "project_id in {{PROJ_ID}}",
+                            "duration_hours": 168,
+                            "ts_column": "timestamp",
+                            "column": "count_",
+                            "agg": "sum"
+                        }
+                    ],
+                    "min_width": 2.4,
+                    "height": 2.6,
+                    "max_width": 2.4,
+                    "widget_id": "dd70d310"
+                },
+                {
+                    "title": "Last 24Hrs Incidents",
+                    "widget_type": "label",
+                    "label": "attachment://last24HrsIncidents",
+                    "stream": "oia-alerts-stream",
+                    "ts_column": "timestamp",
+                    "advanced": true,
+                    "fixed_variables": {
+                        "count_label": "last24HrsIncidents"
+                    },
+                    "segments": [
+                        {
+                            "variable": "last24HrsIncidents",
+                            "stream": "oia-incidents-stream",
+                            "duration_hours": 24,
+                            "ts_column": "timestamp",
+                            "column": "count_",
+                            "agg": "sum"
+                        }
+                    ],
+                    "min_width": 2.4,
+                    "height": 2.6,
+                    "max_width": 2.4,
+                    "widget_id": "7bd8444c"
+                },
+                {
+                    "title": "Last 7 Days Incidents",
+                    "widget_type": "label",
+                    "label": "attachment://last7DIncidents",
+                    "stream": "oia-alerts-stream",
+                    "ts_column": "timestamp",
+                    "advanced": true,
+                    "fixed_variables": {
+                        "count_label": "last7DIncidents"
+                    },
+                    "segments": [
+                        {
+                            "variable": "last7DIncidents",
+                            "stream": "oia-incidents-stream",
+                            "extra_filter": "project_id in {{PROJ_ID}}",
+                            "duration_hours": 168,
+                            "ts_column": "timestamp",
+                            "column": "count_",
+                            "agg": "sum"
+                        }
+                    ],
+                    "min_width": 2.4,
+                    "height": 2.6,
+                    "max_width": 2.4,
+                    "widget_id": "76eea5ec"
+                },
+                {
+                    "title": "skippedonboardedDevices",
+                    "widget_type": "label",
+                    "label": "attachment://skippedonboardedDevices",
+                    "stream": "discovery",
+                    "ts_column": "timestamp",
+                    "advanced": true,
+                    "fixed_variables": {
+                        "count_label": "Skipped Devices"
+                    },
+                    "segments": [
+                        {
+                            "variable": "skippedonboardedDevices",
+                            "stream": "discovery",
+                            "extra_filter": "onboarded in 'no' and projectId in {{PROJ_ID}}",
+                            "duration_hours": 100000,
+                            "ts_column": "timestamp",
+                            "column": "count_",
+                            "agg": "sum"
+                        }
+                    ],
+                    "min_width": 2.4,
+                    "height": 2.6,
+                    "max_width": 2.4,
+                    "widget_id": "23cbd660"
+                },
+                {
+                    "title": "Resolved Incidents",
+                    "widget_type": "label",
+                    "label": "attachment://resolvedIncidents",
+                    "stream": "oia-alerts-stream",
+                    "extra_filter": "project_id in {{PROJ_ID}}",
+                    "ts_column": "timestamp",
+                    "advanced": true,
+                    "segments": [],
+                    "min_width": 2.4,
+                    "height": 2.6,
+                    "max_width": 2.4,
+                    "type": "str",
+                    "widget_id": "8fae0ff5"
+                },
+                {
+                    "title": "clearedAlerts",
+                    "widget_type": "label",
+                    "label": "attachment://clearedAlerts",
+                    "stream": "oia-alerts-stream",
+                    "ts_column": "timestamp",
+                    "advanced": true,
+                    "fixed_variables": {
+                        "count_label": "Cleared"
+                    },
+                    "segments": [
+                        {
+                            "variable": "clearedAlerts",
+                            "stream": "oia-alerts-stream",
+                            "extra_filter": "a_status in 'CLEARED' and (project_id in {{PROJ_ID}})",
+                            "duration_hours": 100000,
+                            "ts_column": "timestamp",
+                            "column": "count_",
+                            "agg": "sum"
+                        }
+                    ],
+                    "min_width": 2.4,
+                    "height": 2.6,
+                    "max_width": 2.4,
+                    "widget_id": "5689e0aa"
+                },
+                {
+                    "title": "totalresolvedIncients",
+                    "widget_type": "label",
+                    "label": "attachment://totalresolvedIncients",
+                    "stream": "oia-incidents-stream",
+                    "ts_column": "timestamp",
+                    "advanced": true,
+                    "fixed_variables": {
+                        "count_label": "Total Resolved Incidents"
+                    },
+                    "segments": [
+                        {
+                            "variable": "totalresolvedIncients",
+                            "stream": "oia-incidents-stream",
+                            "extra_filter": "i_state in 'Resolved' and (project_id in {{PROJ_ID}})",
+                            "duration_hours": 100000,
+                            "ts_column": "timestamp",
+                            "column": "count_",
+                            "agg": "sum"
+                        }
+                    ],
+                    "min_width": 2.4,
+                    "height": 2.6,
+                    "max_width": 2.4,
+                    "widget_id": "76ea416c"
+                },
+                {
+                    "title": "Incidinet Trend",
+                    "widget_type": "counter",
+                    "stream": "oia-incidents-stream",
+                    "ts_column": "i_updated_ts",
+                    "duration_hours": 100000,
+                    "extra_filter": "project_id in {{PROJ_ID}}",
+                    "extra_filter0": "a_source_systemname is not 'Alert Group'",
+                    "max_width": 12,
+                    "height": 6,
+                    "min_width": 12,
+                    "column": "count_",
+                    "group_by": [
+                        "i_priority_label"
+                    ],
+                    "style": {
+                        "color-map": {
+                            "SEVERE": [
+                                "#B71C1C",
+                                "#ffffff"
+                            ],
+                            "CRITICAL": [
+                                "#E53935",
+                                "#ffffff"
+                            ],
+                            "Critical": [
+                                "#E53935",
+                                "#ffffff"
+                            ],
+                            "MAJOR": [
+                                "#F57C00",
+                                "#ffffff"
+                            ],
+                            "Moderate": [
+                                "#F57C00",
+                                "#ffffff"
+                            ],
+                            "MINOR": [
+                                "#FFA726",
+                                "#ffffff"
+                            ],
+                            "WARNING": [
+                                "#FFD54F",
+                                "#ffffff"
+                            ],
+                            "NOTIFICATION": [
+                                "#4DD0E1",
+                                "#ffffff"
+                            ],
+                            "INFORMATION": [
+                                "#03A9F4",
+                                "#ffffff"
+                            ]
+                        }
+                    },
+                    "series_spec": [
+                        {
+                            "column": "count_",
+                            "agg": "sum",
+                            "type": "int"
+                        }
+                    ],
+                    "widget_id": "35903114"
+                },
+                {
+                    "title": "Alert Trend",
+                    "widget_type": "counter",
+                    "stream": "oia-alerts-stream",
+                    "ts_column": "a_raised_ts",
+                    "extra_filter": "project_id in {{PROJ_ID}}",
+                    "extra_filter0": "a_source_systemname is not 'Alert Group'",
+                    "limit": 5,
+                    "max_width": 12,
+                    "height": 6,
+                    "min_width": 12,
+                    "column": "count_",
+                    "group_by": [
+                        "a_severity"
+                    ],
+                    "style": {
+                        "color-map": {
+                            "SEVERE": [
+                                "#B71C1C",
+                                "#ffffff"
+                            ],
+                            "CRITICAL": [
+                                "#E53935",
+                                "#ffffff"
+                            ],
+                            "MAJOR": [
+                                "#F57C00",
+                                "#ffffff"
+                            ],
+                            "MINOR": [
+                                "#FFA726",
+                                "#ffffff"
+                            ],
+                            "WARNING": [
+                                "#FFD54F",
+                                "#ffffff"
+                            ],
+                            "NOTIFICATION": [
+                                "#4DD0E1",
+                                "#ffffff"
+                            ],
+                            "INFORMATION": [
+                                "#03A9F4",
+                                "#ffffff"
+                            ]
+                        }
+                    },
+                    "series_spec": [
+                        {
+                            "column": "count_",
+                            "agg": "sum",
+                            "type": "int"
+                        }
+                    ],
+                    "widget_id": "alerts_types"
+                },
+                {
+                    "title": "last24hrsresolvedIncients",
+                    "widget_type": "label",
+                    "label": "attachment://last24hrsresolvedIncients",
+                    "stream": "oia-incidents-stream",
+                    "ts_column": "timestamp",
+                    "advanced": true,
+                    "fixed_variables": {
+                        "count_label": "Total Resolved Incidents"
+                    },
+                    "segments": [
+                        {
+                            "variable": "last24hrsresolvedIncients",
+                            "stream": "oia-incidents-stream",
+                            "extra_filter": "i_state in 'Resolved' and (project_id in {{PROJ_ID}})",
+                            "duration_hours": 24,
+                            "ts_column": "timestamp",
+                            "column": "count_",
+                            "agg": "sum"
+                        }
+                    ],
+                    "min_width": 2.4,
+                    "height": 2.6,
+                    "max_width": 2.4,
+                    "widget_id": "2b772b3b"
+                },
+                {
+                    "title": "last7daysresolvedIncients",
+                    "widget_type": "label",
+                    "label": "attachment://last7daysresolvedIncients",
+                    "stream": "oia-incidents-stream",
+                    "ts_column": "timestamp",
+                    "advanced": true,
+                    "fixed_variables": {
+                        "count_label": "Total Resolved Incidents"
+                    },
+                    "segments": [
+                        {
+                            "variable": "last7daysresolvedIncients",
+                            "stream": "oia-incidents-stream",
+                            "extra_filter": "i_state in 'Resolved' and (project_id in {{PROJ_ID}})",
+                            "duration_hours": 168,
+                            "ts_column": "timestamp",
+                            "column": "count_",
+                            "agg": "sum"
+                        }
+                    ],
+                    "min_width": 2.4,
+                    "height": 2.6,
+                    "max_width": 2.4,
+                    "widget_id": "e81ae65c"
+                },
+                {
+                    "title": "last24hrsOpenIncients",
+                    "widget_type": "label",
+                    "label": "attachment://last24hrsOpenIncients",
+                    "stream": "oia-incidents-stream",
+                    "ts_column": "timestamp",
+                    "advanced": true,
+                    "fixed_variables": {
+                        "count_label": "Total Open Incidents"
+                    },
+                    "segments": [
+                        {
+                            "variable": "last24hrsOpenIncients",
+                            "stream": "oia-incidents-stream",
+                            "extra_filter": "i_state in 'Open' and (project_id in {{PROJ_ID}})",
+                            "duration_hours": 24,
+                            "ts_column": "timestamp",
+                            "column": "count_",
+                            "agg": "sum"
+                        }
+                    ],
+                    "min_width": 2.4,
+                    "height": 2.6,
+                    "max_width": 2.4,
+                    "widget_id": "c12b4a27"
+                },
+                {
+                    "title": "las7DaysOpenIncients",
+                    "widget_type": "label",
+                    "label": "attachment://las7DaysOpenIncients",
+                    "stream": "oia-incidents-stream",
+                    "ts_column": "timestamp",
+                    "advanced": true,
+                    "fixed_variables": {
+                        "count_label": "Total Open Incidents"
+                    },
+                    "segments": [
+                        {
+                            "variable": "las7DaysOpenIncients",
+                            "stream": "oia-incidents-stream",
+                            "extra_filter": "i_state in 'Open' and (project_id in {{PROJ_ID}})",
+                            "duration_hours": 168,
+                            "ts_column": "timestamp",
+                            "column": "count_",
+                            "agg": "sum"
+                        }
+                    ],
+                    "min_width": 2.4,
+                    "height": 2.6,
+                    "max_width": 2.4,
+                    "widget_id": "d7337a4b"
+                },
+                {
+                    "title": "ticketsCreated",
+                    "widget_type": "label",
+                    "label": "attachment://ticketsCreated",
+                    "stream": "oia-incidents-stream",
+                    "ts_column": "timestamp",
+                    "advanced": true,
+                    "fixed_variables": {
+                        "count_label": "Tickets Created"
+                    },
+                    "segments": [
+                        {
+                            "variable": "ticketsCreated",
+                            "stream": "oia-incidents-stream",
+                            "extra_filter": "i_itsm_ticket_number not in 'Not Available' and (project_id in {{PROJ_ID}})",
+                            "duration_hours": 168,
+                            "ts_column": "timestamp",
+                            "column": "count_",
+                            "agg": "sum"
+                        }
+                    ],
+                    "min_width": 2.4,
+                    "height": 2.6,
+                    "max_width": 2.4,
+                    "widget_id": "137567a7"
+                },
+                {
+                    "widget_type": "pie_chart",
+                    "title": "Tickets Status",
+                    "stream": "oia-incidents-stream",
+                    "extra_filter": "project_id in {{PROJ_ID}}",
+                    "ts_column": "i_created_ts",
+                    "duration_hours": 100000,
+                    "min_width": 4,
+                    "height": 4,
+                    "max_width": 4,
+                    "column": "_RDA_Id",
+                    "agg": "value_count",
+                    "group_by": [
+                        "itsm_ticket_state"
+                    ],
+                    "type": "str",
+                    "style": {
+                        "color-map": {
+                            "CLEARED": [
+                                "#4CAF50",
+                                "#ffffff"
+                            ],
+                            "ACTIVE": [
+                                "#FFA726",
+                                "#ffffff"
+                            ]
+                        }
+                    },
+                    "widget_id": "b7ac7d41"
+                }
+            ]
+        }
+    ],
+    "saved_time": "2025-07-04T15:41:08.417720",
+    "attachments": [
+        {
+            "name": "totalCounts",
+            "value": "{%raw%}\n<div style='display: flex; justify-content: center;'>\n\n<div style='color: white;'>\n\n{%\n  set count = total_events | int\n%}\n\n<div>\n\n<h2>\n\n{% \n  if count < 10000 \n%}\n      {{ '{:,}'.format(count) }} \n{%\n   elif count < 1000000\n%}\n      {{ '{:,}K'.format( (count /1000) | round (1)) }} \n{%\n   else\n%}\n      {{ '{:,}M'.format( (count /1000000) | round (2)) }} \n{%\n   endif\n%}\n\n</h2>\n\n<!--<div style='color: #white; text-align: center;'>Total Syslogs</div>-->\n\n</div>\n\n</div>\n</div>\n\n{%endraw%}"
+        },
+        {
+            "name": "eventsRatePerDay",
+            "value": "{%raw%}\n<div style='display: flex; justify-content: center;'>\n\n<div style='color: white; text-align: center;'>\n\n{%\n  set count = rate_perday | int\n%}\n\n<div>\n\n<h2>\n\n{% \n  if count < 10000 \n%}\n      {{ '{:,}'.format(count) }} \n{%\n   elif count < 1000000\n%}\n      {{ '{:,}K'.format( (count /1000) | round (1)) }} \n{%\n   else\n%}\n      {{ '{:,}M'.format( (count /1000000) | round (2)) }} \n{%\n   endif\n%}\n\n</h2>\n\n<div style='color: #white; text-align: center;'>Events Per Day</div>\n\n</div>\n\n</div>\n</div>\n\n{%endraw%}"
+        },
+        {
+            "name": "dropped",
+            "value": "{%raw%}\n<div style='display: flex; justify-content: center;'>\n\n<div style='color: black;'>\n\n{%\n  set count = dropped | int\n%}\n\n<div>\n\n<h2>\n\n{% \n  if count < 10000 \n%}\n      {{ '{:,}'.format(count) }} \n{%\n   elif count < 1000000\n%}\n      {{ '{:,}K'.format( (count /1000) | round (1)) }} \n{%\n   else\n%}\n      {{ '{:,}M'.format( (count /1000000) | round (2)) }} \n{%\n   endif\n%}\n\n</h2>\n\n<div style='color: #black; text-align: center;'>Dropped</div>\n\n</div>\n\n</div>\n</div>\n\n{%endraw%}"
+        },
+        {
+            "name": "processed",
+            "value": "{%raw%}\n<div style='display: flex; justify-content: center;'>\n\n<div style='color: black;'>\n\n{%\n  set count = processed | int\n%}\n\n<div>\n\n<h2>\n\n{% \n  if count < 10000 \n%}\n      {{ '{:,}'.format(count) }} \n{%\n   elif count < 1000000\n%}\n      {{ '{:,}K'.format( (count /1000) | round (1)) }} \n{%\n   else\n%}\n      {{ '{:,}M'.format( (count /1000000) | round (2)) }} \n{%\n   endif\n%}\n\n</h2>\n\n<div style='color: #black; text-align: center;'>Processed</div>\n\n</div>\n\n</div>\n</div>\n\n{%endraw%}"
+        },
+        {
+            "name": "totalAlerts",
+            "value": "{%raw%}\n<div style='display: flex; justify-content: center;'>\n\n<div style='color: white;'>\n\n{%\n  set count = totalAlerts | int\n%}\n\n<div>\n\n<h2>\n\n{% \n  if count < 10000 \n%}\n      {{ '{:,}'.format(count) }} \n{%\n   elif count < 1000000\n%}\n      {{ '{:,}K'.format( (count /1000) | round (1)) }} \n{%\n   else\n%}\n      {{ '{:,}M'.format( (count /1000000) | round (2)) }} \n{%\n   endif\n%}\n\n</h2>\n\n\n</div>\n\n</div>\n</div>\n\n{%endraw%}"
+        },
+        {
+            "name": "last24hrAlerts",
+            "value": "{%raw%}\n<div style='display: flex; justify-content: center;'>\n\n<div style='color: white;'>\n\n{%\n  set count = last24hrAlerts | int\n%}\n\n<div>\n\n<h2>\n\n{% \n  if count < 10000 \n%}\n      {{ '{:,}'.format(count) }} \n{%\n   elif count < 1000000\n%}\n      {{ '{:,}K'.format( (count /1000) | round (1)) }} \n{%\n   else\n%}\n      {{ '{:,}M'.format( (count /1000000) | round (2)) }} \n{%\n   endif\n%}\n\n</h2>\n\n<div style='color: #white; text-align: center;'>Last 24 Hrs</div>\n\n</div>\n\n</div>\n</div>\n\n{%endraw%}"
+        },
+        {
+            "name": "last7dAlerts",
+            "value": "{%raw%}\n<div style='display: flex; justify-content: center;'>\n\n<div style='color: white;'>\n\n{%\n  set count = last7dAlerts | int\n%}\n\n<div>\n\n<h2>\n\n{% \n  if count < 10000 \n%}\n      {{ '{:,}'.format(count) }} \n{%\n   elif count < 1000000\n%}\n      {{ '{:,}K'.format( (count /1000) | round (1)) }} \n{%\n   else\n%}\n      {{ '{:,}M'.format( (count /1000000) | round (2)) }} \n{%\n   endif\n%}\n\n</h2>\n\n<div style='color: #white; text-align: center;'>Last 7 Days</div>\n\n</div>\n\n</div>\n</div>\n\n{%endraw%}"
+        },
+        {
+            "name": "totalIncidents",
+            "value": "{%raw%}\n<div style='display: flex; justify-content: center;'>\n\n<div style='color: white; text-align: center;'>\n\n{%\n  set count = totalIncidents | int\n%}\n\n<div>\n\n<h2>\n\n{% \n  if count < 10000 \n%}\n      {{ '{:,}'.format(count) }} \n{%\n   elif count < 1000000\n%}\n      {{ '{:,}K'.format( (count /1000) | round (1)) }} \n{%\n   else\n%}\n      {{ '{:,}M'.format( (count /1000000) | round (2)) }} \n{%\n   endif\n%}\n\n</h2>\n\n</div>\n\n</div>\n</div>\n\n{%endraw%}"
+        },
+        {
+            "name": "last24HrsIncidents",
+            "value": "{%raw%}\n<div style='display: flex; justify-content: center;'>\n\n<div style='color: white; text-align: center;'>\n\n{%\n  set count = last24HrsIncidents | int\n%}\n\n<div>\n\n<h2>\n\n{% \n  if count < 10000 \n%}\n      {{ '{:,}'.format(count) }} \n{%\n   elif count < 1000000\n%}\n      {{ '{:,}K'.format( (count /1000) | round (1)) }} \n{%\n   else\n%}\n      {{ '{:,}M'.format( (count /1000000) | round (2)) }} \n{%\n   endif\n%}\n\n</h2>\n\n<div style='color: #white; text-align: center;'>Last 24 Hrs</div>\n\n</div>\n\n</div>\n</div>\n\n{%endraw%}"
+        },
+        {
+            "name": "last7DIncidents",
+            "value": "{%raw%}\n<div style='display: flex; justify-content: center;'>\n\n<div style='color: white; text-align: center;'>\n\n{%\n  set count = last7DIncidents | int\n%}\n\n<div>\n\n<h2>\n\n{% \n  if count < 10000 \n%}\n      {{ '{:,}'.format(count) }} \n{%\n   elif count < 1000000\n%}\n      {{ '{:,}K'.format( (count /1000) | round (1)) }} \n{%\n   else\n%}\n      {{ '{:,}M'.format( (count /1000000) | round (2)) }} \n{%\n   endif\n%}\n\n</h2>\n\n<div style='color: #white; text-align: center;'>Last 7 Days</div>\n\n</div>\n\n</div>\n</div>\n\n{%endraw%}"
+        },
+        {
+            "name": "onboardedDevices",
+            "value": "{%raw%}\n<div style='display: flex; justify-content: center;'>\n\n<div style='color: white; text-align: center;'>\n\n{%\n  set count = onboardedDevices | int\n%}\n\n<div>\n\n<h2>\n\n{% \n  if count < 10000 \n%}\n      {{ '{:,}'.format(count) }} \n{%\n   elif count < 1000000\n%}\n      {{ '{:,}K'.format( (count /1000) | round (1)) }} \n{%\n   else\n%}\n      {{ '{:,}M'.format( (count /1000000) | round (2)) }} \n{%\n   endif\n%}\n\n</h2>\n\n<div style='color: #white; text-align: center;'>Onboarded Devices</div>\n\n</div>\n\n</div>\n</div>\n\n{%endraw%}"
+        },
+        {
+            "name": "skippedonboardedDevices",
+            "value": "{%raw%}\n<div style='display: flex; justify-content: center;'>\n\n<div style='color: white; text-align: center;'>\n\n{%\n  set count = skippedonboardedDevices | int\n%}\n\n<div>\n\n<h2>\n\n{% \n  if count < 10000 \n%}\n      {{ '{:,}'.format(count) }} \n{%\n   elif count < 1000000\n%}\n      {{ '{:,}K'.format( (count /1000) | round (1)) }} \n{%\n   else\n%}\n      {{ '{:,}M'.format( (count /1000000) | round (2)) }} \n{%\n   endif\n%}\n\n</h2>\n\n<div style='color: #white; text-align: center;'>Skipped Devices</div>\n\n</div>\n\n</div>\n</div>\n\n{%endraw%}"
+        },
+        {
+            "name": "resolvedIncidents",
+            "value": "{%raw%}\n\n <div style='width: 120px; height: 40px; padding: 10px; background: #23C023; border-radius: 10px; border: 2px white solid; justify-content: center; align-items: center; gap: 10px; display: inline-flex'> \n\n      <div style='color: white; font-size: 16px; font-family: Avenir; font-weight: 600; word-wrap: break-word'>Resolved Incidents\n\n      </div>\n</div>\n\n{%endraw%}"
+        },
+        {
+            "name": "activeAlerts",
+            "value": "{%raw%}\n<div style='display: flex; justify-content: center;'>\n\n<div style='color: black; text-align: center;'>\n\n{%\n  set count = activeAlerts | int\n%}\n\n<div>\n\n<h2>\n\n{% \n  if count < 10000 \n%}\n      {{ '{:,}'.format(count) }} \n{%\n   elif count < 1000000\n%}\n      {{ '{:,}K'.format( (count /1000) | round (1)) }} \n{%\n   else\n%}\n      {{ '{:,}M'.format( (count /1000000) | round (2)) }} \n{%\n   endif\n%}\n\n</h2>\n\n<div style='color: #black; text-align: center;'>Active Alerts</div>\n\n</div>\n\n</div>\n</div>\n\n{%endraw%}"
+        },
+        {
+            "name": "clearedAlerts",
+            "value": "{%raw%}\n<div style='display: flex; justify-content: center;'>\n\n<div style='color: black; text-align: center;'>\n\n{%\n  set count = clearedAlerts | int\n%}\n\n<div>\n\n<h2>\n\n{% \n  if count < 10000 \n%}\n      {{ '{:,}'.format(count) }} \n{%\n   elif count < 1000000\n%}\n      {{ '{:,}K'.format( (count /1000) | round (1)) }} \n{%\n   else\n%}\n      {{ '{:,}M'.format( (count /1000000) | round (2)) }} \n{%\n   endif\n%}\n\n</h2>\n\n<div style='color: #black; text-align: center;'>Cleared Alerts</div>\n\n</div>\n\n</div>\n</div>\n\n{%endraw%}"
+        },
+        {
+            "name": "totalresolvedIncients",
+            "value": "{%raw%}\n<div style='display: flex; justify-content: center;'>\n\n<div style='color: black; text-align: center;'>\n\n{%\n  set count = totalresolvedIncients | int\n%}\n\n<div>\n\n<h2>\n\n{% \n  if count < 10000 \n%}\n      {{ '{:,}'.format(count) }} \n{%\n   elif count < 1000000\n%}\n      {{ '{:,}K'.format( (count /1000) | round (1)) }} \n{%\n   else\n%}\n      {{ '{:,}M'.format( (count /1000000) | round (2)) }} \n{%\n   endif\n%}\n\n</h2>\n\n<div style='color: #black; text-align: center;'>Total Resolved</div>\n\n</div>\n\n</div>\n</div>\n\n{%endraw%}"
+        },
+        {
+            "name": "last24hrsresolvedIncients",
+            "value": "{%raw%}\n<div style='display: flex; justify-content: center;'>\n\n<div style='color: black; text-align: center;'>\n\n{%\n  set count = last24hrsresolvedIncients | int\n%}\n\n<div>\n\n<h2>\n\n{% \n  if count < 10000 \n%}\n      {{ '{:,}'.format(count) }} \n{%\n   elif count < 1000000\n%}\n      {{ '{:,}K'.format( (count /1000) | round (1)) }} \n{%\n   else\n%}\n      {{ '{:,}M'.format( (count /1000000) | round (2)) }} \n{%\n   endif\n%}\n\n</h2>\n\n<div style='color: #black; text-align: center;'>Resolved in Last 24Hrs</div>\n\n</div>\n\n</div>\n</div>\n\n{%endraw%}"
+        },
+        {
+            "name": "last7daysresolvedIncients",
+            "value": "{%raw%}\n<div style='display: flex; justify-content: center;'>\n\n<div style='color: black; text-align: center;'>\n\n{%\n  set count = last7daysresolvedIncients | int\n%}\n\n<div>\n\n<h2>\n\n{% \n  if count < 10000 \n%}\n      {{ '{:,}'.format(count) }} \n{%\n   elif count < 1000000\n%}\n      {{ '{:,}K'.format( (count /1000) | round (1)) }} \n{%\n   else\n%}\n      {{ '{:,}M'.format( (count /1000000) | round (2)) }} \n{%\n   endif\n%}\n\n</h2>\n\n<div style='color: #black; text-align: center;'>Resolved in Last 7 Days</div>\n\n</div>\n\n</div>\n</div>\n\n{%endraw%}"
+        },
+        {
+            "name": "totalOpenIncients",
+            "value": "{%raw%}\n<div style='display: flex; justify-content: center;'>\n\n<div style='color: black; text-align: center;'>\n\n{%\n  set count = totalOpenIncients | int\n%}\n\n<div>\n\n<h2>\n\n{% \n  if count < 10000 \n%}\n      {{ '{:,}'.format(count) }} \n{%\n   elif count < 1000000\n%}\n      {{ '{:,}K'.format( (count /1000) | round (1)) }} \n{%\n   else\n%}\n      {{ '{:,}M'.format( (count /1000000) | round (2)) }} \n{%\n   endif\n%}\n\n</h2>\n\n<div style='color: #black; text-align: center;'>Open Incidents</div>\n\n</div>\n\n</div>\n</div>\n\n{%endraw%}"
+        },
+        {
+            "name": "last24hrsOpenIncients",
+            "value": "{%raw%}\n<div style='display: flex; justify-content: center;'>\n\n<div style='color: black; text-align: center;'>\n\n{%\n  set count = last24hrsOpenIncients | int\n%}\n\n<div>\n\n<h2>\n\n{% \n  if count < 10000 \n%}\n      {{ '{:,}'.format(count) }} \n{%\n   elif count < 1000000\n%}\n      {{ '{:,}K'.format( (count /1000) | round (1)) }} \n{%\n   else\n%}\n      {{ '{:,}M'.format( (count /1000000) | round (2)) }} \n{%\n   endif\n%}\n\n</h2>\n\n<div style='color: #black; text-align: center;'>Open in Last 24Hrs</div>\n\n</div>\n\n</div>\n</div>\n\n{%endraw%}"
+        },
+        {
+            "name": "las7DaysOpenIncients",
+            "value": "{%raw%}\n<div style='display: flex; justify-content: center;'>\n\n<div style='color: black; text-align: center;'>\n\n{%\n  set count = las7DaysOpenIncients | int\n%}\n\n<div>\n\n<h2>\n\n{% \n  if count < 10000 \n%}\n      {{ '{:,}'.format(count) }} \n{%\n   elif count < 1000000\n%}\n      {{ '{:,}K'.format( (count /1000) | round (1)) }} \n{%\n   else\n%}\n      {{ '{:,}M'.format( (count /1000000) | round (2)) }} \n{%\n   endif\n%}\n\n</h2>\n\n<div style='color: #black; text-align: center;'>Open in Last 7 Days</div>\n\n</div>\n\n</div>\n</div>\n\n{%endraw%}"
+        },
+        {
+            "name": "ticketsCreated",
+            "value": "{%raw%}\n<div style='display: flex; justify-content: center;'>\n\n<div style='color: white; text-align: center;'>\n\n{%\n  set count = ticketsCreated | int\n%}\n\n<div>\n\n<h2>\n\n{% \n  if count < 10000 \n%}\n      {{ '{:,}'.format(count) }} \n{%\n   elif count < 1000000\n%}\n      {{ '{:,}K'.format( (count /1000) | round (1)) }} \n{%\n   else\n%}\n      {{ '{:,}M'.format( (count /1000000) | round (2)) }} \n{%\n   endif\n%}\n\n</h2>\n\n<div style='color: #white; text-align: center;'>Tickets Created</div>\n\n</div>\n\n</div>\n</div>\n\n{%endraw%}"
+        },
+        {
+            "name": "trapCounts",
+            "value": "{%raw%}\n<div style='display: flex; justify-content: center;'>\n\n<div style='color: white;'>\n\n{%\n  set count = total_traps | int\n%}\n\n<div>\n\n<h2>\n\n{% \n  if count < 10000 \n%}\n      {{ '{:,}'.format(count) }} \n{%\n   elif count < 1000000\n%}\n      {{ '{:,}K'.format( (count /1000) | round (1)) }} \n{%\n   else\n%}\n      {{ '{:,}M'.format( (count /1000000) | round (2)) }} \n{%\n   endif\n%}\n\n</h2>\n\n<!--<div style='color: #white; text-align: center;'>Total Traps</div>-->\n\n</div>\n\n</div>\n</div>\n\n{%endraw%}"
+        },
+        {
+            "name": "filteredEvents",
+            "value": "{%raw%}\n<div style='display: flex; justify-content: center;'>\n\n<div style='color: white;'>\n\n{%\n  set count = filtered_events | int\n%}\n\n<div>\n\n<h2>\n\n{% \n  if count < 10000 \n%}\n      {{ '{:,}'.format(count) }} \n{%\n   elif count < 1000000\n%}\n      {{ '{:,}K'.format( (count /1000) | round (1)) }} \n{%\n   else\n%}\n      {{ '{:,}M'.format( (count /1000000) | round (2)) }} \n{%\n   endif\n%}\n\n</h2>\n\n<!--<div style='color: #white; text-align: center;'>Filtered Events</div>-->\n\n</div>\n\n</div>\n</div>\n\n{%endraw%}"
+        },
+        {
+            "name": "processedEvents",
+            "value": "{%raw%}\n<div style='display: flex; justify-content: center;'>\n\n<div style='color: white;'>\n\n{%\n  set count = processed_events | int\n%}\n\n<div>\n\n<h2>\n\n{% \n  if count < 10000 \n%}\n      {{ '{:,}'.format(count) }} \n{%\n   elif count < 1000000\n%}\n      {{ '{:,}K'.format( (count /1000) | round (1)) }} \n{%\n   else\n%}\n      {{ '{:,}M'.format( (count /1000000) | round (2)) }} \n{%\n   endif\n%}\n\n</h2>\n\n<!--<div style='color: #white; text-align: center;'>Processed Events</div>-->\n\n</div>\n\n</div>\n</div>\n\n{%endraw%}"
+        },
+        {
+            "name": "alertsIngested",
+            "value": "{%raw%}\n<div style='display: flex; justify-content: center;'>\n\n<div style='color: white;'>\n{%- set project_ids = context.get(\"projectId\") -%}\n{%- set project_id = project_ids[0] if project_ids and project_ids|length > 0 else '' -%}\n\n{%\n set ta_totalRepeatCount = engine.query_stream_aggs(\n    stream=\"oia-alerts-stream\", \n    aggs=[{\"field\": \"a_repeat_count\", \"function\": \"sum\"}], \n    cfxql_query=\"project_id is '\" ~ project_id ~ \"' and a_source_systemname is not-in 'Alert Group' and a_correlation_status not-in 'AGGREGATE' and a_repeat_count > 1\"\n)[0].get(\"a_repeat_count_sum\")\n%}\n\n{%\nset v1 = engine.query_stream_aggs(\n    stream=\"oia-alerts-stream\", \n    groupby=[\"a_id\"], \n    aggs=[{\"field\": \"count_\", \"function\": \"sum\"}], \n    cfxql_query=\"project_id is '\" ~ project_id ~ \"' and a_source_systemname is not-in 'Alert Group' and a_correlation_status not-in 'AGGREGATE' and a_repeat_count > 1\"\n)\n%}\n{% set ns=namespace(num=0) %}\n{%for x in v1%}{% set ns.num = ns.num + x.get(\"count__sum\")%}{%endfor%}\n{% set ta_alertsWithRepeatCountMoreThanOne = ns.num %}\n\n{%\nset v1 = engine.query_stream_aggs(\n    stream=\"oia-alerts-stream\", \n    groupby=[\"a_id\"], \n    aggs=[{\"field\": \"count_\", \"function\": \"sum\"}], \n    cfxql_query=\"project_id is '\" ~ project_id ~ \"' and a_source_systemname is not-in 'Alert Group' and a_correlation_status not-in 'AGGREGATE'\"\n)\n%}\n{% set ns=namespace(num=0) %}\n{%for x in v1%}{% set ns.num = ns.num + x.get(\"count__sum\")%}{%endfor%}\n{% set ta_totalAlerts = ns.num %}\n\n{%\n  set count = (ta_totalAlerts + (ta_totalRepeatCount - ta_alertsWithRepeatCountMoreThanOne)) | int\n%}\n\n<div>\n\n<h2>\n\n{% \n  if count < 10000 \n%}\n      {{ '{:,}'.format(count) }} \n{%\n   elif count < 1000000\n%}\n      {{ '{:,}K'.format( (count /1000) | round (1)) }} \n{%\n   else\n%}\n      {{ '{:,}M'.format( (count /1000000) | round (2)) }} \n{%\n   endif\n%}\n\n</h2>\n\n</div>\n\n</div>\n</div>\n{%endraw%}\n"
+        },
+        {
+            "name": "alertsDeduped",
+            "value": "{%raw%}\n<div style='display: flex; justify-content: center;'>\n\n<div style='color: white;'>\n\n{%\n set de_totalRepeatCount = engine.query_stream_aggs(stream=\"oia-alerts-stream\", aggs=[{\"field\": \"a_repeat_count\", \"function\": \"sum\"}], cfxql_query=\"a_source_systemname is not-in 'Alert Group' and a_correlation_status not-in 'AGGREGATE' and a_repeat_count > 1\")[0].get(\"a_repeat_count_sum\")\n %}\n{%\nset v1 = engine.query_stream_aggs(stream=\"oia-alerts-stream\", groupby=[\"a_id\"], aggs=[{\"field\": \"count_\", \"function\": \"sum\"}], cfxql_query=\"a_source_systemname is not-in 'Alert Group' and a_correlation_status not-in 'AGGREGATE' and a_repeat_count > 1\")\n%}\n{% set ns=namespace(num=0) %}\n{%for x in v1%}{% set ns.num = ns.num + x.get(\"count__sum\")%}{%endfor%}\n\n {%\n  set count = (de_totalRepeatCount - ns.num) | int\n%}\n<div>\n<h2>\n\n{% \n  if count < 10000 \n%}\n      {{ '{:,}'.format(count) }} \n{%\n   elif count < 1000000\n%}\n      {{ '{:,}K'.format( (count /1000) | round (1)) }} \n{%\n   else\n%}\n      {{ '{:,}M'.format( (count /1000000) | round (2)) }} \n{%\n   endif\n%}\n\n</h2>\n\n\n</div>\n\n</div>\n</div>\n\n{%endraw%}"
+        },
+        {
+            "name": "alertsCorrelated",
+            "value": "{%raw%}\n<div style='display: flex; justify-content: center;'>\n\n<div style='color: white;'>\n\n{%\n  set count = alerts_correlated | int\n%}\n\n<div>\n\n<h2>\n\n{% \n  if count < 10000 \n%}\n      {{ '{:,}'.format(count) }} \n{%\n   elif count < 1000000\n%}\n      {{ '{:,}K'.format( (count /1000) | round (1)) }} \n{%\n   else\n%}\n      {{ '{:,}M'.format( (count /1000000) | round (2)) }} \n{%\n   endif\n%}\n\n</h2>\n\n\n</div>\n\n</div>\n</div>\n\n{%endraw%}"
+        },
+        {
+            "name": "noiseReduction",
+            "value": "{%raw%}\n<div style='display: flex; justify-content: center;'>\n\n<div style='color: white; font:100px'>\n{%- set project_ids = context.get(\"projectId\") -%}\n{%- set project_id = project_ids[0] if project_ids and project_ids|length > 0 else '' -%}\n\n{%\n set ta_totalRepeatCount = engine.query_stream_aggs(\n    stream=\"oia-alerts-stream\", \n    aggs=[{\"field\": \"a_repeat_count\", \"function\": \"sum\"}], \n    cfxql_query=\"project_id is '\" ~ project_id ~ \"' and a_source_systemname is not-in 'Alert Group' and a_correlation_status not-in 'AGGREGATE' and a_repeat_count > 1\"\n)[0].get(\"a_repeat_count_sum\")\n%}\n\n{%\nset v1 = engine.query_stream_aggs(\n    stream=\"oia-alerts-stream\", \n    groupby=[\"a_id\"], \n    aggs=[{\"field\": \"count_\", \"function\": \"sum\"}], \n    cfxql_query=\"project_id is '\" ~ project_id ~ \"' and a_source_systemname is not-in 'Alert Group' and a_correlation_status not-in 'AGGREGATE' and a_repeat_count > 1\"\n)\n%}\n{% set ns=namespace(num=0) %}\n{%for x in v1%}{% set ns.num = ns.num + x.get(\"count__sum\")%}{%endfor%}\n{% set ta_alertsWithRepeatCountMoreThanOne = ns.num %}\n\n{%\nset v1 = engine.query_stream_aggs(\n    stream=\"oia-alerts-stream\", \n    groupby=[\"a_id\"], \n    aggs=[{\"field\": \"count_\", \"function\": \"sum\"}], \n    cfxql_query=\"project_id is '\" ~ project_id ~ \"' and a_source_systemname is not-in 'Alert Group' and a_correlation_status not-in 'AGGREGATE'\"\n)\n%}\n{% set ns=namespace(num=0) %}\n{%for x in v1%}{% set ns.num = ns.num + x.get(\"count__sum\")%}{%endfor%}\n{% set ta_totalAlerts = ns.num %}\n\n{%\nset v1 = engine.query_stream_aggs(\n    stream=\"oia-alerts-stream\", \n    groupby=[\"a_incident_id\"], \n    aggs=[{\"field\": \"count_\", \"function\": \"sum\"}], \n    cfxql_query=\"project_id is '\" ~ project_id ~ \"' and a_source_systemname is not-in 'Alert Group' and a_correlation_status in ['ACTIVE', 'CORRELATING', 'CORRELATED', 'CLEARED']\"\n)\n%}\n{% set ns=namespace(num=0) %}\n{%for x in v1%}{% set ns.num = ns.num + x.get(\"count__sum\")%}{%endfor%}\n{% set totalIncidents = ns.num %}\n\n{%\n  set count = (\n    ((ta_totalAlerts + ta_totalRepeatCount - ta_alertsWithRepeatCountMoreThanOne - totalIncidents) / \n    (ta_totalAlerts + ta_totalRepeatCount - ta_alertsWithRepeatCountMoreThanOne)) * 100 \n    if (ta_totalAlerts + ta_totalRepeatCount - ta_alertsWithRepeatCountMoreThanOne) > 0 \n    else 0\n  ) | int\n%}\n{{ count }}%\n</div>\n</div>\n{%endraw%}\n"
+        },
+        {
+            "name": "totalOpenIncients1",
+            "value": "{%raw%}\r\n<div style='display: flex; justify-content: center;'>\r\n\r\n<div style='color: black; text-align: center;'>\r\n\r\n{%\r\n  set count = totalOpenIncients | int\r\n%}\r\n\r\n<div>\r\n\r\n<h2>\r\n\r\n{% \r\n  if count < 10000 \r\n%}\r\n      {{ '{:,}'.format(count) }} \r\n{%\r\n   elif count < 1000000\r\n%}\r\n      {{ '{:,}K'.format( (count /1000) | round (1)) }} \r\n{%\r\n   else\r\n%}\r\n      {{ '{:,}M'.format( (count /1000000) | round (2)) }} \r\n{%\r\n   endif\r\n%}\r\n\r\n</h2>\r\n\r\n<div style='color: #black; text-align: center;'>Resolved Incidents</div>\r\n\r\n</div>\r\n\r\n</div>\r\n</div>\r\n\r\n{%endraw%}"
+        },
+        {
+            "name": "noisereduction1",
+            "value": "{%raw%}\r\n{%\r\n      set npc = 0\r\n%}\r\n\r\n{%\r\n      if (ta_totalAlerts + ta_totalRepeatCount-ta_alertsWithRepeatCountMoreThanOne) > 0\r\n%}\r\n\r\n{%\r\n     set npc = (((ta_totalAlerts + ta_totalRepeatCount-ta_alertsWithRepeatCountMoreThanOne - totalIncidents ) / (ta_totalAlerts + ta_totalRepeatCount-ta_alertsWithRepeatCountMoreThanOne))*100) | round (1)\r\n%}\r\n\r\n{%\r\n      endif\r\n%}\r\n\r\n\r\n\r\n <div style='width: 75px; height: 40px; padding: 10px; background: #23C023; border-radius: 10px; border: 1px white solid; justify-content: center; align-items: center; gap: 10px; display: inline-flex'> \r\n\r\n      <div style='color: white; font-size: 16px; font-family: Avenir; font-weight: 600; word-wrap: break-word'>{{npc}} %\r\n\r\n      </div>\r\n\r\n      </div>\r\n<div style='display: flex; justify-content: center;'>\r\n</div>\r\n\r\n{%endraw%}"
+        },
+        {
+            "name": "trapDropCounts",
+            "value": "{%raw%}\n<div style='display: flex; justify-content: center;'>\n\n<div style='color: white; text-align: center;'>\n\n{%\n  set count = (total_traps - processed_traps) | int\n%}\n\n<div>\n\n<h2>\n\n{% \n  if count < 10000 \n%}\n      {{ '{:,}'.format(count) }} \n{%\n   elif count < 1000000\n%}\n      {{ '{:,}K'.format( (count /1000) | round (1)) }} \n{%\n   else\n%}\n      {{ '{:,}M'.format( (count /1000000) | round (2)) }} \n{%\n   endif\n%}\n\n</h2>\n\n\n</div>\n\n</div>\n</div>\n\n{%endraw%}"
+        },
+        {
+            "name": "trap_drop_counts",
+            "value": "{%raw%}\n<div style='display: flex; justify-content: center; background:transparent'>\n\n<div style='color: white; font:100px'>\n\n\n{%- set project_ids = context.get(\"projectId\") -%}\n{%- set project_id = project_ids[0] if project_ids and project_ids|length > 0 else '' -%}\n\n{%- set traps = engine.query_stream_aggs(\n    stream=\"snmp_trap_stream\",\n    groupby=[\"snmp_trap_name\"],\n    cfxql_query=\"action is 'DROP' and projectId is '\" ~ project_id ~ \"'\",\n    aggs=[{\"field\": \"count_\", \"function\": \"sum\"}]\n) -%}\n\n<table>\n<tr><th style='border-bottom: 1px solid'>SNMP Trap</th><th style='border-bottom: 1px solid'>Action</th><th style='border-bottom: 1px solid'>Count</th></tr>\n{%for v in traps[0:5]%}\n<tr><td style='border-bottom: 1px solid'>{{v.get(\"snmp_trap_name\")}}</td><td style='border-bottom: 1px solid'>DROP</td><td style='border-bottom: 1px solid'>{{v.get(\"count__sum\")|int}}</td></tr>\n{%endfor%}\n</table>\n</div>\n</div>\n\n{%endraw%}"
+        },
+        {
+            "name": "trap_keep_counts",
+            "value": "{%raw%}\n<div style='display: flex; justify-content: center; background:transparent'>\n\n<div style='color: white; font:100px'>\n\n{%- set project_ids = context.get(\"projectId\") -%}\n{%- set project_id = project_ids[0] if project_ids and project_ids|length > 0 else '' -%}\n\n{%- set traps = engine.query_stream_aggs(\n    stream=\"snmp_trap_stream\",\n    groupby=[\"snmp_trap_name\"],\n    cfxql_query=\"action is 'KEEP' and projectId is '\" ~ project_id ~ \"'\",\n    aggs=[{\"field\": \"count_\", \"function\": \"sum\"}]\n) -%}\n\n\n<table>\n<tr><th style='border-bottom: 1px solid'>SNMP Trap</th><th style='border-bottom: 1px solid'>Action</th><th style='border-bottom: 1px solid'>Count</th></tr>\n{%for v in traps[0:5]%}\n<tr><td style='border-bottom: 1px solid'>{{v.get(\"snmp_trap_name\")}}</td><td style='border-bottom: 1px solid'>KEEP</td><td style='border-bottom: 1px solid'>{{v.get(\"count__sum\")|int}}</td></tr>\n{%endfor%}\n</table>\n</div>\n</div>\n\n{%endraw%}"
+        },
+        {
+            "name": "syslog_drop_counts",
+            "value": "{%raw%}\n<div style='display: flex; justify-content: center; background:transparent'>\n\n<div style='color: white; font:100px'>\n\n\n{%- set project_ids = context.get(\"projectId\") -%}\n{%- set project_id = project_ids[0] if project_ids and project_ids|length > 0 else '' -%}\n\n{%- set syslog_codes = engine.query_stream_aggs(\n    stream=\"syslog_stream\",\n    groupby=[\"syslog_code\",\"action\"],\n    cfxql_query=\"action is 'DROP' and projectId is '\" ~ project_id ~ \"'\",\n    aggs=[{\"field\": \"count_\", \"function\": \"sum\"}]\n) -%}\n\n<table>\n<tr><th style='border-bottom: 1px solid'>Syslog Code</th><th style='border-bottom: 1px solid'>Action</th><th style='border-bottom: 1px solid'>Count</th></tr>\n{%for v in syslog_codes[0:5]%}\n<tr><td style='border-bottom: 1px solid'>{{v.get(\"syslog_code\")}}</td><td style='border-bottom: 1px solid'>{{v.get(\"action\")}}</td><td style='border-bottom: 1px solid'>{{v.get(\"count__sum\")|int}}</td></tr>\n{%endfor%}\n</table>\n</div>\n</div>\n\n{%endraw%}"
+        },
+        {
+            "name": "syslog_keep_counts",
+            "value": "{%raw%}\n<div style='display: flex; justify-content: center; background:transparent'>\n\n<div style='color: white; font:100px'>\n\n\n{%- set project_ids = context.get(\"projectId\") -%}\n{%- set project_id = project_ids[0] if project_ids and project_ids|length > 0 else '' -%}\n\n{%- set syslog_codes = engine.query_stream_aggs(\n    stream=\"syslog_stream\",\n    groupby=[\"syslog_code\",\"action\"],\n    cfxql_query=\"action is 'KEEP' and projectId is '\" ~ project_id ~ \"'\",\n    aggs=[{\"field\": \"count_\", \"function\": \"sum\"}]\n) -%}\n\n\n<table>\n<tr><th style='border-bottom: 1px solid'>Syslog Code</th><th style='border-bottom: 1px solid'>Action</th><th style='border-bottom: 1px solid'>Count</th></tr>\n{%for v in syslog_codes[0:5]%}\n<tr><td style='border-bottom: 1px solid'>{{v.get(\"syslog_code\")}}</td><td style='border-bottom: 1px solid'>{{v.get(\"action\")}}</td><td style='border-bottom: 1px solid'>{{v.get(\"count__sum\")|int}}</td></tr>\n{%endfor%}\n</table>\n</div>\n</div>\n\n{%endraw%}"
+        }
+    ],
+    "storyboards": [
+        {
+            "name": "Network Analytics",
+            "value": "{\n    \"stage\": {\n        \"size\": {\n            \"width\": 1536,\n            \"height\": 1024\n        },\n        \"background\": {\n            \"fill\": null,\n            \"src\": null,\n            \"gradient\": {\n                \"color1\": \"#000000\",\n                \"color2\": \"#0F1C3F\",\n                \"type\": \"linear\",\n                \"rotation\": 90\n            }\n        },\n        \"theme\": null,\n        \"autoFitByDefault\": true,\n        \"autoFitMinWidth\": 480\n    },\n    \"widgets\": [\n        {\n            \"widget_id\": \"rrd-1d\",\n            \"layoutConfig\": {\n                \"rotation\": 0,\n                \"width\": 279,\n                \"height\": 160,\n                \"scaleX\": 1,\n                \"scaleY\": 1,\n                \"fill\": \"#FFFFFF00\",\n                \"opacity\": 1,\n                \"name\": \"widget-38\",\n                \"draggable\": true,\n                \"x\": 919,\n                \"y\": 52,\n                \"id\": \"cfx-3376e45e-ecca-4722-f204-2f8f48741111\"\n            }\n        },\n        {\n            \"widget_id\": \"rrd-1d\",\n            \"layoutConfig\": {\n                \"rotation\": 0,\n                \"width\": 275.01,\n                \"height\": 230.67,\n                \"scaleX\": 1,\n                \"scaleY\": 1,\n                \"fill\": \"#FFFFFF00\",\n                \"opacity\": 1,\n                \"name\": \"widget-39\",\n                \"draggable\": true,\n                \"x\": 927,\n                \"y\": 433,\n                \"id\": \"cfx-09adf747-b4c3-4a35-9f8f-708f12b4d15c\",\n                \"skewX\": 0,\n                \"skewY\": 0\n            }\n        },\n        {\n            \"widget_id\": \"rrd-1d\",\n            \"layoutConfig\": {\n                \"rotation\": 0,\n                \"width\": 175,\n                \"height\": 102,\n                \"scaleX\": 1,\n                \"scaleY\": 1,\n                \"fill\": \"#FFFFFF00\",\n                \"opacity\": 1,\n                \"name\": \"widget-40\",\n                \"draggable\": true,\n                \"x\": 366.4999527928737,\n                \"y\": 281.99980592625866,\n                \"id\": \"cfx-3680a1c6-87c6-478f-f199-de34692287ff\"\n            }\n        },\n        {\n            \"widget_id\": \"rrd-1d\",\n            \"layoutConfig\": {\n                \"rotation\": 0,\n                \"width\": 275.77,\n                \"height\": 122.91,\n                \"scaleX\": 1,\n                \"scaleY\": 1,\n                \"fill\": \"#FFFFFF00\",\n                \"opacity\": 1,\n                \"name\": \"widget-41\",\n                \"draggable\": true,\n                \"x\": 921.0498373976761,\n                \"y\": 256.0596538144073,\n                \"id\": \"cfx-09adf747-b4c3-4a35-9f8f-708f12b4d15c\"\n            }\n        },\n        {\n            \"widget_id\": \"ccafbb82\",\n            \"layoutConfig\": {\n                \"rotation\": 0,\n                \"width\": 100,\n                \"height\": 35,\n                \"scaleX\": 1,\n                \"scaleY\": 1,\n                \"fill\": \"#FFFFFF00\",\n                \"opacity\": 1,\n                \"name\": \"widget-42\",\n                \"draggable\": true,\n                \"x\": 408.3400681880713,\n                \"y\": 306.17938630735847,\n                \"id\": \"cfx-1556f28b-a4db-4785-b81f-9840349b4ebd\"\n            }\n        },\n        {\n            \"widget_id\": \"0ce9837d\",\n            \"layoutConfig\": {\n                \"rotation\": 0,\n                \"width\": 92.33,\n                \"height\": 63.23,\n                \"scaleX\": 1,\n                \"scaleY\": 1,\n                \"fill\": \"#E69125\",\n                \"opacity\": 1,\n                \"name\": \"widget-43\",\n                \"draggable\": true,\n                \"x\": 966.4449790190544,\n                \"y\": 306.9993076288151,\n                \"id\": \"cfx-e1356469-1333-4b5a-a45c-9a35bda80b58\"\n            }\n        },\n        {\n            \"widget_id\": \"cc7455ab\",\n            \"layoutConfig\": {\n                \"rotation\": 0,\n                \"width\": 96.06,\n                \"height\": 62.69,\n                \"scaleX\": 1,\n                \"scaleY\": 1,\n                \"fill\": \"#23C023\",\n                \"opacity\": 1,\n                \"name\": \"widget-44\",\n                \"draggable\": true,\n                \"x\": 1076.1748932869593,\n                \"y\": 307.730518760755,\n                \"id\": \"cfx-85645e85-d0ef-4ca5-9c5d-7398d8e0d216\"\n            }\n        },\n        {\n            \"widget_id\": \"ae722ada\",\n            \"layoutConfig\": {\n                \"rotation\": 0,\n                \"width\": 100,\n                \"height\": 71,\n                \"scaleX\": 1,\n                \"scaleY\": 1,\n                \"fill\": \"#EB6363\",\n                \"opacity\": 1,\n                \"name\": \"widget-45\",\n                \"draggable\": true,\n                \"x\": 962.6898583786212,\n                \"y\": 489.7497115120061,\n                \"id\": \"cfx-33ed2198-fc81-478c-b822-4eb9d3d3266c\"\n            }\n        },\n        {\n            \"widget_id\": \"rrd-1d\",\n            \"layoutConfig\": {\n                \"rotation\": 0,\n                \"width\": 173,\n                \"height\": 114,\n                \"scaleX\": 1,\n                \"scaleY\": 1,\n                \"fill\": \"#FFFFFF00\",\n                \"opacity\": 1,\n                \"name\": \"widget-46\",\n                \"draggable\": true,\n                \"x\": 370.49995279287367,\n                \"y\": 394.99960660728107,\n                \"id\": \"cfx-3680a1c6-87c6-478f-f199-de34692287ff\"\n            }\n        },\n        {\n            \"widget_id\": \"8585f05c\",\n            \"layoutConfig\": {\n                \"rotation\": 0,\n                \"width\": 82.76,\n                \"height\": 32.94,\n                \"scaleX\": 1,\n                \"scaleY\": 1,\n                \"fill\": \"#fafafa00\",\n                \"opacity\": 1,\n                \"name\": \"widget-47\",\n                \"draggable\": true,\n                \"x\": 418.00002622618126,\n                \"y\": 414.0591240455458,\n                \"id\": \"cfx-0ca955e5-a942-40dc-e9e4-dd1b1be91a5b\"\n            }\n        },\n        {\n            \"widget_id\": \"ccafbb83\",\n            \"layoutConfig\": {\n                \"rotation\": 0,\n                \"width\": 68.47,\n                \"height\": 31.69,\n                \"scaleX\": 1,\n                \"scaleY\": 1,\n                \"fill\": \"#fafafa00\",\n                \"opacity\": 1,\n                \"name\": \"widget-48\",\n                \"draggable\": true,\n                \"x\": 463.0004248641364,\n                \"y\": 342.9992971383422,\n                \"id\": \"cfx-7a9dedf6-3e5d-4763-9bb5-68f692cdfe37\"\n            }\n        },\n        {\n            \"widget_id\": \"ccafbb85\",\n            \"layoutConfig\": {\n                \"rotation\": 0,\n                \"width\": 75.36,\n                \"height\": 36.59,\n                \"scaleX\": 1,\n                \"scaleY\": 1,\n                \"fill\": \"#fafafa00\",\n                \"opacity\": 1,\n                \"name\": \"widget-49\",\n                \"draggable\": true,\n                \"x\": 951.0399423024012,\n                \"y\": 104.08975871913236,\n                \"id\": \"cfx-d4697f69-c5eb-45fd-f3d0-9d548b56ac7e\"\n            }\n        },\n        {\n            \"widget_id\": \"ccafbb86\",\n            \"layoutConfig\": {\n                \"rotation\": 0,\n                \"width\": 67.93,\n                \"height\": 33.23,\n                \"scaleX\": 1,\n                \"scaleY\": 1,\n                \"fill\": \"#fafafa00\",\n                \"opacity\": 1,\n                \"name\": \"widget-50\",\n                \"draggable\": true,\n                \"x\": 1034.0698793595661,\n                \"y\": 101.76973773818736,\n                \"id\": \"cfx-71712b88-963d-484e-c89e-85e9b631136a\"\n            }\n        },\n        {\n            \"widget_id\": \"f4243dd1\",\n            \"layoutConfig\": {\n                \"rotation\": 0,\n                \"width\": 77.68,\n                \"height\": 34.59,\n                \"scaleX\": 1,\n                \"scaleY\": 1,\n                \"fill\": \"#fafafa00\",\n                \"opacity\": 1,\n                \"name\": \"widget-51\",\n                \"draggable\": true,\n                \"x\": 1109.3198898500386,\n                \"y\": 100.0897324929511,\n                \"id\": \"cfx-e4b80e21-5e95-4c34-e566-2b1ded992b39\"\n            }\n        },\n        {\n            \"widget_id\": \"6694ae72\",\n            \"layoutConfig\": {\n                \"rotation\": 0,\n                \"width\": 56.56,\n                \"height\": 37.48,\n                \"scaleX\": 1,\n                \"scaleY\": 1,\n                \"fill\": \"#fafafa00\",\n                \"opacity\": 1,\n                \"name\": \"widget-52\",\n                \"draggable\": true,\n                \"x\": 1028.6499055857475,\n                \"y\": 454.2091555169634,\n                \"id\": \"cfx-61cae683-20f6-4a1e-a020-1cfc8250455f\"\n            }\n        },\n        {\n            \"widget_id\": \"35903114\",\n            \"layoutConfig\": {\n                \"rotation\": 0,\n                \"width\": 214.57,\n                \"height\": 76.15,\n                \"scaleX\": 1,\n                \"scaleY\": 1,\n                \"fill\": \"#fafafa44\",\n                \"opacity\": 1,\n                \"name\": \"widget-53\",\n                \"draggable\": true,\n                \"x\": 960.03,\n                \"y\": 566,\n                \"id\": \"cfx-3f2540aa-7c93-4093-c153-3836b9929179\",\n                \"fillPriority\": \"color\",\n                \"skewX\": 0,\n                \"skewY\": 0,\n                \"gradientRotation\": 90,\n                \"fillLinearGradientColorStops\": [\n                    0,\n                    \"#000000\",\n                    1,\n                    \"#cccccc\"\n                ],\n                \"fillLinearGradientStartPointX\": 0,\n                \"fillLinearGradientStartPointY\": 38.074999999999996,\n                \"fillLinearGradientEndPointX\": 214.57,\n                \"fillLinearGradientEndPointY\": 38.07500000000001,\n                \"fillRadialGradientColorStops\": [\n                    0,\n                    \"#000000\",\n                    1,\n                    \"#cccccc\"\n                ],\n                \"fillRadialGradientStartPointX\": 107.285,\n                \"fillRadialGradientStartPointY\": 38.075,\n                \"fillRadialGradientEndPointX\": 107.285,\n                \"fillRadialGradientEndPointY\": 38.075,\n                \"fillRadialGradientStartRadius\": 1,\n                \"fillRadialGradientEndRadius\": 76.15\n            }\n        },\n        {\n            \"widget_id\": \"total_devices\",\n            \"layoutConfig\": {\n                \"rotation\": 0,\n                \"width\": 68,\n                \"height\": 36,\n                \"scaleX\": 1,\n                \"scaleY\": 1,\n                \"fill\": \"#fafafa00\",\n                \"opacity\": 1,\n                \"name\": \"widget-54\",\n                \"draggable\": true,\n                \"x\": 183.99998426429124,\n                \"y\": 368.99926566692466,\n                \"id\": \"cfx-927bfa11-d8c0-40ab-fc87-73c91aaf25b5\"\n            }\n        },\n        {\n            \"widget_id\": \"ae722adc\",\n            \"layoutConfig\": {\n                \"rotation\": 0,\n                \"width\": 88,\n                \"height\": 70,\n                \"scaleX\": 1,\n                \"scaleY\": 1,\n                \"fill\": \"#00FF00\",\n                \"opacity\": 1,\n                \"name\": \"widget-55\",\n                \"draggable\": true,\n                \"x\": 1082.9999003405112,\n                \"y\": 490.74971675724237,\n                \"id\": \"cfx-a68ef400-0c2a-4a45-d359-389cec81a753\"\n            }\n        },\n        {\n            \"widget_id\": \"02be1e24\",\n            \"layoutConfig\": {\n                \"rotation\": 0,\n                \"width\": 62.02,\n                \"height\": 33.9,\n                \"scaleX\": 1,\n                \"scaleY\": 1,\n                \"fill\": \"#fafafa00\",\n                \"opacity\": 1,\n                \"name\": \"widget-56\",\n                \"draggable\": true,\n                \"x\": 1027.4548321524398,\n                \"y\": 156.99970626676986,\n                \"id\": \"cfx-e6ce571c-1fe4-494b-ad22-157993ab4491\"\n            }\n        },\n        {\n            \"widget_id\": \"02be1e2a\",\n            \"layoutConfig\": {\n                \"rotation\": 0,\n                \"width\": 340.63,\n                \"height\": 181.42,\n                \"scaleX\": 1,\n                \"scaleY\": 1,\n                \"fill\": \"#fafafa33\",\n                \"opacity\": 1,\n                \"name\": \"widget-57\",\n                \"draggable\": true,\n                \"x\": 495.36995803811,\n                \"y\": 86.9998006810224,\n                \"id\": \"cfx-1b050eb4-757a-4069-9826-9f9cdf39ed41\"\n            }\n        },\n        {\n            \"widget_id\": \"rrd-1d\",\n            \"layoutConfig\": {\n                \"rotation\": 0,\n                \"width\": 162,\n                \"height\": 71,\n                \"scaleX\": 1,\n                \"scaleY\": 1,\n                \"fill\": \"#fafafa00\",\n                \"opacity\": 1,\n                \"name\": \"widget-58\",\n                \"draggable\": true,\n                \"x\": 1680.5003199594114,\n                \"y\": 341.99939679783097,\n                \"id\": \"cfx-3680a1c6-87c6-478f-f199-de34692287ff\"\n            }\n        },\n        {\n            \"widget_id\": \"ca6ce461\",\n            \"layoutConfig\": {\n                \"rotation\": 0,\n                \"width\": 48.43,\n                \"height\": 31.51,\n                \"scaleX\": 1,\n                \"scaleY\": 1,\n                \"fill\": \"#fafafa00\",\n                \"opacity\": 1,\n                \"name\": \"widget-59\",\n                \"draggable\": true,\n                \"x\": 391.20995279287376,\n                \"y\": 455.74901389558454,\n                \"id\": \"cfx-d62e4c2f-0dc2-42c1-9d58-07fa3f43b2f0\"\n            }\n        },\n        {\n            \"widget_id\": \"ccafbb84\",\n            \"layoutConfig\": {\n                \"rotation\": 0,\n                \"width\": 96.43,\n                \"height\": 34.08,\n                \"scaleX\": 1,\n                \"scaleY\": 1,\n                \"fill\": \"#fafafa00\",\n                \"opacity\": 1,\n                \"name\": \"widget-60\",\n                \"draggable\": true,\n                \"x\": 370.56958562633616,\n                \"y\": 344.9193076288147,\n                \"id\": \"cfx-dda2bdc1-ce1a-4eca-8fdf-ad6f410c98a2\"\n            }\n        },\n        {\n            \"widget_id\": \"81e9470d\",\n            \"layoutConfig\": {\n                \"rotation\": 0,\n                \"width\": 80.47,\n                \"height\": 31.98,\n                \"scaleX\": 1,\n                \"scaleY\": 1,\n                \"fill\": \"#fafafa00\",\n                \"opacity\": 1,\n                \"name\": \"widget-61\",\n                \"draggable\": true,\n                \"x\": 457.9999475476375,\n                \"y\": 457.9990296312933,\n                \"id\": \"cfx-72c7bc6d-97b4-4299-8bc7-5cf20776fa97\"\n            }\n        },\n        {\n            \"widget_id\": \"d7a41260\",\n            \"layoutConfig\": {\n                \"rotation\": 0,\n                \"width\": 381,\n                \"height\": 160,\n                \"scaleX\": 1,\n                \"scaleY\": 1,\n                \"fill\": \"#fafafa33\",\n                \"opacity\": 1,\n                \"name\": \"widget-62\",\n                \"draggable\": true,\n                \"x\": 461.9999108309837,\n                \"y\": 544.0090925741283,\n                \"id\": \"cfx-61d3ef50-f7c6-4d94-b527-56805c9323dd\"\n            }\n        },\n        {\n            \"widget_id\": \"bcc8c4fd\",\n            \"layoutConfig\": {\n                \"rotation\": 0,\n                \"width\": 329.46,\n                \"height\": 165.39,\n                \"scaleX\": 1,\n                \"scaleY\": 1,\n                \"fill\": \"#fafafa33\",\n                \"opacity\": 1,\n                \"name\": \"widget-63\",\n                \"draggable\": true,\n                \"x\": 120.54759243656,\n                \"y\": 545.0109493877618,\n                \"id\": \"cfx-e56172c0-e7d9-4940-e692-7d3d27fea8c4\"\n            }\n        },\n        {\n            \"widget_id\": \"4b622384\",\n            \"layoutConfig\": {\n                \"rotation\": 0,\n                \"width\": 350,\n                \"height\": 195,\n                \"scaleX\": 1,\n                \"scaleY\": 1,\n                \"fill\": \"#fafafa33\",\n                \"opacity\": 1,\n                \"name\": \"widget-64\",\n                \"draggable\": true,\n                \"x\": 125.99923419550709,\n                \"y\": 88.00922895027081,\n                \"id\": \"cfx-36b1172c-22b5-43c3-e4d5-78ec8b4b3e1c\"\n            }\n        },\n        {\n            \"widget_id\": \"f4243dd1\",\n            \"layoutConfig\": {\n                \"rotation\": 0,\n                \"width\": 85.18,\n                \"height\": 73.01,\n                \"scaleX\": 1,\n                \"scaleY\": 1,\n                \"fill\": \"#fafafa00\",\n                \"opacity\": 1,\n                \"name\": \"widget-65\",\n                \"draggable\": true,\n                \"x\": 1018.53,\n                \"y\": 274.33,\n                \"id\": \"cfx-715a99d5-19ba-4602-ecfc-f72ef0578e02\"\n            }\n        }\n    ],\n    \"shapes\": [\n        {\n            \"fill\": \"#F7D007\",\n            \"compType\": \"vText\",\n            \"name\": \"shape-0\",\n            \"text\": \"\u2192\",\n            \"align\": \"center\",\n            \"fontSize\": 30,\n            \"fontStyle\": \"normal\",\n            \"textDecoration\": [],\n            \"draggable\": true,\n            \"x\": 329.9999685285825,\n            \"y\": 315.99935483594095,\n            \"rotation\": 0,\n            \"scaleX\": 1,\n            \"scaleY\": 1,\n            \"offsetX\": 0,\n            \"offsetY\": 0,\n            \"skewX\": 0,\n            \"skewY\": 0,\n            \"id\": \"cfx-ea79be11-a002-467e-a89f-4201f3df1267\",\n            \"width\": 44,\n            \"height\": 30\n        },\n        {\n            \"fill\": \"#E0F113\",\n            \"compType\": \"vText\",\n            \"name\": \"shape-1\",\n            \"text\": \"Syslogs\",\n            \"align\": \"center\",\n            \"fontSize\": 15,\n            \"fontStyle\": \"bold\",\n            \"textDecoration\": [],\n            \"draggable\": true,\n            \"x\": 289.9999685285825,\n            \"y\": 354.99935483594095,\n            \"rotation\": 0,\n            \"scaleX\": 1,\n            \"scaleY\": 1,\n            \"offsetX\": 0,\n            \"offsetY\": 0,\n            \"skewX\": 0,\n            \"skewY\": 0,\n            \"opacity\": 1,\n            \"id\": \"cfx-229cc130-9ae1-43af-cde7-a3a6f5f1f0ec\"\n        },\n        {\n            \"fill\": \"#E0F113\",\n            \"compType\": \"vText\",\n            \"name\": \"shape-2\",\n            \"text\": \"Syslogs Received\",\n            \"align\": \"center\",\n            \"fontSize\": 16,\n            \"fontStyle\": \"bold\",\n            \"textDecoration\": [],\n            \"draggable\": true,\n            \"x\": 395.00007343330753,\n            \"y\": 289.99935483594095,\n            \"rotation\": 0,\n            \"scaleX\": 1,\n            \"scaleY\": 1,\n            \"offsetX\": 0,\n            \"offsetY\": 0,\n            \"skewX\": 0,\n            \"skewY\": 0,\n            \"opacity\": 1,\n            \"id\": \"cfx-2a3e223f-e580-4d78-d064-5215cdcdf850\"\n        },\n        {\n            \"fill\": \"#C1EE0F\",\n            \"compType\": \"vText\",\n            \"name\": \"shape-3\",\n            \"text\": \"Alerts\\nManagement\",\n            \"align\": \"center\",\n            \"fontSize\": 15,\n            \"fontStyle\": \"bold\",\n            \"textDecoration\": [],\n            \"draggable\": true,\n            \"x\": 996.2238335217235,\n            \"y\": 54.99981117149446,\n            \"rotation\": 0,\n            \"scaleX\": 1,\n            \"scaleY\": 1,\n            \"offsetX\": 0,\n            \"offsetY\": 0,\n            \"skewX\": 0,\n            \"skewY\": 0,\n            \"width\": 119.66,\n            \"height\": 30.5,\n            \"id\": \"cfx-46d0b0a0-2933-47f6-94b8-0846f99c58c8\"\n        },\n        {\n            \"fill\": \"#E0F113\",\n            \"compType\": \"vText\",\n            \"name\": \"shape-4\",\n            \"text\": \"Alerts\",\n            \"align\": \"center\",\n            \"fontSize\": 16,\n            \"fontStyle\": \"bold\",\n            \"textDecoration\": [],\n            \"draggable\": true,\n            \"x\": 996.7396727064639,\n            \"y\": 259.3104848230457,\n            \"rotation\": 0,\n            \"scaleX\": 1,\n            \"scaleY\": 1,\n            \"skewX\": 0,\n            \"skewY\": 0,\n            \"width\": 118.34,\n            \"height\": 18,\n            \"offsetX\": 0,\n            \"offsetY\": 0,\n            \"id\": \"cfx-0a142e6f-43bd-47a3-c4c8-60d1b4ab2664\"\n        },\n        {\n            \"fill\": \"#fafafa\",\n            \"compType\": \"vText\",\n            \"name\": \"shape-5\",\n            \"text\": \"Deduped\",\n            \"align\": \"center\",\n            \"fontSize\": 15,\n            \"fontStyle\": \"normal\",\n            \"textDecoration\": [],\n            \"draggable\": true,\n            \"x\": 1041.9531240840322,\n            \"y\": 89.4997797000774,\n            \"rotation\": 0,\n            \"scaleX\": 1,\n            \"scaleY\": 1,\n            \"offsetX\": 0,\n            \"offsetY\": 0,\n            \"skewX\": 0,\n            \"skewY\": 0,\n            \"id\": \"cfx-42b35b59-978f-43fd-b361-42118c8afc53\"\n        },\n        {\n            \"fill\": \"#fafafa\",\n            \"compType\": \"vText\",\n            \"name\": \"shape-6\",\n            \"text\": \"Ingested\",\n            \"align\": \"center\",\n            \"fontSize\": 15,\n            \"fontStyle\": \"normal\",\n            \"textDecoration\": [],\n            \"draggable\": true,\n            \"x\": 961.6194363020197,\n            \"y\": 88.49977445484114,\n            \"rotation\": 0,\n            \"scaleX\": 1,\n            \"scaleY\": 1,\n            \"offsetX\": 0,\n            \"offsetY\": 0,\n            \"skewX\": 0,\n            \"skewY\": 0,\n            \"id\": \"cfx-479a1486-bbe5-4d9e-8835-328787b3e41a\"\n        },\n        {\n            \"id\": \"imageNaN\",\n            \"name\": \"image-7\",\n            \"width\": 54.635038857253704,\n            \"height\": 58.95867502581335,\n            \"draggable\": true,\n            \"compType\": \"vImage\",\n            \"src\": \"/assets/img/icons/featureApp/svgIcons/ml.svg\",\n            \"x\": 130.99996852858317,\n            \"y\": 353.9992499312159,\n            \"rotation\": 0,\n            \"scaleX\": 1,\n            \"scaleY\": 1,\n            \"skewX\": 0,\n            \"skewY\": 0,\n            \"offsetX\": 0,\n            \"offsetY\": 0,\n            \"image\": {}\n        },\n        {\n            \"id\": \"imageNaN\",\n            \"name\": \"image-8\",\n            \"width\": 37.38841895089265,\n            \"height\": 44.86610274107118,\n            \"draggable\": true,\n            \"compType\": \"vImage\",\n            \"src\": \"/assets/img/icons/featureApp/svgIcons/contract.svg\",\n            \"x\": 297.9999685285843,\n            \"y\": 305.9993548359409,\n            \"rotation\": 0,\n            \"scaleX\": 1,\n            \"scaleY\": 1,\n            \"offsetX\": 0,\n            \"offsetY\": 0,\n            \"skewX\": 0,\n            \"skewY\": 0,\n            \"image\": {}\n        },\n        {\n            \"id\": \"imageNaN\",\n            \"name\": \"image-9\",\n            \"width\": 31.63131608268677,\n            \"height\": 34.13451375829508,\n            \"draggable\": true,\n            \"compType\": \"vImage\",\n            \"src\": \"/assets/img/icons/featureApp/svgIcons/alert.svg\",\n            \"x\": 976.5121448601976,\n            \"y\": 51.5613446645707,\n            \"rotation\": 0,\n            \"scaleX\": 1,\n            \"scaleY\": 1,\n            \"skewX\": 0,\n            \"skewY\": 0,\n            \"offsetX\": 0,\n            \"offsetY\": 0,\n            \"image\": {}\n        },\n        {\n            \"width\": 37.38841895089265,\n            \"height\": 44.5916923267527,\n            \"draggable\": true,\n            \"compType\": \"vImage\",\n            \"name\": \"image-10\",\n            \"x\": 299.99995279287555,\n            \"y\": 425.99911355507334,\n            \"src\": \"/assets/img/icons/featureApp/svgIcons/contract.svg\",\n            \"rotation\": 0,\n            \"scaleX\": 1,\n            \"scaleY\": 1,\n            \"offsetX\": 0,\n            \"offsetY\": 0,\n            \"skewX\": 0,\n            \"skewY\": 0,\n            \"image\": {}\n        },\n        {\n            \"fill\": \"#E0F113\",\n            \"compType\": \"vText\",\n            \"name\": \"shape-11\",\n            \"text\": \"SNMP\\nTraps\",\n            \"align\": \"center\",\n            \"fontSize\": 15,\n            \"fontStyle\": \"bold\",\n            \"textDecoration\": [],\n            \"draggable\": true,\n            \"x\": 292.99996328334623,\n            \"y\": 477.9991188003096,\n            \"rotation\": 0,\n            \"scaleX\": 1,\n            \"scaleY\": 1,\n            \"offsetX\": 0,\n            \"offsetY\": 0,\n            \"skewX\": 0,\n            \"skewY\": 0,\n            \"opacity\": 1,\n            \"id\": \"cfx-229cc130-9ae1-43af-cde7-a3a6f5f1f0ec\"\n        },\n        {\n            \"fill\": \"#F7D007\",\n            \"compType\": \"vText\",\n            \"name\": \"shape-12\",\n            \"text\": \"\u2192\",\n            \"align\": \"center\",\n            \"fontSize\": 30,\n            \"fontStyle\": \"normal\",\n            \"textDecoration\": [],\n            \"draggable\": true,\n            \"x\": 321.9999527928737,\n            \"y\": 433.99980592625866,\n            \"rotation\": 0,\n            \"scaleX\": 1,\n            \"scaleY\": 1,\n            \"offsetX\": 0,\n            \"offsetY\": 0,\n            \"skewX\": 0,\n            \"skewY\": 0,\n            \"id\": \"cfx-ea79be11-a002-467e-a89f-4201f3df1267\",\n            \"width\": 62,\n            \"height\": 30\n        },\n        {\n            \"fill\": \"#E0F113\",\n            \"compType\": \"vText\",\n            \"name\": \"shape-13\",\n            \"text\": \"Traps Received\",\n            \"align\": \"center\",\n            \"fontSize\": 16,\n            \"fontStyle\": \"bold\",\n            \"textDecoration\": [],\n            \"draggable\": true,\n            \"x\": 398.000020980945,\n            \"y\": 399.99913453601835,\n            \"rotation\": 0,\n            \"scaleX\": 1,\n            \"scaleY\": 1,\n            \"offsetX\": 0,\n            \"offsetY\": 0,\n            \"skewX\": 0,\n            \"skewY\": 0,\n            \"opacity\": 1,\n            \"id\": \"cfx-2a3e223f-e580-4d78-d064-5215cdcdf850\"\n        },\n        {\n            \"compType\": \"vLine\",\n            \"rotation\": 0,\n            \"x\": 1113.0002465261039,\n            \"y\": 633.9999947547637,\n            \"points\": [\n                -242.000020980945,\n                -185.00090742587167,\n                -242.99997377381874,\n                -484.0000996594888\n            ],\n            \"width\": 100,\n            \"height\": 100,\n            \"scaleX\": 1,\n            \"scaleY\": 1,\n            \"strokeWidth\": 2,\n            \"stroke\": \"#F7D007\",\n            \"name\": \"shape-14\",\n            \"draggable\": true,\n            \"id\": \"cfx-b7a5f02a-0544-494a-f033-6397717b9268\",\n            \"offsetX\": 0,\n            \"offsetY\": 0,\n            \"skewX\": 0,\n            \"skewY\": 0\n        },\n        {\n            \"compType\": \"vLine\",\n            \"rotation\": 0,\n            \"x\": 697.9999685285825,\n            \"y\": 497.99907683841957,\n            \"points\": [\n                -157,\n                -51,\n                172.0002412808676,\n                -49.99999475476375\n            ],\n            \"width\": 100,\n            \"height\": 100,\n            \"scaleX\": 1,\n            \"scaleY\": 1,\n            \"strokeWidth\": 2,\n            \"stroke\": \"#F7D007\",\n            \"name\": \"shape-15\",\n            \"draggable\": true,\n            \"id\": \"cfx-b7a5f02a-0544-494a-f033-6397717b9268\",\n            \"offsetX\": 0,\n            \"offsetY\": 0,\n            \"skewX\": 0,\n            \"skewY\": 0\n        },\n        {\n            \"fill\": \"#E0F113\",\n            \"compType\": \"vText\",\n            \"name\": \"shape-16\",\n            \"text\": \"Dropped\",\n            \"align\": \"center\",\n            \"fontSize\": 15,\n            \"fontStyle\": \"bold\",\n            \"textDecoration\": [],\n            \"draggable\": true,\n            \"x\": 460.00046682602647,\n            \"y\": 330.9993181192872,\n            \"rotation\": 0,\n            \"scaleX\": 1,\n            \"scaleY\": 1,\n            \"offsetX\": 0,\n            \"offsetY\": 0,\n            \"skewX\": 0,\n            \"skewY\": 0,\n            \"opacity\": 1,\n            \"id\": \"cfx-229cc130-9ae1-43af-cde7-a3a6f5f1f0ec\",\n            \"width\": 78.34,\n            \"height\": 19\n        },\n        {\n            \"fill\": \"#fafafa\",\n            \"compType\": \"vText\",\n            \"name\": \"shape-17\",\n            \"text\": \"Correlated\",\n            \"align\": \"center\",\n            \"fontSize\": 15,\n            \"fontStyle\": \"normal\",\n            \"textDecoration\": [],\n            \"draggable\": true,\n            \"x\": 1115.9531083483234,\n            \"y\": 89.4997797000774,\n            \"rotation\": 0,\n            \"scaleX\": 1,\n            \"scaleY\": 1,\n            \"offsetX\": 0,\n            \"offsetY\": 0,\n            \"skewX\": 0,\n            \"skewY\": 0,\n            \"id\": \"cfx-42b35b59-978f-43fd-b361-42118c8afc53\"\n        },\n        {\n            \"compType\": \"vArrow\",\n            \"rotation\": 0,\n            \"x\": 655.9998426429124,\n            \"y\": 170.99989509527495,\n            \"points\": [\n                267,\n                -22,\n                213.0004196189002,\n                -22.000005245236252\n            ],\n            \"width\": 100,\n            \"height\": 100,\n            \"scaleX\": 1,\n            \"scaleY\": 1,\n            \"strokeWidth\": 2,\n            \"stroke\": \"#F7D007\",\n            \"name\": \"shape-18\",\n            \"draggable\": true,\n            \"pointerAtBeginning\": true,\n            \"pointerAtEnding\": false,\n            \"id\": \"cfx-c76b119f-44e0-4166-d464-98bfde21e142\",\n            \"dashEnabled\": true,\n            \"offsetX\": 0,\n            \"offsetY\": 0,\n            \"skewX\": 0,\n            \"skewY\": 0\n        },\n        {\n            \"fill\": \"#E0F113\",\n            \"compType\": \"vText\",\n            \"name\": \"shape-19\",\n            \"text\": \"Incidents\",\n            \"align\": \"center\",\n            \"fontSize\": 16,\n            \"fontStyle\": \"bold\",\n            \"textDecoration\": [],\n            \"draggable\": true,\n            \"x\": 998.7396150088651,\n            \"y\": 437.31027501359563,\n            \"rotation\": 0,\n            \"scaleX\": 1,\n            \"scaleY\": 1,\n            \"skewX\": 0,\n            \"skewY\": 0,\n            \"width\": 118.34,\n            \"height\": 18,\n            \"offsetX\": 0,\n            \"offsetY\": 0,\n            \"id\": \"cfx-0a142e6f-43bd-47a3-c4c8-60d1b4ab2664\"\n        },\n        {\n            \"compType\": \"vArrow\",\n            \"rotation\": 0,\n            \"x\": 700.9999842642912,\n            \"y\": 158.99967479535235,\n            \"points\": [\n                355.9999895095275,\n                93.99969577629736,\n                356,\n                55\n            ],\n            \"width\": 100,\n            \"height\": 100,\n            \"scaleX\": 1,\n            \"scaleY\": 1,\n            \"strokeWidth\": 2,\n            \"stroke\": \"#F7D007\",\n            \"name\": \"shape-20\",\n            \"draggable\": true,\n            \"pointerAtBeginning\": true,\n            \"pointerAtEnding\": false,\n            \"id\": \"cfx-c76b119f-44e0-4166-d464-98bfde21e142\",\n            \"dashEnabled\": true,\n            \"offsetX\": 0,\n            \"offsetY\": 0,\n            \"skewX\": 0,\n            \"skewY\": 0\n        },\n        {\n            \"compType\": \"vArrow\",\n            \"rotation\": 0,\n            \"x\": 723.9999895095275,\n            \"y\": 116.99929713834217,\n            \"points\": [\n                336.00000524523625,\n                312.9998688690937,\n                334,\n                262\n            ],\n            \"width\": 100,\n            \"height\": 100,\n            \"scaleX\": 1,\n            \"scaleY\": 1,\n            \"strokeWidth\": 2,\n            \"stroke\": \"#F7D007\",\n            \"name\": \"shape-21\",\n            \"draggable\": true,\n            \"pointerAtBeginning\": true,\n            \"pointerAtEnding\": false,\n            \"id\": \"cfx-c76b119f-44e0-4166-d464-98bfde21e142\",\n            \"dashEnabled\": true,\n            \"offsetX\": 0,\n            \"offsetY\": 0,\n            \"skewX\": 0,\n            \"skewY\": 0\n        },\n        {\n            \"compType\": \"vLine\",\n            \"rotation\": 0,\n            \"x\": 206.99995279287373,\n            \"y\": 619.5148959121609,\n            \"points\": [\n                35,\n                -234,\n                63,\n                -234\n            ],\n            \"width\": 100,\n            \"height\": 100,\n            \"scaleX\": 1,\n            \"scaleY\": 1,\n            \"strokeWidth\": 2,\n            \"stroke\": \"#F7D007\",\n            \"name\": \"shape-22\",\n            \"draggable\": true,\n            \"id\": \"cfx-0eb287b9-e8cb-48bf-db07-dfc223bdee8a\",\n            \"offsetX\": 0,\n            \"offsetY\": 0,\n            \"skewX\": 0,\n            \"skewY\": 0\n        },\n        {\n            \"compType\": \"vLine\",\n            \"rotation\": 0,\n            \"x\": 243.99996852858249,\n            \"y\": 691.514979835941,\n            \"points\": [\n                28,\n                -362,\n                27.999994754763748,\n                -240.0002307903951\n            ],\n            \"width\": 100,\n            \"height\": 100,\n            \"scaleX\": 1,\n            \"scaleY\": 1,\n            \"strokeWidth\": 2,\n            \"stroke\": \"#F7D007\",\n            \"name\": \"shape-23\",\n            \"draggable\": true,\n            \"id\": \"cfx-0eb287b9-e8cb-48bf-db07-dfc223bdee8a\",\n            \"offsetX\": 0,\n            \"offsetY\": 0,\n            \"skewX\": 0,\n            \"skewY\": 0\n        },\n        {\n            \"compType\": \"vLine\",\n            \"rotation\": 0,\n            \"x\": 240.99998426429124,\n            \"y\": 683.5147438003096,\n            \"points\": [\n                31.999984264291243,\n                -234,\n                55,\n                -234\n            ],\n            \"width\": 100,\n            \"height\": 100,\n            \"scaleX\": 1,\n            \"scaleY\": 1,\n            \"strokeWidth\": 2,\n            \"stroke\": \"#F7D007\",\n            \"name\": \"shape-24\",\n            \"draggable\": true,\n            \"id\": \"cfx-0eb287b9-e8cb-48bf-db07-dfc223bdee8a\",\n            \"offsetX\": 0,\n            \"offsetY\": 0,\n            \"skewX\": 0,\n            \"skewY\": 0\n        },\n        {\n            \"compType\": \"vLine\",\n            \"rotation\": 0,\n            \"x\": 254.99996852858249,\n            \"y\": 620.514979835941,\n            \"points\": [\n                15.999989509527495,\n                -292,\n                39,\n                -292\n            ],\n            \"width\": 100,\n            \"height\": 100,\n            \"scaleX\": 1,\n            \"scaleY\": 1,\n            \"strokeWidth\": 2,\n            \"stroke\": \"#F7D007\",\n            \"name\": \"shape-25\",\n            \"draggable\": true,\n            \"id\": \"cfx-0eb287b9-e8cb-48bf-db07-dfc223bdee8a\",\n            \"offsetX\": 0,\n            \"offsetY\": 0,\n            \"skewX\": 0,\n            \"skewY\": 0\n        },\n        {\n            \"fill\": \"#E0F113\",\n            \"compType\": \"vText\",\n            \"name\": \"shape-26\",\n            \"text\": \"No Ticketing \\nsystem Interaged\",\n            \"align\": \"center\",\n            \"fontSize\": 15,\n            \"fontStyle\": \"bold\",\n            \"textDecoration\": [],\n            \"draggable\": true,\n            \"x\": 1706.0003094689391,\n            \"y\": 479.99946498590225,\n            \"rotation\": 0,\n            \"scaleX\": 1,\n            \"scaleY\": 1,\n            \"offsetX\": 0,\n            \"offsetY\": 0,\n            \"skewX\": 0,\n            \"skewY\": 0,\n            \"opacity\": 1,\n            \"id\": \"cfx-229cc130-9ae1-43af-cde7-a3a6f5f1f0ec\"\n        },\n        {\n            \"fill\": \"#E0F113\",\n            \"compType\": \"vText\",\n            \"name\": \"shape-27\",\n            \"text\": \"Total Devices\",\n            \"align\": \"center\",\n            \"fontSize\": 13,\n            \"fontStyle\": \"bold\",\n            \"textDecoration\": [],\n            \"draggable\": true,\n            \"x\": 176.99996852858249,\n            \"y\": 344.99928140263336,\n            \"rotation\": 0,\n            \"scaleX\": 1,\n            \"scaleY\": 1,\n            \"offsetX\": 0,\n            \"offsetY\": 0,\n            \"skewX\": 0,\n            \"skewY\": 0,\n            \"opacity\": 1,\n            \"id\": \"cfx-229cc130-9ae1-43af-cde7-a3a6f5f1f0ec\"\n        },\n        {\n            \"fill\": \"#fafafa\",\n            \"compType\": \"vText\",\n            \"name\": \"shape-28\",\n            \"text\": \"Noise Reduction\",\n            \"align\": \"center\",\n            \"fontSize\": 18,\n            \"fontStyle\": \"normal\",\n            \"textDecoration\": [],\n            \"draggable\": true,\n            \"x\": 972.9498688690937,\n            \"y\": 133.99968528582485,\n            \"rotation\": 0,\n            \"scaleX\": 1,\n            \"scaleY\": 1,\n            \"offsetX\": 0,\n            \"offsetY\": 0,\n            \"skewX\": 0,\n            \"skewY\": 0,\n            \"id\": \"cfx-42b35b59-978f-43fd-b361-42118c8afc53\",\n            \"width\": 185.03,\n            \"height\": 36\n        },\n        {\n            \"fill\": \"#000000\",\n            \"compType\": \"vText\",\n            \"name\": \"shape-29\",\n            \"text\": \"ITSM\",\n            \"align\": \"center\",\n            \"fontSize\": 32,\n            \"fontFamily\": \"Roboto\",\n            \"fontStyle\": \"normal\",\n            \"textDecoration\": [],\n            \"draggable\": true,\n            \"x\": 1752.0002465261039,\n            \"y\": 493.99939679783097,\n            \"id\": \"cfx-2407f748-d7e3-4613-dd57-ec1383a38f9d\",\n            \"rotation\": 0,\n            \"scaleX\": 1,\n            \"scaleY\": 1,\n            \"offsetX\": 0,\n            \"offsetY\": 0,\n            \"skewX\": 0,\n            \"skewY\": 0\n        },\n        {\n            \"fill\": \"#E0F113\",\n            \"compType\": \"vText\",\n            \"name\": \"shape-30\",\n            \"text\": \"Top 5 Dropped Syslogs\",\n            \"align\": \"center\",\n            \"fontSize\": 15,\n            \"fontStyle\": \"bold\",\n            \"textDecoration\": [],\n            \"draggable\": true,\n            \"x\": 578.0001468666151,\n            \"y\": 62.99981117149491,\n            \"rotation\": 0,\n            \"scaleX\": 1,\n            \"scaleY\": 1,\n            \"offsetX\": 0,\n            \"offsetY\": 0,\n            \"skewX\": 0,\n            \"skewY\": 0,\n            \"opacity\": 1,\n            \"id\": \"cfx-229cc130-9ae1-43af-cde7-a3a6f5f1f0ec\",\n            \"height\": 21,\n            \"width\": 166.41\n        },\n        {\n            \"compType\": \"vLine\",\n            \"rotation\": 0,\n            \"x\": 912.9999685285825,\n            \"y\": 434.99935483594095,\n            \"points\": [\n                -41.999711512006115,\n                -103.9999895095275,\n                -375,\n                -107\n            ],\n            \"width\": 100,\n            \"height\": 100,\n            \"scaleX\": 1,\n            \"scaleY\": 1,\n            \"strokeWidth\": 2,\n            \"stroke\": \"#F7D007\",\n            \"name\": \"shape-31\",\n            \"draggable\": true,\n            \"id\": \"cfx-b7a5f02a-0544-494a-f033-6397717b9268\",\n            \"offsetX\": 0,\n            \"offsetY\": 0,\n            \"skewX\": 0,\n            \"skewY\": 0\n        },\n        {\n            \"fill\": \"#E0F113\",\n            \"compType\": \"vText\",\n            \"name\": \"shape-32\",\n            \"text\": \"Procesed\",\n            \"align\": \"center\",\n            \"fontSize\": 16,\n            \"fontStyle\": \"bold\",\n            \"textDecoration\": [],\n            \"draggable\": true,\n            \"x\": 382.99958562633606,\n            \"y\": 331.9993286097597,\n            \"rotation\": 0,\n            \"scaleX\": 1,\n            \"scaleY\": 1,\n            \"offsetX\": 0,\n            \"offsetY\": 0,\n            \"skewX\": 0,\n            \"skewY\": 0,\n            \"opacity\": 1,\n            \"id\": \"cfx-2a3e223f-e580-4d78-d064-5215cdcdf850\"\n        },\n        {\n            \"fill\": \"#E0F113\",\n            \"compType\": \"vText\",\n            \"name\": \"shape-33\",\n            \"text\": \"Procesed\",\n            \"align\": \"center\",\n            \"fontSize\": 16,\n            \"fontStyle\": \"bold\",\n            \"textDecoration\": [],\n            \"draggable\": true,\n            \"x\": 379.999501702556,\n            \"y\": 443.9990191408208,\n            \"rotation\": 0,\n            \"scaleX\": 1,\n            \"scaleY\": 1,\n            \"offsetX\": 0,\n            \"offsetY\": 0,\n            \"skewX\": 0,\n            \"skewY\": 0,\n            \"opacity\": 1,\n            \"id\": \"cfx-2a3e223f-e580-4d78-d064-5215cdcdf850\"\n        },\n        {\n            \"fill\": \"#E0F113\",\n            \"compType\": \"vText\",\n            \"name\": \"shape-34\",\n            \"text\": \"Dropped\",\n            \"align\": \"center\",\n            \"fontSize\": 16,\n            \"fontStyle\": \"bold\",\n            \"textDecoration\": [],\n            \"draggable\": true,\n            \"x\": 471.00044059984526,\n            \"y\": 445.9990296312933,\n            \"rotation\": 0,\n            \"scaleX\": 1,\n            \"scaleY\": 1,\n            \"offsetX\": 0,\n            \"offsetY\": 0,\n            \"skewX\": 0,\n            \"skewY\": 0,\n            \"opacity\": 1,\n            \"id\": \"cfx-2a3e223f-e580-4d78-d064-5215cdcdf850\"\n        },\n        {\n            \"fill\": \"#E0F113\",\n            \"compType\": \"vText\",\n            \"name\": \"shape-35\",\n            \"text\": \"Top 5 Dropped Traps\",\n            \"align\": \"center\",\n            \"fontSize\": 15,\n            \"fontStyle\": \"bold\",\n            \"textDecoration\": [],\n            \"draggable\": true,\n            \"x\": 570.001101499613,\n            \"y\": 524.0020823587923,\n            \"rotation\": 0,\n            \"scaleX\": 1,\n            \"scaleY\": 1,\n            \"offsetX\": 0,\n            \"offsetY\": 0,\n            \"skewX\": 0,\n            \"skewY\": 0,\n            \"opacity\": 1,\n            \"id\": \"cfx-229cc130-9ae1-43af-cde7-a3a6f5f1f0ec\",\n            \"height\": 20\n        },\n        {\n            \"fill\": \"#E0F113\",\n            \"compType\": \"vText\",\n            \"name\": \"shape-36\",\n            \"text\": \"Top 5 Procesed Traps\",\n            \"align\": \"center\",\n            \"fontSize\": 15,\n            \"fontStyle\": \"bold\",\n            \"textDecoration\": [],\n            \"draggable\": true,\n            \"x\": 181.9989089908594,\n            \"y\": 527.0019407374135,\n            \"rotation\": 0,\n            \"scaleX\": 1,\n            \"scaleY\": 1,\n            \"offsetX\": 0,\n            \"offsetY\": 0,\n            \"skewX\": 0,\n            \"skewY\": 0,\n            \"opacity\": 1,\n            \"id\": \"cfx-229cc130-9ae1-43af-cde7-a3a6f5f1f0ec\",\n            \"height\": 20\n        },\n        {\n            \"fill\": \"#E0F113\",\n            \"compType\": \"vText\",\n            \"name\": \"shape-37\",\n            \"text\": \"Top 5 Processed Syslogs\",\n            \"align\": \"center\",\n            \"fontSize\": 15,\n            \"fontStyle\": \"bold\",\n            \"textDecoration\": [],\n            \"draggable\": true,\n            \"x\": 185.99982690720367,\n            \"y\": 62.999795435786154,\n            \"rotation\": 0,\n            \"scaleX\": 1,\n            \"scaleY\": 1,\n            \"offsetX\": 0,\n            \"offsetY\": 0,\n            \"skewX\": 0,\n            \"skewY\": 0,\n            \"opacity\": 1,\n            \"id\": \"cfx-229cc130-9ae1-43af-cde7-a3a6f5f1f0ec\",\n            \"height\": 21,\n            \"width\": 207.41\n        }\n    ],\n    \"lines\": [],\n    \"sbBookmarkList\": [\n        {\n            \"title\": \"Alert and Incidents Summary\",\n            \"boundRect\": {\n                \"x\": 335.9037935190936,\n                \"y\": 321.7200267809835,\n                \"width\": 389.97,\n                \"height\": 239.98\n            },\n            \"seqNum\": null,\n            \"name\": \"tool-bookmark--Infinity\"\n        },\n        {\n            \"title\": \"FSM\",\n            \"boundRect\": {\n                \"x\": 862.0000000000008,\n                \"y\": 463.0077515368092,\n                \"width\": 331.6,\n                \"height\": 204.07\n            },\n            \"seqNum\": 3,\n            \"name\": \"tool-bookmark-3\"\n        },\n        {\n            \"title\": \"FSM2\",\n            \"boundRect\": {\n                \"x\": 827.1173952865421,\n                \"y\": 65.18901037828898,\n                \"width\": 444.1,\n                \"height\": 273.29\n            },\n            \"seqNum\": 4,\n            \"name\": \"tool-bookmark-4\"\n        }\n    ]\n}"
+        }
+    ]
+}

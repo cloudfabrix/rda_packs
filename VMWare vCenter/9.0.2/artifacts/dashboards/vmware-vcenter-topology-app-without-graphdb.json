@@ -1,0 +1,91 @@
+{
+    "name": "vmware-vcenter-topology-app-without-graphdb",
+    "label": "VMWare Asset Navigator",
+    "description": "VMWare Asset Navigato",
+    "dashboard_folder": "VMWare",
+    "version": "23.4.14.1",
+    "enabled": false,
+    "short_label": "Stack",
+    "context_label_id": "stack_name",
+    "dashboard_type": "template",
+    "dashboard_style": "auto",
+    "dashboard_filters": {},
+    "template_variables": {
+        "NODE_ID": {
+            "contextId": [
+                "navigatorSelectionContexts",
+                "secondaryListSelection",
+                "node_id"
+            ]
+        },
+        "CUST_TAG": {
+            "contextId": "customerTag"
+        },
+        "CUSTOMER_NAME": {
+            "contextId": "customerName"
+        },
+        "CUSTOMER_ID": {
+            "contextId": "customerId"
+        },
+        "PROJECT_ID": {
+            "contextId": "project_id"
+        }
+    },
+    "navigation_dashboards": {
+        "tree_data": {
+            "column_name": "node_type",
+            "pstream_name": "cfx_rdaf_topology_nodes",
+            "cfxql_query": "timestamp is after -12 months and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)"
+        },
+        "tree_detail": {
+            "display_column": "node_label",
+            "selected_columns": {
+                "node_id": "Node Id",
+                "node_label": "Node Name"
+            },
+            "pstream_name": "cfx_rdaf_topology_nodes",
+            "cfxql_query": "timestamp is after -12 months and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)"
+        },
+        "showNodeIcon": true,
+        "showSearchBox": false
+    },
+    "dashboard_sections": [
+        {
+            "title": "Node Details",
+            "widgets": [
+                {
+                    "title": "Summary",
+                    "widget_type": "portal_summary",
+                    "reportId": "rda.saas.topology.node_details.report",
+                    "max_width": 4,
+                    "height": 5,
+                    "min_width": 4,
+                    "widget_id": "182229d8"
+                },
+                {
+                    "title": "Edges Summary",
+                    "widget_type": "tabular",
+                    "stream": "cfx_rdaf_topology_edges",
+                    "query": "timestamp is after -12 months and left_id is '{{NODE_ID}}' or right_id is '{{NODE_ID}}' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "max_width": 8,
+                    "height": 5,
+                    "min_width": 8,
+                    "widget_id": "db22e771"
+                },
+                {
+                    "title": "Topology",
+                    "widget_type": "topology",
+                    "register_search_endpoints": true,
+                    "auto_group": false,
+                    "reportId": "rda.saas.stack.view.topo",
+                    "stack0": "vmware_vcenter_topology",
+                    "stack": "vcenter",
+                    "height": 10,
+                    "min_wdith": 12,
+                    "widget_id": "182287d8"
+                }
+            ]
+        }
+    ],
+    "saved_time": "2025-01-22T22:55:50.890404"
+}

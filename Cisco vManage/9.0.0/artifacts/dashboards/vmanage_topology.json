@@ -1,0 +1,258 @@
+{
+    "name": "vmanage_topology",
+    "label": "SDWAN Topology",
+    "description": "SDWAN Topology",
+    "live_edit": true,
+    "version": "24.07.22.2",
+    "enabled": true,
+    "dashboard_type": "template",
+    "dashboard_folder": "Onboarding",
+    "dashboard_style": "auto",
+    "template_variables": {
+        "CUST_TAG": {
+            "contextId": "customerTag"
+        },
+        "CUSTOMER_NAME": {
+            "contextId": "customerName"
+        },
+        "CUSTOMER_ID": {
+            "contextId": "customerId"
+        },
+        "PROJECT_ID": {
+            "contextId": "project_id"
+        }
+    },
+    "dashboard_sections": [
+        {
+            "title": "SDWAN Topology",
+            "widgets": [
+                {
+                    "title": "Topology View",
+                    "widget_type": "topology",
+                    "inMultiviewContainer": true,
+                    "register_search_endpoints": true,
+                    "reportId": "rda.saas.stack.view.topo",
+                    "context_attributes": {
+                        "CHASSIS": [
+                            "parent_sn",
+                            "device_ip"
+                        ],
+                        "Edge": [
+                            "edge_ip",
+                            "edgeName",
+                            "serialNumber",
+                            "edge_id"
+                        ]
+                    },
+                    "limit_to_node_types": [
+                        "CHASSIS",
+                        "Edge"
+                    ],
+                    "has_more_data_flag": false,
+                    "expand_all": true,
+                    "stack_type": "dynamic",
+                    "stack_definition": {
+                        "name": "Telco Stack",
+                        "description": "",
+                        "saved_time": "2023-09-12T21:08:31.418255",
+                        "is_dynamic": true,
+                        "hierarchical": true,
+                        "dynamic_nodes": {
+                            "stream": "vmanage_nodes",
+                            "query": "(customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                            "limit": 0,
+                            "sorting": null
+                        },
+                        "dynamic_relationships": {
+                            "stream": "vmanage_edges",
+                            "limit": 0,
+                            "sorting": null
+                        }
+                    },
+                    "nodes_report": {
+                        "reportMetaData": {
+                            "sorting": true,
+                            "filtering": true,
+                            "title": "Nodes",
+                            "remote_searchable": false,
+                            "remote_searchable_cols": [
+                                "node_type",
+                                "node_label",
+                                "node_id",
+                                "IP",
+                                "port",
+                                "system_ip"
+                            ],
+                            "reportColumnDefinitionList": [
+                                {
+                                    "identifier": "node_label",
+                                    "title": "Name",
+                                    "key": false
+                                },
+                                {
+                                    "identifier": "system_ip",
+                                    "title": "System IP",
+                                    "key": false
+                                },
+                                {
+                                    "identifier": "node_type",
+                                    "title": "Type",
+                                    "key": false
+                                },
+                                {
+                                    "identifier": "IP",
+                                    "key": false,
+                                    "title": "IP Address"
+                                },
+                                {
+                                    "identifier": "port",
+                                    "key": false,
+                                    "title": "Port"
+                                },
+                                {
+                                    "identifier": "source_ip",
+                                    "key": false,
+                                    "title": "Source IP"
+                                },
+                                {
+                                    "identifier": "node_id",
+                                    "key": true,
+                                    "hidden": true
+                                }
+                            ]
+                        }
+                    },
+                    "nodes_asset_report": {
+                        "dashboardId": "Topology",
+                        "reportId": "dynamic_v2_tabular_report_0_1",
+                        "ignore_context_filter": true
+                    },
+                    "edges_report": {
+                        "reportId": "rda.saas.topology.edges.report",
+                        "reportMetaData": {
+                            "sorting": true,
+                            "filtering": true,
+                            "title": "Edges",
+                            "reportColumnDefinitionList": [
+                                {
+                                    "id": "left_id",
+                                    "identifier": "left_id",
+                                    "key": true,
+                                    "title": "Left Id",
+                                    "type": "TEXT",
+                                    "visible": false
+                                },
+                                {
+                                    "id": "left_label",
+                                    "identifier": "left_label",
+                                    "key": false,
+                                    "title": "Source",
+                                    "type": "TEXT",
+                                    "visible": true
+                                },
+                                {
+                                    "id": "right_id",
+                                    "identifier": "right_id",
+                                    "key": true,
+                                    "title": "Right Id",
+                                    "type": "TEXT",
+                                    "visible": false
+                                },
+                                {
+                                    "id": "right_label",
+                                    "identifier": "right_label",
+                                    "key": false,
+                                    "title": "Destination",
+                                    "type": "TEXT",
+                                    "visible": true
+                                },
+                                {
+                                    "id": "color",
+                                    "identifier": "color",
+                                    "key": false,
+                                    "title": "Color",
+                                    "type": "TEXT"
+                                },
+                                {
+                                    "id": "vdevice_name",
+                                    "identifier": "vdevice_name",
+                                    "key": false,
+                                    "title": "VDevice Name",
+                                    "type": "TEXT"
+                                },
+                                {
+                                    "id": "src_port",
+                                    "identifier": "src_port",
+                                    "key": false,
+                                    "title": "Source Port",
+                                    "type": "TEXT"
+                                },
+                                {
+                                    "id": "dsc_port",
+                                    "identifier": "dsc_port",
+                                    "key": false,
+                                    "title": "Destination Port",
+                                    "type": "TEXT",
+                                    "visible": false
+                                },
+                                {
+                                    "id": "site_id",
+                                    "identifier": "site_id",
+                                    "key": false,
+                                    "title": "site_id",
+                                    "type": "TEXT",
+                                    "visible": false
+                                },
+                                {
+                                    "id": "system_ip",
+                                    "identifier": "system_ip",
+                                    "key": false,
+                                    "title": "System IP",
+                                    "type": "TEXT",
+                                    "visible": false
+                                },
+                                {
+                                    "id": "local_color",
+                                    "identifier": "local_color",
+                                    "key": false,
+                                    "title": "Local Color",
+                                    "type": "TEXT",
+                                    "visible": false
+                                },
+                                {
+                                    "id": "vmanage_system_ip",
+                                    "identifier": "vmanage_system_ip",
+                                    "key": false,
+                                    "title": "vManage System IP",
+                                    "type": "TEXT",
+                                    "visible": false
+                                },
+                                {
+                                    "id": "state",
+                                    "identifier": "state",
+                                    "key": false,
+                                    "title": "state",
+                                    "type": "TEXT",
+                                    "visible": false
+                                },
+                                {
+                                    "id": "proto",
+                                    "identifier": "proto",
+                                    "key": false,
+                                    "title": "Protocol",
+                                    "type": "TEXT",
+                                    "visible": false
+                                }
+                            ],
+                            "actions": []
+                        }
+                    },
+                    "height": 12,
+                    "min_wdith": 12,
+                    "widget_id": "182287d8"
+                }
+            ]
+        }
+    ],
+    "saved_time": "2025-01-30T17:45:39.150284"
+}

@@ -1,0 +1,184 @@
+name: VMWare VeloCloud
+label: VMWare VeloCloud Inventory Collection
+scope: system
+# Pack version needs to be conforming to <major>.<minor>.<micro> etc versioning.
+# More detailed spec for versioning: https://packaging.python.org/en/latest/specifications/version-specifiers/
+version: 8.0.0
+folder: VCOSystemPack
+published_date: 2025-03-30
+publisher: CloudFabrix
+# Description of the package. Supports HTML/markdown/plain text
+# Either can provide description as an inline string in this file
+# or have description.html and description.md and give corresponding file paths instead.
+# If description is provided by multiple ways, the order of precedence is description.md > description.html > description.value
+
+description: 
+  #value: "VeloCloud Inventory collection"
+  md: "./description.md"
+
+type: collection
+
+# Other packs that this solution requires to be deployed
+requires:
+  - name: Base Pack
+    version: ">=5.0.0"
+
+
+artifacts:
+  
+  pstreams:
+
+    - name: vco_1
+      attributes:
+        retention_days: 30
+        unique_keys: ["unique_id"]
+      autocreate: true
+    
+    - name: velocloud_access_verification_status
+      attributes:
+        retention_days: 30
+        unique_keys: ["source_ip"]
+    
+    - name: vco-inventory-collection-status-stream
+      attributes:
+        retention_days: 30
+        unique_keys: ["bot_name"]
+    
+    - name: velocloud_on_boarded_devices
+      attributes:
+        retention_days: 30
+        unique_keys: ["vco_cred","enterprise_id"]
+  
+  dashboards:
+   
+    - name: vco_main_app
+      file: ./artifacts/dashboards/vco_main_app.json
+      folder: VCOSystemPack
+
+ 
+    - name: vco_edge_drilldown
+      file: ./artifacts/dashboards/vco_edge_drilldown.json
+
+    - name: vco_inventory
+      file: ./artifacts/dashboards/vco_inventory.json
+
+    - name: vco_proxy_gateway
+      file: ./artifacts/dashboards/vco_proxy_gateway.json
+
+    - name: vco_topology
+      file: ./artifacts/dashboards/vco_topology.json
+    
+    - name: velocloud_configure_and_manage
+      file: ./artifacts/dashboards/velocloud_configure_and_manage.json
+
+    - name: velocloud_asset_navigator
+      file: ./artifacts/dashboards/velocloud_asset_navigator.json
+    
+    - name: velocloud_collection_and_access_status
+      file: ./artifacts/dashboards/velocloud_collection_and_access_status.json
+    
+    - name: velocloud_configure_and_manage
+      file: ./artifacts/dashboards/velocloud_configure_and_manage.json
+    
+
+   
+  pipelines:
+    - name: vco_inv_collection
+      version: 2024.03.19.1
+      file: ./artifacts/pipelines/vco_inv_collection.txt
+      folder: VCOSystemPack
+
+    - name: vco_inv_collection_main
+      version: 2024.03.19.1
+      file: ./artifacts/pipelines/vco_inv_collection_main.txt
+      folder: VCOSystemPack
+    
+    
+    - name: vco_import_source
+      version: 2024.03.19.1
+      file: ./artifacts/pipelines/vco_import_source.txt
+      folder: VCOSystemPack
+      
+    - name: vco_gateway_and_edges_topology
+      version: 2024.03.19.1
+      file: ./artifacts/pipelines/vco_gateway_and_edges_topology.txt
+      folder: VCOSystemPack
+
+    - name: vco_access_verification
+      version: 2024.03.19.1
+      file: ./artifacts/pipelines/vco_access_verification.txt
+      folder: VCOSystemPack
+
+
+  stacks:
+    - name: vco
+      file: ./artifacts/stacks/vco.json
+
+
+customer_level:
+  launch_locations:
+    - pstream_name: rda_packs_dynamic_groups_and_pages
+      dashboard_group_name: groupDiscovery
+      dashboard_group_label: Onboarding
+      dashboard_group_icon: "asset.svg"
+      dashboard_page_name: velocloud_configure_and_manage
+      dashboard_page_label: "Velocloud Configure and Manage"
+      dashboard_page_icon: "asset.svg"
+    
+    - pstream_name: rda_packs_dynamic_groups_and_pages
+      dashboard_group_name: groupInventory
+      dashboard_group_label: Inventory
+      dashboard_group_icon: ""
+      dashboard_page_name: vco_edge_drilldown
+      dashboard_page_label: VeloCloud Inventory
+      dashboard_page_icon: "asset.svg"
+    
+    - pstream_name: rda_packs_dynamic_groups_and_pages
+      dashboard_group_name: groupInventory
+      dashboard_group_label: Proxy Gateway
+      dashboard_group_icon: ""
+      dashboard_page_name: vco_proxy_gateway
+      dashboard_page_label: Velocloud Proxy Gateway
+      dashboard_page_icon: "asset.svg"
+    
+    - pstream_name: rda_packs_dynamic_groups_and_pages
+      dashboard_group_name: groupDiscovery
+      dashboard_group_label: Device Onboarding
+      dashboard_group_icon: ""
+      dashboard_page_name: velocloud_collection_and_access_status
+      dashboard_page_label: VeloCloud Collection and Access Status
+      dashboard_page_icon: "hardware.svg"
+    
+  
+    
+    - pstream_name: rda_packs_dynamic_groups_and_pages
+      dashboard_group_name: groupTopo
+      dashboard_group_label: Topology
+      dashboard_group_icon: ""
+      dashboard_page_name: vco_topology
+      dashboard_page_label: Velocloud Topology
+      dashboard_page_icon: "asset.svg" 
+    
+    - pstream_name: rda_packs_dynamic_groups_and_pages
+      dashboard_group_name: groupTopo
+      dashboard_group_label: Topology
+      dashboard_group_icon: ""
+      dashboard_page_name: velocloud_asset_navigator
+      dashboard_page_label: Velocloud Asset Navigator
+      dashboard_page_icon: "asset.svg" 
+  artifacts:
+   
+
+    blueprints:
+      - name: Velo-Cloud Multi Tenant
+        file: ./artifacts/blueprints/vco_multi_tenant.yaml  
+      
+
+single_tenant:
+  launch_dashboard: vco_main_app
+  artifacts:
+    blueprints:
+      - name: Velo-Cloud Single Tenant
+        file: ./artifacts/blueprints/vco_single_tenant.yaml
+        remove_on_deactivation: true
+      

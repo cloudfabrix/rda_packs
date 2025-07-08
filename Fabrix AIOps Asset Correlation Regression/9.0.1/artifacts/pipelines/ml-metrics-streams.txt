@@ -1,0 +1,10 @@
+%% stream = no and limit = 0
+
+@dm:create-persistent-stream name='ml-variance-metrics-list' and unique_cols='metric_source,metric_id,asset_id' and retention_days=30
+    --> @dm:create-persistent-stream name='ml-resampled-metrics' and unique_cols='metric_source,metric_id,asset_id,metric_timestamp' and retention_days=30
+    --> @dm:create-persistent-stream name='ml-correlated-assets' and unique_cols='metric_id,asset_id,group' and retention_days=30
+    --> @dm:create-persistent-stream name='ml-correlated-groups-per-asset' and unique_cols='metric_id,asset_id,group' and retention_days=30
+    --> @dm:create-persistent-stream name='ml-metrics-regression-train-output' and unique_cols='timestamp,job_name' and retention_days=30
+    --> @dm:create-persistent-stream name='ml-metrics-regression-anomalies' and unique_cols='timestamp,job_name' and retention_days=30
+    --> @dm:create-persistent-stream name='ml-metrics-regression-live-output' and unique_cols='live_timestamp,job_name,live_data_label' and retention_days=30
+

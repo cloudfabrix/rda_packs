@@ -1,0 +1,29 @@
+{
+    "name": "incident-details-rca",
+    "description": "RCA",
+    "label": "RCA",
+    "enabled": true,
+    "exportable": false,
+    "dashboard_type": "service-dashboard",
+    "dashboard_folder": "AlertIncidentPack",
+    "api-endpoint": {
+        "service-name": "cfxdimensions-app-irm_service",
+        "namespace": "io.cfx.dimensions.app",
+        "version": "*",
+        "methodName": "invokeAppApi:getIncidentRCADashboard",
+        "useReportContext": true,
+        "stringified-params": true,
+        "parse-output": true,
+        "params": [
+            {
+                "metrics_regression_stream": "oia-ml-metrics-regression-output",
+                "logs_regression_stream": "oia-logs-regression-output",
+                "logs_stream": "filebeat_event_stream",
+                "change_requests_stream": "change_requests_stream"
+            }
+        ]
+    },
+    "dashboard_sections": [
+    ],
+    "saved_time": "2024-05-06T04:36:16.743111"
+}

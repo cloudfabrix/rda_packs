@@ -1,0 +1,153 @@
+
+%% stream = no and limit = 0
+%%template_type="jinja"
+%%start_inline_object name="context_dynamic_form" and type="data" and format="json"
+{
+    "formFieldList": [
+        {
+            "fieldId": "customer_tag",
+            "label": "Tag of the customer",
+            "required": false,
+            "dataType": "string"
+        }
+    ]
+}
+%%end_inline_object
+@dm:empty
+    --> @dm:save name = "temp-customer-context"
+
+
+   {% if customer_tag %}
+      {% set customer_id = customer_id %}
+      {% set customer_tag = customer_tag %}
+      {% set customerTag = customer_tag %}
+   {% elif customerTag %}
+      {% set customer_id = customer_id %}
+      {% set customer_tag = customerTag %}
+   {% else %}
+      {% set customer_id = '' %}
+      {% set customer_tag = '' %}
+   {% endif %}
+
+
+
+--> @dm:empty
+    --> @dm:save name = 'temp-variable-dataset'
+    --> @dm:save name = 'temp-variable-dataset-interim'
+    --> @dm:save name = 'temp-meraki-sources'
+
+--> @c:new-block
+    --> @exec:get-input
+    --> @dm:selectcolumns include = "Others"
+    ## --> @dm:skip-pipeline-if-shape column_count = 0
+    --> @dm:explode-json column="Others"
+    --> @dm:rename-columns ml_src_name = 'name'
+    --> @dm:save name = 'temp-variable-dataset'
+
+
+
+--> @c:new-block
+    --> @dm:recall name = 'temp-variable-dataset'
+    --> *exec:if-shape num_rows = 0
+       --> @dm:empty
+       {% if customer_tag %}
+        ## --> #dm:query-persistent-stream type contains 'cisco-meraki' and customerTag contains '{{customer_tag}}' with-input name = 'rda_secrets_meta' and limit= 0
+       {% else %}
+        ## --> #dm:query-persistent-stream type contains 'cisco-meraki' and customerTag is empty with-input name = 'rda_secrets_meta' and limit= 0
+       {% endif %}
+       --> @dm:rename-columns ml_src_name = 'name'
+       --> @dm:save name = 'temp-meraki-sources'
+
+       --> @exec:for-loop num_rows = 1
+       {% if customer_tag %}
+          ##--> #dm:query-persistent-stream meraki_src_name is '{%-raw-%}{{row["meraki_src_name"]}}{%-endraw-%}'  and customer_tag is '{{customer_tag}}' with-input name = 'meraki_on_boarded_devices' and limit= 0
+       {% else %}
+          ## --> #dm:query-persistent-stream meraki_src_name is '{%-raw-%}{{row["meraki_src_name"]}}{%-endraw-%}' and customer_tag is empty with-input name = 'meraki_on_boarded_devices' and limit= 0
+      {% endif %}
+          --> @dm:save name = 'temp-variable-dataset-interim' & append='yes' & return_appended_dataset = 'yes'
+
+       --> @exec:end-loop
+       --> @dm:recall name = 'temp-variable-dataset-interim'
+       --> *exec:if-shape num_rows = 0
+         --> @dm:recall name = 'temp-meraki-sources'
+         -->@dm:eval  discovery_scope = "'yes'"
+         --> @dm:save name = 'temp-variable-dataset'
+       --> @exec:end-if
+
+       --> *exec:if-shape num_rows > 0
+         --> *dm:safe-filter discovery_scope == 'yes'
+         ##-->@dm:eval  discovery_scope = "'yes'"
+         ##--> @dm:rename-columns meraki_src_name = 'name'
+         --> @dm:save name = 'temp-variable-dataset'
+      --> @exec:end-if
+    --> @exec:end-if
+
+
+
+##Add customer context to the dataset
+--> @c:new-block
+    --> @dm:recall name = 'temp-variable-dataset'
+    --> @dm:eval customer_id =  "'{{ customer_id }}'"
+    --> @dm:eval customer_tag =  "'{{ customer_tag }}'"
+   --> @dm:save name = 'temp-variable-dataset'
+
+
+
+
+
+## get total data count for all metrics - to calculate total variance later
+-->@dm:empty
+    --> @dm:addrow name='oia-metrics-data' and limit='0' and aggs='sum:count_' and
+            groupby='asset_id,metric_source,metric_id,asset_name' and
+            max_aggregation_groups='20000'
+    --> #dm:query-persistent-stream *
+    --> @dm:save name='temp-metric-data-count'
+
+## get list of all unique metric ids
+--> @c:data-loop columns='metric_selection_filter' and dataset='ml-metrics-selection-rules'
+    --> @dm:empty
+    --> @dm:addrow name='oia-metrics-data' and limit='0' and aggs='cardinality:metric_id' and
+            groupby='metric_id' and max_aggregation_groups='10000'
+    --> #dm:query-persistent-stream ($metric_selection_filter)
+    --> @dm:save name='temp-unique-metric-ids' and append='yes'
+
+## generate stats for 1 metric at a time in a loop
+## get monthly variance for each asset and metric
+## assign weight for each month's variance based on that month's data count and total data count
+## weighted_variance = monthly variance * weight of the month
+--> @c:data-loop columns='metric_id' and dataset='temp-unique-metric-ids'
+    --> @dm:generate-metric-stats stream="oia-metrics-data" and ts_column="metric_timestamp" and bucket='MONTH' and
+            column="value" and groupby='asset_id,metric_source,metric_id,asset_name,metric_name,unit' and skip_below_threshold='no' and
+            cfxql_query="metric_id is '$metric_id'" and chunk_size='5000'
+    --> @dm:eval var="var if var else 0"
+    --> @dm:enrich dict='temp-metric-data-count' and src_key_cols='metric_source,metric_id,asset_id,asset_name' and
+            dict_key_cols='metric_source,metric_id,asset_id,asset_name' and enrich_cols='count__sum' and enrich_cols_as='total_count'
+    --> @dm:eval total_count="total_count if total_count else 0"
+    --> @dm:eval weight="count/total_count if total_count and count>0 else 0"
+    --> @dm:eval weighted_variance="var * weight"
+    --> @dm:save name='temp-metric-stats' and append='yes'
+
+--> @c:new-block
+    --> @dm:empty
+    --> @dm:addrow name='ml-variance-metrics-list' and limit=0
+    --> #dm:query-persistent-stream
+    --> @dm:add-missing-columns columns='metric_source,metric_id,asset_id,user_selected,static_upper_threshold,statistically_selected'
+    --> @dm:save name='temp-ml-variance-metrics-list'
+
+## calculate total variance of each asset-metric from weights
+## total variance = sum(weighted_variance)
+--> @c:new-block
+    --> @dm:recall name='temp-metric-stats'
+    --> @dm:to-type columns='weighted_variance' and type='float'
+    --> @dm:selectcolumns include='^asset_id$|^metric_source$|^metric_id$|^asset_name$|^metric_name$|^unit$|^weighted_variance$'
+    --> @dm:groupby columns='asset_id,metric_source,metric_id,asset_name,metric_name,unit' and agg='sum'
+    --> @dm:rename-columns variance='weighted_variance'
+    --> @dm:eval variance="round(variance,2)"
+    --> @dm:enrich dict='temp-ml-variance-metrics-list' and src_key_cols='metric_source,metric_id,asset_id' and
+            dict_key_cols='metric_source,metric_id,asset_id' and enrich_cols='user_selected,static_upper_threshold,statistically_selected'
+    --> @dm:add-missing-columns columns='user_selected,static_upper_threshold,statistically_selected'
+    --> @dm:eval user_selected="'Yes' if user_selected == 'Yes' else 'No'" and statistically_selected="'Yes' if statistically_selected == 'Yes' else 'No'"
+    --> @dm:eval customer_id =  "'{{ customer_id }}'"
+    --> @dm:eval customer_tag =  "'{{ customer_tag }}'"
+    --> @rn:write-stream name='ml-variance-metrics-list'
+
