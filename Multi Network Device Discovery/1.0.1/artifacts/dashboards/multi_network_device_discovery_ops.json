@@ -1,0 +1,53 @@
+{
+    "name": "network_device_discovery_ops",
+    "label": "{{NETWORK_NAME}} Device discovery ops App",
+    "description": "Multi Network discovery App",
+    "dashboard_folder": "MultiNetworkPack",
+    "version": "4.0.0",
+    "enabled": true,
+    "dashboard_type": "template",
+    "enable_storyboard": false,
+    "live_edit": true,
+    "template_variables": {
+        "NETWORK_NAME": {
+            "contextId": "network_name"
+        }
+    },
+    "custom_context": {
+        "rda-dashboard-live-edit": true
+    },
+    "dashboard_filters": {
+        "time_filter": true,
+        "columns_filter": []
+    },
+    "dashboard_generator": {
+        "attachment": "add_pages_for_activated_single_packs"
+    },
+    "dashboard_sections": [],
+    "dashboard_groups": {
+        "groupViewData": {
+            "icon": "asset.svg",
+            "label": "Inventory"
+        },
+        "groupAlerts": {
+            "icon": "alert.svg",
+            "label": "Alerts"
+        },
+        "groupCollection": {
+            "icon": "overall.svg",
+            "label": "Events"
+        },
+        "groupMetrics": {
+            "icon": "insights.svg",
+            "label": "Metrics Workbench"
+        }
+    },
+    "dashboard_pages": [],
+    "saved_time": "2025-05-30T09:47:50.031579",
+    "attachments": [
+        {
+            "name": "add_pages_for_activated_single_packs",
+            "value": "{%- set existing_groups = dashboard[\"dashboard_groups\"] -%}\r\n{%- set existing_pages = dashboard[\"dashboard_pages\"] | map(attribute=\"name\") | list -%}\r\n{%- set group_names = [] -%}\r\n{%- set d_groups = [] -%}\r\n{%- set d_pages = [] -%}\r\n{%- set customer_tag = '' -%}\r\n\r\n{#-- Fetch sample of stream to check if 'customer_tag' exists --#}\r\n{%- set sample = engine.query_stream_data(stream=\"rda_packs_dynamic_groups_and_pages\", limit=1) or [] -%}\r\n\r\n{%- if sample and 'customer_tag' in sample[0] -%}\r\n    {%- set customer_tag = customerTag -%}\r\n    {%- set dlist = engine.query_stream_data(stream=\"rda_packs_dynamic_groups_and_pages\", cfxql_query=\"customer_tag is '\" ~ customer_tag ~ \"'\") or [] -%}\r\n{%- else -%}\r\n    {%- set dlist = engine.query_stream_data(stream=\"rda_packs_dynamic_groups_and_pages\") or [] -%}\r\n{%- endif -%}\r\n\r\n{%- if dlist -%}\r\n    {%- for i in dlist -%}\r\n        {%- set name = i[\"dashboard_page_name\"] -%}\r\n        {%- if \"device_syslog_from_alert_fault\" not in name and \"device_SNMP_Traps_from_alerts_fault\" not in name and \"device_alerts_from_alert_fault\" not in name and \"multi\" in name-%}\r\n\r\n            {# Add unique dashboard group #}\r\n            {%- if i[\"dashboard_group_name\"] not in group_names -%}\r\n                {%- set _ = group_names.append(i[\"dashboard_group_name\"]) -%}\r\n                {%- set dgroup = {\r\n                    \"g_name\": i[\"dashboard_group_name\"],\r\n                    \"g_label\": i[\"dashboard_group_label\"],\r\n                    \"g_icon\": i[\"dashboard_group_icon\"]\r\n                } -%}\r\n                {%- set _ = d_groups.append(dgroup) -%}\r\n            {%- endif -%}\r\n\r\n            {# Add dashboard page if not already present #}\r\n            {%- if i[\"dashboard_page_name\"] not in existing_pages -%}\r\n                {%- set dpage = {\r\n                    \"name\": i[\"dashboard_page_name\"],\r\n                    \"label\": i[\"dashboard_page_label\"],\r\n                    \"icon\": i[\"dashboard_page_icon\"],\r\n                    \"group\": i[\"dashboard_page_group\"]\r\n                } -%}\r\n                {%- set _ = d_pages.append(dpage) -%}\r\n            {%- endif -%}\r\n\r\n        {%- endif -%}\r\n    {%- endfor -%}\r\n\r\n    {# Update dashboard groups #}\r\n    {%- for group in d_groups -%}\r\n        {%- if group.g_name not in existing_groups | map(attribute='g_name') | list -%}\r\n            {%- set _ = dashboard[\"dashboard_groups\"].update({\r\n                group.g_name: {\r\n                    \"icon\": group.g_icon,\r\n                    \"label\": group.g_label\r\n                }\r\n            }) -%}\r\n        {%- endif -%}\r\n    {%- endfor -%}\r\n\r\n    {# Update dashboard pages #}\r\n    {%- for page in d_pages -%}\r\n        {%- set _ = dashboard[\"dashboard_pages\"].append({\r\n            \"name\": page.name,\r\n            \"label\": page.label,\r\n            \"icon\": page.icon,\r\n            \"group\": page.group\r\n        }) -%}\r\n    {%- endfor -%}\r\n{%- endif -%}\r\n"
+        }
+    ]
+}

@@ -20,8 +20,8 @@ type: collection
 
 # Other packs that this solution requires to be deployed
 requires:
-  - name: Base Pack
-    version: ">=5.0.0"
+   - name: Fabrix Inventory Collection Base Pack
+     version: ">=6.0.0"
 
 
 artifacts:
@@ -176,6 +176,58 @@ customer_level:
 
 single_tenant:
   launch_dashboard: vco_main_app
+  
+  launch_locations:
+    - pstream_name: rda_packs_dynamic_groups_and_pages
+      dashboard_group_name: groupDiscovery
+      dashboard_group_label: Onboarding
+      dashboard_group_icon: "asset.svg"
+      dashboard_page_name: velocloud_configure_and_manage
+      dashboard_page_label: "Velocloud Configure and Manage"
+      dashboard_page_icon: "asset.svg"
+    
+    - pstream_name: rda_packs_dynamic_groups_and_pages
+      dashboard_group_name: groupInventory
+      dashboard_group_label: Inventory
+      dashboard_group_icon: ""
+      dashboard_page_name: vco_edge_drilldown
+      dashboard_page_label: VeloCloud Inventory
+      dashboard_page_icon: "asset.svg"
+    
+    - pstream_name: rda_packs_dynamic_groups_and_pages
+      dashboard_group_name: groupInventory
+      dashboard_group_label: Proxy Gateway
+      dashboard_group_icon: ""
+      dashboard_page_name: vco_proxy_gateway
+      dashboard_page_label: Velocloud Proxy Gateway
+      dashboard_page_icon: "asset.svg"
+    
+    - pstream_name: rda_packs_dynamic_groups_and_pages
+      dashboard_group_name: groupDiscovery
+      dashboard_group_label: Device Onboarding
+      dashboard_group_icon: ""
+      dashboard_page_name: velocloud_collection_and_access_status
+      dashboard_page_label: VeloCloud Collection and Access Status
+      dashboard_page_icon: "hardware.svg"
+    
+  
+    
+    - pstream_name: rda_packs_dynamic_groups_and_pages
+      dashboard_group_name: groupTopo
+      dashboard_group_label: Topology
+      dashboard_group_icon: ""
+      dashboard_page_name: vco_topology
+      dashboard_page_label: Velocloud Topology
+      dashboard_page_icon: "asset.svg" 
+    
+    - pstream_name: rda_packs_dynamic_groups_and_pages
+      dashboard_group_name: groupTopo
+      dashboard_group_label: Topology
+      dashboard_group_icon: ""
+      dashboard_page_name: velocloud_asset_navigator
+      dashboard_page_label: Velocloud Asset Navigator
+      dashboard_page_icon: "asset.svg" 
+  
   artifacts:
     blueprints:
       - name: Velo-Cloud Single Tenant

@@ -1,0 +1,137 @@
+{
+    "name": "customer_ops_app",
+    "label": "Customer Ops App",
+    "description": "Customer Ops App",
+    "dashboard_folder": "MultiNetworkPack",
+    "context_label_id1": "customer_tag",
+    "custom_context": {
+        "rda-dashboard-live-edit": true
+    },
+    "version": "23.12.17.2",
+    "debug": true,
+    "enabled": true,
+    "dashboard_filters": {
+        "time_filter": true,
+        "columns_filter": []
+    },
+    "template_variables": {
+        "CUST_TAG": {
+            "contextId": "customer_tag"
+        },
+        "NETWORK_NAME": {
+            "contextId": "network_name"
+        }
+    },
+    "dashboard_sections": [
+        {
+            "title": "Org Ops"
+        }
+    ],
+    "dashboard_type": "template",
+    "context_enrichment": {
+        "stream": "rda_packs_meta",
+        "enrich_columns": [
+            "name",
+            "publisher",
+            "id",
+            "customers",
+            "status"
+        ],
+        "query_template": "id contains 'Fault' & status contains 'ACTIVATED'"
+    },
+    "dashboard_groups": {
+        "groupTopo": {
+            "icon": "topology.svg",
+            "label": "Topology"
+        },
+        "group1": {
+            "icon": "hardware.svg",
+            "label": "Inventory"
+        },
+        "groupAlerts": {
+            "icon": "alert.svg",
+            "label": "Alerts"
+        },
+        "group2": {
+            "icon": "overall.svg",
+            "label": "Data Collection"
+        },
+        "group3": {
+            "icon": "activities.svg",
+            "label": "Discovery"
+        }
+    },
+    "dashboard_pages": [
+        {
+            "name": "network_device",
+            "label": "Network Devices",
+            "icon": "hardware.svg",
+            "group": "group1"
+        },
+        {
+            "name": "network_assets_inventory",
+            "label": "Network Assets",
+            "icon": "hardware.svg",
+            "group": "group1"
+        },
+        {
+            "name": "cdp_neighbours",
+            "label": "CDP Neighbours",
+            "icon": "hardware.svg",
+            "group": "group1",
+            "context_filter0": "id contains 'Performance'"
+        },
+        {
+            "name": "customer_oia_alerts_fault",
+            "label": "All Alerts",
+            "icon": "alert.svg",
+            "group": "groupAlerts",
+            "context_filter0": "id contains 'Fault'"
+        },
+        {
+            "name": "customer_syslogs",
+            "label": "Syslogs",
+            "icon": "trace.svg",
+            "group": "group2",
+            "context_filter0": "id contains 'Fault'"
+        },
+        {
+            "name": "customer_SNMP_Traps",
+            "label": "SNMP Traps",
+            "icon": "trace.svg",
+            "group": "group2",
+            "context_filter0": "id contains 'Fault'"
+        },
+        {
+            "name": "customer_discovery",
+            "label": "Discovery",
+            "icon": "hardware.svg",
+            "group": "group3"
+        },
+        {
+            "name": "customer_access_status",
+            "label": "Access Check",
+            "icon": "hardware.svg",
+            "group": "group3"
+        },
+        {
+            "name": "customer_discovery_runs",
+            "label": "Discovery Runs",
+            "group": "group3"
+        },
+        {
+            "name": "customer_topology",
+            "label": "Topology",
+            "icon": "stack.svg",
+            "group": "groupTopo"
+        },
+        
+        {
+            "name": "customer_asset_navigator",
+            "label": "Asset Navigator",
+            "icon": "stack.svg",
+            "group": "groupTopo"
+        }
+    ],
+    "saved_time": "2024-08-14T12:44:20.381087"
+}

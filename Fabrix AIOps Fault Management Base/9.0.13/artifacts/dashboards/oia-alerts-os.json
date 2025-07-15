@@ -1,0 +1,1878 @@
+{
+    "name": "oia-alerts-os",
+    "label": "Open Search Based OIA Alerts",
+    "description": "Open Search Based OIA Alerts",
+    "version": "23.3.30.1",
+    "enabled": true,
+    "stream": "oia-alerts-stream",
+    "debug": true,
+    "dashboard_style": "tabbed",
+    "dashboard_type": "template",
+    "template_variables": {
+        "PROJECT_ID": {
+            "default": [
+                "61ed50a5-8634-4464-a17e-adf6b40225b2"
+            ],
+            "contextId": "USER_PROJECTS"
+        },
+          "SOURCE_DASHBOARD_ID": {
+            "default": "user-dashboard-oia-alerts-os",
+            "contextId": "sourceDashboardId"
+        }
+    },
+    "status_poller": {
+        "stream": "oia-alerts-stream",
+        "frequency": 15,
+        "columns": [
+            "timestamp"
+        ],
+        "sorting": [
+            {
+                "timestamp": "desc"
+            }
+        ],
+        "query": "timestamp is after '$timestamp'",
+        "defaults": {
+            "timestamp": "$UTCNOW"
+        },
+        "action": "refresh"
+    },
+    "dashboard_filters": {
+        "time_filter": true,
+        "default_time_filter_non_removable": true,
+        "show_default_time_filter": false,
+        "additional_datetime_column_filters": [
+            {
+                "id": "a_created_ts",
+                "label": "Created At"
+            },
+            {
+                "id": "a_updated_ts",
+                "label": "Updated At"
+            }
+        ],
+        "columns_filter": [
+            {
+                "id": "a_incident_id",
+                "label": "Incident",
+                "type": "TEXT"
+            },
+            {
+                "id": "a_ticket_id",
+                "label": "ITSM Ticket",
+                "type": "TEXT"
+            },
+            {
+                "id": "a_id",
+                "label": "Alert Id",
+                "type": "TEXT"
+            },
+            {
+                "id": "a_alert_key",
+                "label": "Alert Key",
+                "type": "TEXT"
+            },
+            {
+                "id": "a_event_id",
+                "label": "Event Id",
+                "type": "TEXT"
+            },
+            {
+                "id": "a_source_event_id",
+                "label": "Source Event Id",
+                "type": "TEXT"
+            },
+            {
+                "id": "a_en_incidentAnalytics_alerts",
+                "label": "Alerts",
+                "type": "DOUBLE"
+            },
+            {
+                "id": "project_id",
+                "label": "Organizations",
+                "type": "TEXT"
+            },
+            {
+                "id": "a_component_name",
+                "label": "Component Name",
+                "type": "TEXT"
+            },
+            {
+                "id": "a_cluster_label",
+                "label": "Cluster",
+                "type": "TEXT"
+            },
+            {
+                "id": "a_correlation_status",
+                "label": "Correlation Status",
+                "type": "TEXT"
+            },
+            {
+                "id": "a_rule_type",
+                "label": "Policy Type",
+                "type": "TEXT"
+            },
+            {
+                "id": "a_rule_name",
+                "label": "Policy Name",
+                "type": "TEXT"
+            },
+            {
+                "id": "a_burst_rule_name",
+                "label": "Correlation Burst Policy",
+                "type": "TEXT"
+            },
+            {
+                "id": "a_source_systemname",
+                "label": "Source",
+                "type": "TEXT"
+            },
+            {
+                "id": "a_lastraisereceivedat_ts",
+                "label": "Last Raise Received At",
+                "type": "DATETIME"
+            },
+            {
+                "id": "a_correlation_parent",
+                "label": "Correlation Parent",
+                "type": "TEXT"
+            },
+            {
+                "id": "a_severity",
+                "label": "Severity",
+                "type": "TEXT"
+            },
+            {
+                "id": "a_status",
+                "label": "Monitoring Status",
+                "type": "TEXT"
+            },
+            {
+                "id": "a_alert_category",
+                "label": "Alert Category",
+                "type": "TEXT"
+            },
+            {
+                "id": "a_alert_type",
+                "label": "Alert Type",
+                "type": "TEXT"
+            },
+            {
+                "id": "a_asset_ip_address",
+                "label": "IP Address",
+                "type": "TEXT"
+            },
+            {
+                "id": "a_asset_name",
+                "label": "Asset Name",
+                "type": "TEXT"
+            },
+            {
+                "id": "a_asset_type",
+                "label": "Asset Type",
+                "type": "TEXT"
+            },
+            {
+                "id": "a_source_mechanism",
+                "label": "Source Mechanism",
+                "type": "TEXT"
+            },
+            {
+                "id": "a_message",
+                "label": "Message",
+                "type": "TEXT"
+            },
+            {
+                "id": "a_en_stack_name",
+                "label": "Stack Name",
+                "type": "TEXT"
+            },
+            {
+                "id": "customer_id",
+                "label": "Customer ID",
+                "type": "TEXT"
+            },
+            {
+                "id": "a_en_node_id",
+                "label": "Node ID",
+                "type": "TEXT"
+            },
+            {
+                "id": "a_raised_ts",
+                "label": "Raised At",
+                "type": "DATETIME"
+            },
+            {
+                "id": "a_en_fqdn",
+                "label": "Fully Qualified Domain Name",
+                "type": "TEXT"
+            },
+            {
+                "id": "a_repeat_count",
+                "label": "Repeat Count",
+                "type": "DOUBLE"
+            },
+            {
+                "id": "a_cluster_score",
+                "label": "Cluster Score",
+                "type": "DOUBLE"
+            },
+            {
+                "id": "a_cleared_ts",
+                "label": "Cleared At",
+                "type": "DATETIME"
+            },
+            {
+                "id": "a_sourceeventreceivedat_ts",
+                "label": "Source Event Received At",
+                "type": "DATETIME"
+            },
+            {
+                "id": "a_raisedreceivedat_ts",
+                "label": "Raise Received At",
+                "type": "DATETIME"
+            },
+            {
+                "id": "a_clearreceivedat_ts",
+                "label": "Clear Received At",
+                "type": "DATETIME"
+            },
+            {
+                "id": "a_cleared_by",
+                "label": "Cleared By",
+                "type": "TEXT"
+            },
+            {
+                "id": "a_clearcode",
+                "label": "Clear Code",
+                "type": "TEXT"
+            },
+            {
+                "id": "a_clear_message",
+                "label": "Clear Message",
+                "type": "TEXT"
+            },
+            {
+                "id": "a_reviveat_ts",
+                "label": "Revive At",
+                "type": "DATETIME"
+            },
+            {
+                "id": "a_en_revivededat",
+                "label": "Revived Time",
+                "type": "DATETIME"
+            },
+            {
+                "id": "a_en_revivedrulename",
+                "label": "Revived From Policy",
+                "type": "TEXT"
+            }
+        ],
+        "default_time_filter_labels": [
+            "Last 24 hours"
+        ],
+        "extra_filter": "project_id in {{PROJECT_ID}} and a_source_systemname is not-in 'Alert Group' and a_correlation_status not-in 'AGGREGATE' ",
+        "group_filters": [
+            {
+                "stream": "oia-alerts-stream",
+                "title": "Source",
+                "group_by": [
+                    "a_source_systemname"
+                ],
+                "ts_column": "a_updated_ts",
+                "agg": "value_count",
+                "column": "a_id",
+                "type": "str"
+            },
+            {
+                "stream": "oia-alerts-stream",
+                "title": "Monitoring Status",
+                "group_by": [
+                    "a_status"
+                ],
+                "ts_column": "a_updated_ts",
+                "agg": "value_count",
+                "column": "a_id",
+                "type": "str"
+            },
+            {
+                "stream": "oia-alerts-stream",
+                "title": "Correlation Status",
+                "group_by": [
+                    "a_correlation_status"
+                ],
+                "ts_column": "a_updated_ts",
+                "agg": "value_count",
+                "column": "a_id",
+                "type": "str"
+            },
+            {
+                "stream": "oia-alerts-stream",
+                "title": "Severity",
+                "group_by": [
+                    "a_severity"
+                ],
+                "ts_column": "a_updated_ts",
+                "agg": "value_count",
+                "column": "a_id",
+                "type": "str"
+            },
+            {
+                "stream": "oia-alerts-stream",
+                "title": "Policy",
+                "group_by": [
+                    "a_rule_name"
+                ],
+                "ts_column": "a_updated_ts",
+                "agg": "value_count",
+                "column": "a_id",
+                "type": "str"
+            },
+            {
+                "stream": "oia-alerts-stream",
+                "title": "Cluster",
+                "group_by": [
+                    "a_cluster_label"
+                ],
+                "ts_column": "a_updated_ts",
+                "agg": "value_count",
+                "column": "a_id",
+                "type": "str"
+            },
+            {
+                "stream": "oia-alerts-stream",
+                "title": "Organizations",
+                "group_by": [
+                    "project_id"
+                ],
+                "ts_column": "a_updated_ts",
+                "agg": "value_count",
+                "column": "project_id",
+                "type": "str"
+            }
+        ]
+    },
+    "import": [
+        {
+            "from": "oia-incidents-os-template",
+            "as": "incidents"
+        }
+    ],
+    "dashboard_sections": [
+        {
+            "title": "alerts",
+            "show_filter": true,
+            "projects": [
+                "ACME"
+            ],
+            "widgets": [
+                {
+                    "extends":[
+                            "self:alerts_tabular",
+                            "self:actions_lib.alerts_tabular_actions"
+                    ],
+                     "extend_vars": {
+                        "alerts_tabular_extra_filter": "project_id in {{PROJECT_ID}} and a_source_systemname is not-in 'Alert Group' and a_correlation_status not-in 'AGGREGATE'",
+                        "clear_alerts_extra_filter": "a_status is not 'CLEARED' and project_id in {{PROJECT_ID}} and a_source_systemname is not-in 'Alert Group' and a_correlation_status not-in 'AGGREGATE'"
+                    },
+                    "widget_id": "94a3fc11"
+                }
+            ]
+        },
+        {
+            "title": "alerts Analytics",
+            "show_filter": true,
+            "projects": [
+                "ACME"
+            ],
+            "widgets": [
+                {
+                    "title": "Ingested",
+                    "widget_type": "expression_counter",
+                    "expression": "ta_totalAlerts + (ta_totalRepeatCount-ta_alertsWithRepeatCountMoreThanOne)",
+                    "stream": "oia-alerts-stream",
+                    "ts_column": "a_updated_ts",
+                    "segments": [
+                        {
+                            "variable": "ta_alertsWithRepeatCountMoreThanOne",
+                            "stream": "oia-alerts-stream",
+                            "extra_filter": "a_repeat_count greaterthan 1",
+                            "ts_column": "a_updated_ts",
+                            "group_by": [
+                                "a_id"
+                            ],
+                            "column": "a_id",
+                            "agg": "value_count",
+                            "type": "str"
+                        },
+                        {
+                            "variable": "ta_totalRepeatCount",
+                            "stream": "oia-alerts-stream",
+                            "extra_filter": "a_repeat_count greaterthan 1",
+                            "ts_column": "a_updated_ts",
+                            "column": "a_repeat_count",
+                            "agg": "sum",
+                            "type": "int"
+                        },
+                        {
+                            "variable": "ta_totalAlerts",
+                            "stream": "oia-alerts-stream",
+                            "ts_column": "a_updated_ts",
+                            "group_by": [
+                                "a_id"
+                            ],
+                            "column": "a_id",
+                            "agg": "value_count",
+                            "type": "str"
+                        }
+                    ],
+                    "min_width": 2.4,
+                    "height": 2.6,
+                    "max_width": 2.4,
+                    "type": "str",
+                    "widget_id": "02be1e20"
+                },
+                {
+                    "widget_id": "02be1e21",
+                    "title": "Deduped",
+                    "min_width": 2.4,
+                    "height": 2.6,
+                    "max_width": 2.4,
+                    "widget_type": "expression_counter",
+                    "expression": "de_totalRepeatCount - de_alertsWithRepeatCountMoreThanOne",
+                    "unit": "",
+                    "segments": [
+                        {
+                            "variable": "de_totalRepeatCount",
+                            "stream": "oia-alerts-stream",
+                            "extra_filter": "a_repeat_count greaterthan 1",
+                            "ts_column": "a_updated_ts",
+                            "column": "a_repeat_count",
+                            "agg": "sum",
+                            "type": "int"
+                        },
+                        {
+                            "variable": "de_alertsWithRepeatCountMoreThanOne",
+                            "stream": "oia-alerts-stream",
+                            "extra_filter": "a_repeat_count greaterthan 1",
+                            "ts_column": "a_updated_ts",
+                            "group_by": [
+                                "a_id"
+                            ],
+                            "column": "a_id",
+                            "agg": "value_count",
+                            "type": "str"
+                        }
+                    ]
+                },
+                {
+                    "title": "Suppressed",
+                    "widget_type": "counter",
+                    "stream": "oia-alerts-stream",
+                    "extra_filter": "a_correlation_status in ['SUPPRESSED']",
+                    "ts_column": "a_updated_ts",
+                    "column": "a_id",
+                    "agg": "value_count",
+                    "min_width": 2.4,
+                    "height": 2.6,
+                    "max_width": 2.4,
+                    "type": "str",
+                    "widget_id": "02be1e23"
+                },
+                {
+                    "title": "Correlated Alerts",
+                    "widget_type": "counter",
+                    "stream": "oia-alerts-stream",
+                    "extra_filter": "a_correlation_status in ['CORRELATED', 'CORRELATING']",
+                    "ts_column": "a_updated_ts",
+                    "column": "a_id",
+                    "agg": "value_count",
+                    "min_width": 2.4,
+                    "height": 2.6,
+                    "max_width": 2.4,
+                    "type": "str",
+                    "widget_id": "02be1e22"
+                },
+                {
+                    "title": "Noise Reduction",
+                    "widget_type": "expression_counter",
+                    "expression": "((ta_totalAlerts + ta_totalRepeatCount-ta_alertsWithRepeatCountMoreThanOne - totalIncidents ) / (ta_totalAlerts + ta_totalRepeatCount-ta_alertsWithRepeatCountMoreThanOne))*100  if (ta_totalAlerts + ta_totalRepeatCount-ta_alertsWithRepeatCountMoreThanOne) > 0 else 0",
+                    "stream": "oia-alerts-stream",
+                    "ts_column": "a_updated_ts",
+                    "unit": "%",
+                    "segments": [
+                        {
+                            "variable": "ta_alertsWithRepeatCountMoreThanOne",
+                            "stream": "oia-alerts-stream",
+                            "extra_filter": "a_repeat_count greaterthan 1",
+                            "ts_column": "a_updated_ts",
+                            "group_by": [
+                                "a_id"
+                            ],
+                            "column": "a_id",
+                            "agg": "value_count",
+                            "type": "str"
+                        },
+                        {
+                            "variable": "ta_totalRepeatCount",
+                            "stream": "oia-alerts-stream",
+                            "extra_filter": "a_repeat_count greaterthan 1",
+                            "ts_column": "a_updated_ts",
+                            "column": "a_repeat_count",
+                            "agg": "sum",
+                            "type": "int"
+                        },
+                        {
+                            "variable": "ta_totalAlerts",
+                            "stream": "oia-alerts-stream",
+                            "ts_column": "a_updated_ts",
+                            "group_by": [
+                                "a_id"
+                            ],
+                            "column": "a_id",
+                            "agg": "value_count",
+                            "type": "str"
+                        },
+                        {
+                            "variable": "totalIncidents",
+                            "stream": "oia-alerts-stream",
+                            "extra_filter": "a_correlation_status in ['ACTIVE', 'CORRELATING', 'CORRELATED', 'CLEARED']",
+                            "ts_column": "a_updated_ts",
+                            "group_by": [
+                                "a_incident_id"
+                            ],
+                            "column": "a_incident_id",
+                            "agg": "cardinality",
+                            "type": "str"
+                        }
+                    ],
+                    "min_width": 2.4,
+                    "height": 2.6,
+                    "max_width": 2.4,
+                    "type": "str",
+                    "widget_id": "02be1e24"
+                },
+                {
+                    "title": "Correlated Incidents",
+                    "widget_type": "counter",
+                    "stream": "oia-alerts-stream",
+                    "extra_filter": "a_correlation_status in ['CORRELATED', 'CORRELATING']",
+                    "ts_column": "a_updated_ts",
+                    "column": "a_incident_id",
+                    "agg": "cardinality",
+                    "min_width": 2.4,
+                    "height": 2.6,
+                    "max_width": 2.4,
+                    "type": "str",
+                    "widget_id": "02be1e2b"
+                },
+                {
+                    "title": "Alerts without Policy",
+                    "widget_type": "counter",
+                    "stream": "oia-alerts-stream",
+                    "extra_filter": "a_rule_name is 'Not Available'",
+                    "ts_column": "a_updated_ts",
+                    "column": "a_id",
+                    "agg": "value_count",
+                    "min_width": 2.4,
+                    "height": 2.6,
+                    "max_width": 2.4,
+                    "type": "str",
+                    "widget_id": "02be1e22"
+                },
+                {
+                    "title": "Incidents without Policy",
+                    "widget_type": "counter",
+                    "stream": "oia-alerts-stream",
+                    "extra_filter": "a_rule_name is 'Not Available'",
+                    "ts_column": "a_updated_ts",
+                    "column": "a_incident_id",
+                    "agg": "cardinality",
+                    "min_width": 2.4,
+                    "height": 2.6,
+                    "max_width": 2.4,
+                    "type": "str",
+                    "widget_id": "02be1e2b"
+                },
+                {
+                    "title": "Incidents With Tickets",
+                    "widget_type": "counter",
+                    "stream": "oia-alerts-stream",
+                    "extra_filter": "(a_ticket_id is not None and a_ticket_id is not 'Not Available')",
+                    "ts_column": "timestamp",
+                    "duration_hours": 24,
+                    "column": "a_incident_id",
+                    "agg": "value_count",
+                    "min_width": 2.4,
+                    "height": 2.6,
+                    "max_width": 2.4,
+                    "type": "str",
+                    "widget_id": "4ffca31e"
+                },
+                {
+                    "title": "Incidents Without Tickets",
+                    "widget_type": "counter",
+                    "stream": "oia-alerts-stream",
+                    "extra_filter": "(a_ticket_id is None or a_ticket_id is 'Not Available')",
+                    "ts_column": "timestamp",
+                    "duration_hours": 24,
+                    "column": "a_incident_id",
+                    "agg": "value_count",
+                    "min_width": 2.4,
+                    "height": 2.6,
+                    "max_width": 2.4,
+                    "type": "str",
+                    "widget_id": "4ffca31e"
+                },
+                {
+                    "widget_type": "pie_chart",
+                    "title": "Alerts by Status",
+                    "stream": "oia-alerts-stream",
+                    "ts_column": "a_updated_ts",
+                    "min_width": 4,
+                    "height": 4,
+                    "max_width": 4,
+                    "column": "a_id",
+                    "agg": "value_count",
+                    "group_by": [
+                        "a_status"
+                    ],
+                    "type": "str",
+                    "style": {
+                        "color-map": {
+                            "CLEARED": [
+                                "#4CAF50",
+                                "#ffffff"
+                            ],
+                            "ACTIVE": [
+                                "#FFA726",
+                                "#ffffff"
+                            ]
+                        }
+                    },
+                    "widget_id": "cb0706e6"
+                },
+                {
+                    "widget_type": "pie_chart",
+                    "title": "Alerts by Severity",
+                    "stream": "oia-alerts-stream",
+                    "ts_column": "timestamp",
+                    "min_width": 4,
+                    "height": 4,
+                    "max_width": 4,
+                    "column": "a_id",
+                    "agg": "value_count",
+                    "group_by": [
+                        "a_severity"
+                    ],
+                    "type": "str",
+                    "style": {
+                        "color-map": {
+                            "SEVERE": [
+                                "#B71C1C",
+                                "#ffffff"
+                            ],
+                            "CRITICAL": [
+                                "#E53935",
+                                "#ffffff"
+                            ],
+                            "MAJOR": [
+                                "#F57C00",
+                                "#ffffff"
+                            ],
+                            "MINOR": [
+                                "#FFA726",
+                                "#ffffff"
+                            ],
+                            "WARNING": [
+                                "#FFD54F",
+                                "#ffffff"
+                            ],
+                            "NOTIFICATION": [
+                                "#4DD0E1",
+                                "#ffffff"
+                            ],
+                            "INFORMATION": [
+                                "#03A9F4",
+                                "#ffffff"
+                            ]
+                        }
+                    },
+                    "widget_id": "cb0706e6"
+                },
+                {
+                    "widget_type": "pie_chart",
+                    "title": "Alerts By Source",
+                    "stream": "oia-alerts-stream",
+                    "ts_column": "a_updated_ts",
+                    "min_width": 4,
+                    "height": 4,
+                    "max_width": 4,
+                    "column": "a_id",
+                    "agg": "value_count",
+                    "group_by": [
+                        "a_source_systemname"
+                    ],
+                    "type": "str",
+                    "widget_id": "cb0706e6"
+                },
+                {
+                    "widget_type": "pie_chart",
+                    "title": "Alerts By Type",
+                    "stream": "oia-alerts-stream",
+                    "ts_column": "a_updated_ts",
+                    "min_width": 4,
+                    "height": 4,
+                    "max_width": 4,
+                    "column": "a_id",
+                    "agg": "value_count",
+                    "group_by": [
+                        "a_alert_type"
+                    ],
+                    "type": "str",
+                    "widget_id": "cb0706e6"
+                },
+                {
+                    "widget_type": "pie_chart",
+                    "title": "Suppressed Alerts by Status",
+                    "stream": "oia-alerts-stream",
+                    "extra_filter": "a_correlation_status in 'SUPPRESSED'",
+                    "ts_column": "a_updated_ts",
+                    "min_width": 4,
+                    "height": 4,
+                    "max_width": 4,
+                    "column": "a_id",
+                    "agg": "value_count",
+                    "group_by": [
+                        "a_status"
+                    ],
+                    "type": "str",
+                    "style": {
+                        "color-map": {
+                            "CLEARED": [
+                                "#4CAF50",
+                                "#ffffff"
+                            ],
+                            "ACTIVE": [
+                                "#FFA726",
+                                "#ffffff"
+                            ]
+                        }
+                    },
+                    "widget_id": "cb0706e6"
+                },
+                {
+                    "widget_type": "pie_chart",
+                    "title": "Correlated Alerts By Policy",
+                    "stream": "oia-alerts-stream",
+                    "ts_column": "a_updated_ts",
+                    "min_width": 4,
+                    "height": 4,
+                    "max_width": 4,
+                    "column": "a_id",
+                    "agg": "value_count",
+                    "group_by": [
+                        "a_rule_name"
+                    ],
+                    "type": "str",
+                    "widget_id": "cb0706e6"
+                },
+                {
+                    "title": "Alerts By Cluster",
+                    "widget_type": "bar_chart",
+                    "stream": "oia-alerts-stream",
+                    "ts_column": "a_updated_ts",
+                    "min_width": 4,
+                    "height": 4,
+                    "max_width": 4,
+                    "chartProperties": {
+                        "yAxisLabel": "Cluster",
+                        "xAxisLabel": "Number",
+                        "stacked": true,
+                        "legendLocation": "right",
+                        "orientation": "horizontal"
+                    },
+                    "group_by": [
+                        "a_cluster_label"
+                    ],
+                    "column": "a_id",
+                    "agg": "value_count",
+                    "type": "str",
+                    "widget_id": "172919af"
+                },
+                {
+                    "title": " Noisy Alerts By Source",
+                    "widget_type": "bar_chart",
+                    "stream": "oia-alerts-stream",
+                    "ts_column": "a_updated_ts",
+                    "min_width": 6,
+                    "height": 6,
+                    "max_width": 6,
+                    "chartProperties": {
+                        "yAxisLabel": "Count",
+                        "xAxisLabel": "Source",
+                        "stacked": true,
+                        "legendLocation": "right",
+                        "orientation": "vertical"
+                    },
+                    "limit": 10,
+                    "sort_by_value": true,
+                    "group_by": [
+                        "a_source_systemname"
+                    ],
+                    "column": "a_id",
+                    "agg": "value_count",
+                    "type": "str",
+                    "widget_id": "172919af"
+                },
+                {
+                    "title": " Noisy Alerts By Asset",
+                    "widget_type": "bar_chart",
+                    "stream": "oia-alerts-stream",
+                    "ts_column": "a_updated_ts",
+                    "min_width": 6,
+                    "height": 6,
+                    "max_width": 6,
+                    "chartProperties": {
+                        "yAxisLabel": "Count",
+                        "xAxisLabel": "Assets",
+                        "stacked": true,
+                        "legendLocation": "right",
+                        "orientation": "vertical"
+                    },
+                    "limit": 10,
+                    "sort_by_value": true,
+                    "group_by": [
+                        "a_asset_name"
+                    ],
+                    "column": "a_id",
+                    "agg": "value_count",
+                    "type": "str",
+                    "widget_id": "172919af"
+                },
+                {
+                    "extends": "self:alerts_by_source_timeseries",
+                    "widget_id": "94a3fc11"
+                },
+                {
+                    "extends": "self:alerts_by_severity_timeseries",
+                    "widget_id": "94a3fc11"
+                },
+                {
+                    "title": "Alerts By Correlation Status",
+                    "widget_type": "timeseries",
+                    "stream": "oia-alerts-stream",
+                    "ts_column": "a_updated_ts",
+                    "max_width": 6,
+                    "height": 6,
+                    "min_width": 6,
+                    "chartProperties": {
+                        "yAxisLabel": "Count",
+                        "xAxisLabel": "Alerts by Minutes",
+                        "legendLocation": "top"
+                    },
+                    "interval": "1H",
+                    "group_by": [
+                        "a_correlation_status"
+                    ],
+                    "series_spec": [
+                        {
+                            "column": "a_id",
+                            "agg": "value_count",
+                            "type": "int"
+                        }
+                    ],
+                    "widget_id": "c29bb687"
+                },
+                {
+                    "title": "Alerts By Monitoring Status",
+                    "widget_type": "timeseries",
+                    "stream": "oia-alerts-stream",
+                    "ts_column": "a_updated_ts",
+                    "max_width": 6,
+                    "height": 6,
+                    "min_width": 6,
+                    "chartProperties": {
+                        "yAxisLabel": "Count",
+                        "xAxisLabel": "Alerts by Minutes",
+                        "legendLocation": "top"
+                    },
+                    "interval": "1H",
+                    "group_by": [
+                        "a_status"
+                    ],
+                    "series_spec": [
+                        {
+                            "column": "a_id",
+                            "agg": "value_count",
+                            "type": "int"
+                        }
+                    ],
+                    "style": {
+                        "color-map": {
+                            "CLEARED": [
+                                "#4CAF50",
+                                "#ffffff"
+                            ],
+                            "ACTIVE": [
+                                "#FFA726",
+                                "#ffffff"
+                            ]
+                        }
+                    },
+                    "widget_id": "c29bb688"
+                }
+            ]
+        }
+    ],
+    "library": {
+        "widgets": {
+            "alerts_by_source_timeseries": {
+                "title": "Alerts By Source",
+                "widget_type": "timeseries",
+                "stream": "oia-alerts-stream",
+                "ts_column": "a_updated_ts",
+                "max_width": 6,
+                "height": 6,
+                "min_width": 6,
+                "chartProperties": {
+                    "yAxisLabel": "Count",
+                    "xAxisLabel": "Alerts by Minutes",
+                    "legendLocation": "top"
+                },
+                "interval": "1H",
+                "group_by": [
+                    "a_source_systemname"
+                ],
+                "series_spec": [
+                    {
+                        "column": "a_id",
+                        "agg": "value_count",
+                        "type": "int"
+                    }
+                ],
+                "style": {
+                    "color-map": {
+                        "SEVERE": [
+                            "#B71C1C",
+                            "#ffffff"
+                        ],
+                        "CRITICAL": [
+                            "#E53935",
+                            "#ffffff"
+                        ],
+                        "MAJOR": [
+                            "#F57C00",
+                            "#ffffff"
+                        ],
+                        "MINOR": [
+                            "#FFA726",
+                            "#ffffff"
+                        ],
+                        "WARNING": [
+                            "#FFD54F",
+                            "#ffffff"
+                        ],
+                        "NOTIFICATION": [
+                            "#4DD0E1",
+                            "#ffffff"
+                        ],
+                        "INFORMATION": [
+                            "#03A9F4",
+                            "#ffffff"
+                        ]
+                    }
+                },
+                "widget_id": "c29bb685"
+            },
+            "alerts_by_severity_timeseries": {
+                "title": "Alerts By Severity",
+                "widget_type": "timeseries",
+                "stream": "oia-alerts-stream",
+                "ts_column": "a_updated_ts",
+                "max_width": 6,
+                "height": 6,
+                "min_width": 6,
+                "chartProperties": {
+                    "yAxisLabel": "Count",
+                    "xAxisLabel": "Alerts by Minutes",
+                    "legendLocation": "top"
+                },
+                "interval": "1H",
+                "group_by": [
+                    "a_severity"
+                ],
+                "series_spec": [
+                    {
+                        "column": "a_id",
+                        "agg": "value_count",
+                        "type": "int"
+                    }
+                ],
+                "style": {
+                    "color-map": {
+                        "SEVERE": [
+                            "#B71C1C",
+                            "#ffffff"
+                        ],
+                        "CRITICAL": [
+                            "#E53935",
+                            "#ffffff"
+                        ],
+                        "MAJOR": [
+                            "#F57C00",
+                            "#ffffff"
+                        ],
+                        "MINOR": [
+                            "#FFA726",
+                            "#ffffff"
+                        ],
+                        "WARNING": [
+                            "#FFD54F",
+                            "#ffffff"
+                        ],
+                        "NOTIFICATION": [
+                            "#4DD0E1",
+                            "#ffffff"
+                        ],
+                        "INFORMATION": [
+                            "#03A9F4",
+                            "#ffffff"
+                        ]
+                    }
+                },
+                "widget_id": "c29bb686"
+            },
+            "alerts_tabular": {
+                "extra_filter": "$alerts_tabular_extra_filter",
+                "title": "Alerts",
+                "widget_type": "tabular",
+                "stream": "oia-alerts-stream",
+                "ts_column": "a_updated_ts",
+                "min_width": 12,
+                "height": 12,
+                "max_width": 12,
+                "paginated": true,
+                "resizableColumns": false,
+                "remote_searchable": true,
+                "remote_searchable_cols": [
+                    "a_id",
+                    "a_message",
+                    "a_correlation_status",
+                    "a_severity",
+                    "a_status",
+                    "a_incident_id",
+                    "a_ticket_id",
+                    "a_source_systemname",
+                    "a_asset_name",
+                    "a_asset_ip_address"
+                ],
+                "refreshRequired": true,
+                "timebased": false,
+                "max_rows": 50,
+                "columns": {
+                     "a_en_mapper_id": {
+                        "title": "Mapper Id",
+                        "visible": false,
+                        "key": true,
+                        "defaultWidth": 150
+                    },
+                    "a_id": {
+                        "title": "Alert Id",
+                        "visible": false,
+                        "key": true,
+                        "defaultWidth": 150
+                    },
+                    "id": {
+                        "title": "ID",
+                        "value": "user-dashboard-view-delta",
+                        "key": true,
+                        "type": "FIXED_VALUE",
+                        "hidden": true,
+                        "visible": false
+                    },
+                    "a_alert_key": {
+                        "title": "Alert Key",
+                        "visible": false,
+                        "defaultWidth": 150
+                    },
+                    "a_en_alertDeepLink": {
+                        "title": "Alert Deep Link",
+                        "type": "DYNAMIC_HTML",
+                        "htmlTemplate": "<div v-if='rowData.a_en_alertDeepLink'><a :href='rowData.a_en_alertDeepLink' target='_blank' rel='noopener noreferrer'> <md-icon style='font-size: 16px !important;' class='mdi mdi-link-variant'></md-icon> </a></div><div v-else> </div>",
+                        "key": true
+                    },
+                    "customer_id": {
+                        "title": "Customer Id",
+                        "visible": false,
+                        "hidden": false,
+                        "key": true,
+                        "defaultWidth": 150
+                    },
+                    "project_id": {
+                        "title": "Project Id",
+                        "visible": false,
+                        "hidden": false,
+                        "key": true,
+                        "defaultWidth": 150
+                    },
+                    "a_message": {
+                        "title": "Message",
+                        "formatter": "truncate",
+                        "defaultWidth": 270
+                    },
+                    "a_correlation_status": {
+                        "title": "Correlation Status",
+                        "defaultWidth": 150
+                    },
+                    "a_event_id": {
+                        "title": "Event Id",
+                        "description": "Id of the ingestion-tracker event",
+                        "visible": false,
+                        "key": true,
+                        "defaultWidth": 150
+                    },
+                    "a_source_event_id": {
+                        "title": "Source Event ID",
+                        "visible": false,
+                        "key": true,
+                        "defaultWidth": 150
+                    },
+                    "a_severity_color": {
+                        "title": "Sev_2",
+                        "type": "COLOR-MAP",
+                        "source-column": "a_severity",
+                        "color-map": {
+                            "SEVERE": "#B71C1C",
+                            "CRITICAL": "#E53935",
+                            "MAJOR": "#F57C00",
+                            "MINOR": "#FFA726",
+                            "WARNING": "#FFD54F",
+                            "NOTIFICATION": "#4DD0E1",
+                            "INFORMATION": "#03A9F4"
+                        }
+                    },
+                    "a_severity": {
+                        "title": "Severity",
+                        "htmlTemplateForRow": "<span class='badge' style='background-color: {{'{{ row.a_severity_color }}'}}' > {{'{{ row.a_severity }}'}} </span>",
+                        "defaultWidth": 150
+                    },
+                    "a_state_color": {
+                        "type": "COLOR-MAP",
+                        "source-column": "a_status",
+                        "color-map": {
+                            "CLEARED": "#4CAF50",
+                            "ACTIVE": "#FFA726"
+                        }
+                    },
+                    "a_status": {
+                        "title": "Monitoring Status",
+                        "htmlTemplateForRow": "<span class='badge' style='background-color: {{'{{ row.a_state_color }}'}}' > {{'{{ row.a_status }}'}} </span>",
+                        "defaultWidth": 150
+                    },
+                    "a_incident_id": {
+                        "title": "Incident",
+                        "key": true,
+                        "defaultWidth": 150
+                    },
+                    "a_ticket_id": {
+                        "title": "ITSM Ticket",
+                        "defaultWidth": 100
+                    },
+                    "a_source_systemname": {
+                        "title": "Source",
+                        "defaultWidth": 100
+                    },
+                    "a_raised_ts": {
+                        "title": "Raised At",
+                        "type": "DATETIME",
+                        "defaultWidth": 180
+                    },
+                    "a_created_ts": {
+                        "title": "Created At",
+                        "type": "DATETIME",
+                        "defaultWidth": 180,
+                        "key": true
+                    },
+                    "a_updated_ts": {
+                        "title": "Updated At",
+                        "type": "DATETIME",
+                        "defaultWidth": 180
+                    },
+                    "a_cleared_ts": {
+                        "title": "Cleared At",
+                        "type": "DATETIME",
+                        "defaultWidth": 180
+                    },
+                    "a_sourceeventreceivedat_ts": {
+                        "title": "Source Event Received At",
+                        "type": "DATETIME",
+                        "visible": false,
+                        "defaultWidth": 200
+                    },
+                    "a_lastraisereceivedat_ts": {
+                        "title": "Last Raise Received At",
+                        "type": "DATETIME",
+                        "visible": false,
+                        "defaultWidth": 180
+                    },
+                    "a_raisedreceivedat_ts": {
+                        "title": "Raise Received At",
+                        "type": "DATETIME",
+                        "visible": false,
+                        "defaultWidth": 180
+                    },
+                    "a_clearreceivedat_ts": {
+                        "title": "Clear Received At",
+                        "type": "DATETIME",
+                        "visible": false,
+                        "defaultWidth": 180
+                    },
+                    "a_reviveat_ts": {
+                        "title": "Revive At",
+                        "type": "DATETIME",
+                        "visible": false,
+                        "defaultWidth": 180
+                    },
+                    "a_en_revivededat": {
+                        "title": "Revived Time",
+                        "type": "DATETIME",
+                        "visible": false,
+                        "defaultWidth": 180
+                    },
+                    "a_en_revivedrulename": {
+                        "title": "Revived From Policy",
+                        "visible": false,
+                        "defaultWidth": 200
+                    },
+                    "a_asset_name": {
+                        "title": "Asset Name",
+                        "defaultWidth": 150
+                    },
+                    "a_asset_type": {
+                        "title": "Asset Type",
+                        "defaultWidth": 150
+                    },
+                    "a_asset_ip_address": {
+                        "title": "IP Address",
+                        "defaultWidth": 150,
+                        "key": true
+                    },
+                    "a_en_fqdn": {
+                        "title": "Fully Qualified Domain Name",
+                        "defaultWidth": 250
+                    },
+                    "a_component_name": {
+                        "title": "Component Name",
+                        "visible": false,
+                        "defaultWidth": 150
+                    },
+                    "a_source_mechanism": {
+                        "title": "Source Mechanism",
+                        "visible": false,
+                        "defaultWidth": 150
+                    },
+                    "a_rule_name": {
+                        "title": "Policy Name",
+                        "defaultWidth": 180
+                    },
+                    "a_burst_rule_name": {
+                        "title": " Correlation Burst Policy",
+                        "visible": false,
+                        "defaultWidth": 180
+                    },
+                    "a_alert_category": {
+                        "title": "Alert Category",
+                        "defaultWidth": 180
+                    },
+                    "a_alert_type": {
+                        "title": "Alert Type",
+                        "defaultWidth": 150
+                    },
+                    "a_cluster_label": {
+                        "title": "Cluster",
+                        "visible": false,
+                        "defaultWidth": 150
+                    },
+                    "a_cluster_score": {
+                        "title": "Cluster Score",
+                        "type": "DOUBLE",
+                        "visible": false,
+                        "defaultWidth": 150
+                    },
+                    "a_correlation_parent": {
+                        "title": "Correlation Parent ID",
+                        "visible": false,
+                        "defaultWidth": 150
+                    },
+                    "a_repeat_count": {
+                        "title": "Repeat Count",
+                        "type": "DOUBLE",
+                        "defaultWidth": 180
+                    },
+                    "a_en_stack_name": {
+                        "title": "Stack Name",
+                        "defaultWidth": 180
+                    },
+                    "a_en_node_id": {
+                        "title": "Node ID",
+                        "visible": false,
+                        "hidden": true
+                    },
+                    "a_rule_type": {
+                        "title": "Policy Type",
+                        "visible": false,
+                        "defaultWidth": 150
+                    },
+                    "a_cleared_by": {
+                        "title": "Cleared By",
+                        "visible": false,
+                        "defaultWidth": 150
+                    },
+                    "a_clearcode": {
+                        "title": "Clear Code",
+                        "visible": false,
+                        "defaultWidth": 150
+                    },
+                    "a_clear_message": {
+                        "title": "Clear Message",
+                        "visible": false,
+                        "defaultWidth": 150
+                    },
+                    "a_cause_notes": {
+                        "title": "Cause Notes",
+                        "visible": false,
+                        "defaultWidth": 150
+                    },
+                    "alert-context": {
+                        "title": "alert-context",
+                        "value": true,
+                        "key": true,
+                        "type": "FIXED_VALUE",
+                        "hidden": true,
+                        "visible": false
+                    }
+                },
+                "widget_id": "94a3fc11"
+            }
+        },
+         "actions_lib": {
+                "alerts_tabular_actions": {
+                        "actions": [
+                            {
+                                "title": "View Topology",
+                                "type": "POPUP_CHART",
+                                "chart-type": "GRAPH",
+                                "permission-resource": "update",
+                                "permission": "oia:incident:view",
+                                "selectionType": "SINGLE",
+                                "identifier": "saas-service-action:stack-view-topology",
+                                "contextParamList": {
+                                    "contextParams": [
+                                        {
+                                            "paramKey": "a_incident_id",
+                                            "paramId": "incident_id"
+                                        }
+                                    ]
+                                },
+                                "api-endpoint": {
+                                    "service-name": "saas-reports",
+                                    "methodName": "getReport",
+                                    "stringified-params": false,
+                                    "parse-output": false,
+                                    "params": [
+                                        {
+                                            "reportId": "rda.saas.stack.view.topo",
+                                            "oia_details": {
+                                                "oia_stream": "oia-alerts-stream",
+                                                "query": "timestamp later than -1 months",
+                                                "oia_id_attribute": "a_id",
+                                                "node_id_attribute": "a_en_node_id",
+                                                "stack_name_attribute": "a_en_stack_name",
+                                                "alert_source": {
+                                                    "stream": "oia-alerts-stream",
+                                                    "group_by": [
+                                                        "a_en_node_id",
+                                                        "a_severity",
+                                                        "a_status"
+                                                    ],
+                                                    "incident_id_attr": "a_incident_id",
+                                                    "context_incident_id_attr": "a_incident_id",
+                                                    "extra_filter": "a_source_systemname is not 'Alert Group' ",
+                                                    "ts_column": "timestamp",
+                                                    "duration_hours": 1440,
+                                                    "agg": "value_count",
+                                                    "column": "count_",
+                                                    "type": "int"
+                                                }
+                                            },
+                                            "stack_type": "OIA",
+                                            "register_search_endpoints": true,
+                                            "auto_group": false
+                                        }
+                                    ]
+                                },
+                                "actionCondition": {
+                                    "actionControl": "SHOW_IF",
+                                    "conditionalField": [
+                                        {
+                                            "conditionType": "IS_NOT_NULL",
+                                            "fieldId": "a_en_stack_name"
+                                        },
+                                        {
+                                            "conditionType": "IS_NOT_NULL",
+                                            "fieldId": "a_en_node_id"
+                                        },
+                                        {
+                                            "conditionType": "NOT_EQUAL",
+                                            "conditionValue": "Not Available",
+                                            "fieldId": "a_incident_id"
+                                        }
+                                    ]
+                                }
+                            },
+                            {
+                                "permission": "oia:alert:clear",
+                                "title": "Clear Alerts",
+                                "type": "POPUP_FORM",
+                                "selectionType": "NONE",
+                                "identifier": "alert-processor:cfx.alert.clear.batch",
+                                "api-endpoint": {
+                                    "service-name": "saas-reports",
+                                    "methodName": "getForm",
+                                    "stringified-params": true,
+                                    "parse-output": false,
+                                    "params": [
+                                        {
+                                            "formId": "rda.saas.dynamic.form",
+                                            "formDefinition": {
+                                                "id": "rda.saas.dynamic.form",
+                                                "refreshRequired": true,
+                                                "formFieldList": [
+                                                    {
+                                                        "help": "Clear Alerts",
+                                                        "dataType": "string",
+                                                        "controlType": "SELECTOR_TABLE",
+                                                        "controlPropertyList": [
+                                                            {
+                                                                "attribute": "column-key",
+                                                                "value": "a_id"
+                                                            },
+                                                            {
+                                                                "attribute": "selection",
+                                                                "value": "MULTIPLE"
+                                                            },
+                                                            {
+                                                                "attribute": "paginated",
+                                                                "value": true
+                                                            }
+                                                        ],
+                                                        "widget": {
+                                                            "extends": "self:alerts_tabular",
+                                                            "populate_filters": true,
+                                                            "extend_vars": {
+                                                                "alerts_tabular_extra_filter": "$clear_alerts_extra_filter"
+                                                            }
+                                                        },
+                                                        "required": true,
+                                                        "editable": true,
+                                                        "label": "Alerts",
+                                                        "hidden": false,
+                                                        "fieldId": "selectedAlerts"
+                                                    },
+                                                    {
+                                                        "fieldId": "notes",
+                                                        "label": "Notes",
+                                                        "help": "Notes",
+                                                        "dataType": "string",
+                                                        "controlType": "TEXT_AREA",
+                                                        "hidden": false,
+                                                        "editable": true,
+                                                        "required": true
+                                                    }
+                                                ]
+                                            },
+                                             "formActionList": {
+                                                "formActions": [
+                                                    {
+                                                        "identifier": "Submit",
+                                                        "actionLabel": "Clear"
+                                                    }
+                                                ]
+                                            },
+                                            "actions": [
+                                                {
+                                                    "type": "UPDATE_PSTREAM",
+                                                    "pstreamName": "alert_clear_jobs",
+                                                    "collapse_json": true,
+                                                    "collapsed_json_column": "payload"
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                }
+                            },
+                            {
+                                "permission": "oia:alert:clear",
+                                "identifier": "alert-processor:cfx.alert.clear",
+                                "selectionType": "SINGLE",
+                                "title": "Clear Alert",
+                                "type": "POPUP_FORM",
+                                "api-endpoint": {
+                                    "methodName": "invokeAppApi:getFormById",
+                                    "namespace": "io.cfx.dimensions.app",
+                                    "params": [
+                                        {
+                                            "context": {},
+                                            "form_id": "cfx.alert.clear"
+                                        }
+                                    ],
+                                    "parse-output": false,
+                                    "service-name": "alert-processor",
+                                    "stringified-params": true
+                                },
+                                "actionCondition": {
+                                    "actionControl": "SHOW_IF",
+                                    "conditionalField": [
+                                        {
+                                            "conditionType": "NOT_EQUAL",
+                                            "conditionValue": "CLEARED",
+                                            "fieldId": "a_status"
+                                        }
+                                    ]
+                                }
+                            },
+                            {
+                                "permission": "oia:alert:view",
+                                "title": "Alert Details",
+                                "type": "GO_TO_APP_STATE",
+                                "stateName": "app.featureapp",
+                                "appName": "user-dashboard/alert-details-app",
+                                "selectionType": "SINGLE",
+                                "drillDownContext": "a_message",
+                                "destinationContext": "a_message",
+                                "displayLabelColumnId": "a_incident_id",
+                                "contextParamList": {
+                                     "contextParams": [
+                                {
+                                    "paramKey": "project_id",
+                                    "paramId": "projectId"
+                                },
+                                {
+                                    "paramKey": "a_source_system_id",
+                                    "paramId": "sourcesystemid"
+                                },
+                                {
+                                    "paramKey": "a_incident_id",
+                                    "paramId": "incidentid"
+                                },
+                                {
+                                    "paramKey": "a_incident_id",
+                                    "paramId": "incident_id"
+                                },
+                                {
+                                    "paramKey": "project_id",
+                                    "paramId": "roomid"
+                                },
+                                {
+                                    "paramKey": "project_id",
+                                    "paramId": "projectid"
+                                },
+                                {
+                                    "paramKey": "a_event_id",
+                                    "paramId": "eventid"
+                                },
+                                {
+                                    "paramKey": "a_source_event_id",
+                                    "paramId": "sourceeventid"
+                                },
+                                {
+                                    "paramKey": "a_alert_key",
+                                    "paramId": "eventkey"
+                                },
+                                {
+                                    "paramKey": "a_id",
+                                    "paramId": "processedeventid"
+                                }
+                            ]
+                                }
+                            },
+                            {
+                                "permission": "oia:alert:addToIncident",
+                                "title": "Add To Incident",
+                                "type": "POPUP_FORM",
+                                "templateUrl": "cfx-oia/source-alert-report",
+                                "icon": "mdi mdi-plus",
+                                "selectionType": "SINGLE",
+                                "identifier": "alert-processor:cfx.alert.add.to.incident",
+                                "contextParamList": {
+                                    "contextParams": [
+                                        {
+                                            "paramKey": "a_incident_id",
+                                            "paramId": "incidentid"
+                                        },
+                                        {
+                                            "paramKey": "project_id",
+                                            "paramId": "projectId"
+                                        },
+                                        {
+                                            "paramKey": "a_message",
+                                            "paramId": "message"
+                                        },
+                                        {
+                                            "paramKey": "a_severity_id",
+                                            "paramId": "severity"
+                                        },
+                                        {
+                                            "paramKey": "a_asset_name",
+                                            "paramId": "assetname"
+                                        },
+                                        {
+                                            "paramKey": "a_asset_ip_address",
+                                            "paramId": "assetipaddress"
+                                        },
+                                        {
+                                            "paramKey": "a_id",
+                                            "paramId": "id"
+                                        }
+                                    ]
+                                },
+                                "api-endpoint": {
+                                    "service-name": "saas-reports",
+                                    "methodName": "getForm",
+                                    "stringified-params": true,
+                                    "parse-output": false,
+                                    "params": [
+                                        {
+                                            "form_id": "rda.saas.dynamic.form",
+                                            "formDefinition": {
+                                                "id": "rda.saas.dynamic.form",
+                                                "refreshRequired": true,
+                                                "submitRequired": true,
+                                                "formFieldList": [
+                                                    {
+                                                        "fieldId": "id",
+                                                        "label": "Alert Id",
+                                                        "help": "Alert ID",
+                                                        "dataType": "string",
+                                                        "hidden": false,
+                                                        "editable": false,
+                                                        "required": true
+                                                    },
+                                                    {
+                                                        "fieldId": "customerid",
+                                                        "label": "Customer Id",
+                                                        "help": "Customer Id",
+                                                        "dataType": "string",
+                                                        "hidden": true,
+                                                        "editable": false,
+                                                        "required": false
+                                                    },
+                                                    {
+                                                        "fieldId": "projectid",
+                                                        "label": "Project Id",
+                                                        "help": "Project Id",
+                                                        "dataType": "string",
+                                                        "hidden": true,
+                                                        "editable": false,
+                                                        "required": false
+                                                    },
+                                                    {
+                                                        "fieldId": "message",
+                                                        "label": "Message",
+                                                        "help": "Message",
+                                                        "dataType": "string",
+                                                        "hidden": false,
+                                                        "editable": false,
+                                                        "required": true
+                                                    },
+                                                    {
+                                                        "fieldId": "severity",
+                                                        "label": "Severity",
+                                                        "help": "Description",
+                                                        "dataType": "string",
+                                                        "hidden": false,
+                                                        "editable": false,
+                                                        "required": false,
+                                                        "controlPropertyList": [
+                                                            {
+                                                                "attribute": "layout-group-id",
+                                                                "value": "severity-group"
+                                                            },
+                                                            {
+                                                                "attribute": "layout-percent",
+                                                                "value": 50
+                                                            }
+                                                        ]
+                                                    },
+                                                    {
+                                                        "fieldId": "assetname",
+                                                        "label": "Asset Name",
+                                                        "help": "Asset Name",
+                                                        "dataType": "string",
+                                                        "hidden": false,
+                                                        "editable": false,
+                                                        "required": false,
+                                                        "controlPropertyList": [
+                                                            {
+                                                                "attribute": "layout-group-id",
+                                                                "value": "ipaddress-group"
+                                                            },
+                                                            {
+                                                                "attribute": "layout-percent",
+                                                                "value": 50
+                                                            }
+                                                        ]
+                                                    },
+                                                    {
+                                                        "fieldId": "assetipaddress",
+                                                        "label": "IP Address",
+                                                        "help": "IP Address",
+                                                        "dataType": "string",
+                                                        "hidden": false,
+                                                        "editable": false,
+                                                        "required": false,
+                                                        "controlPropertyList": [
+                                                            {
+                                                                "attribute": "layout-group-id",
+                                                                "value": "ipaddress-group"
+                                                            },
+                                                            {
+                                                                "attribute": "layout-percent",
+                                                                "value": 50
+                                                            }
+                                                        ]
+                                                    },
+                                                    {
+                                                        "fieldId": "incidentid",
+                                                        "label": "Current Incident",
+                                                        "help": "Incident",
+                                                        "controlType": "TEXT_FIELD",
+                                                        "visible": true,
+                                                        "editable": false,
+                                                        "required": true,
+                                                        "controlPropertyList": [
+                                                            {
+                                                                "attribute": "layout-group-id",
+                                                                "value": "severity-group"
+                                                            },
+                                                            {
+                                                                "attribute": "layout-percent",
+                                                                "value": 50
+                                                            }
+                                                        ]
+                                                    },
+                                                    {
+                                                        "dataType": "string",
+                                                        "controlType": "SELECTOR_TABLE",
+                                                        "controlPropertyList": [
+                                                                {
+                                                                    "attribute": "paginated",
+                                                                    "value": true
+                                                                }
+                                                        ],
+                                                        "widget": {
+                                                            "populate_filters": false,
+                                                            "extends": "incidents:incident_tabular",
+                                                            "extend_vars": {
+                                                                "incidents_tabular_extra_filter": "i_created_ts is after -1d and project_id is '$project_id' and i_source is 'Alert Group' and incident_id is not '$a_incident_id' "
+                                                            },
+                                                            "timebased": false
+                                                        },
+                                                        "required": true,
+                                                        "editable": false,
+                                                        "label": "Incidents",
+                                                        "hidden": false,
+                                                        "fieldId": "toIncident"
+                                                    }
+                                                ]
+                                            },
+                                            "actions": [
+                                                {
+                                                    "type": "API_ENDPOINT",
+                                                    "service-name": "alert-processor",
+                                                    "methodName": "submitForm",
+                                                    "namespace": "io.cfx.dimensions.app",
+                                                    "stringified-params": true,
+                                                    "parse-output": false,
+                                                    "useReportContext": true,
+                                                    "params": [
+                                                        {
+                                                            "form_id": "cfx.alert.form.add.to.incident",
+                                                            "context": {},
+                                                            "form_data": {}
+                                                        }
+                                                    ]
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                },
+                                "actionCondition": {
+                                    "actionControl": "SHOW_IF",
+                                    "conditionalField": [
+                                        {
+                                            "conditionType": "EQUAL",
+                                            "conditionValue": "CORRELATED",
+                                            "fieldId": "a_correlation_status"
+                                        }
+                                    ]
+                                }
+                            },
+                            {
+                                "permission": "oia:alert:view",
+                                "title": "View Incident",
+                                "type": "GO_TO_APP_STATE",
+                                "stateName": "app.featureapp",
+                                "appName": "user-dashboard/incident-details-app",
+                                "selectionType": "SINGLE",
+                                "drillDownLinkField": "a_incident_id",
+                                "drillDownContext": "a_incident_id",
+                                "destinationContext": "incidentid",
+                                "displayLabelColumnId": "a_incident_id",
+                                "contextParamList": {
+                                    "contextParams": [
+                                        {
+                                            "paramKey": "project_id",
+                                            "paramId": "projectId"
+                                        },
+                                        {
+                                            "paramKey": "a_incident_id",
+                                            "paramId": "incidentid"
+                                        },
+                                        {
+                                            "paramKey": "a_incident_id",
+                                            "paramId": "incident_id"
+                                        },
+                                        {
+                                            "paramKey": "project_id",
+                                            "paramId": "roomid"
+                                        },
+                                        {
+                                            "paramKey": "project_id",
+                                            "paramId": "projectid"
+                                        }
+                                    ]
+                                },
+                                "actionCondition": {
+                                    "actionControl": "SHOW_IF",
+                                    "conditionalField": [
+                                        {
+                                            "conditionType": "NOT_EQUAL",
+                                            "conditionValue": "SUPPRESSED",
+                                            "fieldId": "a_correlation_status"
+                                        },
+                                        {
+                                            "conditionType": "NOT_EQUAL",
+                                            "conditionValue": "Not Available",
+                                            "fieldId": "a_incident_id"
+                                        }
+                                    ]
+                                }
+                            }
+                        ]
+                    }
+            }
+    },
+    "saved_time": "2025-04-14T08:49:35.814061"
+}

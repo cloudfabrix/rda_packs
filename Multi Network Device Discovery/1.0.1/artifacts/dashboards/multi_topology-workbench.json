@@ -1,0 +1,53 @@
+{
+    "name": "topology-workbench",
+    "label": "Topology",
+    "showTitle": false,
+    "live_edit": true,
+    "description": "topology path visualization",
+    "enabled": true,
+    "dashboard_type": "template",
+    "dashboard_folder": "MultiNetworkPack",
+    "custom_context": {
+        "formEndpoint": "dynamic_form.preview_topology_dashboard",
+        "previewEndpoint": "preview_topology_dashboard"
+    },
+    "template_variables": {
+        "CUST_ID": {
+            "contextId": "customerId"
+        },
+        "PROJ_ID": {
+            "contextId": "projectId"
+        },
+        "PROJ_ID_SINGLE": {
+            "contextId": "project_id"
+        },
+        "CUST_TAG": {
+            "contextId": "customerTag"
+        },
+        "NETWORK_NAME": {
+            "contextId": "network_name"
+        }
+    },
+    "dashboard_filters": {
+        "time_filter": false,
+        "extra_filter0": "customerTag is '{{CUST_TAG}}'"
+    },
+    "dashboard_sections": [
+        {
+            "title": "KPI Workbench",
+            "show_filter": false,
+            "widgets": [
+                {
+                    "title": "KPI Workbench",
+                    "widget_type": "portal_html",
+                    "widget_template": "app-rda/network-path-viewer",
+                    "reportId": "benchmark.actions.list.tabular",
+                    "height": 12,
+                    "min_wdith": 12,
+                    "widget_id": "d767314b"
+                }
+            ]
+        }
+    ],
+    "saved_time": "2024-12-21T17:39:34.111427"
+}

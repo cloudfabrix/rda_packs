@@ -1,0 +1,502 @@
+{
+    "name": "multi_customer_discovery_runs",
+    "label": "On Demand Discovery",
+    "description": "onboarded_devices: Insights",
+    "dashboard_folder": "MultiNetworkPack",
+    "version": "1.0.3",
+    "enabled": false,
+    "dashboard_type": "template",
+    "live_edit": true,
+    "template_variables": {
+        "CUST_ID": {
+            "contextId": "customerId"
+        },
+        "PROJ_ID": {
+            "contextId": "project_id"
+        },
+        "PROJ_ID_SINGLE": {
+            "contextId": "project_id"
+        },
+        "CUST_TAG": {
+            "contextId": "customerTag"
+        },
+        "NETWORK_NAME": {
+            "contextId": "network_name"
+        }
+    },
+    "dashboard_filters": {
+        "time_filter": true,
+        "extra_filter0": "(target_type contains 'DEVICE')",
+        "default_time_filter_labels": [
+            "Last 1 month"
+        ],
+        "columns_filter": [
+            {
+                "id": "timestamp",
+                "label": "Timestamp",
+                "type": "DATETIME"
+            }
+        ],
+        "group_filters": []
+    },
+    "dashboard_sections": [
+        {
+            "title": "Onboarded Devices",
+            "show_filter": true,
+            "widgets": [
+                {
+                    "title": "Discovery Runs",
+                    "widget_type": "tabular",
+                    "stream": "asset_inventory_collection_status_stream",
+                    "extra_filter0": "customer_tag contains '{{CUST_TAG}}' or customer_tag is empty",
+                    "extra_filter1": "(jobname contains '{{CUST_TAG}}' or jobname is empty) and type_ is 'overall_status' and total is not empty and pending is 0",
+                    "extra_filter": "(jobname contains '{{CUST_TAG}}' or jobname contains 'job') and type_ is 'overall_status' and total is not empty and pending is 0 and jobname contains '{{NETWORK_NAME}}'",
+                    "height": 4,
+                    "max_width": 12,
+                    "min_width": 12,
+                    "columns": {
+                        "collection_start_time": {
+                            "title": "Collection Start Time",
+                            "type": "DATETIME",
+                            "visible": true
+                        },
+                        "collection_timestamp": {
+                            "title": "Discovery End time",
+                            "type": "DATETIME"
+                        },
+                        
+                        "total": "Total Devices",
+                        "success": {
+                            "title": "Total Successful",
+                            "htmlTemplateForRow0": "<{%raw%}span class='badge' style='background-color: {{ row.response_colors}}' > {{ row.success}} </span>{%endraw%}"
+                        },
+                        "failed": {
+                            "title": "Total Failed",
+                            "htmlTemplateForRow0": "{%raw%}<span class='badge' style='background-color: {{ row.response_colorf}}' > {{ row.failed}} </span>{%endraw%}"
+                        },
+                        "jobname": {
+                            "title": "Jobname",
+                            "type": "TEXT",
+                            "hidden": true
+                        },
+                        "jobid": {
+                            "title": "job id",
+                            "type": "TEXT",
+                            "hidden": true
+                        },
+                        "duplicates": {
+                            "title": "Duplicates(Serial Number)",
+                            "type": "TEXT",
+                            "hidden": false
+                        }
+                    },
+                    "custom_columns": [
+                        {
+                            "id": "response_colors",
+                            "label": "Enable Color",
+                            "expr": "['#b3b3b3'] if success == 0 else ['#4CAF50']",
+                            "hidden": true,
+                            "visible": false,
+                            "sortable": false
+                        },
+                        {
+                            "id": "response_colorf",
+                            "label": "Enable Color",
+                            "expr": "['#b3b3b3'] if failed == 0 else ['#BB0000']",
+                            "hidden": true,
+                            "visible": false,
+                            "sortable": false
+                        },
+                        {
+                            "id": "status",
+                            "label": "Status",
+                            "expr": "'Success' if failed == 0 else 'Failed'",
+                            "hidden": false,
+                            "visible": true,
+                            "sortable": false
+                        }
+                    ],
+                    "actions": [
+                        {
+                            "permission": "rda:github:view",
+                            "title": "Run Discovery",
+                            "type": "POPUP_FORM",
+                            "selectionType": "NONE",
+                            "identifier": "saas-service-action:userdashboard-add-yaml",
+                            "api-endpoint": {
+                                "service-name": "saas-reports",
+                                "methodName": "getForm",
+                                "stringified-params": true,
+                                "parse-output": false,
+                                "params": [
+                                    {
+                                        "formId": "rda.saas.dynamic.form",
+                                        "formActionList": {
+                                            "formActions": [
+                                                {
+                                                    "identifier": "Submit",
+                                                    "actionLabel": "Run"
+                                                }
+                                            ]
+                                        },
+                                        "formDefinition": {
+                                            "id": "rda.saas.dynamic.form",
+                                            "refreshRequired": true,
+                                            "formFieldList": [
+                                                {
+                                                    "help": "Make sure access Verification is run for the devices you want to run discovery on",
+                                                    "dataType": "string",
+                                                    "required": true,
+                                                    "editable": true,
+                                                    "label": "NOTE: Make sure that access verification is completed for  devices for which discovery needs to be run.",
+                                                    "controlType": "LABEL",
+                                                    "hidden": false,
+                                                    "fieldId": "note_field"
+                                                },
+                                                {
+                                                    "help": "Select network devices for which you want to run discovery",
+                                                    "dataType": "string",
+                                                    "required": true,
+                                                    "editable": true,
+                                                    "label": "Network Devices",
+                                                    "hidden": false,
+                                                    "fieldId": "Others",
+                                                    "controlType": "SELECTOR_TABLE",
+                                                    "controlPropertyList": [
+                                                        {
+                                                            "attribute": "column-key",
+                                                            "value": "device_ip"
+                                                        },
+                                                        {
+                                                            "attribute": "selection",
+                                                            "value": "MULTIPLE"
+                                                        }
+                                                    ],
+                                                    "widget": {
+                                                        "title": "Device Details",
+                                                        "timebased": false,
+                                                        "max_width": 12,
+                                                        "height": 8,
+                                                        "min_width": 12,
+                                                        "extra_filter0": "type contains 'windows'",
+                                                        "stream": "multi_discovery",
+                                                        "extra_filter": "(customer_tag contains '{{CUST_TAG}}' or customer_tag is empty) and network_name is '{{NETWORK_NAME}}'",
+                                                        "ts_column": "timestamp",
+                                                        "sorting": [],
+                                                        "columns": {
+                                                            "device_ip": {
+                                                                "title": "IP Address",
+                                                                "key": true
+                                                            },
+                                                            "discovery_scope": {
+                                                                "title": "discovery Scope",
+                                                                "key": true,
+                                                                "visible": false
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            ]
+                                        },
+                                        "actions": [
+                                            {
+                                                "type": "RUN_PIPELINE",
+                                                "pipelineName": "multi_ondemand_discovery_main",
+                                                "isSync": false,
+                                                "workerGroup": "{{CUST_TAG}}.*"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "permission": "rda:github:view",
+                            "title": "Run Topology",
+                            "type": "POPUP_FORM",
+                            "selectionType": "NONE",
+                            "identifier": "saas-service-action:userdashboard-add-yaml",
+                            "api-endpoint": {
+                                "service-name": "saas-reports",
+                                "methodName": "getForm",
+                                "stringified-params": true,
+                                "parse-output": false,
+                                "params": [
+                                    {
+                                        "formId": "rda.saas.dynamic.form",
+                                        "formActionList": {
+                                            "formActions": [
+                                                {
+                                                    "identifier": "Submit",
+                                                    "actionLabel": "Run"
+                                                }
+                                            ]
+                                        },
+                                        "formDefinition": {
+                                            "id": "rda.saas.dynamic.form",
+                                            "refreshRequired": true,
+                                            "formFieldList": [
+                                                {
+                                                    "help": "Make sure Discovery is run for the devices you want to run Topology on",
+                                                    "dataType": "string",
+                                                    "required": true,
+                                                    "editable": true,
+                                                    "label": "NOTE: Make sure that Run Discovery is completed for  devices for which Topology needs to be run.",
+                                                    "controlType": "LABEL",
+                                                    "hidden": false,
+                                                    "fieldId": "note_field"
+                                                }
+                                            ]
+                                        },
+                                        "actions": [
+                                            {
+                                                "type": "RUN_PIPELINE",
+                                                "pipelineName": "multi_network_device_topology_calculation",
+                                                "isSync": false,
+                                                "workerGroup": "{{CUST_TAG}}.*"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "permission": "aia:page:view",
+                            "drillDownLinkField": "success",
+                            "identifier": "success",
+                            "selectionType": "SINGLE",
+                            "stateName": "app.featureapp",
+                            "title": "View Success",
+                            "contextParamList": {
+                                "contextParams": [
+                                    {
+                                        "paramKey": "jobid",
+                                        "paramId": "jobid"
+                                    }
+                                ]
+                            },
+                            "actionCondition": {
+                                "actionControl": "SHOW_IF",
+                                "conditionalField": [
+                                    {
+                                        "conditionType": "IS_NOT_NULL",
+                                        "fieldId": "success"
+                                    }
+                                ]
+                            },
+                            "type": "GO_TO_APP_STATE",
+                            "appName": "user-dashboard/multi_customer_discovery_runs_details_success"
+                        },
+                        {
+                            "permission": "aia:page:view",
+                            "drillDownLinkField": "duplicates",
+                            "identifier": "duplicates",
+                            "selectionType": "SINGLE",
+                            "stateName": "app.featureapp",
+                            "title": "View Duplicates",
+                            "contextParamList": {
+                                "contextParams": [
+                                    {
+                                        "paramKey": "jobid",
+                                        "paramId": "jobid"
+                                    }
+                                ]
+                            },
+                            "actionCondition": {
+                                "actionControl": "SHOW_IF",
+                                "conditionalField": [
+                                    {
+                                        "conditionType": "IS_NOT_NULL",
+                                        "fieldId": "duplicates"
+                                    }
+                                ]
+                            },
+                            "type": "GO_TO_APP_STATE",
+                            "appName": "user-dashboard/multi_customer_discovery_runs_details_duplicates"
+                        },
+                        {
+                            "appName": "user-dashboard/multi_customer_discovery_runs_details_failed",
+                            "permission": "aia:page:view",
+                            "drillDownContext": "failed",
+                            "drillDownLinkField": "failed",
+                            "identifier": "failed",
+                            "selectionType": "SINGLE",
+                            "stateName": "app.featureapp",
+                            "title": "View Failed",
+                            "contextParamList": {
+                                "contextParams": [
+                                    {
+                                        "paramKey": "jobid",
+                                        "paramId": "jobid"
+                                    }
+                                ]
+                            },
+                            "actionCondition": {
+                                "actionControl": "SHOW_IF",
+                                "conditionalField": [
+                                    {
+                                        "conditionType": "IS_NOT_NULL",
+                                        "fieldId": "failed"
+                                    }
+                                ]
+                            },
+                            "type": "GO_TO_APP_STATE"
+                        },
+                        {
+                            "appName": "user-dashboard/multi_customer_discovery_runs_details_total_devices",
+                            "permission": "aia:page:view",
+                            "identifier": "total",
+                            "drillDownLinkField": "total",
+                            "contextParamList": {
+                                "contextParams": [
+                                    {
+                                        "paramKey": "jobid",
+                                        "paramId": "jobid"
+                                    }
+                                ]
+                            },
+                            "selectionType": "SINGLE",
+                            "stateName": "app.featureapp",
+                            "title": "View Total Devices",
+                            "type": "GO_TO_APP_STATE"
+                        },
+                        {
+                            "appName": "user-dashboard/multi_logs",
+                            "permission": "aia:page:view",
+                            "identifier": "Logs",
+                            "drillDownLinkField": "jobid",
+                            "contextParamList": {
+                                "contextParams": [
+                                    {
+                                        "paramKey": "jobid",
+                                        "paramId": "jobid"
+                                    }
+                                ]
+                            },
+                            "selectionType": "SINGLE",
+                            "stateName": "app.featureapp",
+                            "title": "View Logs",
+                            "type": "GO_TO_APP_STATE"
+                        }
+                    ],
+                    "widget_id": "b2c8d81c"
+                },
+                {
+                    "title": "All Jobs",
+                    "widget_type": "tabular",
+                    "stream": "rda_system_job_tracker",
+                    "extra_filter0": "attributes_deployment_id is 'network_device_discovery'",
+                    "extra_filter": "pipeline_name in ['multi_ondemand_discovery_main','multi_network_device_topology_calculation','multi_access_verification_main_pipeline']",
+                    "refreshOptions": {
+                        "refreshType": "Periodic",
+                        "refreshInterval": 30000
+                    },
+                    "duration_hours": 87600,
+                    "ts_column": "timestamp",
+                    "min_width": 12,
+                    "height": 10,
+                    "max_width": 12,
+                    "paginated": true,
+                    "refreshRequired": true,
+                    "timebased": false,
+                    "max_rows": 10,
+                    "remote_searchable": true,
+                    "columns": {
+                        "jobid": {
+                            "title": "Job ID",
+                            "key": true
+                        },
+                        "pid": {
+                            "title": "PID",
+                            "key": true
+                        },
+                        "pod_id": {
+                            "title": "POD ID"
+                        },
+                        "pipeline_name": {
+                            "title": "Pipeline Name",
+                            "key": true,
+                            "visible": true
+                        },
+                        "attributes_pipeline_version": {
+                            "title": "Pipeline Version",
+                            "visible": false
+                        },
+                        "status": {
+                            "title": "Status",
+                            "visible": true
+                        },
+                        "reason": {
+                            "title": "Reason",
+                            "key": true,
+                            "visible": true
+                        },
+                        "start_time": {
+                            "title": "Job Created",
+                            "type": "DATETIME",
+                            "key": true,
+                            "visible": true
+                        },
+                        "ended_time": {
+                            "title": "Job Ended",
+                            "type": "DATETIME",
+                            "key": true,
+                            "visible": true
+                        },
+                        "age": {
+                            "title": "Duration",
+                            "key": true,
+                            "visible": true
+                        },
+                        "attributes_deployment_run_mode": {
+                            "title": "Run Mode",
+                            "key": true,
+                            "visible": true
+                        }
+                    },
+                    "custom_columns": [],
+                    "actions": [
+                        {
+                            "permission": "rda:jobs:view",
+                            "title": "View Traces",
+                            "type": "POPUP_REPORT",
+                            "selectionType": "SINGLE",
+                            "identifier": "saas-service-action:job-traces",
+                            "api-endpoint": {
+                                "service-name": "saas-reports",
+                                "methodName": "getReport",
+                                "stringified-params": false,
+                                "parse-output": false,
+                                "params": [
+                                    {
+                                        "reportId": "rda.saas.worker.traces"
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "permission": "rda:logs:view",
+                            "title": "View Logs",
+                            "type": "POPUP_REPORT",
+                            "selectionType": "SINGLE",
+                            "identifier": "saas-service-action:job-logs",
+                            "api-endpoint": {
+                                "service-name": "saas-reports",
+                                "methodName": "getReport",
+                                "stringified-params": false,
+                                "parse-output": false,
+                                "params": [
+                                    {
+                                        "reportId": "rda.saas.worker.logs"
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "widget_id": "0c070112"
+                }
+            ]
+        }
+    ],
+    "saved_time": "2025-05-26T05:02:01.927909"
+}

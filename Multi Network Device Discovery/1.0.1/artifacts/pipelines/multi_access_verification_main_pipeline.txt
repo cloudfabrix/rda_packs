@@ -1,0 +1,238 @@
+%% stream = no and limit = 0
+%% template_type="jinja"
+##%% import_src_type = "diagnostictools"
+%%start_inline_object name="context_dynamic_form" and type="data" and format="json"
+{
+    "formFieldList": [
+        {
+            "fieldId": "customer_tag",
+            "label": "Tag of the customer",
+            "required": false,
+            "dataType": "string"
+        },
+        {
+            "fieldId": "network_name",
+            "label": "Network Name",
+            "required": false,
+            "dataType": "string"
+        }
+    ]
+}
+%%end_inline_object
+@dm:empty
+    --> @dm:save name = "temp-customer-context"
+    
+
+## {% set row = "" %}
+{% if customer_tag %} 
+   {% set customer_id = customer_id %}
+   {% set customer_tag = customer_tag %}
+   {% set customerTag = customer_tag %}
+   {% set network_name = network_name %}
+   
+{% elif customerTag %} 
+   {% set customer_id = customer_id %}
+   {% set customer_tag = customerTag %}
+{% else %}
+   {% set customer_id = '' %}
+   {% set customer_tag = '' %}
+{% endif %}   
+
+## access
+--> @dm:empty
+    
+
+--> @c:new-block
+    --> @exec:get-input 
+    --> @dm:save name="temp-access-verify"
+    ## --> @dm:save name="test-access-verify"
+
+
+-->  @c:new-block     
+
+           -->  @dm:empty 
+           {% if customer_tag %}   
+           -->  #dm:query-persistent-stream     type in ['snmp-cred','ssh-cred','device-snmp-v3','device-host-ssh','device-snmp-v1v2'] and (customerTag contains '{{customer_tag}}') and name contains '{{network_name}}'  with-input name = 'rda_secrets_meta' and limit= 0
+            {% else %}
+           -->  #dm:query-persistent-stream     type in ['snmp-cred','ssh-cred','device-snmp-v3','device-host-ssh','device-snmp-v1v2'] and (customerTag is empty) and name contains '{{network_name}}' with-input name = 'rda_secrets_meta' and limit= 0
+            {% endif %}
+           --> @dm:eval key ="'key'"  
+            --> @dm:eval snmp_cred_name = "name if type in ['snmp-cred','device-snmp-v3','device-snmp-v1v2'] else None" 
+           --> @dm:eval ssh_cred_name = "name if type in ['ssh-cred','device-host-ssh'] else None"  
+                    
+-->  @dm:save     name = 'temp-creds'
+##-->  @dm:save     name = 'test2-creds'
+
+--> @c:new-block
+  -->  @dm:recall     name = 'temp-creds' and return_empty = "yes"
+  -->*dm:filter snmp_cred_name is not empty
+  -->  @dm:eval     key ="'key'"
+  ##-->  @dm:save     name = 'test-creds-snmp'
+  -->  @dm:save     name = 'temp-creds-snmp'
+
+--> @c:new-block
+  -->  @dm:recall     name = 'temp-creds' and return_empty = "yes"
+  -->*dm:filter ssh_cred_name is not empty
+  -->  @dm:eval     key ="'key'"
+  ##-->  @dm:save     name = 'test-creds-ssh'
+  -->  @dm:save     name = 'temp-creds-ssh'
+   
+  
+--> @c:new-block
+    --> @dm:recall name="temp-access-verify" and return_empty = "yes"
+    --> @dm:skip-block-if-shape row_count = 0
+    --> @dm:selectcolumns include = "Others|customer_tag|customer_id|network_name"
+    ## --> @dm:eval Others = 'Others.replace("\'", "\"")'
+    --> @dm:explode-json column="Others"
+    --> @dm:eval key ="'key'"
+    --> @dm:save name="temp-network-access-verification-pipeline"
+    ##--> @dm:save name="network-access-verification-pipeline"
+
+ 
+--> @c:new-block
+    --> @dm:recall name="temp-access-verify" and return_empty = "yes"
+    --> @dm:skip-block-if-shape row_count > 0     
+ {% if customer_tag %} 
+           -->  #dm:query-persistent-stream     device_ip is not empty and (customer_tag is '{{customer_tag}}') and (network_name is '{{network_name}}') with-input name = "multi_discovery" & limit = "0"
+{% else %}
+           -->  #dm:query-persistent-stream     device_ip is not empty and (customer_tag is empty or customer_tag is 'None')  and (network_name is '{{network_name}}') with-input name = "multi_discovery" & limit = "0"
+    {% endif %}
+-->  *dm:filter     device_ip not in ['nan', 'not available']
+-->@dm:selectcolumns include = "^device_ip$|^discovery_scope$|^network_name$"
+-->  @dm:dedup     columns= "device_ip"
+-->  @dm:eval     key ="'key'"
+ --> @dm:save name = 'temp-network-access-verification-pipeline'
+
+     
+
+--> @c:new-block
+    --> @dm:recall name="temp-network-access-verification-pipeline" and return_empty = "yes"
+    --> @dm:add-missing-columns columns = "customer_tag,customer_id" 
+--> @dm:save name="temp-ip-list"
+##--> @dm:save name="test-ip-list"
+
+--> @c:data-loop columns="snmp_cred_name" and dataset ="temp-creds-snmp" and return_empty = "yes"
+--> @dm:recall name = 'temp-ip-list' and return_empty = "yes"
+--> @dm:eval snmp_cred_name ="'$snmp_cred_name'"
+--> @dm:save name="temp-ip-list-snmp" & append = "yes"
+ 
+  
+    
+--> @c:data-loop columns="ssh_cred_name" and dataset ="temp-creds-ssh" and return_empty = "yes"
+--> @dm:recall name = 'temp-ip-list' and return_empty = "yes"
+--> @dm:eval ssh_cred_name ="'$ssh_cred_name'"
+--> @dm:save name="temp-ip-list-ssh" & append = "yes"
+
+
+## SNMP/SSH Credentials Access Verification
+
+--> @c:data-loop columns="device_ip,discovery_scope,snmp_cred_name" and dataset ="temp-ip-list-snmp" and return_empty = "yes"
+   --> @dm:recall name = 'temp-ip-list-snmp' and return_empty = "yes"
+   --> @dm:skip-block-if-shape row_count = 0  
+   --> *exec:if-condition device_ip = "${device_ip}"
+    --> @asset-discovery:access-check ip_column = 'device_ip' & protocol = 'snmp' and snmp_creds_regex = "$snmp_cred_name"
+    --> @dm:eval discovery_scope ="'$discovery_scope'"
+    --> @dm:eval key ="'key'"
+    --> @dm:enrich dict="temp-ip-list" and src_key_cols="key" and dict_key_cols="key" and enrich_cols="customer_tag,customer_id,network_name"
+    --> @dm:save name = "temp-access-snmp" & append = "yes"
+    ##--> @rn:write-stream name="network_access_verification"
+    --> @exec:end-if
+     
+
+--> @c:new-block
+--> @dm:recall    name = 'temp-access-snmp' and return_empty = "yes"
+##--> @dm:save name="test-access-snmp"
+--> @dm:dedup columns="ip_address,auth_state"
+--> @dm:save name="temp-snmp"
+-->*dm:filter auth_state = "Success"
+--> @dm:eval success_row="'yes'"
+--> @dm:save name="temp-snmp-success"
+ --> @dm:recall name="temp-snmp" and return_empty = "yes"
+ -->@dm:add-missing-columns columns = "auth_state"
+ -->*dm:filter auth_state = "Failed"
+--> @dm:save name="temp-failed"
+##--> @dm:save name="test-failed"
+ ##--> *exec:if-condition row_count > 0
+   --> @dm:skip-block-if-shape row_count = 0  
+ --> @dm:enrich-conditional dict is 'temp-snmp-success' and condition is 'ip_address == "$ip_address"' and enrich_cols = "success_row"
+
+ ##--> @dm:enrich dict='temp-success' and src_key_cols="ip_address" and dict_key_cols="ip_address" and enrich_cols="success_row"
+    -->@dm:add-missing-columns columns = "success_row"
+    --> *dm:filter success_row notin ["yes"]
+     --> @dm:save name="temp-failed-unique-snmp"
+ ##-->@exec:end-if
+ --> @c:new-block
+ --> @dm:recall name="temp-failed" and return_empty = "yes"
+   --> @dm:skip-block-if-shape row_count > 0  
+ ##--> *exec:if-shape row_count = 0  
+
+    --> @dm:recall name="temp-snmp-success" and return_empty = "yes"
+ --> @rn:write-stream name="multi_network_access_verification"
+##--> @exec:end-if
+
+--> @c:new-block
+ ##--> @dm:recall name="temp-failed"
+ ##  --> @dm:skip-block-if-shape row_count = 0  
+ ## --> *exec:if-condition row_count > 0 
+    --> @dm:concat names="temp-snmp-success|temp-failed-unique-snmp" and return_empty = "yes"
+    --> @dm:save name="temp-successfull-data"
+     ##--> @dm:save name="test-successfull-data"
+    --> @rn:write-stream name="multi_network_access_verification"
+   ## -->@exec:end-if
+    
+
+
+--> @c:data-loop columns="device_ip,discovery_scope,ssh_cred_name" and dataset ="temp-ip-list-ssh" and return_empty = "yes"
+    --> @dm:recall name = 'temp-ip-list-ssh' and return_empty = "yes"
+    --> @dm:skip-block-if-shape row_count = 0  
+    --> *exec:if-condition device_ip = "${device_ip}"
+    --> @asset-discovery:access-check ip_column = 'device_ip' & protocol = 'ssh' & ssh_creds_regex = "$ssh_cred_name"
+    --> @dm:eval key ="'key'"
+    --> @dm:eval discovery_scope ="'$discovery_scope'"
+    --> @dm:enrich dict="temp-ip-list" and src_key_cols="key" and dict_key_cols="key" and enrich_cols="customer_tag,customer_id,network_name"
+    --> @dm:save name = "temp-access-ssh" & append = 'yes'
+    ##--> @rn:write-stream name="multi_network_access_verification"
+    --> @exec:end-if
+
+    --> @c:new-block
+    --> @dm:recall    name = 'temp-access-ssh' and return_empty = "yes"
+    ##--> @dm:save name="test-access-ssh"
+    --> @dm:dedup columns="ip_address,auth_state"
+    --> @dm:save name="temp-ssh"
+    --> *dm:filter auth_state = "Success"
+    --> @dm:eval success_row="'yes'"
+    --> @dm:save name="temp-ssh-success"
+    --> @dm:recall name="temp-ssh" and return_empty = "yes"
+    --> @dm:add-missing-columns columns = "auth_state"
+    --> *dm:filter auth_state = "Failed"
+    --> @dm:save name="temp-failed-ssh"
+    ##--> @dm:save name="test-failed"
+    ## --> *exec:if-condition row_count > 0
+    --> @dm:skip-block-if-shape row_count = 0
+    --> @dm:enrich-conditional dict is 'temp-ssh-success' and condition is 'ip_address == "$ip_address"' and enrich_cols = "success_row"
+    ## --> @dm:enrich dict='temp-success' and src_key_cols="ip_address" and dict_key_cols="ip_address" and enrich_cols="success_row"
+    --> @dm:add-missing-columns columns = "success_row"
+    --> *dm:filter success_row notin ["yes"]
+    --> @dm:save name="temp-failed-unique-ssh"
+
+## -->@exec:end-if
+--> @c:new-block
+    --> @dm:recall name="temp-failed-ssh" and return_empty = "yes"
+    --> @dm:skip-block-if-shape row_count > 0
+    ## --> *exec:if-shape row_count = 0
+    --> @dm:recall name="temp-ssh-success" and return_empty = "yes"
+    --> @rn:write-stream name="multi_network_access_verification"
+
+## --> @exec:end-if
+--> @c:new-block
+    ## --> @dm:recall name="temp-failed"
+    ## --> @dm:skip-block-if-shape row_count = 0
+    ## --> *exec:if-condition row_count > 0
+    --> @dm:concat names="temp-ssh-success|temp-failed-unique-ssh"
+    --> @dm:save name="temp-successfull-data"
+    ##--> @dm:save name="test-successfull-data"
+    --> @rn:write-stream name="multi_network_access_verification"
+
+
+
+  
