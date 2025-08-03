@@ -1,0 +1,207 @@
+{
+    "name": "device_monitoring_stream",
+    "label": "Stream Monitoring",
+    "description": "device_monitoring_stream: Insights",
+    "dashboard_folder": "fabrix-mobility",
+    "version": "2026.02.10.1",
+    "enabled": false,
+    "stream": "device_monitoring_stream",
+    "dashboard_type": "dashboard",
+    "dashboard_filters": {
+        "time_filter": false,
+        "default_time_filter_labels": [
+            "Last 24 hours"
+        ],
+        "columns_filter": [
+            {
+                "id": "timestamp",
+                "label": "Timestamp",
+                "type": "DATETIME"
+            },
+            {
+                "id": "category",
+                "label": "Category",
+                "type": "TEXT"
+            },
+            {
+                "id": "device_ip",
+                "label": "Device IP",
+                "type": "TEXT"
+            },
+            {
+                "id": "issue_status",
+                "label": "Status",
+                "type": "TEXT"
+            }
+        ],
+        "group_filters": [
+            {
+                "stream": "device_monitoring_stream",
+                "title": "Network Type",
+                "duration_hours": 1080,
+                "limit": 200,
+                "extra_filter": null,
+                "group_by": [
+                    "network_type"
+                ],
+                "ts_column": "timestamp",
+                "agg": "sum",
+                "column": "count_",
+                "type": "int"
+            },
+            {
+                "stream": "device_monitoring_stream",
+                "title": "Category",
+                "duration_hours": 1080,
+                "limit": 200,
+                "extra_filter": null,
+                "group_by": [
+                    "category"
+                ],
+                "ts_column": "timestamp",
+                "agg": "sum",
+                "column": "count_",
+                "type": "int"
+            },
+            {
+                "stream": "device_monitoring_stream",
+                "title": "Status",
+                "duration_hours": 1080,
+                "limit": 200,
+                "extra_filter": null,
+                "group_by": [
+                    "issue_status"
+                ],
+                "ts_column": "timestamp",
+                "agg": "sum",
+                "column": "count_",
+                "type": "int"
+            },
+            {
+                "stream": "device_monitoring_stream",
+                "title": "Device ",
+                "duration_hours": 1080,
+                "limit": 200,
+                "extra_filter": null,
+                "group_by": [
+                    "device"
+                ],
+                "ts_column": "timestamp",
+                "agg": "sum",
+                "column": "count_",
+                "type": "int"
+            }
+        ]
+    },
+    "dashboard_sections": [
+        {
+            "title": "Stream Monitoring",
+            "show_filter": true,
+            "widgets": [
+                {
+                    "widget_type": "pie_chart",
+                    "title": "Category",
+                    "duration_hours": 1080,
+                    "stream": "device_monitoring_stream",
+                    "ts_column": "timestamp",
+                    "extra_filter": null,
+                    "column": "count_",
+                    "agg": "sum",
+                    "group_by": [
+                        "category"
+                    ],
+                    "type": "int",
+                    "min_width": 3,
+                    "height": 4,
+                    "max_width": 6,
+                    "widget_id": "dd9b1fda"
+                },
+                {
+                    "widget_type": "pie_chart",
+                    "title": "Status",
+                    "duration_hours": 1080,
+                    "stream": "device_monitoring_stream",
+                    "ts_column": "timestamp",
+                    "extra_filter": null,
+                    "column": "count_",
+                    "agg": "sum",
+                    "group_by": [
+                        "issue_status"
+                    ],
+                    "type": "int",
+                    "min_width": 3,
+                    "height": 4,
+                    "max_width": 6,
+                    "widget_id": "6795f19d"
+                },
+                {
+                    "widget_type": "pie_chart",
+                    "title": "Device ",
+                    "duration_hours": 1080,
+                    "stream": "device_monitoring_stream",
+                    "ts_column": "timestamp",
+                    "extra_filter": null,
+                    "column": "count_",
+                    "agg": "sum",
+                    "group_by": [
+                        "device"
+                    ],
+                    "type": "int",
+                    "min_width": 3,
+                    "height": 4,
+                    "max_width": 6,
+                    "widget_id": "f7e60e26"
+                },
+                {
+                    "title": "Missing Data ( Last 15 Mins )",
+                    "widget_type": "tabular",
+                    "duration_hours": 1080,
+                    "max_width": 12,
+                    "height": 8,
+                    "min_width": 12,
+                    "stream": "device_monitoring_stream",
+                    "ts_column": "timestamp",
+                    "extra_filter": null,
+                    "columns": {
+                        "device_ip": {
+                            "title": "Device IP",
+                            "type": "TEXT",
+                            "hidden": false
+                        },
+                        "device": {
+                            "title": "Device Name",
+                            "type": "TEXT",
+                            "hidden": false
+                        },
+                        "category": {
+                            "title": "Source",
+                            "type": "TEXT",
+                            "hidden": false
+                        },
+                        "issue_status": {
+                            "title": "Status",
+                            "type": "TEXT",
+                            "hidden": false
+                        },
+                        "network_type": {
+                            "title": "Network Type",
+                            "type": "TEXT",
+                            "hidden": false
+                        },
+                        "last_updated_time": {
+                            "title": "Last Updated",
+                            "type": "DATETIME",
+                            "visible": true
+                        },
+                        "timestamp": {
+                            "title": "Timestamp",
+                            "type": "DATETIME",
+                            "visible": false
+                        }
+                    },
+                    "widget_id": "f07190ac"
+                }
+            ]
+        }
+    ]
+}

@@ -1,0 +1,913 @@
+{
+    "name": "customer_overview",
+    "label": "Customer Overview Dashboard",
+    "description": "Customer Health Overview Dashboard",
+    "version": "26.05.05.1",
+    "enabled": false,
+    "live_edit": true,
+    "dashboard_style": "auto",
+    "dashboard_type": "dashboard",
+    "dashboard_folder": "MSP",
+    "dashboard_filters": {
+        "time_filter": true,
+        "default_time_filter_labels": [
+            "Last 1 week"
+        ],
+        "group_filters": [
+            {
+                "stream": "mobility_device_mappings",
+                "title": "Network Type",
+                "extra_filter": "device is not empty",
+                "group_by": [
+                    "network_type"
+                ],
+                "ts_column": "timestamp",
+                "agg": "sum",
+                "column": "count_",
+                "type": "str",
+                "show_counts": false
+            }
+        ]
+    },
+    "dashboard_sections": [
+        {
+            "title": "Ingestion Stat",
+            "show_filter": true,
+            "widgets": [
+                {
+                    "widget_type": "label",
+                    "max_width": 12,
+                    "height": 0.5,
+                    "min_width": 12,
+                    "label": "<div style='text-align:center;width:100%;'><h1><a style='text-decoration:none;color:#0066ff;' target='_blank'>  4G/5G Evolved Packet Core",
+                    "widget_id": "a2e0ffb4"
+                },
+                {
+                    "title": "Network Devices",
+                    "widget_type": "counter",
+                    "min_width": 12,
+                    "max_width": 12,
+                    "extra_filter1": "network_type in ['Consumer','FirstNet','Enterprise']",
+                    "stream": "mobility_device_mappings",
+                    "ts_column": "device",
+                    "style": {
+                        "color-map": {
+                            "Consumer": "#388e3c",
+                            "FirstNet": "#8e24aa",
+                            "Enterprise": "#d32f2f"
+                        }
+                    },
+                    "group_by": [
+                        "network_type"
+                    ],
+                    "total_counter": {
+                        "show": true,
+                        "label": "Total",
+                        "location": "right",
+                        "color": "#0096FF"
+                    },
+                    "column": "count_",
+                    "agg": "sum",
+                    "type": "int",
+                    "widget_id": "2cdc076a"
+                },
+                {
+                    "widget_type": "label",
+                    "max_width": 12,
+                    "height": 0.5,
+                    "min_width": 12,
+                    "label": "<div style='text-align:center;width:100%;'><h1><a style='text-decoration:none;color:#0066ff;' target='_blank'>  Top N KPI's",
+                    "widget_id": "2806a318"
+                },
+                {
+                    "title": "GGSN Uplink Packets Dropped Total Number",
+                    "widget_type": "timeseries",
+                    "stream": "mobility_kpi_metrics_data",
+                    "description": "kpi_APN_GGSN_Uplink_Packets_Dropped_Total_Number",
+                    "ts_column": "timestamp",
+                    "extra_filter": "",
+                    "gap_interval": "join",
+                    "max_width": 6,
+                    "height": 6,
+                    "min_width": 6,
+                    "chartProperties": {
+                        "yAxisLabel": "Count",
+                        "xAxisLabel": null,
+                        "legendLocation": "bottom"
+                    },
+                    "formatting": {
+                        "maximumFractionDigits": 2,
+                        "notation": "compact"
+                    },
+                    "group_by": [
+                        "network_type"
+                    ],
+                    "interval": "1h",
+                    "series_spec": [
+                        {
+                            "column": "kpi_APN_GGSN_Uplink_Packets_Dropped_Total_Number",
+                            "agg": "avg",
+                            "type": "int"
+                        }
+                    ],
+                    "widget_id": "382077da"
+                },
+                {
+                    "title": "GGSN Outbound Packets Dropped due to ACL Filtering Total Number",
+                    "widget_type": "timeseries",
+                    "stream": "mobility_kpi_metrics_data",
+                    "description": "kpi_GGSN_Outbound_Packets_Dropped_due_to_ACL_Filtering_Total_Number",
+                    "ts_column": "timestamp",
+                    "extra_filter": "network_type is not 'Enterprise'",
+                    "gap_interval": "join",
+                    "max_width": 6,
+                    "height": 6,
+                    "min_width": 6,
+                    "chartProperties": {
+                        "yAxisLabel": "Count",
+                        "xAxisLabel": null,
+                        "legendLocation": "bottom"
+                    },
+                    "formatting": {
+                        "maximumFractionDigits": 2,
+                        "notation": "compact"
+                    },
+                    "group_by": [
+                        "network_type"
+                    ],
+                    "interval": "1h",
+                    "series_spec": [
+                        {
+                            "column": "kpi_GGSN_Outbound_Packets_Dropped_due_to_ACL_Filtering_Total_Number",
+                            "agg": "avg",
+                            "type": "int"
+                        }
+                    ],
+                    "widget_id": "4b0f7e3e"
+                },
+                {
+                    "title": "APN Subscriber Success Rate",
+                    "widget_type": "timeseries",
+                    "stream": "mobility_kpi_metrics_data",
+                    "description": "kpi_APN_Subscriber_Success_Rate",
+                    "ts_column": "timestamp",
+                    "extra_filter": "",
+                    "gap_interval": "join",
+                    "max_width": 6,
+                    "height": 6,
+                    "min_width": 6,
+                    "chartProperties": {
+                        "yAxisLabel": "Count",
+                        "xAxisLabel": null,
+                        "legendLocation": "bottom"
+                    },
+                    "formatting": {
+                        "maximumFractionDigits": 2,
+                        "notation": "compact"
+                    },
+                    "group_by": [
+                        "network_type"
+                    ],
+                    "interval": "1h",
+                    "series_spec": [
+                        {
+                            "column": "kpi_APN_Subscriber_Success_Rate",
+                            "agg": "avg",
+                            "type": "int"
+                        }
+                    ],
+                    "widget_id": "20db8"
+                },
+                {
+                    "title": "GGSN Uplink Packets Total Number Falling",
+                    "widget_type": "timeseries",
+                    "stream": "mobility_kpi_metrics_data",
+                    "description": "kpi_GGSN_Uplink_Packets_Total_Number_Falling(%uplnk-pkts%)",
+                    "ts_column": "timestamp",
+                    "gap_interval": "join",
+                    "max_width": 6,
+                    "height": 8,
+                    "min_width": 6,
+                    "chartProperties": {
+                        "yAxisLabel": "Count",
+                        "xAxisLabel": null,
+                        "legendLocation": "bottom"
+                    },
+                    "formatting": {
+                        "maximumFractionDigits": 0,
+                        "notation": "compact"
+                    },
+                    "group_by": [
+                        "network_type"
+                    ],
+                    "interval": "1h",
+                    "series_spec": [
+                        {
+                            "column": "kpi_GGSN_Uplink_Packets_Total_Number_Falling",
+                            "agg": "avg",
+                            "type": "int"
+                        }
+                    ],
+                    "widget_id": "fce0f2"
+                },
+                {
+                    "title": "APN Accounting Requests Timed Out",
+                    "widget_type": "timeseries",
+                    "stream": "mobility_kpi_metrics_data",
+                    "description": "kpi_APN_Accounting_Requests_Timed_Out(%acc-req-timeout%)",
+                    "ts_column": "timestamp",
+                    "gap_interval": "join",
+                    "max_width": 6,
+                    "height": 8,
+                    "min_width": 6,
+                    "chartProperties": {
+                        "yAxisLabel": "Count",
+                        "xAxisLabel": null,
+                        "legendLocation": "bottom"
+                    },
+                    "formatting": {
+                        "maximumFractionDigits": 0,
+                        "notation": "compact"
+                    },
+                    "group_by": [
+                        "network_type"
+                    ],
+                    "interval": "1h",
+                    "series_spec": [
+                        {
+                            "column": "kpi_APN_Accounting_Requests_Timed_Out",
+                            "agg": "avg",
+                            "type": "int"
+                        }
+                    ],
+                    "widget_id": "fce0f2e8"
+                },
+                {
+                    "title": "APN Packet Drop Ratio",
+                    "widget_type": "timeseries",
+                    "stream": "mobility_kpi_metrics_data",
+                    "description": "kpi_APN_Packet_Drop_Ratio",
+                    "ts_column": "timestamp",
+                    "gap_interval": "join",
+                    "max_width": 6,
+                    "height": 8,
+                    "min_width": 6,
+                    "chartProperties": {
+                        "yAxisLabel": "Count",
+                        "xAxisLabel": null,
+                        "legendLocation": "bottom"
+                    },
+                    "formatting": {
+                        "maximumFractionDigits": 0,
+                        "notation": "compact"
+                    },
+                    "group_by": [
+                        "network_type"
+                    ],
+                    "interval": "1h",
+                    "series_spec": [
+                        {
+                            "column": "kpi_APN_Packet_Drop_Ratio",
+                            "agg": "avg",
+                            "type": "int"
+                        }
+                    ],
+                    "widget_id": "e0f2e8"
+                },
+                {
+                    "title": "CPU Memory Usage Percentage",
+                    "widget_type": "timeseries",
+                    "stream": "mobility_kpi_metrics_data",
+                    "description": "kpi_CPU_Memory_Usage_Percentage",
+                    "ts_column": "timestamp",
+                    "gap_interval": "join",
+                    "max_width": 6,
+                    "height": 8,
+                    "min_width": 6,
+                    "chartProperties": {
+                        "yAxisLabel": "Count",
+                        "xAxisLabel": null,
+                        "legendLocation": "bottom"
+                    },
+                    "formatting": {
+                        "maximumFractionDigits": 0,
+                        "notation": "compact"
+                    },
+                    "group_by": [
+                        "network_type"
+                    ],
+                    "interval": "1h",
+                    "series_spec": [
+                        {
+                            "column": "kpi_CPU_Memory_Usage_Percentage",
+                            "agg": "avg",
+                            "type": "int"
+                        }
+                    ],
+                    "widget_id": "abcffdgd"
+                },
+                {
+                    "title": "CPU Load Busy Percentage Last 5 Minutes Peak",
+                    "widget_type": "timeseries",
+                    "stream": "mobility_kpi_metrics_data",
+                    "description": "kpi_CPU_Load_Busy_Percentage_Last_5_Minutes_Peak",
+                    "ts_column": "timestamp",
+                    "gap_interval": "join",
+                    "max_width": 6,
+                    "height": 8,
+                    "min_width": 6,
+                    "chartProperties": {
+                        "yAxisLabel": "Count",
+                        "xAxisLabel": null,
+                        "legendLocation": "bottom"
+                    },
+                    "formatting": {
+                        "maximumFractionDigits": 0,
+                        "notation": "compact"
+                    },
+                    "group_by": [
+                        "network_type"
+                    ],
+                    "interval": "1h",
+                    "series_spec": [
+                        {
+                            "column": "kpi_CPU_Load_Busy_Percentage_Last_5_Minutes_Peak",
+                            "agg": "avg",
+                            "type": "int"
+                        }
+                    ],
+                    "widget_id": "abcfgd"
+                },
+                {
+                    "title": "PGW Network Bearers Modification Failed",
+                    "widget_type": "timeseries",
+                    "stream": "mobility_kpi_metrics_data",
+                    "description": "kpi_PGW_Network_Bearers_Modification_Failed",
+                    "ts_column": "timestamp",
+                    "gap_interval": "join",
+                    "max_width": 6,
+                    "height": 8,
+                    "min_width": 6,
+                    "chartProperties": {
+                        "yAxisLabel": "Count",
+                        "xAxisLabel": null,
+                        "legendLocation": "bottom"
+                    },
+                    "formatting": {
+                        "maximumFractionDigits": 0,
+                        "notation": "compact"
+                    },
+                    "group_by": [
+                        "network_type"
+                    ],
+                    "interval": "1h",
+                    "series_spec": [
+                        {
+                            "column": "kpi_PGW_Network_Bearers_Modification_Failed",
+                            "agg": "avg",
+                            "type": "int"
+                        }
+                    ],
+                    "widget_id": "abc7ww2gd"
+                },
+                {
+                    "title": "PGW EPS Bearers Modification Failures - Network Initiated System Failure",
+                    "widget_type": "timeseries",
+                    "stream": "mobility_kpi_metrics_data",
+                    "description": "kpi_PGW_EPS_Bearers_Modification_Failures_Network_Initiated_System_Failure",
+                    "ts_column": "timestamp",
+                    "gap_interval": "join",
+                    "max_width": 6,
+                    "height": 8,
+                    "min_width": 6,
+                    "chartProperties": {
+                        "yAxisLabel": "Count",
+                        "xAxisLabel": null,
+                        "legendLocation": "bottom"
+                    },
+                    "formatting": {
+                        "maximumFractionDigits": 0,
+                        "notation": "compact"
+                    },
+                    "group_by": [
+                        "network_type"
+                    ],
+                    "interval": "1h",
+                    "series_spec": [
+                        {
+                            "column": "kpi_PGW_EPS_Bearers_Modification_Failures_Network_Initiated_System_Failure",
+                            "agg": "avg",
+                            "type": "int"
+                        }
+                    ],
+                    "widget_id": "abww2gd"
+                },
+                {
+                    "title": "PGW UE Bearers Modification Failure Packet Filter Syntax Error",
+                    "widget_type": "timeseries",
+                    "stream": "mobility_kpi_metrics_data",
+                    "description": "kpi_PGW_UE_Bearers_Modification_Failure_Packet_Filter_Syntax_Error(%sessstat-bearmodfail-uesynpkt%)",
+                    "ts_column": "timestamp",
+                    "gap_interval": "join",
+                    "max_width": 6,
+                    "height": 8,
+                    "min_width": 6,
+                    "chartProperties": {
+                        "yAxisLabel": "Count",
+                        "xAxisLabel": null,
+                        "legendLocation": "bottom"
+                    },
+                    "formatting": {
+                        "maximumFractionDigits": 0,
+                        "notation": "compact"
+                    },
+                    "group_by": [
+                        "network_type"
+                    ],
+                    "interval": "1h",
+                    "series_spec": [
+                        {
+                            "column": "kpi_PGW_UE_Bearers_Modification_Failure_Packet_Filter_Syntax_Error",
+                            "agg": "avg",
+                            "type": "int"
+                        }
+                    ],
+                    "widget_id": "abc7ww90gd"
+                },
+                {
+                    "title": "PGW Network Bearers Modification Failure TFT Syntax Error",
+                    "widget_type": "timeseries",
+                    "stream": "mobility_kpi_metrics_data",
+                    "description": "kpi_PGW_Network_Bearers_Modification_Failure_TFT_Syntax_Error(%sessstat-bearmodfail-nwsyntft%)",
+                    "ts_column": "timestamp",
+                    "gap_interval": "join",
+                    "max_width": 6,
+                    "height": 8,
+                    "min_width": 6,
+                    "chartProperties": {
+                        "yAxisLabel": "Count",
+                        "xAxisLabel": null,
+                        "legendLocation": "bottom"
+                    },
+                    "formatting": {
+                        "maximumFractionDigits": 0,
+                        "notation": "compact"
+                    },
+                    "group_by": [
+                        "network_type"
+                    ],
+                    "interval": "1h",
+                    "series_spec": [
+                        {
+                            "column": "kpi_PGW_Network_Bearers_Modification_Failure_TFT_Syntax_Error",
+                            "agg": "avg",
+                            "type": "int"
+                        }
+                    ],
+                    "widget_id": "e25937f8"
+                },
+                {
+                    "widget_type1": "pie_chart",
+                    "title": "Top 5 Highest VoLTE  Sessions",
+                    "description": "SAEGW_VoLTE_Active_Sessions(%pgw-subqosstat-bearact-qci5%)",
+                    "duration_hours0": 24,
+                    "stream": "mobility_kpi_metrics_data",
+                    "ts_column": "timestamp",
+                    "extra_filter": null,
+                    "column": "kpi_SAEGW_VoLTE_Active_Sessions",
+                    "agg": "max",
+                    "group_by": [
+                        "device"
+                    ],
+                    "formatting": {
+                        "maximumFractionDigits": 0,
+                        "notation": "compact"
+                    },
+                    "top_n": 5,
+                    "type": "int",
+                    "min_width": 6,
+                    "height": 6,
+                    "max_width": 6,
+                    "widget_id": "29c372c5"
+                },
+                {
+                    "widget_type1": "pie_chart",
+                    "title": "Top 5 Highest Sessions",
+                    "description": "System_Calls_Active(%sess-curactcall%)",
+                    "duration_hours0": 24,
+                    "stream": "mobility_kpi_metrics_data",
+                    "ts_column": "timestamp",
+                    "extra_filter": null,
+                    "column": "kpi_System_Calls_Active",
+                    "agg": "max",
+                    "group_by": [
+                        "device"
+                    ],
+                    "formatting": {
+                        "maximumFractionDigits": 0,
+                        "notation": "compact"
+                    },
+                    "top_n": 5,
+                    "type": "int",
+                    "min_width": 6,
+                    "height": 6,
+                    "max_width": 6,
+                    "widget_id": "f4fdf6f8"
+                },
+                {
+                    "title": "Aggregate Throughput",
+                    "widget_type1": "timeseries",
+                    "stream": "mobility_kpi_metrics_data",
+                    "description": "SYSTEM_Throughput_Mbps((8*(%sess-txbytes%+%sess-rxbytes%))/(INTERVAL*60)/1000/1000)",
+                    "ts_column": "timestamp",
+                    "extra_filter": "",
+                    "gap_interval": "join",
+                    "max_width": 6,
+                    "height": 6,
+                    "min_width": 6,
+                    "chartProperties": {
+                        "yAxisLabel": "Mbps",
+                        "xAxisLabel": null,
+                        "legendLocation": "right",
+                        "mode_0": "selection",
+                        "column-id": "timestamp"
+                    },
+                    "group_by0": [
+                        "network_type"
+                    ],
+                    "formatting": {
+                        "maximumFractionDigits": 2,
+                        "notation0": "compact"
+                    },
+                    "interval": "1h",
+                    "series_spec": [
+                        {
+                            "column": "kpi_SYSTEM_Throughput_Mbps",
+                            "agg": "avg",
+                            "type": "int"
+                        }
+                    ],
+                    "widget_id": "44f9ca1d"
+                },
+                {
+                    "widget_type": "bar_chart",
+                    "title": "Top 5 Highest Throughput",
+                    "stream": "mobility_kpi_metrics_data",
+                    "description": "SYSTEM_Throughput_Mbps((8*(%sess-txbytes%+%sess-rxbytes%))/(INTERVAL*60)/1000/1000)",
+                    "extra_filter": "device is not 'BOTHWANZ12G'",
+                    "chartProperties": {
+                        "orientation": "vertical"
+                    },
+                    "formatting0": {
+                        "notation": "compact"
+                    },
+                    "group_by": [
+                        "device"
+                    ],
+                    "ts_column": "timestamp",
+                    "top_n": 5,
+                    "column": "kpi_PGW_LTE_Throughput_per_User_UL",
+                    "agg": "avg",
+                    "type": "int",
+                    "widget_id": "786ae9c3"
+                },
+                {
+                    "title": "Top 5 Session Memory Utilization",
+                    "widget_type": "timeseries",
+                    "stream": "mobility_kpi_metrics_data",
+                    "description": "kpi_CPU_Memory_Usage_Percentage",
+                    "ts_column": "timestamp",
+                    "gap_interval": "join",
+                    "max_width": 6,
+                    "height": 6,
+                    "min_width": 6,
+                    "chartProperties": {
+                        "yAxisLabel": "Count",
+                        "xAxisLabel": null,
+                        "legendLocation": "right"
+                    },
+                    "formatting": {
+                        "maximumFractionDigits": 0,
+                        "notation": "compact"
+                    },
+                    "group_by": [
+                        "device"
+                    ],
+                    "group_selection": {
+                        "column": "kpi_CPU_Memory_Usage_Percentage",
+                        "agg": "avg",
+                        "limit": 5,
+                        "orderby": "desc"
+                    },
+                    "interval": "1h",
+                    "series_spec": [
+                        {
+                            "column": "kpi_CPU_Memory_Usage_Percentage",
+                            "agg": "avg",
+                            "type": "int"
+                        }
+                    ],
+                    "widget_id": "85a9e32b"
+                },
+                {
+                    "title": "Top 5 PGW EPS Bearers Modification Failures - Network Initiated System Failure",
+                    "widget_type1": "tabular",
+                    "description": "PGW EPS Bearers Modification Failures - Network Initiated System Failure(%sessstat-bearmodfail-nwsysfail%)",
+                    "stream": "mobility_kpi_metrics_data",
+                    "ts_column": "timestamp",
+                    "interval_type": "day",
+                    "extra_filter1": "kpi_IMSA_Credit_control_Update_Success_Rate >= 90 and schema is 'imsa' and servname is 'Gx'",
+                    "min_width": 6,
+                    "height": 8,
+                    "max_width": 6,
+                    "limit": 5,
+                    "agg_size": 5,
+                    "resizableColumns": true,
+                    "paginated": true,
+                    "pivot": {
+                        "pivot_type": "advanced",
+                        "group_by": [
+                            "device"
+                        ],
+                        "series": [
+                            {
+                                "column": "PGW EPS Bearers Modification Failures - Network Initiated System Failure",
+                                "agg": "min",
+                                "type": "int",
+                                "label": "Success Rate"
+                            }
+                        ],
+                        "agg_sort_order": "asc"
+                    },
+                    "formatting": {
+                        "notation": "compact"
+                    },
+                    "columns": {
+                        "device": "Device"
+                    },
+                    "widget_id": "faad0c11"
+                },
+                {
+                    "title": "Top 5 Lowest IMS Gx CCR-I Success Rate",
+                    "widget_type1": "tabular",
+                    "description": "(100 * (%dpca-msg-ccainitacc% / %dpca-msg-ccrinit%))",
+                    "stream": "mobility_kpi_metrics_data",
+                    "ts_column": "timestamp",
+                    "interval_type": "day",
+                    "extra_filter1": " kpi_IMSA_Credit_Control_Initial_Success_Rate >= 90 and schema is 'imsa' and servname is 'Gx'",
+                    "min_width": 6,
+                    "height": 8,
+                    "max_width": 6,
+                    "top_n": 10,
+                    "max_rows": 10,
+                    "agg_size": 5,
+                    "resizableColumns": true,
+                    "paginated": true,
+                    "pivot": {
+                        "pivot_type": "advanced",
+                        "group_by": [
+                            "device",
+                            "ip_address"
+                        ],
+                        "series": [
+                            {
+                                "column": "kpi_IMSA_Credit_Control_Initial_Success_Rate",
+                                "agg": "min",
+                                "type": "int",
+                                "label": "Success Rate"
+                            }
+                        ],
+                        "agg_sort_order": "asc"
+                    },
+                    "formatting": {
+                        "notation": "compact"
+                    },
+                    "columns": {
+                        "device": "Device"
+                    },
+                    "widget_id": "7346b5b4"
+                },
+                {
+                    "title": "Top 5 Lowest IMS Gx RAR Success Rate",
+                    "widget_type1": "tabular",
+                    "description": "((%dpca-imsa-raa-msg-success%/%dpca-msg-rar%)*100)",
+                    "stream": "mobility_kpi_metrics_data",
+                    "ts_column": "timestamp",
+                    "interval_type": "day",
+                    "extra_filter1": "kpi_Gx_RAR_Success_Rate >= 90  and schema is 'imsa' and servname is 'Gx'",
+                    "min_width": 6,
+                    "height": 8,
+                    "max_width": 6,
+                    "max_rows": 10,
+                    "agg_size": 5,
+                    "resizableColumns": true,
+                    "paginated": true,
+                    "pivot": {
+                        "pivot_type": "advanced",
+                        "group_by": [
+                            "device",
+                            "ip_address"
+                        ],
+                        "series": [
+                            {
+                                "column": "kpi_Gx_RAR_Success_Rate",
+                                "agg": "min",
+                                "type": "int",
+                                "label": "Success Rate"
+                            }
+                        ],
+                        "agg_sort_order": "asc"
+                    },
+                    "formatting": {
+                        "notation": "compact"
+                    },
+                    "columns": {
+                        "device": "Device"
+                    },
+                    "widget_id": "b5cbf7c2"
+                },
+                {
+                    "widget_type": "label",
+                    "max_width": 12,
+                    "height": 0.5,
+                    "min_width": 12,
+                    "label": "<div style='text-align:center;width:100%;'><h1><a style='text-decoration:none;color:#0066ff;' target='_blank'>  Incidents",
+                    "widget_id": "7a269a2d"
+                },
+                {
+                    "title": "By State",
+                    "widget_type1": "counter",
+                    "max_width": 8,
+                    "height": 4,
+                    "limit": 10,
+                    "min_width": 3,
+                    "stream": "oia-incidents-stream",
+                    "extra_filter": "i_state does not contains 'cancelled'",
+                    "ts_column": "i_up",
+                    "style": {
+                        "color-map": {
+                            "Resolved": "#4CAF50",
+                            "Assigned": "#FFA726",
+                            "Open": "#B71C1C",
+                            "On Hold": "#FFA726",
+                            "Cancelled": "#4CAF50",
+                            "Closed": "#4CAF50"
+                        }
+                    },
+                    "group_by": [
+                        "i_state"
+                    ],
+                    "total_counter": {
+                        "show": true,
+                        "label": "Count",
+                        "location": "right",
+                        "color": "#0096FF"
+                    },
+                    "column": "count_",
+                    "agg": "sum",
+                    "type": "int",
+                    "widget_id": "e2746f40"
+                },
+                {
+                    "title": "Open Incidents",
+                    "widget_type": "custom_counter",
+                    "stream": "oia-incidents-stream",
+                    "ts_column": "i_updated_ts",
+                    "extra_filter": "i_state not in ['Resolved','Closed','Cancelled']",
+                    "column": "count_",
+                    "agg": "sum",
+                    "style": {
+                        "color-list": [
+                            "#B71C1C"
+                        ]
+                    },
+                    "sparkline": {
+                        "interval": "4h"
+                    },
+                    "max_width": 4,
+                    "height": 4,
+                    "min_width": 3,
+                    "widget_id": "9523ac85"
+                },
+                {
+                    "title": "Resolved Incidents",
+                    "widget_type": "custom_counter",
+                    "stream": "oia-incidents-stream",
+                    "ts_column": "i_updated_ts",
+                    "extra_filter": "i_state in ['Resolved','Closed']",
+                    "column": "count_",
+                    "max_width": 4,
+                    "height": 4,
+                    "min_width": 3,
+                    "agg": "sum",
+                    "type": "str",
+                    "style": {
+                        "color-list": [
+                            "#4CAF50"
+                        ]
+                    },
+                    "sparkline": {
+                        "interval": "4h"
+                    },
+                    "widget_id": "53383e25"
+                },
+                {
+                    "title": "Total Incidents",
+                    "widget_type": "custom_counter",
+                    "stream": "oia-incidents-stream",
+                    "extra_filter": "i_state does not contains 'cancelled'",
+                    "ts_column": "i_updated_ts",
+                    "column": "count_",
+                    "max_width": 4,
+                    "height": 4,
+                    "min_width": 3,
+                    "style": {
+                        "color-list": [
+                            "#1E88E5"
+                        ]
+                    },
+                    "sparkline": {
+                        "interval": "4h"
+                    },
+                    "agg": "sum",
+                    "type": "str",
+                    "widget_id": "af367a10"
+                },
+                {
+                    "widget_type": "label",
+                    "max_width": 12,
+                    "height": 0.5,
+                    "min_width": 12,
+                    "label": "<div style='text-align:center;width:100%;'><h1><a style='text-decoration:none;color:#0066ff;' target='_blank'>  Ingestion Stats",
+                    "widget_id": "64e3254a"
+                },
+                {
+                    "widget_type": "pie_chart",
+                    "title": "Bulkstats",
+                    "duration_hours": 1080,
+                    "stream": "mobility_file_system_tracker",
+                    "ts_column": "timestamp",
+                    "extra_filter": null,
+                    "column": "count_",
+                    "agg": "sum",
+                    "group_by": [
+                        "network_type"
+                    ],
+                    "type": "int",
+                    "min_width": 3,
+                    "height": 4,
+                    "max_width": 6,
+                    "widget_id": "bad16b8f"
+                },
+                {
+                    "widget_type": "pie_chart",
+                    "title": "Syslogs by IP Address",
+                    "duration_hours": 1080,
+                    "stream": "syslog_stream",
+                    "ts_column": "timestamp",
+                    "extra_filter": null,
+                    "column": "count_",
+                    "agg": "sum",
+                    "group_by": [
+                        "rda_gw_client_ip"
+                    ],
+                    "type": "int",
+                    "min_width": 3,
+                    "height": 4,
+                    "max_width": 6,
+                    "widget_id": "fa65de3c"
+                },
+                {
+                    "widget_type": "pie_chart",
+                    "title": "SNMP Traps",
+                    "duration_hours": 1080,
+                    "stream": "snmp_trap_stream",
+                    "ts_column": "timestamp",
+                    "extra_filter": null,
+                    "column": "count_",
+                    "style": {
+                        "color-map": {
+                            "ERROR": "#EF5350",
+                            "NOTICE": "#4DD0E1",
+                            "EMERGENCY": "#B71C1C",
+                            "INFORMATIONAL": "#03A9F4",
+                            "WARNING": "#FFD54F",
+                            "ALERT": "#FFA726",
+                            "CRITICAL": "#E53935",
+                            "DEBUG": "#BCAAA4"
+                        }
+                    },
+                    "agg": "sum",
+                    "group_by": [
+                        "rda_gw_client_ip"
+                    ],
+                    "type": "int",
+                    "min_width": 3,
+                    "height": 4,
+                    "max_width": 6,
+                    "widget_id": "73436249"
+                }
+            ]
+        }
+    ]
+}

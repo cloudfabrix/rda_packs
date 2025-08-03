@@ -1,0 +1,398 @@
+{
+  "name": "StarOS_KPI_PGW_APN_IP_Address_Allocation_Method_Distribution",
+  "label": "StarOS KPI PGW APN IP Address Allocation Method Distribution",
+  "description": "Web report: StarOS KPI PGW APN IP Address Allocation Method Distribution",
+  "dashboard_folder": "mobility-webreport",
+  "enabled": true,
+  "stream": "mobility_kpi_metrics_data",
+  "dashboard_type": "template",
+  "template_variables": {
+    "DEVICE": {
+      "contextId": "device",
+      "default": "HSTNTXNZ62G"
+    },
+    "FUNCTION": {
+      "contextId": "function",
+      "default": "max"
+    },
+    "INTERVAL": {
+      "contextId": "interval",
+      "default": "auto"
+    },
+    "ROLLUP": {
+      "contextId": "rollup",
+      "default": "device"
+    },
+    "SCHEMA": {
+      "contextId": "schema",
+      "default": "apn"
+    }
+  },
+  "dashboard_filters": {
+    "time_filter": true,
+    "default_time_filter_labels": [
+      "Last 24 hours"
+    ]
+  },
+  "dynamic_form": {
+    "formData": {
+      "device": "HSTNTXNZ62G"
+    },
+    "controlPanelFormDefinition": {
+      "id": "kpi.benchmark.json",
+      "refreshRequired": true,
+      "formFieldList": [
+        {
+          "fieldId": "function",
+          "label": "Function",
+          "help": "Function",
+          "dataType": "string",
+          "hidden": false,
+          "editable": true,
+          "required": true,
+          "controlType": "COMBO_BOX",
+          "defaultValue": "max",
+          "lovValues": [
+            {
+              "identifier": "max",
+              "displayName": "Maximum"
+            },
+            {
+              "identifier": "min",
+              "displayName": "Minimum"
+            },
+            {
+              "identifier": "avg",
+              "displayName": "Average"
+            },
+            {
+              "identifier": "sum",
+              "displayName": "Sum"
+            }
+          ]
+        },
+        {
+          "fieldId": "interval",
+          "label": "Interval",
+          "help": "Interval",
+          "dataType": "string",
+          "hidden": false,
+          "editable": true,
+          "required": true,
+          "controlType": "COMBO_BOX",
+          "defaultValue": null,
+          "lovValues": [
+            {
+              "identifier": "auto",
+              "displayName": "Auto"
+            },
+            {
+              "identifier": "5Min",
+              "displayName": "5 Minutes"
+            },
+            {
+              "identifier": "15Min",
+              "displayName": "15 Minutes"
+            },
+            {
+              "identifier": "1H",
+              "displayName": "1 Hour"
+            },
+            {
+              "identifier": "24H",
+              "displayName": "1 Day"
+            }
+          ]
+        },
+        {
+          "fieldId": "device",
+          "label": "Device",
+          "help": "Device",
+          "dataType": "string",
+          "hidden": false,
+          "editable": true,
+          "required": true,
+          "controlType": "COMBO_BOX",
+          "lovSourceType": "pstream",
+          "lovSourceParams": {
+            "name": "mobility_kpi_metrics_data",
+            "valueColumn": "device",
+            "labelColumn": "device",
+            "query": "schema_key is 'apn'"
+          },
+          "defaultValue": "HSTNTXNZ62G"
+        }
+      ],
+      "formActionList": {
+        "formActions": [
+          {
+            "api-endpoint": {
+              "methodName": "submitForm",
+              "parse-output": false,
+              "params": [
+                {
+                  "formData": {},
+                  "formId": "kpi.benchmark.json"
+                }
+              ],
+              "service-name": "saas-reports",
+              "stringified-params": true
+            },
+            "actionLabel": "Save",
+            "type": "SUBMIT",
+            "identifier": "Submit"
+          },
+          {
+            "actionLabel": "Cancel",
+            "type": "CANCEL",
+            "identifier": "Cancel"
+          }
+        ]
+      }
+    }
+  },
+  "dashboard_sections": [
+    {
+      "title": "StarOS KPI PGW APN IP Address Allocation Method Distribution",
+      "show_filter": true,
+      "widgets": [
+        {
+          "title": "PGW APN IP Address Allocation Method Distribution - Static",
+          "widget_type": "timeseries",
+          "stream": "mobility_kpi_metrics_data",
+          "description": "Formula: (%addr-stat%) Description: PGW APN IP Address Allocation Method Distribution - Static",
+          "ts_column": "timestamp",
+          "max_width": 12,
+          "height": 6,
+          "min_width": 12,
+          "chartProperties": {
+            "yAxisLabel": "",
+            "xAxisLabel": null,
+            "legendLocation": "right",
+            "mode": "selection",
+            "column-id": "timestamp"
+          },
+          "interval": "{{INTERVAL}}",
+          "series_spec": [
+            {
+              "column": "kpi_PGW_APN_IP_Address_Allocation_Method_Distribution_Static",
+              "agg": "{{FUNCTION}}",
+              "type": "int"
+            }
+          ],
+          "extra_filter": "device = '{{DEVICE}}' and schema_key is 'apn'",
+          "group_by": [
+            "{{ROLLUP}}"
+          ],
+          "formatting": {
+            "maximumFractionDigits": 5,
+            "notation": "compact"
+          },
+          "widget_id": "194ffc65"
+        },
+        {
+          "title": "PGW APN IP Address Allocation Method Distribution - Pools Configured Locally",
+          "widget_type": "timeseries",
+          "stream": "mobility_kpi_metrics_data",
+          "description": "Formula: (%addr-lpool%) Description: PGW APN IP Address Allocation Method Distribution - Pools Configured Locally",
+          "ts_column": "timestamp",
+          "max_width": 12,
+          "height": 6,
+          "min_width": 12,
+          "chartProperties": {
+            "yAxisLabel": "",
+            "xAxisLabel": null,
+            "legendLocation": "right",
+            "mode": "selection",
+            "column-id": "timestamp"
+          },
+          "interval": "{{INTERVAL}}",
+          "series_spec": [
+            {
+              "column": "kpi_PGW_APN_IP_Address_Allocation_Method_Distribution_Pools_Configured_Locally",
+              "agg": "{{FUNCTION}}",
+              "type": "int"
+            }
+          ],
+          "extra_filter": "device = '{{DEVICE}}' and schema_key is 'apn'",
+          "group_by": [
+            "{{ROLLUP}}"
+          ],
+          "formatting": {
+            "maximumFractionDigits": 5,
+            "notation": "compact"
+          },
+          "widget_id": "d0724732"
+        },
+        {
+          "title": "PGW APN IP Address Allocation Method Distribution - RADIUS Server",
+          "widget_type": "timeseries",
+          "stream": "mobility_kpi_metrics_data",
+          "description": "Formula: (%addr-rad%) Description: PGW APN IP Address Allocation Method Distribution - RADIUS Server",
+          "ts_column": "timestamp",
+          "max_width": 12,
+          "height": 6,
+          "min_width": 12,
+          "chartProperties": {
+            "yAxisLabel": "",
+            "xAxisLabel": null,
+            "legendLocation": "right",
+            "mode": "selection",
+            "column-id": "timestamp"
+          },
+          "interval": "{{INTERVAL}}",
+          "series_spec": [
+            {
+              "column": "kpi_PGW_APN_IP_Address_Allocation_Method_Distribution_RADIUS_Server",
+              "agg": "{{FUNCTION}}",
+              "type": "int"
+            }
+          ],
+          "extra_filter": "device = '{{DEVICE}}' and schema_key is 'apn'",
+          "group_by": [
+            "{{ROLLUP}}"
+          ],
+          "formatting": {
+            "maximumFractionDigits": 5,
+            "notation": "compact"
+          },
+          "widget_id": "e1c228be"
+        },
+        {
+          "title": "PGW APN IP Address Allocation Method Distribution - DHCP",
+          "widget_type": "timeseries",
+          "stream": "mobility_kpi_metrics_data",
+          "description": "Formula: (%addr-dhcp%) Description: PGW APN IP Address Allocation Method Distribution - DHCP",
+          "ts_column": "timestamp",
+          "max_width": 12,
+          "height": 6,
+          "min_width": 12,
+          "chartProperties": {
+            "yAxisLabel": "",
+            "xAxisLabel": null,
+            "legendLocation": "right",
+            "mode": "selection",
+            "column-id": "timestamp"
+          },
+          "interval": "{{INTERVAL}}",
+          "series_spec": [
+            {
+              "column": "kpi_PGW_APN_IP_Address_Allocation_Method_Distribution_DHCP",
+              "agg": "{{FUNCTION}}",
+              "type": "int"
+            }
+          ],
+          "extra_filter": "device = '{{DEVICE}}' and schema_key is 'apn'",
+          "group_by": [
+            "{{ROLLUP}}"
+          ],
+          "formatting": {
+            "maximumFractionDigits": 5,
+            "notation": "compact"
+          },
+          "widget_id": "86e0ccc6"
+        },
+        {
+          "title": "PGW APN IP Address Allocation Method Distribution - DHCP Relay",
+          "widget_type": "timeseries",
+          "stream": "mobility_kpi_metrics_data",
+          "description": "Formula: (%addr-dhcp-rly%) Description: PGW APN IP Address Allocation Method Distribution - DHCP Relay",
+          "ts_column": "timestamp",
+          "max_width": 12,
+          "height": 6,
+          "min_width": 12,
+          "chartProperties": {
+            "yAxisLabel": "",
+            "xAxisLabel": null,
+            "legendLocation": "right",
+            "mode": "selection",
+            "column-id": "timestamp"
+          },
+          "interval": "{{INTERVAL}}",
+          "series_spec": [
+            {
+              "column": "kpi_PGW_APN_IP_Address_Allocation_Method_Distribution_DHCP_Relay",
+              "agg": "{{FUNCTION}}",
+              "type": "int"
+            }
+          ],
+          "extra_filter": "device = '{{DEVICE}}' and schema_key is 'apn'",
+          "group_by": [
+            "{{ROLLUP}}"
+          ],
+          "formatting": {
+            "maximumFractionDigits": 5,
+            "notation": "compact"
+          },
+          "widget_id": "ec4defcc"
+        },
+        {
+          "title": "PGW APN IP Address Allocation Method Distribution - No IP Addresses",
+          "widget_type": "timeseries",
+          "stream": "mobility_kpi_metrics_data",
+          "description": "Formula: (%addr-no-alloc%) Description: PGW APN IP Address Allocation Method Distribution - No IP Addresses",
+          "ts_column": "timestamp",
+          "max_width": 12,
+          "height": 6,
+          "min_width": 12,
+          "chartProperties": {
+            "yAxisLabel": "",
+            "xAxisLabel": null,
+            "legendLocation": "right",
+            "mode": "selection",
+            "column-id": "timestamp"
+          },
+          "interval": "{{INTERVAL}}",
+          "series_spec": [
+            {
+              "column": "kpi_PGW_APN_IP_Address_Allocation_Method_Distribution_No_IP_Addresses",
+              "agg": "{{FUNCTION}}",
+              "type": "int"
+            }
+          ],
+          "extra_filter": "device = '{{DEVICE}}' and schema_key is 'apn'",
+          "group_by": [
+            "{{ROLLUP}}"
+          ],
+          "formatting": {
+            "maximumFractionDigits": 5,
+            "notation": "compact"
+          },
+          "widget_id": "5fed3fcb"
+        },
+        {
+          "title": "KPI's Summary",
+          "widget_type": "tabular",
+          "stream": "mobility_kpi_metrics_data",
+          "ts_column": "timestamp",
+          "query": "*",
+          "extra_filter": "device = '{{DEVICE}}' and schema_key is 'apn'",
+          "min_width": 6,
+          "height": 12,
+          "max_width": 12,
+          "paginated": true,
+          "resizableColumns": true,
+          "virtual_scrolling": false,
+          "showRowSummary": true,
+          "max_rows": 50,
+          "sorting": [
+            {
+              "timestamp": "desc"
+            }
+          ],
+          "columns": {
+            "timestamp": "Timestamp",
+            "instance_key": "Instance_Key",
+            "kpi_PGW_APN_IP_Address_Allocation_Method_Distribution_Static": "PGW APN IP Address Allocation Method Distribution - Static",
+            "kpi_PGW_APN_IP_Address_Allocation_Method_Distribution_Pools_Configured_Locally": "PGW APN IP Address Allocation Method Distribution - Pools Configured Locally",
+            "kpi_PGW_APN_IP_Address_Allocation_Method_Distribution_RADIUS_Server": "PGW APN IP Address Allocation Method Distribution - RADIUS Server",
+            "kpi_PGW_APN_IP_Address_Allocation_Method_Distribution_DHCP": "PGW APN IP Address Allocation Method Distribution - DHCP",
+            "kpi_PGW_APN_IP_Address_Allocation_Method_Distribution_DHCP_Relay": "PGW APN IP Address Allocation Method Distribution - DHCP Relay",
+            "kpi_PGW_APN_IP_Address_Allocation_Method_Distribution_No_IP_Addresses": "PGW APN IP Address Allocation Method Distribution - No IP Addresses"
+          },
+          "widget_id": "94a3fc11"
+        }
+      ]
+    }
+  ]
+}

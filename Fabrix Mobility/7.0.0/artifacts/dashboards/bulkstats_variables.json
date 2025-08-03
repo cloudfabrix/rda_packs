@@ -1,0 +1,245 @@
+{
+  "name": "bulkstats_variables",
+  "label": "Bulkstats Variables",
+  "description": "bulkstats_variables: Insights",
+  "dashboard_folder": "fabrix-mobility",
+  "version": "2026.02.10.1",
+  "enabled": false,
+  "stream": "bulkstats_variables",
+  "live_edit": true,
+  "dashboard_type": "dashboard",
+  "dashboard_filters": {
+    "time_filter": false,
+    "default_time_filter_labels": [
+      "All Time"
+    ],
+    "columns_filter": [
+      {
+        "id": "timestamp",
+        "label": "Timestamp",
+        "type": "DATETIME"
+      },
+      {
+        "id": "counter_type",
+        "label": "Counter Type",
+        "type": "TEXT"
+      },
+      {
+        "id": "data_type",
+        "label": "Data Type",
+        "type": "TEXT"
+      },
+      {
+        "id": "is_key",
+        "label": "Is Key",
+        "type": "TEXT"
+      },
+      {
+        "id": "schema",
+        "label": "Schema",
+        "type": "TEXT"
+      },
+      {
+        "id": "variable",
+        "label": "Variable",
+        "type": "TEXT"
+      }
+    ],
+    "group_filters": [
+      {
+        "stream": "bulkstats_variables",
+        "title": "Schema",
+        "duration_hours": 1080,
+        "limit": 200,
+        "extra_filter": null,
+        "group_by": [
+          "schema"
+        ],
+        "ts_column": "timestamp",
+        "agg": "sum",
+        "column": "count_",
+        "type": "int"
+      },
+      {
+        "stream": "bulkstats_variables",
+        "title": "Counter Type",
+        "duration_hours": 1080,
+        "limit": 200,
+        "extra_filter": null,
+        "group_by": [
+          "counter_type"
+        ],
+        "ts_column": "timestamp",
+        "agg": "sum",
+        "column": "count_",
+        "type": "int"
+      },
+      {
+        "stream": "bulkstats_variables",
+        "title": "Data Type",
+        "duration_hours": 1080,
+        "limit": 200,
+        "extra_filter": null,
+        "group_by": [
+          "data_type"
+        ],
+        "ts_column": "timestamp",
+        "agg": "sum",
+        "column": "count_",
+        "type": "int"
+      },
+      {
+        "stream": "bulkstats_variables",
+        "title": "Is Key",
+        "duration_hours": 1080,
+        "limit": 200,
+        "extra_filter": null,
+        "group_by": [
+          "is_key"
+        ],
+        "ts_column": "timestamp",
+        "agg": "sum",
+        "column": "count_",
+        "type": "int"
+      }
+    ]
+  },
+  "dashboard_sections": [
+    {
+      "title": "Bulkstats Variables",
+      "show_filter": true,
+      "widgets": [
+        {
+          "widget_type": "pie_chart",
+          "title": "Schema",
+          "duration_hours": 1080,
+          "stream": "bulkstats_variables",
+          "ts_column": "timestamp",
+          "extra_filter": null,
+          "column": "count_",
+          "agg": "sum",
+          "group_by": [
+            "schema"
+          ],
+          "type": "int",
+          "min_width": 3,
+          "height": 4,
+          "max_width": 6,
+          "widget_id": "2bbaf109"
+        },
+        {
+          "widget_type": "pie_chart",
+          "title": "Counter Type",
+          "duration_hours": 1080,
+          "stream": "bulkstats_variables",
+          "ts_column": "timestamp",
+          "extra_filter": null,
+          "column": "count_",
+          "agg": "sum",
+          "group_by": [
+            "counter_type"
+          ],
+          "type": "int",
+          "min_width": 3,
+          "height": 5,
+          "max_width": 6,
+          "widget_id": "620d14ba"
+        },
+        {
+          "widget_type": "pie_chart",
+          "title": "Data Type",
+          "duration_hours": 1080,
+          "stream": "bulkstats_variables",
+          "ts_column": "timestamp",
+          "extra_filter": null,
+          "column": "count_",
+          "agg": "sum",
+          "group_by": [
+            "data_type"
+          ],
+          "type": "int",
+          "min_width": 3,
+          "height": 5,
+          "max_width": 6,
+          "widget_id": "c9ead1b9"
+        },
+        {
+          "widget_type": "pie_chart",
+          "title": "Is Key",
+          "duration_hours": 1080,
+          "stream": "bulkstats_variables",
+          "ts_column": "timestamp",
+          "extra_filter": null,
+          "column": "count_",
+          "agg": "sum",
+          "group_by": [
+            "is_key"
+          ],
+          "type": "int",
+          "min_width": 3,
+          "height": 5,
+          "max_width": 6,
+          "widget_id": "d9f6f14a"
+        },
+        {
+          "title": "Variable List",
+          "widget_type": "tabular",
+          "duration_hours": 1080,
+          "max_width": 12,
+          "height": 10,
+          "min_width": 12,
+          "stream": "bulkstats_variables",
+          "paginated": true,
+          "virtual_scrolling": false,
+          "ts_column": "timestamp",
+          "extra_filter": null,
+          "sorting": [
+            {
+              "schema": "asc"
+            }
+          ],
+          "remote_searchable": true,
+          "remote_searchable_cols": [
+            "schema",
+            "variable",
+            "counter_type",
+            "data_type"
+          ],
+          "columns": {
+            "schema": {
+              "title": "Schema",
+              "type": "TEXT",
+              "hidden": false
+            },
+            "variable": {
+              "title": "Variable",
+              "type": "TEXT",
+              "hidden": false
+            },
+            "counter_type": {
+              "title": "Counter Type",
+              "type": "TEXT",
+              "hidden": false
+            },
+            "data_type": {
+              "title": "Data Type",
+              "type": "TEXT",
+              "hidden": false
+            },
+            "is_key": {
+              "title": "Is Key",
+              "type": "TEXT",
+              "hidden": false
+            },
+            "timestamp": {
+              "title": "Timestamp",
+              "type": "DATETIME",
+              "hidden": true
+            }
+          },
+          "widget_id": "49f700ed"
+        }
+      ]
+    }
+  ]
+}

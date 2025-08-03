@@ -1,0 +1,864 @@
+{
+    "name": "mobility_kpi_list_validation",
+    "label": "KPI List",
+    "description": "mobility_new_kpi_list: Insights",
+    "dashboard_folder": "fabrix-mobility",
+    "version": "26.05.06.01",
+    "enabled": false,
+    "live_edit": true,
+    "stream": "mobility_new_kpi_list",
+    "dashboard_type": "dashboard",
+    "dashboard_filters": {
+        "time_filter": false,
+        "default_time_filter_labels": [
+            "All Time"
+        ],
+        "columns_filter": [
+            {
+                "id": "timestamp",
+                "label": "Timestamp",
+                "type": "DATETIME"
+            },
+            {
+                "id": "Description",
+                "label": "Description",
+                "type": "TEXT"
+            },
+            {
+                "id": "Formula",
+                "label": "Formula",
+                "type": "TEXT"
+            },
+            {
+                "id": "KPI_Name",
+                "label": "Kpi Name",
+                "type": "TEXT"
+            },
+            {
+                "id": "schema",
+                "label": "Schema",
+                "type": "TEXT"
+            },
+            {
+                "id": "schema_index",
+                "label": "Schema Index",
+                "type": "TEXT"
+            }
+        ],
+        "group_filters": [
+            {
+                "stream": "mobility_new_kpi_list",
+                "title": "Schema",
+                "duration_hours": 1080,
+                "limit": 200,
+                "extra_filter": null,
+                "group_by": [
+                    "schema"
+                ],
+                "ts_column": "timestamp",
+                "agg": "sum",
+                "column": "count_",
+                "type": "int"
+            },
+            {
+                "stream": "mobility_new_kpi_list",
+                "title": "Validation",
+                "duration_hours": 1080,
+                "limit": 200,
+                "extra_filter": null,
+                "group_by": [
+                    "validation"
+                ],
+                "ts_column": "timestamp",
+                "agg": "sum",
+                "column": "count_",
+                "type": "int"
+            },
+            {
+                "stream": "mobility_new_kpi_list",
+                "title": "Reason",
+                "duration_hours": 1080,
+                "limit": 200,
+                "extra_filter": null,
+                "group_by": [
+                    "reason"
+                ],
+                "ts_column": "timestamp",
+                "agg": "sum",
+                "column": "count_",
+                "type": "int"
+            }
+        ]
+    },
+    "dashboard_sections": [
+        {
+            "title": "KPI List",
+            "show_filter": true,
+            "widgets": [
+                {
+                    "widget_type": "bar_chart",
+                    "title": "Schema",
+                    "duration_hours": 1080,
+                    "stream": "mobility_new_kpi_list",
+                    "ts_column": "timestamp",
+                    "extra_filter": null,
+                    "column": "count_",
+                    "limit": 20,
+                    "agg": "sum",
+                    "group_by": [
+                        "schema"
+                    ],
+                    "type": "int",
+                    "min_width": 4,
+                    "height": 5,
+                    "chartProperties": {
+                        "yAxisLabel": "Schema's",
+                        "xAxisLabel": "KPI Count",
+                        "stacked": true,
+                        "legendLocation": "none",
+                        "orientation": "horizontal"
+                    },
+                    "max_width": 12,
+                    "widget_id": "45124d37"
+                },
+                {
+                    "widget_type": "bar_chart",
+                    "title": "Validation",
+                    "duration_hours": 1080,
+                    "stream": "mobility_new_kpi_list",
+                    "ts_column": "timestamp",
+                    "extra_filter": null,
+                    "column": "count_",
+                    "agg": "sum",
+                    "group_by": [
+                        "validation"
+                    ],
+                    "type": "int",
+                    "min_width": 2,
+                    "height": 5,
+                    "chartProperties": {
+                        "yAxisLabel": "KPI Count",
+                        "xAxisLabel": null,
+                        "stacked": true,
+                        "legendLocation": "none",
+                        "orientation": "vertical"
+                    },
+                    "style": {
+                        "color-map": {
+                            "Failed": [
+                                "#F44336",
+                                "#ffffff"
+                            ],
+                            "Passed": [
+                                "#4CAF50",
+                                "#ffffff"
+                            ]
+                        }
+                    },
+                    "max_width": 5,
+                    "widget_id": "dc74ccf4"
+                },
+                {
+                    "widget_type": "bar_chart",
+                    "title": "Reason",
+                    "duration_hours": 1080,
+                    "limit": 20,
+                    "stream": "mobility_new_kpi_list",
+                    "ts_column": "timestamp",
+                    "extra_filter": null,
+                    "column": "count_",
+                    "agg": "sum",
+                    "group_by": [
+                        "reason"
+                    ],
+                    "type": "int",
+                    "min_width": 6,
+                    "height": 5,
+                    "chartProperties": {
+                        "yAxisLabel": null,
+                        "xAxisLabel": "KPI Count",
+                        "stacked": true,
+                        "legendLocation": "none",
+                        "orientation": "horizontal"
+                    },
+                    "max_width": 12,
+                    "widget_id": "bb0a99af"
+                },
+                {
+                    "title": "KPIs",
+                    "widget_type": "tabular",
+                    "max_width": 12,
+                    "height": 10,
+                    "min_width": 12,
+                    "stream": "Autox_KPI_list_new",
+                    "ts_column": "timestamp",
+                    "virtual_scrolling": true,
+                    "remote_searchable0": true,
+                    "remote_searchable_cols": [
+                        "schema",
+                        "KPI_Name",
+                        "Formula",
+                        "KPI_Label"
+                    ],
+                    "resizableColumns": [
+                        "Formula"
+                    ],
+                    "columns": {
+                        "schema": {
+                            "title": "Schema",
+                            "type": "TEXT",
+                            "key": true,
+                            "hidden": false
+                        },
+                        "Schema_Original": {
+                            "title": "Schema Original",
+                            "type": "TEXT",
+                            "key": true,
+                            "hidden": true
+                        },
+                        "KPI_Label": {
+                            "title": "KPI Name",
+                            "type": "TEXT",
+                            "defaultWidth": 300,
+                            "key": true,
+                            "hidden": false
+                        },
+                        "KPI_Name": {
+                            "title": "KPI Name",
+                            "type": "TEXT",
+                            "defaultWidth": 300,
+                            "key": true,
+                            "hidden": true
+                        },
+                        "Formula": {
+                            "title": "Formula",
+                            "type": "TEXT",
+                            "defaultWidth": 300,
+                            "hidden": false,
+                            "key": true,
+                            "formatter": "truncate"
+                        },
+                        "Description": {
+                            "title": "Description",
+                            "type": "TEXT",
+                            "hidden": false,
+                            "key": true,
+                            "formatter": "truncate"
+                        },
+                        "__uuid": {
+                            "title": "UUID ID",
+                            "key": true,
+                            "visible": false
+                        },
+                        "lastupdated": {
+                            "title": "Last Updated",
+                            "type": "DATETIME",
+                            "key": true,
+                            "visible": false
+                        }
+                    },
+                    "actions": [
+                        {
+                            "permission": "rda:mobility:update",
+                            "title": "Delete KPI",
+                            "type": "POPUP_FORM",
+                            "selectionType": "SINGLE",
+                            "identifier": "saas-service-action:userdashboard-add-yaml",
+                            "api-endpoint": {
+                                "service-name": "saas-reports",
+                                "methodName": "getForm",
+                                "stringified-params": true,
+                                "parse-output": false,
+                                "params": [
+                                    {
+                                        "formId": "rda.saas.dynamic.form",
+                                        "formActionList": {
+                                            "formActions": [
+                                                {
+                                                    "identifier": "Submit",
+                                                    "actionLabel": "Delete"
+                                                }
+                                            ]
+                                        },
+                                        "formDefinition": {
+                                            "id": "rda.saas.dynamic.form",
+                                            "refreshRequired": true,
+                                            "formFieldList": [
+                                                {
+                                                    "help": "Delete this KPI",
+                                                    "dataType": "string",
+                                                    "required": true,
+                                                    "editable": false,
+                                                    "label": "Delete this KPI",
+                                                    "controlType": "TEXT",
+                                                    "hidden": false,
+                                                    "fieldId": "KPI_Label"
+                                                }
+                                            ]
+                                        },
+                                        "actions": [
+                                            {
+                                                "type": "RUN_PIPELINE",
+                                                "pipelineName": "delete_kpi",
+                                                "isSync": true
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "permission": "rda:mobility:update",
+                            "title": "Edit KPI",
+                            "type": "POPUP_FORM",
+                            "selectionType": "SINGLE",
+                            "identifier": "saas-service-action:userdashboard-add-yaml",
+                            "api-endpoint": {
+                                "service-name": "saas-reports",
+                                "methodName": "getForm",
+                                "stringified-params": true,
+                                "parse-output": false,
+                                "params": [
+                                    {
+                                        "formId": "rda.saas.dynamic.form",
+                                        "formActionList": {
+                                            "formActions": [
+                                                {
+                                                    "identifier": "Submit",
+                                                    "actionLabel": "Edit"
+                                                }
+                                            ]
+                                        },
+                                        "formDefinition": {
+                                            "id": "rda.saas.dynamic.form",
+                                            "refreshRequired": true,
+                                            "formFieldList": [
+                                                {
+                                                    "help": "Enter the Schema ",
+                                                    "dataType": "string",
+                                                    "required": false,
+                                                    "editable": true,
+                                                    "label": "Enter the Schema ",
+                                                    "controlType": "TEXT",
+                                                    "hidden": false,
+                                                    "fieldId": "schema"
+                                                },
+                                                {
+                                                    "help": "Enter the KPI Name",
+                                                    "dataType": "string",
+                                                    "required": true,
+                                                    "editable": true,
+                                                    "label": "Enter the KPI Name",
+                                                    "controlType": "TEXT",
+                                                    "hidden": false,
+                                                    "fieldId": "KPI_Label"
+                                                },
+                                                {
+                                                    "help": "Enter the KPI Formula ",
+                                                    "dataType": "string",
+                                                    "required": false,
+                                                    "editable": true,
+                                                    "label": "Enter the Formula ",
+                                                    "controlType": "TEXT",
+                                                    "hidden": false,
+                                                    "fieldId": "Formula"
+                                                },
+                                                {
+                                                    "help": "Enter the Description ",
+                                                    "dataType": "string",
+                                                    "required": false,
+                                                    "editable": true,
+                                                    "label": "Enter the Description",
+                                                    "controlType": "TEXT",
+                                                    "hidden": false,
+                                                    "fieldId": "Description"
+                                                }
+                                            ]
+                                        },
+                                        "actions": [
+                                            {
+                                                "type": "RUN_PIPELINE",
+                                                "pipelineName": "kpi_editing",
+                                                "isSync": true
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "permission": "rda:mobility:update",
+                            "title": "Add",
+                            "type": "POPUP_FORM",
+                            "selectionType": "NONE",
+                            "identifier": "saas-service-action:userdashboard-add-yaml",
+                            "api-endpoint": {
+                                "service-name": "saas-reports",
+                                "methodName": "getForm",
+                                "stringified-params": true,
+                                "parse-output": false,
+                                "params": [
+                                    {
+                                        "formId": "rda.saas.dynamic.form",
+                                        "formActionList": {
+                                            "formActions": [
+                                                {
+                                                    "identifier": "Submit",
+                                                    "actionLabel": "Add"
+                                                }
+                                            ]
+                                        },
+                                        "formDefinition": {
+                                            "id": "rda.saas.dynamic.form",
+                                            "refreshRequired": true,
+                                            "formFieldList": [
+                                                {
+                                                    "help": "Enter the Schema",
+                                                    "dataType": "string",
+                                                    "required": false,
+                                                    "editable": true,
+                                                    "label": "Enter the Schema",
+                                                    "controlType": "TEXT",
+                                                    "hidden": false,
+                                                    "fieldId": "schema"
+                                                },
+                                                {
+                                                    "help": "Enter the KPI Name",
+                                                    "dataType": "string",
+                                                    "required": true,
+                                                    "editable": true,
+                                                    "label": "Enter the KPI Name ",
+                                                    "controlType": "TEXT",
+                                                    "hidden": false,
+                                                    "fieldId": "KPI_Label"
+                                                },
+                                                {
+                                                    "help": "Enter the Formula ",
+                                                    "dataType": "string",
+                                                    "required": false,
+                                                    "editable": true,
+                                                    "label": "Enter the KPI Formula ",
+                                                    "controlType": "TEXT",
+                                                    "hidden": false,
+                                                    "fieldId": "Formula"
+                                                },
+                                                {
+                                                    "help": "Enter the Description ",
+                                                    "dataType": "string",
+                                                    "required": false,
+                                                    "editable": true,
+                                                    "label": "Enter the Description ",
+                                                    "controlType": "TEXT",
+                                                    "hidden": false,
+                                                    "fieldId": "Description"
+                                                }
+                                            ]
+                                        },
+                                        "actions": [
+                                            {
+                                                "type": "RUN_PIPELINE",
+                                                "pipelineName": "add_kpi",
+                                                "isSync": true,
+                                                "workerGroup": "rda-site-01"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "permission": "rda:mobility:update",
+                            "title": "Upload",
+                            "type": "POPUP_FORM",
+                            "selectionType": "NONE",
+                            "identifier": "saas-service-action:userdashboard-add-yaml",
+                            "api-endpoint": {
+                                "service-name": "saas-reports",
+                                "methodName": "getForm",
+                                "stringified-params": true,
+                                "parse-output": false,
+                                "params": [
+                                    {
+                                        "formId": "rda.saas.dynamic.form",
+                                        "formActionList": {
+                                            "formActions": [
+                                                {
+                                                    "identifier": "Submit",
+                                                    "actionLabel": "Upload"
+                                                }
+                                            ]
+                                        },
+                                        "formDefinition": {
+                                            "id": "rda.saas.dynamic.form",
+                                            "refreshRequired": true,
+                                            "formFieldList": [
+                                                {
+                                                    "help": "Choose file to upload",
+                                                    "dataType": "string",
+                                                    "required": true,
+                                                    "editable": true,
+                                                    "label": "Choose file to upload",
+                                                    "controlType": "FILE_UPLOAD",
+                                                    "hidden": false,
+                                                    "fieldId": "fileUpload"
+                                                },
+                                                {
+                                                    "help": "KPI will come into action after reload",
+                                                    "required": false,
+                                                    "editable": false,
+                                                    "label": "KPI will come into action after reload",
+                                                    "hidden": false,
+                                                    "dataType": "string",
+                                                    "controlType": "LABEL"
+                                                },
+                                                {
+                                                    "help": "Overwrite existing onboarded data",
+                                                    "required": false,
+                                                    "editable": true,
+                                                    "label": "Replace Data",
+                                                    "hidden": false,
+                                                    "fieldId": "replace",
+                                                    "dataType": "boolean",
+                                                    "controlType": "BOOLEAN_FIELD",
+                                                    "defaultValue": false,
+                                                    "controlPropertyList": [
+                                                        {
+                                                            "attribute": "layout-group-id",
+                                                            "value": "Features"
+                                                        },
+                                                        {
+                                                            "attribute": "layout-percent",
+                                                            "value": "25"
+                                                        }
+                                                    ]
+                                                }
+                                            ]
+                                        },
+                                        "actions": [
+                                            {
+                                                "type": "RUN_PIPELINE",
+                                                "pipelineName": "upload_kpi",
+                                                "isSync": true,
+                                                "workerGroup": "rda-site-01"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "permission": "rda:mobility:update",
+                            "title": "Reload",
+                            "type": "POPUP_FORM",
+                            "selectionType": "NONE",
+                            "identifier": "saas-service-action:userdashboard-add-yaml",
+                            "api-endpoint": {
+                                "service-name": "saas-reports",
+                                "methodName": "getForm",
+                                "stringified-params": true,
+                                "parse-output": false,
+                                "params": [
+                                    {
+                                        "formId": "rda.saas.dynamic.form",
+                                        "formActionList": {
+                                            "formActions": [
+                                                {
+                                                    "api-endpoint": {
+                                                        "methodName": "reload_kpis",
+                                                        "parse-output": false,
+                                                        "namespace": "io.cfx.dimensions.app",
+                                                        "params": [
+                                                            {
+                                                                "args": [
+                                                                    "Autox_KPI_list_new"
+                                                                ]
+                                                            }
+                                                        ],
+                                                        "service-name": "rapid-ingestion-service",
+                                                        "stringified-params": false
+                                                    },
+                                                    "identifier": "Submit",
+                                                    "actionLabel": "Reload"
+                                                }
+                                            ]
+                                        },
+                                        "formData": {
+                                            "confirmLabel": "Do you want to Reload?"
+                                        },
+                                        "formDefinition": {
+                                            "id": "rda.saas.dynamic.form",
+                                            "refreshRequired": true,
+                                            "formFieldList": [
+                                                {
+                                                    "fieldId": "confirmLabel",
+                                                    "help": "Do you want to Reload?",
+                                                    "dataType": "string",
+                                                    "controlType": "LABEL",
+                                                    "required": false,
+                                                    "editable": false,
+                                                    "label": "Uploaded KPI's will be validated and used for calculation. Do you want to Reload?",
+                                                    "hidden": false
+                                                }
+                                            ]
+                                        },
+                                        "actions": [],
+                                        "context": {
+                                            "confirmLabel": "Uploaded KPI will be validated and used for calculation. Do you want to continue?"
+                                        }
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "permission": "rda:mobility:update",
+                            "title": "Delete KPI",
+                            "type": "POPUP_FORM",
+                            "selectionType": "NONE",
+                            "identifier": "saas-service-action:userdashboard-add-yaml",
+                            "api-endpoint": {
+                                "service-name": "saas-reports",
+                                "methodName": "getForm",
+                                "stringified-params": true,
+                                "parse-output": false,
+                                "params": [
+                                    {
+                                        "formId": "rda.saas.dynamic.form",
+                                        "formActionList": {
+                                            "formActions": [
+                                                {
+                                                    "identifier": "Submit",
+                                                    "actionLabel": "Delete"
+                                                }
+                                            ]
+                                        },
+                                        "formDefinition": {
+                                            "id": "rda.saas.dynamic.form",
+                                            "refreshRequired": true,
+                                            "submitRequired": true,
+                                            "formFieldList": [
+                                                {
+                                                    "help": "KPIs",
+                                                    "dataType": "string",
+                                                    "required": false,
+                                                    "editable": true,
+                                                    "label": "KPIs",
+                                                    "hidden": false,
+                                                    "fieldId": "Others",
+                                                    "controlType": "SELECTOR_TABLE",
+                                                    "controlPropertyList": [
+                                                        {
+                                                            "attribute": "column-key",
+                                                            "value": "KPI_Label"
+                                                        },
+                                                        {
+                                                            "attribute": "selection",
+                                                            "value": "MULTIPLE"
+                                                        }
+                                                    ],
+                                                    "widget": {
+                                                        "title": "KPIs Details",
+                                                        "timebased": false,
+                                                        "max_width": 12,
+                                                        "height": 8,
+                                                        "min_width": 12,
+                                                        "stream": "Autox_KPI_list_new",
+                                                        "ts_column": "timestamp",
+                                                        "sorting": [],
+                                                        "columns": {
+                                                            "schema": {
+                                                                "title": "Schema",
+                                                                "type": "TEXT",
+                                                                "key": false,
+                                                                "hidden": false
+                                                            },
+                                                            "Schema_Original": {
+                                                                "title": "Schema Original",
+                                                                "type": "TEXT",
+                                                                "key": false,
+                                                                "hidden": true
+                                                            },
+                                                            "KPI_Label": {
+                                                                "title": "KPI Name",
+                                                                "type": "TEXT",
+                                                                "defaultWidth": 300,
+                                                                "key": true,
+                                                                "hidden": false
+                                                            },
+                                                            "KPI_Name": {
+                                                                "title": "KPI Name",
+                                                                "type": "TEXT",
+                                                                "defaultWidth": 300,
+                                                                "key": true,
+                                                                "hidden": true
+                                                            },
+                                                            "Formula": {
+                                                                "title": "Formula",
+                                                                "type": "TEXT",
+                                                                "defaultWidth": 300,
+                                                                "hidden": false,
+                                                                "key": false,
+                                                                "formatter": "truncate"
+                                                            },
+                                                            "Description": {
+                                                                "title": "Description",
+                                                                "type": "TEXT",
+                                                                "hidden": false,
+                                                                "key": false,
+                                                                "formatter": "truncate"
+                                                            },
+                                                            "__uuid": {
+                                                                "title": "UUID ID",
+                                                                "key": true,
+                                                                "visible": false
+                                                            }
+                                                        }
+                                                    }
+                                                },
+                                                {
+                                                    "fieldId": "kpi_deletion_confirmation",
+                                                    "label": "Delete the selected KPIs",
+                                                    "dataType": "boolean",
+                                                    "defaultValue": false,
+                                                    "hidden": false,
+                                                    "editable": true,
+                                                    "required": true,
+                                                    "controlType": "BOOLEAN_FIELD",
+                                                    "lovValues": [
+                                                        {
+                                                            "identifier": "delete",
+                                                            "displayName": "Delete"
+                                                        }
+                                                    ]
+                                                }
+                                            ]
+                                        },
+                                        "actions": [
+                                            {
+                                                "type": "RUN_PIPELINE",
+                                                "pipelineName": "delete_kpi",
+                                                "isSync": true
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "widget_id": "b039e934"
+                },
+                {
+                    "title": "Validated KPIs",
+                    "widget_type": "tabular",
+                    "max_width": 12,
+                    "height": 10,
+                    "min_width": 12,
+                    "stream": "mobility_new_kpi_list",
+                    "ts_column": "timestamp",
+                    "virtual_scrolling": true,
+                    "extra_filter": null,
+                    "sorting": [
+                        {
+                            "schema": "asc"
+                        }
+                    ],
+                    "remote_searchable": true,
+                    "remote_searchable_cols": [
+                        "schema",
+                        "KPI_Name",
+                        "Formula",
+                        "schema_index",
+                        "KPI_Label"
+                    ],
+                    "resizableColumns": [
+                        "Formula"
+                    ],
+                    "columns": {
+                        "schema": {
+                            "title": "Schema",
+                            "type": "TEXT",
+                            "hidden": false
+                        },
+                        "KPI_Label": {
+                            "title": "KPI Name",
+                            "type": "TEXT",
+                            "key": true,
+                            "hidden": false
+                        },
+                        "KPI_Name": {
+                            "title": "KPI Name",
+                            "type": "TEXT",
+                            "key": true,
+                            "hidden": true
+                        },
+                        "row_color": {
+                            "type": "COLOR-MAP",
+                            "visible": true,
+                            "source-column": "validation",
+                            "color-map": {
+                                "Passed": "#4CAF50",
+                                "Failed": " #F44336"
+                            }
+                        },
+                        "validation": {
+                            "title": "Validation",
+                            "hidden": false,
+                            "htmlTemplateForRow": "<span class='badge' style='background-color: {{ row.row_color }};' > {{ row.validation }} </span>"
+                        },
+                        "Formula": {
+                            "title": "Formula",
+                            "type": "TEXT",
+                            "hidden": false,
+                            "formatter0": "truncate"
+                        },
+                        "reason": {
+                            "title": "Reason",
+                            "type": "TEXT",
+                            "hidden": false
+                        },
+                        "unknown_variables": {
+                            "title": "Unknown Variables",
+                            "type": "TEXT",
+                            "hidden": false
+                        },
+                        "schema_keys": {
+                            "title": "Schema Keys",
+                            "type": "TEXT",
+                            "hidden": false
+                        },
+                        "Description": {
+                            "title": "Description",
+                            "type": "TEXT",
+                            "hidden": false,
+                            "formatter": "truncate"
+                        },
+                        "lastupdated": {
+                            "title": "Last Updated",
+                            "type": "DATETIME",
+                            "key": true,
+                            "visible": false
+                        }
+                    },
+                    "actions0": [
+                        {
+                            "appName": "user-dashboard",
+                            "permission": "aia:page:view",
+                            "selectionType": "SINGLE",
+                            "stateName": "app.featureapp",
+                            "title": "Edit",
+                            "type": "GO_TO_APP_STATE"
+                        },
+                        {
+                            "appName": "user-dashboard",
+                            "permission": "aia:page:view",
+                            "selectionType": "NONE",
+                            "stateName": "app.featureapp",
+                            "title": "Add",
+                            "type": "GO_TO_APP_STATE"
+                        }
+                    ],
+                    "widget_id": "cc306c76"
+                }
+            ]
+        }
+    ]
+}

@@ -1,0 +1,232 @@
+{
+    "name": "mobility-view-trace-data",
+    "label": "bulkstats_execute_command_pipeline",
+    "description": "View pipeline traces",
+    "enabled": true,
+    "context_label_id": "pipeline_name",
+    "dashboard_type": "template",
+    "version": "2026.02.10.1",
+    "live_edit": false,
+    "short_label": "Pipeline Traces",
+    "dashboard_filters": {
+        "time_filter": true,
+        "group_filters": [
+            {
+                "stream": "rda_system_worker_traces",
+                "title": "Job ID",
+                "group_by": [
+                    "jobid"
+                ],
+                "extra_filter": "pipeline_name is 'bulkstats_execute_command_pipeline'",
+                "ts_column": "timestamp",
+                "agg": "cardinality",
+                "column": "count_",
+                "type": "int",
+                "show_counts": true
+            },
+            {
+                "stream": "rda_system_worker_traces",
+                "title": "Status",
+                "group_by": [
+                    "status_type"
+                ],
+                "extra_filter": "pipeline_name is 'bulkstats_execute_command_pipeline'",
+                "ts_column": "timestamp",
+                "agg": "value_count",
+                "column": "count_",
+                "type": "int"
+            }
+        ],
+        "default_time_filter_labels": [
+            "All Time"
+        ]
+    },
+    "dashboard_sections": [
+        {
+            "title": "View Traces",
+            "show_filter": true,
+            "widgets": [
+                {
+                    "title": "Header",
+                    "widget_type": "label",
+                    "max_width": 12,
+                    "min_width": 12,
+                    "height": 1,
+                    "extra_filter": "pipeline_name is 'bulkstats_execute_command_pipeline'",
+                    "label": "<div style='text-align:center;width:100%;'><h1><a style='text-decoration:none;' target='_blank'><span style='color:#03A9F4;'>Pipeline Name:</span> <span style='color:#03A9F4;'>bulkstats_execute_command_pipeline</span></a></h1></div>",
+                    "widget_id": "62e651e0"
+                },
+                {
+                    "title": "Traces",
+                    "widget_type": "tabular",
+                    "stream": "rda_system_worker_traces",
+                    "refreshOptions": {
+                        "refreshType": "Periodic",
+                        "refreshInterval": 60000
+                    },
+                    "virtual_scrolling": false,
+                    "showRowSummary": true,
+                    "resizableColumns": true,
+                    "ts_column": "timestamp",
+                    "timebased": false,
+                    "paginated": true,
+                    "ui_widget_type": "TABULAR",
+                    "max_width": 12,
+                    "height": 10,
+                    "min_width": 12,
+                    "widget_id": "182229d8",
+                    "extra_filter": "pipeline_name is 'bulkstats_execute_command_pipeline'",
+                    "columns": {
+                        "timestamp": {
+                            "title": "When",
+                            "type": "HUMANIZE_TIME_DELTA",
+                            "source-column": "timestamp",
+                            "sortable": false,
+                            "defaultWidth": 200
+                        }
+                    },
+                    "actions": [
+                        {
+                            "title": "Trace Data",
+                            "type": "POPUP_REPORT",
+                            "permission": "rda:pipeline:view",
+                            "selectionType": "SINGLE",
+                            "identifier": "saas-service-action:trace-inspect-data",
+                            "api-endpoint": {
+                                "service-name": "saas-reports",
+                                "methodName": "getReport",
+                                "stringified-params": false,
+                                "parse-output": false,
+                                "params": [
+                                    {
+                                        "reportId": "rda.saas.pipeline.trace.inspect.data"
+                                    }
+                                ]
+                            },
+                            "actionCondition": {
+                                "actionControl": "SHOW_IF",
+                                "conditionalField": [
+                                    {
+                                        "conditionType": "EQUAL",
+                                        "conditionValue": "yes",
+                                        "fieldId": "inspect"
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "custom_columns": [
+                        {
+                            "id": "Saved Time",
+                            "type": "DATETIME",
+                            "expr": "timestamp"
+                        },
+                        {
+                            "id": "Status Type",
+                            "hidden": true,
+                            "expr": "status_type"
+                        },
+                        {
+                            "id": "status_type_color",
+                            "hidden": true,
+                            "expr": "'#007BFF' if status_type == 'in-progress' else '#28A745' if status_type == 'completed' else '#FFA500' if status_type == 'trace' else '#F44336'"
+                        },
+                        {
+                            "id": "Status",
+                            "expr": "'ok' if status_type == 'in-progress' else 'Completed' if status_type == 'completed' else 'Trace' if status_type == 'trace' else 'Failed'",
+                            "htmlTemplateForRow": "{%raw%}<span class='badge' style='background-color: {{ row.status_type_color }}' > {{ row.Status }} </span>{%endraw%}"
+                        },
+                        {
+                            "id": "Bot",
+                            "expr": "bot"
+                        },
+                        {
+                            "id": "Query",
+                            "expr": "query"
+                        },
+                        {
+                            "id": "Dataframe",
+                            "expr": "str(num_rows) + 'x' + str(num_cols)"
+                        },
+                        {
+                            "id": "Message",
+                            "expr": "error_message"
+                        },
+                        {
+                            "id": "Job ID",
+                            "expr": "str(jobid)[0:8]"
+                        },
+                        {
+                            "id": "Sequence",
+                            "expr": "seq",
+                            "defaultWidth": 100
+                        },
+                        {
+                            "id": "Site",
+                            "expr": "pod_group",
+                            "defaultWidth": 100
+                        },
+                        {
+                            "id": "Pipeline",
+                            "expr": "pipeline_name",
+                            "defaultWidth": 150
+                        },
+                        {
+                            "id": "Version",
+                            "expr": "attributes_pipeline_version",
+                            "defaultWidth": 100
+                        },
+                        {
+                            "id": "Bot Position",
+                            "expr": "pos",
+                            "defaultWidth": 100
+                        },
+                        {
+                            "id": "Inspect",
+                            "expr": "inspect",
+                            "defaultWidth": 100,
+                            "key": true,
+                            "visible": false
+                        },
+                        {
+                            "id": "Inspect Data",
+                            "expr": "inspect_data",
+                            "defaultWidth": 100,
+                            "key": true,
+                            "visible": false
+                        },
+                        {
+                            "id": "inspect",
+                            "expr": "inspect",
+                            "defaultWidth": 100,
+                            "key": true,
+                            "hidden": true
+                        },
+                        {
+                            "id": "inspect_data",
+                            "expr": "inspect_data",
+                            "defaultWidth": 100,
+                            "key": true,
+                            "hidden": true
+                        },
+                        {
+                            "id": "PID",
+                            "expr": "proc_id",
+                            "defaultWidth": 100
+                        },
+                        {
+                            "id": "CPU",
+                            "expr": "proc_info_cpu_percent",
+                            "defaultWidth": 100
+                        },
+                        {
+                            "id": "Memory (MB)",
+                            "expr": "proc_info_mem_mb",
+                            "defaultWidth": 100
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

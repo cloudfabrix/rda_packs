@@ -1,0 +1,174 @@
+{
+    "name": "auto-x-3-app",
+    "label": "EPC Mobility",
+    "description": "Mobility 4G EPC KPI Data Explorer",
+    "version": "2026.05.06.01",
+    "enabled": true,
+    "status_poller": {},
+    "dashboard_type": "app",
+    "live_edit": true,
+    "custom_context": {
+        "rda-dashboard-live-edit": true
+    },
+    "context_enrichment": [
+        {
+            "dataset": "organizations",
+            "enrich_columns": [
+                "accedianURL",
+                "bpaURL"
+            ],
+            "query_template": "projectId in $projectId",
+            "defaultValues": {}
+        }
+    ],
+    "template_variables": {
+        "USERID": {
+            "default": "admin@cfx.com",
+            "contextId": "USER_ID"
+        }
+    },
+    "dashboard_groups": {
+        "group": {
+            "icon": "overall.svg",
+            "label": "Devices New"
+        },
+        "groupAlerts": {
+            "icon": "alert.svg",
+            "label": "Alerts"
+        },
+        "groupTopo": {
+            "icon": "topology.svg",
+            "label": "Topology"
+        },
+        "group1": {
+            "icon": "hardware.svg",
+            "label": "Inventory"
+        },
+        "group2": {
+            "icon": "overall.svg",
+            "label": "Data Collection"
+        },
+        "group3": {
+            "icon": "hardware.svg",
+            "label": "Onboarding"
+        },
+        "StarOs": {
+            "icon": "status.svg",
+            "label": "Mobility StarOS"
+        },
+        "model": {
+            "icon": "blueprint.svg",
+            "label": "Data Model"
+        }
+    },
+    "dashboard_pages": [
+        {
+            "name": "customer_overview",
+            "label": "Overview",
+            "icon": "license.svg"
+        },
+        {
+            "name": "customer_network_devices_inventory",
+            "label": "Network Devices",
+            "icon": "hardware.svg",
+            "group": "group1"
+        },
+        {
+            "name": "customer_oia_incidents",
+            "label": "Incidents",
+            "icon": "incident.svg"
+        },
+        {
+            "name": "customer_oia_alerts_fault",
+            "label": "Alerts",
+            "icon": "alert.svg"
+        },
+        {
+            "name": "mobility-devices-report-device",
+            "label": "Devices",
+            "group": "StarOs"
+        },
+        {
+            "name": "mobility-devices-report-schema",
+            "label": "Schemas",
+            "group": "StarOs"
+        },
+        {
+            "name": "mobility-devices-report-kpi",
+            "label": "KPI Workbench",
+            "group": "StarOs"
+        },
+        {
+            "name": "mobility-devices-kpi-reports",
+            "label": "Reports",
+            "group": "StarOs"
+        },
+        {
+            "name": "bulkstats_variables",
+            "label": "Bulkstats Variables",
+            "group": "model"
+        },
+        {
+            "name": "mobility_kpi_list_validation",
+            "label": "KPI Administration",
+            "group": "model"
+        },
+        {
+            "name": "customer_syslogs",
+            "label": "Syslogs",
+            "icon": "trace.svg",
+            "group": "group2"
+        },
+        {
+            "name": "customer_SNMP_Traps",
+            "label": "SNMP Traps",
+            "icon": "trace.svg",
+            "group": "group2"
+        },
+        {
+            "name": "mobility_ingestion_tracker",
+            "label": "Bulkstats Ingestion Tracker",
+            "icon": "trace.svg",
+            "group": "group2"
+        },
+        {
+            "name": "mobility_raw_data",
+            "label": "Bulkstats Ingested Data",
+            "icon": "trace.svg",
+            "group": "group2"
+        },
+        {
+            "name": "device_monitoring_stream",
+            "label": "Device Monitoring",
+            "icon": "trace.svg",
+            "group": "group2"
+        },
+        {
+            "name": "mobility_kpi_computation_jobs",
+            "label": "Computational Jobs",
+            "icon": "trace.svg",
+            "group": "group2"
+        },
+        {
+            "name": "network-configure-and-manage",
+            "label": "Configure Discovery",
+            "icon": "hardware.svg",
+            "group": "group3",
+            "context_filter": "USER_ROLE is 'msp-admin'"
+        },
+        {
+            "name": "bulkstats_schemas",
+            "label": "Schemas",
+            "group": "group3"
+        },
+        {
+            "name": "mobility_search_project",
+            "label": "Search",
+            "icon": "detail.svg"
+        }
+    ],
+    "dashboard_folder": "fabrix-mobility",
+    "menu_folder_path": [
+        "Top Level"
+    ]
+}

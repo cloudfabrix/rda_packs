@@ -1,0 +1,256 @@
+{
+  "name": "mobility_kpi_computation_jobs",
+  "label": "Computational Jobs",
+  "description": "mobility_kpi_computation_jobs: Insights",
+  "dashboard_folder": "fabrix-mobility",
+  "version": "2026.04.15.1",
+  "enabled": false,
+  "stream": "mobility_kpi_computation_jobs",
+  "dashboard_type": "dashboard",
+  "dashboard_filters": {
+    "time_filter": true,
+    "default_time_filter_labels": [
+      "Last 24 hours"
+    ],
+    "columns_filter": [
+      {
+        "id": "created_at",
+        "label": "Created At",
+        "type": "DATETIME"
+      },
+      {
+        "id": "from_date",
+        "label": "From Date",
+        "type": "DATETIME"
+      },
+      {
+        "id": "timestamp",
+        "label": "Timestamp",
+        "type": "DATETIME"
+      },
+      {
+        "id": "to_date",
+        "label": "To Date",
+        "type": "DATETIME"
+      },
+      {
+        "id": "updated_at",
+        "label": "Updated At",
+        "type": "DATETIME"
+      },
+      {
+        "id": "age",
+        "label": "Age",
+        "type": "TEXT"
+      },
+      {
+        "id": "device_names",
+        "label": "Device Names",
+        "type": "TEXT"
+      },
+      {
+        "id": "job_id",
+        "label": "Job Id",
+        "type": "TEXT"
+      },
+      {
+        "id": "job_name",
+        "label": "Job Name",
+        "type": "TEXT"
+      },
+      {
+        "id": "job_progress",
+        "label": "Job Progress",
+        "type": "TEXT"
+      },
+      {
+        "id": "reason",
+        "label": "Reason",
+        "type": "TEXT"
+      },
+      {
+        "id": "schemas",
+        "label": "Schemas",
+        "type": "TEXT"
+      },
+      {
+        "id": "sort_0",
+        "label": "Sort 0",
+        "type": "TEXT"
+      },
+      {
+        "id": "sort_1",
+        "label": "Sort 1",
+        "type": "TEXT"
+      },
+      {
+        "id": "status",
+        "label": "Status",
+        "type": "TEXT"
+      },
+      {
+        "id": "devices",
+        "label": "Devices",
+        "type": "DOUBLE"
+      },
+      {
+        "id": "from_date_epoch",
+        "label": "From Date Epoch",
+        "type": "DOUBLE"
+      },
+      {
+        "id": "pid",
+        "label": "Pid",
+        "type": "DOUBLE"
+      },
+      {
+        "id": "to_date_epoch",
+        "label": "To Date Epoch",
+        "type": "DOUBLE"
+      }
+    ],
+    "group_filters": []
+  },
+  "dashboard_sections": [
+    {
+      "title": "Computational Jobs",
+      "show_filter": true,
+      "widgets": [
+        {
+          "title": "Data",
+          "widget_type": "tabular",
+          "duration_hours": 1080,
+          "max_width": 12,
+          "height": 8,
+          "min_width": 12,
+          "stream": "mobility_kpi_computation_jobs",
+          "ts_column": "created_at",
+          "extra_filter": null,
+          "columns": {
+            "job_name": {
+              "title": "Job Name",
+              "type": "TEXT",
+              "hidden": false,
+              "key": true
+            },
+            "job_id": {
+              "title": "Job ID",
+              "type": "TEXT",
+              "visible": true,
+              "key": true
+            },
+            "schemas": {
+              "title": "Schemas",
+              "type": "TEXT",
+              "hidden": false
+            },
+            "devices": {
+              "title": "Devices",
+              "type": "DOUBLE",
+              "hidden": false
+            },
+            "from_date": {
+              "title": "From Date",
+              "type": "DATETIME",
+              "hidden": false
+            },
+            "to_date": {
+              "title": "To Date",
+              "type": "DATETIME",
+              "hidden": false
+            },
+            "status": {
+              "title": "Status",
+              "type": "TEXT",
+              "hidden": false
+            },
+            "created_at": {
+              "title": "Created At",
+              "type": "DATETIME",
+              "hidden": false
+            },
+            "updated_at": {
+              "title": "Updated At",
+              "type": "DATETIME",
+              "hidden": false
+            },
+            "device_names": {
+              "title": "Device Names",
+              "type": "TEXT",
+              "hidden": false
+            },
+            "age": {
+              "title": "Duration",
+              "type": "TEXT",
+              "hidden": false
+            },
+            "pid": {
+              "title": "Pid",
+              "type": "DOUBLE",
+              "hidden": false
+            },
+            "job_progress": {
+              "title": "Job Progress",
+              "type": "TEXT",
+              "hidden": false
+            },
+            "reason": {
+              "title": "Reason",
+              "type": "TEXT",
+              "hidden": false
+            }
+          },
+          "actions": [
+            {
+              "permission": "rda:mobility:update",
+              "title": "Cancel Job",
+              "type": "POPUP_FORM",
+              "selectionType": "SINGLE",
+              "identifier": "saas-service-action:cancel-job",
+              "api-endpoint": {
+                "service-name": "saas-reports",
+                "methodName": "getForm",
+                "stringified-params": true,
+                "parse-output": false,
+                "params": [
+                  {
+                    "formId": "rda.saas.cancel.job"
+                  }
+                ]
+              },
+              "actionCondition": {
+                "actionControl": "SHOW_IF",
+                "conditionalField": [
+                  {
+                    "conditionType": "EQUAL",
+                    "conditionValue": "In Progress",
+                    "fieldId": "status"
+                  }
+                ]
+              }
+            },
+            {
+              "permission": "rda:mobility:update",
+              "title": "Create Job",
+              "type": "POPUP_FORM",
+              "selectionType": "NONE",
+              "identifier": "saas-service-action:create-job",
+              "api-endpoint": {
+                "service-name": "saas-reports",
+                "methodName": "getForm",
+                "stringified-params": true,
+                "parse-output": false,
+                "params": [
+                  {
+                    "formId": "rda.saas.create.job"
+                  }
+                ]
+              }
+            }
+          ],
+          "widget_id": "f848182b"
+        }
+      ]
+    }
+  ]
+}

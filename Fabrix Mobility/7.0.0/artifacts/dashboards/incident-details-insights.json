@@ -1,0 +1,137 @@
+{
+  "name": "incident-details-insights",
+  "label": "Incident Insights",
+  "description": "OIA Insights for Incident",
+  "version": "2026.02.10.1",
+  "enabled": true,
+  "dashboard_style": "auto",
+  "status_poller": {},
+  "dashboard_type": "template",
+  "template_variables": {
+    "PROJECT_ID": {
+      "default": null,
+      "contextId": "projectid"
+    },
+    "INCIDENT_ID": {
+      "default": null,
+      "contextId": "incidentid"
+    }
+  },
+  "dashboard_filters": {
+    "time_filter": false,
+    "columns_filter": []
+  },
+  "dashboard_sections": [
+    {
+      "title": "Insights",
+      "show_filter": false,
+      "projects": [],
+      "widgets": [
+        {
+          "title": "Incident Summary",
+          "min_width": 12,
+          "height": 2,
+          "widget_type": "portal_html",
+          "widget_template": "cfx-oia/incident-summary",
+          "widget_id": "6e64b2f1"
+        },
+        {
+          "title": "Similar Incidents",
+          "widget_type": "portal_list",
+          "min_width": 12,
+          "height": 4,
+          "max_width": 12,
+          "refreshRequired": false,
+          "timebased": false,
+          "api-endpoint": {
+            "service-name": "cfxdimensions-app-irm_service",
+            "namespace": "io.cfx.dimensions.app",
+            "version": "*",
+            "methodName": "invokeAppApi:getNextSteps",
+            "stringified-params": true,
+            "parse-output": false,
+            "params": [
+              {
+                "section_title": "Similar Incidents",
+                "grouping_field": "i_state",
+                "value_groups": {
+                  "Opened": [
+                    "Open",
+                    "ACTIVE",
+                    "New",
+                    "Assigned"
+                  ],
+                  "Resolved": [
+                    "Resolved"
+                  ]
+                }
+              }
+            ]
+          },
+          "widget_template": "cfx-oia/recommendation",
+          "widget_id": "similar_incidents"
+        },
+        {
+          "title": "How Similar Incidents are Resolved?",
+          "widget_type": "portal_list",
+          "min_width": 12,
+          "height": 4,
+          "max_width": 12,
+          "refreshRequired": false,
+          "timebased": false,
+          "api-endpoint": {
+            "service-name": "cfxdimensions-app-irm_service",
+            "namespace": "io.cfx.dimensions.app",
+            "version": "*",
+            "methodName": "invokeAppApi:getNextSteps",
+            "stringified-params": true,
+            "parse-output": false,
+            "params": [
+              {
+                "section_title": "How Similar Incidents are Resolved?",
+                "grouping_field": "i_resolution_code",
+                "value_type": "PERCENT",
+                "label_keys": [
+                  "user_name",
+                  "user"
+                ]
+              }
+            ]
+          },
+          "widget_template": "cfx-oia/recommendation",
+          "widget_id": "resolution_code"
+        },
+        {
+          "title": "Who Resolved?",
+          "widget_type": "portal_list",
+          "min_width": 12,
+          "height": 4,
+          "max_width": 12,
+          "refreshRequired": false,
+          "timebased": false,
+          "api-endpoint": {
+            "service-name": "cfxdimensions-app-irm_service",
+            "namespace": "io.cfx.dimensions.app",
+            "version": "*",
+            "methodName": "invokeAppApi:getNextSteps",
+            "stringified-params": true,
+            "parse-output": false,
+            "params": [
+              {
+                "section_title": "Who Resolved?",
+                "grouping_field": "i_resolved_by",
+                "value_type": "PERCENT",
+                "label_keys": [
+                  "user_name",
+                  "user"
+                ]
+              }
+            ]
+          },
+          "widget_template": "cfx-oia/recommendation",
+          "widget_id": "resolved_user"
+        }
+      ]
+    }
+  ]
+}

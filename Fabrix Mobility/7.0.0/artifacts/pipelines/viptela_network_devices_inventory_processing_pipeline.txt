@@ -1,0 +1,418 @@
+%% stream = no and limit = 0
+
+%% import_source = "cfxaia"
+
+## Viptela Network Devices Inventory Data Processing ##
+@exec:get-input
+    --> *dm:filter output_data is not null
+    --> @dm:save name = 'temp-viptela_network_devices_inventory'
+
+--> @c:new-block
+    --> @dm:empty
+    --> @exec:run-pipeline name  = "aia_utility_functions" & import_functions = "yes"
+
+## Creates device and ops view
+--> @c:new-block
+    --> @dm:recall name= "temp-viptela_network_devices_inventory" and return_empty = "yes"
+    --> *exec:if-shape num_rows > 0
+       --> @dm:dedup columns = 'asset_ip'
+       --> @asset-discovery:entity-analysis path_column= "minio_location" and output_path = "data/customers/device_data" and device_ops_view = True and device_view = True and poe_summary = True
+    --> @exec:end-if
+
+## Viptela Network Devices: Capture Collected Files and Target IP details Pre Processing
+--> @c:new-block
+    --> @dm:recall name = 'temp-viptela_network_devices_inventory' and return_empty = 'yes'
+    --> *exec:if-shape num_rows > 0
+       --> *dm:filter * get asset_ip,jobname,jobid,minio_location,collection_timestamp,collection_status,reason
+       --> @dm:eval data_processing_state = "'Started'"
+       --> @dm:dedup
+       --> @rn:write-stream name = 'network_device_data_processing_debug'
+    --> @exec:end-if
+
+## Viptela Network Device: base collection group
+--> @c:new-block
+    --> @dm:recall name="temp-viptela_network_devices_inventory" and return_empty = 'yes'
+    --> *exec:if-condition output_groupname = 'base'
+       --> @dm:explode-json column = 'output_data'
+       --> *exec:if-shape num_rows > 0
+          --> @dm:rename-columns sys_descr="sysDescr" and
+                  system_vendor_id="systemVendorID" and
+                  vendor="systemVendorName" and
+                  sw_type="systemVendorOS" and
+                  system_vendor_sub_id="systemVendorSubID" and
+                  source_filename="minio_location" and
+                  collection_reason="reason"
+          --> @dm:selectcolumns include="^asset_ip$|^sys_descr$|^system_vendor_id$|^vendor$|^sw_type$|^system_vendor_sub_id$|^jobid$|^jobname$|^source_filename$|^collection_reason$|^collection_status$|^collection_timestamp$"
+          --> @dm:save name='temp-viptela_network_device_inventory_base_info'
+       --> @exec:end-if
+    --> @exec:end-if
+
+## Viptela Network Device: system collection group
+--> @c:new-block
+    --> @dm:recall name="temp-viptela_network_devices_inventory" and return_empty = 'yes'
+    --> *exec:if-condition output_groupname = 'system'
+       --> @dm:explode-json column = 'output_data'
+       --> *exec:if-shape num_rows > 0
+          --> @dm:rename-columns sys_descr="sysDescr" and
+                  sys_contact="sysContact" and
+                  hostname="sysName" and
+                  sys_object_id ="sysObjectID" and
+                  sys_location="sysLocation" and
+                  source_filename="minio_location" and
+                  collection_reason="reason"
+          --> @dm:selectcolumns exclude="^sysServices$"
+          --> @dm:save name='temp-viptela_network_device_inventory_system_info_for_interface'
+          --> @dm:add-missing-columns columns="sysUpTime,uptime,snmpEngineTime" and value=0
+          --> @dm:fixnull columns="sysUpTime,uptime,snmpEngineTime" and value=0
+          --> @dm:eval sysUpTime="int(str(sysUpTime).replace('','0')) if sysUpTime=='' else sysUpTime"
+          --> @dm:to-type columns="sysUpTime,snmpEngineTime" and type="int"
+          --> @dm:eval sysUpTime = "round(sysUpTime/8640000, 1) if sysUpTime>0 else sysUpTime"
+          --> @dm:eval sysUpTime = "str(round(sysUpTime, 1)) if sysUpTime<1 else int(sysUpTime)"
+          --> @dm:eval snmpEngineTime = "round(snmpEngineTime/86400, 1) if snmpEngineTime and snmpEngineTime>0 else snmpEngineTime"
+          --> @dm:eval sysUpTime = "int(snmpEngineTime) if snmpEngineTime>0 else int(float(sysUpTime))"
+          --> @dm:eval uptime = "str(int(snmpEngineTime)) if snmpEngineTime>0 else str(sysUpTime)"
+          --> @dm:eval uptime_since = "int(time_now_as_ms())-(24*60*60*1000 * int(float(sysUpTime))) if int(sysUpTime)>0 else None"
+          --> @dm:change-time-format columns="uptime_since" and from_format="ms" and to_format="datetimestr"
+          --> @dm:rename-columns sys_uptime="sysUpTime"
+          --> @dm:eval sys_uptime_days=" '>180' if sys_uptime> 180 else '<150' if sys_uptime <150 else '150-180'"
+          --> @dm:selectcolumns include="^uptime_since$|^uptime$|^asset_ip$|^sys_uptime_days$|^sys_uptime$|^sys_location$|^sys_descr$|^sys_contact$|^hostname$|^sys_object_id$|^jobid$|^jobname$|^source_filename$|^collection_reason$|^collection_status$"
+          --> @dm:save name='temp-viptela_network_device_inventory_system_info'
+       --> @exec:end-if
+    --> @exec:end-if
+
+## Viptela Network Device: cli_show_software_viptela collection group
+--> @c:new-block
+    --> @dm:recall name="temp-viptela_network_devices_inventory" and return_empty = 'yes'
+    --> *exec:if-condition output_groupname = 'cli_show_software_viptela'
+       --> @dm:explode-json column = 'output_data'
+       --> *exec:if-shape num_rows > 0
+          --> *dm:filter active is not None and active is "true" and previous is not None and previous is "false"
+          --> @dm:rename-columns sw_version="version"
+          --> @dm:save name = "temp-viptela_device_inventory_cli_sw_version_info"
+       --> @exec:end-if
+    --> @exec:end-if
+
+## Viptela Network Device: ipAddrTable collection group
+--> @c:new-block
+    --> @dm:recall name="temp-viptela_network_devices_inventory" and return_empty = 'yes'
+    --> *exec:if-condition output_groupname = 'ipAddrTable'
+       --> @dm:explode-json column = 'output_data'
+       --> *exec:if-shape num_rows > 0
+          --> @dm:fixnull columns="ipAdEntAddr" and value=''
+          --> @dm:implode key_columns = "asset_ip" and merge_columns="ipAdEntAddr"
+          --> @dm:save name="temp-viptela_device_inventory_ipaddrtable_info"
+       --> @exec:end-if
+    --> @exec:end-if
+
+## Viptela Network Device: base_start_time collection group
+--> @c:new-block
+    --> @dm:recall name="temp-viptela_network_devices_inventory" and return_empty = 'yes'
+    --> *exec:if-condition output_groupname = 'base'
+       --> @dm:explode-json column = 'output_data'
+       --> *exec:if-shape num_rows > 0
+          --> @dm:selectcolumns include="^asset_ip$|^output_start_time$"
+          --> @dm:save name="temp-viptela_device_inventory_base_start_time"
+       --> @exec:end-if
+    --> @exec:end-if
+
+## Viptela Network Device: management_target collection group
+--> @c:new-block
+    --> @dm:recall name="temp-viptela_network_devices_inventory" and return_empty = 'yes'
+    --> *exec:if-shape num_rows > 0
+       --> @dm:selectcolumns include="^management_target$|^asset_ip$"
+       --> @dm:sort columns="management_target,asset_ip"
+       --> @dm:implode key_columns="asset_ip" and merge_columns="management_target"
+       --> @dm:save name="temp-viptela_network_device_inventory_mgmt_list_info"
+    --> @exec:end-if
+
+## Viptela Network Device: cli_show_hardware_inventory_viptela collection group
+--> @c:new-block
+    --> @dm:recall name="temp-viptela_network_devices_inventory" and return_empty = 'yes'
+    --> *exec:if-condition output_groupname = 'cli_show_hardware_inventory_viptela'
+       --> @dm:explode-json column = 'output_data'
+       --> *exec:if-shape num_rows > 0
+          --> *dm:filter hw_type in ["CHASSIS","chassis","Chassis"]
+          --> @dm:eval equipment_type = "'CHASSIS' if  hw_type and 'CHASSIS' == str(hw_type).upper() else None"
+          --> @dm:copy-columns from="equipment_type" and to="equipment_type" and func="upper"
+          --> @dm:eval product_id= "part_num if  hw_type and 'CHASSIS' == str(hw_type).upper() else None"
+          --> @dm:eval parent_pid= "part_num if  hw_type and 'CHASSIS' == str(hw_type).upper() else None"
+          --> @dm:eval serial_number= "serial_number if  hw_type and 'CHASSIS' == str(hw_type).upper() else None"
+          --> @dm:eval parent_serial_number= "serial_number if  hw_type and 'CHASSIS' == str(hw_type).upper() else None"
+          --> @dm:eval hw_revision = "version if  hw_type and 'CHASSIS' == str(hw_type).upper() else None"
+          --> @dm:eval device_model= "product_id"
+          --> @dm:eval original_pid= "product_id"
+          --> @dm:eval asset_type = "'Hardware'"
+          --> @dm:selectcolumns exclude = "^part_num$|^Version$"
+          --> @dm:save name = "temp-viptela_network_device_inventory_cli_show_hardware_inventory_info"
+       --> @exec:end-if
+    --> @exec:end-if
+
+## Viptela Network Device: cli_show_interface_viptela collection group
+--> @c:new-block
+    --> @dm:recall name="temp-viptela_network_devices_inventory" and return_empty = 'yes'
+    --> *exec:if-condition output_groupname = 'cli_show_interface_viptela'
+       --> @dm:explode-json column = 'output_data'
+       --> *exec:if-shape num_rows > 0
+          --> @dm:fixcolumns
+          ## --> @dm:rename-columns interface_oper_status="if_oper_status" and interface_name="if_name" and interface_admin_status="if_admin_status"
+          --> @dm:rename-columns interface_oper_status="oper_status" and interface_name="interface" and interface_admin_status="admin_status"
+          --> *dm:filter port_type in ['service', 'transport', 'mgmt']
+          --> *dm:filter interface_name not null
+          --> @dm:eval check_ports="'up' if (interface_oper_status and interface_oper_status =='Up') else 'down' if (interface_oper_status and interface_oper_status !='Up') else None"
+          --> @dm:eval interface_admin_status = "'down' if interface_admin_status and interface_admin_status == 'Down' else 'up'"
+          --> @dm:to-type columns="interface_name" and type="str"
+          --> @dm:copy-columns from="interface_oper_status" and to="interface_oper_st"
+          ## --> @dm:save name="temp-viptela_network_device_inventory_cli_interface_info_for_interfaces"
+          --> @dm:implode key_columns="asset_ip" and merge_columns="interface_name,check_ports,interface_admin_status" and dedup_merge_values="no"
+          --> @dm:eval total_eth_ports="len(interface_name.split(','))" and
+                  total_up_ports="check_ports.split(',').count('up')" and
+                  total_down_ports="total_eth_ports-total_up_ports" and
+                  total_admin_down_ports="interface_admin_status.split(',').count('down')"
+          --> @dm:to-type columns="total_eth_ports,total_up_ports,total_down_ports,total_admin_down_ports" and type="int"
+          --> @dm:save name = "temp-viptela_network_device_inventory_cli_interface_info"
+       --> @exec:end-if
+    --> @exec:end-if
+
+## Viptela Network Device: Fetch Viptela device base details and enrich them with system attributes like uptime, sys_contact, sys_location, etc.
+--> @c:new-block
+    --> @dm:recall name='temp-viptela_network_device_inventory_base_info' and return_empty = 'yes'
+    --> *exec:if-shape num_rows > 0
+       --> @dm:enrich dict="temp-viptela_network_device_inventory_system_info" and src_key_cols="asset_ip" and
+               dict_key_cols="asset_ip"
+               and enrich_cols="uptime_since,uptime,sys_uptime_days,sys_uptime,sys_location,sys_descr,sys_contact,hostname,sys_object_id"
+               and enrich_cols_as="uptime_since,uptime,sys_uptime_days,sys_uptime,sys_location,sys_descr_system_group,sys_contact,hostname,sys_object_id" and return_empty_dict = 'yes' and return_empty_cols = 'yes'
+       --> @dm:eval sys_descr = "sys_descr if sys_descr is not None and len(sys_descr.strip())>0 else sys_descr_system_group"
+       --> @dm:eval parent_rows="'yes'"
+       --> @dm:selectcolumns include="^asset_ip$|^parent_rows$|^uptime_since$|^uptime$|^sys_uptime_days$|^sys_uptime$|^sys_location$|^sys_descr$|^sys_contact$|^hostname$|^system_vendor_id$|^vendor$|^sw_type$|^system_vendor_sub_id$|^asset_ip$|^sys_object_id$|^jobid$|^jobname$|^source_filename$|^collection_reason$|^collection_status$|^collection_timestamp$"
+       --> @dm:save name='temp-viptela_device_inventory_base_system_info'
+    --> @exec:end-if
+
+## Viptela Network Device: Enrich viptela devices with software version from cli_show_software_viptela group
+--> @c:new-block
+    --> @dm:recall name = "temp-viptela_device_inventory_base_system_info" and return_empty = 'yes'
+    --> *exec:if-shape num_rows > 0
+       --> @dm:enrich dict = "temp-viptela_device_inventory_cli_sw_version_info" and
+               src_key_cols = "asset_ip"
+               and dict_key_cols = "asset_ip" and
+               enrich_cols = "sw_version" and
+               replace_values='yes' and return_empty_dict = 'yes' and return_empty_cols = 'yes'
+       --> @dm:fixnull columns="sw_version" and value="Missing SW Version" and apply_for_empty="yes"
+       --> @dm:save name = "temp-viptela_with_system_sw_version"
+    --> @exec:end-if
+
+## Viptela Network Device: Enrich viptela devices with device additional ips from ippAddrTable
+--> @c:new-block
+    --> @dm:recall name="temp-viptela_with_system_sw_version" and return_empty = 'yes'
+    --> *exec:if-shape num_rows > 0
+       --> @dm:enrich dict="temp-viptela_device_inventory_ipaddrtable_info" and src_key_cols="asset_ip" and dict_key_cols="asset_ip" and enrich_cols="ipAdEntAddr" and enrich_cols_as="additional_ips" and return_empty_dict = 'yes' and return_empty_cols = 'yes'
+       --> @dm:fixnull-regex columns="additional_ips" and value="Not Available"
+       --> @dm:save name="temp-viptela_with_device_additional_ips"
+    --> @exec:end-if
+
+## Viptela Network Device: Enrich viptela devices with inventory collection time from base_start_time group
+--> @c:new-block
+    --> @dm:recall name="temp-viptela_with_device_additional_ips" and return_empty = 'yes'
+    --> *exec:if-shape num_rows > 0
+       --> @dm:enrich dict="temp-viptela_device_inventory_base_start_time" and src_key_cols="asset_ip" and dict_key_cols="asset_ip" and enrich_cols="output_start_time" and enrich_cols_as="inv_collection_time" and return_empty_dict = 'yes' and return_empty_cols = 'yes'
+       --> @dm:save name="temp-viptela_with_inv_collection_time"
+    --> @exec:end-if
+
+## Viptela Network Device: Enrich viptela devices with management IP from management target group
+--> @c:new-block
+    --> @dm:recall name="temp-viptela_with_inv_collection_time" and return_empty = 'yes'
+    --> *exec:if-shape num_rows > 0
+       --> @dm:enrich dict="temp-viptela_network_device_inventory_mgmt_list_info" and src_key_cols="asset_ip" and dict_key_cols="asset_ip" and enrich_cols="management_target" and enrich_cols_as="management_ip" and return_empty_dict = 'yes' and return_empty_cols = 'yes'
+       --> @dm:selectcolumns exclude="^output_data$"
+       ## --> @dm:map from="management_ip" and to ="ip_address"
+       --> @dm:save name="temp-viptela_with_mgmt_ip"
+    --> @exec:end-if
+
+## Viptela Network Device: Enrich viptela devices with cli_show_hardware_inventory group attributes like equipment_type, product_id, serial_number etc
+--> @c:new-block
+    --> @dm:recall name = "temp-viptela_with_mgmt_ip" and return_empty = 'yes'
+    --> *exec:if-shape num_rows > 0
+       --> @dm:enrich dict = "temp-viptela_network_device_inventory_cli_show_hardware_inventory_info" and  src_key_cols = "asset_ip" and dict_key_cols = "asset_ip" and enrich_cols = "equipment_type,product_id,device_model,original_pid,asset_type,parent_pid,serial_number,parent_serial_number,hw_revision" and return_empty_dict = 'yes' and return_empty_cols = 'yes' and replace_values="yes"
+       --> @dm:save name = "temp-viptela_after_cli_show_hardware_inventory_viptela"
+    --> @exec:end-if
+
+## Viptela Network Device: Enrich viptela devices with cli_show_interface group attributes like total_eth_ports, total_up_ports, serial_number etc
+--> @c:new-block
+    --> @dm:recall name = "temp-viptela_after_cli_show_hardware_inventory_viptela" and return_empty = 'yes'
+    --> *exec:if-shape num_rows > 0
+       --> @dm:enrich dict = "temp-viptela_network_device_inventory_cli_interface_info" and dedup_dict = "no" and replace_values = "yes" and  src_key_cols = "asset_ip" and dict_key_cols = "asset_ip" and enrich_cols = "total_eth_ports,total_up_ports,total_down_ports,total_admin_down_ports" and return_empty_dict = 'yes' and return_empty_cols = 'yes'
+       --> @dm:save name = "temp-viptela_after_cli_show_interface_viptela"
+    --> @exec:end-if
+
+## Get Parent Chassis from Pstream
+--> @c:new-block
+    --> @dm:recall name = 'temp-viptela_after_cli_show_interface_viptela' and return_empty = 'yes'
+    --> @exec:call-function name = "get_parent_chassis_from_pstream"
+    ## --> @dm:eval created_time = "int(time_now_as_ms())"
+    --> @dm:save name = 'temp-viptela_chassis_inventory_collection_timestamp_dict'
+    ## Exclude assets by state
+    --> @exec:call-function name = "exclude_assets_by_state"
+    --> @dm:save name="temp-ignored-assets"
+
+## Viptela Network Device: Process and Normalize Network Device Chassis Inventory data
+--> @c:new-block
+    --> @dm:recall name = 'temp-viptela_after_cli_show_interface_viptela' and return_empty = 'yes'
+    --> *exec:if-shape num_rows > 0
+       ## --> @dm:fixnull columns = "vendor" and value = "Unknown"
+       ## --> @dm:enrich dict = 'temp-viptela_chassis_inventory_collection_timestamp_dict' and src_key_cols = 'management_ip' and dict_key_cols = 'management_ip' and enrich_cols = 'first_seen,last_seen,created_time' and return_empty_dict = 'yes' and return_empty_cols = 'yes'
+       --> @dm:map attr = 'product_id' & func = 'upper'
+       --> @dm:eval ip_address = "management_ip if management_ip and management_ip != 'Not Available' else ip_address"
+       --> @dm:save name="viptela_chassis_input"
+       --> @exec:run-pipeline name="product_type_enrichment_pipeline" and ignore_failures = "no"
+       ## --> @dm:fixnull columns="sys_location" and value="Missing SNMP SysLocation" and apply_for_empty="yes"
+       --> @dm:add-missing-columns columns="poe_remaining_watts,poe_used_watts,poe_total_watts,poe_admin_auto,poe_admin_off,poe_admin_static,poe_oper_off,poe_oper_faulty,poe_oper_on,poe_oper_power_deny,is_poe_capable,poe_watts_categorization,fex_number,fex_name,fex_grid,fex_state,fex_description,fex_serial,fex_model,cdp_global_device_id"
+       --> @dm:add-missing-columns columns="sw_version_details" and value="Missing SW Version Details"
+       --> @dm:add-missing-columns columns="equipment_name" and value="Missing Equipment Name"
+       ## --> @dm:fixnull columns="is_poe_capable" and value="No" and apply_for_empty="yes"
+       --> @dm:copy-columns from="asset_ip" and to="target_ip"
+       --> @dm:copy-columns from="hostname" and to="dns_name"
+       --> @dm:save name = 'temp-viptela_device_parent_chassis_dict'
+    --> @exec:end-if
+
+## Viptela Network Device: Updates the asset status for the chassis devices and convert timestamps from milliseconds to date-time strings, handling missing values
+--> @c:new-block
+    --> @dm:recall name="temp-viptela_device_parent_chassis_dict" and return_empty = 'yes'
+    --> *exec:if-shape num_rows > 0
+       --> @dm:dedup columns = "serial_number"
+       --> @dm:eval asset_status="'ACTIVE'"
+       --> @dm:eval asset_mode="'AUTO'"
+       --> @dm:eval asset_object="'Chassis'"
+       --> @dm:copy-columns from="sw_type" and to="system_vendor_os"
+       --> @cfxaia:conditional-statement condition_column="parent_serial_number,serial_number" and operator="=" and to_column="is_parent" and return_if="Yes" and return_else="No"
+       ## --> @dm:add-missing-columns columns="sw_ldos,sw_status,sw_expiring_qtr,sw_expiring_year"
+       --> @dm:add-missing-columns columns="child_devices" and value=0
+       --> @dm:selectcolumns exclude="^(hw_ldos_api|hw_ldos_dict|hw_ldos_new|hw_ldos_pt)$"
+       --> @dm:map from = 'serial_number,asset_object' and to = 'unique_id' and func = 'join' and sep = '_'
+       --> @dm:to-type columns="unique_id" and type="str"
+       --> @dm:add-missing-columns columns="first_seen,last_seen,created_time"
+       --> @dm:eval node_id = "ip_address+'_'+asset_object"
+       --> @dm:copy-columns from="product_id" and to="device_model"
+       --> @exec:call-function name = "port_count_categorization"
+       --> @dm:save name="temp-viptela_final_data_processed"
+       --> @exec:call-function name="generate_common_columns_and_write_parent_device_to_stream"
+    --> @exec:end-if
+
+## Viptela Network Device: Create Software assets by getting the unique sw_version and sw_type
+--> @c:new-block
+    --> @dm:recall name="temp-viptela_device_parent_chassis_dict" and return_empty="yes"
+    --> *dm:filter sw_version is not empty and sw_version != 'Not Available' and sw_type is not null and sw_type !='Not Available'
+    --> *exec:if-shape num_rows > 0
+       --> @dm:manipulate-string to = "asset_object" and value = "'Software'" and func = "eval"
+       --> @dm:manipulate-string to = "asset_mode" and value = "'AUTO'" and func = "eval"
+       --> @dm:manipulate-string to = "asset_status" and value = "'ACTIVE'" and func = "eval"
+       --> @dm:manipulate-string to = "equipment_type" and value = "'Software'" and func = "eval"
+       --> @dm:copy-columns from="equipment_type" and to="equipment_type" and func="upper"
+       --> @dm:selectcolumns exclude = '^total_.*|^hw_.*|^additional_.*|^vpc.*|^system_vendor_.*|^equipment_index.*|^equipment_parent.*|^parent_rows.*|parent_pid.*|inv_collection_time.*|sys_object_id.*'
+       --> @dm:copy-columns from="asset_ip" and to="target_ip" and func="upper"
+       --> @dm:map from = 'sw_version,sw_type,asset_object' and to = 'unique_id' and func = 'join' and sep = '_'
+       --> @dm:to-type columns="unique_id" and type="str"
+       --> @dm:dedup columns="unique_id"
+       --> @dm:eval ip_address = "management_ip if management_ip and management_ip != 'Not Available' else ip_address"
+       --> @dm:selectcolumns exclude = 'pipline_exec_.*|^target_lookup$'
+       --> @dm:fixnull-regex columns="^(?!(sys_uptime|sys_uptime_days|customer_eos_date)$).*" and value="Not Available"
+       --> @dm:copy-columns from="asset_ip" and to="target_ip"
+       --> @dm:copy-columns from="product_id" and to="device_model"
+       --> @exec:call-function name = "write_to_pstream"
+    --> @exec:end-if
+
+## Viptela Network Device: cli_show_interface_viptela collection group
+--> @c:new-block
+    --> @dm:recall name="temp-viptela_network_devices_inventory" and return_empty = 'yes'
+    --> *exec:if-condition output_groupname = 'cli_show_interface_viptela'
+       --> @dm:explode-json column = 'output_data'
+       --> *exec:if-shape num_rows > 0
+          --> @dm:fixcolumns
+          --> @dm:rename-columns interface_oper_status="oper_status" and interface_name="interface" and interface_admin_status="admin_status" and management_ip="management_target"
+          --> *dm:filter interface_name not null
+          --> @dm:eval check_ports="'up' if (interface_oper_status and interface_oper_status =='Up') else 'down' if (interface_oper_status and interface_oper_status !='Up') else None"
+          --> @dm:eval interface_shortname="interface_name.replace('Ethernet', 'Eth') if interface_name and 'Ethernet' in interface_name and len(interface_name.replace('Ethernet', 'Eth')) > 0 else interface_name if interface_name and 'Te' in interface_name else  interface_name if interface_name and 'Gi' in interface_name and 'Gig' not in interface_name else interface_name"
+          --> @dm:to-type columns="interface_name" and type="str"
+          --> @dm:copy-columns from="interface_oper_status" and to="interface_oper_st"
+          --> @dm:selectcolumns include = '^(interface_name|ip_address|interface_admin_status|interface_oper_status|rx_packets|tx_packets|asset_ip|management_ip|jobname|collection_timestamp|collection_status|minio_location|interface_shortname)$'
+          --> @dm:save name="temp-viptela_network_device_inventory_cli_interface_info_for_interfaces"
+       --> @exec:end-if
+    --> @exec:end-if
+
+## Viptela Network Device: interfaces collection group
+--> @c:new-block
+    --> @dm:recall name = 'temp-viptela_network_devices_inventory' & return_empty = 'yes'
+    --> *exec:if-condition output_groupname = 'interfaces'
+       --> @dm:explode-json column = 'output_data'
+       --> *exec:if-shape num_rows > 0
+          --> *dm:filter ifIndex is not empty
+          --> *dm:filter * get ifName as 'interface_shortname',ifDescr as 'interface_name',ifAdminStatusEnumeratedLabel as 'interface_admin_status',ifOperStatusEnumeratedLabel as 'interface_oper_status',ifPhysAddress as 'interface_mac',ifIndex as 'interface_index',ifType as 'interface_type_index',ifAlias as 'interface_alias',ifSpeed as 'interface_supported_speed',ifHighSpeed as 'interface_current_speed',asset_ip,collection_timestamp,collection_status,reason as 'collection_reason', ifLastChange as 'if_last_change', ifOperStatus as 'interface_oper_st', ifAdminStatus as 'interface_admin_st'
+          --> *dm:filter interface_type_index is not empty
+          --> @dm:eval interface_type = "'Ethernet' if interface_type_index ==  6 or interface_type_index == 62 else 'Loopback' if interface_type_index == 24 else 'Vlan' if interface_type_index == 53 or interface_type_index == 135 else 'Port_Channel' if interface_type_index == 161 else 'Other'"
+          --> @dm:eval interface_speed_gbps = "interface_current_speed / 1000 if interface_current_speed else interface_current_speed"
+          --> @dm:copy-columns from="interface_name" and to="interface_description"
+          --> @dm:map attr = 'interface_mac' & func = 'lower'
+          --> @dm:map attr = 'interface_mac' & func = 'replace' & oldvalue = '-' & newvalue = ':'
+          --> @dm:to-type columns = "interface_index" & type = "str"
+          --> @dm:enrich dict="temp-viptela_network_device_inventory_system_info_for_interface" and src_key_cols="asset_ip" and dict_key_cols="asset_ip" and enrich_cols="sysUpTime" & return_empty_dict = 'yes' & return_empty_cols = 'yes'
+          --> @dm:rename-columns sys_uptime_system= "sysUpTime"
+          --> @dm:enrich dict = 'temp-viptela_network_snmp_engine_details' & src_key_cols = 'asset_ip' & dict_key_cols = 'asset_ip' & enrich_cols = 'snmpEngineTime' & enrich_cols_as="snmp_uptime" and return_empty_dict = 'yes' & return_empty_cols = 'yes'
+          --> @dm:to-type columns="snmp_uptime,if_last_change,sys_uptime_system" and type="int"
+          --> @cfxaia:conditional-statement condition_column = "sys_uptime_system" and operator = "!=" and value = "" and return_if = "sys_uptime_system" and return_else = "snmp_uptime" and to_column = "sys_uptime"
+          --> @dm:to-type columns="sys_uptime" and type="float"
+          --> @dm:manipulate-string to="round_up" and func="eval" and value="(sys_uptime - if_last_change)/8640000"
+          --> @dm:manipulate-string to="round_up" and func="eval" and value="round_up.round(1)"
+          --> @cfxaia:conditional-statement condition_column="sys_uptime" and to_column="flag1" and return_if="yes" and return_else="no" and check_value="yes" and value="0" and operator=">"
+          --> @cfxaia:conditional-statement condition_column="if_last_change" and to_column="flag2" and return_if="yes" and return_else="no" and check_value="yes" and value="0" and operator=">"
+          --> @cfxaia:conditional-statement condition_column="flag1,flag2" and check_value="yes" and operator="=" and value="yes,yes" and return_if="round_up" and to_column="round_up"
+          --> @dm:copy-columns from="round_up" and to="if_last_change"
+          --> @dm:eval if_last_change="int(if_last_change) if if_last_change else None"
+          --> @dm:eval if_change_since = "int(time_now_as_ms())-if_last_change*24*60*60*1000 if if_last_change is not None else None"
+          --> @dm:selectcolumns exclude = "round_up|sys_uptime|snmp_uptime|flag1|flag2|if_index"
+          --> @dm:to-type columns="if_last_change" and type="int"
+          --> @cfxaia:conditional-statement condition_column="if_last_change" and operator=">" and check_value="yes" and value="120" and return_if=">120" and to_column="interface_change_days"
+          --> @cfxaia:conditional-statement condition_column="if_last_change" and operator="<" and check_value="yes" and value="60" and return_if="<60" and to_column="interface_change_days" and replace_if_null="true"
+          --> @cfxaia:conditional-statement condition_column="if_last_change" and return_if="60-120" and to_column="interface_change_days" and replace_if_null="true"
+          --> @dm:fixnull columns="interface_change_days" and value="Not Available"
+          --> @dm:save name = "temp-viptela_network_device_inventory_interfaces"
+       --> @exec:end-if
+    --> @exec:end-if
+
+## Viptela Network Device: Ingest interfaces group to the stream
+--> @c:new-block
+    --> @dm:recall name="temp-viptela_network_device_inventory_cli_interface_info_for_interfaces" and return_empty="yes"
+    --> *exec:if-shape num_rows > 0
+       --> @dm:enrich dict = "temp-viptela_network_device_inventory_interfaces" and
+               src_key_cols = "asset_ip,interface_name" and
+               dict_key_cols = "asset_ip,interface_name" and
+               enrich_cols = "interface_alias,interface_description,interface_type_index,if_last_change,interface_change_days,interface_admin_st,if_change_since,interface_oper_st" & return_empty_dict = 'yes' & return_empty_cols = 'yes' & replace_values = "yes"
+       --> @dm:fixnull columns="if_last_change" and value=0 and apply_for_empty="yes"
+       --> @dm:enrich dict= "temp-viptela_final_data_processed" and src_key_cols = "asset_ip" and dict_key_cols = "asset_ip" and enrich_cols = "hostname,dns_name,vendor,equipment_type,serial_number,parent_serial_number,device_model,sw_version,sys_location,sys_contact,product_id,source_filename" & return_empty_dict = 'yes' & return_empty_cols = 'yes' & replace_values="yes"
+       --> @dm:eval ip_address = "management_ip if management_ip and management_ip != 'Not Available' else asset_ip"
+       --> @dm:rename-columns chassis_serial_number="serial_number"
+       --> @dm:add-missing-columns columns = "asset_object" & value = "Interface"
+       --> @dm:add-missing-columns columns = "asset_status" & value = "ACTIVE"
+       --> @dm:map from = "parent_serial_number,interface_name,asset_object" & to = "unique_id" & func = "join" & sep = "_"
+       --> @dm:to-type columns="unique_id" and type="str"
+       --> @dm:manipulate-string to = "asset_mode" and value = "'AUTO'" and func = "eval"
+       --> @dm:add-missing-columns columns = 'serial_number,fex_number,interface_ip,admin,oper,power,device,class,max,rc_port_type,rc_channel_group,rc_config_duplex,rc_config_speed,rc_config_vlan,rc_other_configs,rc_interface_vlan,fex_unique_id,total_input_drops,total_output_drops,interface_status_name,interface_status,interface_duplex,interface_speed,interface_status_type,interface_vlan'
+       --> @dm:add-missing-columns columns ="uplink_port" and value="Unknown"
+       --> @dm:fixnull-regex columns=".*" and value = "Not Available" & apply_for_empty = "yes"
+       --> @dm:dedup columns = 'unique_id'
+       --> @dm:copy-columns from="asset_ip" and to="target_ip"
+       --> @dm:rename-columns interface_oper_status="interface_oper_st" and
+               interface_oper_status_label="interface_oper_status" and
+               interface_admin_status="interface_admin_st" and
+               interface_admin_status_label="interface_admin_status"
+       --> @dm:selectcolumns exclude = '^(admin|oper|device|class|max)$'
+       --> @dm:copy-columns from="product_id" and to="device_model"
+       --> @exec:call-function name = "write_to_pstream"
+    --> @exec:end-if
+
+## Cisco Network Device: Cisco Network Devices: Caputre Collected Files and Target IP details Post Processing
+--> @c:new-block
+    --> @dm:recall name = 'temp-viptela_network_devices_inventory' & return_empty = 'yes'
+    --> *exec:if-shape num_rows > 0
+       --> *dm:filter * get asset_ip,jobname,jobid,minio_location,collection_timestamp,collection_status,reason
+       --> @dm:eval data_processing_state = "'Completed'"
+       --> @dm:dedup
+       --> @rn:write-stream name = 'network_device_data_processing_debug'
+    --> @exec:end-if

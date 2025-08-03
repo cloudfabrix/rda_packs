@@ -1,0 +1,228 @@
+{
+    "name": "customer_SNMP_Traps",
+    "label": "SNMP Traps",
+    "description": "SNMP traps dashboard",
+    "version": "2026.02.10.1",
+    "enabled": false,
+    "dashboard_style": "auto",
+    "live_edit": true,
+    "template_variables": {
+        "CUST_ID": {
+            "contextId": "customerId"
+        },
+        "PROJ_ID": {
+            "contextId": "projectId"
+        },
+        "CUST_TAG": {
+            "contextId": "customerTag"
+        }
+    },
+    "dashboard_filters": {
+        "default_time_filter_labels": [
+            "Last 24 hours"
+        ],
+        "extra_filter": "snmpVersion != '1' and snmpTrapName is not null",
+        "time_filter": true,
+        "columns_filter": [
+            {
+                "id": "ipAddress",
+                "label": "Device IP",
+                "type": "TEXT"
+            },
+            {
+                "id": "device",
+                "label": "Device",
+                "type": "TEXT"
+            },
+            {
+                "id": "message",
+                "label": "Message",
+                "type": "TEXT"
+            },
+            {
+                "id": "snmpVersion",
+                "label": "SNMP Version",
+                "type": "TEXT"
+            },
+            {
+                "id": "device_vendor",
+                "label": "Device Vendor",
+                "type": "TEXT"
+            },
+            {
+                "id": "device_status",
+                "label": "Device Status",
+                "type": "TEXT"
+            },
+            {
+                "id": "snmpTrapDescription",
+                "label": "MIB Description",
+                "type": "TEXT"
+            },
+            {
+                "id": "snmpTrapName",
+                "label": "Trap Name",
+                "type": "TEXT"
+            },
+            {
+                "id": "device_fw_version",
+                "label": "OS Version",
+                "type": "TEXT"
+            },
+            {
+                "id": "snmpTrapOID",
+                "label": "Trap OID",
+                "type": "TEXT"
+            },
+            {
+                "id": "snmpTrapMIB",
+                "label": "MIB Name",
+                "type": "TEXT"
+            }
+        ],
+        "group_filters": [
+            {
+                "stream": "snmp_trap_event_stream",
+                "title": "Network Type",
+                "group_by": [
+                    "network_type"
+                ],
+                "ts_column": "timestamp",
+                "agg": "sum",
+                "column": "count_",
+                "type": "str",
+                "show_counts": false
+            },
+            {
+                "stream": "snmp_trap_event_stream",
+                "title": "Device",
+                "group_by": [
+                    "device"
+                ],
+                "ts_column": "timestamp",
+                "agg": "sum",
+                "column": "count_",
+                "type": "str",
+                "show_counts": false
+            },
+            {
+                "stream": "snmp_trap_event_stream",
+                "title": "Trap Name",
+                "group_by": [
+                    "snmpTrapName"
+                ],
+                "ts_column": "timestamp",
+                "agg": "sum",
+                "column": "count_"
+            }
+        ]
+    },
+    "dashboard_sections": [
+        {
+            "title": "snmp details",
+            "show_filter": true,
+            "widgets": [
+                {
+                    "title": "Total Traps",
+                    "widget_type": "custom_counter",
+                    "formatter": "DescriptiveCountFormatter",
+                    "stream": "snmp_trap_event_stream",
+                    "ts_column": "timestamp",
+                    "column": "_id",
+                    "agg": "value_count",
+                    "type": "int",
+                    "max_width": 2,
+                    "height": 4,
+                    "min_width": 2,
+                    "style": {
+                        "color-list": [
+                            "#215CC3"
+                        ]
+                    },
+                    "widget_id": "df82078f"
+                },
+                {
+                    "title": "By Trap",
+                    "widget_type": "pie_chart",
+                    "stream": "snmp_trap_event_stream",
+                    "ts_column": "timestamp",
+                    "chartProperties": {
+                        "yAxisLabel": "Count",
+                        "xAxisLabel": "OID",
+                        "stacked": true,
+                        "legendLocation": "right",
+                        "orientation": "vertical"
+                    },
+                    "group_by": [
+                        "snmpTrapName"
+                    ],
+                    "column": "_RDA_Id",
+                    "agg": "value_count",
+                    "type": "int",
+                    "min_width": 4,
+                    "height": 4,
+                    "max_width": 6,
+                    "widget_id": "43799fef"
+                },
+                {
+                    "title": "Traps by Device",
+                    "widget_type": "pie_chart",
+                    "stream": "snmp_trap_event_stream",
+                    "ts_column": "timestamp",
+                    "column": "device",
+                    "agg": "value_count",
+                    "group_by": [
+                        "device"
+                    ],
+                    "type": "str",
+                    "min_width": 4,
+                    "height": 4,
+                    "max_width": 4,
+                    "widget_id": "5d627f3e"
+                },
+                {
+                    "title": "SNMP Traps",
+                    "widget_type": "tabular",
+                    "max_width": 12,
+                    "height": 10,
+                    "min_width": 12,
+                    "stream": "snmp_trap_event_stream",
+                    "ts_column": "timestamp",
+                    "resizableColumns": false,
+                    "max_rows": 100,
+                    "showRowSummary": true,
+                    "sorting": [
+                        {
+                            "timestamp": "desc"
+                        }
+                    ],
+                    "remote_searchable": true,
+                    "remote_searchable_cols": [
+                        "ipAddress",
+                        "device",
+                        "snmpTrapOID",
+                        "device_status",
+                        "snmpTrapMIB",
+                        "snmpVersion",
+                        "rda_gw_client_ip",
+                        "snmpTrapName"
+                    ],
+                    "columns": {
+                        "timestamp": "Timestamp",
+                        "device": "Device",
+                        "ipAddress": "Device IP",
+                        "snmpTrapName": "Trap Name",
+                        "message": "Message",
+                        "snmpVersion": "SNMP Version",
+                        "snmpTrapDescription": "MIB Description",
+                        "snmpTrapMIB": "MIB Name",
+                        "snmpTrapOID": "Trap OID"
+                    },
+                    "widget_id": "46a6b5b6"
+                }
+            ]
+        }
+    ],
+    "dashboard_type": "template",
+    "dashboard_pages": []
+}

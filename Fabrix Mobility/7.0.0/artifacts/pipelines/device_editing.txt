@@ -1,0 +1,11 @@
+%% stream = no and limit = 0
+
+@dm:empty
+    --> @exec:get-input
+    --> @dm:save name="temp-dataset"
+
+--> @c:new-block
+    --> @dm:recall name="mobility_device_mappings"
+    --> @dm:enrich dict="temp-dataset" and src_key_cols="device" and dict_key_cols="device" and enrich_cols="device,ip_address,image,city,region,zone,clli_code,network_code,network_type" and replace_values='yes'
+    --> @dm:save name="mobility_device_mappings"
+

@@ -1,0 +1,311 @@
+{
+    "name": "mobility_device_mapping_admin",
+    "label": "Device Mappings",
+    "description": "mobility_device_mapping: Insights",
+    "dashboard_folder": "fabrix-mobility",
+    "version": "2026.04.15.1",
+    "enabled": false,
+    "live_edit": true,
+    "stream": "mobility_device_mappings",
+    "dashboard_type": "dashboard",
+    "dashboard_filters": {
+        "time_filter": false,
+        "default_time_filter_labels": [
+            "All Time"
+        ],
+        "columns_filter": [
+            {
+                "id": "timestamp",
+                "label": "Timestamp",
+                "type": "DATETIME"
+            },
+            {
+                "id": "device",
+                "label": "Device",
+                "type": "TEXT"
+            },
+            {
+                "id": "ip_address",
+                "label": "IP Address",
+                "type": "TEXT"
+            },
+            {
+                "id": "city",
+                "label": "City",
+                "type": "TEXT"
+            },
+            {
+                "id": "clli_code",
+                "label": "CLLI Code",
+                "type": "TEXT"
+            },
+            {
+                "id": "region",
+                "label": "Region",
+                "type": "TEXT"
+            },
+            {
+                "id": "zone",
+                "label": "Zone",
+                "type": "TEXT"
+            },
+            {
+                "id": "image",
+                "label": "Image",
+                "type": "TEXT"
+            },
+            {
+                "id": "network_code",
+                "label": "Network Code",
+                "type": "TEXT"
+            },
+            {
+                "id": "network_type",
+                "label": "Network Type",
+                "type": "TEXT"
+            }
+        ],
+        "group_filters": [
+            {
+                "stream": "mobility_device_mappings",
+                "title": "Image",
+                "duration_hours": 1080,
+                "limit": 200,
+                "extra_filter": null,
+                "group_by": [
+                    "image"
+                ],
+                "ts_column": "timestamp",
+                "agg": "sum",
+                "column": "count_",
+                "type": "int"
+            },
+            {
+                "stream": "mobility_device_mappings",
+                "title": "City",
+                "duration_hours": 1080,
+                "limit": 200,
+                "extra_filter": null,
+                "group_by": [
+                    "city"
+                ],
+                "ts_column": "timestamp",
+                "agg": "sum",
+                "column": "count_",
+                "type": "int"
+            },
+            {
+                "stream": "mobility_device_mappings",
+                "title": "Region",
+                "duration_hours": 1080,
+                "limit": 200,
+                "extra_filter": null,
+                "group_by": [
+                    "region"
+                ],
+                "ts_column": "timestamp",
+                "agg": "sum",
+                "column": "count_",
+                "type": "int"
+            },
+            {
+                "stream": "mobility_device_mappings",
+                "title": "Zone",
+                "duration_hours": 1080,
+                "limit": 200,
+                "extra_filter": null,
+                "group_by": [
+                    "zone"
+                ],
+                "ts_column": "timestamp",
+                "agg": "sum",
+                "column": "count_",
+                "type": "int"
+            },
+            {
+                "stream": "mobility_device_mappings",
+                "title": "Network Type",
+                "duration_hours": 1080,
+                "limit": 200,
+                "extra_filter": null,
+                "group_by": [
+                    "network_type"
+                ],
+                "ts_column": "timestamp",
+                "agg": "sum",
+                "column": "count_",
+                "type": "int"
+            },
+            {
+                "stream": "mobility_device_mappings",
+                "title": "CLLI Code",
+                "duration_hours": 1080,
+                "limit": 200,
+                "extra_filter": null,
+                "group_by": [
+                    "clli_code"
+                ],
+                "ts_column": "timestamp",
+                "agg": "sum",
+                "column": "count_",
+                "type": "int"
+            }
+        ]
+    },
+    "dashboard_sections": [
+        {
+            "title": "Device List",
+            "show_filter": true,
+            "widgets": [
+                {
+                    "widget_type": "bar_chart",
+                    "title": "Image",
+                    "duration_hours": 1080,
+                    "stream": "mobility_device_mappings",
+                    "ts_column": "timestamp",
+                    "extra_filter": null,
+                    "column": "count_",
+                    "limit": 20,
+                    "agg": "sum",
+                    "group_by": [
+                        "image"
+                    ],
+                    "type": "int",
+                    "min_width": 4,
+                    "height": 5,
+                    "chartProperties": {
+                        "yAxisLabel": null,
+                        "xAxisLabel": "Device Count",
+                        "stacked": true,
+                        "legendLocation": "none",
+                        "orientation": "horizontal"
+                    },
+                    "max_width": 12,
+                    "widget_id": "45124d37"
+                },
+                {
+                    "widget_type": "bar_chart",
+                    "title": "Network Type",
+                    "duration_hours": 1080,
+                    "stream": "mobility_device_mappings",
+                    "ts_column": "timestamp",
+                    "extra_filter": null,
+                    "column": "count_",
+                    "agg": "sum",
+                    "group_by": [
+                        "network_type"
+                    ],
+                    "type": "int",
+                    "min_width": 2,
+                    "height": 5,
+                    "chartProperties": {
+                        "yAxisLabel": "Device Count",
+                        "xAxisLabel": null,
+                        "stacked": true,
+                        "legendLocation": "none",
+                        "orientation": "vertical"
+                    },
+                    "style": {
+                        "color-map": {
+                            "FirstNet": [
+                                "#8e24aa",
+                                "#ffffff"
+                            ],
+                            "Consumer": [
+                                "#388e3c",
+                                "#ffffff"
+                            ],
+                            "Enterprise": [
+                                "#d32f2f",
+                                "#ffffff"
+                            ]
+                        }
+                    },
+                    "max_width": 5,
+                    "widget_id": "18599e9d"
+                },
+                {
+                    "title": "Devices",
+                    "widget_type": "tabular",
+                    "max_width": 12,
+                    "height": 10,
+                    "min_width": 12,
+                    "stream": "mobility_device_mappings",
+                    "ts_column": "timestamp",
+                    "virtual_scrolling": true,
+                    "remote_searchable0": true,
+                    "remote_searchable_cols0": [
+                        "device",
+                        "ip_address",
+                        "network_type"
+                    ],
+                    "resizableColumns0": [
+                        "device"
+                    ],
+                    "columns": {
+                        "device": {
+                            "title": "Device",
+                            "type": "TEXT",
+                            "key": true,
+                            "hidden": false
+                        },
+                        "ip_address": {
+                            "title": "IP Address",
+                            "type": "TEXT",
+                            "key": true,
+                            "hidden": false
+                        },
+                        "image": {
+                            "title": "Image",
+                            "type": "TEXT",
+                            "key": true,
+                            "hidden": false
+                        },
+                        "city": {
+                            "title": "City",
+                            "type": "TEXT",
+                            "key": true,
+                            "hidden": false
+                        },
+                        "clli_code": {
+                            "title": "CLLI Code",
+                            "type": "TEXT",
+                            "hidden": false,
+                            "key": true
+                        },
+                        "zone": {
+                            "title": "Zone",
+                            "type": "TEXT",
+                            "hidden": false,
+                            "key": true
+                        },
+                        "region": {
+                            "title": "Region",
+                            "type": "TEXT",
+                            "hidden": false,
+                            "key": true
+                        },
+                        "network_code": {
+                            "title": "Network Code",
+                            "type": "TEXT",
+                            "hidden": false,
+                            "key": true
+                        },
+                        "network_type": {
+                            "title": "Network Type",
+                            "type": "TEXT",
+                            "hidden": false,
+                            "key": true
+                        },
+                        "__uuid": {
+                            "title": "UUID ID",
+                            "key": true,
+                            "visible": false
+                        }
+                    },
+                    "widget_id": "b039e934"
+                }
+            ]
+        }
+    ]
+}

@@ -1,0 +1,340 @@
+{
+    "name": "auto-x-3-card_clone-{{schema}}",
+    "label": "{{schema}}",
+    "description": "mobility_kpi_metrics_data: Insights",
+    "dashboard_folder": "mobility-auto-x-3",
+    "version": "2026.02.10.1",
+    "enabled": false,
+    "live_edit": true,
+    "live-edit": true,
+    "stream": "mobility_kpi_metrics_data",
+    "dashboard_type": "template",
+    "section_as_dashboard": true,
+    "template_variables": {
+        "FUNCTION": {
+            "contextId": "function",
+            "default": "max"
+        },
+        "SCHEMA_KEY": {
+            "contextId": "schema_key",
+            "default": "card"
+        },
+        "INTERVAL": {
+            "contextId": "interval",
+            "default": "1H"
+        },
+        "ROLLUP": {
+            "contextId": "rollup",
+            "default": "network_type"
+        }
+    },
+    "dashboard_filters": {
+        "time_filter": true,
+        "default_time_filter_labels": [
+            "Last 24 hours"
+        ],
+        "columns_filter": [
+            {
+                "id": "timestamp",
+                "label": "Timestamp",
+                "type": "DATETIME"
+            },
+            {
+                "id": "network_type",
+                "label": "Network Type",
+                "type": "TEXT"
+            },
+            {
+                "id": "region",
+                "label": "Region",
+                "type": "TEXT"
+            },
+            {
+                "id": "city",
+                "label": "City",
+                "type": "TEXT"
+            },
+            {
+                "id": "clli_code",
+                "label": "CLLI Code",
+                "type": "TEXT"
+            },
+            {
+                "id": "device",
+                "label": "Device",
+                "type": "TEXT"
+            },
+            {
+                "id": "instance_key",
+                "label": "Instance Key",
+                "type": "TEXT"
+            },
+            {
+                "id": "card",
+                "label": "Card",
+                "type": "TEXT"
+            }
+        ],
+        "group_filters": [
+            {
+                "stream": "mobility_kpi_metrics_data",
+                "title": "Network Type",
+                "group_by": [
+                    "network_type"
+                ],
+                "extra_filter": "schema_key is '{{schema}}'",
+                "ts_column": "timestamp",
+                "agg": "{{FUNCTION}}",
+                "column": "count_",
+                "type": "int",
+                "show_counts": false
+            },
+            {
+                "stream": "mobility_kpi_metrics_data",
+                "title": "Region",
+                "group_by": [
+                    "region"
+                ],
+                "extra_filter": "schema_key is '{{schema}}'",
+                "ts_column": "timestamp",
+                "agg": "{{FUNCTION}}",
+                "column": "count_",
+                "type": "int",
+                "show_counts": false
+            },
+            {
+                "stream": "mobility_kpi_metrics_data",
+                "title": "City",
+                "group_by": [
+                    "city"
+                ],
+                "extra_filter": "schema_key is '{{schema}}'",
+                "ts_column": "timestamp",
+                "agg": "{{FUNCTION}}",
+                "column": "count_",
+                "type": "int",
+                "show_counts": false
+            },
+            {
+                "stream": "mobility_kpi_metrics_data",
+                "title": "CLLI Code",
+                "group_by": [
+                    "clli_code"
+                ],
+                "extra_filter": "schema_key is '{{schema}}'",
+                "ts_column": "timestamp",
+                "agg": "{{FUNCTION}}",
+                "column": "count_",
+                "type": "int",
+                "show_counts": false
+            },
+            {
+                "stream": "mobility_kpi_metrics_data",
+                "title": "Device",
+                "group_by": [
+                    "device"
+                ],
+                "extra_filter": "schema_key is '{{schema}}'",
+                "ts_column": "timestamp",
+                "agg": "{{FUNCTION}}",
+                "column": "count_",
+                "type": "int",
+                "show_counts": false
+            },
+            {
+                "stream": "mobility_kpi_metrics_data",
+                "title": "Instance Key",
+                "group_by": [
+                    "instance_key"
+                ],
+                "extra_filter": "schema_key is '{{schema}}'",
+                "ts_column": "timestamp",
+                "agg": "{{FUNCTION}}",
+                "column": "count_",
+                "type": "int",
+                "show_counts": false
+            }
+        ]
+    },
+    "dashboard_sections": [
+        {
+            "title": "{{schema}}",
+            "show_filter": true,
+            "widgets": [
+                {
+                    "title": "IP_Pool_Utilization",
+                    "widget_type": "timeseries",
+                    "stream": "mobility_kpi_metrics_data",
+                    "description": "Formula: (100*(%used%)/(%used%+%free%+%hold%))\nDescription: IP Pool utilization",
+                    "ts_column": "timestamp",
+                    "extra_filter": "schema_key is '{{schema}}'",
+                    "max_width": 12,
+                    "height": 6,
+                    "min_width": 12,
+                    "chartProperties": {
+                        "yAxisLabel": "Percentage (%)",
+                        "xAxisLabel": null,
+                        "legendLocation": "right",
+                        "mode": "selection",
+                        "column-id": "timestamp"
+                    },
+                    "formatting": {
+                        "maximumFractionDigits": 5,
+                        "notation": "compact"
+                    },
+                    "style": {
+                        "color-map": {
+                            "FirstNet": [
+                                "#8e24aa",
+                                "#ffffff"
+                            ],
+                            "Consumer": [
+                                "#388e3c",
+                                "#ffffff"
+                            ],
+                            "Enterprise": [
+                                "#d32f2f",
+                                "#ffffff"
+                            ]
+                        }
+                    },
+                    "interval": "{{INTERVAL}}",
+                    "group_by": [
+                        "{{ROLLUP}}"
+                    ],
+                    "series_spec": [
+                        {
+                            "column": "kpi_IP_Pool_Utilization",
+                            "agg": "{{FUNCTION}}",
+                            "type": "int"
+                        }
+                    ],
+                    "widget_id": "7428feec"
+                },
+                {
+                    "title": "KPI's Summary",
+                    "widget_type": "tabular",
+                    "stream": "mobility_kpi_metrics_data",
+                    "ts_column": "timestamp",
+                    "query": "*",
+                    "extra_filter": "schema_key is '{{schema}}'",
+                    "min_width": 6,
+                    "height": 12,
+                    "max_width": 12,
+                    "paginated": true,
+                    "resizableColumns": true,
+                    "virtual_scrolling": false,
+                    "showRowSummary": true,
+                    "max_rows": 50,
+                    "sorting": [
+                        {
+                            "timestamp": "desc"
+                        }
+                    ],
+                    "columns": {
+                        "timestamp": "Timestamp",
+                        "instance_key": "Instance_Key"
+                    },
+                    "widget_id": "94a3fc11"
+                }
+            ]
+        }
+    ],
+    "dynamic_form": {
+        "formData": {},
+        "controlPanelFormDefinition": {
+            "id": "kpi.benchmark.json",
+            "refreshRequired": true,
+            "formFieldList": [
+                {
+                    "fieldId": "function",
+                    "label": "Function",
+                    "help": "Function",
+                    "dataType": "string",
+                    "hidden": false,
+                    "editable": true,
+                    "required": true,
+                    "controlType": "COMBO_BOX",
+                    "defaultValue": "max",
+                    "lovValues": [
+                        {
+                            "identifier": "max",
+                            "displayName": "Maximum"
+                        },
+                        {
+                            "identifier": "min",
+                            "displayName": "Minimum"
+                        },
+                        {
+                            "identifier": "avg",
+                            "displayName": "Average"
+                        },
+                        {
+                            "identifier": "sum",
+                            "displayName": "Sum"
+                        }
+                    ]
+                },
+                {
+                    "fieldId": "interval",
+                    "label": "Interval",
+                    "help": "Interval",
+                    "dataType": "string",
+                    "hidden": false,
+                    "editable": true,
+                    "required": true,
+                    "controlType": "COMBO_BOX",
+                    "defaultValue": "auto",
+                    "lovValues": [
+                        {
+                            "identifier": "auto",
+                            "displayName": "Auto"
+                        },
+                        {
+                            "identifier": "5Min",
+                            "displayName": "5 Minutes"
+                        },
+                        {
+                            "identifier": "15Min",
+                            "displayName": "15 Minutes"
+                        },
+                        {
+                            "identifier": "1H",
+                            "displayName": "1 Hour"
+                        },
+                        {
+                            "identifier": "24H",
+                            "displayName": "1 Day"
+                        }
+                    ]
+                },
+                {
+                    "fieldId": "rollup",
+                    "label": "Rollup",
+                    "help": "Rollup",
+                    "dataType": "string",
+                    "hidden": false,
+                    "editable": true,
+                    "required": true,
+                    "controlType": "COMBO_BOX",
+                    "defaultValue": "network_type",
+                    "lovValues": [
+                        {
+                            "identifier": "network_type",
+                            "displayName": "Network Type"
+                        },
+                        {
+                            "identifier": "device",
+                            "displayName": "Device"
+                        },
+                        {
+                            "identifier": "region",
+                            "displayName": "Region"
+                        }
+                    ]
+                }
+            ]
+        }
+    },
+    "saved_time": "2026-03-11T06:44:07.954125"
+}

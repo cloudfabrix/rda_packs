@@ -1,0 +1,229 @@
+{
+    "name": "mobility-devices-kpi-reports",
+    "label": "Reports",
+    "description": "Reports",
+    "enabled": true,
+    "version": "2026.05.05.01",
+    "dashboard_type": "dashboard",
+    "dashboard_style": "auto",
+    "live_edit": true,
+    "dashboard_filters": {
+        "time_filter": true,
+        "default_time_filter_labels": [
+            "All Time"
+        ]
+    },
+    "template_variables": {
+        "SCHEMA_NAME": {
+            "contextId": "schema"
+        }
+    },
+    "dashboard_sections": [
+        {
+            "title": "Reports",
+            "show_filter": true,
+            "widgets": [
+                {
+                    "title": "Reports",
+                    "widget_type": "tabular",
+                    "stream": "mobility_reports_metadata",
+                    "extra_filter0": "validation is 'passed'",
+                    "paginated": true,
+                    "columns": {
+                        "report_name": {
+                            "title": "Report Name",
+                            "key": true
+                        },
+                        "schema": {
+                            "title": "Schema",
+                            "key": true
+                        },
+                        "report_name_key": {
+                            "title": "Report Name key",
+                            "key": true,
+                            "visible": false
+                        }
+                    },
+                    "height": 10,
+                    "min_wdith": 12,
+                    "widget_id": "2ea74a7d",
+                    "custom_columns": [
+                        {
+                            "id": "id",
+                            "expr": "'user-dashboard-'+ report_name_key",
+                            "key": true,
+                            "visible": false
+                        }
+                    ],
+                    "actions": [
+                        {
+                            "permission": "rda:github:view",
+                            "type": "GO_TO_APP_STATE",
+                            "title": "Device Details",
+                            "identifier": "report_name_key",
+                            "stateName": "app.featureapp",
+                            "drillDownContext": "id",
+                            "drillDownLinkField": "report_name",
+                            "appName": "user-dashboard",
+                            "selectionType": "SINGLE"
+                        },
+                        {
+                            "permission1": "rda:github:add",
+                            "title": "Add",
+                            "type": "POPUP_FORM",
+                            "selectionType": "NONE",
+                            "identifier": "saas-service-action:userdashboard-add-yaml",
+                            "api-endpoint": {
+                                "service-name": "saas-reports",
+                                "methodName": "getForm",
+                                "stringified-params": true,
+                                "parse-output": false,
+                                "params": [
+                                    {
+                                        "formId": "rda.saas.dynamic.form",
+                                        "formActionList": {
+                                            "formActions": [
+                                                {
+                                                    "api-endpoint": {
+                                                        "methodName": "add_dashboards",
+                                                        "parse-output": false,
+                                                        "namespace": "io.cfx.dimensions.app",
+                                                        "params": [
+                                                            {
+                                                                "report_name": "report_name"
+                                                            }
+                                                        ],
+                                                        "service-name": "rapid-ingestion-service",
+                                                        "stringified-params": false
+                                                    },
+                                                    "identifier": "Submit",
+                                                    "actionLabel": "Add"
+                                                }
+                                            ]
+                                        },
+                                        "formDefinition": {
+                                            "id": "rda.saas.dynamic.form",
+                                            "refreshRequired": true,
+                                            "formFieldList": [
+                                                {
+                                                    "help": "Report Name",
+                                                    "required": true,
+                                                    "editable": true,
+                                                    "label": "Enter the Report Name to be added",
+                                                    "hidden": false,
+                                                    "dataType": "string",
+                                                    "controlType": "TEXT",
+                                                    "fieldId": "report_name"
+                                                },
+                                                {
+                                                    "help": "Select KPIs and Schemas",
+                                                    "dataType": "string",
+                                                    "required": true,
+                                                    "editable": true,
+                                                    "label": "KPIs and Schemas",
+                                                    "hidden": false,
+                                                    "fieldId": "Others",
+                                                    "controlType": "SELECTOR_TABLE",
+                                                    "controlPropertyList": [
+                                                        {
+                                                            "attribute": "column-key",
+                                                            "value": "device_ip"
+                                                        },
+                                                        {
+                                                            "attribute": "selection",
+                                                            "value": "MULTIPLE"
+                                                        }
+                                                    ],
+                                                    "widget": {
+                                                        "title": "KPI Details",
+                                                        "timebased": false,
+                                                        "max_width": 12,
+                                                        "height": 8,
+                                                        "min_width": 12,
+                                                        "stream": "mobility_new_kpi_list",
+                                                        "extra_filter": "validation is 'passed'",
+                                                        "ts_column": "timestamp",
+                                                        "sorting": [],
+                                                        "columns": {
+                                                            "KPI_Label": {
+                                                                "title": "KPI Label",
+                                                                "key": true
+                                                            },
+                                                            "KPI_Name": {
+                                                                "title": "KPI Name",
+                                                                "key": true
+                                                            },
+                                                            "schema": {
+                                                                "title": "Schema",
+                                                                "key": true
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            ]
+                                        }
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "permission1": "rda:github:add",
+                            "title": "Delete",
+                            "type": "POPUP_FORM",
+                            "selectionType": "SINGLE",
+                            "identifier": "saas-service-action:userdashboard-add-yaml",
+                            "api-endpoint": {
+                                "service-name": "saas-reports",
+                                "methodName": "getForm",
+                                "stringified-params": true,
+                                "parse-output": false,
+                                "params": [
+                                    {
+                                        "formId": "rda.saas.dynamic.form",
+                                        "formActionList": {
+                                            "formActions": [
+                                                {
+                                                    "api-endpoint": {
+                                                        "methodName": "delete_kpi_dashboard",
+                                                        "parse-output": false,
+                                                        "namespace": "io.cfx.dimensions.app",
+                                                        "params": [
+                                                            {
+                                                                "fieldId": "report_name"
+                                                            }
+                                                        ],
+                                                        "service-name": "rapid-ingestion-service",
+                                                        "stringified-params": false
+                                                    },
+                                                    "identifier": "Submit",
+                                                    "actionLabel": "Delete"
+                                                }
+                                            ]
+                                        },
+                                        "formDefinition": {
+                                            "id": "rda.saas.dynamic.form",
+                                            "refreshRequired": true,
+                                            "formFieldList": [
+                                                {
+                                                    "help": "Delete this Dashboard",
+                                                    "dataType": "string",
+                                                    "required": true,
+                                                    "editable": false,
+                                                    "label": "Delete this Dashboard",
+                                                    "controlType": "TEXT",
+                                                    "hidden": false,
+                                                    "fieldId": "report_name"
+                                                }
+                                            ]
+                                        },
+                                        "actions": []
+                                    }
+                                ]
+                            }
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}
