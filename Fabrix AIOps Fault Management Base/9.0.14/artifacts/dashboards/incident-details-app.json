@@ -1,0 +1,98 @@
+{
+    "name": "incident-details-app",
+    "label": "Incident Details",
+    "description": "Incident Details",
+    "version": "24.9.18.1",
+    "enabled": true,
+    "exportable": false,
+    "status_poller": {},
+    "dashboard_type": "app",
+    "dashboard_folder": "Default",
+    "template_variables": {},
+    "context_enrichment": {
+        "stream": "oia-incidents-stream",
+        "enrich_columns": [
+            "i_created_ts",
+            "attrs_stack_name",
+            "attrs_node_id",
+            "attrs_metric_asset_id",
+            "i_cluster"
+        ],
+        "query_template": "incident_id = '$a_incident_id' or incident_id = '$incident_id'",
+        "defaultValues": {}
+    },
+    "dashboard_filters": {
+        "time_filter": false
+    },
+    "dashboard_sections": [
+        {
+            "title": "Dashboard",
+			"widgets": [
+                {
+                    "title": "Incident Summary",
+                    "min_width": 12,
+                    "height": 2,
+                    "widget_type": "header_section",
+                    "widget_template": "cfx-oia/incident-summary",
+                    "widget_id": "6e64b2f1"
+                }
+			]
+		}
+	],
+    "dashboard_groups": {
+        "alerts": {
+            "icon": "alert.svg",
+            "label": "Alerts",
+            "pageName": "Alerts"
+        }
+    },
+    "dashboard_pages": [
+        {
+            "name": "incident-details-alerts",
+            "label": "Correlated Alerts",
+            "icon": "alert.svg",
+            "group": "alerts"
+        },
+        {
+            "name": "related-alerts",
+            "label": "Related Alerts",
+            "icon": "alert.svg",
+            "group": "alerts"
+        },
+        {
+            "name": "incident-details-topology",
+            "label": "Topology",
+            "icon": "topology.svg",
+            "context_filter": "attrs_stack_name is not None and attrs_node_id is not None"
+        },
+        {
+            "name": "incident-details-metrics",
+            "label": "Metrics",
+            "icon": "metrics.svg"
+        },
+        {
+            "name": "incident-details-insights",
+            "label": "Insights",
+            "icon": "nextSteps.svg",
+            "context_filter": "i_cluster is not None"
+        },
+        {
+            "name": "incident-details-collaboration",
+            "label": "Collaboration",
+            "icon": "collaboration.svg"
+        },
+        {
+            "name": "incident-details-diagnostics",
+            "label": "Diagnostics",
+            "icon": "diagnostic.svg",
+            "context_filter": "attrs_stack_name is not None"
+        },
+        {
+            "name": "incident-details-remediation",
+            "label": "Remediation",
+            "icon": "remedial.svg",
+            "context_filter": "attrs_stack_name is not None"
+        }
+    ],
+    "saved_time": "2024-06-14T11:59:56.536776"
+}
