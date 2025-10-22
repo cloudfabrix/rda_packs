@@ -1,0 +1,512 @@
+{
+    "name": "snmp_metrics_navigator",
+    "label": "SNMP Metrics Navigator",
+    "description": "SNMP Metrics Navigator",
+    "enabled": true,
+    "dashboard_style": "auto",
+    "dashboard_type": "template",
+    "dashboard_folder": "NetworkDevicePack",
+    "version": "24.1.27.2",
+    "short_label": "Stack",
+    "live_edit": true,
+    "context_label_id0": "",
+    "template_variables": {
+        "PROJ_ID": {
+            "contextId": "projectId"
+        },
+        "DEVICE_IP": {
+            "contextId": "secondaryList_i_agent_host"
+        },
+        "INTERFACE": {
+            "contextId": "secondaryList_name"
+        },
+        "DEVICE": {
+            "contextId": [
+                "navigatorSelectionContexts",
+                "secondaryListSelection",
+                "i_agent_host"
+            ]
+        },
+        "NAME": {
+            "contextId": [
+                "navigatorSelectionContexts",
+                "secondaryListSelection",
+                "name"
+            ]
+        }
+    },
+    "dashboard_filters": {
+        "default_time_filter_labels": [
+            "Last 24 hours"
+        ],
+        "extra_filter": "i_projectid in {{PROJ_ID}}",
+        "time_filter": true,
+        "columns_filter": [],
+        "group_filters": [
+            {
+                "stream": "rdaf_telegraf_metrics",
+                "context_filter0": "secondaryList_i_agent_host is i_agent_host",
+                "extra_filter": "(name is 'interface') and (i_input is 'SNMP') and i_projectid in {{PROJ_ID}}",
+                "title": "Interfaces",
+                "group_by": [
+                    "i_description"
+                ],
+                "ts_column": "timestamp",
+                "agg0": "sum",
+                "agg": "value_count",
+                "column": "_id",
+                "column0": "count_"
+            }
+        ]
+    },
+    "navigation_dashboards": {
+        "tree_data": {
+            "column_name": "i_agent_host",
+            "pstream_name": "rdaf_telegraf_metrics",
+            "cfxql_query": "i_input is 'SNMP' and i_projectid in {{PROJ_ID}}",
+            "include_icon_url": false,
+            "show_counts": false
+        },
+        "tree_detail": {
+            "display_column": "name",
+            "selected_columns": {
+                "name": "name",
+                "i_agent_host": "Device"
+            },
+            "pstream_name": "rdaf_telegraf_metrics",
+            "cfxql_query": "(name in ['cpu', 'interface','memory','device_availability'] and i_projectid in {{PROJ_ID}})",
+            "report_definition": {
+                "title": "Metrics Checks",
+                "widget_type": "tabular",
+                "stream": "rdaf_telegraf_metrics",
+                "ts_column": "timestamp",
+                "timebased": false,
+                "columns": {
+                    "name": "name",
+                    "i_agent_host": "i_agent_host"
+                },
+                "sorting0": [
+                    {
+                        "result_int_max": "desc"
+                    }
+                ],
+                "cfxql_query": "i_agent_host is '{{DEVICE}}'",
+                "pivot": {
+                    "pivot_type": "advanced",
+                    "series": [
+                        {
+                            "column": "name",
+                            "agg": "cardinality"
+                        }
+                    ],
+                    "group_by": [
+                        "name",
+                        "i_agent_host"
+                    ]
+                },
+                "paginated": true,
+                "enableVirtualScrolling": false,
+                "custom_columns": [
+                    {
+                        "id": "label1",
+                        "expr": "str(name)"
+                    }
+                ],
+                "widget_id": "5afc2391"
+            },
+            "duration_hours": 24
+        },
+        "showNodeIcon": false,
+        "showSearchBox": false
+    },
+    "dashboard_sections": [
+        {
+            "title": "Metric Details",
+            "context_filter0": "metric_name contains 'cpu'",
+            "widgets": [
+                {
+                    "title": "Operational Status",
+                    "widget_type": "timeseries",
+                    "stream": "rdaf_telegraf_metrics",
+                    "extra_filter": "(name is '{{NAME}}' and i_agent_host is '{{DEVICE}}') and i_projectid in {{PROJ_ID}} and i_input is 'SNMP'",
+                    "context_filter": "secondaryList_name contains 'interface'",
+                    "ts_column": "timestamp",
+                    "duration_hours0": 24000,
+                    "max_width": 12,
+                    "height": 5,
+                    "min_width": 12,
+                    "custom_columns0": [
+                        {
+                            "id": "oper_status_id",
+                            "label": "Oper Status",
+                            "expr": "'UP'",
+                            "visible": true
+                        }
+                    ],
+                    "chartProperties": {
+                        "yAxisLabel": "Status",
+                        "xAxisLabel": "time",
+                        "legendLocation": "bottom"
+                    },
+                    "interval": "5Min",
+                    "group_by": [
+                        "m_oper_status_label"
+                    ],
+                    "series_spec": [
+                        {
+                            "column": "count_",
+                            "agg": "value_count",
+                            "type": "int"
+                        }
+                    ],
+                    "widget_id": "4792441d"
+                },
+                {
+                    "title": "CPU utilization",
+                    "widget_type": "timeseries",
+                    "formatting": {
+                        "style": "unit",
+                        "unit": "percent"
+                    },
+                    "stream": "rdaf_telegraf_metrics",
+                    "ts_column": "timestamp",
+                    "extra_filter": "(name is '{{NAME}}' and i_agent_host is '{{DEVICE}}') and i_projectid in {{PROJ_ID}} and i_input is 'SNMP'",
+                    "context_filter": "secondaryList_name contains 'cpu'",
+                    "duration_hours0": 24000,
+                    "max_width": 6,
+                    "height": 5,
+                    "min_width": 6,
+                    "chartProperties": {
+                        "yAxisLabel": "CPU Utilization (%)",
+                        "xAxisLabel": "time",
+                        "legendLocation": "bottom"
+                    },
+                    "interval1": "auto",
+                    "group_by": [
+                        "i_agent_host"
+                    ],
+                    "series_spec": [
+                        {
+                            "column0": "m_cpu_total_5min_rev",
+                            "column": "m_cpu_usage",
+                            "agg": "max",
+                            "type": "int"
+                        }
+                    ],
+                    "widget_id": "7e6744ce"
+                },
+                {
+                    "title": "Memory Utilization",
+                    "widget_type": "timeseries",
+                    "formatting": {
+                        "style": "unit",
+                        "unit": "percent"
+                    },
+                    "stream": "rdaf_telegraf_metrics",
+                    "ts_column": "timestamp",
+                    "extra_filter": "(name is '{{NAME}}' and i_agent_host is '{{DEVICE}}')  and i_projectid in {{PROJ_ID}}",
+                    "context_filter": "secondaryList_name contains 'memory'",
+                    "extra_filter1": "name contains 'memory' and (i_agent_host is '{{DEVICE_IP}}' or i_agent_host is '{{ASSET_IP}}') ",
+                    "max_width": 6,
+                    "height": 5,
+                    "min_width": 6,
+                    "chartProperties": {
+                        "yAxisLabel": "Memory Utilization (%)",
+                        "xAxisLabel": "time",
+                        "legendLocation": "bottom"
+                    },
+                    "interval21": "auto",
+                    "group_by": [
+                        "i_agent_host"
+                    ],
+                    "series_spec": [
+                        {
+                            "column": "m_memory_usage",
+                            "agg": "max",
+                            "type": "int"
+                        }
+                    ],
+                    "widget_id": "0d2a1ef8"
+                },
+                {
+                    "title": "Top 10 Interfaces by ifInOctets",
+                    "widget_type": "timeseries",
+                    "segment_filter": false,
+                    "formatting": {
+                        "notation": "compact"
+                    },
+                    "stream": "rdaf_telegraf_metrics",
+                    "extra_filter1": "(i_agent_host is '{{DEVICE_IP}}' or i_agent_host is '{{ASSET_IP}}') and i_if_type equals '6'",
+                    "extra_filter": "(name is '{{NAME}}' and i_agent_host is '{{DEVICE}}') and i_projectid in {{PROJ_ID}} and i_input is 'SNMP'",
+                    "context_filter": "secondaryList_name contains 'interface'",
+                    "ts_column": "timestamp",
+                    "duration_hours0": 24000,
+                    "min_width": 12,
+                    "height": 5,
+                    "max_width": 12,
+                    "chartProperties": {
+                        "yAxisLabel": "bytes",
+                        "xAxisLabel": "time",
+                        "legendLocation": "none"
+                    },
+                    "group_by": [
+                        "i_agent_host",
+                        "i_description"
+                    ],
+                    "group_selection": {
+                        "column": "m_in_octets",
+                        "agg": "sum",
+                        "limit": 10,
+                        "orderby": "desc"
+                    },
+                    "series_spec": [
+                        {
+                            "column": "m_in_octets",
+                            "agg": "sum",
+                            "type": "int"
+                        }
+                    ],
+                    "widget_id": "c0f4a4de"
+                },
+                {
+                    "title": "Top 10 Interfaces by IfOutOctets",
+                    "widget_type": "timeseries",
+                    "segment_filter": false,
+                    "formatting": {
+                        "notation": "compact"
+                    },
+                    "stream": "rdaf_telegraf_metrics",
+                    "extra_filter1": "(i_agent_host is '{{DEVICE_IP}}' or i_agent_host is '{{ASSET_IP}}') and i_if_type equals '6'",
+                    "extra_filter": "(name is '{{NAME}}' and i_agent_host is '{{DEVICE}}') and i_projectid in {{PROJ_ID}} and i_input is 'SNMP'",
+                    "context_filter": "secondaryList_name contains 'interface'",
+                    "ts_column": "timestamp",
+                    "duration_hours0": 24000,
+                    "top_n": 10,
+                    "min_width": 12,
+                    "height": 5,
+                    "max_width": 12,
+                    "chartProperties": {
+                        "yAxisLabel": "bytes",
+                        "xAxisLabel": "time",
+                        "legendLocation": "none"
+                    },
+                    "group_by": [
+                        "i_agent_host",
+                        "i_description"
+                    ],
+                    "group_selection": {
+                        "column": "m_out_octets",
+                        "agg": "max",
+                        "limit": 10,
+                        "orderby": "desc"
+                    },
+                    "series_spec": [
+                        {
+                            "column": "m_out_octets",
+                            "agg": "sum",
+                            "type": "int"
+                        }
+                    ],
+                    "type": "double",
+                    "widget_id": "5fb30dc5"
+                },
+                {
+                    "title": "Top 10 Interfaces by IfInErrors",
+                    "widget_type": "timeseries",
+                    "segment_filter": false,
+                    "formatting": {
+                        "notation": "compact"
+                    },
+                    "stream": "rdaf_telegraf_metrics",
+                    "extra_filter1": "(i_agent_host is '{{DEVICE_IP}}' or i_agent_host is '{{ASSET_IP}}') and i_if_type equals '6'",
+                    "extra_filter": "(name is '{{NAME}}' and i_agent_host is '{{DEVICE}}') and i_projectid in {{PROJ_ID}} and i_input is 'SNMP'",
+                    "context_filter": "secondaryList_name contains 'interface'",
+                    "ts_column": "timestamp",
+                    "duration_hours0": 24000,
+                    "top_n": 10,
+                    "min_width": 12,
+                    "height": 5,
+                    "max_width": 12,
+                    "chartProperties": {
+                        "yAxisLabel": "bytes",
+                        "xAxisLabel": "time",
+                        "legendLocation": "none"
+                    },
+                    "group_by": [
+                        "i_agent_host",
+                        "i_description"
+                    ],
+                    "group_selection": {
+                        "column": "m_in_errors",
+                        "agg": "max",
+                        "limit": 10,
+                        "orderby": "desc"
+                    },
+                    "series_spec": [
+                        {
+                            "column": "m_in_errors",
+                            "agg": "sum",
+                            "type": "int"
+                        }
+                    ],
+                    "type": "double",
+                    "widget_id": "f66a376b"
+                },
+                {
+                    "title": "Top 10 Interfaces by IfOutErrors",
+                    "widget_type": "timeseries",
+                    "segment_filter": false,
+                    "formatting": {
+                        "notation": "compact"
+                    },
+                    "stream": "rdaf_telegraf_metrics",
+                    "extra_filter1": "(i_agent_host is '{{DEVICE_IP}}' or i_agent_host is '{{ASSET_IP}}') and i_if_type equals '6'",
+                    "extra_filter": "(name is '{{NAME}}' and i_agent_host is '{{DEVICE}}') and i_projectid in {{PROJ_ID}} and i_input is 'SNMP'",
+                    "context_filter": "secondaryList_name contains 'interface'",
+                    "ts_column": "timestamp",
+                    "duration_hours0": 24000,
+                    "top_n": 10,
+                    "min_width": 12,
+                    "height": 5,
+                    "max_width": 12,
+                    "chartProperties": {
+                        "yAxisLabel": "bytes",
+                        "xAxisLabel": "time",
+                        "legendLocation": "none"
+                    },
+                    "group_by": [
+                        "i_agent_host",
+                        "i_description"
+                    ],
+                    "group_selection": {
+                        "column": "m_out_errors",
+                        "agg": "max",
+                        "limit": 10,
+                        "orderby": "desc"
+                    },
+                    "series_spec": [
+                        {
+                            "column": "m_out_errors",
+                            "agg": "sum",
+                            "type": "int"
+                        }
+                    ],
+                    "type": "double",
+                    "widget_id": "4a618d69"
+                },
+                {
+                    "title": "Top 10 Interfaces by ifInDiscards",
+                    "widget_type": "timeseries",
+                    "segment_filter": false,
+                    "formatting": {
+                        "notation": "compact"
+                    },
+                    "stream": "rdaf_telegraf_metrics",
+                    "extra_filter1": "(i_agent_host is '{{DEVICE_IP}}' or i_agent_host is '{{ASSET_IP}}') and i_if_type equals '6'",
+                    "extra_filter": "(name is '{{NAME}}' and i_agent_host is '{{DEVICE}}') and i_projectid in {{PROJ_ID}} and i_input is 'SNMP'",
+                    "context_filter": "secondaryList_name contains 'interface'",
+                    "ts_column": "timestamp",
+                    "duration_hours0": 24000,
+                    "min_width": 12,
+                    "height": 5,
+                    "max_width": 12,
+                    "chartProperties": {
+                        "yAxisLabel": "bytes",
+                        "xAxisLabel": "time",
+                        "legendLocation": "none"
+                    },
+                    "group_by": [
+                        "i_agent_host",
+                        "i_description"
+                    ],
+                    "group_selection": {
+                        "column": "m_in_discards",
+                        "agg": "sum",
+                        "limit": 10,
+                        "orderby": "desc"
+                    },
+                    "series_spec": [
+                        {
+                            "column": "m_in_discards",
+                            "agg": "sum",
+                            "type": "int"
+                        }
+                    ],
+                    "widget_id": "11fbf414"
+                },
+                {
+                    "title": "Top 10 Interfaces by IfOutDiscards",
+                    "widget_type": "timeseries",
+                    "segment_filter": false,
+                    "formatting": {
+                        "notation": "compact"
+                    },
+                    "stream": "rdaf_telegraf_metrics",
+                    "extra_filter1": "(i_agent_host is '{{DEVICE_IP}}' or i_agent_host is '{{ASSET_IP}}') and i_if_type equals '6'",
+                    "extra_filter": "(name is '{{NAME}}' and i_agent_host is '{{DEVICE}}') and i_projectid in {{PROJ_ID}} and i_input is 'SNMP'",
+                    "context_filter": "secondaryList_name contains 'interface'",
+                    "ts_column": "timestamp",
+                    "duration_hours0": 24000,
+                    "top_n": 10,
+                    "min_width": 12,
+                    "height": 5,
+                    "max_width": 12,
+                    "chartProperties": {
+                        "yAxisLabel": "bytes",
+                        "xAxisLabel": "time",
+                        "legendLocation": "none"
+                    },
+                    "group_by": [
+                        "i_agent_host",
+                        "i_description"
+                    ],
+                    "group_selection": {
+                        "column": "m_out_discards",
+                        "agg": "max",
+                        "limit": 10,
+                        "orderby": "desc"
+                    },
+                    "series_spec": [
+                        {
+                            "column": "m_out_discards",
+                            "agg": "sum",
+                            "type": "int"
+                        }
+                    ],
+                    "type": "double",
+                    "widget_id": "73de2b87"
+                },
+                {
+                    "title": "Device Availability",
+                    "widget_type": "timeseries",
+                    "stream": "rdaf_telegraf_metrics",
+                    "extra_filter": "(name is '{{NAME}}' and i_agent_host is '{{DEVICE}}') and i_projectid in {{PROJ_ID}} and i_input is 'Ping'",
+                    "context_filter": "secondaryList_name contains 'device_availability'",
+                    "ts_column": "timestamp",
+                    "duration_hours0": 24000,
+                    "max_width": 12,
+                    "height": 5,
+                    "min_width": 12,
+                    "chartProperties": {
+                        "yAxisLabel": "Status",
+                        "xAxisLabel": "time",
+                        "legendLocation": "bottom"
+                    },
+                    "interval": "5Min",
+                    "group_by": [
+                        "m_device_availability"
+                    ],
+                    "series_spec": [
+                        {
+                            "column": "count_",
+                            "agg": "value_count",
+                            "type": "int"
+                        }
+                    ],
+                    "widget_id": "826d659e"
+                }
+            ]
+        }
+    ],
+    "saved_time": "2025-08-22T06:13:41.225655"
+}

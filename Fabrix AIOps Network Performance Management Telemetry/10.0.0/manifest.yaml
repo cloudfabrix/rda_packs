@@ -1,0 +1,185 @@
+name: Fabrix AIOps Network Performance Management Telemetry
+version: 10.0.0
+folder: /collection/network/fabrix_aiops_network_performance_management_telemetry
+published_date: 2025-10-22
+publisher: Fabrix.ai
+label: Fabrix AIOps Network Performance Management Telemetry
+scope: system
+description:
+  value: ""
+  md: ./description.md
+type: collection
+requires:
+  - name: Network Device Discovery
+    version: ">=9.0.0"
+    auto_install_requires: true
+
+fabric_services:
+ - name: worker
+   version: ">=8.1.0"
+ - name: api-server
+   version: ">=8.1.0"
+  
+
+artifacts:
+  pstreams:
+    - name: rdaf_telegraf_metrics
+      remove_on_deactivation: false
+      
+  dashboards:
+    - name: kpi-workbench-telemetry
+      file: ./artifacts/dashboards/kpi-workbench-telemetry.json
+    - name: preview_kpi_telemetry_dashboard
+      file: ./artifacts/dashboards/preview_kpi_telemetry_dashboard.json
+    - name: telemetry_metrics_navigator
+      file: ./artifacts/dashboards/telemetry_metrics_navigator.json
+  
+
+  
+customer_level:  
+  launch_locations:
+
+  - pstream_name: rda_packs_dynamic_groups_and_pages
+    dashboard_group_name: groupMetrics 
+    dashboard_group_label: Metrics
+    dashboard_group_icon: "insights.svg"
+    dashboard_page_name: kpi-workbench-telemetry
+    dashboard_page_label: "Telemetry Workbench"
+    dashboard_page_icon: "insights.svg"
+  
+  - pstream_name: rda_packs_dynamic_groups_and_pages
+    dashboard_group_name: groupMetrics 
+    dashboard_group_label: Configuration
+    dashboard_group_icon: "settings.svg"
+    dashboard_page_name: telemetry_metrics_navigator
+    dashboard_page_label: "Telemetry Metrics Navigator"
+    dashboard_page_icon: "settings.svg"
+
+  
+
+  artifacts:
+
+    endpoints:
+      - name: asm_telemetry
+        file: ./artifacts/endpoints/asm_telemetry.json
+      
+    mappings:
+      - name: asm_telemetry_log_mapper
+        file: ./artifacts/mappings/asm_telemetry_log_mapper.json
+      - name: asm_telemetry_metrics_mapper
+        file: ./artifacts/mappings/asm_telemetry_metrics_mapper.json
+
+    notification_channels:      
+      - name: telegraf_telemetry_metrics
+        file: ./artifacts/notification_channels/telegraf_telemetry_metrics.json
+        remove_on_deactivation: true   
+
+    alert_rules:
+      - name: cpu_telemetry_metric
+        file: ./artifacts/alert_rules_multi_tenant/cpu_telemetry_metric.json
+        remove_on_deactivation: true
+  
+      - name: in_discards_telemetry_metric
+        file: ./artifacts/alert_rules_multi_tenant/in_discards_telemetry_metric.json
+        remove_on_deactivation: true
+  
+      - name: in_errors_telemetry_metric
+        file: ./artifacts/alert_rules_multi_tenant/in_errors_telemetry_metric.json
+        remove_on_deactivation: true
+  
+      - name: in_octets_telemetry_metric
+        file: ./artifacts/alert_rules_multi_tenant/in_octets_telemetry_metric.json
+        remove_on_deactivation: true
+  
+      - name: memory_telemetry_metric
+        file: ./artifacts/alert_rules_multi_tenant/memory_telemetry_metric.json
+        remove_on_deactivation: true
+  
+      - name: out_discards_telemetry_metric
+        file: ./artifacts/alert_rules_multi_tenant/out_discards_telemetry_metric.json
+        remove_on_deactivation: true
+  
+      - name: out_errors_telemetry_metric
+        file: ./artifacts/alert_rules_multi_tenant/out_errors_telemetry_metric.json
+        remove_on_deactivation: true
+  
+      - name: out_octets_telemetry_metric
+        file: ./artifacts/alert_rules_multi_tenant/out_octets_telemetry_metric.json
+        remove_on_deactivation: true
+      
+      - name: device_availability
+        file: ./artifacts/alert_rules_multi_tenant/device_availability_telemetry.json
+        remove_on_deactivation: true
+
+single_tenant:
+  launch_dashboard: network_discovery_main_app  
+  launch_locations:
+
+  - pstream_name: rda_packs_dynamic_groups_and_pages
+    dashboard_group_name: groupMetrics 
+    dashboard_group_label: Metrics
+    dashboard_group_icon: "insights.svg"
+    dashboard_page_name: kpi-workbench-telemetry
+    dashboard_page_label: "Telemetry Workbench"
+    dashboard_page_icon: "insights.svg"
+  - pstream_name: rda_packs_dynamic_groups_and_pages
+    dashboard_group_name: groupMetrics 
+    dashboard_group_label: Metrics
+    dashboard_group_icon: "settings.svg"
+    dashboard_page_name: telemetry_metrics_navigator
+    dashboard_page_label: "Telemetry Metrics Navigator"
+    dashboard_page_icon: "settings.svg"
+  
+    
+  artifacts:
+    endpoints:
+      - name: asm_telemetry
+        file: ./artifacts/endpoints/asm_telemetry.json
+      
+    mappings:
+      - name: asm_telemetry_log_mapper
+        file: ./artifacts/mappings/asm_telemetry_log_mapper.json
+      - name: asm_telemetry_metrics_mapper
+        file: ./artifacts/mappings/asm_telemetry_metrics_mapper.json
+    
+    notification_channels:      
+      - name: telegraf_telemetry_metrics
+        file: ./artifacts/notification_channels/telegraf_telemetry_metrics.json
+        remove_on_deactivation: true 
+   
+
+    alert_rules:
+      - name: cpu_telemetry_metric
+        file: ./artifacts/alert_rules/cpu_telemetry_metric.json
+        remove_on_deactivation: true
+
+      - name: in_discards_telemetry_metric
+        file: ./artifacts/alert_rules/in_discards_telemetry_metric.json
+        remove_on_deactivation: true
+
+      - name: in_errors_telemetry_metric
+        file: ./artifacts/alert_rules/in_errors_telemetry_metric.json
+        remove_on_deactivation: true
+
+      - name: in_octets_telemetry_metric
+        file: ./artifacts/alert_rules/in_octets_telemetry_metric.json
+        remove_on_deactivation: true
+
+      - name: memory_telemetry_metric
+        file: ./artifacts/alert_rules/memory_telemetry_metric.json
+        remove_on_deactivation: true
+
+      - name: out_discards_telemetry_metric
+        file: ./artifacts/alert_rules/out_discards_telemetry_metric.json
+        remove_on_deactivation: true
+
+      - name: out_errors_telemetry_metric
+        file: ./artifacts/alert_rules/out_errors_telemetry_metric.json
+        remove_on_deactivation: true
+
+      - name: out_octets_telemetry_metric
+        file: ./artifacts/alert_rules/out_octets_telemetry_metric.json
+        remove_on_deactivation: true
+      - name: device_availability
+        file: ./artifacts/alert_rules/device_availability_telemetry.json
+        remove_on_deactivation: true
