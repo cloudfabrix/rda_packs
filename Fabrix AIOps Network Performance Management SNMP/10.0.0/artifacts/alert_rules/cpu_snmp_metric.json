@@ -1,0 +1,55 @@
+{
+    "type": "metric",
+    "name": "cpu_snmp_metric",
+    "enabled": true,
+    "schedule": {
+        "minutes": 15
+    },
+    "data": {
+        "stream": "rdaf_telegraf_metrics",
+        "groupby": [
+            "i_agent_host",
+            "name"
+        ],
+        "query": "(name == 'cpu') and i_input == 'SNMP'"
+    },
+    "actions": [
+        {
+            "state": "OPEN",
+            "timestamp": "timestamp",
+            "threshold": "30",
+            "agg_column": "m_cpu_usage",
+            "agg_func": "avg",
+            "repeat_count": 1,
+            "attributes": {
+                "severity": "CRITICAL",
+                "metric_name": "cpu_usage",
+                "metric_value_field": "m_cpu_usage_avg"
+            },
+            "notification": [
+                {
+                    "channel": "telegraf_snmp_metrics"
+                }
+                
+            ]
+        },
+        {
+            "state": "CLEAR",
+            "timestamp": "timestamp",
+            "agg_column": "m_cpu_usage",
+            "agg_func": "avg",
+            "threshold": "28",
+            "attributes": {
+                "severity": "INFO",
+                "metric_name": "cpu_usage",
+                "metric_value_field": "m_cpu_usage_avg"
+            },
+            "notification": [
+                {
+                    "channel": "telegraf_snmp_metrics"
+                }
+            ]
+        }
+    ],
+    "saved_time": "2025-08-19T06:19:45.755171"
+}
