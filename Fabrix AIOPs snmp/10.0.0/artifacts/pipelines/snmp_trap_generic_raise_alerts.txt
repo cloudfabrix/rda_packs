@@ -1,0 +1,119 @@
+%% template_type="jinja"
+%%start_inline_object name="context_dynamic_form" and type="data" and format="json"
+{
+    "formFieldList": [
+        {
+            "fieldId": "customer_tag",
+            "label": "Tag of the customer",
+            "required": false,
+            "dataType": "string"
+        }
+    ]
+}
+%%end_inline_object
+
+ {% if customer_tag %} 
+      {% set customer_id = customer_id %}
+      {% set customer_tag = customer_tag %}
+      {% set customerTag = customer_tag %}
+   {% elif customerTag %} 
+      {% set customer_id = customer_id %}
+      {% set customer_tag = customerTag %}
+   {% else %}
+      {% set customer_id = '' %}
+      {% set customer_tag = '' %}
+   {% endif %}  
+
+
+{% set ep_name = 'SNMP_Traps' %} 
+{%- set webhook_url = engine.get_endpoint_url(ep_name ,customer_tag= customer_tag ) -%}
+
+## Handle error method
+@dm:empty
+    --> @exec:define-function name="safe_skip"
+       --> @rn:write-stream name = 'failed_snmp_trap_alerts'
+    --> @exec:end-function
+
+## Get and Process SNMP Trap Events
+--> @c:flex-block
+{% if customer_tag %}  
+   --> @dn:read-stream name="{{customer_tag}}_snmp_trap_event_stream" and
+            group="{{customer_tag}}_snmp_trap_event_stream" and
+            batch_size=10000 and
+            max_poll_interval_ms=60000 and offset_reset="latest" and
+            batch_wait=5
+{% else %}   
+   --> @dn:read-stream name="snmp_trap_event_stream" and
+            group="snmp_trap_event_stream" and
+            batch_size=10000 and
+            max_poll_interval_ms=60000 and offset_reset="latest" and
+            batch_wait=5
+{% endif %}
+--> @exec:retry-loop retries = 0 and retry_delay_millis= 2000  and on_failure_callback="safe_skip"
+    --> @dm:save name = "temp-snmp_data"
+    --> @exec:retry-loop retries= 5 and retry_delay_millis= 2000
+         {% if customer_tag %}
+            --> @dm:enrich dict = '{{customer_tag}}-cisco_device_chassis_dict' & src_key_cols = 'rda_gw_client_ip,customerTag' & dict_key_cols = 'device_ip,customer_tag' & enrich_cols = 'device_eq_description,device_hostname,device_location,device_serial_number,device_model,device_vendor,device_version_summary,device_fw_type,device_fw_version,device_status,device_hostname_short,parent_sn,node_id' & return_empty_cols = "yes" &  cache = 'yes' & cache_refresh_seconds=21600
+         {% else %}
+            --> @dm:enrich dict = 'cisco_device_chassis_dict' & src_key_cols = 'rda_gw_client_ip' & dict_key_cols = 'device_ip' & enrich_cols = 'device_eq_description,device_hostname,device_location,device_serial_number,device_model,device_vendor,device_version_summary,device_fw_type,device_fw_version,device_status,device_hostname_short,parent_sn,node_id' & return_empty_cols = "yes" &  cache = 'yes' & cache_refresh_seconds=21600
+         {% endif %}
+    --> @exec:end-loop
+    --> @dm:fixnull-regex columns = "device_status" & value = "UNMANAGED"
+       
+    
+    --> @dm:add-missing-columns columns = 'mappingStatus' & value = 'found'
+    --> @dm:eval execution_step = "'source_event'"
+    --> *dm:filter mappingStatus is 'found'
+    --> @dm:eval execution_step = "'mapping_filter'"
+    --> @dm:rename-columns snmp_trap_mib = 'snmpTrapMIB' & snmp_trap_name = 'snmpTrapName' & snmp_trap_description = 'snmpTrapDescription' & snmp_trap_oid = 'snmpTrapOID'
+    --> @dm:selectcolumns exclude = "^device_ip$"
+    --> @dm:add-missing-columns columns = 'ifIndex'
+    --> @dm:fixnull columns = 'ifIndex' & value = 'None' & apply_for_empty = 'yes'
+    --> @dm:to-type columns = 'ifIndex' & type = 'str'
+    --> *exec:if-condition ifIndex is not null and ifIndex is not in ['Not Available', '', 'NONE', 'None']
+       --> @exec:retry-loop retries= 5 and retry_delay_millis= 2000
+            {% if customer_tag %}
+                --> @dm:enrich dict = "{{customer_tag}}-cisco_device_interface_data" & src_key_cols = "rda_gw_client_ip,ifIndex,customerTag" & dict_key_cols="device_ip,device_int_index,customer_tag" & enrich_cols = "device_int_name,device_interface_status,device_int_alias,device_int_shortname,remote_device_int_index,remote_device_ip,remote_device_int_name,remote_device_id,remote_device_model,cdp_device_order"  & return_empty_cols = "yes" &  cache = 'yes' & cache_refresh_seconds=21600
+            {% else %}
+                --> @dm:enrich dict = "cisco_device_interface_data" & src_key_cols = "rda_gw_client_ip,ifIndex" & dict_key_cols="device_ip,device_int_index" & enrich_cols = "device_int_name,device_interface_status,device_int_alias,device_int_shortname,remote_device_int_index,remote_device_ip,remote_device_int_name,remote_device_id,remote_device_model,cdp_device_order"  & return_empty_cols = "yes" &  cache = 'yes' & cache_refresh_seconds=21600
+            {% endif %}
+        --> @exec:end-loop
+        --> @dm:add-missing-columns columns = 'device_interface_status,device_int_name,device_int_alias,device_int_shortname,remote_device_int_index,remote_device_ip,remote_device_int_name,remote_device_id,remote_device_model,device_hostname,remote_device_int_alias,remote_device_int_shortname,device_interface_order,cdp_device_order,device_interface_admin_status'
+        --> @dm:eval device_interface_order= "device_interface_order if device_interface_order else device_int_name.split('.')[0] if device_int_name and device_int_name not in ['Not Available', '', 'NONE', 'None'] else ifIndex"
+        --> @dm:eval remote_int_info ="f'IMPACTS Peer Device: {remote_device_id}; Interface Name: {remote_device_int_name}; Interface Description: {remote_device_int_alias}' if remote_device_int_name not in ['Not Available' , '', 'NONE', 'None'] else ''"
+        ## if cdp_device_order is not set; then set it to be same as device hostname.
+        --> @dm:eval cdp_device_order = "device_hostname if cdp_device_order is None or cdp_device_order in ['Not Available', '', 'NONE', 'None'] or cdp_device_order is empty else cdp_device_order"
+        --> @dm:save name = 'temp-enriched_snmp_alerts'
+        
+    --> @exec:end-if
+    --> *exec:if-condition ifIndex is null or ifIndex is in ['Not Available' , '', 'NONE', 'None']
+             ## in this case, cdp_device_order should either not exist or be blank; set it to be same as device hostname.
+             --> @dm:add-missing-columns columns = 'cdp_device_order,device_interface_order'
+             --> @dm:eval cdp_device_order = 'device_hostname'
+             --> @dm:eval device_interface_order= 'device_hostname'
+             --> @dm:save name = "temp-enriched_snmp_alerts" and append="yes"
+    --> @exec:end-if
+    ##--> @dm:eval ifAdminStatus = "device_interface_admin_status if ifAdminStatus not in ['down', 'up'] else ifAdminStatus"
+    
+    --> @dm:recall name = "temp-enriched_snmp_alerts" 
+    --> @exec:retry-loop retries= 5 and retry_delay_millis= 2000
+        --> @dm:enrich-using-rule-dict dict = "snmp_trap_alert_rules_dict" & enrich_columns = "action,reason,state,severity,raise_code,alarm_class" and cache = "yes" & cache_refresh_seconds=3600
+    --> @exec:end-loop
+    ##--> @dm:eval-multi-proc execution_step = "'alert_rule_enrichment'" and timestamp="utcnow().isoformat()"
+    --> @dm:copy-columns from = "device_vendor,device_model,device_fw_type,device_fw_version" & to = "device_vendor,device_model,device_fw_type,device_fw_version" & func = "strip"
+    --> @dm:fixnull columns = "device_vendor,device_model,device_fw_type,device_fw_version,device_hostname" & value = "Not Available" & apply_for_empty = 'yes'
+       
+    --> @dm:eval-multi-proc timestamp="utcnow().isoformat()"
+    --> @dm:map to = 'snmp_trap_timestamp' and from = 'rda_gw_timestamp'
+    --> @dm:eval raise_code="raise_code if raise_code else snmp_trap_name"
+    --> @dm:eval key = "f'{rda_gw_client_ip}_{raise_code}_{ifIndex}'"
+    --> @rn:write-stream name = "snmp_trap_stream"
+    --> *dm:filter action is 'KEEP'
+    --> @dm:skip-block-if-shape row_count=0
+    --> @dm:to-json output_column is payload
+    --> @dm:save name = "temp-url"
+    
+    --> @exec:retry-loop retries= 5 and retry_delay_millis= 2000
+        --> @restclient:write url = "{{ webhook_url }}" & envelope is "{{'{{payload}}'}}" & batch_size = 1
+    --> @exec:end-loop
+--> @exec:end-loop

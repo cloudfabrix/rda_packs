@@ -1,0 +1,25 @@
+name: snmp_fault_management
+id: snmp_fault_management
+version: 20240516
+category: FaultManagementPack
+comment: Fault Management
+enabled: true
+type: Service
+provider: CloudFabrix Software, Inc.
+attrs: {}
+
+service_pipelines:
+     -  name: snmp_trap_generic_raise_alerts
+        label: Snmp Trap generic raise alerts 
+        version: '*'
+        site: ${PKG_CONTEXT_CUSTOMER_TAG}.*
+        run_context:
+            customer_tag: $PKG_CONTEXT_CUSTOMER_TAG
+            customer_id: $PKG_CONTEXT_CUSTOMER_ID
+        site_type: regex
+        instances: 1
+        scaling_policy:
+            min_instances: 1
+            max_instances: 1
+           
+saved_time: '2024-03-01T07: 14: 16.390898'

@@ -26,7 +26,7 @@ Following are the key features covered by Fabrix AIOps Network Performance Manag
 - Install Event-Gateway. Use `rdaf event_gateway install --tag 8.1.1`.<br>
 - Add the projectId in telegraf.conf in the path `/opt/rdaf/event_gateway/telegraf/config`<br>
 Example:`projectId = "ab7085a8-6dda-11f0-b23b-0242ac150006"`
-- Copy all Telegarf config files from the resources folder to path: `/opt/rdaf/event_gateway/telegraf/config/conf.d`<br><a href="https://github.com/cloudfabrix/rda_packs/tree/main/Fabrix%20AIOps%20Network%20Performance%20Management%20Telemetry/9.0.0/telegraf_config_files" target="_blank">Click here for Telegarf Config Files</a><br>
+- Copy all Telegarf config files from the resources folder to path: `/opt/rdaf/event_gateway/telegraf/config/conf.d`<br><a href="https://github.com/cloudfabrix/rda_packs/tree/main/Fabrix%20AIOps%20Network%20Performance%20Management%20Telemetry/9.0.0/resources/telegraf_config_files" target="_blank">Click here for Telegarf Config Files</a><br>
 
 - Add agents in ping_metrics.conf<br>
 Example:

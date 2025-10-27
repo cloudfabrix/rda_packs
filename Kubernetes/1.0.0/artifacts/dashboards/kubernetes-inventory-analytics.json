@@ -1,0 +1,57 @@
+{
+    "name": "kubernetes-inventory-analytics",
+    "label": "kubernetes Analytics",
+    "description": "kubernetes Inventory and Analytics Dashboard",
+    "version": "2024.03.11.1",
+    "enabled": true,
+    "dashboard_folder": "kubernetes",
+    "status_poller": {
+        "stream": "cfx_rdaf_topology_nodes",
+        "frequency": 120,
+        "columns": [
+            "collection_timestamp"
+        ],
+        "sorting": [
+            {
+                "collection_timestamp": "desc"
+            }
+        ],
+        "query": "`collection_timestamp` is after '${timestamp}'",
+        "defaults": {
+            "collection_timestamp": "$UTCNOW"
+        },
+        "action": "refresh"
+    },
+    "dashboard_filters": {
+        "time_filter": true,
+        "default_time_filter_labels": [
+            "Last 1 week"
+        ],
+        "columns_filter": []
+    },
+    "dashboard_sections": [],
+    "dashboard_type": "app",
+    "dashboard_pages": [
+        {
+            "name": "kubernetes_configure_and_manage",
+            "label": "Kubernetes Management",
+            "icon": "settings.svg"
+        },
+        {
+            "name": "kubernetes_collection_and_access_status",
+            "label": "Kubernetes Status",
+            "icon": "history.svg"
+        },
+        {
+            "name": "kubernetes_inventory",
+            "label": "Kubernetes Inventory",
+            "icon": "asset.svg"
+        },
+        {
+            "name": "kubernetes_topology",
+            "label": "Kubernetes Topology",
+            "icon": "topology.svg"
+        }
+    ],
+    "saved_time": "2025-08-19T09:52:44.700324"
+}

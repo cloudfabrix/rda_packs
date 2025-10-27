@@ -1,0 +1,177 @@
+{
+    "name": "kubernetes_topology",
+    "label": "kubernetes Topology",
+    "description": "kubernetes Topology",
+    "live_edit": true,
+    "version": "25.01.31.1",
+    "enabled": false,
+    "dashboard_type": "template",
+    "dashboard_folder": "kubernetespack",
+    "dashboard_style": "auto",
+    "template_variables": {
+        "CUST_TAG": {
+            "contextId": "customerTag"
+        },
+        "CUSTOMER_NAME": {
+            "contextId": "customerName"
+        },
+        "CUSTOMER_ID": {
+            "contextId": "customerId"
+        },
+        "PROJECT_ID": {
+            "contextId": "project_id"
+        }
+    },
+    "dashboard_filters": {
+        "extra_filter": "(customer_tag is '{{CUST_TAG}}' or customer_tag is empty  or customer_tag is '' or customer_tag is 'None')",
+        "group_filters": []
+    },
+    "dashboard_sections": [
+        {
+            "title": "Kubernetes Topology",
+            "widgets": [
+                {
+                    "title": "Topology View",
+                    "widget_type": "topology",
+                    "extra_filter": "(customer_tag is '{{CUST_TAG}}' or customer_tag is empty  or customer_tag is '' or customer_tag is 'None')",
+                    "inMultiviewContainer": true,
+                    "register_search_endpoints": true,
+                    "reportId": "rda.saas.stack.view.topo",
+                    "context_attributes0": {
+                        "CHASSIS": [
+                            "parent_sn",
+                            "device_ip"
+                        ],
+                        "Edge": [
+                            "edge_ip",
+                            "edgeName",
+                            "serialNumber",
+                            "edge_id"
+                        ]
+                    },
+                    "limit_to_node_types": [
+                        "Kubernetes_Cluster",
+                        "Kubernetes_POD",
+                        "Kubernetes_Worker"
+                    ],
+                    "has_more_data_flag": false,
+                    "expand_all": true,
+                    "stack_type": "dynamic",
+                    "stack_definition": {
+                        "name": "cfx_rdaf_topology",
+                        "description": "",
+                        "saved_time": "2023-09-12T21:08:31.418255",
+                        "is_dynamic": true,
+                        "hierarchical": true,
+                        "dynamic_nodes": {
+                            "stream": "graphdb://cfx_rdaf_topology/cfx_rdaf_topology_nodes",
+                            "query": "layer is 'Kubernetes' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty or customer_tag is 'None')",
+                            "limit": 0,
+                            "sorting": null
+                        },
+                        "dynamic_relationships": {
+                            "stream": "graphdb://cfx_rdaf_topology/cfx_rdaf_topology_edges",
+                            "query": "(customer_tag is '{{CUST_TAG}}' or customer_tag is empty or customer_tag is 'None')",
+                            "graph_name": "cfx_rdaf_topology_graph",
+                            "relation_map": "rdaf_topology_relationships"
+                        }
+                    },
+                    "nodes_report": {
+                        "reportMetaData": {
+                            "sorting": true,
+                            "filtering": true,
+                            "title": "Nodes",
+                            "remote_searchable": false,
+                            "remote_searchable_cols": [
+                                "node_type",
+                                "node_label",
+                                "node_id",
+                                "kube_controller_ip",
+                                "kube_node_hostname"
+                            ],
+                            "reportColumnDefinitionList": [
+                                {
+                                    "identifier": "node_label",
+                                    "title": "Name",
+                                    "key": false
+                                },
+                                {
+                                    "identifier": "node_type",
+                                    "title": "Type",
+                                    "key": false
+                                },
+                                {
+                                    "identifier": "kube_node_hostname",
+                                    "key": false,
+                                    "title": "Host Name"
+                                },
+                                {
+                                    "identifier": "kube_controller_ip",
+                                    "title": "Host IP",
+                                    "key": false
+                                },
+                                {
+                                    "identifier": "node_id",
+                                    "key": true,
+                                    "hidden": true
+                                }
+                            ]
+                        }
+                    },
+                    "nodes_asset_report0": {
+                        "dashboardId": "Kubernetes Topology",
+                        "reportId": "dynamic_v2_tabular_report_0_1",
+                        "ignore_context_filter": true
+                    },
+                    "edges_report": {
+                        "reportId": "rda.saas.topology.edges.report",
+                        "reportMetaData": {
+                            "sorting": true,
+                            "filtering": true,
+                            "title": "Edges",
+                            "reportColumnDefinitionList": [
+                                {
+                                    "id": "left_id",
+                                    "identifier": "left_id",
+                                    "key": true,
+                                    "title": "Left Id",
+                                    "type": "TEXT",
+                                    "visible": false
+                                },
+                                {
+                                    "id": "left_label",
+                                    "identifier": "left_label",
+                                    "key": false,
+                                    "title": "Source",
+                                    "type": "TEXT",
+                                    "visible": true
+                                },
+                                {
+                                    "id": "right_id",
+                                    "identifier": "right_id",
+                                    "key": true,
+                                    "title": "Right Id",
+                                    "type": "TEXT",
+                                    "visible": false
+                                },
+                                {
+                                    "id": "right_label",
+                                    "identifier": "right_label",
+                                    "key": false,
+                                    "title": "Destination",
+                                    "type": "TEXT",
+                                    "visible": true
+                                }
+                            ],
+                            "actions": []
+                        }
+                    },
+                    "height": 12,
+                    "min_wdith": 12,
+                    "widget_id": "182287d8"
+                }
+            ]
+        }
+    ],
+    "saved_time": "2025-08-07T07:12:53.923097"
+}

@@ -712,7 +712,7 @@
        --> *dm:safe-filter vm_power_state = 'poweredOff'
         
        --> @dm:to-type columns = 'vm_cpus,vm_cpu_sockets,vm_cores_per_socket,vm_cpu_shares,vm_cpu_reservation_mhz,vm_cpu_limit_mhz,vm_memory_mb,vm_memory_shares,vm_memory_reservation_mb,vm_memory_limit_mb,vm_template,vm_disk_bus_num,vm_disk_number,vm_nics,vm_disks,vm_disk_capacity_gb' and type = 'float'
-    --> @dm:save name = 'working_groupby'
+    
        --> @dm:groupby columns = 'vcenter_name,vcenter_address,datacenter,vm_disk_datastore' & agg = 'sum'
         
        --> *dm:safe-filter * get vcenter_name,vcenter_address,datacenter,vm_disk_datastore,vm_disk_capacity_gb as 'vm_off_capacity_gb',customer_id,customer_tag

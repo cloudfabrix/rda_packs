@@ -1,9 +1,9 @@
-### Overview
 Cisco Meraki pack is designed for inventory collection for Meraki using **Meraki-Networks** bot. Following bots are being called by this pack:
 
 - **networks**
 - **network-devices**
 - **network-clients**
+
 
 
 ### Feature Summary
@@ -25,3 +25,5 @@ Following are the key features covered by Cisco Meraki solution package:
 | 5    | Under `Configure and Manage` ->  `Run Discovery`  use `Run Access Verification` option to perform the credential check for Meraki. The verification results can be seen in `Access Verification Status` dashboard page. |  
 | 6    | Use `Configure and Manage` ->  `Run Discovery` to view and/or edit the schedule of the discovery or run the discovery on demand using `Run Meraki Inventory Collection` option. |  
 | 7    | After the collection completes successfully, use the pages under `Meraki Inventory` to view the inventory details. |   
+   
+

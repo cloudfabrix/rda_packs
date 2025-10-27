@@ -15,14 +15,12 @@ run_context: {
     customer_tag: $PKG_CONTEXT_CUSTOMER_TAG
 }
 scheduled_pipelines:
-
-    -   name: vcenter_access_verification
-        label: vmware vcenter access verification
-        version: '*'
-        site: ${PKG_CONTEXT_CUSTOMER_TAG}-.*
-        site_type: regex
-        cron_expression: 0 0 * * *
-
+    # -   name: access_verification
+    #     label: Access Verification
+    #     version: '*'
+    #     site: rda.*
+    #     site_type: regex
+    #     cron_expression: 0 0 * * *
     -   name: vcenter_inventory
         label: vmware vcenter inventory data
         version: '*'
@@ -30,10 +28,23 @@ scheduled_pipelines:
         site_type: regex
         cron_expression: 0 1 * * *
 
-    -   name: vcenter_vmware_topology
-        label: vmware vcenter topology data
+    # -   name: vcenter_vmware_topology
+    #     label: vmware vcenter topology
+    #     version: '*'
+    #     site: ${PKG_CONTEXT_CUSTOMER_TAG}-.*
+    #     site_type: regex
+    #     cron_expression: 0 2 * * *
+
+    -   name: vcenter_access_verification
+        label: vmware vcenter access verification
         version: '*'
         site: ${PKG_CONTEXT_CUSTOMER_TAG}-.*
         site_type: regex
         cron_expression: 0 0 * * *
+    # -   name: vcenter_organizations
+    #     label: vmware vcenter organization
+    #     version: '*'
+    #     site: $PKG_VAR_site_name
+    #     site_type: regex
+    #     cron_expression: 0 2 * * *
 saved_time: '2024-03-01T07: 14: 16.390898'

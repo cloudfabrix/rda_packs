@@ -1,4 +1,3 @@
-
 ### Overview  
   
 Network Device Discovery solution package collects inventory data for network devices. Following network device vendors are supported out of the box. If needed, additional ones can be added.  

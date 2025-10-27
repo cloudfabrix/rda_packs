@@ -321,279 +321,6 @@
             "show_filter": true,
             "widgets": [
                 {
-                    "title": "Active Alerts",
-                    "widget_type": "custom_counter",
-                    "stream": "oia-alerts-stream",
-                    "ts_column": "a_updated_ts",
-                    "extra_filter": "a_status is 'ACTIVE' and project_id in {{PROJ_ID}}",
-                    "column": "count_",
-                    "agg": "sum",
-                    "type": "str",
-                    "style": {
-                        "color-list": [
-                            "#FFA726"
-                        ]
-                    },
-                    "sparkline": {
-                        "interval": "4h"
-                    },
-                    "max_width": 2.4,
-                    "height": 4,
-                    "min_width": 2.4,
-                    "widget_id": "90fc33be"
-                },
-                {
-                    "title": "Alerts Suppressed",
-                    "widget_type": "custom_counter",
-                    "stream": "oia-alerts-stream",
-                    "extra_filter": "a_correlation_status in ['SUPPRESSED'] and project_id in {{PROJ_ID}}",
-                    "ts_column": "a_updated_ts",
-                    "column": "count_",
-                    "agg": "sum",
-                    "type": "int",
-                    "min_width": 2.4,
-                    "height": 4,
-                    "max_width": 2.4,
-                    "style": {
-                        "color-list": [
-                            "#4CAF50"
-                        ]
-                    },
-                    "sparkline": {
-                        "interval": "4h"
-                    },
-                    "widget_id": "02be1e23"
-                },
-                {
-                    "title": "Cleared Alerts",
-                    "widget_type": "custom_counter",
-                    "stream": "oia-alerts-stream",
-                    "extra_filter": " a_status is 'CLEARED' and project_id in {{PROJ_ID}}",
-                    "ts_column": "a_updated_ts",
-                    "column": "count_",
-                    "max_width": 2.4,
-                    "height": 4,
-                    "min_width": 2.4,
-                    "style": {
-                        "color-list": [
-                            "#4CAF50"
-                        ]
-                    },
-                    "sparkline": {
-                        "interval": "4h"
-                    },
-                    "agg": "sum",
-                    "type": "str",
-                    "widget_id": "53383e25"
-                },
-                {
-                    "widget_id": "02be1e21",
-                    "title": "Alerts Deduped",
-                    "min_width": 2.4,
-                    "height": 4,
-                    "max_width": 2.4,
-                    "widget_type": "expression_counter",
-                    "expression": "de_totalRepeatCount - de_alertsWithRepeatCountMoreThanOne",
-                    "unit": "",
-                    "segments": [
-                        {
-                            "variable": "de_totalRepeatCount",
-                            "stream": "oia-alerts-stream",
-                            "extra_filter": "a_repeat_count >= 1 and project_id in {{PROJ_ID}}",
-                            "ts_column": "a_updated_ts",
-                            "column": "a_repeat_count",
-                            "agg": "sum",
-                            "type": "int"
-                        },
-                        {
-                            "variable": "de_alertsWithRepeatCountMoreThanOne",
-                            "stream": "oia-alerts-stream",
-                            "extra_filter": "a_repeat_count >= 1 and project_id in {{PROJ_ID}}",
-                            "ts_column": "a_updated_ts",
-                            "column": "count_",
-                            "agg": "sum",
-                            "type": "int"
-                        }
-                    ]
-                },
-                {
-                    "title": "Alerts Ingested",
-                    "widget_type": "custom_counter",
-                    "stream": "oia-alerts-stream",
-                    "extra_filter0": "a_source_systemname is not 'Alert Group' and a_repeat_count >= 1 ",
-                    "extra_filter": "project_id in {{PROJ_ID}}",
-                    "ts_column": "a_updated_ts",
-                    "column": "a_repeat_count",
-                    "max_width": 2.4,
-                    "height": 4,
-                    "min_width": 2.4,
-                    "agg": "sum",
-                    "type": "int",
-                    "style": {
-                        "color-list": [
-                            "#1E88E5"
-                        ]
-                    },
-                    "sparkline": {
-                        "interval": "4h"
-                    },
-                    "widget_id": "e579e213"
-                },
-                {
-                    "widget_type": "pie_chart",
-                    "title": "Alerts by State",
-                    "description": "Does not include duplicates",
-                    "stream": "oia-alerts-stream",
-                    "extra_filter0": "a_source_systemname is not 'Alert Group'",
-                    "extra_filter": "project_id in {{PROJ_ID}}",
-                    "ts_column": "a_updated_ts",
-                    "column": "count_",
-                    "style": {
-                        "color-map": {
-                            "CLEARED": [
-                                "#4CAF50",
-                                "#ffffff"
-                            ],
-                            "ACTIVE": [
-                                "#FFA726",
-                                "#ffffff"
-                            ]
-                        }
-                    },
-                    "max_width": 3,
-                    "height": 4,
-                    "min_width": 3,
-                    "agg": "sum",
-                    "group_by": [
-                        "a_status"
-                    ],
-                    "type": "int",
-                    "widget_id": "c9ac6704"
-                },
-                {
-                    "title": "Active Alerts by Devices",
-                    "widget_type": "pie_chart",
-                    "stream": "oia-alerts-stream",
-                    "extra_filter": "a_status is 'ACTIVE' and project_id in {{PROJ_ID}}",
-                    "ts_column": "a_updated_ts",
-                    "segment_filter": false,
-                    "column": "count_",
-                    "group_by": [
-                        "a_asset_ip_address"
-                    ],
-                    "agg": "sum",
-                    "max_width": 3,
-                    "height": 4,
-                    "min_width": 3,
-                    "widget_id": "5b9bd1c8"
-                },
-                {
-                    "widget_type": "multi_bar_chart",
-                    "title": "Active Alerts by Source and Severity",
-                    "stream": "oia-alerts-stream",
-                    "ts_column": "a_updated_ts",
-                    "column": "count_",
-                    "description": "Values: Severe, Critical, Major, Minor, Warning, Notification, Information",
-                    "extra_filter": "a_status not in ['CLEARED'] and project_id in {{PROJ_ID}}",
-                    "segment_filter": false,
-                    "max_width": 6,
-                    "height": 6,
-                    "min_width": 6,
-                    "style": {
-                        "color-map": {
-                            "SEVERE": "#B71C1C",
-                            "CRITICAL": "#E53935",
-                            "MAJOR": "#F57C00",
-                            "MINOR": "#FFA726",
-                            "WARNING": "#FFD54F",
-                            "NOTIFICATION": "#4DD0E1",
-                            "INFORMATION": "#03A9F4"
-                        }
-                    },
-                    "chartProperties": {
-                        "yAxisLabel": "Source",
-                        "xAxisLabel": "Count",
-                        "stacked": true,
-                        "legendLocation": "right",
-                        "orientation": "horizontal"
-                    },
-                    "agg": "sum",
-                    "group_by": [
-                        "a_severity",
-                        "a_source_systemname"
-                    ],
-                    "type": "int",
-                    "widget_id": "7e94e94b"
-                },
-                {
-                    "title": "Alert Trend",
-                    "widget_type": "timeseries",
-                    "stream": "oia-alerts-stream",
-                    "ts_column": "a_updated_ts",
-                    "extra_filter0": "a_source_systemname is not 'Alert Group'",
-                    "extra_filter": "project_id in {{PROJ_ID}}",
-                    "max_width": 12,
-                    "height": 6,
-                    "min_width": 12,
-                    "propagateTimeFilter": {
-                        "enabled": true,
-                        "ts_column": "a_updated_ts"
-                    },
-                    "chartProperties": {
-                        "yAxisLabel": "count",
-                        "xAxisLabel": "time",
-                        "stacked": true,
-                        "legendLocation": "right",
-                        "orientation": "horizontal",
-                        "mode": "selection",
-                        "column-id": "a_updated_ts"
-                    },
-                    "interval": "15m",
-                    "group_by": [
-                        "a_severity"
-                    ],
-                    "style": {
-                        "color-map": {
-                            "SEVERE": [
-                                "#B71C1C",
-                                "#ffffff"
-                            ],
-                            "CRITICAL": [
-                                "#E53935",
-                                "#ffffff"
-                            ],
-                            "MAJOR": [
-                                "#F57C00",
-                                "#ffffff"
-                            ],
-                            "MINOR": [
-                                "#FFA726",
-                                "#ffffff"
-                            ],
-                            "WARNING": [
-                                "#FFD54F",
-                                "#ffffff"
-                            ],
-                            "NOTIFICATION": [
-                                "#4DD0E1",
-                                "#ffffff"
-                            ],
-                            "INFORMATION": [
-                                "#03A9F4",
-                                "#ffffff"
-                            ]
-                        }
-                    },
-                    "series_spec": [
-                        {
-                            "column": "count_",
-                            "agg": "sum",
-                            "type": "int"
-                        }
-                    ],
-                    "widget_id": "35903114"
-                },
-                {
                     "title": "Alerts",
                     "widget_type": "tabular",
                     "stream": "oia-alerts-stream",
@@ -1103,7 +830,286 @@
                     "widget_id": "ca37008a"
                 }
             ]
+        },
+        {
+            "title": "Analytics",
+            "show_filter": true,
+            "widgets": [
+                {
+                    "title": "Active Alerts",
+                    "widget_type": "custom_counter",
+                    "stream": "oia-alerts-stream",
+                    "ts_column": "a_updated_ts",
+                    "extra_filter": "a_status is 'ACTIVE' and project_id in {{PROJ_ID}}",
+                    "column": "count_",
+                    "agg": "sum",
+                    "type": "str",
+                    "style": {
+                        "color-list": [
+                            "#FFA726"
+                        ]
+                    },
+                    "sparkline": {
+                        "interval": "4h"
+                    },
+                    "max_width": 2.4,
+                    "height": 4,
+                    "min_width": 2.4,
+                    "widget_id": "90fc33be"
+                },
+                {
+                    "title": "Alerts Suppressed",
+                    "widget_type": "custom_counter",
+                    "stream": "oia-alerts-stream",
+                    "extra_filter": "a_correlation_status in ['SUPPRESSED'] and project_id in {{PROJ_ID}}",
+                    "ts_column": "a_updated_ts",
+                    "column": "count_",
+                    "agg": "sum",
+                    "type": "int",
+                    "min_width": 2.4,
+                    "height": 4,
+                    "max_width": 2.4,
+                    "style": {
+                        "color-list": [
+                            "#4CAF50"
+                        ]
+                    },
+                    "sparkline": {
+                        "interval": "4h"
+                    },
+                    "widget_id": "02be1e23"
+                },
+                {
+                    "title": "Cleared Alerts",
+                    "widget_type": "custom_counter",
+                    "stream": "oia-alerts-stream",
+                    "extra_filter": " a_status is 'CLEARED' and project_id in {{PROJ_ID}}",
+                    "ts_column": "a_updated_ts",
+                    "column": "count_",
+                    "max_width": 2.4,
+                    "height": 4,
+                    "min_width": 2.4,
+                    "style": {
+                        "color-list": [
+                            "#4CAF50"
+                        ]
+                    },
+                    "sparkline": {
+                        "interval": "4h"
+                    },
+                    "agg": "sum",
+                    "type": "str",
+                    "widget_id": "53383e25"
+                },
+                {
+                    "widget_id": "02be1e21",
+                    "title": "Alerts Deduped",
+                    "min_width": 2.4,
+                    "height": 4,
+                    "max_width": 2.4,
+                    "widget_type": "expression_counter",
+                    "expression": "de_totalRepeatCount - de_alertsWithRepeatCountMoreThanOne",
+                    "unit": "",
+                    "segments": [
+                        {
+                            "variable": "de_totalRepeatCount",
+                            "stream": "oia-alerts-stream",
+                            "extra_filter": "a_repeat_count >= 1 and project_id in {{PROJ_ID}}",
+                            "ts_column": "a_updated_ts",
+                            "column": "a_repeat_count",
+                            "agg": "sum",
+                            "type": "int"
+                        },
+                        {
+                            "variable": "de_alertsWithRepeatCountMoreThanOne",
+                            "stream": "oia-alerts-stream",
+                            "extra_filter": "a_repeat_count >= 1 and project_id in {{PROJ_ID}}",
+                            "ts_column": "a_updated_ts",
+                            "column": "count_",
+                            "agg": "sum",
+                            "type": "int"
+                        }
+                    ]
+                },
+                {
+                    "title": "Alerts Ingested",
+                    "widget_type": "custom_counter",
+                    "stream": "oia-alerts-stream",
+                    "extra_filter0": "a_source_systemname is not 'Alert Group' and a_repeat_count >= 1 ",
+                    "extra_filter": "project_id in {{PROJ_ID}}",
+                    "ts_column": "a_updated_ts",
+                    "column": "a_repeat_count",
+                    "max_width": 2.4,
+                    "height": 4,
+                    "min_width": 2.4,
+                    "agg": "sum",
+                    "type": "int",
+                    "style": {
+                        "color-list": [
+                            "#1E88E5"
+                        ]
+                    },
+                    "sparkline": {
+                        "interval": "4h"
+                    },
+                    "widget_id": "e579e213"
+                },
+                {
+                    "widget_type": "pie_chart",
+                    "title": "Alerts by State",
+                    "description": "Does not include duplicates",
+                    "stream": "oia-alerts-stream",
+                    "extra_filter0": "a_source_systemname is not 'Alert Group'",
+                    "extra_filter": "project_id in {{PROJ_ID}}",
+                    "ts_column": "a_updated_ts",
+                    "column": "count_",
+                    "style": {
+                        "color-map": {
+                            "CLEARED": [
+                                "#4CAF50",
+                                "#ffffff"
+                            ],
+                            "ACTIVE": [
+                                "#FFA726",
+                                "#ffffff"
+                            ]
+                        }
+                    },
+                    "max_width": 3,
+                    "height": 4,
+                    "min_width": 3,
+                    "agg": "sum",
+                    "group_by": [
+                        "a_status"
+                    ],
+                    "type": "int",
+                    "widget_id": "c9ac6704"
+                },
+                {
+                    "title": "Active Alerts by Devices",
+                    "widget_type": "pie_chart",
+                    "stream": "oia-alerts-stream",
+                    "extra_filter": "a_status is 'ACTIVE' and project_id in {{PROJ_ID}}",
+                    "ts_column": "a_updated_ts",
+                    "segment_filter": false,
+                    "column": "count_",
+                    "group_by": [
+                        "a_asset_ip_address"
+                    ],
+                    "agg": "sum",
+                    "max_width": 3,
+                    "height": 4,
+                    "min_width": 3,
+                    "widget_id": "5b9bd1c8"
+                },
+                {
+                    "widget_type": "multi_bar_chart",
+                    "title": "Active Alerts by Source and Severity",
+                    "stream": "oia-alerts-stream",
+                    "ts_column": "a_updated_ts",
+                    "column": "count_",
+                    "description": "Values: Severe, Critical, Major, Minor, Warning, Notification, Information",
+                    "extra_filter": "a_status not in ['CLEARED'] and project_id in {{PROJ_ID}}",
+                    "segment_filter": false,
+                    "max_width": 6,
+                    "height": 6,
+                    "min_width": 6,
+                    "style": {
+                        "color-map": {
+                            "SEVERE": "#B71C1C",
+                            "CRITICAL": "#E53935",
+                            "MAJOR": "#F57C00",
+                            "MINOR": "#FFA726",
+                            "WARNING": "#FFD54F",
+                            "NOTIFICATION": "#4DD0E1",
+                            "INFORMATION": "#03A9F4"
+                        }
+                    },
+                    "chartProperties": {
+                        "yAxisLabel": "Source",
+                        "xAxisLabel": "Count",
+                        "stacked": true,
+                        "legendLocation": "right",
+                        "orientation": "horizontal"
+                    },
+                    "agg": "sum",
+                    "group_by": [
+                        "a_severity",
+                        "a_source_systemname"
+                    ],
+                    "type": "int",
+                    "widget_id": "7e94e94b"
+                },
+                {
+                    "title": "Alert Trend",
+                    "widget_type": "timeseries",
+                    "stream": "oia-alerts-stream",
+                    "ts_column": "a_updated_ts",
+                    "extra_filter0": "a_source_systemname is not 'Alert Group'",
+                    "extra_filter": "project_id in {{PROJ_ID}}",
+                    "max_width": 12,
+                    "height": 6,
+                    "min_width": 12,
+                    "propagateTimeFilter": {
+                        "enabled": true,
+                        "ts_column": "a_updated_ts"
+                    },
+                    "chartProperties": {
+                        "yAxisLabel": "count",
+                        "xAxisLabel": "time",
+                        "stacked": true,
+                        "legendLocation": "right",
+                        "orientation": "horizontal",
+                        "mode": "selection",
+                        "column-id": "a_updated_ts"
+                    },
+                    "interval": "15m",
+                    "group_by": [
+                        "a_severity"
+                    ],
+                    "style": {
+                        "color-map": {
+                            "SEVERE": [
+                                "#B71C1C",
+                                "#ffffff"
+                            ],
+                            "CRITICAL": [
+                                "#E53935",
+                                "#ffffff"
+                            ],
+                            "MAJOR": [
+                                "#F57C00",
+                                "#ffffff"
+                            ],
+                            "MINOR": [
+                                "#FFA726",
+                                "#ffffff"
+                            ],
+                            "WARNING": [
+                                "#FFD54F",
+                                "#ffffff"
+                            ],
+                            "NOTIFICATION": [
+                                "#4DD0E1",
+                                "#ffffff"
+                            ],
+                            "INFORMATION": [
+                                "#03A9F4",
+                                "#ffffff"
+                            ]
+                        }
+                    },
+                    "series_spec": [
+                        {
+                            "column": "count_",
+                            "agg": "sum",
+                            "type": "int"
+                        }
+                    ],
+                    "widget_id": "35903114"
+                }
+            ]
         }
     ],
-    "saved_time": "2025-07-30T17:55:03.942762"
+    "saved_time": "2025-10-21T05:28:44.577517"
 }

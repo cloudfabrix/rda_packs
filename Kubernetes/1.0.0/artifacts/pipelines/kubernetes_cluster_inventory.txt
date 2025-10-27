@@ -1,0 +1,480 @@
+%% stream = no and limit = 0
+
+@c:new-block
+    --> @exec:get-input
+    --> @dm:save name = 'temp-variable-dataset'
+
+## Kubernetes Cluster Nodes Inventory
+--> @c:data-loop dataset='temp-variable-dataset' & columns = 'kubernetes_src_name,ip_address,customer_tag,customer_id'
+    --> @dm:empty
+    --> @dm:addrow ip_address = '$ip_address'
+    --> @$kubernetes_src_name:nodes column_name='ip_address'
+    --> *exec:if-condition collection_status != 'Success'
+       --> *dm:filter * get source_ip as 'asset_id',collection_status,collection_timestamp,collection_reason as 'reason'
+       --> @dm:map attr = 'collection_timestamp' & func = 'ts_to_datetimestr' & unit = 'ms'
+       --> @dm:eval bot_source_name = "'$kubernetes_src_name'"
+       --> @dm:eval customer_tag = "'$customer_tag'"
+       --> @dm:eval customer_id = "'$customer_id'"
+       --> @dm:eval bot_name = "'k8s-nodes'"
+       --> @dm:eval bot_source_type = "'kubernetes-inventory'"
+       --> @dm:save name = 'temp-k8s_nodes_info_failed_status'
+       --> @rn:write-stream name = 'asset_inventory_collection_status_stream'
+    --> @exec:end-if
+    --> *exec:if-condition collection_status = 'Success'
+       --> @dm:save name = 'temp-kubernetes_nodes_info'
+       --> @dm:dedup columns = 'source_ip'
+       --> *dm:filter * get source_ip as 'asset_id',collection_status,collection_timestamp,collection_reason as 'reason'
+       --> @dm:map attr = 'collection_timestamp' & func = 'ts_to_datetimestr' & unit = 'ms'
+       --> @dm:eval bot_source_name = "'$kubernetes_src_name'"
+       --> @dm:eval customer_tag = "'$customer_tag'"
+       --> @dm:eval customer_id = "'$customer_id'"
+       --> @dm:eval bot_name = "'k8s-nodes'"
+       --> @dm:eval bot_source_type = "'kubernetes-inventory'"
+       --> @dm:save name = 'temp-k8s_nodes_info_success_status'
+       --> @rn:write-stream name = 'asset_inventory_collection_status_stream'
+    --> @exec:end-if
+
+## Kubernetes Cluster Images Inventory
+--> @c:data-loop dataset='temp-variable-dataset' & columns = 'ip_address,kubernetes_src_name,customer_tag,customer_id'
+    --> @dm:empty
+    --> @dm:addrow ip_address = '$ip_address'
+    --> @$kubernetes_src_name:nodes-images column_name='ip_address'
+    --> *exec:if-condition collection_status != 'Success'
+       --> *dm:filter * get source_ip as 'asset_id',collection_status,collection_timestamp,collection_reason as 'reason'
+       --> @dm:map attr = 'collection_timestamp' & func = 'ts_to_datetimestr' & unit = 'ms'
+       --> @dm:eval bot_source_name = "'$kubernetes_src_name'"
+       --> @dm:eval customer_tag = "'$customer_tag'"
+       --> @dm:eval customer_id = "'$customer_id'"
+       --> @dm:eval bot_name = "'k8s-nodes-images'"
+       --> @dm:eval bot_source_type = "'kubernetes-inventory'"
+       --> @dm:save name = 'temp-k8s-nodes-images_info_failed_status'
+       --> @rn:write-stream name = 'asset_inventory_collection_status_stream'
+    --> @exec:end-if
+    --> *exec:if-condition collection_status = 'Success'
+       --> @dm:save name = 'temp-kubernetes_images_info'
+       --> @dm:dedup columns = 'source_ip'
+       --> *dm:filter * get source_ip as 'asset_id',collection_status,collection_timestamp,collection_reason as 'reason'
+       --> @dm:map attr = 'collection_timestamp' & func = 'ts_to_datetimestr' & unit = 'ms'
+       --> @dm:eval bot_source_name = "'$kubernetes_src_name'"
+       --> @dm:eval customer_tag = "'$customer_tag'"
+       --> @dm:eval customer_id = "'$customer_id'"
+       --> @dm:eval bot_name = "'k8s-nodes-images'"
+       --> @dm:eval bot_source_type = "'kubernetes-inventory'"
+       --> @dm:save name = 'temp-k8s-nodes-images_info_success_status'
+       --> @rn:write-stream name = 'asset_inventory_collection_status_stream'
+    --> @exec:end-if
+
+## Kubernetes Cluster PODs Inventory
+--> @c:data-loop dataset='temp-variable-dataset' & columns = 'ip_address,kubernetes_src_name,customer_tag,customer_id'
+    --> @dm:empty
+    --> @dm:addrow ip_address = '$ip_address'
+    --> @$kubernetes_src_name:pods column_name='ip_address'
+    --> *exec:if-condition collection_status != 'Success'
+       --> *dm:filter * get source_ip as 'asset_id',collection_status,collection_timestamp,collection_reason as 'reason'
+       --> @dm:map attr = 'collection_timestamp' & func = 'ts_to_datetimestr' & unit = 'ms'
+       --> @dm:eval bot_source_name = "'$kubernetes_src_name'"
+       --> @dm:eval customer_tag = "'$customer_tag'"
+       --> @dm:eval customer_id = "'$customer_id'"
+       --> @dm:eval bot_name = "'k8s-pods'"
+       --> @dm:eval bot_source_type = "'kubernetes-inventory'"
+       --> @dm:save name = 'temp-k8s-pods_info_failed_status'
+       --> @rn:write-stream name = 'asset_inventory_collection_status_stream'
+    --> @exec:end-if
+    --> *exec:if-condition collection_status = 'Success'
+       --> @dm:save name = 'temp-kubernetes_pods_info'
+       ##--> @dm:save name = 'kubernetes_pods_info_init'
+       --> @dm:dedup columns = 'source_ip'
+       --> *dm:filter * get source_ip as 'asset_id',collection_status,collection_timestamp,collection_reason as 'reason'
+       --> @dm:map attr = 'collection_timestamp' & func = 'ts_to_datetimestr' & unit = 'ms'
+       --> @dm:eval bot_source_name = "'$kubernetes_src_name'"
+       --> @dm:eval customer_tag = "'$customer_tag'"
+       --> @dm:eval customer_id = "'$customer_id'"
+       --> @dm:eval bot_name = "'k8s-pods'"
+       --> @dm:eval bot_source_type = "'kubernetes-inventory'"
+       --> @dm:save name = 'temp-k8s-pods_info_success_status'
+       --> @rn:write-stream name = 'asset_inventory_collection_status_stream'
+    --> @exec:end-if
+
+## Kubernetes Cluster POD Containers Inventory
+--> @c:data-loop dataset='temp-variable-dataset' & columns = 'ip_address,kubernetes_src_name,customer_tag,customer_id'
+    --> @dm:empty
+    --> @dm:addrow ip_address = '$ip_address'
+    --> @$kubernetes_src_name:pod-containers column_name='ip_address'
+    --> *exec:if-condition collection_status != 'Success'
+       --> *dm:filter * get source_ip as 'asset_id',collection_status,collection_timestamp,collection_reason as 'reason'
+       --> @dm:map attr = 'collection_timestamp' & func = 'ts_to_datetimestr' & unit = 'ms'
+       --> @dm:eval bot_source_name = "'$kubernetes_src_name'"
+       --> @dm:eval customer_tag = "'$customer_tag'"
+       --> @dm:eval customer_id = "'$customer_id'"
+       --> @dm:eval bot_name = "'k8s-pod-containers'"
+       --> @dm:eval bot_source_type = "'kubernetes-inventory'"
+       --> @dm:save name = 'temp-k8s-pod-containers_info_failed_status'
+       --> @rn:write-stream name = 'asset_inventory_collection_status_stream'
+    --> @exec:end-if
+    --> *exec:if-condition collection_status = 'Success'
+       --> @dm:save name = 'temp-kubernetes_containers_info'
+       --> @dm:dedup columns = 'source_ip'
+       --> *dm:filter * get source_ip as 'asset_id',collection_status,collection_timestamp,collection_reason as 'reason'
+       --> @dm:map attr = 'collection_timestamp' & func = 'ts_to_datetimestr' & unit = 'ms'
+       --> @dm:eval bot_source_name = "'$kubernetes_src_name'"
+       --> @dm:eval customer_tag = "'$customer_tag'"
+       --> @dm:eval customer_id = "'$customer_id'"
+       --> @dm:eval bot_name = "'k8s-pod-containers'"
+       --> @dm:eval bot_source_type = "'kubernetes-inventory'"
+       --> @dm:save name = 'temp-k8s-pod-containers_info_success_status'
+       --> @rn:write-stream name = 'asset_inventory_collection_status_stream'
+    --> @exec:end-if
+
+## Kubernetes Cluster Deployment Inventory
+--> @c:data-loop dataset='temp-variable-dataset' & columns = 'ip_address,kubernetes_src_name,customer_tag,customer_id'
+    --> @dm:empty
+    --> @dm:addrow ip_address = '$ip_address'
+    --> @$kubernetes_src_name:deployment column_name='ip_address'
+    --> *exec:if-condition collection_status != 'Success'
+       --> *dm:filter * get source_ip as 'asset_id',collection_status,collection_timestamp,collection_reason as 'reason'
+       --> @dm:map attr = 'collection_timestamp' & func = 'ts_to_datetimestr' & unit = 'ms'
+       --> @dm:eval bot_source_name = "'$kubernetes_src_name'"
+       --> @dm:eval customer_tag = "'$customer_tag'"
+       --> @dm:eval customer_id = "'$customer_id'"
+       --> @dm:eval bot_name = "'k8s-deployment'"
+       --> @dm:eval bot_source_type = "'kubernetes-inventory'"
+       --> @dm:save name = 'temp-k8s-deployment_info_failed_status'
+       --> @rn:write-stream name = 'asset_inventory_collection_status_stream'
+    --> @exec:end-if
+    --> *exec:if-condition collection_status = 'Success'
+       --> @dm:save name = 'temp-kubernetes_deployments_info'
+       --> @dm:dedup columns = 'source_ip'
+       --> *dm:filter * get source_ip as 'asset_id',collection_status,collection_timestamp,collection_reason as 'reason'
+       --> @dm:map attr = 'collection_timestamp' & func = 'ts_to_datetimestr' & unit = 'ms'
+       --> @dm:eval bot_source_name = "'$kubernetes_src_name'"
+       --> @dm:eval customer_tag = "'$customer_tag'"
+       --> @dm:eval customer_id = "'$customer_id'"
+       --> @dm:eval bot_name = "'k8s-deployment'"
+       --> @dm:eval bot_source_type = "'kubernetes-inventory'"
+       --> @dm:save name = 'temp-k8s-deployment_info_success_status'
+       --> @rn:write-stream name = 'asset_inventory_collection_status_stream'
+    --> @exec:end-if
+
+## Kubernetes Cluster Deployment Containers Inventory
+--> @c:data-loop dataset='temp-variable-dataset' & columns = 'ip_address,kubernetes_src_name,customer_tag,customer_id'
+    --> @dm:empty
+    --> @dm:addrow ip_address = '$ip_address'
+    --> @$kubernetes_src_name:deployment-containers column_name='ip_address'
+    --> *exec:if-condition collection_status != 'Success'
+       --> *dm:filter * get source_ip as 'asset_id',collection_status,collection_timestamp,collection_reason as 'reason'
+       --> @dm:map attr = 'collection_timestamp' & func = 'ts_to_datetimestr' & unit = 'ms'
+       --> @dm:eval bot_source_name = "'$kubernetes_src_name'"
+       --> @dm:eval customer_tag = "'$customer_tag'"
+       --> @dm:eval customer_id = "'$customer_id'"
+       --> @dm:eval bot_name = "'k8s-deployment-containers'"
+       --> @dm:eval bot_source_type = "'kubernetes-inventory'"
+       --> @dm:save name = 'temp-k8s-deployment-containers_info_failed_status'
+       --> @rn:write-stream name = 'asset_inventory_collection_status_stream'
+    --> @exec:end-if
+    --> *exec:if-condition collection_status = 'Success'
+       --> @dm:save name = 'temp-kubernetes_deployment_containers_info'
+       --> @dm:dedup columns = 'source_ip'
+       --> *dm:filter * get source_ip as 'asset_id',collection_status,collection_timestamp,collection_reason as 'reason'
+       --> @dm:map attr = 'collection_timestamp' & func = 'ts_to_datetimestr' & unit = 'ms'
+       --> @dm:eval bot_source_name = "'$kubernetes_src_name'"
+       --> @dm:eval customer_tag = "'$customer_tag'"
+       --> @dm:eval customer_id = "'$customer_id'"
+       --> @dm:eval bot_name = "'k8s-deployment-containers'"
+       --> @dm:eval bot_source_type = "'kubernetes-inventory'"
+       --> @dm:save name = 'temp-k8s-deployment-containers_info_success_status'
+       --> @rn:write-stream name = 'asset_inventory_collection_status_stream'
+    --> @exec:end-if
+
+## Kubernetes Cluster Services Inventory
+--> @c:data-loop dataset='temp-variable-dataset' & columns = 'ip_address,kubernetes_src_name,customer_tag,customer_id'
+    --> @dm:empty
+    --> @dm:addrow ip_address = '$ip_address'
+    --> @$kubernetes_src_name:services column_name='ip_address'
+    --> *exec:if-condition collection_status != 'Success'
+       --> *dm:filter * get source_ip as 'asset_id',collection_status,collection_timestamp,collection_reason as 'reason'
+       --> @dm:map attr = 'collection_timestamp' & func = 'ts_to_datetimestr' & unit = 'ms'
+       --> @dm:eval bot_source_name = "'$kubernetes_src_name'"
+       --> @dm:eval customer_tag = "'$customer_tag'"
+       --> @dm:eval customer_id = "'$customer_id'"
+       --> @dm:eval bot_name = "'k8s-services'"
+       --> @dm:eval bot_source_type = "'kubernetes-inventory'"
+       --> @dm:save name = 'temp-k8s-services_info_failed_status'
+       --> @rn:write-stream name = 'asset_inventory_collection_status_stream'
+    --> @exec:end-if
+    --> *exec:if-condition collection_status = 'Success'
+       --> @dm:save name = 'temp-kubernetes_pod_services_info'
+       --> @dm:dedup columns = 'source_ip'
+       --> *dm:filter * get source_ip as 'asset_id',collection_status,collection_timestamp,collection_reason as 'reason'
+       --> @dm:map attr = 'collection_timestamp' & func = 'ts_to_datetimestr' & unit = 'ms'
+       --> @dm:eval bot_source_name = "'$kubernetes_src_name'"
+       --> @dm:eval customer_tag = "'$customer_tag'"
+       --> @dm:eval customer_id = "'$customer_id'"
+       --> @dm:eval bot_name = "'k8s-services'"
+       --> @dm:eval bot_source_type = "'kubernetes-inventory'"
+       --> @dm:save name = 'temp-k8s-services_info_success_status'
+       --> @rn:write-stream name = 'asset_inventory_collection_status_stream'
+    --> @exec:end-if
+
+## Kubernetes Cluster Service Ports Inventory
+--> @c:data-loop dataset='temp-variable-dataset' & columns = 'ip_address,kubernetes_src_name,customer_tag,customer_id'
+    --> @dm:empty
+    --> @dm:addrow ip_address = '$ip_address'
+    --> @$kubernetes_src_name:service-ports column_name='ip_address'
+    --> *exec:if-condition collection_status != 'Success'
+       --> *dm:filter * get source_ip as 'asset_id',collection_status,collection_timestamp,collection_reason as 'reason'
+       --> @dm:map attr = 'collection_timestamp' & func = 'ts_to_datetimestr' & unit = 'ms'
+       --> @dm:eval bot_source_name = "'$kubernetes_src_name'"
+       --> @dm:eval customer_tag = "'$customer_tag'"
+       --> @dm:eval customer_id = "'$customer_id'"
+       --> @dm:eval bot_name = "'k8s-service-ports'"
+       --> @dm:eval bot_source_type = "'kubernetes-inventory'"
+       --> @dm:save name = 'temp-k8s-services-ports_info_failed_status'
+       --> @rn:write-stream name = 'asset_inventory_collection_status_stream'
+    --> @exec:end-if
+    --> *exec:if-condition collection_status = 'Success'
+       --> @dm:save name = 'temp-kubernetes_pod_service_ports_info'
+       --> @dm:dedup columns = 'source_ip'
+       --> *dm:filter * get source_ip as 'asset_id',collection_status,collection_timestamp,collection_reason as 'reason'
+       --> @dm:map attr = 'collection_timestamp' & func = 'ts_to_datetimestr' & unit = 'ms'
+       --> @dm:eval bot_source_name = "'$kubernetes_src_name'"
+       --> @dm:eval customer_tag = "'$customer_tag'"
+       --> @dm:eval customer_id = "'$customer_id'"
+       --> @dm:eval bot_name = "'k8s-service-ports'"
+       --> @dm:eval bot_source_type = "'kubernetes-inventory'"
+       --> @dm:save name = 'temp-k8s-service-ports_info_success_status'
+       --> @rn:write-stream name = 'asset_inventory_collection_status_stream'
+    --> @exec:end-if
+
+## Kube Endpoints
+--> @c:data-loop dataset='temp-variable-dataset' & columns = 'ip_address,kubernetes_src_name,customer_tag,customer_id'
+    --> @dm:empty
+    --> @dm:addrow ip_address = '$ip_address'
+    --> @$kubernetes_src_name:endpoints column_name='ip_address'
+    --> *exec:if-condition collection_status != 'Success'
+       --> *dm:filter * get source_ip as 'asset_id',collection_status,collection_timestamp,collection_reason as 'reason'
+       --> @dm:map attr = 'collection_timestamp' & func = 'ts_to_datetimestr' & unit = 'ms'
+       --> @dm:eval bot_source_name = "'$kubernetes_src_name'"
+       --> @dm:eval customer_tag = "'$customer_tag'"
+       --> @dm:eval customer_id = "'$customer_id'"
+       --> @dm:eval bot_name = "'k8s-endpoints'"
+       --> @dm:eval bot_source_type = "'kubernetes-inventory'"
+       --> @dm:save name = 'temp-k8s-endpoints_info_failed_status'
+       --> @rn:write-stream name = 'asset_inventory_collection_status_stream'
+    --> @exec:end-if
+    --> *exec:if-condition collection_status = 'Success'
+       --> @dm:save name = 'temp-kubernetes_pod_endpoints_info'
+       --> @dm:dedup columns = 'source_ip'
+       --> *dm:filter * get source_ip as 'asset_id',collection_status,collection_timestamp,collection_reason as 'reason'
+       --> @dm:map attr = 'collection_timestamp' & func = 'ts_to_datetimestr' & unit = 'ms'
+       --> @dm:eval bot_source_name = "'$kubernetes_src_name'"
+       --> @dm:eval customer_tag = "'$customer_tag'"
+       --> @dm:eval customer_id = "'$customer_id'"
+       --> @dm:eval bot_name = "'k8s-endpoints'"
+       --> @dm:eval bot_source_type = "'kubernetes-inventory'"
+       --> @dm:save name = 'temp-k8s-endpoints_info_success_status'
+       --> @rn:write-stream name = 'asset_inventory_collection_status_stream'
+    --> @exec:end-if
+
+## Kube Endpoint addresses
+--> @c:data-loop dataset='temp-variable-dataset' & columns = 'ip_address,kubernetes_src_name,customer_tag,customer_id'
+    --> @dm:empty
+    --> @dm:addrow ip_address = '$ip_address'
+    ## --> @dm:save name = 'k8s-op-ipaddress'
+    --> @$kubernetes_src_name:endpoint-addresses column_name='ip_address'
+    ## --> @dm:save name = 'k8s-op'
+    --> *exec:if-condition collection_status != 'Success'
+       --> *dm:filter * get source_ip as 'asset_id',collection_status,collection_timestamp,collection_reason as 'reason'
+       --> @dm:map attr = 'collection_timestamp' & func = 'ts_to_datetimestr' & unit = 'ms'
+       --> @dm:eval bot_source_name = "'$kubernetes_src_name'"
+       --> @dm:eval customer_tag = "'$customer_tag'"
+       --> @dm:eval customer_id = "'$customer_id'"
+       --> @dm:eval bot_name = "'k8s-endpoint-addresses'"
+       --> @dm:eval bot_source_type = "'kubernetes-inventory'"
+       --> @dm:save name = 'temp-k8s-endpoints-addresses_info_failed_status'
+       --> @rn:write-stream name = 'asset_inventory_collection_status_stream'
+    --> @exec:end-if
+    --> *exec:if-condition collection_status = 'Success'
+       --> @dm:save name = 'temp-kubernetes_pod_endpoint_addresses_info'
+       ## --> @dm:save name = 'test-kubernetes_pod_endpoint_addresses_info'
+       --> @dm:dedup columns = 'source_ip'
+       --> *dm:filter * get source_ip as 'asset_id',collection_status,collection_timestamp,collection_reason as 'reason'
+       --> @dm:map attr = 'collection_timestamp' & func = 'ts_to_datetimestr' & unit = 'ms'
+       --> @dm:eval bot_source_name = "'$kubernetes_src_name'"
+       --> @dm:eval customer_tag = "'$customer_tag'"
+       --> @dm:eval customer_id = "'$customer_id'"
+       --> @dm:eval bot_name = "'k8s-endpoint-addresses'"
+       --> @dm:eval bot_source_type = "'kubernetes-inventory'"
+       --> @dm:save name = 'temp-k8s-endpoints-addresses_info_success_status'
+       --> @rn:write-stream name = 'asset_inventory_collection_status_stream'
+    --> @exec:end-if
+
+## Kubernetes Cluster Inventory - Data Processing
+## Kubernetes Cluster Nodes - Data processing
+--> @c:data-loop dataset='temp-variable-dataset' & columns = 'kubernetes_src_name,customer_tag,customer_id'
+    --> @dm:recall name = 'temp-kubernetes_nodes_info' & return_empty = 'yes'
+    --> *exec:if-shape num_rows > 0
+       --> *exec:if-condition collection_status = 'Success'
+          --> @dm:fixcolumns
+          ## --> @dm:save name = 'k8s-bfr-filter'
+          --> *dm:filter * get type as 'kube_node_type',metadata_name as 'kube_node_hostname',status_addresses_InternalIP as 'kube_node_ip',status_nodeInfo_systemUUID as 'kube_node_bios_uuid',source_ip as 'kube_controller_ip',metadata_labels_kubernetes_io_os as 'kube_node_os_type',status_nodeInfo_osImage as 'kube_node_os_name',status_nodeInfo_kernelVersion as 'kube_node_os_kernel_version',status_nodeInfo_kubeletVersion as 'kube_cluster_version',collection_timestamp,collection_status,collection_reason as 'reason'
+          --> @dm:map attr = 'collection_timestamp' & func = 'ts_to_datetimestr' & unit = 'ms'
+          --> @dm:map from = 'kube_node_bios_uuid' & to = 'kube_node_bios_uuid_reverse'
+          --> @dm:map-multi-proc attr = 'kube_node_bios_uuid' & func = 'reverse_uuid_endian'
+          --> @dm:add-missing-columns columns = 'kube_cluster_name'
+          --> @dm:fixnull columns = 'kube_cluster_name' & value = '$kubernetes_src_name'
+          --> @dm:map from = 'kube_node_ip,kube_node_bios_uuid' & to = 'unique_id' & func = 'join' & sep = "_"
+          --> @dm:eval asset_object = "'Node'"
+          --> @dm:eval asset_status = "'Active'"
+          --> @dm:eval customer_tag = "'$customer_tag'"
+          --> @dm:eval customer_id = "'$customer_id'"
+          --> @dm:save name = 'temp-kubernetes_node_systems_info'
+          --> @rn:write-stream name = 'kubernetes-cluster-inventory'
+       --> @exec:end-if
+    --> @exec:end-if
+
+## Kubernetes Cluster Nodes - Data processing
+--> @c:data-loop dataset='temp-variable-dataset' & columns = 'kubernetes_src_name,customer_tag,customer_id'
+    --> @dm:recall name = 'temp-kubernetes_images_info' & return_empty = 'yes'
+    --> *exec:if-shape num_rows > 0
+       --> *exec:if-condition collection_status = 'Success'
+          --> @dm:fixcolumns
+          --> *dm:filter * get type as 'kube_node_type',names as 'kube_node_image_name_temp',node_containerRuntimeVersion as 'kube_node_containerd_version',source_ip as 'kube_controller_ip',node_systemUUID as 'kube_node_bios_uuid',node_operatingSystem as 'kube_node_os_type',node_osImage as 'kube_node_os_name',node_kernelVersion as 'kube_node_os_kernel_version',node_kubeletVersion as 'kube_cluster_version',sizeBytes as 'kube_node_image_size',collection_timestamp,collection_status,collection_reason as 'reason'
+          --> @dm:map attr = 'collection_timestamp' & func = 'ts_to_datetimestr' & unit = 'ms'
+          --> @dm:map-multi-proc attr = 'kube_node_bios_uuid' & func = 'reverse_uuid_endian'
+          --> @dm:enrich dict = 'temp-kubernetes_node_systems_info' & src_key_cols = 'kube_node_bios_uuid' & dict_key_cols = 'kube_node_bios_uuid' & enrich_cols = 'kube_node_hostname,kube_node_ip'
+          --> @dm:grok column = 'kube_node_image_name_temp' & pattern = "%{DATA}:%{DATA:kube_node_image_id},%{GREEDYDATA:kube_node_image_name}"
+          --> @dm:selectcolumns exclude = '^kube_node_image_name_temp$'
+          --> @dm:add-missing-columns columns = 'kube_cluster_name'
+          --> @dm:fixnull columns = 'kube_cluster_name' & value = '$kubernetes_src_name'
+          --> @dm:map from = 'kube_node_image_name,kube_node_image_id' & to = 'unique_id' & func = 'join' & sep = "_"
+          --> @dm:eval asset_object = "'Image'"
+          --> @dm:eval asset_status = "'Active'"
+          --> @dm:eval customer_tag = "'$customer_tag'"
+          --> @dm:eval customer_id = "'$customer_id'"
+          --> @dm:save name = 'temp-kubernetes_node_images_info'
+          --> @rn:write-stream name = 'kubernetes-cluster-inventory'
+       --> @exec:end-if
+    --> @exec:end-if
+
+## Kubernetes - Pods Info - Data processing
+--> @c:data-loop dataset='temp-variable-dataset' & columns = 'kubernetes_src_name,customer_tag,customer_id'
+    --> @dm:recall name = 'temp-kubernetes_pods_info' & return_empty = 'yes'
+    ##--> @dm:save name = 'kubernetes_pods_info'
+    --> *exec:if-shape num_rows > 0
+       --> *exec:if-condition collection_status = 'Success'
+          --> @dm:fixcolumns
+          --> *dm:safe-filter * get metadata_name as 'kube_pod_name',metadata_labels_name as 'kube_pod_shortname',metadata_namespace as 'kube_namespace',spec_nodeName as 'kube_node_hostname',status_hostIP as 'kube_node_ip',status_podIPs as 'kube_pod_ip',metadata_uid as 'kube_pod_uuid',metadata_labels_app as 'kube_pod_app_label',status_phase as 'kube_pod_status',source_ip as 'kube_controller_ip',collection_timestamp,collection_status,collection_reason as 'reason'
+          ##--> @dm:save name = 'kubernetes_pods_info2'
+          --> @dm:map attr = 'collection_timestamp' & func = 'ts_to_datetimestr' & unit = 'ms'
+          --> @dm:map attr = 'kube_pod_uuid' & func = 'strip'
+          --> @dm:add-missing-columns columns = 'kube_cluster_name'
+          --> @dm:eval customer_tag = "'$customer_tag'"
+          --> @dm:eval customer_id = "'$customer_id'"
+          --> @dm:fixnull columns = 'kube_cluster_name' & value = '$kubernetes_src_name'
+          --> @dm:save name = 'temp-kubernetes_pods_system_info'
+          ##--> @dm:save name = 'kubernetes_pods_system_info'
+       --> @exec:end-if
+    --> @exec:end-if
+
+## ##
+## Kubernetes - Pods Containers Info - Data Processing
+--> @c:data-loop dataset='temp-variable-dataset' & columns = 'kubernetes_src_name,customer_tag,customer_id'
+    --> @dm:recall name = 'temp-kubernetes_containers_info' & return_empty = 'yes'
+    ##--> @dm:save name = 'kubernetes_containers_info'
+    --> *exec:if-shape num_rows > 0
+       --> *exec:if-condition collection_status = 'Success'
+          --> @dm:fixcolumns
+          --> *dm:filter * get pod_name as 'kube_pod_name',nodeName as 'kube_node_hostname',containerID as 'kube_pod_container_id_full',pod_uid as 'kube_pod_uuid',state_running_startedAt as 'kube_prod_start_time',source_ip as 'kube_controller_ip',collection_timestamp,collection_status,collection_reason as 'reason'
+          --> @dm:map attr = 'collection_timestamp' & func = 'ts_to_datetimestr' & unit = 'ms'
+          --> @dm:grok column = 'kube_pod_container_id_full' & pattern = "docker://%{GREEDYDATA:kube_pod_container_id}"
+          ## --> @dm:eval kube_pod_container_id = "kube_pod_container_id[0:12] if kube_pod_container_id else kube_pod_container_id"
+          --> @dm:map attr = 'kube_pod_uuid' & func = 'strip'
+          --> @dm:enrich dict = 'temp-kubernetes_pods_system_info' & src_key_cols = 'kube_pod_uuid' & dict_key_cols = 'kube_pod_uuid' & enrich_cols = 'kube_namespace,kube_node_ip,kube_pod_ip,kube_pod_status,kube_pod_app_label,kube_pod_shortname'
+          ##--> @dm:save name = 'kube_node_ip-after-enrch'
+          --> @dm:enrich dict = 'temp-kubernetes_node_systems_info' & src_key_cols = 'kube_node_hostname,kube_controller_ip' & dict_key_cols = 'kube_node_hostname,kube_controller_ip' & enrich_cols = 'kube_node_bios_uuid'
+          --> @dm:add-missing-columns columns = 'kube_cluster_name'
+          --> @dm:fixnull columns = 'kube_cluster_name' & value = '$kubernetes_src_name'
+          --> @dm:map from = 'kube_pod_uuid,kube_pod_container_id' & to = 'unique_id' & func = 'join' & sep = "_"
+          --> @dm:eval asset_object = "'POD'"
+          --> @dm:eval asset_status = "'Active'"
+          --> @dm:eval customer_tag = "'$customer_tag'"
+          --> @dm:eval customer_id = "'$customer_id'"
+          --> @dm:save name = 'temp-kubernetes_pods_container_updated_info'
+          --> @rn:write-stream name = 'kubernetes-cluster-inventory'
+       --> @exec:end-if
+    --> @exec:end-if
+
+## Kubernetes - Endpoints Info - Data processing
+--> @c:data-loop dataset='temp-variable-dataset' & columns = 'kubernetes_src_name,customer_tag,customer_id'
+    --> @dm:recall name = 'temp-kubernetes_pod_endpoint_addresses_info' & return_empty = 'yes'
+    --> *exec:if-shape num_rows > 0
+       --> *exec:if-condition collection_status = 'Success'
+          --> @dm:fixcolumns
+          --> *dm:filter * get targetRef_name as 'kube_pod_name',targetRef_namespace as 'kube_namespace',nodeName as 'kube_node_hostname',ports as 'kube_pod_ports',ip as 'kube_pod_ip',source_ip as 'kube_controller_ip',collection_timestamp,collection_status,collection_reason as 'reason'
+          --> @dm:add-missing-columns columns = 'kube_cluster_name'
+          --> @dm:eval customer_tag = "'$customer_tag'"
+          --> @dm:eval customer_id = "'$customer_id'"
+          --> @dm:fixnull columns = 'kube_cluster_name' & value = '$kubernetes_src_name'
+          --> @dm:save name = 'temp-kubernetes_endpoints_info'
+       --> @exec:end-if
+    --> @exec:end-if
+
+## ##
+## Kubernetes - Services and Ports Data processing
+--> @c:data-loop dataset='temp-variable-dataset' & columns = 'kubernetes_src_name,customer_tag,customer_id'
+    --> @dm:recall name = 'temp-kubernetes_pod_services_info' & return_empty = 'yes'
+    --> *exec:if-shape num_rows > 0
+       --> *exec:if-condition collection_status = 'Success'
+          --> @dm:fixcolumns
+          --> *dm:filter * get source_ip as 'kube_controller_ip',metadata_labels_k8s_app as 'kube_service_app_name',metadata_name as 'kube_service_name',metadata_namespace as 'kube_namespace',spec_clusterIP as 'kube_service_ip',spec_type as 'kube_service_type',collection_timestamp,collection_status,collection_reason as 'reason'
+          --> @dm:map attr = 'collection_timestamp' & func = 'ts_to_datetimestr' & unit = 'ms'
+          --> @dm:add-missing-columns columns = 'kube_cluster_name'
+          --> @dm:eval customer_tag = "'$customer_tag'"
+          --> @dm:eval customer_id = "'$customer_id'"
+          --> @dm:fixnull columns = 'kube_cluster_name' & value = '$kubernetes_src_name'
+          --> @dm:save name = 'temp-kubernetes_services_info'
+       --> @exec:end-if
+    --> @exec:end-if
+
+## ##
+--> @c:data-loop dataset='temp-variable-dataset' & columns = 'kubernetes_src_name,customer_tag,customer_id'
+    --> @dm:recall name = 'temp-kubernetes_pod_service_ports_info' & return_empty = 'yes'
+    --> *exec:if-shape num_rows > 0
+       --> *exec:if-condition collection_status = 'Success'
+          --> @dm:fixcolumns
+          --> *dm:filter * get source_ip as 'kube_controller_ip',name as 'kube_service_port_name',service_name as 'kube_service_name',service_namespace as 'kube_namespace', port as 'kube_service_port',targetPort as 'kube_service_target_port',port as 'kube_service_node_port',collection_timestamp,collection_status,collection_reason as 'reason'
+          --> @dm:map attr = 'collection_timestamp' & func = 'ts_to_datetimestr' & unit = 'ms'
+          --> @dm:add-missing-columns columns = 'kube_cluster_name'
+          --> @dm:fixnull columns = 'kube_cluster_name' & value = '$kubernetes_src_name'
+          --> @dm:map from = 'kube_service_name,kube_namespace,kube_service_port_name,kube_service_port' & to = 'unique_id' & func = 'join' & sep = "_"
+          --> @dm:eval asset_object = "'Service'"
+          --> @dm:eval asset_status = "'Active'"
+          --> @dm:eval customer_tag = "'$customer_tag'"
+          --> @dm:eval customer_id = "'$customer_id'"
+          --> @dm:save name = 'temp-kubernetes_services_port_info'
+          --> @rn:write-stream name = 'kubernetes-cluster-inventory'
+       --> @exec:end-if
+    --> @exec:end-if
+
+## Kubernetes - Services and Endpoints Data processing
+--> @c:data-loop dataset='temp-variable-dataset' & columns = 'kubernetes_src_name,customer_tag,customer_id'
+    --> @dm:recall name = 'temp-kubernetes_pod_endpoint_addresses_info' & return_empty = 'yes'
+    --> *exec:if-shape num_rows > 0
+       --> *exec:if-condition collection_status = 'Success'
+          --> @dm:fixcolumns
+          --> *dm:filter * get source_ip as 'kube_controller_ip',endpoint_name as 'kube_service_name',endpoint_namespace as 'kube_namespace',nodeName as 'kube_node_hostname',targetRef_kind as 'kube_endpoint_type',targetRef_name as 'kube_endpoint_name',ip as 'kube_endpoint_ip',targetRef_namespace as 'kube_endpoint_namespace',collection_timestamp,collection_status,collection_reason as 'reason'
+          --> @dm:map attr = 'collection_timestamp' & func = 'ts_to_datetimestr' & unit = 'ms'
+          --> @dm:add-missing-columns columns = 'kube_cluster_name'
+          --> @dm:fixnull columns = 'kube_cluster_name' & value = '$kubernetes_src_name'
+          --> @dm:enrich dict = 'temp-kubernetes_pods_container_updated_info' & src_key_cols = 'kube_cluster_name,kube_endpoint_name,kube_namespace' & dict_key_cols = 'kube_cluster_name,kube_pod_name,kube_namespace' & enrich_cols = 'kube_pod_uuid'
+          --> @dm:selectcolumns exclude = '^kube_pod_name$'
+          --> @dm:map from = 'kube_service_name,kube_namespace,kube_endpoint_name,kube_endpoint_ip' & to = 'unique_id' & func = 'join' & sep = "_"
+          --> @dm:eval asset_object = "'ServiceEndpoint'"
+          --> @dm:eval asset_status = "'Active'"
+          --> @dm:eval customer_tag = "'$customer_tag'"
+          --> @dm:eval customer_id = "'$customer_id'"
+          --> @dm:save name = 'temp-kubernetes_services_endpoints_info'
+          --> @rn:write-stream name = 'kubernetes-cluster-inventory'
+       --> @exec:end-if
+    --> @exec:end-if
+

@@ -1,0 +1,191 @@
+##This pipeline needs customer_tag or customerTag in context 
+##If its not provided to the pipeline it does not run
+%% stream = no and limit = 0
+
+%%template_type="jinja"
+
+%% import_src_type = "kubernetes-inventory,linux-inventory"
+%%start_inline_object name="context_dynamic_form" and type="data" and format="json"
+{
+    "formFieldList": [
+        {
+            "fieldId": "customer_tag",
+            "label": "Tag of the customer",
+            "required": false,
+            "dataType": "string"
+        }
+    ]
+}
+%%end_inline_object
+@dm:empty
+    --> @dm:save name = "temp-customer-context"
+
+   {% if customer_tag %} 
+      {% set customer_id = customer_id %}
+      {% set customer_tag = customer_tag %}
+      {% set customerTag = customer_tag %}
+   {% elif customerTag %} 
+      {% set customer_id = customer_id %}
+      {% set customer_tag = customerTag %}
+   {% else %}
+      {% set customer_id = '' %}
+      {% set customer_tag = '' %}
+   {% endif %}   
+   
+
+--> @dm:empty
+    --> @dm:save name = 'temp-variable-dataset'
+  
+   --> @dm:save name = 'temp-variable-dataset-interim'
+
+
+--> @c:new-block
+    --> @exec:get-input
+    ##--> @dm:save name = 'others'
+    --> @dm:selectcolumns include = "Others|customer_tag|customer_id"
+    ## --> @dm:skip-pipeline-if-shape column_count = 0
+     
+    --> @dm:explode-json column="Others"
+   
+    ##--> @dm:save name="try-input"
+    --> @dm:rename-columns kubernetes_src_name = 'credential'
+    --> @dm:save name = 'temp-variable-dataset'
+    ##--> @dm:save name="try1"
+
+
+--> @c:new-block
+    --> @dm:recall name = 'temp-variable-dataset'
+    ##--> *exec:if-shape num_rows = 0
+       --> @dm:empty
+       {% if customer_tag %} 
+         --> #dm:query-persistent-stream type in ['kubernetes-inventory','linux-inventory'] and (customerTag contains '{{customer_tag}}') with-input name = 'rda_secrets_meta' and limit= 0
+      {% else %}
+         --> #dm:query-persistent-stream type in ['kubernetes-inventory','linux-inventory'] and (customerTag is empty) with-input name = 'rda_secrets_meta' and limit= 0
+      {% endif %}    
+       --> @dm:save name = 'temp-kubernetes-sources'
+        ##--> @dm:save name = 'test-kubernetes-sources'
+        --> @dm:recall name = 'temp-variable-dataset'
+            --> @dm:enrich dict="temp-kubernetes-sources" and src_key_cols="kubernetes_src_name" and dict_key_cols="name" and enrich_cols="type"
+          --> @dm:save name = 'temp-variable-dataset'
+
+          ##--> @dm:save name = 'test-variable-dataset28'
+      
+       --> @c:new-block
+    --> @dm:recall name = 'temp-variable-dataset'
+    --> *exec:if-shape num_rows = 0
+       --> @exec:for-loop num_rows = 1
+       --> #dm:query-persistent-stream credential contains '{%-raw-%}{{row["name"]}}{%-endraw-%}'  with-input name = 'kubernetes_on_boarded_devices' and limit= 0
+          --> @dm:save name = 'temp-variable-dataset-interim' & append='yes' & return_appended_dataset = 'yes'
+       --> @exec:end-loop
+       
+       --> @dm:recall name = 'temp-variable-dataset-interim'
+       --> *exec:if-shape num_rows = 0    
+         --> @dm:recall name = 'temp-kubernetes-sources' and return_empty = "yes"
+         -->@dm:eval  discovery_scope = "'yes'"
+         --> @dm:rename-columns kubernetes_src_name = 'name'
+         --> @dm:save name = 'temp-variable-dataset'
+         ##--> @dm:save name="try3"
+      --> @exec:end-if
+      
+       --> *exec:if-shape num_rows > 0  
+         --> *dm:safe-filter discovery_scope == 'yes'   
+         ##-->@dm:eval  discovery_scope = "'yes'"
+         ##--> @dm:rename-columns kubernetes_src_name = 'name'
+         --> @dm:save name = 'temp-variable-dataset'
+         ##--> @dm:save name="try4"
+      --> @exec:end-if
+    --> @exec:end-if
+##Add customer context to the dataset
+--> @c:data-loop dataset='temp-variable-dataset' & columns = 'kubernetes_src_name,type'
+    --> @dm:recall name = 'temp-variable-dataset'
+    
+     --> @dm:empty
+       {% if customer_tag %} 
+            --> #dm:query-persistent-stream credential is '$kubernetes_src_name' and  discovery_scope is 'yes' and customer_tag is '{{customer_tag}}' with-input name = "kubernetes_on_boarded_devices" & limit = "0"
+       {% else %} 
+            --> #dm:query-persistent-stream credential is '$kubernetes_src_name' and discovery_scope is 'yes' and (customer_tag is empty or customer_tag is 'None') with-input name = "kubernetes_on_boarded_devices" & limit = "0"
+       {% endif %} 
+  
+    --> @dm:eval type =   "'$type'"
+    --> @dm:eval customer_id =  "'{{customer_id}}'"
+    --> @dm:eval customer_id =  "'{{customer_id}}'"
+    --> @dm:eval customer_tag =  "'{{customer_tag}}'"
+   --> @dm:save name = 'temp-dataset' and append="yes"
+
+-->@c:new-block
+   --> @dm:recall name = 'temp-dataset'  
+   ##--> @dm:save name = 'test-dataset-type'
+   
+   -->*dm:filter type is "kubernetes-inventory"
+    --> @dm:rename-columns kubernetes_src_name="credential"
+   --> @dm:save name = 'temp-kubernetes-type'
+   -->@c:new-block
+   --> @dm:recall name = 'temp-dataset'  
+  
+   -->*dm:filter type is "linux-inventory"
+    --> @dm:rename-columns linux_src_name="credential"
+   
+   --> @dm:save name = 'temp-linux-type'
+   
+
+## access verification for type kubernetes-inventory
+--> @c:data-loop dataset='temp-kubernetes-type' & columns = 'kubernetes_src_name,customer_id,customer_tag,ip_address'
+    --> @dm:empty
+    --> @dm:addrow     ip_address = "$ip_address"
+    --> @$kubernetes_src_name:configmap  column_name = "ip_address"
+    ##--> @dm:save name = 'nodes'
+    --> *exec:if-condition collection_status != 'Success'
+       --> *dm:safe-filter * get source_ip as 'asset_ip',collection_status,collection_timestamp,reason
+       --> @dm:map to = 'collection_timestamp' & func = 'time_now'
+       --> @dm:eval bot_source_name = "'$kubernetes_src_name'"
+       --> @dm:eval bot_source_type = "'kubernetes-inventory'"
+       --> @dm:eval bot_name = "'configmap'"
+       --> @dm:eval customer_id = "'$customer_id'"
+       --> @dm:eval customer_tag = "'$customer_tag'"
+       --> @dm:save name="temp-packs_asset_inventory_collection_status" & append = 'yes'
+       ##--> @dm:save name="try8"
+       --> @rn:write-stream name = 'kubernetes_access_verification_status'
+    --> @exec:end-if
+    --> *exec:if-condition collection_status = 'Success'
+       --> @dm:eval kubernetes_name = "'$kubernetes_src_name'"
+       --> @dm:save name = 'temp-kubernetes-configmap' & append = 'yes'
+       --> @dm:dedup columns = 'source_ip'
+       --> *dm:safe-filter * get source_ip as 'asset_ip',collection_status,collection_timestamp,reason
+       --> @dm:map attr = 'collection_timestamp' & func = 'ts_to_datetimestr' & unit = 'ms'
+       --> @dm:eval bot_source_name = "'$kubernetes_src_name'"
+       --> @dm:eval bot_source_type = "'kubernetes-inventory'"
+       --> @dm:eval customer_id = "'$customer_id'"
+       --> @dm:eval customer_tag = "'$customer_tag'"
+       --> @dm:eval bot_name = "'configmap'"
+       --> @dm:save name="temp-packs_asset_inventory_collection_status" & append = 'yes'
+       --> @rn:write-stream name = 'kubernetes_access_verification_status'
+    --> @exec:end-if
+
+## access verification for type linux-inventory
+--> @c:data-loop  dataset = 'temp-linux-type' & columns = 'linux_src_name,customer_id,customer_tag,ip_address'
+ --> @dm:empty
+    --> @dm:addrow     ip_address = "$ip_address"
+    --> @$linux_src_name:system-info column_name='ip_address' & concurrent_discovery = '100' & connect_timeout = '600' & cli_timeout = '150'
+    ##-->@dm:save name = "linux-access"
+    --> *exec:if-condition collection_status != 'Success'
+       --> *dm:safe-filter * get source_ip as 'asset_ip',collection_status,collection_timestamp,reason
+       --> @dm:map attr = 'collection_timestamp' & func = 'ts_to_datetimestr' & unit = 'ms'
+       --> @dm:eval bot_source_name = "'$linux_src_name'"
+       --> @dm:eval bot_source_type = "'linux-inventory'"
+       --> @dm:eval bot_name = "'system-info'"
+       --> @dm:eval customer_id = "'$customer_id'"
+       --> @dm:eval customer_tag = "'$customer_tag'"
+       --> @rn:write-stream name = 'kubernetes_access_verification_status'
+    --> @exec:end-if
+    --> *exec:if-condition collection_status = 'Success'
+       --> @dm:save name = 'temp-linux_os_system_inventory' & append = 'yes'
+       --> @dm:dedup columns = 'source_ip'
+       --> *dm:safe-filter * get source_ip as 'asset_ip',collection_status,collection_timestamp,reason
+       --> @dm:map attr = 'collection_timestamp' & func = 'ts_to_datetimestr' & unit = 'ms'
+       --> @dm:eval bot_source_name = "'$linux_src_name'"
+       --> @dm:eval bot_source_type = "'linux-inventory'"
+       --> @dm:eval bot_name = "'system-info'"
+       --> @dm:eval customer_id = "'$customer_id'"
+       --> @dm:eval customer_tag = "'$customer_tag'"
+       --> @rn:write-stream name = 'kubernetes_access_verification_status'
+    --> @exec:end-if

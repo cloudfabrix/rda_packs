@@ -1,0 +1,111 @@
+%% stream = no and limit = 0
+
+## # Kubernetes Cluster Inventory (Nodes, PODs, Services, Deployments etc)
+##This pipeline needs customer_tag or customerTag in context 
+##If its not provided to the pipeline it does not run
+%% stream = no and limit = 0
+
+%%template_type="jinja"
+
+%% import_src_type = "kubernetes-inventory"
+%%start_inline_object name="context_dynamic_form" and type="data" and format="json"
+{
+    "formFieldList": [
+        {
+            "fieldId": "customer_tag",
+            "label": "Tag of the customer",
+            "required": false,
+            "dataType": "string"
+        }
+    ]
+}
+%%end_inline_object
+@dm:empty
+    --> @dm:save name = "temp-customer-context"
+
+   {% if customer_tag %} 
+      {% set customer_id = customer_id %}
+      {% set customer_tag = customer_tag %}
+      {% set customerTag = customer_tag %}
+   {% elif customerTag %} 
+      {% set customer_id = customer_id %}
+      {% set customer_tag = customerTag %}
+   {% else %}
+      {% set customer_id = '' %}
+      {% set customer_tag = '' %}
+   {% endif %}   
+   
+
+--> @dm:empty
+    --> @dm:save name = 'temp-variable-dataset'
+   --> @dm:save name = 'temp-kubernetes-sources'
+   --> @dm:save name = 'temp-variable-dataset-interim'
+
+
+--> @c:new-block
+    --> @exec:get-input
+    --> @dm:selectcolumns include = "Others|customer_tag|customer_id"
+    ## --> @dm:skip-pipeline-if-shape column_count = 0
+    --> @dm:explode-json column="Others"
+  
+    --> @dm:rename-columns kubernetes_src_name = 'name'
+    --> @dm:save name = 'temp-variable-dataset'
+   
+
+
+--> @c:new-block
+    --> @dm:recall name = 'temp-variable-dataset'
+    --> *exec:if-shape num_rows = 0
+       --> @dm:empty
+       {% if customer_tag %} 
+         --> #dm:query-persistent-stream type contains 'kubernetes-inventory' and (customerTag contains '{{customer_tag}}') with-input name = 'rda_secrets_meta' and limit= 0
+      {% else %}
+         --> #dm:query-persistent-stream type contains 'kubernetes-inventory' and (customerTag is empty) with-input name = 'rda_secrets_meta' and limit= 0
+      {% endif %}    
+       --> @dm:save name = 'temp-kubernetes-sources'
+       --> @dm:recall name = 'temp-kubernetes-sources'
+       
+       
+       --> @exec:for-loop num_rows = 1
+       --> #dm:query-persistent-stream kubernetes_src_name contains '{%-raw-%}{{row["name"]}}{%-endraw-%}'  with-input name = 'kubernetes_on_boarded_devices' and limit= 0
+          --> @dm:save name = 'temp-variable-dataset-interim' & append='yes' & return_appended_dataset = 'yes'
+       --> @exec:end-loop
+       
+       --> @dm:recall name = 'temp-variable-dataset-interim'
+       
+       
+       --> *exec:if-shape num_rows = 0    
+         --> @dm:recall name = 'temp-kubernetes-sources'
+         -->@dm:eval  discovery_scope = "'yes'"
+         --> @dm:rename-columns kubernetes_src_name = 'name'
+         --> @dm:save name = 'temp-variable-dataset'
+       
+      --> @exec:end-if
+      
+       --> *exec:if-shape num_rows > 0  
+         --> *dm:safe-filter discovery_scope == 'yes'   
+         ##-->@dm:eval  discovery_scope = "'yes'"
+         ##--> @dm:rename-columns kubernetes_src_name = 'name'
+         --> @dm:save name = 'temp-variable-dataset'
+         
+      --> @exec:end-if
+    --> @exec:end-if
+##Add customer context to the dataset
+--> @c:data-loop dataset='temp-variable-dataset' & columns = 'kubernetes_src_name'
+    --> @dm:recall name = 'temp-variable-dataset'
+    
+     --> @dm:empty
+       {% if customer_tag %} 
+            --> #dm:query-persistent-stream credential is '$kubernetes_src_name' and  discovery_scope is 'yes' and customer_tag is '{{customer_tag}}' with-input name = "kubernetes_on_boarded_devices" & limit = "0"
+       {% else %} 
+            --> #dm:query-persistent-stream credential is '$kubernetes_src_name' and discovery_scope is 'yes' and (customer_tag is empty or customer_tag is 'None') with-input name = "kubernetes_on_boarded_devices" & limit = "0"
+       {% endif %} 
+   --> @dm:rename-columns kubernetes_src_name="credential"
+    ##--> @dm:eval customer_id =  "'{{customer_id}}'"
+    ##--> @dm:eval customer_id =  "'{{customer_id}}'"
+    ##--> @dm:eval customer_tag =  "'{{customer_tag}}'"
+   --> @dm:save name = 'temp-variable-dataset' 
+   --> @exec:run-pipeline name = 'kubernetes_cluster_inventory'
+
+
+

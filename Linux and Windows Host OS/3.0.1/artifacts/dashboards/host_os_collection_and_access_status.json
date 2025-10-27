@@ -1,0 +1,361 @@
+{
+    "name": "host_os_collection_and_access_status",
+    "label": "Host OS Collection status",
+    "description": "Host OS collection and access verification status",
+    "dashboard_folder": "HostOSInventory",
+    "version": "1.0.3",
+    "enabled": false,
+    "dashboard_type": "template",
+    "template_variables": {
+        "CUST_ID": {
+            "contextId": "customerId"
+        },
+        "PROJ_ID": {
+            "contextId": "projectId"
+        },
+        "CUST_TAG": {
+            "contextId": "customerTag"
+        }
+    },
+    "dashboard_sections": [
+        {
+            "title": "Access Verification Status",
+            "show_filter": true,
+            "widgets": [
+                {
+                    "title": "Access Verification Status",
+                    "widget_type": "tabular",
+                    "stream": "host_os_access_verification_status",
+                    "extra_filter": "customer_tag is '{{CUST_TAG}}' or customer_tag is empty",
+                    "height": 4,
+                    "max_width": 12,
+                    "min_width": 12,
+                    "columns": {
+                        "asset_id": {
+                            "title": "Host IP",
+                            "key": true,
+                            "visible": true,
+                            "hidden": false
+                        },
+                        "access_verification_timestamp": {
+                            "title": "Verification Time",
+                            "type": "DATETIME",
+                            "visible": true
+                        },
+                        "access_verification_status": {
+                            "title": "Status",
+                            "htmlTemplateForRow": "{%raw%}<span class='badge' style='background-color: {{ row.status_color }}' > {{ row.access_verification_status }} </span>{%endraw%}"
+                        },
+                        "bot_source_name": {
+                            "title": "Credential Used"
+                        },
+                        "host_type": {
+                            "title": "Type"
+                        },
+                        "bot_name": {
+                            "title": "Bot Name",
+                            "visible": false
+                        },
+                        "reason": {
+                            "title": "Failure Reason"
+                        }
+                    },
+                    "custom_columns": [
+                        {
+                            "id": "status_color",
+                            "label": "Discovery Scope Color",
+                            "key": false,
+                            "visible": false,
+                            "expr": "'#008000' if access_verification_status == 'Success' else '#FF0000'"
+                        }
+                    ],
+                    "widget_id": "b2c8d81c"
+                }
+            ]
+        },
+        {
+            "title": "Collection Status",
+            "show_filter": true,
+            "widgets": [
+                {
+                    "widget_type": "label",
+                    "label": "<div style='text-align:center;width:100%;'><h1><a style='text-decoration:none;color:#0066ff;' target='_blank'> LINUX OS </a></h1></div>",
+                    "max_width": 12,
+                    "height": 0.1,
+                    "min_width": 12,
+                    "widget_id": "a2e0ffb4"
+                },
+                {
+                    "title": "Total Linux OS",
+                    "widget_type": "counter",
+                    "stream": "asset_inventory_collection_status_stream",
+                    "extra_filter": "bot_source_type is 'linux_os'  and collection_status in ['Failed','Success'] and bot_name is 'system-info' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "ts_column": "collection_timestamp",
+                    "column": "asset_id",
+                    "min_width": 3,
+                    "height": 4,
+                    "max_width": 3,
+                    "agg": "cardinality",
+                    "type": "str",
+                    "widget_id": "8f81fe68"
+                },
+                {
+                    "widget_type": "counter",
+                    "title": "Discovery status",
+                    "stream": "asset_inventory_collection_status_stream",
+                    "extra_filter": "bot_source_type is 'linux_os' and bot_name is 'system-info' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "ts_column": "collection_timestamp",
+                    "min_width": 3,
+                    "height": 4,
+                    "max_width": 3,
+                    "duration_hours0": 24,
+                    "style0": {
+                        "color-map": {
+                            "Success": "#00BB00",
+                            "Failed": "#BB0000"
+                        }
+                    },
+                    "group_by": [
+                        "collection_status"
+                    ],
+                    "column": "asset_id",
+                    "agg": "cardinality",
+                    "type": "str",
+                    "widget_id": "74f6c74a"
+                },
+                {
+                    "title": "Total Linux OS Success",
+                    "min_width": 3,
+                    "height": 3,
+                    "max_width": 3,
+                    "widget_type": "expression_counter",
+                    "expression": "0 if Total == 0 else (success/Total)*100",
+                    "extra_filter": "bot_source_name is 'linux' and collection_status in ['Failed','Success'] and bot_name is 'system-info' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "unit": "%",
+                    "stream": "asset_inventory_collection_status_stream",
+                    "ts_column": "collection_timestamp",
+                    "segments": [
+                        {
+                            "variable": "Total",
+                            "stream": "asset_inventory_collection_status_stream",
+                            "ts_column": "collection_timestamp",
+                            "column": "asset_id",
+                            "duration_hours0": 9600,
+                            "agg": "cardinality",
+                            "type": "int"
+                        },
+                        {
+                            "variable": "success",
+                            "stream": "asset_inventory_collection_status_stream",
+                            "ts_column": "collection_timestamp",
+                            "extra_filter": "collection_status is 'Success' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                            "column": "asset_id",
+                            "duration_hours0": 9600,
+                            "agg": "cardinality",
+                            "type": "int"
+                        }
+                    ],
+                    "widget_id": "c29afdc1"
+                },
+                {
+                    "title": "Total Linux OS Failed",
+                    "min_width": 3,
+                    "height": 3,
+                    "max_width": 3,
+                    "widget_type": "expression_counter",
+                    "expression": "0 if Total == 0 else (Failed/Total)*100",
+                    "extra_filter": "bot_source_name is 'linux' and collection_status in ['Failed','Success'] and bot_name is 'system-info' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "unit": "%",
+                    "stream": "asset_inventory_collection_status_stream",
+                    "ts_column": "timestamp",
+                    "segments": [
+                        {
+                            "variable": "Total",
+                            "stream": "asset_inventory_collection_status_stream",
+                            "ts_column": "timestamp",
+                            "column": "asset_id",
+                            "duration_hours0": 9600,
+                            "agg": "cardinality",
+                            "type": "int"
+                        },
+                        {
+                            "variable": "Failed",
+                            "stream": "asset_inventory_collection_status_stream",
+                            "ts_column": "timestamp",
+                            "extra_filter": "collection_status is 'Failed' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                            "column": "asset_id",
+                            "duration_hours0": 9600,
+                            "agg": "cardinality",
+                            "type": "int"
+                        }
+                    ],
+                    "widget_id": "9f4851e9"
+                },
+                {
+                    "widget_type": "label",
+                    "label": "<div style='text-align:center;width:100%;'><h1><a style='text-decoration:none;color:#0066ff;' target='_blank'> WINDOWS OS </a></h1></div>",
+                    "max_width": 12,
+                    "height": 0.1,
+                    "min_width": 12,
+                    "widget_id": "85e27aaf"
+                },
+                {
+                    "title": "Total Windows OS",
+                    "widget_type": "counter",
+                    "stream": "asset_inventory_collection_status_stream",
+                    "extra_filter": "bot_source_type is 'windows_os' and bot_name is 'system-info' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "ts_column": "timestamp",
+                    "duration_hours0": 48,
+                    "column": "asset_id",
+                    "min_width": 3,
+                    "height": 4,
+                    "max_width": 3,
+                    "agg": "cardinality",
+                    "type": "str",
+                    "widget_id": "7fa65386"
+                },
+                {
+                    "widget_type": "counter",
+                    "title": "Discovery status",
+                    "stream": "asset_inventory_collection_status_stream",
+                    "extra_filter": "bot_source_type is 'windows_os' and bot_name is 'system-info' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "ts_column": "timestamp",
+                    "min_width": 3,
+                    "height": 4,
+                    "max_width": 3,
+                    "duration_hours": 48,
+                    "style": {
+                        "color-map": {
+                            "Success": "#00BB00",
+                            "Failed": "#BB0000"
+                        }
+                    },
+                    "group_by": [
+                        "collection_status"
+                    ],
+                    "column": "asset_id",
+                    "agg": "cardinality",
+                    "type": "str",
+                    "widget_id": "19b3c8e0"
+                },
+                {
+                    "title": "Total Windows OS Success",
+                    "min_width": 3,
+                    "height": 3,
+                    "max_width": 3,
+                    "widget_type": "expression_counter",
+                    "expression": "0 if Total == 0 else (success/Total)*100",
+                    "extra_filter": "bot_source_type is 'windows_os' and collection_status in ['Failed','Success'] and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty) ",
+                    "unit": "%",
+                    "stream": "asset_inventory_collection_status_stream",
+                    "ts_column": "timestamp",
+                    "segments": [
+                        {
+                            "variable": "Total",
+                            "stream": "asset_inventory_collection_status_stream",
+                            "ts_column": "timestamp",
+                            "column": "asset_id",
+                            "duration_hours0": 9600,
+                            "agg": "cardinality",
+                            "type": "int"
+                        },
+                        {
+                            "variable": "success",
+                            "stream": "asset_inventory_collection_status_stream",
+                            "ts_column": "timestamp",
+                            "extra_filter": "collection_status is 'Success' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                            "column": "asset_id",
+                            "duration_hours0": 9600,
+                            "agg": "cardinality",
+                            "type": "int"
+                        }
+                    ],
+                    "widget_id": "47a4be89"
+                },
+                {
+                    "title": "Total Windows OS Failed",
+                    "min_width": 3,
+                    "height": 3,
+                    "max_width": 3,
+                    "widget_type": "expression_counter",
+                    "expression": "0 if Total == 0 else (Failed/Total)*100",
+                    "extra_filter": "bot_source_type is 'windows_os' and collection_status in ['Failed','Success'] and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "unit": "%",
+                    "stream": "asset_inventory_collection_status_stream",
+                    "ts_column": "timestamp",
+                    "segments": [
+                        {
+                            "variable": "Total",
+                            "stream": "asset_inventory_collection_status_stream",
+                            "ts_column": "timestamp",
+                            "column": "asset_id",
+                            "duration_hours0": 9600,
+                            "agg": "cardinality",
+                            "type": "int"
+                        },
+                        {
+                            "variable": "Failed",
+                            "stream": "asset_inventory_collection_status_stream",
+                            "ts_column": "timestamp",
+                            "extra_filter": "collection_status is 'Failed' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                            "column": "asset_id",
+                            "duration_hours0": 9600,
+                            "agg": "cardinality",
+                            "type": "int"
+                        }
+                    ],
+                    "widget_id": "840f52e4"
+                },
+                {
+                    "title": "Collection Status",
+                    "widget_type": "tabular",
+                    "stream": "asset_inventory_collection_status_stream",
+                    "extra_filter": "customer_tag is '{{CUST_TAG}}' or customer_tag is empty",
+                    "height": 4,
+                    "max_width": 12,
+                    "min_width": 12,
+                    "columns": {
+                        "asset_id": {
+                            "title": "Host IP",
+                            "key": true,
+                            "visible": true,
+                            "hidden": false
+                        },
+                        "collection_timestamp": {
+                            "title": "Collection time",
+                            "type": "DATETIME",
+                            "visible": true
+                        },
+                        "collection_status": {
+                            "title": "Status",
+                            "htmlTemplateForRow": "{%raw%}<span class='badge' style='background-color: {{ row.status_color }}' > {{ row.collection_status }} </span>{%endraw%}"
+                        },
+                        "bot_source_name": {
+                            "title": "Bot Source Name"
+                        },
+                        "bot_source_type": {
+                            "title": "Bot Source Type"
+                        },
+                        "bot_name": {
+                            "title": "Bot Name"
+                        },
+                        "reason": {
+                            "title": "Failure Reason"
+                        }
+                    },
+                    "custom_columns": [
+                        {
+                            "id": "status_color",
+                            "label": "Discovery Scope Color",
+                            "key": false,
+                            "visible": false,
+                            "expr": "'#008000' if collection_status == 'Success' else '#FF0000'"
+                        }
+                    ],
+                    "widget_id": "5493167a"
+                }
+            ]
+        }
+    ],
+    "saved_time": "2025-10-27T18:02:50.578672"
+}

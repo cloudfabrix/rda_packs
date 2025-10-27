@@ -1,0 +1,38 @@
+name: Kubernetes
+id: kubernetes
+version: 2024021201031903
+category: ITSM
+comment: kubernetes
+enabled: true
+type: Scheduled
+provider: CloudFabrix Software, Inc.
+attrs: {
+    customer_id: $PKG_CONTEXT_CUSTOMER_ID,
+    customer_tag: $PKG_CONTEXT_CUSTOMER_TAG
+}
+run_context: {
+    customer_id: $PKG_CONTEXT_CUSTOMER_ID,
+    customer_tag: $PKG_CONTEXT_CUSTOMER_TAG
+}
+scheduled_pipelines:
+    -   name: kubernetes_cluster_rdaf_platform_linux_inventory
+        label: Kubernetes Cluster RDAF Platform Linux Inventory
+        version: '*'
+        site: .*
+        site_type: regex
+        cron_expression: 0 1 * * *
+    
+    -   name: kubernetes_cluster_rdaf_production_inventory
+        label: Kubernetes Cluster RDAF Production Inventory
+        version: '*'
+        site: .*
+        site_type: regex
+        cron_expression: 0 3 * * *
+    -   name: kubernetes_cluster_rdaf_production_topology
+        label: Kubernetes Cluster RDAF Production Topology
+        version: '*'
+        site: .*
+        site_type: regex
+        cron_expression: 0 4 * * *
+   
+saved_time: '2024-03-01T07: 14: 16.390898'

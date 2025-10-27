@@ -579,7 +579,7 @@
     --> *dm:safe-filter topology_ingestion_id is not empty
     --> *exec:if-shape num_rows > 0
        --> @dm:dedup columns = 'topology_ingestion_id'
-
+       
        --> @exec:for-loop num_rows = 1
        {% if customer_tag %}
          --> #dm:pstream-delete-data-by-query topology_ingestion_id != '{%- raw -%}{{row.topology_ingestion_id}}{%- endraw -%}' & vcenter_name = '{%- raw -%}{{row.vcenter_name}}{%- endraw -%}' and customer_tag is '{{customer_tag}}' with-input name = 'cfx_rdaf_topology_nodes' & timeout = 300

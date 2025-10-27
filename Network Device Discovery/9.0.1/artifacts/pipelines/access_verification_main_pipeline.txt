@@ -1,0 +1,122 @@
+%% stream = no and limit = 0
+%% template_type="jinja"
+%% import_src_type = "asset-discovery"
+##%% import_src_type = "diagnostictools"
+%%start_inline_object name="context_dynamic_form" and type="data" and format="json"
+{
+    "formFieldList": [
+        {
+            "fieldId": "customer_tag",
+            "label": "Tag of the customer",
+            "required": false,
+            "dataType": "string"
+        }
+    ]
+}
+%%end_inline_object
+
+@dm:empty
+    --> @dm:save name = "temp-customer-context"
+    
+
+## {% set row = "" %}
+{% if customer_tag %} 
+   {% set customer_id = customer_id %}
+   {% set customer_tag = customer_tag %}
+   {% set customerTag = customer_tag %}
+{% elif customerTag %} 
+   {% set customer_id = customer_id %}
+   {% set customer_tag = customerTag %}
+{% else %}
+   {% set customer_id = '' %}
+   {% set customer_tag = '' %}
+{% endif %}   
+
+
+--> @c:new-block
+    --> @exec:get-input 
+    --> @dm:save name="temp-access-verify"
+
+
+-->  @c:new-block     
+
+-->  @dm:empty 
+{% if customer_tag %}   
+   -->  #dm:query-persistent-stream     type in ['snmp-cred','ssh-cred','device-snmp-v3','device-host-ssh','device-snmp-v1v2'] and (customerTag contains '{{customer_tag}}') with-input name = 'rda_secrets_meta' and limit= 0
+{% else %}
+   -->  #dm:query-persistent-stream     type in ['snmp-cred','ssh-cred','device-snmp-v3','device-host-ssh','device-snmp-v1v2'] and (customerTag is empty) with-input name = 'rda_secrets_meta' and limit= 0
+{% endif %}
+--> @dm:eval key ="'key'"  
+--> @dm:eval snmp_cred_name = "name if type in ['snmp-cred','device-snmp-v3','device-snmp-v1v2'] else None" 
+--> @dm:eval ssh_cred_name = "name if type in ['ssh-cred','device-host-ssh'] else None"                     
+-->  @dm:save     name = 'temp-creds'
+
+
+--> @c:new-block
+  -->  @dm:recall     name = 'temp-creds' and return_empty = "yes"
+  -->  *dm:filter snmp_cred_name is not empty
+  -->  @dm:eval     key ="'key'"
+  -->  @dm:save     name = 'temp-creds-snmp'
+
+--> @c:new-block
+  -->  @dm:recall     name = 'temp-creds' and return_empty = "yes"
+  -->  *dm:filter ssh_cred_name is not empty
+  -->  @dm:eval     key ="'key'"
+  -->  @dm:save     name = 'temp-creds-ssh'
+   
+  
+--> @c:new-block
+    --> @dm:recall name="temp-access-verify" and return_empty = "yes"
+    --> @dm:skip-block-if-shape row_count = 0
+    --> @dm:selectcolumns include = "Others|customer_tag|customer_id"
+    ## --> @dm:eval Others = 'Others.replace("\'", "\"")'
+    --> @dm:explode-json column="Others"
+    --> @dm:eval key ="'key'"
+    --> @dm:save name="temp-network-access-verification-pipeline"
+
+ 
+--> @c:new-block
+    --> @dm:recall name="temp-access-verify" and return_empty = "yes"
+    --> @dm:skip-block-if-shape row_count > 0     
+ {% if customer_tag %} 
+           -->  #dm:query-persistent-stream     device_ip is not empty and (customer_tag is '{{customer_tag}}') with-input name = "discovery" & limit = "0"
+ {% else %}
+           -->  #dm:query-persistent-stream     device_ip is not empty and (customer_tag is empty or customer_tag is 'None') with-input name = "discovery" & limit = "0"
+ {% endif %}
+-->  *dm:filter     device_ip not in ['nan', 'not available']
+--> @dm:selectcolumns include = "^device_ip$|^discovery_scope$|customer_tag|customer_id"
+-->  @dm:dedup     columns= "device_ip"
+-->  @dm:eval     key ="'key'"
+--> @dm:save name = 'temp-network-access-verification-pipeline'
+
+     
+
+--> @c:new-block
+    --> @dm:recall name="temp-network-access-verification-pipeline" and return_empty = "yes"
+    --> @dm:add-missing-columns columns = "customer_tag,customer_id"  & value = "None"
+    -->  @dm:dedup     columns= "device_ip"
+    --> @dm:save name="temp-ip-list"
+
+
+--> @c:data-loop columns="snmp_cred_name" and dataset ="temp-creds-snmp" and return_empty = "yes"
+--> @dm:recall name = 'temp-ip-list' and return_empty = "yes"
+--> @dm:eval snmp_cred_name ="'$snmp_cred_name'"
+--> @dm:counter
+--> @dm:save name="temp-ip-list-snmp" & append = "yes"
+ 
+    
+--> @c:data-loop columns="ssh_cred_name" and dataset ="temp-creds-ssh" and return_empty = "yes"
+--> @dm:recall name = 'temp-ip-list' and return_empty = "yes"
+--> @dm:eval ssh_cred_name ="'$ssh_cred_name'"
+--> @dm:counter
+--> @dm:save name="temp-ip-list-ssh" & append = "yes"
+
+--> @c:new-block
+--> @dm:recall name = 'temp-ip-list-snmp' and return_empty = "yes"
+--> @dm:enrich dict = "temp-ip-list-ssh" & src_key_cols = "device_ip,COUNTER" & dict_key_cols = "device_ip,COUNTER" & enrich_cols = "ssh_cred_name" & return_empty_dict = "yes" & return_empty_cols = "yes"
+--> @dm:dedup     columns= "device_ip,snmp_cred_name,ssh_cred_name"
+--> @dm:eval pipeline_name = "'network_access_verification_pipeline'"
+--> @dm:save name="temp-snmp-ssh-creds"
+--> @dm:save name = 'temp-ip'
+--> @exec:run-pipeline-by-row-multi-proc pipeline_col = "pipeline_name"  
+

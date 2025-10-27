@@ -1,0 +1,11 @@
+%% stream = no and limit = 0
+
+%% import_src_type = "kubernetes-inventory"
+
+## # Kubernetes Cluster Inventory (Nodes, PODs, Services, Deployments etc)
+@c:new-block
+    --> @dm:empty
+    --> @dm:addrow k8s_cluster_ip='10.95.125.50' & k8s_cluster_name='rdaf_prod' & k8s_cluster_src_name='rdaf_prod'
+    --> @dm:save name = 'temp-variable-dataset'
+    --> @exec:run-pipeline name = 'kubernetes_cluster_rdaf_platform_linux_inventory'
+

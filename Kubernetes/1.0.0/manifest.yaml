@@ -1,0 +1,232 @@
+name: Kubernetes
+label: Kubernetes Cluster
+scope: system
+version: 1.0.0
+folder: /collection/kubernetes
+published_date: 2025-08-21
+publisher: Fabrix.ai
+description: 
+  md: "./description.md"
+
+requires:
+  - name: Fabrix Inventory Collection Base Pack
+    version: ">=7.2.0"
+    
+artifacts:
+  credentials:
+    - name: graph
+      type: graphdb
+
+  pstreams:
+    - name: kubernetes-cluster-inventory
+      attributes:
+        unique_keys: ["unique_id"]
+        search_case_insensitive: true
+      _settings:
+        number_of_shards: 3
+        number_of_replicas: 1
+        refresh_interval: 30s
+
+    - name: host-os-inventory
+      attributes:
+        retention_days: 5
+        unique_keys: ["unique_id"]
+        search_case_insensitive: true
+        _settings:
+          number_of_shards: 3
+          number_of_replicas: 1
+          refresh_interval: "30s"
+        timestamp: "collection_timestamp"
+        retention_purge_extra_filter: "asset_status = 'Purge'"
+        _mappings:
+          properties:
+            host_cpus:
+              type: "double"
+            host_cores_per_socket:
+              type: "double"
+            host_cpu_sockets:
+              type: "double"
+            host_threads_per_core:
+              type: "double"
+            host_memory_gb:
+              type: "double"
+            host_os_nic_mtu:
+              type: "double"
+            host_os_disk_size:
+              type: "double"
+            host_os_disk_size_gb:
+              type: "double"
+            host_os_process_pid:
+              type: "double"
+            host_os_process_ppid:
+              type: "double"
+            host_os_service_pid:
+              type: "double"
+            client_port:
+              type: "double"
+            server_port:
+              type: "double"
+            host_os_fs_used_perc:
+              type: "double"
+            host_os_fs_size_gb:
+              type: "double"
+            host_os_fs_used_gb:
+              type: "double"
+            host_os_fs_available_gb:
+              type: "double"
+
+
+    - name: kubernetes_on_boarded_devices
+      attributes:
+        retention_days: 365
+        unique_keys: ["ip_address","credential"]
+      autocreate: true
+
+    - name: kubernetes_access_verification_status
+      attributes:
+        retention_days: 7
+        unique_keys: ["asset_ip","bot_source_name"]
+      autocreate: true
+    
+    - name: network-endpoints-identity-stream 
+      attributes:
+        unique_keys: ["unique_id"]
+        timestamp: "collection_timestamp"
+        retention_days: 3
+        search_case_insensitive: true
+        _settings:
+          number_of_shards: 3
+          number_of_replicas: 1
+          refresh_interval: "30s"
+
+  dashboards:
+    - name: kubernetes_cluster_detailed_view
+      file: ./artifacts/dashboards/kubernetes_cluster_detailed_view.json
+    - name: kubernetes_topology
+      file: ./artifacts/dashboards/kubernetes_topology.json
+    - name: kubernetes_collection_and_access_status
+      file: ./artifacts/dashboards/kubernetes_collection_and_access_status.json
+    - name: kubernetes_configure_and_manage
+      file: ./artifacts/dashboards/kubernetes_configure_and_manage.json
+    - name: kubernetes_inventory
+      file: ./artifacts/dashboards/kubernetes_inventory.json
+    - name: kubernetes-inventory-analytics
+      file: ./artifacts/dashboards/kubernetes-inventory-analytics.json
+
+  pipelines:
+    - name: kubernetes_cluster_inventory
+      version: 2025.08.05.1
+      file: ./artifacts/pipelines/kubernetes_cluster_inventory.txt
+      folder: kubernetespack
+    - name: kubernetes_cluster_topology
+      version: 2025.08.05.1
+      file: ./artifacts/pipelines/kubernetes_cluster_topology.txt
+      folder: kubernetespack
+    - name: kubernetes_cluster_rdaf_platform_linux_inventory
+      version: 2025.08.05.1
+      file: ./artifacts/pipelines/kubernetes_cluster_rdaf_platform_linux_inventory.txt
+      folder: kubernetespack
+    - name: kubernetes_cluster_rdaf_production_inventory
+      version: 2025.08.05.1
+      file: ./artifacts/pipelines/kubernetes_cluster_rdaf_production_inventory.txt
+      folder: kubernetespack
+      skip_validation: true
+    - name: kubernetes_cluster_rdaf_production_topology
+      version: 2025.08.05.1
+      file: ./artifacts/pipelines/kubernetes_cluster_rdaf_production_topology.txt
+      folder: kubernetespack
+    - name: kubernetes_access_verification
+      version: 2025.08.05.1
+      file: ./artifacts/pipelines/kubernetes_access_verification.txt
+      folder: kubernetespack
+    ##- name: kubernetes_import
+    ##  version: 2025.08.05.1
+    ##  file: ./artifacts/pipelines/kubernetes_import.txt
+    ##  folder: kubernetespack
+      
+    ##- name: kubernetes_cluster_rdaf_platform_linux_production_inventory
+    ##  version: 2025.08.05.1
+    ##  file: ./artifacts/pipelines/kubernetes_cluster_rdaf_platform_linux_production_inventory.txt
+    ##  folder: kubernetespack
+    
+customer_level:
+
+  launch_locations:
+  - pstream_name: rda_packs_dynamic_groups_and_pages
+    dashboard_group_name: groupDiscovery
+    dashboard_group_label: Onboarding
+    dashboard_group_icon: "history.svg"
+    dashboard_page_name: kubernetes_collection_and_access_status
+    dashboard_page_label: Kubernetes Status
+    dashboard_page_icon: "history.svg"
+  - pstream_name: rda_packs_dynamic_groups_and_pages
+    dashboard_group_name: groupDiscovery
+    dashboard_group_label: Onboarding
+    dashboard_group_icon: "settings.svg"
+    dashboard_page_name: kubernetes_configure_and_manage
+    dashboard_page_label: "Kubernetes Management"
+    dashboard_page_icon: "asset.svg"
+  - pstream_name: rda_packs_dynamic_groups_and_pages
+    dashboard_group_name: groupInventory
+    dashboard_group_label: Inventory
+    dashboard_group_icon: "asset.svg"
+    dashboard_page_name: kubernetes_inventory
+    dashboard_page_label: Kubernetes Inventory
+    dashboard_page_icon: "asset.svg"
+   
+  - pstream_name: rda_packs_dynamic_groups_and_pages
+    dashboard_group_name: groupTopo
+    dashboard_group_label: Topology
+    dashboard_group_icon: "topology.svg"
+    dashboard_page_name: kubernetes_topology
+    dashboard_page_label: Kubernetes Topology
+    dashboard_page_icon: "asset.svg" 
+
+  artifacts:
+
+    blueprints:
+      - name: kubernetes
+        file: ./artifacts/blueprints/kubernetes.yaml
+      
+
+single_tenant:
+
+  launch_dashboard: kubernetes-inventory-analytics
+  launch_locations:
+  - pstream_name: rda_packs_dynamic_groups_and_pages
+    dashboard_group_name: groupConfigure
+    dashboard_group_label: Management
+    dashboard_group_icon: "settings.svg"
+    dashboard_page_name: kubernetes_configure_and_manage
+    dashboard_page_label: "Kubernetes Management"
+    dashboard_page_icon: "settings.svg"
+  - pstream_name: rda_packs_dynamic_groups_and_pages
+    dashboard_group_name: groupStatus
+    dashboard_group_label: Status
+    dashboard_group_icon: "history.svg"
+    dashboard_page_name: kubernetes_collection_and_access_status
+    dashboard_page_label: Kubernetes Status
+    dashboard_page_icon: "cluster.svg"
+  - pstream_name: rda_packs_dynamic_groups_and_pages
+    dashboard_group_name: groupTopo
+    dashboard_group_label: Topology
+    dashboard_group_icon: "topology.svg"
+    dashboard_page_name: kubernetes_topology
+    dashboard_page_label: Kubernetes Topology
+    dashboard_page_icon: "topology.svg"
+  - pstream_name: rda_packs_dynamic_groups_and_pages
+    dashboard_group_name: groupInventory
+    dashboard_group_label: Inventory
+    dashboard_group_icon: "asset.svg"
+    dashboard_page_name: kubernetes_inventory
+    dashboard_page_label: Kubernetes Inventory
+    dashboard_page_icon: "settings.svg"
+ 
+  
+
+  artifacts:
+
+    blueprints:
+      - name: kubernetes_single_tenant
+        file: ./artifacts/blueprints/kubernetes_single_tenant.yaml
+      

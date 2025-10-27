@@ -112,7 +112,7 @@
  --> *exec:if-condition collection_status = 'Success'
        --> @dm:eval meraki_name = "'$meraki_src_name'"
        --> @dm:save name = 'temp-vmanage_device_inventory' & append = 'yes'
-       --> @dm:map attr = 'collection_timestamp' & func = 'ts_to_datetimestr' & unit = 'ms'
+       --> @dm:map to = 'collection_timestamp' & func = 'time_now'
        --> @dm:eval bot_source_name = "'$meraki_src_name'"
        --> @dm:eval bot_source_type = "'Meraki'"
        --> @dm:eval bot_name = "'networks'"

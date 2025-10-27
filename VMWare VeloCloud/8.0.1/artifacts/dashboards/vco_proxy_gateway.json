@@ -1,0 +1,303 @@
+{
+    "name": "vco_proxy_gateway",
+    "label": "Velocloud",
+    "description": "VeloCloud",
+    "enabled": true,
+    "dashboard_type": "template",
+    "dashboard_folder": "VCOSystemPack",
+    "dashboard_style": "auto",
+    "template_variables": {
+        "CUST_ID": {
+            "contextId": "customerId"
+        },
+        "PROJ_ID": {
+            "contextId": "projectId"
+        },
+        "CUST_TAG": {
+            "contextId": "tag1"
+        }
+    },
+    "dashboard_filters": {
+        "time_filter": true,
+        "extra_filter": "(customerTag is '{{CUST_TAG}}' or customerTag is empty) and source is 'gateway'",
+        "group_filters": [
+            {
+                "stream": "vco_1",
+                "title": "Status",
+                "duration_hours": 1080,
+                "group_by": [
+                    "gateway_state"
+                ],
+                "ts_column": "timestamp",
+                "extra_filter": "source is 'gateway'",
+                "agg": "value_count",
+                "column": "_RDA_Id",
+                "type": "int"
+            },
+            {
+                "stream": "vco_1",
+                "title": "Activation State",
+                "duration_hours": 1080,
+                "group_by": [
+                    "activationState"
+                ],
+                "ts_column": "timestamp",
+                "extra_filter": "source is 'gateway'",
+                "agg": "value_count",
+                "column": "_RDA_Id",
+                "type": "str"
+            },
+            {
+                "stream": "vco_1",
+                "title": "Service State",
+                "duration_hours": 1080,
+                "group_by": [
+                    "serviceState"
+                ],
+                "ts_column": "timestamp",
+                "extra_filter": "source is 'gateway'",
+                "agg": "value_count",
+                "column": "_RDA_Id",
+                "type": "str"
+            },
+            {
+                "stream": "vco_1",
+                "title": "Software Versions",
+                "duration_hours": 1080,
+                "group_by": [
+                    "gateway_softwareVersion"
+                ],
+                "ts_column": "timestamp",
+                "extra_filter": "source is 'gateway'",
+                "agg": "value_count",
+                "column": "_RDA_Id",
+                "type": "str"
+            }
+        ],
+        "columns_filter": [
+            {
+                "id": "activationState",
+                "label": "Activation_state",
+                "type": "TEXT"
+            },
+            {
+                "id": "gateway_name",
+                "label": " Name",
+                "type": "TEXT"
+            },
+            {
+                "id": "gateway_ip",
+                "label": "Ip Address",
+                "type": "DOUBLE"
+            },
+            {
+                "id": "gateway_state",
+                "label": "Status",
+                "type": "TEXT"
+            },
+            {
+                "id": "serviceState",
+                "label": "Service State",
+                "type": "TEXT"
+            },
+            {
+                "id": "gateway_softwareVersion",
+                "label": "Software Version",
+                "type": "DOUBLE"
+            },
+            {
+                "id": "gateway_softwareVersion",
+                "label": "Software Version",
+                "type": "TEXT"
+            },
+            {
+                "id": "project_id",
+                "label": "Project ID",
+                "type": "TEXT"
+            },
+            {
+                "id": "customer_id",
+                "label": "Customer ID",
+                "type": "TEXT"
+            },
+            {
+                "id": "id",
+                "label": "ID",
+                "type": "DOUBLE"
+            },
+            {
+                "id": "gateway_name",
+                "label": "Name",
+                "type": "TEXT"
+            },
+            {
+                "id": "edge_count",
+                "label": "Connected Edges",
+                "type": "DOUBLE"
+            }
+        ]
+    },
+    "dashboard_sections": [
+        {
+            "title": "Proxy Gateways",
+            "show_filter": true,
+            "widgets": [
+                {
+                    "widget_type": "label",
+                    "max_width": 12,
+                    "height": 0.5,
+                    "min_width": 12,
+                    "label": "<div style='text-align:center;width:100%;'><h1><a style='text-decoration:none;color:#0066ff;' target='_blank'>Customer Gateways</a></h1></div>",
+                    "widget_id": "33317e49"
+                },
+                {
+                    "widget_type": "pie_chart",
+                    "title": "Status",
+                    "stream": "vco_1",
+                    "ts_column": "timestamp",
+                    "duration_hours": 1080,
+                    "column": "_RDA_Id",
+                    "extra_filter": "source is 'gateway'",
+                    "agg": "value_count",
+                    "group_by": [
+                        "gateway_state"
+                    ],
+                    "type": "str",
+                    "min_width": 4,
+                    "orientation": "vertical",
+                    "height": 4,
+                    "max_width": 4,
+                    "style": {
+                        "color-map": {
+                            "CONNECTED": "#4CAF50",
+                            "OFFLINE": " #FF9800"
+                        }
+                    },
+                    "widget_id": "5ecc884"
+                },
+                {
+                    "widget_type": "pie_chart",
+                    "title": "Activation State",
+                    "stream": "vco_1",
+                    "ts_column": "timestamp",
+                    "duration_hours": 1080,
+                    "column": "_RDA_Id",
+                    "extra_filter": "source is 'gateway'",
+                    "agg": "value_count",
+                    "group_by": [
+                        "activationState"
+                    ],
+                    "style": {
+                        "color-map": {
+                            "ACTIVATED": "#4CAF50",
+                            "REACTIVATION_PENDING": " #FF9800"
+                        }
+                    },
+                    "type": "str",
+                    "min_width": 4,
+                    "orientation": "vertical",
+                    "height": 4,
+                    "max_width": 4,
+                    "widget_id": "45ecc884"
+                },
+                {
+                    "widget_type": "pie_chart",
+                    "title": "Service State",
+                    "stream": "vco_1",
+                    "ts_column": "timestamp",
+                    "duration_hours": 1080,
+                    "column": "_RDA_Id",
+                    "agg": "value_count",
+                    "extra_filter": "source is 'gateway'",
+                    "group_by": [
+                        "serviceState"
+                    ],
+                    "type": "str",
+                    "min_width": 4,
+                    "orientation": "vertical",
+                    "height": 4,
+                    "max_width": 4,
+                    "widget_id": "e392e5a8"
+                },
+                {
+                    "title": "Gateways",
+                    "widget_type": "tabular",
+                    "duration_hours": 1080,
+                    "max_width": 12,
+                    "ts_column": "timestamp",
+                    "height": 7,
+                    "showRowSummary": true,
+                    "extra_filter": "source is 'gateway'",
+                    "min_width": 12,
+                    "stream": "vco_1",
+                    "sorting": [
+                        {
+                            "edge_count": "desc"
+                        }
+                    ],
+                    "columns": {
+                        "id": {
+                            "title": "ID",
+                            "value": "user-dashboard-vco_edge-drilldown",
+                            "key": true,
+                            "type": "FIXED_VALUE",
+                            "hidden": true,
+                            "visible": false
+                        },
+                        "gateway_id": "GatewayID",
+                        "gateway_name": "Name",
+                        "gateway_ip": {
+                            "title": "IP Address",
+                            "type": "TEXT",
+                            "key": true,
+                            "visible": true
+                        },
+                        "edge_count": "Connected Edges",
+                        "gateway_state_color": {
+                            "type": "COLOR-MAP",
+                            "visible": true,
+                            "source-column": "gateway_state",
+                            "color-map": {
+                                "CONNECTED": "#4CAF50",
+                                "OFFLINE": " #FF9800"
+                            }
+                        },
+                        "gateway_state": {
+                            "title": "Status",
+                            "type": "TEXT",
+                            "key": true,
+                            "htmlTemplateForRow": "{%raw%}<span class='badge' style='background-color: {{ row.gateway_state_color }}' > {{ row.gateway_state}} </span>{%endraw%}"
+                        },
+                        "activationState_color": {
+                            "type": "COLOR-MAP",
+                            "visible": true,
+                            "source-column": "activationState",
+                            "color-map": {
+                                "ACTIVATED": "#4CAF50",
+                                "REACTIVATION_PENDING": " #FF9800"
+                            }
+                        },
+                        "activationState": {
+                            "title": "Activation State",
+                            "type": "TEXT",
+                            "key": true,
+                            "htmlTemplateForRow": "{%raw%}<span class='badge' style='background-color: {{ row.activationState_color }}' > {{ row.activationState}} </span>{%endraw%}"
+                        },
+                        "gateway_softwareVersion": "Software Version",
+                        "serviceState": "Service State ",
+                        "serviceUpSince": "ServiceUp since ",
+                        "systemUpSince": "systemUp since ",
+                        "utilizationDetail_cpu": "UtilizationDetail Cpu",
+                        "utilizationDetail_memory": "UtilizationDetail Memory",
+                        "utilizationDetail_load": "UtilizationDetail Load",
+                        "utilizationDetail_overall": "UtilizationDetail Overall",
+                        "timestamp": "Timestamp",
+                        "utilization": "Utilization "
+                    },
+                    "widget_id": "fbdfbc96"
+                }
+            ]
+        }
+    ],
+    "saved_time": "2025-03-25T16:14:14.734875"
+}
