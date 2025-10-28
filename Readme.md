@@ -31,7 +31,6 @@ To use a specific pack:
 ## Latest Versions of RDA Packs
 | RDA Pack Name | RDA Pack Version | Supported Fabrix Services | Required Base Packs | Description |
 |---------------|------------------|----------------------------|---------------------|-------------|
-| [Base Pack](https://github.com/cloudfabrix/rda_packs/tree/main/Base%20Pack/5.0.0) | 5.0.0 | api-server >=8.0.0, <br>worker >=8.0.0 |  |  |
 | [Cisco Meraki](https://github.com/cloudfabrix/rda_packs/tree/main/Cisco%20Meraki/9.0.2) | 9.0.2 | api-server >=8.0.0, <br>worker >=8.0.0 | Fabrix Inventory Collection Base Pack >=6.0.0 | Cisco Meraki pack is designed for inventory collection for Meraki using **Meraki-Networks** . |
 | [Cisco vManage](https://github.com/cloudfabrix/rda_packs/tree/main/Cisco%20vManage/9.0.1) | 9.0.1 | api-server >=8.0.0, <br>worker >=8.0.0 | Fabrix Inventory Collection Base Pack >=6.0.0 | Cisco vManage pack is designed for inventory collection for vManage using **query-api** bot. |
 | [Fabrix AIOPs snmp](https://github.com/cloudfabrix/rda_packs/tree/main/Fabrix%20AIOPs%20snmp/10.0.0) | 10.0.0 | worker >=8.1.1, <br>api-server >=8.1.1, <br>alert-processor >=8.1.1, <br>alert-ingester >=8.1.1, <br>alert-correlator >=8.1.1, <br>cfxdimensions-app-irm_service >=8.1.1, <br>cfxdimensions-app-collaboration >=8.1.1 | Network Device Discovery >=9.0.1, <br>Fabrix AIOps Fault Management Base >=9.0.14 | Fabrix AIOPs SNMP Pack collects SNMP alerts. |
