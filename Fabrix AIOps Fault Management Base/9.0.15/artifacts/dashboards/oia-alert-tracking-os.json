@@ -1,0 +1,516 @@
+{
+    "name": "oia-alert-tracking-os",
+    "label": "Open Search Based OIA Alert Tracking",
+    "description": "Open Search Based OIA Alert Tracking",
+    "version": "23.1.2",
+    "enabled": true,
+    "stream": "oia-events-stream",
+    "debug": true,
+    "dashboard_style": "tabbed",
+    "status_poller": {},
+    "dashboard_type": "template",
+    "template_variables": {
+        "PROJECT_ID": {
+            "default": ["61ed50a5-8634-4464-a17e-adf6b40225b2"],
+            "contextId": "USER_PROJECTS"
+        }
+    },
+    "dashboard_filters": {
+        "time_filter": true,
+        "default_time_filter_non_removable": true,
+        "show_default_time_filter": false,
+        "additional_datetime_column_filters": [
+            {
+                "id": "e_createdat",
+                "label": "Created At"
+            },
+            {
+                "id": "e_updatedat",
+                "label": "Updated At"
+             }
+        ],
+        "columns_filter": [
+            {
+                "id": "e_label",
+                "label": "Message",
+                "type": "TEXT"
+            },
+            {
+                "id": "e_customerid",
+                "label": "Customer ID",
+                "type": "TEXT"
+            },
+            {
+                "id": "e_status",
+                "label": "Phase Status",
+                "type": "TEXT"
+            },
+            {
+                "id": "e_sourcesystemname",
+                "label": "Source",
+                "type": "TEXT"
+            },
+            {
+                "id": "e_message",
+                "label": "Comments",
+                "type": "TEXT"
+            },
+            {
+                "id": "e_projectid",
+                "label": "Organizations",
+                "type": "TEXT"
+            },
+            {
+                "id": "e_severity",
+                "label": "Severity",
+                "type": "TEXT"
+            },
+            {
+                "id": "e_sourceeventid",
+                "label": "Source Event Id",
+                "type": "TEXT"
+            },
+            {
+                "id": "e_eventstate",
+                "label": "Phase",
+                "type": "TEXT"
+            },
+            {
+                "id": "e_triggeredevent",
+                "label": "Event Type",
+                "type": "TEXT"
+            },
+            {
+                "id": "e_processedeventid",
+                "label": "Alert Id",
+                "type": "TEXT"
+            },
+            {
+                "id": "e_eventkey",
+                "label": "Alert Key",
+                "type": "TEXT"
+            }
+        ],
+        "extra_filter": "e_projectid in {{PROJECT_ID}}",
+        "group_filters": [
+            {
+                "stream": "oia-events-stream",
+                "title": "Source",
+                "group_by": [
+                    "e_sourcesystemname"
+                ],
+                "ts_column": "e_updatedat",
+                "agg": "value_count",
+                "column": "e_id",
+                "type": "str"
+            },
+            {
+                "stream": "oia-events-stream",
+                "title": "Severity",
+                "group_by": [
+                    "e_severity"
+                ],
+                "ts_column": "e_updatedat",
+                "agg": "value_count",
+                "column": "e_id",
+                "type": "str"
+            },
+            {
+                "stream": "oia-events-stream",
+                "title": "Phase",
+                "group_by": [
+                    "e_eventstate"
+                ],
+                "ts_column": "e_updatedat",
+                "agg": "value_count",
+                "column": "e_id",
+                "type": "str"
+            },
+            {
+                "stream": "oia-events-stream",
+                "title": "Phase Status",
+                "group_by": [
+                    "e_status"
+                ],
+                "ts_column": "e_updatedat",
+                "agg": "value_count",
+                "column": "e_id",
+                "type": "str"
+            },
+            {
+                "stream": "oia-events-stream",
+                "title": "Organizations",
+                "group_by": [
+                    "project_id"
+                ],
+                "ts_column": "e_updatedat",
+                "agg": "value_count",
+                "column": "e_projectid",
+                "type": "str"
+            }
+        ],
+        "default_time_filter_labels": [
+            "Last 24 hours"
+        ]
+    },
+    "dashboard_sections": [
+        {
+            "title": "Alerts",
+            "show_filter": true,
+            "projects": [
+                "ACME"
+            ],
+            "widgets": [
+                {
+                    "title": "Alerts",
+                    "widget_type": "tabular",
+                    "stream": "oia-events-stream",
+                    "ts_column": "e_updatedat",
+                    "timebased": false,
+                    "min_width": 12,
+                    "height": 12,
+                    "max_width": 12,
+                    "paginated": true,
+                    "resizableColumns": false,
+                    "refreshRequired": true,
+                    "remote_searchable": true,
+                    "remote_searchable_cols": [
+                        "e_processedeventid",
+                        "e_label",
+                        "e_severity",
+                        "e_sourcesystemname",
+                        "e_eventstate",
+                        "e_status",
+                        "e_message"
+                    ],
+                    "max_rows": 50,
+                    "columns": {
+                        "e_processedeventid": {
+                            "title": "Alert ID",
+                            "visible": false,
+                            "key": true,
+                            "defaultWidth": 150
+                        },
+                        "e_projectid": {
+                            "title": "project Id",
+                            "visible": false,
+                            "key": true,
+                            "defaultWidth": 150
+                        },
+                        "e_label": {
+                            "title": "Message",
+                            "formatter": "truncate",
+                            "defaultWidth": 270
+                        },
+                        "e_id": {
+                            "title": "Event Id",
+                            "visible": false,
+                            "key": true,
+                            "defaultWidth": 150
+                        },
+                        "e_sourceeventid": {
+                            "title": "Source Event ID",
+                            "visible": false,
+                            "key": true,
+                            "defaultWidth": 150
+                        },
+                        "e_severity_color": {
+                            "title": "Sev_2",
+                            "type": "COLOR-MAP",
+                            "source-column": "e_severity",
+                            "color-map": {
+                                "SEVERE": "#B71C1C",
+                                "CRITICAL": "#E53935",
+                                "MAJOR": "#F57C00",
+                                "MINOR": "#FFA726",
+                                "WARNING": "#FFD54F",
+                                "NOTIFICATION": "#4DD0E1",
+                                "INFORMATION": "#03A9F4"
+                            }
+                        },
+                        "e_severity": {
+                            "title": "Severity",
+                            "htmlTemplateForRow": "<span class='badge' style='background-color: {{'{{ row.e_severity_color }}'}}' > {{'{{ row.e_severity }}'}} </span>",
+                            "defaultWidth": 150
+                        },
+                        "e_sourcesystemname": {
+                            "title":"Source",
+                            "defaultWidth": 150
+                        },
+                        "e_createdat": {
+                            "title": "Created At",
+                            "type": "DATETIME",
+                            "defaultWidth": 180
+                        },
+                        "e_updatedat": {
+                            "title": "Updated At",
+                            "type": "DATETIME",
+                            "defaultWidth": 180
+                        },
+                        "e_eventstate": {
+                            "title":"Phase",
+                            "defaultWidth": 150
+                        },
+                        "e_status": {
+                            "title":"Phase Status",
+                            "defaultWidth": 150
+                        },
+                        "e_message": {
+                            "title":"Comments",
+                            "defaultWidth": 270
+                        },
+                        "e_mapperId": {
+                            "title": "Mapper Id",
+                            "visible": false,
+                            "defaultWidth": 270,
+                            "key": true
+                        },
+                        "e_triggeredevent": {
+                            "title": "Event Type",
+                            "visible": false,
+                            "key": true,
+                            "defaultWidth": 150
+                        },
+                        "e_eventkey": {
+                            "title": "Alert Key",
+                            "visible": false,
+                            "key": true,
+                            "defaultWidth": 150
+                        }
+                    },
+                    "actions": [
+                        {
+                            "permission": "oia:alert:view",
+                            "title": "Alert Details",
+                            "type": "GO_TO_APP_STATE",
+                            "stateName": "app.featureapp",
+                            "appName": "user-dashboard/tracking-event-details-app",
+                            "selectionType": "SINGLE",
+                            "drillDownContext": "e_label",
+                            "destinationContext": "e_label",
+                            "displayLabelColumnId": "e_label",
+                            "contextParamList": {
+                                "contextParams": [
+                                    {
+                                        "paramKey": "e_projectid",
+                                        "paramId": "projectId"
+                                    },
+                                    {
+                                        "paramKey": "e_projectid",
+                                        "paramId": "roomid"
+                                    },
+                                    {
+                                        "paramKey": "e_projectid",
+                                        "paramId": "projectid"
+                                    },
+                                    {
+                                        "paramKey": "e_id",
+                                        "paramId": "eventid"
+                                    },
+                                    {
+                                        "paramKey": "e_sourceeventid",
+                                        "paramId": "sourceeventid"
+                                    },
+                                    {
+                                        "paramKey": "e_eventkey",
+                                        "paramId": "eventkey"
+                                    },
+                                    {
+                                        "paramKey": "e_processedeventid",
+                                        "paramId": "processedeventid"
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "widget_id": "94a3fc11"
+                }
+            ]
+        },
+        {
+            "title": "Tracking Analytics",
+            "show_filter": true,
+            "projects": [
+                "ACME"
+            ],
+            "widgets": [
+                {
+                    "title": "Consumed Alerts",
+                    "widget_type": "counter",
+                    "stream": "oia-events-stream",
+                    "ts_column": "e_updatedat",
+                    "column": "e_id",
+                    "agg": "value_count",
+                    "min_width": 6,
+                    "height": 2.6,
+                    "max_width": 6,
+                    "type": "str",
+                    "widget_id": "02be1e20"
+                },
+                {
+                    "title": "Deduped Alerts",
+                    "widget_type": "counter",
+                    "stream": "oia-events-stream",
+                    "extra_filter": "e_status is 'Deduped'",
+                    "ts_column": "e_updatedat",
+                    "column": "e_id",
+                    "agg": "value_count",
+                    "min_width": 6,
+                    "height": 2.6,
+                    "max_width": 6,
+                    "type": "str",
+                    "widget_id": "02be1e20"
+                },
+                {
+                    "widget_type": "pie_chart",
+                    "title": "Alerts By Phase Status",
+                    "stream": "oia-events-stream",
+                    "ts_column": "e_updatedat",
+                    "min_width": 4,
+                    "height": 4,
+                    "max_width": 4,
+                    "column": "e_id",
+                    "agg": "value_count",
+                    "group_by": [
+                        "e_status"
+                    ],
+                    "type": "str",
+                    "widget_id": "cb0706e6"
+                },
+                {
+                    "widget_type": "pie_chart",
+                    "title": "Alerts By Source",
+                    "stream": "oia-events-stream",
+                    "ts_column": "e_updatedat",
+                    "min_width": 4,
+                    "height": 4,
+                    "max_width": 4,
+                    "column": "e_id",
+                    "agg": "value_count",
+                    "group_by": [
+                        "e_sourcesystemname"
+                    ],
+                    "type": "str",
+                    "widget_id": "cb0706e6"
+                },
+                {
+                    "widget_type": "pie_chart",
+                    "title": "Alerts By Phase",
+                    "stream": "oia-events-stream",
+                    "ts_column": "e_updatedat",
+                    "min_width": 4,
+                    "height": 4,
+                    "max_width": 4,
+                    "column": "e_id",
+                    "agg": "value_count",
+                    "group_by": [
+                        "e_eventstate"
+                    ],
+                    "type": "str",
+                    "widget_id": "cb0706e6"
+                },
+                {
+                    "title": "Alerts Status By Source",
+                    "widget_type": "multi_bar_chart",
+                    "stream": "oia-events-stream",
+                    "ts_column": "e_updatedat",
+                    "min_width": 4,
+                    "height": 4,
+                    "max_width": 4,
+                    "chartProperties": {
+                        "yAxisLabel": "Count",
+                        "xAxisLabel": "Source",
+                        "stacked": true,
+                        "legendLocation": "right",
+                        "orientation": "vertical"
+                    },
+                    "group_by": [
+                        "e_status",
+                        "e_sourcesystemname"
+                    ],
+                    "column": "e_id",
+                    "agg": "value_count",
+                    "type": "int",
+                    "widget_id": "172919af"
+                },
+                {
+                    "title": "Hourly Alerts by Source",
+                    "widget_type": "timeseries",
+                    "stream": "oia-events-stream",
+                    "ts_column": "e_updatedat",
+                    "max_width": 4,
+                    "height": 4,
+                    "min_width": 4,
+                    "chartProperties": {
+                        "yAxisLabel": "Count",
+                        "xAxisLabel": "Hourly Alerts",
+                        "legendLocation": "top",
+                        "options": {
+        "elements": {
+            "line": {
+                "borderWidth": 1
+            },
+            "point": {
+                "radius": 2,
+                "hitRadius": 3,
+                "hoverRadius": 3
+            }
+        }
+    }
+                    },
+                    "interval": "60Min",
+                    "group_by": [
+                        "e_sourcesystemname"
+                    ],
+                    "series_spec": [
+                        {
+                            "column": "e_id",
+                            "agg": "value_count",
+                            "type": "int"
+                        }
+                    ],
+                    "widget_id": "c29bb685"
+                },
+                {
+                    "title": "Hourly Alerts by Severity",
+                    "widget_type": "timeseries",
+                    "stream": "oia-events-stream",
+                    "ts_column": "e_updatedat",
+                    "max_width": 4,
+                    "height": 4,
+                    "min_width": 4,
+                    "chartProperties": {
+                        "yAxisLabel": "Count",
+                        "xAxisLabel": "Hourly Alerts",
+                        "legendLocation": "top",
+                        "options": {
+        "elements": {
+            "line": {
+                "borderWidth": 1
+            },
+            "point": {
+                "radius": 2,
+                "hitRadius": 3,
+                "hoverRadius": 3
+            }
+        }
+    }
+                    },
+                    "interval": "60Min",
+                    "group_by": [
+                        "e_severity"
+                    ],
+                    "series_spec": [
+                        {
+                            "column": "e_id",
+                            "agg": "value_count",
+                            "type": "int"
+                        }
+                    ],
+                    "widget_id": "c29bb685"
+                }
+            ]
+        }
+    ],
+    "saved_time": "2023-03-16T10:18:30.743877"
+}

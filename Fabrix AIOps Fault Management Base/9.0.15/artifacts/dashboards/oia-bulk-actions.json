@@ -1,0 +1,279 @@
+{
+    "name": "oia-bulk-actions",
+    "label": "Bulk Actions for Alerts and Incidents",
+    "description": "oia-bulk-actions: Insights",
+    "dashboard_folder": "default",
+    "version": "1.0.0",
+    "enabled": false,
+    "stream": "oia-bulk-actions",
+    "dashboard_type": "template",
+    "template_variables": {
+      "USER_ID": {
+        "default": [
+          "acme@cfx.com"
+        ],
+        "contextId": "USER_ID"
+      }
+    },
+    "dashboard_filters": {
+        "time_filter": true,
+        "extra_filter": "user_id is '{{USER_ID}}'",
+        "default_time_filter_labels": [
+            "Last 24 hours"
+        ],
+        "columns_filter": [
+            {
+                "id": "completed_time",
+                "label": "Completed Time",
+                "type": "DATETIME"
+            },
+            {
+                "id": "last_updated_time",
+                "label": "Last Updated Time",
+                "type": "DATETIME"
+            },
+            {
+                "id": "start_time",
+                "label": "Start Time",
+                "type": "DATETIME"
+            },
+            {
+                "id": "submit_time",
+                "label": "Submit Time",
+                "type": "DATETIME"
+            },
+            {
+                "id": "action_run_id",
+                "label": "Action Run Id",
+                "type": "TEXT"
+            },
+            {
+                "id": "all_records",
+                "label": "All Records",
+                "type": "TEXT"
+            },
+            {
+                "id": "failed_records",
+                "label": "Failed Records",
+                "type": "TEXT"
+            },
+            {
+                "id": "payload",
+                "label": "Payload",
+                "type": "TEXT"
+            },
+            {
+                "id": "status",
+                "label": "Status",
+                "type": "TEXT"
+            },
+            {
+                "id": "successful_records",
+                "label": "Successful Records",
+                "type": "TEXT"
+            },
+            {
+                "id": "summary",
+                "label": "Summary",
+                "type": "TEXT"
+            },
+            {
+                "id": "user_id",
+                "label": "User Id",
+                "type": "TEXT"
+            },
+            {
+                "id": "failed_count",
+                "label": "Failed Count",
+                "type": "DOUBLE"
+            },
+            {
+                "id": "successful_count",
+                "label": "Successful Count",
+                "type": "DOUBLE"
+            },
+            {
+                "id": "total_count",
+                "label": "Total Count",
+                "type": "DOUBLE"
+            }
+        ],
+        "group_filters": [
+            {
+                "stream": "oia-bulk-actions",
+                "title": "Status",
+                "duration_hours": 1080,
+                "limit": 200,
+                "extra_filter": null,
+                "group_by": [
+                    "status"
+                ],
+                "ts_column": "submit_time",
+                "agg": "sum",
+                "column": "count_",
+                "type": "int"
+            },
+            {
+                "stream": "oia-bulk-actions",
+                "title": "User Id",
+                "duration_hours": 1080,
+                "limit": 200,
+                "extra_filter": null,
+                "group_by": [
+                    "user_id"
+                ],
+                "ts_column": "submit_time",
+                "agg": "sum",
+                "column": "count_",
+                "type": "int"
+            }
+        ]
+    },
+    "dashboard_sections": [
+        {
+            "title": "Bulk Actions for Alerts and Incidents",
+            "show_filter": true,
+            "widgets": [
+                {
+                    "widget_type": "pie_chart",
+                    "title": "Status",
+                    "duration_hours": 1080,
+                    "stream": "oia-bulk-actions",
+                    "ts_column": "submit_time",
+                    "extra_filter": null,
+                    "column": "count_",
+                    "agg": "sum",
+                    "group_by": [
+                        "status"
+                    ],
+                    "type": "int",
+                    "min_width": 3,
+                    "height": 3,
+                    "max_width": 6,
+                    "widget_id": "48db5cfc"
+                },
+                {
+                    "widget_type": "pie_chart",
+                    "title": "User Id",
+                    "duration_hours": 1080,
+                    "stream": "oia-bulk-actions",
+                    "ts_column": "submit_time",
+                    "extra_filter": null,
+                    "column": "count_",
+                    "agg": "sum",
+                    "group_by": [
+                        "user_id"
+                    ],
+                    "type": "int",
+                    "min_width": 3,
+                    "height": 3,
+                    "max_width": 6,
+                    "widget_id": "454af0b1"
+                },
+                {
+                    "title": "Details",
+                    "widget_type": "tabular",
+                    "paginated": true,
+                    "duration_hours": 1080,
+                    "max_width": 12,
+                    "height": 8,
+                    "min_width": 12,
+                    "stream": "oia-bulk-actions",
+                    "ts_column": "submit_time",
+                    "extra_filter": null,
+                    "columns": {
+                        "action_run_id": {
+                            "title": "Action Run Id",
+                            "type": "TEXT",
+                            "key": true,
+                            "hidden": true
+                        },
+                        "all_records": {
+                            "title": "All Records",
+                            "type": "TEXT",
+                            "hidden": true
+                        },
+                        "failed_records": {
+                            "title": "Failed Records",
+                            "type": "TEXT",
+                            "hidden": true
+                        },
+                        "successful_records": {
+                            "title": "Successful Records",
+                            "type": "TEXT",
+                            "hidden": true
+                        },
+                        "summary": {
+                            "title": "Summary",
+                            "type": "TEXT",
+                            "hidden": false
+                        },
+                        "status": {
+                            "title": "Status",
+                            "type": "TEXT",
+                            "hidden": false
+                        },
+                        "user_id": {
+                            "title": "User Id",
+                            "type": "TEXT",
+                            "hidden": false
+                        },
+                        "total_count": {
+                            "title": "Total Count",
+                            "type": "DOUBLE",
+                            "hidden": false
+                        },
+                        "successful_count": {
+                            "title": "Successful Count",
+                            "type": "DOUBLE",
+                            "hidden": false
+                        },
+                        "failed_count": {
+                            "title": "Failed Count",
+                            "type": "DOUBLE",
+                            "hidden": false
+                        },
+                        "submit_time": {
+                            "title": "Submit Time",
+                            "type": "DATETIME",
+                            "hidden": false
+                        },
+                        "start_time": {
+                            "title": "Start Time",
+                            "type": "DATETIME",
+                            "hidden": false
+                        },
+                        "last_updated_time": {
+                            "title": "Last Updated Time",
+                            "type": "DATETIME",
+                            "hidden": false
+                        },
+                        "completed_time": {
+                            "title": "Completed Time",
+                            "type": "DATETIME",
+                            "hidden": false
+                        }
+                    },
+                    "actions": [
+                        {
+                            "title": "View Details",
+                            "type": "GO_TO_APP_STATE",
+                            "permission": "oia:incident:view",
+                            "stateName": "app.featureapp",
+                            "appName": "user-dashboard/oia-bulk-action-details",
+                            "selectionType": "SINGLE",
+                            "identifier": "view.incident.data",
+                            "drillDownLinkField": "summary",
+                            "drillDownContext": "action_run_id",
+                            "destinationContext": "action_run_id",
+                            "displayLabelColumnId": "Summary",
+                            "contextParamList": {}
+                        }
+                    ],
+                    "widget_id": "d9df8fea"
+                }
+            ]
+        }
+    ],
+    "saved_time": "2025-05-21T17:19:52.265501"
+}

@@ -1,0 +1,259 @@
+{
+    "name": "incident-details-topology",
+    "label": "Dynamic Incident Topology",
+    "description": "Dynamic Incident Topology",
+    "dashboard_style": "auto",
+    "dashboard_type": "template",
+    "version": "25.7.29.1",
+    "enabled": false,
+    "exportable": false,
+    "dashboard_generator": {
+        "attachment": "generator_jinja"
+    },
+    "template_variables": {
+        "INCIDENT_CREATED_TIME": {
+            "contextId": "i_created_ts",
+            "default": "2025-07-29T09:39:36.265000"
+        },
+        "ROOM_ID": {
+            "default": "",
+            "contextId": "project_id"
+        },
+        "PROJECT_ID": {
+            "default": null,
+            "contextId": "projectid"
+        },
+        "INCIDENT_ID": {
+            "default": "",
+            "contextId": "incident_id"
+        },
+        "A_INCIDENT_ID": {
+            "default": "",
+            "contextId": "a_incident_id"
+        },
+        "STACK_NAME": {
+            "default": "",
+            "contextId": "attrs_stack_name"
+        },
+        "MY_TEMPLATE": {
+            "default": "<details><summary><b>{{row.a_alert_type}}</b></summary><div class='v-data-table v-data-table--dense theme--light'><div class='v-data-table__wrapper'><table style='width: 300px;'><tbody><tr><td>Source</td><td>{{row.a_source_systemname}}</td></tr><tr><td>Message</td><td>{{row.a_message}}</td></tr><tr><td>Assett IP</td><td>{{row.a_asset_ip_address}}</td></tr><tr><td>Alert Status</td><td>{{row.a_status}}</td></tr></tbody></table></div></div></details>",
+            "contextId": "MY_TEMPLATE"
+        }
+    },
+    "dashboard_filters": {
+        "columns_filter": []
+    },
+    "import": [
+        {
+            "from": "oia-alerts-os",
+            "as": "alerts"
+        },
+        {
+            "from": "oia-incidents-os-template",
+            "as": "incidents"
+        }
+    ],
+    "dashboard_sections": [
+        {
+            "title": "Topology",
+            "show_filter": false,
+            "widgets": [
+                {
+                    "widget_type": "topology",
+                    "title": "Topology",
+                    "register_search_endpoints": true,
+                    "show_alert_details": false,
+                    "chartProperties": {
+                        "hasToolbar": true,
+                        "shortToolbar": true,
+                        "userZoomingEnabled": false,
+                        "customLabelTooltip": "Related Alerts"
+                    },
+                    "nodeSelectionPreview": {
+                        "trigger": "CLICK",
+                        "position": "CONTROL_PANEL",
+                        "contentType": "DASHBOARD",
+                        "contentInfo": {
+                            "dashboardId": "user-dashboard-oia-topology-node-details"
+                        }
+                    },
+                    "edgeSelectionPreview": {
+                        "trigger": "CLICK",
+                        "position": "CONTROL_PANEL",
+                        "contentType": "DASHBOARD",
+                        "contentInfo": {
+                            "dashboardId": "user-dashboard-oia-topology-edge-details"
+                        }
+                    },
+                    "nodes_report": {
+                        "reportMetaData": {
+                            "sorting": true,
+                            "filtering": true,
+                            "title": "Nodes",
+                            "remote_searchable": false,
+                            "remote_searchable_cols": [
+                                "name",
+                                "node_label",
+                                "node_id",
+                                "node_type"
+                            ],
+                            "actions": [],
+                            "reportColumnDefinitionList": [
+                                {
+                                    "identifier": "node_label",
+                                    "title": "Name",
+                                    "key": false
+                                },
+                                {
+                                    "identifier": "layer",
+                                    "key": false,
+                                    "title": "Layer"
+                                },
+                                {
+                                    "identifier": "node_type",
+                                    "key": false,
+                                    "title": "node_type"
+                                },
+                                {
+                                    "identifier": "name",
+                                    "hidden": true,
+                                    "key": false
+                                },
+                                {
+                                    "identifier": "vcenter_name",
+                                    "title": "vCenter Name",
+                                    "key": false
+                                },
+                                {
+                                    "identifier": "datacenter",
+                                    "key": false,
+                                    "title": "Data Center"
+                                },
+                                {
+                                    "identifier": "esxi_cluster",
+                                    "key": false,
+                                    "title": "ESXI Cluster"
+                                },
+                                {
+                                    "identifier": "vcenter_address",
+                                    "key": false,
+                                    "title": "vCenter Address"
+                                },
+                                {
+                                    "identifier": "vcenter_object",
+                                    "key": false,
+                                    "title": "vCenter Object"
+                                },
+                                {
+                                    "identifier": "vcenter_os_type",
+                                    "key": false,
+                                    "title": "vCenter OS type"
+                                },
+                                {
+                                    "identifier": "phy_switch_name",
+                                    "key": false,
+                                    "title": "Physical Switch Name"
+                                },
+                                {
+                                    "identifier": "node_id",
+                                    "key": true,
+                                    "hidden": true
+                                }
+                            ]
+                        }
+                    },
+                    "edges_report": {
+                        "reportId": "rda.saas.topology.edges.report",
+                        "reportMetaData": {
+                            "sorting": true,
+                            "filtering": true,
+                            "title": "Edges",
+                            "reportColumnDefinitionList": [
+                                {
+                                    "hidden": false,
+                                    "id": "left_id",
+                                    "identifier": "left_id",
+                                    "key": true,
+                                    "title": "Left Id",
+                                    "type": "TEXT",
+                                    "visible": false
+                                },
+                                {
+                                    "hidden": false,
+                                    "id": "left_label",
+                                    "identifier": "left_label",
+                                    "key": false,
+                                    "title": "Source",
+                                    "type": "TEXT",
+                                    "visible": true
+                                },
+                                {
+                                    "hidden": false,
+                                    "id": "right_id",
+                                    "identifier": "right_id",
+                                    "key": true,
+                                    "title": "Right Id",
+                                    "type": "TEXT",
+                                    "visible": false
+                                },
+                                {
+                                    "hidden": false,
+                                    "id": "right_label",
+                                    "identifier": "right_label",
+                                    "key": false,
+                                    "title": "Destination",
+                                    "type": "TEXT",
+                                    "visible": true
+                                },
+                                {
+                                    "hidden": false,
+                                    "id": "relation_type",
+                                    "identifier": "relation_type",
+                                    "key": false,
+                                    "title": "Relation",
+                                    "type": "TEXT",
+                                    "visible": true
+                                }
+                            ],
+                            "actions": []
+                        }
+                    },
+                    "stack_type": "OIA",
+                    "auto_group": false,
+                    "oia_details": {
+                        "oia_stream": "oia-incidents-stream",
+                        "query": "timestamp later than -12 months",
+                        "oia_id_attribute": "incident_id",
+                        "stack_type": "OIA",
+                        "alert_source": {
+                            "stream": "oia-alerts-stream",
+                            "group_by": [
+                                "a_severity",
+                                "a_status"
+                            ],
+                            "incident_id_attr": "a_incident_id",
+                            "context_incident_id_attr": "incidentid",
+                            "extra_filter": "a_source_systemname is not 'Alert Group' and project_id is '{{PROJECT_ID}}'",
+                            "ts_column": "timestamp",
+                            "duration_hours": 9000,
+                            "agg": "value_count",
+                            "column": "count_",
+                            "type": "int"
+                        }
+                    },
+                    "max_width": 12,
+                    "min_width": 12,
+                    "height": 12,
+                    "widget_id": "0ff73e14"
+                }
+            ]
+        }
+    ],
+    "saved_time": "2025-07-29T06:04:02.733993",
+    "attachments": [
+        {
+            "name": "generator_jinja",
+            "value": "{% set ns = namespace() %}\r\n{% set query = \"project_id is '\" + projectid + \"' and incident_id is '\" + incidentid + \"' \" %}\r\n{% set incidentstream = \"oia-incidents-stream\" %}\r\n{% set incident_res = engine.query_stream_data(stream=incidentstream, cfxql_query=query) %}\r\n{% if incident_res is defined and incident_res|length > 0 %}\r\n    {% set incident = incident_res[0] %}\r\n    {% set config_query = \"roomid is '\" + projectid + \"' and pagename is 'topology' \" %}\r\n    {% set config_stream = \"oia-incident-page-config\" %}\r\n    {% set config_res = engine.query_stream_data(stream=config_stream, cfxql_query=config_query) %}\r\n    {% set page_config = {} %}\r\n    {% if config_res is defined and config_res|length > 0 %}\r\n        {% set config_json_res = config_res[0] %}\r\n        {% set config_json = config_json_res.get(\"config_json\") %}\r\n        {% set config_json_type = \"string\" %}\r\n        {% if config_json is mapping and config_json is not string %}\r\n            {% set config_json_type = \"mapping\" %}\r\n        {% elif config_json is sequence and config_json is not mapping and config_json is not string %}\r\n            {% set config_json_type = \"list\" %}\r\n        {% endif %}\r\n        {% if config_json and config_json_type == \"string\" %}\r\n            {% set page_config = json_loads(config_json) %}\r\n        {% endif %}\r\n    {% endif %}\r\n\r\n    ## defaults for topology - start\r\n    {% set node_id_col_incidents = \"attrs_node_id\" %}\r\n    {% set node_id_col_alerts = \"a_en_node_id\" %}\r\n    {% set related_alerts_enabled = True %}\r\n    {% set related_nodes_max_distance = 2 %}\r\n    {% set stack_details_type = \"use_context\" %}\r\n    {% set context_field_for_stack_name = \"attrs_stack_name\" %}\r\n    {% set fixed_stack_name = \"\" %}\r\n    {% set stack_definition = {} %}\r\n    ## defaults for topology - end\r\n\r\n    {% set topology_widget = dashboard[\"dashboard_sections\"][0][\"widgets\"][0] %}\r\n    {% if topology_widget %}\r\n        {% if page_config %}\r\n            {% set _ = logger.debug(\"page_config is: \" + str(page_config)) %}\r\n\r\n            {% set node_id_col_incidents = page_config.get(\"node_id_col_incidents_stream\", node_id_col_incidents) %}\r\n            {% set node_id_col_alerts = page_config.get(\"node_id_col_alerts_stream\", node_id_col_alerts) %}\r\n\r\n            {% set _ = topology_widget.__setitem__(\"node_id_attribute\", node_id_col_incidents) %}\r\n            {% set _ = topology_widget[\"oia_details\"][\"alert_source\"].__setitem__(\"group_by\", [node_id_col_alerts] + topology_widget[\"oia_details\"][\"alert_source\"][\"group_by\"]) %}\r\n\r\n            {% set related_alerts = page_config.get(\"related_alerts\") %}\r\n            {% if related_alerts%}\r\n                {% set related_alerts_enabled = related_alerts.get(\"enabled\", related_alerts_enabled) %}\r\n                {% set related_nodes_max_distance = related_alerts.get(\"related_nodes_max_distance\", related_nodes_max_distance) %}\r\n            {% else %}\r\n                {% set related_alerts_enabled = False %}\r\n            {% endif %}\r\n            {% if related_alerts_enabled == True or ( related_alerts_enabled is string and related_alerts_enabled|lower in (\"yes\", \"true\") ) %}\r\n                {% set _ = topology_widget.__setitem__(\"show_alert_details\", true) %}\r\n                {% set _ = topology_widget[\"oia_details\"][\"alert_source\"].__setitem__(\"related_nodes_max_distance\", related_nodes_max_distance) %}\r\n            {% else %}\r\n                {% set _ = topology_widget.__setitem__(\"show_alert_details\", false) %}\r\n            {% endif %}\r\n\r\n            {% set stack_details = page_config.get(\"stack_details\") %}\r\n            {% if stack_details %}\r\n                {% set stack_details_type = stack_details.get(\"type\", stack_details_type) %}\r\n\r\n                {% if stack_details_type == \"use_context\" %}\r\n                    {% set context_field_for_stack_name = stack_details.get(\"context_field_for_stack_name\", context_field_for_stack_name) %}\r\n                    {% set _ = topology_widget[\"oia_details\"].__setitem__(\"stack_name_attribute\", context_field_for_stack_name) %}\r\n                {% elif stack_details_type == \"fixed\" %}\r\n                    {% set fixed_stack_name = stack_details.get(\"stack_name\") %}\r\n                    {% set _ = topology_widget[\"oia_details\"].__setitem__(\"stack\", fixed_stack_name) %}\r\n                    {% set _ = topology_widget.__setitem__(\"stack_name\", fixed_stack_name) %}\r\n                {% elif stack_details_type == \"dynamic\" %}\r\n                    {% set stack_definition = stack_details.get(\"stack_definition\") %}\r\n                    {% set _ = topology_widget[\"oia_details\"].__setitem__(\"stack_definition\", stack_definition) %}\r\n                {% endif %}\r\n            {% endif %}\r\n        {% else %}\r\n            {% set _ = logger.info(\"No page_config defined for topology hence using defaults.\") %}\r\n\r\n            {% set _ = topology_widget.__setitem__(\"node_id_attribute\", node_id_col_incidents) %}\r\n            {% set _ = topology_widget[\"oia_details\"][\"alert_source\"].__setitem__(\"group_by\", [node_id_col_alerts] + topology_widget[\"oia_details\"][\"alert_source\"][\"group_by\"]) %}\r\n\r\n            {% set _ = topology_widget.__setitem__(\"show_alert_details\", true) %}\r\n            {% set _ = topology_widget[\"oia_details\"][\"alert_source\"].__setitem__(\"related_nodes_max_distance\", related_nodes_max_distance) %}\r\n            {% set _ = topology_widget[\"oia_details\"].__setitem__(\"stack_name_attribute\", context_field_for_stack_name) %}\r\n        {% endif %}\r\n    {% else %}\r\n        {% set _ = logger.info(\"No topology widget defined in dashboard.\") %}\r\n    {% endif %}\r\n{% else %}\r\n  {% set _ = logger.warning(\"Can not find incident details hence can not show topology for incident: \" + incidentid) %}\r\n{% endif %}\r\n{% set _ = logger.debug(\"Final topology dashboard: \" + str(dashboard)) %}\r\n"
+        }
+    ]
+}
