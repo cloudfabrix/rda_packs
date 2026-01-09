@@ -1,0 +1,33 @@
+name: network_device_discovery_single_tenant
+id: network_device_discovery_single_tenant
+version: 20240802
+category: NetworkDevicePack
+comment: Network Device Asset Inventory
+enabled: true
+type: Service
+provider: CloudFabrix Software, Inc.
+attrs: {}
+scheduled_pipelines:
+    -   name: access_verification_main_pipeline
+        label: Access Verification pipeline
+        version: '*'
+        site: ".*"
+        site_type: regex
+        instances: 1
+        cron_expression: 0 0 * * *
+    -   name: ondemand_discovery_main
+        label: Network Device Discovery
+        version: '*'
+        site: ".*"
+        site_type: regex
+        instances: 1
+        cron_expression: 5 0 * * *
+    -   name: network_device_topology_calculation
+        label: Network Device Topology
+        version: '*'
+        site: ".*"
+        site_type: regex
+        instances: 1
+        cron_expression: 35 0 * * *
+       
+saved_time: '2024-10-21T18:34:37.968421'

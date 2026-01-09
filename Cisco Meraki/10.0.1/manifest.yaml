@@ -1,0 +1,261 @@
+name: Cisco Meraki
+label: Cisco Meraki
+scope: system
+# Pack version needs to be conforming to <major>.<minor>.<micro> etc versioning.
+# More detailed spec for versioning: https://packaging.python.org/en/latest/specifications/version-specifiers/
+version: 10.0.1
+folder: /collection/cisco_meraki_pack
+published_date: 2025-12-30
+publisher: Fabrix.ai
+# Description of the package. Supports HTML/markdown/plain text
+# Either can provide description as an inline string in this file
+# or have description.html and description.md and give corresponding file paths instead.
+# If description is provided by multiple ways, the order of precedence is description.md > description.html > description.value
+
+description: 
+
+   md: "./description.md"
+# Type could be collection/feature
+type: collection
+# Other packs that this solution requires to be deployed
+
+requires:
+  - name: Fabrix Inventory Collection Base Pack
+    version: ">=7.2.0"
+    
+fabric_services:
+ - name: worker
+   version: ">=8.1.0.3"
+ - name: api-server
+   version: ">=8.1.0.3"
+
+artifacts:
+  pstreams:
+
+    - name: meraki_inventory_collection
+      attributes:
+        unique_keys: ["unique_id"]
+      autocreate: true
+      ##creation_policy: overwrite
+
+    - name: meraki_on_boarded_devices
+      attributes:
+        retention_days: 365
+        unique_keys: ["meraki_src_name"]
+      autocreate: true
+      ##creation_policy: overwrite
+
+    - name: meraki_access_verification_status
+      attributes:
+        retention_days: 7
+        unique_keys: ["asset_ip"]
+      autocreate: true
+      ##creation_policy: overwrite
+
+    ##- name: meraki_topology_nodes
+    ##  attributes:
+    ##    retention_days: 7
+    ##    unique_keys: [ "node_id"]
+    ##  autocreate: true
+    ##  ##creation_policy: overwrite
+
+    ##- name: meraki_topology_edges
+    ##  attributes:
+    ##    retention_days: 7
+    ##    unique_keys: [ "left_id","right_id"]
+    ##  autocreate: true
+    ##  ##creation_policy: overwrite
+
+    - name: meraki-asset-inventory-collection-status-stream
+      autocreate: true
+      ##creation_policy: overwrite
+
+    - name: meraki_metrics
+      autocreate: true
+      ##creation_policy: overwrite
+
+
+  dashboards:
+
+    - name: meraki_pack_app
+      file: ./artifacts/dashboards/meraki_pack_app.json
+      folder: MerakiPack
+      ##creation_policy: overwrite
+
+    - name: meraki_inventory
+      file: ./artifacts/dashboards/meraki_inventory.json
+      folder: MerakiPack
+      ##creation_policy: overwrite
+
+    - name: meraki_configure_and_manage
+      file: ./artifacts/dashboards/meraki_configure_and_manage.json
+      folder: MerakiPack
+      ##creation_policy: overwrite
+
+    - name: meraki_collection_and_access_status
+      file: ./artifacts/dashboards/meraki_collection_and_access_status.json
+      folder: MerakiPack
+      ##creation_policy: overwrite
+
+    - name: meraki_metrics
+      file: ./artifacts/dashboards/meraki_metrics.json
+      folder: MerakiPack
+      ##creation_policy: overwrite
+
+    - name: meraki_topology
+      file: ./artifacts/dashboards/meraki_topology.json
+      folder: MerakiPack
+      ##creation_policy: overwrite
+
+  pipelines:
+    - name: meraki_import_devices
+      version: 2025.12.30.1
+      file: ./artifacts/pipelines/meraki_import_devices.txt
+      folder: MerakiPack
+      ##creation_policy: overwrite
+
+    - name: meraki_inv_collection
+      version: 2025.12.30.1
+      file: ./artifacts/pipelines/meraki_inv_collection.txt
+      folder: MerakiPack
+      ##creation_policy: overwrite
+
+    - name: meraki_topology
+      version: 2025.12.30.1
+      file: ./artifacts/pipelines/meraki_topology.txt
+      folder: MerakiPack
+      ##creation_policy: overwrite
+
+    - name: meraki_access_verification_status
+      version: 2025.12.30.1
+      file: ./artifacts/pipelines/meraki_access_verification_status.txt
+      folder: MerakiPack
+      ##creation_policy: overwrite
+    
+    - name: meraki_metrics_collection
+      version: 2025.12.30.1
+      file: ./artifacts/pipelines/meraki_metrics_collection.txt
+      folder: MerakiPack
+      ##creation_policy: overwrite
+
+  stacks:
+    - name: meraki
+      file: ./artifacts/stacks/meraki.json
+      ##creation_policy: overwrite
+
+customer_level:
+
+  launch_locations:
+    # - pstream_name: rda_packs_dynamic_groups_and_pages
+    #   dashboard_group_name: groupMeraki
+    #   dashboard_group_label: Meraki
+    #   dashboard_group_icon: "library.svg"
+    #   dashboard_page_name: meraki_topology
+    #   dashboard_page_label: Topology
+    #   dashboard_page_icon: "library.svg"
+    # - pstream_name: rda_packs_dynamic_groups_and_pages
+    #   dashboard_group_name: groupMeraki
+    #   dashboard_group_label: Meraki
+    #   dashboard_group_icon: "library.svg"
+    #   dashboard_page_name: meraki_inventory
+    #   dashboard_page_label: Inventory
+    #   dashboard_page_icon: "library.svg"
+    - pstream_name: rda_packs_dynamic_groups_and_pages
+      dashboard_group_name: groupDiscovery
+      dashboard_group_label: Onboarding
+      dashboard_group_icon: "library.svg"
+      dashboard_page_name: meraki_collection_and_access_status
+      dashboard_page_label: Meraki Status
+      dashboard_page_icon: "library.svg"
+    - pstream_name: rda_packs_dynamic_groups_and_pages
+      dashboard_group_name: groupDiscovery
+      dashboard_group_label: Onboarding
+      dashboard_group_icon: "library.svg"
+      dashboard_page_name: meraki_configure_and_manage
+      dashboard_page_label: Meraki Configure and Manage
+      dashboard_page_icon: "library.svg"
+    - pstream_name: rda_packs_dynamic_groups_and_pages
+      dashboard_group_name: groupInventory
+      dashboard_group_label: Inventory
+      dashboard_group_icon: ""
+      dashboard_page_name: meraki_inventory
+      dashboard_page_label: Meraki Assets
+      dashboard_page_icon: "library.svg"
+    - pstream_name: rda_packs_dynamic_groups_and_pages
+      dashboard_group_name: groupMetrics 
+      dashboard_group_label: Metrics
+      dashboard_group_icon: "settings.svg"
+      dashboard_page_name: meraki_metrics
+      dashboard_page_label: "Meraki Metrics"
+      dashboard_page_icon: "settings.svg"  
+    - pstream_name: rda_packs_dynamic_groups_and_pages
+      dashboard_group_name: groupTopo
+      dashboard_group_label: Topology
+      dashboard_group_icon: ""
+      dashboard_page_name: meraki_topology
+      dashboard_page_label: Meraki Topology
+      dashboard_page_icon: "library.svg" 
+  
+  artifacts:
+    # credentials:
+    #   - name: cisco_meraki
+    #     type: cisco-meraki
+    #     add_to_default_site: true
+    #     data: {"api": ".*", customerTag:  $PKG_CONTEXT_CUSTOMER_TAG, customerId:  $PKG_CONTEXT_CUSTOMER_ID}
+    blueprints:
+      - name: meraki_service_blueprint
+        file: ./artifacts/blueprints/meraki_service_blueprint.yaml
+        ##creation_policy: overwrite
+
+single_tenant:
+
+  launch_dashboard: meraki_pack_app
+  launch_locations:
+    - pstream_name: rda_packs_dynamic_groups_and_pages
+      dashboard_group_name: groupConfigure
+      dashboard_group_label: Configure and Manage
+      dashboard_group_icon: "library.svg"
+      dashboard_page_name: meraki_configure_and_manage
+      dashboard_page_label: Meraki Management
+      dashboard_page_icon: "library.svg"
+    - pstream_name: rda_packs_dynamic_groups_and_pages
+      dashboard_group_name: groupStatus
+      dashboard_group_label: Status
+      dashboard_group_icon: "library.svg"
+      dashboard_page_name: meraki_collection_and_access_status
+      dashboard_page_label: Meraki Status
+      dashboard_page_icon: "library.svg"
+    - pstream_name: rda_packs_dynamic_groups_and_pages
+      dashboard_group_name: groupInventory
+      dashboard_group_label: Inventory
+      dashboard_group_icon: ""
+      dashboard_page_name: meraki_inventory
+      dashboard_page_label: Meraki Assets
+      dashboard_page_icon: "library.svg"
+    - pstream_name: rda_packs_dynamic_groups_and_pages
+      dashboard_group_name: groupMetrics 
+      dashboard_group_label: Metrics
+      dashboard_group_icon: "settings.svg"
+      dashboard_page_name: meraki_metrics
+      dashboard_page_label: "Meraki Metrics"
+      dashboard_page_icon: "settings.svg"
+    - pstream_name: rda_packs_dynamic_groups_and_pages
+      dashboard_group_name: groupTopo
+      dashboard_group_label: Topology
+      dashboard_group_icon: ""
+      dashboard_page_name: meraki_topology
+      dashboard_page_label: Meraki Topology
+      dashboard_page_icon: "library.svg"
+
+  artifacts:
+    # credentials:
+    #   - name: cisco_meraki
+    #     type: cisco-meraki
+    #     add_to_default_site: true
+    #     data: {"api": ".*"}
+    blueprints:
+      - name: meraki_service_blueprint
+        file: ./artifacts/blueprints/meraki_service_blueprint_single_tenant.yaml
+        ##creation_policy: overwrite
+  
+

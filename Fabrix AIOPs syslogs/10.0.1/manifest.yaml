@@ -1,0 +1,217 @@
+name: Fabrix AIOPs syslogs
+version: 10.0.1
+folder: /collection/network/fabrix_aiops_syslogs
+published_date: 2025-12-30
+publisher: Fabrix.ai
+label: Fabrix AIOPs Syslogs
+scope: system
+description: 
+  value: ""
+  ##html: "./description.html"
+  md: "./description.md"
+
+type: collection
+
+fabric_services:
+ - name: worker
+   version: ">=8.1.0.3"
+ - name: api-server
+   version: ">=8.1.0.3"
+ - name: alert-processor
+   version: ">=8.1.0.3"
+ - name: alert-ingester
+   version: ">=8.1.0.3"
+ - name: alert-correlator
+   version: ">=8.1.0.3"
+ - name: cfxdimensions-app-irm_service
+   version: ">=8.1.0.3"
+ - name: cfxdimensions-app-collaboration
+   version: ">=8.1.0.3"
+
+requires:
+  - name: Network Device Discovery 
+    version: ">=9.0.1"
+    auto_install_requires: true
+  - name: Fabrix AIOps Fault Management Base 
+    version: ">=9.0.14"
+    auto_install_requires: true
+
+
+ 
+artifacts:
+  credentials:
+    - name: restclient
+      type: restclient
+  
+
+  pstreams:
+
+    - name: syslog_udp_event_stream_all
+      index_name: "syslog_udp_event_stream_*"
+      autocreate: true
+      ##creation_policy: overwrite
+    - name: syslog_stream
+      autocreate: true
+      ##creation_policy: overwrite
+    - name: failed_syslog_alerts
+      autocreate: true
+      ##creation_policy: overwrite
+  pipelines:
+    - name: syslog_generic_raise_alerts
+      version: 2025.12.30.1
+      folder: FaultManagementPack
+      file: ./artifacts/pipelines/syslog_generic_raise_alerts.txt 
+      ##creation_policy: overwrite      
+    
+  dashboards:
+    - name: customer_syslogs
+      file: ./artifacts/dashboards/customer_syslogs.json
+      ##creation_policy: overwrite
+    - name: device_syslog_from_alert_fault
+      file: ./artifacts/dashboards/device_syslog_from_alert_fault.json  
+      ##creation_policy: overwrite
+    - name: syslog_configure_and_manage
+      file: ./artifacts/dashboards/syslog_configure_and_manage.json
+      ##creation_policy: overwrite  
+  
+  
+    
+
+  
+  datasets:
+    - name: syslog-severities
+      folder: FaultManagementPack
+      data_file: ./data/syslog-severities.csv
+      ##creation_policy: overwrite
+    - name: syslog_alert_rules_dict
+      folder: FaultManagementPack
+      data_file: ./data/syslog_alert_rules_dict.csv 
+      ##creation_policy: overwrite 
+
+customer_level:
+  launch_locations:
+  - pstream_name: rda_packs_dynamic_groups_and_pages
+    dashboard_group_name: groupData
+    dashboard_group_label: Events
+    dashboard_group_icon: "trace.svg"
+    dashboard_page_name: customer_syslogs
+    dashboard_page_label: Syslogs
+    dashboard_page_icon: "topology.svg" 
+  - pstream_name: rda_packs_dynamic_groups_and_pages
+    dashboard_group_name: groupData
+    dashboard_group_label: Events
+    dashboard_group_icon: "trace.svg"
+    dashboard_page_name: device_syslog_from_alert_fault
+    dashboard_page_label: Syslogs
+    dashboard_page_icon: "topology.svg"
+  - pstream_name: rda_packs_dynamic_groups_and_pages
+    dashboard_group_name: groupDiscovery
+    dashboard_group_label: Device Onboarding
+    dashboard_group_icon: "library.svg"
+    dashboard_page_name: syslog_configure_and_manage
+    dashboard_page_label: Syslog Management
+    dashboard_page_icon: "library.svg"
+  
+
+
+
+  artifacts:
+    endpoints:
+   
+      - name: Syslog
+        file: ./artifacts/endpoints/Syslog.json
+        ##creation_policy: overwrite
+          
+    mappings:
+      - name: syslog_mapping
+        file: ./artifacts/mappings/syslog_mapping.json
+        ##creation_policy: overwrite
+    ##correlation_policies:
+    ##  - name: ${PKG_CONTEXT_CUSTOMER_TAG}_syslog_interface_cdp
+    ##    file: ./artifacts/correlation_policy/syslog_interface_cdp_multi.json
+
+    
+    pstreams:
+      - name: syslog_udp_event_stream
+        index_name: syslog_udp_event_stream_${PKG_CONTEXT_CUSTOMER_TAG}
+        autocreate: true
+        retention_days: 31
+        ##creation_policy: overwrite
+        search_case_insensitive: true
+        messaging_platform_settings:
+          platform: kafka
+          kafka-params:
+            topics:
+              - ${PKG_CONTEXT_CUSTOMER_TAG}_syslog_udp_event_stream
+            auto.offset.reset: latest
+            consumer_poll_timeout: 1.0
+        
+    blueprints:
+      - name: syslog_fault_management
+        file: ./artifacts/blueprints/syslog_fault_management.yaml
+        ##creation_policy: overwrite
+
+single_tenant:
+  launch_dashboard: network_discovery_main_app 
+  launch_locations:
+  - pstream_name: rda_packs_dynamic_groups_and_pages
+    dashboard_group_name: groupData
+    dashboard_group_label: Events
+    dashboard_group_icon: "trace.svg"
+    dashboard_page_name: customer_syslogs
+    dashboard_page_label: Syslogs
+    dashboard_page_icon: "topology.svg"
+  - pstream_name: rda_packs_dynamic_groups_and_pages
+    dashboard_group_name: groupData
+    dashboard_group_label: Events
+    dashboard_group_icon: "trace.svg"
+    dashboard_page_name: device_syslog_from_alert_fault
+    dashboard_page_label: Syslogs
+    dashboard_page_icon: "topology.svg"
+  - pstream_name: rda_packs_dynamic_groups_and_pages
+    dashboard_group_name: groupConfigure
+    dashboard_group_label: Configure and Manage
+    dashboard_group_icon: "library.svg"
+    dashboard_page_name: syslog_configure_and_manage
+    dashboard_page_label: Syslog Management
+    dashboard_page_icon: "library.svg"
+  
+  
+
+  artifacts:
+    pstreams:
+      - name: syslog_udp_event_stream
+        index_name: syslog_udp_event_stream_single
+        autocreate: true
+        ##creation_policy: overwrite
+        attributes:
+          retention_days: 31
+          search_case_insensitive: true
+          messaging_platform_settings:
+            platform: kafka
+            kafka-params:
+              topics:
+                - syslog_udp_event_stream
+              auto.offset.reset: latest
+              consumer_poll_timeout: 1.0
+        
+    endpoints:
+    - name: Syslog
+      file: ./artifacts/endpoints/Syslog.json 
+      ##creation_policy: overwrite 
+    mappings:
+    - name: syslog_mapping
+      file: ./artifacts/mappings/syslog_mapping.json
+      ##creation_policy: overwrite
+    
+    ##correlation_policies:
+    ##  - name: syslog_interface_cdp
+    ##    file: ./artifacts/correlation_policy/syslog_interface_cdp.json
+    
+    blueprints:
+    - name: syslog_fault_management_single_tenant
+      file: ./artifacts/blueprints/syslog_fault_management_single_tenant.yaml
+      ##creation_policy: overwrite
+
+
+  

@@ -1,0 +1,138 @@
+name: Cisco Crosswork Inventory Collection
+label: Cisco Crosswork inventory collection and management
+scope: system
+# Pack version needs to be conforming to <major>.<minor>.<micro> etc versioning.
+# More detailed spec for versioning: https://packaging.python.org/en/latest/specifications/version-specifiers/
+version: 8.1.0 
+folder: /collection/CrossworkPack
+published_date: 2025-12-22
+publisher: Fabrix.ai
+fabric_services:
+  - name: api-server
+    version: ">=8.1.0.3"
+
+description: 
+   md: "./description.md"
+type: collection
+#launch_dashboard: cisco_ucs_intersight
+
+#Other packs that this solution requires to be deployed
+requires:
+  - name: Fabrix Inventory Collection Base Pack
+    version: ">=6.0.0"
+
+artifacts:
+  pstreams:
+    - name: cisco_crosswork_on_boarded_devices
+      attributes:
+        retention_days: 365
+        unique_keys: ["customer_tag","ip_address"]
+      autocreate: true
+
+    - name: crosswork-devices-inventory
+      attributes:
+        unique_keys: ["unique_id"]
+        timestamp0: collection_timestamp
+        retention_days: 5
+      autocreate: true
+    
+    - name: cisco_crosswork_access_verification_status
+      attributes:
+        retention_days: 7
+        unique_keys: ["customer_tag","ip_address","cisco_crosswork_src_name"]
+      autocreate: true
+
+  dashboards:
+    - name: cisco-crosswork-inventory-analytics
+      file: ./artifacts/dashboards/cisco-crosswork-inventory-analytics.json
+      folder: CrossworkPack
+
+    - name: cisco_crossworks_inventory_dashboard
+      file: ./artifacts/dashboards/cisco_crossworks_inventory_dashboard.json
+      folder: CrossworkPack
+
+
+    - name: cisco_crosswork_configure_and_manage
+      file: ./artifacts/dashboards/cisco_crosswork_configure_and_manage.json
+      folder: CrossworkPack
+
+    - name: cisco_crosswork_asset_discovery_collection_status
+      file: ./artifacts/dashboards/cisco_crosswork_asset_discovery_collection_status.json
+      folder: CrossworkPack
+
+
+  pipelines:
+    - name: crosswork_inventory_pipeline
+      version: 2025.12.22.1
+      file: ./artifacts/pipelines/crosswork_inventory_pipeline.txt
+      folder: CrossworkPack
+
+    - name: cisco_crosswork_access_verification
+      version: 2025.12.22.1
+      file: ./artifacts/pipelines/cisco_crosswork_access_verification.txt
+      folder: CrossworkPack
+
+customer_level:
+
+  launch_locations:
+
+  - pstream_name: rda_packs_dynamic_groups_and_pages
+    dashboard_group_name: groupConfigure
+    dashboard_group_label: Management
+    dashboard_group_icon: "settings.svg"
+    dashboard_page_name: cisco_crosswork_configure_and_manage
+    dashboard_page_label: "CrossWork Configuration and Status"
+    dashboard_page_icon: "settings.svg"
+  - pstream_name: rda_packs_dynamic_groups_and_pages
+    dashboard_group_name: groupStatus
+    dashboard_group_label: Status
+    dashboard_group_icon: "history.svg"
+    dashboard_page_name: cisco_crosswork_asset_discovery_collection_status
+    dashboard_page_label: "CrossWork Asset Discovery Collection Status"
+    dashboard_page_icon: "library.svg"
+  - pstream_name: rda_packs_dynamic_groups_and_pages
+    dashboard_group_name: groupInventory
+    dashboard_group_label: Inventory
+    dashboard_group_icon: ""
+    dashboard_page_name: cisco_crossworks_inventory_dashboard
+    dashboard_page_label: "CrossWork Inventory"
+    dashboard_page_icon: "library.svg"
+  artifacts:
+
+    blueprints:
+      - name: CrossWork Inventory Collection Multi tenant
+        file: ./artifacts/blueprints/cisco_crosswork.yaml
+
+
+single_tenant:
+
+  launch_dashboard: cisco-crosswork-inventory-analytics
+  launch_locations:
+  - pstream_name: rda_packs_dynamic_groups_and_pages
+    dashboard_group_name: groupConfigure
+    dashboard_group_label: Management
+    dashboard_group_icon: "settings.svg"
+    dashboard_page_name: cisco_crosswork_configure_and_manage
+    dashboard_page_label: "CrossWork Configuration and Status"
+    dashboard_page_icon: "settings.svg"
+  - pstream_name: rda_packs_dynamic_groups_and_pages
+    dashboard_group_name: groupStatus
+    dashboard_group_label: Status
+    dashboard_group_icon: "history.svg"
+    dashboard_page_name: cisco_crosswork_asset_discovery_collection_status
+    dashboard_page_label: "CrossWork Asset Discovery Collection Status"
+    dashboard_page_icon: "library.svg"
+  - pstream_name: rda_packs_dynamic_groups_and_pages
+    dashboard_group_name: groupInventory
+    dashboard_group_label: Inventory
+    dashboard_group_icon: ""
+    dashboard_page_name: cisco_crossworks_inventory_dashboard
+    dashboard_page_label: "CrossWork Inventory"
+    dashboard_page_icon: "library.svg"
+
+  artifacts:
+    blueprints:
+      - name: CrossWork Inventory Collection Single tenant
+        file: ./artifacts/blueprints/cisco_crosswork_single_tenant.yaml
+  
+

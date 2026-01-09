@@ -1,0 +1,1439 @@
+{
+    "name": "cisco_crossworks_inventory_dashboard",
+    "label": "Cisco Cross Works Analytics",
+    "description": "Cisco Cross Works Analytics Dashboard",
+    "version": "2025.12.18.1",
+    "enabled": true,
+    "dashboard_style": "tabbed",
+    "dashboard_folder": "CrossworkPack",
+    "live_edit": true,
+    "template_variables": {
+        "CUST_ID": {
+            "contextId": "customerId"
+        },
+        "PROJ_ID": {
+            "contextId": "projectId"
+        },
+        "CUST_TAG": {
+            "contextId": "customerTag"
+        }
+    },
+    "status_poller": {},
+    "dashboard_filters": {
+        "time_filter": true,
+        "default_time_filter_labels": [
+            "Last 9 month"
+        ],
+        "columns_filter": [
+            {
+                "id": "crosswork_gui_ip",
+                "lable": "Crosswork GUI IP Address",
+                "type": "TEXT"
+            },
+            {
+                "id": "host_name",
+                "label": "Host Name",
+                "type": "TEXT"
+            },
+            {
+                "id": "ip_address ",
+                "label": "Node IP Address",
+                "type": "TEXT"
+            }
+        ],
+        "group_filters": [
+            {
+                "stream": "crosswork-devices-inventory",
+                "extra_filter": "asset_object = 'Devices' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                "title": "Crosswork GUI IP Address",
+                "limit": 200,
+                "group_by": [
+                    "crosswork_gui_ip"
+                ],
+                "ts_column": "collection_timestamp",
+                "agg": "cardinality",
+                "column": "_id",
+                "type": "int"
+            },
+            {
+                "stream": "crosswork-devices-inventory",
+                "extra_filter": "asset_object = 'Devices' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                "title": "Node IP Address",
+                "limit": 200,
+                "group_by": [
+                    "ip_address"
+                ],
+                "ts_column": "collection_timestamp",
+                "agg": "cardinality",
+                "column": "_id",
+                "type": "int"
+            },
+            {
+                "stream": "crosswork-devices-inventory",
+                "extra_filter": "asset_object = 'Devices' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                "title": "Host Name",
+                "limit": 200,
+                "group_by": [
+                    "host_name"
+                ],
+                "ts_column": "collection_timestamp",
+                "agg": "cardinality",
+                "column": "_id",
+                "type": "int"
+            }
+        ]
+    },
+    "dashboard_sections": [
+        {
+            "title": "Devices",
+            "show_filter": true,
+            "widgets": [
+                {
+                    "title": "Devices",
+                    "widget_type": "custom_counter",
+                    "stream": "crosswork-devices-inventory",
+                    "extra_filter": "asset_object = 'Devices' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "column": "host_name",
+                    "agg": "value_count",
+                    "ts_column": "timestamp",
+                    "style": {
+                        "color-list": [
+                            "#334FFF"
+                        ]
+                    },
+                    "min_width": 3,
+                    "height": 4,
+                    "max_width": 5,
+                    "type": "str",
+                    "widget_id": "a6fd3618"
+                },
+                {
+                    "title": "Device Version",
+                    "widget_type": "pie_chart",
+                    "stream": "crosswork-devices-inventory",
+                    "extra_filter": "asset_object = 'Devices' and software_version is not empty and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "ts_column": "collection_timestamp",
+                    "column": "count_",
+                    "agg": "value_count",
+                    "type": "str",
+                    "group_by": [
+                        "software_version"
+                    ],
+                    "min_width": 3,
+                    "height": 4,
+                    "max_width": 5,
+                    "widget_id": "6f2c79fc"
+                },
+                {
+                    "title": "Device Software Type",
+                    "widget_type": "pie_chart",
+                    "stream": "crosswork-devices-inventory",
+                    "extra_filter": "asset_object = 'Devices' and software_type is not empty and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "ts_column": "collection_timestamp",
+                    "column": "count_",
+                    "agg": "value_count",
+                    "type": "str",
+                    "group_by": [
+                        "software_type"
+                    ],
+                    "style": {
+                        "color-map": {
+                            "controller": [
+                                "#00BB00",
+                                "#ffffff"
+                            ],
+                            "leaf": [
+                                "#FF5722",
+                                "#ffffff"
+                            ],
+                            "spine": [
+                                "#FFA726",
+                                "#ffffff"
+                            ]
+                        }
+                    },
+                    "min_width": 3,
+                    "height": 4,
+                    "max_width": 5,
+                    "widget_id": "6f2c79fc"
+                },
+                {
+                    "title": "Device Family",
+                    "widget_type": "pie_chart",
+                    "stream": "crosswork-devices-inventory",
+                    "extra_filter": "asset_object = 'Devices' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "ts_column": "collection_timestamp",
+                    "column": "count_",
+                    "agg": "value_count",
+                    "type": "str",
+                    "group_by": [
+                        "product_family"
+                    ],
+                    "style": {
+                        "color-map": {
+                            "in-service": [
+                                "#00BB00",
+                                "#ffffff"
+                            ],
+                            "unknown": [
+                                "#BB0000",
+                                "#ffffff"
+                            ]
+                        }
+                    },
+                    "min_width": 3,
+                    "height": 4,
+                    "max_width": 5,
+                    "widget_id": "6f2c79fc"
+                },
+                {
+                    "title": "Device Status",
+                    "widget_type": "pie_chart",
+                    "stream": "crosswork-devices-inventory",
+                    "extra_filter": "asset_object = 'Devices' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "ts_column": "collection_timestamp",
+                    "column": "count_",
+                    "agg": "value_count",
+                    "type": "str",
+                    "group_by": [
+                        "device_status"
+                    ],
+                    "style": {
+                        "color-map": {
+                            "active": [
+                                "#00BB00",
+                                "#ffffff"
+                            ],
+                            "unknown": [
+                                "#BB0000",
+                                "#ffffff"
+                            ]
+                        }
+                    },
+                    "min_width": 3,
+                    "height": 4,
+                    "max_width": 5,
+                    "widget_id": "6f2c79fc"
+                },
+                {
+                    "title": "Device Model",
+                    "widget_type": "pie_chart",
+                    "stream": "crosswork-devices-inventory",
+                    "extra_filter": "asset_object = 'Devices' and model is not empty and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "ts_column": "collection_timestamp",
+                    "column": "count_",
+                    "agg": "value_count",
+                    "type": "str",
+                    "group_by": [
+                        "model"
+                    ],
+                    "style": {
+                        "color-map": {
+                            "active": [
+                                "#00BB00",
+                                "#ffffff"
+                            ],
+                            "unknown": [
+                                "#BB0000",
+                                "#ffffff"
+                            ]
+                        }
+                    },
+                    "min_width": 3,
+                    "height": 4,
+                    "max_width": 5,
+                    "widget_id": "6f2c79fc"
+                },
+                {
+                    "title": "Device Admin State",
+                    "widget_type": "pie_chart",
+                    "stream": "crosswork-devices-inventory",
+                    "extra_filter": "asset_object = 'Devices' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "ts_column": "collection_timestamp",
+                    "column": "count_",
+                    "agg": "value_count",
+                    "type": "str",
+                    "group_by": [
+                        "status"
+                    ],
+                    "style": {
+                        "color-map": {
+                            "active": [
+                                "#00BB00",
+                                "#ffffff"
+                            ],
+                            "unknown": [
+                                "#BB0000",
+                                "#ffffff"
+                            ]
+                        }
+                    },
+                    "min_width": 3,
+                    "height": 4,
+                    "max_width": 5,
+                    "widget_id": "6f2c79fc"
+                },
+                {
+                    "title": "Device Details",
+                    "widget_type": "tabular",
+                    "stream": "crosswork-devices-inventory",
+                    "extra_filter": "asset_object = 'Devices' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "ts_column": "collection_timestamp",
+                    "column": "count_",
+                    "agg": "cardinality",
+                    "type": "str",
+                    "columns": {
+                        "crosswork_gui_ip": "CrossWork GUI IP",
+                        "hostname": "Host Name",
+                        "host_name": "Device Name",
+                        "ip_address": "IP Address",
+                        "model": "Model",
+                        "device_status": "Status",
+                        "uptime": "Uptime",
+                        "product_family": "Family",
+                        "product_type": "Type",
+                        "serialnumber": "Serial Number",
+                        "software_type": "Software Type",
+                        "software_version": "Software Version",
+                        "mgmt_ip_address": "Managed Address",
+                        "status": "Admin Status",
+                        "creation_time": "Creation Time",
+                        "entity_id": "Entity Id",
+                        "owning_entity_id": "Owning Entity ID",
+                        "vrf_status": "VRF Status",
+                        "life_cycle_state": "Life Cycle State",
+                        "inventory_collection_status": "Inventory Collection Status",
+                        "inventory_collection_time": "Inventory Collection Time",
+                        "asset_object": "Asset Object",
+                        "collection_timestamp": "Collection_TimeStamp"
+                    },
+                    "actions": [
+                        {
+                            "permission": "rda:user_dashboard:view",
+                            "appName": "user-dashboard/cisco_aci_apic_single",
+                            "drillDownLinkField": "node_ip_address",
+                            "identifier": "launch.dashboard.device_view_app",
+                            "selectionType": "SINGLE",
+                            "title": "View Details",
+                            "type": "GO_TO_APP_STATE",
+                            "contextParamList": {
+                                "contextParams": [
+                                    {
+                                        "paramKey": "node_id_nodes",
+                                        "paramId": "node_id"
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "min_width": 12,
+                    "height": 8,
+                    "max_width": 12,
+                    "widget_id": "6f2c79fc"
+                }
+            ]
+        },
+        {
+            "title": "Devices Nodes",
+            "show_filter": true,
+            "widgets": [
+                {
+                    "title": "Devices",
+                    "widget_type": "custom_counter",
+                    "stream": "crosswork-devices-inventory",
+                    "extra_filter": "asset_object = 'DevicesNodes' and host_name is not empty and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "column": "host_name",
+                    "agg": "value_count",
+                    "ts_column": "timestamp",
+                    "style": {
+                        "color-list": [
+                            "#334FFF"
+                        ]
+                    },
+                    "min_width": 3,
+                    "height": 4,
+                    "max_width": 5,
+                    "type": "str",
+                    "widget_id": "a6fd3618"
+                },
+                {
+                    "title": "Node Model",
+                    "widget_type": "pie_chart",
+                    "stream": "crosswork-devices-inventory",
+                    "extra_filter": "asset_object = 'DevicesNodes' and product_family is not empty and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "ts_column": "collection_timestamp",
+                    "column": "count_",
+                    "agg": "value_count",
+                    "type": "str",
+                    "group_by": [
+                        "product_family"
+                    ],
+                    "min_width": 3,
+                    "height": 4,
+                    "max_width": 5,
+                    "widget_id": "6f2c79fc"
+                },
+                {
+                    "title": "Device Status",
+                    "widget_type": "pie_chart",
+                    "stream": "crosswork-devices-inventory",
+                    "extra_filter": "asset_object = 'Devices' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "ts_column": "collection_timestamp",
+                    "column": "count_",
+                    "agg": "value_count",
+                    "type": "str",
+                    "group_by": [
+                        "device_status"
+                    ],
+                    "style": {
+                        "color-map": {
+                            "active": [
+                                "#00BB00",
+                                "#ffffff"
+                            ],
+                            "unknown": [
+                                "#BB0000",
+                                "#ffffff"
+                            ]
+                        }
+                    },
+                    "min_width": 3,
+                    "height": 4,
+                    "max_width": 5,
+                    "widget_id": "6f2c79fc"
+                },
+                {
+                    "title": "Profile Name",
+                    "widget_type": "pie_chart",
+                    "stream": "crosswork-devices-inventory",
+                    "extra_filter": "asset_object = 'DevicesNodes' and profile_name is not empty and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "ts_column": "collection_timestamp",
+                    "column": "count_",
+                    "agg": "value_count",
+                    "type": "str",
+                    "group_by": [
+                        "profile_name"
+                    ],
+                    "min_width": 3,
+                    "height": 4,
+                    "max_width": 5,
+                    "widget_id": "6f2c79fc"
+                },
+                {
+                    "title": "Provider Name",
+                    "widget_type": "pie_chart",
+                    "stream": "crosswork-devices-inventory",
+                    "extra_filter": "asset_object = 'DevicesNodes' and provider_name is not empty and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "ts_column": "collection_timestamp",
+                    "column": "count_",
+                    "agg": "value_count",
+                    "type": "str",
+                    "group_by": [
+                        "provider_name"
+                    ],
+                    "min_width": 3,
+                    "height": 4,
+                    "max_width": 5,
+                    "widget_id": "6f2c79fc"
+                },
+                {
+                    "title": "City",
+                    "widget_type": "pie_chart",
+                    "stream": "crosswork-devices-inventory",
+                    "extra_filter": "asset_object = 'DevicesNodes' and city is not empty and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "ts_column": "collection_timestamp",
+                    "column": "count_",
+                    "agg": "value_count",
+                    "type": "str",
+                    "group_by": [
+                        "city"
+                    ],
+                    "min_width": 3,
+                    "height": 4,
+                    "max_width": 5,
+                    "widget_id": "6f2c79fc"
+                },
+                {
+                    "title": "State",
+                    "widget_type": "pie_chart",
+                    "stream": "crosswork-devices-inventory",
+                    "extra_filter": "asset_object = 'DevicesNodes' and state is not empty and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "ts_column": "collection_timestamp",
+                    "column": "count_",
+                    "agg": "value_count",
+                    "type": "str",
+                    "group_by": [
+                        "state"
+                    ],
+                    "min_width": 3,
+                    "height": 4,
+                    "max_width": 5,
+                    "widget_id": "6f2c79fc"
+                },
+                {
+                    "title": "Device Node Details",
+                    "widget_type": "tabular",
+                    "stream": "crosswork-devices-inventory",
+                    "extra_filter": "asset_object = 'DevicesNodes' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "ts_column": "collection_timestamp",
+                    "column": "count_",
+                    "agg": "cardinality",
+                    "type": "str",
+                    "columns": {
+                        "crosswork_gui_ip": "CrossWork GUI IP",
+                        "host_name": "Device Name",
+                        "ip_address": "IP Address",
+                        "netmask": "Netmask",
+                        "device_type": "Device Type",
+                        "sys_description": "Description",
+                        "uptime": "Uptime",
+                        "product_family": "Family",
+                        "product_type": "Type",
+                        "software_version": "Software Version",
+                        "status": "Admin Status",
+                        "profile_name": "Profile Name",
+                        "street": "Street",
+                        "city": "City",
+                        "state": "State",
+                        "country": "Country",
+                        "latitude_value": "Latitude",
+                        "longitude_value": "Longitude",
+                        "provider_name": "Provider Name",
+                        "provider_node_id": "Provider Node Id",
+                        "capability": "Capability",
+                        "sys_object_id": "Object ID",
+                        "syslog_format": "Syslog Format",
+                        "uuid": "UUID",
+                        "asset_object": "Asset Object",
+                        "collection_timestamp": "Collection_TimeStamp"
+                    },
+                    "min_width": 12,
+                    "height": 8,
+                    "max_width": 12,
+                    "widget_id": "6f2c79fc"
+                }
+            ]
+        },
+        {
+            "title": "Chassis",
+            "show_filter": true,
+            "widgets": [
+                {
+                    "title": "Devices Count",
+                    "widget_type": "counter",
+                    "stream": "crosswork-devices-inventory",
+                    "extra_filter": "asset_object = 'Chassis' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "column": "count_",
+                    "agg": "value_count",
+                    "ts_column": "timestamp",
+                    "style": {
+                        "color-list": [
+                            "#334FFF"
+                        ]
+                    },
+                    "min_width": 2,
+                    "height": 4,
+                    "max_width": 3,
+                    "type": "str",
+                    "widget_id": "a6fd3618"
+                },
+                {
+                    "title": "Device State",
+                    "widget_type": "pie_chart",
+                    "stream": "crosswork-devices-inventory",
+                    "extra_filter": "asset_object = 'Chassis' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "ts_column": "collection_timestamp",
+                    "column": "count_",
+                    "agg": "value_count",
+                    "type": "str",
+                    "group_by": [
+                        "state"
+                    ],
+                    "min_width": 3,
+                    "height": 4,
+                    "max_width": 5,
+                    "widget_id": "6f2c79fc"
+                },
+                {
+                    "title": "Service State",
+                    "widget_type": "pie_chart",
+                    "stream": "crosswork-devices-inventory",
+                    "extra_filter": "asset_object = 'Chassis' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "ts_column": "collection_timestamp",
+                    "column": "count_",
+                    "agg": "value_count",
+                    "type": "str",
+                    "group_by": [
+                        "service_state"
+                    ],
+                    "min_width": 3,
+                    "height": 4,
+                    "max_width": 5,
+                    "widget_id": "6f2c79fc"
+                },
+                {
+                    "title": "Equipment Type",
+                    "widget_type": "pie_chart",
+                    "stream": "crosswork-devices-inventory",
+                    "extra_filter": "asset_object = 'Chassis' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "ts_column": "collection_timestamp",
+                    "column": "count_",
+                    "agg": "value_count",
+                    "type": "str",
+                    "group_by": [
+                        "equipment_type"
+                    ],
+                    "min_width": 3,
+                    "height": 4,
+                    "max_width": 5,
+                    "widget_id": "6f2c79fc"
+                },
+                {
+                    "title": "Replaceable Unit",
+                    "widget_type": "pie_chart",
+                    "stream": "crosswork-devices-inventory",
+                    "extra_filter": "asset_object = 'Chassis' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "ts_column": "collection_timestamp",
+                    "column": "count_",
+                    "agg": "value_count",
+                    "type": "str",
+                    "group_by": [
+                        "replaceable_unit"
+                    ],
+                    "min_width": 3,
+                    "height": 4,
+                    "max_width": 5,
+                    "widget_id": "6f2c79fc"
+                },
+                {
+                    "title": "Physically Status",
+                    "widget_type": "pie_chart",
+                    "stream": "crosswork-devices-inventory",
+                    "extra_filter": "asset_object = 'Chassis' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "ts_column": "collection_timestamp",
+                    "column": "count_",
+                    "agg": "value_count",
+                    "type": "str",
+                    "group_by": [
+                        "physically_present"
+                    ],
+                    "min_width": 3,
+                    "height": 4,
+                    "max_width": 5,
+                    "widget_id": "6f2c79fc"
+                },
+                {
+                    "title": "Device Node Details",
+                    "widget_type": "tabular",
+                    "stream": "crosswork-devices-inventory",
+                    "extra_filter": "asset_object = 'Chassis' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "ts_column": "collection_timestamp",
+                    "column": "count_",
+                    "agg": "cardinality",
+                    "type": "str",
+                    "columns": {
+                        "crosswork_gui_ip": "CrossWork GUI IP",
+                        "host_name": "Device Name",
+                        "device_type": "Device Type",
+                        "state": "State",
+                        "chassis_name": "Chassis Name",
+                        "description": "Description",
+                        "service_state": "Service State",
+                        "assembly_revision": "Assembly Revision",
+                        "clei_code": "clei Code",
+                        "physical_index": "Physical Index ID",
+                        "equipment_type": "Equipment Type",
+                        "hardware_version": "Hardware Version",
+                        "replaceable_unit": "Replaceable Unit",
+                        "physically_present": "Physically Status",
+                        "alarms": "Alarms",
+                        "manufactured_date": "Date Of Manufactured",
+                        "vendor": "Vendor",
+                        "part_number": "Part Number",
+                        "prodcut_id": "Prodcut ID",
+                        "serial_number": "Serial Number",
+                        "asset_object": "Asset Object",
+                        "collection_timestamp": "Collection_TimeStamp"
+                    },
+                    "min_width": 12,
+                    "height": 8,
+                    "max_width": 12,
+                    "widget_id": "6f2c79fc"
+                }
+            ]
+        },
+        {
+            "title": "Physical Connectors",
+            "show_filter": true,
+            "widgets": [
+                {
+                    "title": "Devices",
+                    "widget_type": "custom_counter",
+                    "stream": "crosswork-devices-inventory",
+                    "extra_filter": "asset_object = 'Devices' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "column": "host_name",
+                    "agg": "value_count",
+                    "ts_column": "timestamp",
+                    "style": {
+                        "color-list": [
+                            "#334FFF"
+                        ]
+                    },
+                    "min_width": 3,
+                    "height": 4,
+                    "max_width": 5,
+                    "type": "str",
+                    "widget_id": "a6fd3618"
+                },
+                {
+                    "title": "Device Model",
+                    "widget_type": "pie_chart",
+                    "stream": "crosswork-devices-inventory",
+                    "extra_filter": "asset_object = 'Devices' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "ts_column": "collection_timestamp",
+                    "column": "count_",
+                    "agg": "value_count",
+                    "type": "str",
+                    "group_by": [
+                        "product_family"
+                    ],
+                    "min_width": 3,
+                    "height": 4,
+                    "max_width": 5,
+                    "widget_id": "6f2c79fc"
+                },
+                {
+                    "title": "Connection Details",
+                    "widget_type": "tabular",
+                    "stream": "crosswork-devices-inventory",
+                    "extra_filter": "asset_object = 'PhysicalConnectors' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "ts_column": "collection_timestamp",
+                    "column": "count_",
+                    "agg": "cardinality",
+                    "type": "str",
+                    "columns": {
+                        "crosswork_gui_ip": "CrossWork GUI IP",
+                        "host_name": "Host Name",
+                        "description": "Description",
+                        "connection_interface_name": "Interface Name",
+                        "first_index": "First Index",
+                        "last_index": "Last Index",
+                        "asset_object": "Asset Object",
+                        "collection_timestamp": "Collection_TimeStamp"
+                    },
+                    "min_width": 12,
+                    "height": 6,
+                    "max_width": 12,
+                    "widget_id": "6f2c79fc"
+                }
+            ]
+        },
+        {
+            "title": "Network and Link Details",
+            "show_filter": true,
+            "widgets": [
+                {
+                    "title": "Network's",
+                    "widget_type": "custom_counter",
+                    "stream": "crosswork-devices-inventory",
+                    "extra_filter": "asset_object = 'NetworkNodes' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "column": "name",
+                    "agg": "value_count",
+                    "ts_column": "timestamp",
+                    "style": {
+                        "color-list": [
+                            "#334FFF"
+                        ]
+                    },
+                    "min_width": 3,
+                    "height": 4,
+                    "max_width": 5,
+                    "type": "str",
+                    "widget_id": "a6fd3618"
+                },
+                {
+                    "title": "Interfaces",
+                    "widget_type": "pie_chart",
+                    "stream": "crosswork-devices-inventory",
+                    "extra_filter": "asset_object = 'NetworkNodes' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "ts_column": "collection_timestamp",
+                    "column": "count_",
+                    "agg": "value_count",
+                    "type": "str",
+                    "group_by": [
+                        "interface_id"
+                    ],
+                    "min_width": 3,
+                    "height": 4,
+                    "max_width": 5,
+                    "widget_id": "6f2c79fc"
+                },
+                {
+                    "title": "L3 Domain ID's",
+                    "widget_type": "pie_chart",
+                    "stream": "crosswork-devices-inventory",
+                    "extra_filter": "asset_object = 'NetworkNodes' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "ts_column": "collection_timestamp",
+                    "column": "count_",
+                    "agg": "value_count",
+                    "type": "str",
+                    "group_by": [
+                        "l3_domain_id"
+                    ],
+                    "style": {
+                        "color-map": {
+                            "active": [
+                                "#00BB00",
+                                "#ffffff"
+                            ],
+                            "unknown": [
+                                "#BB0000",
+                                "#ffffff"
+                            ]
+                        }
+                    },
+                    "min_width": 3,
+                    "height": 4,
+                    "max_width": 5,
+                    "widget_id": "6f2c79fc"
+                },
+                {
+                    "title": "Network Node Details",
+                    "widget_type": "tabular",
+                    "stream": "crosswork-devices-inventory",
+                    "extra_filter": "asset_object = 'NetworkNodes' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "ts_column": "collection_timestamp",
+                    "column": "count_",
+                    "agg": "cardinality",
+                    "type": "str",
+                    "columns": {
+                        "crosswork_gui_ip": "Crosswork GUI IP Address",
+                        "router_id": "Router ID",
+                        "name": "Name",
+                        "node_id": "Node ID",
+                        "interface_id": "Interface Name",
+                        "l3_pcc_ip_address": "L3 PCC IP Address",
+                        "l3_pce_ip_address": "L3 PCE IP Address",
+                        "l3_termination_point_ip_address": "L3 Termination Point",
+                        "l3_termination_point_unnumbered_id": "L3 Termination Point Unnumbered ID",
+                        "l3_domain_id": "L3 Domain ID",
+                        "l3_pcep_instantiate": "L3 PCEP Instantiate",
+                        "l3_pcep_sr": "L3 PCEP SR",
+                        "l2_encapsulation_type": "L2 Encapsulation Type",
+                        "l2_mac_address": "L2 MAC",
+                        "l2_unnumbered_id": "L2 Unnumbered ID",
+                        "ospf_area_id": "OSPF Area ID",
+                        "ospf_router_id": "OSPF Router ID",
+                        "mpls_network_id": "MPLS Network ID",
+                        "mpls_algorithm": "MPLS Algorithm",
+                        "mpls_algorithm_value": "MPLS Algorithm Value",
+                        "mpls_is_local": "MPLS Local",
+                        "mpls_is_node": "MPLS Node State",
+                        "mpls_range": "MPLS Range",
+                        "mpls_start_sid": "MPLS Start SID",
+                        "mpls_value_type": "MPLS Value Type",
+                        "sr_mpls_msd": "MPLS MSD",
+                        "sr_mpls_srgb_lower_bound": "MPLS SRGB Lower Bound",
+                        "sr_mpls_srgb_upper_bound": "MPLS SRGB Upper Bound",
+                        "sr_mpls_srlb_lower_bound": "MPLS SRLB Lower Bound",
+                        "sr_mpls_srlb_upper_bound": "MPLS SRLB Upper Bound",
+                        "device_vendor": "Cisco",
+                        "device_type": "Crosswork",
+                        "asset_object": "NetworkNodes",
+                        "collection_timestamp": "Collection_TimeStamp"
+                    },
+                    "min_width": 12,
+                    "height": 8,
+                    "max_width": 12,
+                    "widget_id": "6f2c79fc"
+                },
+                {
+                    "title": "Network Link Details",
+                    "widget_type": "tabular",
+                    "stream": "crosswork-devices-inventory",
+                    "extra_filter": "asset_object = 'NetworkLink' and l3_domain_id is not empty and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "ts_column": "collection_timestamp",
+                    "column": "count_",
+                    "agg": "cardinality",
+                    "type": "str",
+                    "columns": {
+                        "crosswork_gui_ip": "Crosswork GUI IP Address",
+                        "name": "Network Link Name",
+                        "link_id": "Network Link ID",
+                        "source_interface_id": "Network Link Source Interface ID",
+                        "source_node_id": "Network Link Source Node ID",
+                        "destination_interface_id": "Network Link Destination Interface ID",
+                        "destination_node_id": "Network Link Destination Node ID",
+                        "l3_administrative_group": "L3 Admin Group",
+                        "l3_domain_id": "L3 Domain ID",
+                        "l3_max_bandwidth_kbps": "L3 MAX Bandwidth KBPS",
+                        "osps_link_area_id": "OSPS Area ID",
+                        "osps_router_id": "OSPS Router ID",
+                        "mpls_advertise_protection": "MPLS Protection",
+                        "mpls_information_source": "MPLS Source Type",
+                        "mpls_msd": "MPLS MSD ID",
+                        "mpls_sids_address_family": "MPLS SIDS Address Family",
+                        "mpls_sids_sid": "MPLS SID",
+                        "device_vendor": "Cisco",
+                        "device_type": "Crosswork",
+                        "asset_object": "NetworkNodes",
+                        "collection_timestamp": "Collection_TimeStamp"
+                    },
+                    "min_width": 12,
+                    "height": 8,
+                    "max_width": 12,
+                    "widget_id": "6f2c79fc"
+                }
+            ]
+        },
+        {
+            "title": "L2 VPN And Link Details",
+            "show_filter": true,
+            "widgets": [
+                {
+                    "title": "L2 VPN's",
+                    "widget_type": "custom_counter",
+                    "stream": "crosswork-devices-inventory",
+                    "extra_filter": "asset_object = 'l2vpnservices' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "column": "vpn_id",
+                    "agg": "value_count",
+                    "ts_column": "timestamp",
+                    "style": {
+                        "color-list": [
+                            "#334FFF"
+                        ]
+                    },
+                    "min_width": 1.5,
+                    "height": 4,
+                    "max_width": 1.5,
+                    "type": "str",
+                    "widget_id": "a6fd3618"
+                },
+                {
+                    "title": "L2 VPN Type",
+                    "widget_type": "pie_chart",
+                    "stream": "crosswork-devices-inventory",
+                    "extra_filter": "asset_object = 'l2vpnservices' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "ts_column": "collection_timestamp",
+                    "column": "count_",
+                    "agg": "value_count",
+                    "type": "str",
+                    "group_by": [
+                        "vpn_type"
+                    ],
+                    "min_width": 2.5,
+                    "height": 4,
+                    "max_width": 2.5,
+                    "widget_id": "6f2c79fc"
+                },
+                {
+                    "title": "L2 VPN Profile Name",
+                    "widget_type": "pie_chart",
+                    "stream": "crosswork-devices-inventory",
+                    "extra_filter": "asset_object = 'l2vpnservices' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "ts_column": "collection_timestamp",
+                    "column": "count_",
+                    "agg": "value_count",
+                    "type": "str",
+                    "group_by": [
+                        "vpn_profile_name"
+                    ],
+                    "style": {
+                        "color-map": {
+                            "active": [
+                                "#00BB00",
+                                "#ffffff"
+                            ],
+                            "unknown": [
+                                "#BB0000",
+                                "#ffffff"
+                            ]
+                        }
+                    },
+                    "min_width": 2.5,
+                    "height": 4,
+                    "max_width": 2.5,
+                    "widget_id": "6f2c79fc"
+                },
+                {
+                    "title": "L2 VPN Status",
+                    "widget_type": "pie_chart",
+                    "stream": "crosswork-devices-inventory",
+                    "extra_filter": "asset_object = 'l2vpnservices' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "ts_column": "collection_timestamp",
+                    "column": "count_",
+                    "agg": "value_count",
+                    "type": "str",
+                    "group_by": [
+                        "status"
+                    ],
+                    "style": {
+                        "color-map": {
+                            "active": [
+                                "#00BB00",
+                                "#ffffff"
+                            ],
+                            "unknown": [
+                                "#BB0000",
+                                "#ffffff"
+                            ]
+                        }
+                    },
+                    "min_width": 2.5,
+                    "height": 4,
+                    "max_width": 2.5,
+                    "widget_id": "6f2c79fc"
+                },
+                {
+                    "title": "L2 Color Status",
+                    "widget_type": "pie_chart",
+                    "stream": "crosswork-devices-inventory",
+                    "extra_filter": "asset_object = 'l2-vpn-service-underlay-transport' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "ts_column": "collection_timestamp",
+                    "column": "count_",
+                    "agg": "value_count",
+                    "type": "str",
+                    "group_by": [
+                        "color_state"
+                    ],
+                    "style": {
+                        "color-map": {
+                            "active": [
+                                "#00BB00",
+                                "#ffffff"
+                            ],
+                            "unknown": [
+                                "#BB0000",
+                                "#ffffff"
+                            ]
+                        }
+                    },
+                    "min_width": 2.5,
+                    "height": 4,
+                    "max_width": 2.5,
+                    "widget_id": "6f2c79fc"
+                },
+                {
+                    "title": "L2 VPN Details",
+                    "widget_type": "tabular",
+                    "stream": "crosswork-devices-inventory",
+                    "extra_filter": "asset_object = 'l2vpnservices' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "ts_column": "collection_timestamp",
+                    "column": "count_",
+                    "agg": "cardinality",
+                    "type": "str",
+                    "columns": {
+                        "crosswork_gui_ip": "Crosswork GUI IP Address",
+                        "vpn_id": "VPN ID",
+                        "vpn_node_id": "VPN NODE ID",
+                        "vpn_type": "VPN Type",
+                        "vpn_active_device": "ACTIVE Device",
+                        "vpn_configured_devices": "Host Devices",
+                        "vpn_profile_name": "Profile Name",
+                        "vpn_rule_name": "Rule Name",
+                        "vpn_services": "Services Offered",
+                        "vpn_node_vc_id": "VC ID",
+                        "vpn_node_access_id": "Node Access ID",
+                        "vpn_node_access_interface_id": "Node Access Interface ID",
+                        "vpn_node_peer_addr": "Peer Address",
+                        "monitoing_state": "Monitoing State",
+                        "vpn_state_modified_devices_0": "Last Modified Devices",
+                        "vpn_state_modified_services_0": "Service Modified 0",
+                        "vpn_state_modified_services_1": "Service Modified 1",
+                        "active_state": "State",
+                        "status": "Status",
+                        "current_state_time": "Current State Time",
+                        "log_level": "Log Level",
+                        "log_message": "Log Message",
+                        "log_type": "Log Type",
+                        "log_time": "Log Time",
+                        "device_vendor": "Cisco",
+                        "device_type": "Crosswork",
+                        "asset_object": "NetworkNodes",
+                        "collection_timestamp": "Collection_TimeStamp"
+                    },
+                    "min_width": 12,
+                    "height": 8,
+                    "max_width": 12,
+                    "widget_id": "6f2c79fc"
+                },
+                {
+                    "title": "L2 VPN Link Details",
+                    "widget_type": "tabular",
+                    "stream": "crosswork-devices-inventory",
+                    "extra_filter": "asset_object = 'l2-vpn-service-underlay-transport' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "ts_column": "collection_timestamp",
+                    "column": "count_",
+                    "agg": "cardinality",
+                    "type": "str",
+                    "columns": {
+                        "crosswork_gui_ip": "Crosswork GUI IP Address",
+                        "vpn_id": "VPN ID",
+                        "start_point": "Starting Point IP",
+                        "end_point": "Ending Point IP",
+                        "color_state": "Color State",
+                        "device_vendor": "Cisco",
+                        "device_type": "Crosswork",
+                        "asset_object": "NetworkNodes",
+                        "collection_timestamp": "Collection_TimeStamp"
+                    },
+                    "min_width": 12,
+                    "height": 8,
+                    "max_width": 12,
+                    "widget_id": "6f2c79fc"
+                }
+            ]
+        },
+        {
+            "title": "Alarm Configuration",
+            "show_filter": true,
+            "widgets": [
+                {
+                    "title": "Alarms Types",
+                    "widget_type": "custom_counter",
+                    "stream": "crosswork-devices-inventory",
+                    "extra_filter": "asset_object = 'AlarmSeverityConfig' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "column": "name",
+                    "agg": "value_count",
+                    "ts_column": "timestamp",
+                    "style": {
+                        "color-list": [
+                            "#334FFF"
+                        ]
+                    },
+                    "min_width": 3,
+                    "height": 4,
+                    "max_width": 5,
+                    "type": "str",
+                    "widget_id": "a6fd3618"
+                },
+                {
+                    "title": "Alarm Severity Type",
+                    "widget_type": "pie_chart",
+                    "stream": "crosswork-devices-inventory",
+                    "extra_filter": "asset_object = 'AlarmSeverityConfig' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "ts_column": "collection_timestamp",
+                    "column": "count_",
+                    "agg": "value_count",
+                    "type": "str",
+                    "group_by": [
+                        "severity"
+                    ],
+                    "style": {
+                        "color-map": {
+                            "Critical": [
+                                "#B71C1C",
+                                "#ffffff"
+                            ],
+                            "Major": [
+                                "#FF5722",
+                                "#ffffff"
+                            ],
+                            "Minor": [
+                                "#F57C00",
+                                "#ffffff"
+                            ],
+                            "warning": [
+                                "#1E88E5",
+                                "#ffffff"
+                            ],
+                            "Information": [
+                                "#4CAF50",
+                                "#ffffff"
+                            ]
+                        }
+                    },
+                    "min_width": 3,
+                    "height": 4,
+                    "max_width": 5,
+                    "widget_id": "6f2c79fc"
+                },
+                {
+                    "title": "Alarm Category Type",
+                    "widget_type": "pie_chart",
+                    "stream": "crosswork-devices-inventory",
+                    "extra_filter": "asset_object = 'AlarmSeverityConfig' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "ts_column": "collection_timestamp",
+                    "column": "count_",
+                    "agg": "value_count",
+                    "type": "str",
+                    "group_by": [
+                        "Category"
+                    ],
+                    "min_width": 3,
+                    "height": 4,
+                    "max_width": 5,
+                    "widget_id": "6f2c79fc"
+                },
+                {
+                    "title": "Alarm Severity Configuration Details",
+                    "widget_type": "tabular",
+                    "stream": "crosswork-devices-inventory",
+                    "extra_filter": "asset_object = 'AlarmSeverityConfig' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "ts_column": "collection_timestamp",
+                    "column": "count_",
+                    "agg": "cardinality",
+                    "type": "str",
+                    "columns": {
+                        "crosswork_gui_ip": "Crosswork GUI IP Address",
+                        "name": "Name",
+                        "severity": {
+                            "title": "severity",
+                            "htmlTemplateForRow": "<span class='badge' style='background-color: {{ row.severity_status_color }}' > {{ row.severity }} </span>"
+                        },
+                        "severity_status_color": {
+                            "type": "COLOR-MAP",
+                            "source-column": "severity",
+                            "color-map": {
+                                "Critical": "#B71C1C",
+                                "Major": "#FF5722",
+                                "Minor": "#F57C00",
+                                "warning": "#1E88E5",
+                                "Information": "#4CAF50"
+                            }
+                        },
+                        "Category": "Category",
+                        "event_type_name": "Event Type",
+                        "device_vendor": "Cisco",
+                        "device_type": "Crosswork",
+                        "asset_object": "Asset Object",
+                        "collection_timestamp": "Collection_TimeStamp"
+                    },
+                    "min_width": 12,
+                    "height": 6,
+                    "max_width": 12,
+                    "widget_id": "6f2c79fc"
+                }
+            ]
+        },
+        {
+            "title": "Alarms",
+            "show_filter": true,
+            "widgets": [
+                {
+                    "title": "Total Alarms",
+                    "widget_type": "custom_counter",
+                    "stream": "crosswork-devices-inventory",
+                    "extra_filter": "asset_object = 'Alarms' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "column": "uuid",
+                    "agg": "value_count",
+                    "ts_column": "timestamp",
+                    "style": {
+                        "color-list": [
+                            "#334FFF"
+                        ]
+                    },
+                    "min_width": 3,
+                    "height": 4,
+                    "max_width": 5,
+                    "type": "str",
+                    "widget_id": "a6fd3618"
+                },
+                {
+                    "title": "Alarm Severity Type",
+                    "widget_type": "pie_chart",
+                    "stream": "crosswork-devices-inventory",
+                    "extra_filter": "asset_object = 'Alarms' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "ts_column": "collection_timestamp",
+                    "column": "count_",
+                    "agg": "value_count",
+                    "type": "str",
+                    "group_by": [
+                        "severity"
+                    ],
+                    "style": {
+                        "color-map": {
+                            "critical": [
+                                "#B71C1C",
+                                "#ffffff"
+                            ],
+                            "major": [
+                                "#FF5722",
+                                "#ffffff"
+                            ],
+                            "minor": [
+                                "#F57C00",
+                                "#ffffff"
+                            ],
+                            "warning": [
+                                "#1E88E5",
+                                "#ffffff"
+                            ],
+                            "cleared": [
+                                "#4CAF50",
+                                "#ffffff"
+                            ]
+                        }
+                    },
+                    "min_width": 3,
+                    "height": 4,
+                    "max_width": 5,
+                    "widget_id": "6f2c79fc"
+                },
+                {
+                    "title": "Alarm Category Type",
+                    "widget_type": "pie_chart",
+                    "stream": "crosswork-devices-inventory",
+                    "extra_filter": "asset_object = 'Alarms' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "ts_column": "collection_timestamp",
+                    "column": "count_",
+                    "agg": "value_count",
+                    "type": "str",
+                    "group_by": [
+                        "category"
+                    ],
+                    "min_width": 3,
+                    "height": 4,
+                    "max_width": 5,
+                    "widget_id": "6f2c79fc"
+                },
+                {
+                    "title": "Alarm Severity Configuration Details",
+                    "widget_type": "tabular",
+                    "stream": "crosswork-devices-inventory",
+                    "extra_filter": "asset_object = 'Alarms' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "ts_column": "collection_timestamp",
+                    "column": "count_",
+                    "agg": "cardinality",
+                    "type": "str",
+                    "columns": {
+                        "crosswork_gui_ip": "Crosswork GUI IP Address",
+                        "device_ip_address": "Device Name",
+                        "uuid": "Alarm ID",
+                        "acknowledged_state": "State",
+                        "severity": {
+                            "title": "Severity",
+                            "htmlTemplateForRow": "<span class='badge' style='background-color: {{ row.severity_status_color }}' > {{ row.severity }} </span>"
+                        },
+                        "severity_status_color": {
+                            "type": "COLOR-MAP",
+                            "source-column": "severity",
+                            "color-map": {
+                                "critical": "#B71C1C",
+                                "major": "#FF5722",
+                                "Minor": "#F57C00",
+                                "warning": "#1E88E5",
+                                "cleared": "#4CAF50"
+                            }
+                        },
+                        "category": "Category",
+                        "business_key": "Key",
+                        "cause_type": "Cause Type",
+                        "description": "Description",
+                        "node_ref": "Node Reference ID",
+                        "probable_cause": "Casue",
+                        "service_impacting": "Service Impacting",
+                        "object_ref": "Reference Object",
+                        "received_time": "Received Time",
+                        "update_time": "Update Time",
+                        "device_vendor": "Cisco",
+                        "device_type": "Crosswork",
+                        "asset_object": "Asset Object",
+                        "collection_timestamp": "Collection_TimeStamp"
+                    },
+                    "min_width": 12,
+                    "height": 6,
+                    "max_width": 12,
+                    "widget_id": "6f2c79fc"
+                }
+            ]
+        },
+        {
+            "title": "Performance",
+            "show_filter": true,
+            "widgets": [
+                {
+                    "title": "Network Performance",
+                    "widget_type": "timeseries",
+                    "stream": "crosswork-devices-inventory",
+                    "ts_column": "collection_timestamp",
+                    "extra_filter0": "l3_sessions is not empty and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "max_width": 12,
+                    "height": 6,
+                    "min_width": 12,
+                    "chartProperties": {
+                        "yAxisLabel": "Count",
+                        "xAxisLabel": null,
+                        "legendLocation": "right"
+                    },
+                    "interval": "30Min",
+                    "duration_hours": 1080000,
+                    "group_by": [
+                        "network_id",
+                        "router_id"
+                    ],
+                    "series_spec": [
+                        {
+                            "column": "metrci_id1",
+                            "agg": "value_count",
+                            "type": "TEXT"
+                        },
+                        {
+                            "column": "metrci_id2",
+                            "agg": "value_count",
+                            "type": "TEXT"
+                        }
+                    ],
+                    "widget_id": "ced78ab4"
+                },
+                {
+                    "title": "Bandwidth Trend",
+                    "widget_type": "timeseries",
+                    "stream": "crosswork-devices-inventory",
+                    "ts_column": "collection_timestamp",
+                    "extra_filter": "l3_bandwidth_kbps is not empty and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "max_width": 12,
+                    "height": 6,
+                    "min_width": 12,
+                    "chartProperties": {
+                        "yAxisLabel": "Bandwidth(kbps)",
+                        "xAxisLabel": null,
+                        "legendLocation": "right"
+                    },
+                    "interval": "15min",
+                    "duration_hours": 108000000,
+                    "group_by": [
+                        "network_node_id"
+                    ],
+                    "series_spec": [
+                        {
+                            "column": "l3_bandwidth_kbps_int",
+                            "agg": "value_count",
+                            "type": "float"
+                        }
+                    ],
+                    "widget_id": "ced78ab4"
+                },
+                {
+                    "title": "L3 Session Trend",
+                    "widget_type": "timeseries",
+                    "stream": "crosswork-devices-inventory",
+                    "ts_column": "collection_timestamp",
+                    "extra_filter": "l3_sessions is not empty and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "max_width": 12,
+                    "height": 6,
+                    "min_width": 12,
+                    "chartProperties": {
+                        "yAxisLabel": "Count",
+                        "xAxisLabel": null,
+                        "legendLocation": "right"
+                    },
+                    "interval": "30Min",
+                    "duration_hours": 1080000,
+                    "group_by": [
+                        "network_node_id"
+                    ],
+                    "series_spec": [
+                        {
+                            "column": "l3_sessions",
+                            "agg": "value_count",
+                            "type": "float"
+                        }
+                    ],
+                    "widget_id": "ced78ab4"
+                }
+            ]
+        }
+    ],
+    "saved_time": "2025-12-22T12:00:00.000000"
+}

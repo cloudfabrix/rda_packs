@@ -1,0 +1,56 @@
+{
+    "type": "metric",
+    "name": "memory_snmp_metric",
+    "enabled": true,
+    "schedule": {
+        "minutes": 15
+    },
+    "data": {
+        "stream": "rdaf_telegraf_metrics",
+        "groupby": [
+            "i_agent_host",
+            "name",
+            "i_memory_pool_name",
+            "i_projectid"
+        ],
+        "query": "(name == 'memory') and i_input == 'SNMP'"
+    },
+    "actions": [
+        {
+            "state": "OPEN",
+            "timestamp": "timestamp",
+            "threshold": "30",
+            "agg_column": "m_memory_usage",
+            "agg_func": "avg",
+            "repeat_count": 1,
+            "attributes": {
+                "severity": "CRITICAL",
+                "metric_name": "memory_usage",
+                "metric_value_field": "m_memory_usage_avg"
+            },
+            "notification": [
+                {
+                    "channel": "telegraf_snmp_metrics"
+                }
+            ]
+        },
+        {
+            "state": "CLEAR",
+            "timestamp": "timestamp",
+            "agg_column": "m_memory_usage",
+            "agg_func": "avg",
+            "threshold": "30",
+            "attributes": {
+                "severity": "INFO",
+                "metric_name": "memory_usage",
+                "metric_value_field": "m_memory_usage_avg"
+            },
+            "notification": [
+                {
+                    "channel": "telegraf_snmp_metrics"
+                }
+            ]
+        }
+    ],
+    "saved_time": "2025-08-14T09:40:29.375071"
+}

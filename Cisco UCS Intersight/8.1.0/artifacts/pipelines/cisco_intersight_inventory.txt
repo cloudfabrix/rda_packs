@@ -1,0 +1,586 @@
+%% stream = no and limit = 0
+##This pipeline needs customer_id or customerTag in context to run
+%% stream = no and limit = 0
+%%template_type="jinja"
+%% import_src_type = "cisco-intersight"
+%%start_inline_object name="context_dynamic_form" and type="data" and format="json"
+{
+    "formFieldList": [
+        {
+            "fieldId": "customer_tag",
+            "label": "Tag of the customer",
+            "required": false,
+            "dataType": "string"
+        }
+    ]
+}
+%%end_inline_object
+
+@dm:empty
+    --> @dm:save name = "temp-customer-context"
+   {% if customer_tag %} 
+      {% set customer_id = customer_id %}
+      {% set customer_tag = customer_tag %}
+      {% set customerTag = customer_tag %}
+   {% elif customerTag %} 
+      {% set customer_id = customer_id %}
+      {% set customer_tag = customerTag %}
+   {% else %}
+      {% set customer_id = '' %}
+      {% set customer_tag = '' %}
+   {% endif %}   
+   
+--> @dm:empty
+    --> @dm:save name = 'temp-variable-dataset'
+    --> @dm:save name = 'temp-variable-dataset-interim'
+    --> @dm:save name = 'temp-intersight-sources'
+--> @c:new-block
+    --> @exec:get-input
+    --> @dm:selectcolumns include = "Others"
+    ## --> @dm:skip-pipeline-if-shape column_count = 0
+    --> @dm:explode-json column="Others"
+    --> @dm:rename-columns intersight_src_name = 'name'
+    --> @dm:save name = 'temp-variable-dataset'
+    
+--> @c:new-block
+    --> @dm:recall name = 'temp-variable-dataset'
+    --> *exec:if-shape num_rows = 0
+       --> @dm:empty
+      {% if customer_tag %}
+         --> #dm:query-persistent-stream type contains 'cisco-intersight' and customerTag contains '{{customer_tag}}'  with-input name = 'rda_secrets_meta' and limit= 0
+      {% else %}
+         --> #dm:query-persistent-stream type contains 'cisco-intersight' and customerTag is empty with-input name = 'rda_secrets_meta' and limit= 0
+      {% endif %}   
+       --> @dm:save name = 'temp-intersight-sources'
+       --> @dm:recall name = 'temp-intersight-sources'
+       
+       --> @exec:for-loop num_rows = 1
+       {% if customer_tag %} 
+          --> #dm:query-persistent-stream intersight_src_name is '{%-raw-%}{{row["intersight_src_name"]}}{%-endraw-%}'  and customer_tag is '{{customer_tag}}' with-input name = 'cisco_intersight_on_boarded_devices' and limit= 0
+       {% else %}    
+          --> #dm:query-persistent-stream intersight_src_name is '{%-raw-%}{{row["intersight_src_name"]}}{%-endraw-%}' and customer_tag is empty with-input name = 'cisco_intersight_on_boarded_devices' and limit= 0
+      {% endif %}   
+          --> @dm:save name = 'temp-variable-dataset-interim' & append='yes' & return_appended_dataset = 'yes'
+       --> @exec:end-loop
+       
+       --> @dm:recall name = 'temp-variable-dataset-interim'
+       
+       --> *exec:if-shape num_rows = 0    
+         --> @dm:recall name = 'temp-intersight-sources'
+         -->@dm:eval  discovery_scope = "'yes'"
+         --> @dm:rename-columns intersight_src_name = 'name'
+                  --> @dm:skip-pipeline-if-shape row_count = 0
+         --> @dm:save name = 'temp-variable-dataset'
+      --> @exec:end-if
+       --> *exec:if-shape num_rows > 0
+         --> *dm:safe-filter discovery_scope == 'yes'
+         ##-->@dm:eval  discovery_scope = "'yes'"
+         ##--> @dm:rename-columns intersight_src_name = 'name'
+         --> @dm:save name = 'temp-variable-dataset'
+         
+      --> @exec:end-if
+    --> @exec:end-if
+##Add customer context to the dataset
+--> @c:new-block
+    --> @dm:recall name = 'temp-variable-dataset'
+    --> @dm:eval customer_id =  "'{{ customer_id }}'"
+    --> @dm:eval customer_tag =  "'{{ customer_tag }}'"
+   --> @dm:save name = 'temp-variable-dataset'
+
+## Cisco Intersight Server Inventory
+--> @c:data-loop name = "intersight-details" & dataset = 'temp-variable-dataset'  & columns = 'intersight_src_name,customer_id,customer_tag'
+    --> *$intersight_src_name:ucs-server-summary
+    --> @dm:fixcolumns
+    --> @dm:eval customer_id = "'$customer_id'"
+    --> @dm:eval customer_tag = "'$customer_tag'"
+    --> *exec:if-condition collection_status != 'Success'
+       --> *dm:filter * get source_ip as 'asset_id',collection_status,collection_timestamp,reason
+       --> @dm:map attr = 'collection_timestamp' & func = 'ts_to_datetimestr' & unit = 'ms'
+       --> @dm:eval bot_source_name = "'$intersight_src_name'"
+       --> @dm:eval bot_source_type = "'cisco_intersight'"
+       --> @dm:eval bot_name = "'ucs-server-summary'"
+       --> @dm:save name = 'temp-intersight_server_failed_status'
+     --> @rn:write-stream name = 'asset_inventory_collection_status_stream'
+    --> @exec:end-if
+    --> *exec:if-condition collection_status = 'Success'
+       --> @dm:save name = 'temp-intersight_server_inventory'
+       --> *dm:filter * get source_ip as 'asset_id',collection_status,collection_timestamp,reason,customer_id,customer_tag
+       --> @dm:map attr = 'collection_timestamp' & func = 'ts_to_datetimestr' & unit = 'ms'
+       --> @dm:eval bot_source_name = "'$intersight_src_name'"
+       --> @dm:eval bot_source_type = "'cisco_intersight'"
+       --> @dm:eval bot_name = "'ucs-server-summary'"
+       --> @dm:save name = 'temp-intersight_server_success_status'
+     --> @rn:write-stream name = 'asset_inventory_collection_status_stream'
+    --> @exec:end-if
+
+## intersight CPU Inventory
+--> @c:data-loop name = "intersight-details" & dataset = 'temp-variable-dataset'  & columns = 'intersight_src_name,customer_id,customer_tag'
+    --> *$intersight_src_name:ucs-server-cpu-inventory
+    --> @dm:fixcolumns
+    --> @dm:eval customer_id = "'$customer_id'"
+    --> @dm:eval customer_tag = "'$customer_tag'"
+    --> *exec:if-condition collection_status != 'Success'
+       --> *dm:filter * get source_ip as 'asset_id',collection_status,collection_timestamp,reason
+       --> @dm:map attr = 'collection_timestamp' & func = 'ts_to_datetimestr' & unit = 'ms'
+       --> @dm:eval bot_source_name = "'$intersight_src_name'"
+       --> @dm:eval bot_source_type = "'cisco_intersight'"
+       --> @dm:eval bot_name = "'ucs-server-cpu-inventory'"
+       --> @dm:save name = 'temp-intersight_cpu_failed_status'
+     --> @rn:write-stream name = 'asset_inventory_collection_status_stream'
+    --> @exec:end-if
+    --> *exec:if-condition collection_status = 'Success'
+       --> @dm:save name = 'temp-intersight_cpu_inventory'
+       --> *dm:filter * get source_ip as 'asset_id',collection_status,collection_timestamp,reason,customer_id,customer_tag
+       --> @dm:map attr = 'collection_timestamp' & func = 'ts_to_datetimestr' & unit = 'ms'
+       --> @dm:eval bot_source_name = "'$intersight_src_name'"
+       --> @dm:eval bot_source_type = "'cisco_intersight'"
+       --> @dm:eval bot_name = "'ucs-server-cpu-inventory'"
+       --> @dm:save name = 'temp-intersight_cpu_success_status'
+     --> @rn:write-stream name = 'asset_inventory_collection_status_stream'
+    --> @exec:end-if
+
+## intersight Memory Inventory
+--> @c:data-loop name = "intersight-details" & dataset = 'temp-variable-dataset'  & columns = 'intersight_src_name,customer_id,customer_tag'
+    --> *$intersight_src_name:ucs-server-memory-inventory
+    --> @dm:fixcolumns
+    --> @dm:eval customer_id = "'$customer_id'"
+    --> @dm:eval customer_tag = "'$customer_tag'"
+    --> *exec:if-condition collection_status != 'Success'
+       --> *dm:filter * get source_ip as 'asset_id',collection_status,collection_timestamp,reason
+       --> @dm:map attr = 'collection_timestamp' & func = 'ts_to_datetimestr' & unit = 'ms'
+       --> @dm:eval bot_source_name = "'$intersight_src_name'"
+       --> @dm:eval bot_source_type = "'cisco_intersight'"
+       --> @dm:eval bot_name = "'ucs-server-memory-inventory'"
+       --> @dm:save name = 'temp-intersight_memory_failed_status'
+     --> @rn:write-stream name = 'asset_inventory_collection_status_stream'
+    --> @exec:end-if
+    --> *exec:if-condition collection_status = 'Success'
+       --> @dm:save name = 'temp-intersight_memory_inventory'
+       --> *dm:filter * get source_ip as 'asset_id',collection_status,collection_timestamp,reason,customer_id,customer_tag
+       --> @dm:map attr = 'collection_timestamp' & func = 'ts_to_datetimestr' & unit = 'ms'
+       --> @dm:eval bot_source_name = "'$intersight_src_name'"
+       --> @dm:eval bot_source_type = "'cisco_intersight'"
+       --> @dm:eval bot_name = "'ucs-server-memory-inventory'"
+       --> @dm:save name = 'temp-intersight_memory_success_status'
+     --> @rn:write-stream name = 'asset_inventory_collection_status_stream'
+    --> @exec:end-if
+
+## intersight Network Inventory
+--> @c:data-loop name = "intersight-details" & dataset = 'temp-variable-dataset'  & columns = 'intersight_src_name,customer_id,customer_tag'
+    --> *$intersight_src_name:ucs-server-network-inventory
+    --> @dm:fixcolumns
+    --> @dm:eval customer_id = "'$customer_id'"
+    --> @dm:eval customer_tag = "'$customer_tag'"
+    --> *exec:if-condition collection_status != 'Success'
+       --> *dm:filter * get source_ip as 'asset_id',collection_status,collection_timestamp,reason
+       --> @dm:map attr = 'collection_timestamp' & func = 'ts_to_datetimestr' & unit = 'ms'
+       --> @dm:eval bot_source_name = "'$intersight_src_name'"
+       --> @dm:eval bot_source_type = "'cisco_intersight'"
+       --> @dm:eval bot_name = "'ucs-server-network-inventory'"
+       --> @dm:save name = 'temp-intersight_network_failed_status'
+     --> @rn:write-stream name = 'asset_inventory_collection_status_stream'
+    --> @exec:end-if
+    --> *exec:if-condition collection_status = 'Success'
+       --> @dm:save name = 'temp-intersight_network_inventory'
+       --> *dm:filter * get source_ip as 'asset_id',collection_status,collection_timestamp,reason,customer_id,customer_tag
+       --> @dm:map attr = 'collection_timestamp' & func = 'ts_to_datetimestr' & unit = 'ms'
+       --> @dm:eval bot_source_name = "'$intersight_src_name'"
+       --> @dm:eval bot_source_type = "'cisco_intersight'"
+       --> @dm:eval bot_name = "'ucs-server-network-inventory'"
+       --> @dm:save name = 'temp-intersight_network_success_status'
+     --> @rn:write-stream name = 'asset_inventory_collection_status_stream'
+    --> @exec:end-if
+
+## intersight Storage Inventory
+--> @c:data-loop name = "intersight-details" & dataset = 'temp-variable-dataset'  & columns = 'intersight_src_name,customer_id,customer_tag'
+    --> *$intersight_src_name:ucs-server-storage-inventory
+    --> @dm:fixcolumns
+    --> @dm:eval customer_id = "'$customer_id'"
+    --> @dm:eval customer_tag = "'$customer_tag'"
+    --> *exec:if-condition collection_status != 'Success'
+       --> *dm:filter * get source_ip as 'asset_id',collection_status,collection_timestamp,reason
+       --> @dm:map attr = 'collection_timestamp' & func = 'ts_to_datetimestr' & unit = 'ms'
+       --> @dm:eval bot_source_name = "'$intersight_src_name'"
+       --> @dm:eval bot_source_type = "'cisco_intersight'"
+       --> @dm:eval bot_name = "'ucs-server-storage-inventory'"
+       --> @dm:save name = 'temp-intersight_storage_failed_status'
+     --> @rn:write-stream name = 'asset_inventory_collection_status_stream'
+    --> @exec:end-if
+    --> *exec:if-condition collection_status = 'Success'
+       --> @dm:save name = 'temp-intersight_storage_inventory'
+       --> *dm:filter * get source_ip as 'asset_id',collection_status,collection_timestamp,reason,customer_id,customer_tag
+       --> @dm:map attr = 'collection_timestamp' & func = 'ts_to_datetimestr' & unit = 'ms'
+       --> @dm:eval bot_source_name = "'$intersight_src_name'"
+       --> @dm:eval bot_source_type = "'cisco_intersight'"
+       --> @dm:eval bot_name = "'ucs-server-storage-inventory'"
+       --> @dm:save name = 'temp-intersight_storage_success_status'
+     --> @rn:write-stream name = 'asset_inventory_collection_status_stream'
+    --> @exec:end-if
+
+## intersight HBA Inventory
+--> @c:data-loop name = "intersight-details" & dataset = 'temp-variable-dataset'  & columns = 'intersight_src_name,customer_id,customer_tag'
+    --> *$intersight_src_name:ucs-server-hba-inventory
+    --> @dm:fixcolumns
+    --> @dm:eval customer_id = "'$customer_id'"
+    --> @dm:eval customer_tag = "'$customer_tag'"
+    --> *exec:if-condition collection_status != 'Success'
+       --> *dm:filter * get source_ip as 'asset_id',collection_status,collection_timestamp,reason
+       --> @dm:map attr = 'collection_timestamp' & func = 'ts_to_datetimestr' & unit = 'ms'
+       --> @dm:eval bot_source_name = "'$intersight_src_name'"
+       --> @dm:eval bot_source_type = "'cisco_intersight'"
+       --> @dm:eval bot_name = "'ucs-server-hba-inventory'"
+       --> @dm:save name = 'temp-intersight_hba_failed_status'
+     --> @rn:write-stream name = 'asset_inventory_collection_status_stream'
+    --> @exec:end-if
+    --> *exec:if-condition collection_status = 'Success'
+       --> @dm:save name = 'temp-intersight_hba_inventory'
+       --> *dm:filter * get source_ip as 'asset_id',collection_status,collection_timestamp,reason,customer_id,customer_tag
+       --> @dm:map attr = 'collection_timestamp' & func = 'ts_to_datetimestr' & unit = 'ms'
+       --> @dm:eval bot_source_name = "'$intersight_src_name'"
+       --> @dm:eval bot_source_type = "'cisco_intersight'"
+       --> @dm:eval bot_name = "'ucs-server-hba-inventory'"
+       --> @dm:save name = 'temp-intersight_hba_success_status'
+     --> @rn:write-stream name = 'asset_inventory_collection_status_stream'
+    --> @exec:end-if
+
+## intersight FW Inventory
+--> @c:data-loop name = "intersight-details" & dataset = 'temp-variable-dataset'  & columns = 'intersight_src_name,customer_id,customer_tag'
+    --> *$intersight_src_name:ucs-fw-inventory
+    --> @dm:fixcolumns
+    --> @dm:eval customer_id = "'$customer_id'"
+    --> @dm:eval customer_tag = "'$customer_tag'"
+    --> *exec:if-condition collection_status != 'Success'
+       --> *dm:filter * get source_ip as 'asset_id',collection_status,collection_timestamp,reason
+       --> @dm:map attr = 'collection_timestamp' & func = 'ts_to_datetimestr' & unit = 'ms'
+       --> @dm:eval bot_source_name = "'$intersight_src_name'"
+       --> @dm:eval bot_source_type = "'cisco_intersight'"
+       --> @dm:eval bot_name = "'ucs-fw-inventory'"
+       --> @dm:save name = 'temp-intersight_fw_failed_status'
+     --> @rn:write-stream name = 'asset_inventory_collection_status_stream'
+    --> @exec:end-if
+    --> *exec:if-condition collection_status = 'Success'
+       --> @dm:save name = 'temp-intersight_fw_inventory'
+       --> *dm:filter * get source_ip as 'asset_id',collection_status,collection_timestamp,reason,customer_id,customer_tag
+       --> @dm:map attr = 'collection_timestamp' & func = 'ts_to_datetimestr' & unit = 'ms'
+       --> @dm:eval bot_source_name = "'$intersight_src_name'"
+       --> @dm:eval bot_source_type = "'cisco_intersight'"
+       --> @dm:eval bot_name = "'ucs-fw-inventory'"
+       --> @dm:save name = 'temp-intersight_fw_success_status'
+     --> @rn:write-stream name = 'asset_inventory_collection_status_stream'
+    --> @exec:end-if
+
+## intersight FI (Swtich) Inventory
+--> @c:data-loop name = "intersight-details" & dataset = 'temp-variable-dataset'  & columns = 'intersight_src_name,customer_id,customer_tag'
+    --> *$intersight_src_name:ucs-fi-summary
+    --> @dm:fixcolumns
+    --> @dm:eval customer_id = "'$customer_id'"
+    --> @dm:eval customer_tag = "'$customer_tag'"
+    --> *exec:if-condition collection_status != 'Success'
+       --> *dm:filter * get source_ip as 'asset_id',collection_status,collection_timestamp,reason
+       --> @dm:map attr = 'collection_timestamp' & func = 'ts_to_datetimestr' & unit = 'ms'
+       --> @dm:eval bot_source_name = "'$intersight_src_name'"
+       --> @dm:eval bot_source_type = "'cisco_intersight'"
+       --> @dm:eval bot_name = "'ucs-fi-summary'"
+       --> @dm:save name = 'temp-intersight_fi_failed_status'
+     --> @rn:write-stream name = 'asset_inventory_collection_status_stream'
+    --> @exec:end-if
+    --> *exec:if-condition collection_status = 'Success'
+       --> @dm:save name = 'temp-intersight_fi_inventory'
+       --> *dm:filter * get source_ip as 'asset_id',collection_status,collection_timestamp,reason,customer_id,customer_tag
+       --> @dm:map attr = 'collection_timestamp' & func = 'ts_to_datetimestr' & unit = 'ms'
+       --> @dm:eval bot_source_name = "'$intersight_src_name'"
+       --> @dm:eval bot_source_type = "'cisco_intersight'"
+       --> @dm:eval bot_name = "'ucs-fi-summary'"
+       --> @dm:save name = 'temp-intersight_fi_success_status'
+     --> @rn:write-stream name = 'asset_inventory_collection_status_stream'
+    --> @exec:end-if
+
+## intersight ETH Inventory
+--> @c:data-loop name = "intersight-details" & dataset = 'temp-variable-dataset'  & columns = 'intersight_src_name,customer_id,customer_tag'
+    --> *$intersight_src_name:ucs-fi-eth-port-inventory
+    --> @dm:fixcolumns
+    --> @dm:eval customer_id = "'$customer_id'"
+    --> @dm:eval customer_tag = "'$customer_tag'"
+    --> *exec:if-condition collection_status != 'Success'
+       --> *dm:filter * get source_ip as 'asset_id',collection_status,collection_timestamp,reason
+       --> @dm:map attr = 'collection_timestamp' & func = 'ts_to_datetimestr' & unit = 'ms'
+       --> @dm:eval bot_source_name = "'$intersight_src_name'"
+       --> @dm:eval bot_source_type = "'cisco_intersight'"
+       --> @dm:eval bot_name = "'ucs-fi-eth-port-inventory'"
+       --> @dm:save name = 'temp-intersight_eth_failed_status'
+     --> @rn:write-stream name = 'asset_inventory_collection_status_stream'
+    --> @exec:end-if
+    --> *exec:if-condition collection_status = 'Success'
+       --> @dm:save name = 'temp-intersight_eth_inventory'
+       --> *dm:filter * get source_ip as 'asset_id',collection_status,collection_timestamp,reason,customer_id,customer_tag
+       --> @dm:map attr = 'collection_timestamp' & func = 'ts_to_datetimestr' & unit = 'ms'
+       --> @dm:eval bot_source_name = "'$intersight_src_name'"
+       --> @dm:eval bot_source_type = "'cisco_intersight'"
+       --> @dm:eval bot_name = "'ucs-fi-eth-port-inventory'"
+       --> @dm:save name = 'temp-intersight_eth_success_status'
+     --> @rn:write-stream name = 'asset_inventory_collection_status_stream'
+    --> @exec:end-if
+
+## intersight HX Cluster Inventory
+--> @c:data-loop name = "intersight-details" & dataset = 'temp-variable-dataset'  & columns = 'intersight_src_name,customer_id,customer_tag'
+    --> *$intersight_src_name:ucs-hx-clusters
+    --> @dm:fixcolumns
+    --> @dm:eval customer_id = "'$customer_id'"
+    --> @dm:eval customer_tag = "'$customer_tag'"
+    --> *exec:if-condition collection_status != 'Success'
+       --> *dm:filter * get source_ip as 'asset_id',collection_status,collection_timestamp,reason
+       --> @dm:map attr = 'collection_timestamp' & func = 'ts_to_datetimestr' & unit = 'ms'
+       --> @dm:eval bot_source_name = "'$intersight_src_name'"
+       --> @dm:eval bot_source_type = "'cisco_intersight'"
+       --> @dm:eval bot_name = "'ucs-hx-clusters'"
+       --> @dm:save name = 'temp-intersight_hx_cluster_failed_status'
+     --> @rn:write-stream name = 'asset_inventory_collection_status_stream'
+    --> @exec:end-if
+    --> *exec:if-condition collection_status = 'Success'
+       --> @dm:save name = 'temp-intersight_hx_cluster_inventory'
+       --> *dm:filter * get source_ip as 'asset_id',collection_status,collection_timestamp,reason,customer_id,customer_tag
+       --> @dm:map attr = 'collection_timestamp' & func = 'ts_to_datetimestr' & unit = 'ms'
+       --> @dm:eval bot_source_name = "'$intersight_src_name'"
+       --> @dm:eval bot_source_type = "'cisco_intersight'"
+       --> @dm:eval bot_name = "'ucs-hx-clusters'"
+       --> @dm:save name = 'temp-intersight_hx_cluster_success_status'
+     --> @rn:write-stream name = 'asset_inventory_collection_status_stream'
+    --> @exec:end-if
+
+## intersight HX Nodess Inventory
+--> @c:data-loop name = "intersight-details" & dataset = 'temp-variable-dataset'  & columns = 'intersight_src_name,customer_id,customer_tag'
+    --> *$intersight_src_name:ucs-hx-nodes
+    --> @dm:fixcolumns
+    --> @dm:eval customer_id = "'$customer_id'"
+    --> @dm:eval customer_tag = "'$customer_tag'"
+    --> *exec:if-condition collection_status != 'Success'
+       --> *dm:filter * get source_ip as 'asset_id',collection_status,collection_timestamp,reason
+       --> @dm:map attr = 'collection_timestamp' & func = 'ts_to_datetimestr' & unit = 'ms'
+       --> @dm:eval bot_source_name = "'$intersight_src_name'"
+       --> @dm:eval bot_source_type = "'cisco_intersight'"
+       --> @dm:eval bot_name = "'ucs-hx-nodes'"
+       --> @dm:save name = 'temp-intersight_hx_nodes_failed_status'
+     --> @rn:write-stream name = 'asset_inventory_collection_status_stream'
+    --> @exec:end-if
+    --> *exec:if-condition collection_status = 'Success'
+       --> @dm:save name = 'temp-intersight_hx_nodes_inventory'
+       --> *dm:filter * get source_ip as 'asset_id',collection_status,collection_timestamp,reason,customer_id,customer_tag
+       --> @dm:map attr = 'collection_timestamp' & func = 'ts_to_datetimestr' & unit = 'ms'
+       --> @dm:eval bot_source_name = "'$intersight_src_name'"
+       --> @dm:eval bot_source_type = "'cisco_intersight'"
+       --> @dm:eval bot_name = "'ucs-hx-nodes'"
+       --> @dm:save name = 'temp-intersight_hx_nodes_success_status'
+     --> @rn:write-stream name = 'asset_inventory_collection_status_stream'
+    --> @exec:end-if
+
+## Cisco Intersight - Server Inventory Processed
+--> @c:new-block
+    --> @dm:recall name = 'temp-intersight_server_inventory' & return_empty = 'yes'
+    --> *exec:if-shape num_rows > 0
+       --> @dm:fixcolumns
+       --> *dm:safe-filter * get Moid as 'mo_uuid',Name as 'server_name',Model as 'model',Vendor as 'vendor',Serial as 'serial',ServerId as 'server_uuid',Alerts as 'total_alerts',AlarmSummary_Health as 'server_status',FaultSummary as 'fault_status',Uuid as 'uuid',AccountMoid as 'account_moid',OperState as 'oper_state',Operability as 'operability',OperPowerState as 'power_status',AdminPowerState as 'admin_power_state',NumCpuCores as 'total_cores',NumCpuCoresEnabled	as 'total_cores_enabled',NumCpus as 'total_cpus',CpuCapacity as 'cpu_capacity',NumThreads as 'total_threads',TotalMemory as 'total_memory',AvailableMemory	as 'free_memory',MemorySpeed as 'memory_speed_mhz',NumAdaptors as 'total_adaptors',NumEthHostInterfaces as 'total_eth_ports',NumFcHostInterfaces	as 'total_fc_ports',MgmtIpAddress as 'mgmt_ip_address',ConnectionStatus as 'connection_status',ClassId as 'class_uuid',BmcInventoryReady as 'bmc_inventory_state',Bmc_Moid as 'bmc_moid',Bmc_ObjectType as 'bmc_objectType',KvmServerStateEnabled as 'kvm_state',KvmVendor as 'kvm_vendor',ManagementMode as 'mgmt_mode',Owners as 'owners',PlatformType as 'platform_type',ServiceProfile as 'server_profile',Dn as 'dn',CoolingMode as 'cooling_mode',ObjectType as 'object_type',source_ip as 'intersight_name',collection_timestamp,collection_status,reason,customer_id,customer_tag
+       ## --> @dm:map attr = 'collection_timestamp' & func = 'time_now'
+       --> @dm:eval total_memory = "round(int(total_memory) / 1024, 0)"
+       --> @dm:eval free_memory= "round(int(free_memory) / 1024, 0)"
+       --> @dm:grok column = 'dn' & pattern = "(sys/(?<rack_unit>rack-unit-\d+)|/redfish/v1/Systems/(?<rack_unit>[^/]+))"
+       --> @dm:selectcolumns exclude = "meta_grok_message"
+       --> @dm:map attr = 'kvm_state' & func = 'lower'
+       --> @dm:eval asset_vendor = "'Cisco'"
+       --> @dm:eval asset_status = "'Active'"
+       --> @dm:eval asset_object = "'Server'"
+       --> @dm:map from = 'intersight_name,server_name,serial' & to = 'unique_id' & func = 'join' & sep = '_'
+       --> @dm:dedup columns = 'unique_id'
+       --> @dm:save name = 'temp-cisco_intersight_server_processed_inventory'
+       --> @rn:write-stream name = 'cisco_intersight_inventory'
+    --> @exec:end-if
+
+## Cisco Intersight - CPU Inventory Processed
+--> @c:new-block
+    --> @dm:recall name = 'temp-intersight_cpu_inventory' & return_empty = 'yes'
+    --> *exec:if-shape num_rows > 0
+       --> @dm:fixcolumns
+       --> *dm:safe-filter * get ProcessorId as 'processor_id',Speed as 'cpu_speed',Model as 'model',NumCores as 'total_cores',NumCoresEnabled	as 'total_cores_enabled',NumThreads as 'total_threads',Serial as 'cpu_serail',PartNumber as 'part_number',Thermal as 'thermal_state',Vendor as 'vendor',AccountMoid as 'account_moid',Architecture as 'architecture',ClassId as 'class_uuid',Description as 'description',DeviceMoId as 'device_moid',Dn as 'dn',Moid as 'mo_uuid',ObjectType as 'object_type',OperPowerState as 'power_status',OperState as 'oper_state',Operability as 'operability',Owners as 'owners',Parent_Moid	as 'parent_moid',Pid as 'pid',RegisteredDevice_Moid as 'registeredDevice_moid',source_ip as 'intersight_name',collection_timestamp,collection_status,reason,customer_id,customer_tag
+       --> @dm:grok column = 'dn' & pattern = "(sys/(?<rack_unit>rack-unit-\d+)/board/cpu-\d+|/redfish/v1/Systems/(?<rack_unit>[^/]+)/Processors/CPU\d+)"
+       --> @dm:selectcolumns exclude = "meta_grok_message"
+       --> @dm:enrich dict = 'temp-cisco_intersight_server_processed_inventory' & src_key_cols = 'rack_unit' & dict_key_cols = 'rack_unit' & enrich_cols = 'server_name,serial'
+       --> @dm:eval asset_vendor = "'Cisco'"
+       --> @dm:eval asset_status = "'Active'"
+       --> @dm:eval asset_object = "'CPU'"
+       --> @dm:map from = 'intersight_name,rack_unit,cpu_name,processor_id' & to = 'unique_id' & func = 'join' & sep = '_'
+       --> @dm:dedup columns = 'unique_id'
+       --> @dm:save name = 'temp-cisco_intersight_cpu_processed_inventory'
+       --> @rn:write-stream name = 'cisco_intersight_inventory'
+    --> @exec:end-if
+
+## Cisco Intersight - Memory Inventory Processed
+--> @c:new-block
+    --> @dm:recall name = 'temp-intersight_memory_inventory' & return_empty = 'yes'
+    --> *exec:if-shape num_rows > 0
+       --> @dm:fixcolumns
+       --> *dm:safe-filter * get Location as 'location',Capacity as 'capacity_mb',Latency as 'latency',Clock as 'clock_speed',Bank as 'bank',MemoryId as 'memory_uuid',
+               AccountMoid	as 'account_moid',AdminState as 'admin_state',ArrayId as 'array_id',ClassId as 'class_uuid',Description	as 'description',DeviceMoId as 'device_moid',Dn as 'dn',FormFactor as 'form_factor',MemoryArray_Moid as 'memoryarray_moid',Model as 'model',Moid as 'mo_uuid',ObjectType as 'object_type',OperPowerState as 'power_status',OperState as 'oper_state',Operability	as 'operability',Owners as 'owners',Parent_Moid	as 'parent_moid',PartNumber	as 'part_number',Pid as 'pid',Presence as 'presence',RegisteredDevice_Moid as 'registeredDevice_moid',Serial as 'dimm_serial',Speed as 'speed',Thermal as 'thermal_state',Type as 'type',Vendor as 'vendor',Visibility as 'visibility',source_ip as 'intersight_name',collection_timestamp,collection_status,reason,customer_id,customer_tag
+       --> @dm:grok column = 'dn' & pattern = "(sys/(?<rack_unit>rack-unit-\d+)/board/memarray-\d+/mem-(?<memory_id>\d+)|/redfish/v1/Systems/(?<rack_unit>[^/]+)/Memory/(?<memory_id>[^/]+))"
+       --> @dm:selectcolumns exclude = "meta_grok_message"
+       --> @dm:enrich dict = 'temp-cisco_intersight_server_processed_inventory' & src_key_cols = 'rack_unit' & dict_key_cols = 'rack_unit' & enrich_cols = 'server_name,serial'
+       --> @dm:eval asset_vendor = "'Cisco'"
+       --> @dm:eval asset_status = "'Active'"
+       --> @dm:eval asset_object = "'Memory'"
+       --> @dm:map from = 'intersight_name,rack_unit,location,memory_uuid' & to = 'unique_id' & func = 'join' & sep = '_'
+       --> @dm:dedup columns = 'unique_id'
+       --> @dm:save name = 'temp-cisco_intersight_memory_processed_inventory'
+       --> @rn:write-stream name = 'cisco_intersight_inventory'
+    --> @exec:end-if
+
+## Cisco Intersight - Network Inventory Processed
+--> @c:new-block
+    --> @dm:recall name = 'temp-intersight_network_inventory' & return_empty = 'yes'
+    --> *exec:if-shape num_rows > 0
+       --> @dm:fixcolumns
+       --> *dm:safe-filter * get Name as 'interface_name',InterfaceType as 'interface_id',MacAddress as 'mac_address',AdminState as 'admin_state',AccountMoid	as 'account_moid',AdapterUnit_Moid as 'adapterunit_moid',ClassId	as 'class_uuid',DeviceMoId	as 'device_moid',Dn	as 'dn',HostEthInterfaceId as 'Host_eth_interface_id',Moid as 'mo_uuid',ObjectType as 'object_type',OperState as 'oper_state',Operability	as 'operability',Owners as 'owners',Parent_Moid as 'parent_moid',PciAddr as 'pci_addrs',PeerDn as 'peer_dn',QinqEnabled as 'qing_enabled',QinqVlan as 'qing_vlan',RegisteredDevice_Moid as 'registeredDevice_moid',VifId as 'vif_id',VnicDn as 'vnic_dn',source_ip as 'intersight_name',collection_timestamp,collection_status,reason,customer_id,customer_tag
+       --> @dm:grok column = 'dn' & pattern = "^(?:sys/(?<rack_unit>rack-unit-\d+)/(?:network-adapter|adaptor)-[A-Za-z0-9]+/(?<eth_id>(?:eth|host-eth)-?\d+)|/redfish/v1/(?:Systems|Chassis)/(?<rack_unit>[^/]+)/(?:EthernetInterfaces|NetworkAdapters/[^/]+/NetworkDeviceFunctions)/(?<eth_id>[^/]+))$"
+       --> @dm:grok column = 'peer_dn' & pattern = "(sys/(?<switch_id>switch-[A-Z])/(?<slot_id>slot-\d+)/switch-ether/(?<port_id>port-\d+)|/redfish/v1/Chassis/(?<switch_id>[^/]+)/NetworkPorts/(?<port_id>[^/]+))"
+       --> @dm:enrich dict = 'temp-cisco_intersight_server_processed_inventory' & src_key_cols = 'rack_unit' & dict_key_cols = 'rack_unit' & enrich_cols = 'server_name,serial'
+       --> @dm:map attr = 'mac_address' & func = 'lower'
+       --> @dm:map attr = 'qing_enabled' & func = 'lower'
+       --> @dm:map attr = 'pci_addrs' & func = 'lower'
+       --> @dm:selectcolumns exclude = "meta_grok_message"
+       --> @dm:eval asset_vendor = "'Cisco'"
+       --> @dm:eval asset_status = "'Active'"
+       --> @dm:eval asset_object = "'Network'"
+       --> @dm:map from = 'intersight_name,interface_name,mac_address' & to = 'unique_id' & func = 'join' & sep = '_'
+       --> @dm:dedup columns = 'unique_id'
+       --> @dm:save name = 'temp-cisco_intersight_network_processed_inventory'
+       --> @rn:write-stream name = 'cisco_intersight_inventory'
+    --> @exec:end-if
+
+## Cisco Intersight - Storage Inventory Processed
+--> @c:new-block
+    --> @dm:recall name = 'temp-intersight_storage_inventory' & return_empty = 'yes'
+    --> *exec:if-shape num_rows > 0
+       --> @dm:fixcolumns
+       --> *dm:safe-filter * get AccessPolicy as 'access_policy',AccountMoid	 as 'account_moid',BlockSize as 'block_size',Bootable as 'bootable',ClassId as 'class_uuid',ConnectionProtocol as 'connection_protocol',ControllerId as 'controller_id',ControllerStatus as 'controller_status',DefaultDriveMode as 'defautl_drive_mode',Description as 'description',DeviceMoId as 'device_moid',DisabledForRemoval as 'disabled_for_removal',DiscoveredPath as 'discoverd_path',DiskGroup as 'disk_group',DiskId as 'diskid',DiskSlot as 'disk_slot',DiskState as 'disk_state',Dn as 'dn',DriveCache as 'drive_cache',DriveFirmware as 'drive_firmware',DriveSecurity as 'drive_security',DriveState as 'drive_state',EncryptionStatus as 'encryption_status',FailurePredicted as 'failure_predicted',HotSpareType as 'hot_spare_type',HwRevision as 'hw_version',HybridSlotsSupported as 'hybrid_slot_supported',IndicatorLed as 'indicator_led',InterfaceType as 'interface_type',IoPolicy as 'io_policy',IsPlatformSupported as 'is_platform_supported',LinkSpeed as 'link_speed',Model as 'model',Moid as 'disk_moid',Name as 'disk_name',ObjectType as 'object_type',OobInterfaceSupported as 'oob_supported',OperState as 'oper_state',Operability	as 'operability',Owners as 'owners',Parent_Moid	as 'parent_moid',PartNumber as 'part_number',PciAddr	as 'pci_addrr',PciSlot as 'pci_slot',Pid as 'pid',Presence as 'presence',Protocol as 'protocol',RaidSupport as 'raid_support',RawSize	as 'raw_size',RebuildRate as 'rebuild_rate',RebuildRatePercent as 'rebuild_rate_percent',Serial as 'disk_serial',Size as 'size',StripSize	as 'stripe_size',Type as 'disk_type',Vendor as 'vendor',source_ip as 'intersight_name',collection_timestamp,collection_status,reason,customer_id,customer_tag
+       --> @dm:grok column = 'dn' & pattern = "^(?:sys/(?<rack_unit>rack-unit-\d+)/board/storage-(?<storage_type>[A-Za-z0-9.\-]+)/?(?:(?:disk|pd)-(?<disk_id>[A-Za-z0-9.\-]+))?|/redfish/v1/Systems/(?<rack_unit>[^/]+)/Storage/(?<storage_type>[^/]+)(?:/Drives/(?<disk_id>[^/]+))?)$"
+       --> @dm:enrich dict = 'temp-cisco_intersight_server_processed_inventory' & src_key_cols = 'rack_unit' & dict_key_cols = 'rack_unit' & enrich_cols = 'server_name,serial'
+       --> @dm:selectcolumns exclude = "meta_grok_message"
+       --> @dm:eval asset_vendor = "'Cisco'"
+       --> @dm:eval asset_status = "'Active'"
+       --> @dm:eval asset_object = "'Storage'"
+       --> @dm:map from = 'intersight_name,disk_moid,disk_serial' & to = 'unique_id' & func = 'join' & sep = '_'
+       --> @dm:dedup columns = 'unique_id'
+       --> @dm:save name = 'temp-cisco_intersight_storage_processed_inventory'
+       --> @rn:write-stream name = 'cisco_intersight_inventory'
+    --> @exec:end-if
+
+## Cisco Intersight - HBA Inventory Processed
+--> @c:new-block
+    --> @dm:recall name = 'temp-intersight_hba_inventory' & return_empty = 'yes'
+    --> *exec:if-shape num_rows > 0
+       --> @dm:fixcolumns
+       --> *dm:safe-filter * get Name as 'hba_name',Wwnn as 'wwnn',Wwpn as 'wwpn',Model as 'model',Moid as 'hba_moid',AccountMoid as 'account_moid',AdapterUnit_Moid as 'adapterUnit_moid',AdminState as 'admin_state',ClassId as 'class_uuid',DeviceMoId as 'device_moid',Dn as 'dn',HostFcInterfaceId as 'host_fc_interface_id',ObjectType as 'object_type',OperState as 'oper_state',	Operability	as 'operability',Owners	as 'owners',Parent_Moid	as 'parent_moid',PeerDn	as 'peer_dn',PinGroupName as 'pin_group_name',PinnedInterface as 'pinned_interface',Presence as 'presence',RegisteredDevice_Moid as 'registeredDevice_moid',Serial as 'hba_serial',Vendor as 'vendor',source_ip as 'intersight_name',collection_timestamp,collection_status,reason,customer_id,customer_tag
+       --> @dm:map attr = 'wwnn' & func = 'lower'
+       --> @dm:map attr = 'wwpn' & func = 'lower'
+       --> @dm:eval asset_vendor = "'Cisco'"
+       --> @dm:eval asset_status = "'Active'"
+       --> @dm:eval asset_object = "'HBA'"
+       --> @dm:map from = 'intersight_name,hba_name,wwnn' & to = 'unique_id' & func = 'join' & sep = '_'
+       --> @dm:dedup columns = 'unique_id'
+       --> @dm:save name = 'temp-cisco_intersight_hba_processed_inventory'
+       --> @rn:write-stream name = 'cisco_intersight_inventory'
+    --> @exec:end-if
+
+## Cisco Intersight - FW Inventory Processed
+--> @c:new-block
+    --> @dm:recall name = 'temp-intersight_fw_inventory' & return_empty = 'yes'
+    --> *exec:if-shape num_rows > 0
+       --> @dm:fixcolumns
+       --> *dm:safe-filter * get Moid as 'fw_moid',Component as 'component',AccountMoid	as 'account_moid',ClassId as 'class_uuid',DeviceMoId as 'device_moid',Dn as 'dn',ManagementController_Moid as 'managementcontroller_moid',ObjectType as 'object_type',Owners as 'owners',PackageVersion as 'package_version',Parent_Moid as 'parent_moid',PciSwitch as 'pci_swtich',RegisteredDevice_Moid as 'registeredDevice_moid',Type as 'type',Version as 'version',ManagementController as 'management_controller',StorageController_Moid	as 'storage_controller_moid',StorageController_ObjectType as 'storage_controller_objecttype',BiosUnit_Moid as 'biosunit_moid',BiosUnit_ObjectType as 'biosunit_objecttype',source_ip as 'intersight_name',collection_timestamp,collection_status,reason,customer_id,customer_tag
+       --> @dm:grok column = 'dn' & pattern = "^(?:sys/(?:(?<rack_unit>rack-unit-\d+|switch-[A-Za-z]+)|mgmt)(?:/(?<component_type>(?:board/storage-[A-Za-z0-9.\-]+|bios|adaptor-[A-Za-z0-9]+|network-adapter-[A-Za-z0-9]+|mgmt)(?:/[A-Za-z0-9.\-]+)*))?/(?<firmware_id>fw-[A-Za-z0-9\-]+|pd-[A-Za-z0-9\-]+)|/redfish/v1/(?:(?:UpdateService/FirmwareInventory|Managers)/(?<firmware_id>[A-Za-z0-9.\-]+)|(?:Systems|Chassis)/(?<rack_unit>[^/]+)/(?:(?<component_type>Storage|NetworkAdapters)/[^/]+)?(?:/Drives/[^/]+)?/(?<firmware_id>(?:Fw|FirmwareRunningFirmware)-[A-Za-z0-9.\-]+)))$"
+       --> @dm:selectcolumns exclude = "meta_grok_message"
+       --> @dm:enrich dict = 'temp-cisco_intersight_server_processed_inventory' & src_key_cols = 'rack_unit' & dict_key_cols = 'rack_unit' & enrich_cols = 'server_name,serial'
+       --> @dm:eval asset_vendor = "'Cisco'"
+       --> @dm:eval asset_status = "'Active'"
+       --> @dm:eval asset_object = "'FW'"
+       --> @dm:map from = 'intersight_name,fw_moid' & to = 'unique_id' & func = 'join' & sep = '_'
+       --> @dm:dedup columns = 'unique_id'
+       --> @dm:save name = 'temp-cisco_intersight_fw_processed_inventory'
+       --> @rn:write-stream name = 'cisco_intersight_inventory'
+    --> @exec:end-if
+
+## Cisco Intersight - Switch (FI) Inventory Processed
+--> @c:new-block
+    --> @dm:recall name = 'temp-intersight_fi_inventory' & return_empty = 'yes'
+    --> *exec:if-shape num_rows > 0
+       --> @dm:fixcolumns
+       --> *dm:safe-filter * get Dn as 'dn',ManagementMode as 'management_mode',SwitchId as 'switch_id',SlotId as 'slot_id',Serial as 'switch_serial',Status as 'status',
+               Model as 'model',
+               OutOfBandIpAddress as 'ip_address',
+               OutOfBandIpGateway as 'gateway',
+               OutOfBandIpMask as 'netmask',
+               OutOfBandMac as 'mac_address',Moid as 'switch_moid',EthernetSwitchingMode as 'switch_mode',TotalMemory as 'total_memory',AdminEvacState as 'evac_state',AdminInbandInterfaceState as 'inband_interface_state',InbandIpAddress as 'inband_ip_address',InbandIpGateway as 'inband_gateway',InbandIpMask as 'inband_netmask',InbandVlan as 'inband_vlan',AlarmSummary_Health as 'health',AlarmSummary_Suppressed as 'alarm_suppressed',ClassId	as 'class_uuid',AccountMoid	as 'account_moid',DeviceMoId as 'device_moid',FaultSummary as 'fault_summary',FcPortChannels as 'fc_port_channels',FcSwitchingMode as 'fc_switch_mode',InterClusterLinkState as 'intercluster_link_state',LocationDetails as 'location',NtpServer as 'ntp_server',ObjectType as 'object_type',Operability as 'operability',Owners as 'owners',PartNumber as 'part_number',PortMacBindings as 'port_mac_bindings',Presence as 'presence',ProcessorUnit as 'processor_unit',Sensors	as 'sensors',SupervisorCard	as 'supervisor_card',SwitchProfileName as 'switch_profile_name',SwitchType as 'switch_type',SystemUpTime as 'uptime',Thermal as 'thermal_state',Vendor as 'vendor',Version as 'version',Veths as 'virtual_eths',Vfcs as 'virtual_fcs',VpcDomain as 'virtual_domains',source_ip as 'intersight_name',collection_timestamp,collection_status,reason,customer_id,customer_tag
+       --> @dm:grok column = 'dn' & pattern = "^sys/(?<switch_name>switch-[A-Za-z]+)$"
+       --> @dm:selectcolumns exclude = "meta_grok_message"
+       --> @dm:map attr = 'mac_address' & func = 'lower'
+       --> @dm:eval asset_vendor = "'Cisco'"
+       --> @dm:eval asset_status = "'Active'"
+       --> @dm:eval asset_object = "'Switch'"
+       --> @dm:map from = 'intersight_name,mac_address,switch_name' & to = 'unique_id' & func = 'join' & sep = '_'
+       --> @dm:dedup columns = 'unique_id'
+       --> @dm:save name = 'temp-cisco_intersight_swtich_processed_inventory'
+       --> @rn:write-stream name = 'cisco_intersight_inventory'
+    --> @exec:end-if
+
+## Cisco Intersight - ETH Inventory Processed
+--> @c:new-block
+    --> @dm:recall name = 'temp-intersight_eth_inventory' & return_empty = 'yes'
+    --> *exec:if-shape num_rows > 0
+       --> @dm:fixcolumns
+       --> *dm:safe-filter * get SlotId	as 'slot_id',SwitchId as 'switch_id',PortId as 'port_id',PortChannelId as 'port_channel_id',MacAddress as 'mac_address',DeviceMoId as 'device_moid',Dn as 'dn',Mode as 'mode',AccountMoid as 'account_moid',AdminSpeed as 'admin_speed',AdminState as 'admin_state',ClassId	as 'class_uuid',LicenseState as 'license_state',Moid as 'eth_moid',Name as 'eth_name',ObjectType as 'object_type',OperSpeed as 'oper_speed',OperState as 'oper_state',Owners as 'owners',PeerDn as 'peer_dn',PeerInterface as 'peer_interface',PortType as 'port_type',Role as 'role',UserLabel as 'user_label',source_ip as 'intersight_name',collection_timestamp,collection_status,reason,customer_id,customer_tag
+       --> @dm:grok column = 'dn' & pattern = "^sys/(?<switch_name>switch-[A-Za-z0-9]+)(?:/(?<component_type>slot-\d+/switch-ether))/(?<port_ids>port-\d+)$"
+       --> @dm:selectcolumns exclude = "meta_grok_message"
+       --> @dm:map attr = 'mac_address' & func = 'lower'
+       --> @dm:eval asset_vendor = "'Cisco'"
+       --> @dm:eval asset_status = "'Active'"
+       --> @dm:eval asset_object = "'ETH'"
+       --> @dm:map from = 'intersight_name,mac_address,eth_moid' & to = 'unique_id' & func = 'join' & sep = '_'
+       --> @dm:dedup columns = 'unique_id'
+       --> @dm:save name = 'temp-cisco_intersight_eth_processed_inventory'
+       --> @rn:write-stream name = 'cisco_intersight_inventory'
+    --> @exec:end-if
+
+## Cisco Intersight -HX Cluster Inventory Processed
+--> @c:new-block
+    --> @dm:recall name = 'temp-intersight_hx_cluster_inventory' & return_empty = 'yes'
+    --> *exec:if-shape num_rows > 0
+       --> @dm:fixcolumns
+       --> *dm:safe-filter * get Moid as 'hx_moid',Name as 'hx_cluster_name',HxVersion as 'hx_version',HxdpBuildVersion as 'hx_build_version',ConvergedNodeCount as 'hx_cluster_nodes',DeploymentType as 'deployment_type',DnsServers as 'dns_servers',ClusterPurpose as 'hx_cluster_purpose',ClusterType as 'hx_cluster_type',ClusterUuid as 'hx_cluster_uuid',NetworkConfiguration_DataGatewayIpAddress as 'data_gateway',NetworkConfiguration_DataIpAddress as 'data_ip_address',NetworkConfiguration_DataNetmask as 'data_netmask',NetworkConfiguration_DataVlan as 'data_vlan',NetworkConfiguration_MgmtGatewayIpAddress as 'mgmt_gateway',NetworkConfiguration_MgmtIpAddress as 'mgmt_ip_address',NetworkConfiguration_MgmtNetmask as 'mgmt_netmask',NetworkConfiguration_MgmtVlan as 'mgmt_vlan',NetworkConfiguration_Timezone as 'time_zone',NetworkConfiguration_VmNetworkVlans as 'vm_network_vlans',NtpServers as 'ntp_servers',AccountMoid	 as 'account_moid',AlarmSummary_Health as 'alarm_health_summary',AlarmSummary_Info as 'alarm_info',AlarmSummary_Warning as 'alarm_warning',ObjectType	as 'object_type',Owners	as 'owners',Capability_EncryptionSupported as 'encryption_support',Capability_IscsiSupported as 'iscsi_support',Capability_ReplicationSupported	 as 'replication_support',DriveType as 'drive_type',UpgradeStatus as 'upgrade_status',UplinkSpeed as 'uplink_speed',UtilizationPercentage as 'utilization_percentage',Status as 'status',StorageCapacity as 'storage_capactiy',StorageClientIpPools as 'storage_ip_pools',StorageClientVrf as 'storage_vrf',StorageNodeCount as 'storage_node_count',Summary_ActiveNodes as 'active_nodes',Summary_Boottime as 'boot_time',Summary_ClusterAccessPolicy as 'access_policy',Summary_DataReplicationFactor as 'replication_factor',Summary_DeduplicationSavings as 'deduplication_savings',Summary_Downtime as 'downtime',Summary_FreeCapacity as 'free_capacity',Summary_SpaceStatus as 'space_status',Summary_State as 'hx_cluster_state',Summary_TotalCapacity as 'total_capacity',Summary_TotalSavings as 'total_savings',Summary_Uptime as 'uptime',Summary_UsedCapacity as 'used_capacity',HypervisorType as 'hypervisor_type',HypervisorVersion as 'hypervisor_version',VcenterConfiguration_ClusterId as 'vcenter_cluster_id',VcenterConfiguration_ClusterName as 'vcenter_cluster_name',VcenterConfiguration_DatacenterId as 'vcenter_cluster_datacenter_id',VcenterConfiguration_DatacenterName as 'vcenter_cluster_datacenter_name',VcenterConfiguration_Url as 'vcenter_access_point',VmCount as 'vm_count',source_ip as 'intersight_name',collection_timestamp,collection_status,reason,customer_id,customer_tag
+       --> @dm:map attr = 'iscsi_support' & func = 'lower'
+       --> @dm:map attr = 'replication_support' & func = 'lower'
+       --> @dm:eval storage_capactiy = "round(int(storage_capactiy) / 1024/ 1024, 0)"
+       --> @dm:eval free_capacity = "round(int(free_capacity) / 1024/ 1024, 0)"
+       --> @dm:eval total_capacity = "round(int(total_capacity) / 1024/ 1024, 0)"
+       --> @dm:eval used_capacity = "round(int(used_capacity) / 1024/ 1024 , 0)"
+       --> @dm:eval asset_vendor = "'Cisco'"
+       --> @dm:eval asset_status = "'Active'"
+       --> @dm:eval asset_object = "'HxCluster'"
+       --> @dm:map from = 'intersight_name,hx_cluster_name,hx_moid' & to = 'unique_id' & func = 'join' & sep = '_'
+       --> @dm:dedup columns = 'unique_id'
+       --> @dm:save name = 'temp-cisco_intersight_hx_cluster_processed_inventory'
+       --> @rn:write-stream name = 'cisco_intersight_inventory'
+    --> @exec:end-if
+
+## Cisco Intersight -HX Nodes Inventory Processed
+--> @c:new-block
+    --> @dm:recall name = 'temp-intersight_hx_nodes_inventory' & return_empty = 'yes'
+    --> *exec:if-shape num_rows > 0
+       --> @dm:fixcolumns
+       --> *dm:safe-filter * get HostName as 'node_name',AccountMoid	as 'account_moid',BuildNumber as 'build_number',ClassId as 'class_uuid',Cluster_Moid as 'hx_moid',DisplayVersion as 'node_version',EmptySlotsList as 'empty_slots',HxdpDataIp_Ip	as 'data_ip',HxdpMmgtIp_Ip as 'mgnt_ip',Hypervisor,HypervisorDataIp_Ip as 'hpervisor_ip',Ip_Ip as 'ip_address',ModelNumber as 'model_number',Moid as 'node_moid',NodeMaintenanceMode as 'node_maintenance_mode',NodeStatus as 'node_status',NodeUuid as 'node_uid',ObjectType as 'object_type',Owners as 'owners',Parent_Moid as 'parent_moid',Role as 'role',SerialNumber as 'node_serial',Status as 'status',Version as 'version',source_ip as 'intersight_name',collection_timestamp,collection_status,reason,customer_id,customer_tag
+       --> @dm:enrich dict = 'temp-cisco_intersight_hx_cluster_processed_inventory' & src_key_cols = 'hx_moid' & dict_key_cols = 'hx_moid' & enrich_cols = 'hx_cluster_name'
+       --> @dm:eval asset_vendor = "'Cisco'"
+       --> @dm:eval asset_status = "'Active'"
+       --> @dm:eval asset_object = "'HxNodes'"
+       --> @dm:map from = 'intersight_name,node_name,node_moid' & to = 'unique_id' & func = 'join' & sep = '_'
+       --> @dm:dedup columns = 'unique_id'
+       --> @dm:save name = 'temp-cisco_intersight_hx_nodes_processed_inventory'
+       --> @rn:write-stream name = 'cisco_intersight_inventory'
+    --> @exec:end-if
+

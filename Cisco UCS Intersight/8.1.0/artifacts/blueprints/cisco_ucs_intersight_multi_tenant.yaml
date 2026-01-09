@@ -1,0 +1,40 @@
+name: Cisco UCS Intersight Collection Multi tenant
+id: cisco_ucs_intersight
+version: '2025.10.13.1'
+category: Intersight
+comment: Cisco UCS Intersight
+enabled: true
+type: Service
+auto_deploy: false
+provider: CloudFabrix Software Inc.
+attrs: {
+    customer_id: $PKG_CONTEXT_CUSTOMER_ID,
+    customer_tag: $PKG_CONTEXT_CUSTOMER_TAG
+}
+run_context: {
+    customer_id: $PKG_CONTEXT_CUSTOMER_ID,
+    customer_tag: $PKG_CONTEXT_CUSTOMER_TAG
+}
+scheduled_pipelines:
+
+    -   name: cisco_intersight_access_verification
+        label: Intersight Access Verification
+        version: '*'
+        site: ${PKG_CONTEXT_CUSTOMER_TAG}-.*
+        cron_expression: 55 0 * * *
+        site_type: regex
+        instances: 1
+        scaling_policy:
+            min_instances: 1
+            max_instances: 1
+    -   name: cisco_intersight_inventory
+        label: Intersight Inventory
+        version: '*'
+        site: ${PKG_CONTEXT_CUSTOMER_TAG}-.*
+        cron_expression: 0 1 * * *
+        site_type: regex
+        instances: 1
+        scaling_policy:
+            min_instances: 1
+            max_instances: 1
+saved_time: '2025-07-01T21:27:25.649176'

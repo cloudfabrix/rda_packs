@@ -1,0 +1,162 @@
+%% stream = no and limit = 0
+
+## BGP Topology Calculation Pipeline
+## Receives customer_tag via input dataset from parent pipeline (via @exec:run-pipeline)
+## This pipeline processes BGP (Border Gateway Protocol) data to build network topology
+## Datasets are available from parent pipeline execution context
+@c:new-block
+    --> @exec:get-input
+    --> @dm:save name="temp-input-context"
+
+## Get existing nodes from topology for label enrichment
+## Nodes are queried once in main pipeline and passed to child pipelines
+--> @c:new-block
+    --> @dm:recall name="temp-input-context" and return_empty="yes"
+    --> @dm:head n=1
+    --> @dm:skip-block-if-shape row_count="0"
+    --> *exec:if-condition topo_customer_tag is not empty and topo_customer_tag is not "None" and topo_customer_tag is not "none"
+       --> @dm:eval dataset_name = "topo_customer_tag + '_topology_nodes'"
+       --> @dm:save name="temp-dataset-config"
+    --> @exec:end-if
+    --> *exec:if-condition topo_customer_tag is empty or topo_customer_tag is "None" or topo_customer_tag is "none"
+       --> @dm:recall name="topology_nodes" and return_empty="yes"
+       --> *dm:safe-filter bgp is 'yes'
+       --> @dm:save name="temp-nodes"
+       --> @dm:empty
+       --> @dm:save name="temp-dataset-config"
+    --> @exec:end-if
+
+--> @c:new-block
+    --> @dm:recall name="temp-dataset-config" and return_empty="yes"
+    --> @dm:skip-block-if-shape row_count="0"
+
+--> @c:data-loop dataset="temp-dataset-config" & columns="dataset_name"
+    --> @dm:recall name="$dataset_name" and return_empty="yes"
+    --> *dm:safe-filter bgp is 'yes'
+    --> @dm:save name="temp-nodes"
+
+## enrich show_ip_bgp_neighbor_data   with customer_id, customer_tag, org_id
+--> @c:new-block
+    --> @dm:recall name="temp-input-context" and return_empty="yes"
+    --> @dm:head n=1
+    --> *exec:if-condition topo_customer_tag is not empty and topo_customer_tag is not "None" and topo_customer_tag is not "none"
+       --> @dm:eval dataset_name = "topo_customer_tag + '_show_ip_bgp_neighbor_data'"
+       --> @dm:save name="temp-dataset-dict-config"
+    --> @exec:end-if
+    --> *exec:if-condition topo_customer_tag is empty or topo_customer_tag is "None" or topo_customer_tag is "none"
+       --> @dm:recall name = "show_ip_bgp_neighbor_data" and cache="no" and return_empty="yes"
+       --> @dm:save name = "show_ip_bgp_neighbor_data"
+       --> @dm:empty
+       --> @dm:save name="temp-dataset-dict-config"
+    --> @exec:end-if
+
+--> @c:new-block
+    --> @dm:recall name="temp-dataset-dict-config" and return_empty="yes"
+    --> @dm:skip-block-if-shape row_count="0"
+
+--> @c:data-loop dataset="temp-dataset-dict-config" & columns="dataset_name"
+    --> @dm:recall name = "$dataset_name" and cache="no" and return_empty="yes"
+    --> @dm:save name = "show_ip_bgp_neighbor_data"
+
+--> @c:new-block
+    --> @dm:recall name="temp-input-context" and return_empty="yes"
+    --> @dm:head n=1
+    ## lookup remote device's interface and managemet ip address from the neighbor
+    --> *exec:if-condition topo_customer_tag is not empty and topo_customer_tag is not "None" and topo_customer_tag is not "none"
+       --> @dm:eval dict_name = "topo_customer_tag + '_show_ip_interface_brief_enriched'"
+       --> @dm:save name="temp-dict-config"
+    --> @exec:end-if
+    --> *exec:if-condition topo_customer_tag is empty or topo_customer_tag is "None" or topo_customer_tag is "none"
+       --> @dm:empty
+       --> @dm:save name="temp-dict-config"
+       --> @dm:recall name = "show_ip_bgp_neighbor_data" and cache="no" and return_empty="yes"
+       --> @dm:skip-block-if-shape row_count = 0
+       --> @dm:rename-columns src_device_ip="source_ip"
+       --> @dm:enrich dict="show_ip_interface_brief_enriched"
+               and src_key_cols="neighbor"
+               and dict_key_cols="ip_address"
+               and enrich_cols="interface,source_ip"
+               and enrich_cols_as="neighbor_interface,dest_device_ip" and cache="no" &  return_empty_dict = "yes" & return_empty_cols = "yes"
+       ## Lookup local ip address configured on the local_interface
+       --> @dm:enrich dict="show_ip_interface_brief_enriched"
+               and src_key_cols="localhost_ip,src_device_ip"
+               and dict_key_cols="ip_address,source_ip"
+               and enrich_cols="interface,device_hostname_short"
+               and enrich_cols_as="local_interface,src_device_hostname" and cache="no" &  return_empty_dict = "yes" & return_empty_cols = "yes"
+       --> @dm:add-missing-columns columns="remote_as,bgp_state,local_as,vrf,peer_group"
+       --> *dm:filter source_ip is not Empty
+       --> *dm:filter dest_device_ip is not Empty
+       --> @dm:save name="temp-enriched_show_ip_bgp_neighbor_data"
+    --> @exec:end-if
+
+--> @c:new-block
+    --> @dm:recall name="temp-dict-config" and return_empty="yes"
+    --> @dm:skip-block-if-shape row_count="0"
+
+--> @c:data-loop dataset="temp-dict-config" & columns="dict_name"
+    --> @dm:recall name = "show_ip_bgp_neighbor_data" and cache="no" and return_empty="yes"
+    --> @dm:skip-block-if-shape row_count = 0
+    --> @dm:rename-columns src_device_ip="source_ip"
+    --> @dm:enrich dict="$dict_name"
+            and src_key_cols="neighbor"
+            and dict_key_cols="ip_address"
+            and enrich_cols="interface,source_ip"
+            and enrich_cols_as="neighbor_interface,dest_device_ip" and cache="no" &  return_empty_dict = "yes" & return_empty_cols = "yes"
+    ## Lookup local ip address configured on the local_interface
+    --> @dm:enrich dict="$dict_name"
+            and src_key_cols="localhost_ip,src_device_ip"
+            and dict_key_cols="ip_address,source_ip"
+            and enrich_cols="interface,device_hostname_short"
+            and enrich_cols_as="local_interface,src_device_hostname" and cache="no" &  return_empty_dict = "yes" & return_empty_cols = "yes"
+    --> @dm:add-missing-columns columns="remote_as,bgp_state,local_as,vrf,peer_group"
+    --> *dm:filter source_ip is not Empty
+    --> *dm:filter dest_device_ip is not Empty
+    --> @dm:save name="temp-enriched_show_ip_bgp_neighbor_data"
+
+## Calculate bgp edges
+--> @c:new-block
+    --> @dm:recall name="temp-enriched_show_ip_bgp_neighbor_data" and return_empty="yes"
+    --> @dm:skip-block-if-shape row_count = 0
+    ## Enrich node_id and node_label from nodes collection
+    --> @dm:enrich dict="temp-nodes"
+            and src_key_cols="src_device_ip"
+            and dict_key_cols="device_ip"
+            and enrich_cols="node_id,node_label,latitude,longitude"
+            and enrich_cols_as="left_id,left_label,latitude,longitude" &  return_empty_dict = "yes" & return_empty_cols = "yes"
+    --> @dm:enrich dict="temp-nodes"
+            and src_key_cols="dest_device_ip"
+            and dict_key_cols="device_ip"
+            and enrich_cols="node_id,node_label"
+            and enrich_cols_as="right_id,right_label" &  return_empty_dict = "yes" & return_empty_cols = "yes"
+    --> @dm:eval left_node_type = "'CHASSIS'" and
+            right_node_type = "'CHASSIS'" and
+            link_type = "'BGP'" and
+            relation_type = "'connected-to'" and
+            remote_ip = "neighbor" and
+            showAttrs="'^local_ip$|^local_interface$|^remote_ip$|^neighbor_interface$|^bgp_state$|^remote_as$|^local_as$|^vrf$|^peer_group$|^link_type$'" and
+            direction = "'NO_DIRECTION'" and
+            style_color="'#837619'" and
+            style_width="'4'"
+    --> *dm:filter left_id is not Empty
+    --> *dm:filter right_id is not Empty
+    --> *dm:filter left_id != right_id
+    --> @dm:fixnull columns="left_id,right_id,local_interface,neighbor_interface,link_type,vrf" and value="None"
+    --> *dm:filter left_id is not Empty
+    --> *dm:filter right_id is not Empty
+    --> @dm:eval sorted_arr="[f'{left_id}_{local_interface}',f'{right_id}_{neighbor_interface}']" and
+            unique_id="':'.join(sorted(sorted_arr)) + str(link_type)"
+    --> *dm:filter unique_id is not Empty
+    --> @dm:map attr="unique_id" and func="strip"
+    --> @dm:dedup columns="unique_id"
+    --> @dm:selectcolumns exclude="sorted_arr|^interface*|^ip_address*|^source_ip_*|^ip*$|router_id|interface"
+    --> @dm:save name="bgp_edges"
+    --> *dm:filter link_type is not empty
+    --> *dm:filter left_id is not Empty
+    --> *dm:filter right_id is not Empty
+    --> *dm:filter left_id != right_id
+    --> @dm:rename-columns left_ip = 'src_device_ip'
+    --> @dm:rename-columns right_ip = 'dest_device_ip'
+    --> @dm:save name="temp-bgp_edges"
+    --> @rn:write-stream name='cfx_rdaf_topology_edges'
+    --> @graph:insert-edges dbname = 'cfx_rdaf_topology' & nodes_collection = 'cfx_rdaf_topology_nodes' & edges_collection = 'cfx_rdaf_topology_edges' & left_id = 'left_id' & right_id = 'right_id' & edge_key_attrs = "unique_id" & sort_on_key = true
+

@@ -1,0 +1,88 @@
+%% stream = no and limit = 0
+
+%% import_src_type = "asset-discovery"
+
+@exec:get-input
+    --> @dm:eval key="'key'"
+    --> @dm:add-missing-columns columns= 'snmp_status,ssh_status' and value = 'Success'
+    --> @dm:eval current_time ='int(time_now_as_ms())'
+    --> @dm:to-type columns="customer_tag" and type="str"
+    --> @dm:manipulate-string from="current_time,customer_tag" and func="concat_columns" and to="ingestion_id"
+    --> @dm:map from = 'ingestion_id' & to = 'ingestion_id' & func = 'md5'
+    --> @dm:eval discovey_start_time ='utc_time_now_as_isoformat()'
+    ##--> @dm:save name="test-ing-id"
+    --> @dm:save name="temp-input-org-details"
+
+## asset-discovery bot
+--> @c:new-block
+    --> @dm:recall name="temp-input-org-details" and return_empty = "yes"
+    --> @dm:dedup columns = 'device_ip'
+    --> *exec:if-condition snmp_status = 'Success' and ssh_status = 'Success'
+       --> @asset-discovery:collector seed_addresses_col is device_ip and collection_group_rules is "default" and extended_inventory = True and cli_access = True and jobname = "{{row.customer_tag}}" and status_stream = "asset_inventory_collection_status_stream" and  dedupe_serial_number = "no"
+       ## --> *dm:filter collection_status = 'Success'
+       --> @dm:eval key="'key'"
+       --> @dm:enrich dict	 = "temp-input-org-details" and src_key_cols	 = "key" and dict_key_cols	="key" and enrich_cols	="discovery_enabled,customer_tag,customer_id,ingestion_id,discovey_start_time"
+       ##--> @dm:save name="test-ing-id-enrch-1"
+       --> @dm:save name = "temp-asset-discovery" & append = "yes"
+       --> @exec:run-pipeline name ="discovery_collection" & ignore_failures = "no"
+    --> @exec:end-if
+    --> *exec:if-condition ssh_status = 'Failed'
+       --> @asset-discovery:collector seed_addresses_col is device_ip and collection_group_rules is "default" and extended_inventory = True and cli_access = False and jobname = "{{row.customer_tag}}" and status_stream = "asset_inventory_collection_status_stream" and  dedupe_serial_number = "no"
+       --> @dm:save name = "asset-discovery-output-snmp"
+       ## --> *dm:filter collection_status = 'Success'
+       --> @dm:eval key="'key'"
+       --> @dm:enrich dict	 = "temp-input-org-details" and src_key_cols	 = "key" and dict_key_cols	="key" and enrich_cols	="discovery_enabled,customer_tag,customer_id,ingestion_id,discovey_start_time"
+       ##--> @dm:save name="test-ing-id-enrch-2"
+       --> @dm:save name = "temp-asset-discovery" & append = "yes"
+       --> @exec:run-pipeline name ="discovery_collection" & ignore_failures = "no"
+    --> @exec:end-if
+
+--> @c:new-block
+    --> @dm:recall name = "temp-asset-discovery" & return_empty = "yes"
+    ##--> @dm:save name = "test-asset-discovery"
+    --> @dm:dedup columns="jobid"
+    --> @dm:save name="temp-jobid"
+    ##--> @dm:save name="test-jobid"
+
+--> @c:data-loop columns="jobid,ingestion_id,discovey_start_time,customer_tag" and dataset ="temp-jobid"
+    --> @dm:empty
+    --> #dm:query-persistent-stream jobid is '$jobid'
+            with-input name = "asset_inventory_collection_status_stream" & limit = "0"
+    --> @dm:eval ingestion_id = "'$ingestion_id'"
+    --> @dm:eval customer_tag = "'$customer_tag'"
+    --> @dm:eval discovey_start_time = "'$discovey_start_time'"
+    --> @dm:save name="temp-asset-status" & append = "yes"
+
+--> @c:new-block
+    --> @dm:recall name = "temp-asset-status" & return_empty = "yes"
+    ##--> @dm:save name="test-asset-status"
+    --> *dm:filter type_ is 'overall_status' and discovery_status is 'Completed'
+    --> @dm:to_type columns="total,success,pending,failed,duplicates" & type="int"
+    --> @dm:selectcolumns include="ingestion_id|discovey_start_time|total|success|pending|failed|duplicates|customer_tag|customer_id"
+    --> @dm:groupby columns = 'ingestion_id,discovey_start_time,customer_tag' & agg = 'sum'
+    --> @dm:copy-columns from="customer_tag" and to="jobname"
+    --> @dm:rename-columns collection_start_time  = "discovey_start_time"
+    --> @dm:eval collection_timestamp ='utc_time_now_as_isoformat()'
+    --> @dm:eval type_ = "'overall_status'"
+    ##--> @dm:save name="test-asset-query-main"
+    --> @dm:save name = "temp-discovery-status" & append = "yes"
+    --> @rn:write-stream name= "discovery_status"
+    --> @dm:recall name = "temp-asset-status" & return_empty = "yes"
+    --> *dm:filter type_ != 'overall_status'
+    --> @rn:write-stream name= "discovery_status"
+
+--> @c:data-loop columns="jobid" and dataset ="temp-asset-discovery"
+    --> @dm:recall name = "temp-asset-discovery" and return_empty = "yes"
+    --> *dm:filter jobid is "$jobid"
+    ## --> @dm:save name = "test-check-op"
+    --> @dm:selectcolumns include = "jobid|collection_timestamp|target_ip|collection_status|reason"
+    --> *dm:filter collection_status = 'Success'
+    --> @dm:skip-block-if-shape row_count=0
+    --> @dm:eval discovery_status ="'Completed'"
+    --> @dm:eval discovery_end_time = "int(time_now_as_ms())"
+    --> @dm:eval logs ="'Successfully completed the discovery and processing of the data for all devices.'"
+    --> @dm:map from = 'jobid,discovery_status,logs,target_ip' &  to = "unique_id" & func = "join" & sep = "_"
+    --> @dm:eval key="'key'"
+    --> @dm:enrich dict	 = "temp-input-org-details" and src_key_cols	 = "key" and dict_key_cols	="key" and enrich_cols	="customer_id,customer_tag,ingestion_id"
+    --> @rn:write-stream name= "discovery_logs"
+

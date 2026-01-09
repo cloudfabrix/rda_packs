@@ -1,0 +1,178 @@
+%% template_type="jinja"
+%%start_inline_object name="context_dynamic_form" and type="data" and format="json"
+{
+    "formFieldList": [
+        {
+            "fieldId": "customer_tag",
+            "label": "Tag of the customer",
+            "required": false,
+            "dataType": "string"
+        },
+        {
+            "fieldId": "ep_name",
+            "label": "Endpoint Name",
+            "required": false,
+            "dataType": "string"
+        }
+         
+    ]
+}
+%%end_inline_object
+
+ {% if customer_tag %} 
+      {% set customer_id = customer_id %}
+      {% set customer_tag = customer_tag %}
+      {% set customerTag = customer_tag %}
+   {% elif customerTag %} 
+      {% set customer_id = customer_id %}
+      {% set customer_tag = customerTag %}
+   {% else %}
+      {% set customer_id = '' %}
+      {% set customer_tag = '' %}
+   {% endif %}  
+
+## Construct dynamic dataset names #
+{% set dict_device_chassis = (customer_tag ~ '-cisco_device_chassis_dict') if customer_tag else 'cisco_device_chassis_dict' %}
+{% set dict_device_additional_ip = (customer_tag ~ '-cisco_device_additional_ip_dict') if customer_tag else 'cisco_device_additional_ip_dict' %}
+{% set dict_device_interface = (customer_tag ~ '-cisco_device_interface_data') if customer_tag else 'cisco_device_interface_data' %}
+
+
+{% set ep_name = ep_name | default('Syslog', true) %}
+{%- set webhook_url = engine.get_endpoint_url(ep_name ,customer_tag= customer_tag ) -%}
+
+## Handle error method
+@dm:empty
+    --> @exec:define-function name="safe_skip"
+       --> @rn:write-stream name = 'failed_syslog_alerts'
+    --> @exec:end-function
+
+--> @c:flex-block
+{% if customer_tag %} 
+     --> @dn:read-stream name="{{customer_tag}}_syslog_udp_event_stream" and
+            group="{{customer_tag}}_syslog_udp_event_stream" and
+            batch_size=2000 and
+            lazy_commit="yes" and
+            max_poll_interval_ms=600000 and offset_reset="latest" and
+            batch_wait=1
+{% else %}
+    --> @dn:read-stream name="syslog_udp_event_stream" and group="syslog_udp_event_stream" and batch_size=2000 and lazy_commit="yes" and max_poll_interval_ms=600000 and offset_reset="latest" and batch_wait=1
+    ##-->@dm:empty
+    ##--> #dm:query-persistent-stream timestamp after -5mins with-input name = "syslog_udp_event_stream"
+{% endif %}
+    --> @dm:save name="temp-pipeline-input"
+    --> @exec:retry-loop retries = 0 and retry_delay_millis= 2000  and on_failure_callback="safe_skip"
+       --> @dm:save name = 'temp-keep-events'
+       ## Initialize the temp datasets
+       --> @dm:empty
+       --> @dm:save name="temp-result-1"
+       --> @dm:recall name = 'temp-keep-events'
+       --> @exec:retry-loop retries= 5 and retry_delay_millis= 2000
+         
+            --> @dm:enrich dict = '{{ dict_device_chassis }}' & src_key_cols = 'rda_gw_client_ip' & dict_key_cols = 'device_ip' & enrich_cols = 'device_eq_description,device_hostname,device_location,device_serial_number,device_model,device_vendor,device_version_summary,device_fw_type,device_fw_version,device_status,device_hostname_short,parent_sn,node_id' & return_empty_cols = "yes" &  cache = 'yes' & cache_refresh_seconds=21600
+         
+       --> @exec:end-loop
+       
+       
+       ## If the syslog source IP (rda_gw_client_ip) is not same as the device on-boarding IP (device_ip); then syslog source IP won't exist in 'cisco_device_chassis_dict'.
+       ## In this case, search for the additional IPs.
+       --> *exec:if-condition device_ip is empty
+          --> @dm:selectcolumns exclude="^device_ip$|^device_eq_description$|^device_hostname$|^device_location$|^device_serial_number$|^device_model$|^device_vendor$|^device_version_summary$|^device_fw_type$|^device_fw_version$|^node_id$|^device_status$"
+          --> @exec:retry-loop retries= 5 and retry_delay_millis= 2000
+             
+                --> @dm:enrich dict = '{{ dict_device_additional_ip }}' & src_key_cols = 'rda_gw_client_ip' & dict_key_cols = 'device_additional_ips' & enrich_cols = 'device_ip,device_eq_description,device_hostname,device_location,device_serial_number,device_model,device_vendor,device_version_summary,device_fw_type,device_fw_version,node_id,device_status' & return_empty_cols = "yes"  & cache = 'yes' and cache_refresh_seconds=21600
+             
+       --> @exec:end-loop
+       --> @dm:fixnull columns = "device_status" & value = "UNMANAGED" & apply_for_empty = 'yes'
+       --> @dm:save name="temp-result-1" & append="yes"
+       --> @exec:end-if
+       --> *exec:if-condition device_ip is not empty
+          --> @dm:save name="temp-result-1" & append="yes"
+       --> @exec:end-if
+       --> @dm:recall name="temp-result-1"
+       --> @dm:copy-columns from="rda_gw_client_ip" & to= "rda_gw_client_ip_orig"
+       --> @dm:add-missing-columns columns = 'device_ip,device_eq_description,device_hostname,device_location,device_serial_number,device_model,device_version_summary,device_fw_type,device_fw_version,device_uuid'
+       ## device_ip can be null or empty; if the above enrichment fails for some reason.
+       ## device_ip is used in the alert key. So, it should be set to a valid value.
+       ## Setting the device_ip same as rda_gw_client_ip in case it is null or empty.
+       --> @dm:eval device_ip="rda_gw_client_ip if device_ip is None or device_ip in ['Not Available' , '', 'NONE', 'None'] else device_ip"
+       --> @dm:eval rda_gw_client_ip="rda_gw_client_ip if device_ip is None or device_ip in ['Not Available' , '', 'NONE', 'None'] else device_ip"
+       ## ## Additional IPs fix
+       --> @dm:copy-columns from="raw" & to= "message"
+       --> @dm:extract columns = 'message' & expr = ".*%(?P<syslog_code>[A-Z0-9\-_]+)\s*:.*"
+       --> @dm:grok column = 'message' & pattern = "%{DATA} \%%{DATA}: %{GREEDYDATA:log_message}|%{DATA}: %{GREEDYDATA:log_message}"
+       --> @exec:retry-loop retries= 5 and retry_delay_millis= 2000
+          --> @dm:enrich-using-rule-dict dict = "syslog_alert_rules_dict" & enrich_columns = "action,state,severity,raise_code,alarm_class,key_eval,grok" and cache="yes" and cache_refresh_seconds=21600
+       --> @exec:end-loop
+       --> @dm:grok column = 'raw' & pattern_column = "grok" 
+       --> @dm:add-missing-columns columns="priority" and value=0
+       --> @dm:eval syslog_severity_num="int(priority) % 8 if priority else 8"
+       --> @dm:add-missing-columns columns="syslog_severity"
+       --> *exec:if-condition syslog_severity is empty
+            --> @exec:retry-loop retries= 5 and retry_delay_millis= 2000
+              --> @dm:enrich dict="syslog-severities" and src_key_cols="syslog_severity_num" and dict_key_cols="serverity_num" and enrich_cols="syslog_severity"
+            --> @exec:end-loop
+       --> @exec:end-if
+       --> @dm:copy-columns from = "device_vendor,device_model,device_fw_type,device_fw_version" & to = "device_vendor,device_model,device_fw_type,device_fw_version" & func = "strip"
+       --> @dm:fixnull columns = "device_vendor,device_model,device_fw_type,device_fw_version,device_hostname" & value = "Not Available" & apply_for_empty = 'yes'
+       --> @dm:save name = "temp-tagged-events-2"
+       --> *dm:filter action is 'DROP'
+       --> @rn:write-stream name = 'syslog_stream'
+       --> @dm:recall name = "temp-tagged-events-2"
+       --> @dm:add-missing-columns columns="syslog_code" 
+       --> @dm:eval raise_code="raise_code if raise_code else syslog_code"
+       --> *dm:filter action is 'KEEP'
+       ## Skip rest of the block if there are no alerts to KEEP
+       --> @dm:skip-block-if-shape row_count=0
+       --> @dm:add-missing-columns columns = 'interface_name' & value = 'ABSENT'
+       --> @dm:fixnull columns = 'interface_name' & value = 'ABSENT' & apply_for_empty = 'yes'
+       --> @dm:save name = 'temp-keep-events'
+       ## Initialize the temp datasets
+       --> @dm:empty
+       --> @dm:save name="temp-enriched_syslog_alerts"
+       --> @dm:recall name = 'temp-keep-events'
+       ##--> @dm:save name="syslog_alerts"
+       ## Do Enrichment using interface_name only if interface_name is a valid value
+       --> *exec:if-condition interface_name is not null and interface_name is not in ['ABSENT', 'Not Available' , '', 'NONE', 'None']
+          --> @exec:retry-loop retries= 5 and retry_delay_millis= 2000
+           
+              --> @dm:enrich dict = '{{ dict_device_interface }}' & src_key_cols = 'device_ip,interface_name' & dict_key_cols = 'device_ip,device_int_name' & enrich_cols = 'device_interface_status,device_int_index,device_int_alias,device_int_shortname,remote_device_int_index,remote_device_ip,remote_device_int_name,remote_device_id,remote_device_model,remote_device_int_alias,remote_device_int_shortname,device_interface_order,cdp_device_order,device_interface_admin_status' & return_empty_cols = "yes" & cache="yes" & cache_refresh_seconds=3600
+            
+          --> @exec:end-loop
+          --> @dm:add-missing-columns columns = 'device_interface_status,device_int_index,device_int_alias,device_int_shortname,remote_device_int_index,remote_device_ip,remote_device_int_name,remote_device_id,remote_device_model,device_hostname,remote_device_int_alias,remote_device_int_shortname,device_interface_order,cdp_device_order,device_interface_admin_status'
+          --> @dm:save name = 'temp-enriched_syslog_alerts'
+          --> *dm:filter device_interface_admin_status in ['down', 'DOWN'] and alarm_class is 'Interface'
+          --> @rn:write-stream name = 'syslog_stream'
+          --> @dm:recall name = 'temp-enriched_syslog_alerts'
+          --> *dm:filter device_interface_admin_status not in ['down', 'DOWN'] or alarm_class is not 'Interface'
+          --> @dm:skip-block-if-shape row_count=0
+          --> @dm:eval device_interface_order= 'device_interface_order if device_interface_order else interface_name.split(".")[0]'
+          --> @dm:selectcolumns exclude = '^target$'
+          --> @dm:add-missing-columns columns = 'interface_name_x'
+          --> @dm:eval interface_name = "interface_name_x if interface_name_x else interface_name"
+          --> @dm:selectcolumns exclude = '^interface_name_.*'
+          --> @dm:save name = 'temp-enriched_syslog_alerts'
+       --> @exec:end-if
+       --> *exec:if-condition (interface_name is null) or (interface_name is in ['ABSENT', 'Not Available' , '', 'NONE', 'None'])
+          --> @dm:eval device_interface_order= 'device_hostname'
+          --> @dm:save name = 'temp-enriched_syslog_alerts' & append="yes"
+       --> @exec:end-if
+       --> @dm:recall name="temp-enriched_syslog_alerts"
+       --> @dm:add-missing-columns columns = "bgp_neighbor_ip,bfd_sess_ld,bfd_sess_handle,isis_system_id,isis_interface_name,t1e1_interface,card_id,syslog_code,log_message"
+       --> @dm:eval key_eval = "eval(key_eval)"
+       --> @rn:write-stream name = 'syslog_stream'
+       --> @dm:selectcolumns include="syslog_code|log_message|raw|rda_gw_client_ip|rda_gw_ep_name|rda_gw_ep_type|rda_gw_timestamp|syslog_facility|syslog_facility_num|syslog_severity|device_ip|device_eq_description|device_hostname|device_serial_number|device_model|device_vendor|device_fw_type|device_fw_version|device_location|state|severity|interface_name|port_channel_name|alarm_class|device_interface_order|key|rda_gw_seq|message|action|key_eval|node_id"
+       --> @dm:to-json output_column = 'payload'
+       --> @exec:retry-loop retries= 5 and retry_delay_millis= 2000
+          --> @restclient:write url is "{{ webhook_url }}" & envelope is "{{'{{payload}}'}}" & batch_size = 1
+       --> @exec:end-loop
+    --> @exec:end-loop
+    
+
+
+
+
+
+
+
+    
+

@@ -1,0 +1,645 @@
+##This pipeline needs customer_tag or customerTag in context 
+##If its not provided to the pipeline it does not run
+%% stream = no and limit = 0
+%% template_type="jinja"
+%% import_src_type = "cisco-crosswork"
+%%start_inline_object name="context_dynamic_form" and type="data" and format="json"
+{
+    "formFieldList": [
+        {
+            "fieldId": "customer_tag",
+            "label": "Tag of the customer",
+            "required": false,
+            "dataType": "string"
+        }
+    ]
+}
+%%end_inline_object
+--> @dm:empty
+    --> @dm:save name="temp-customer-context"
+   {% if customer_tag %} 
+      {% set customer_id = customer_id %}
+      {% set customer_tag = customer_tag %}
+      {% set customerTag = customer_tag %}
+   {% elif customerTag %} 
+      {% set customer_id = customer_id %}
+      {% set customer_tag = customerTag %}
+   {% else %}
+      {% set customer_id = '' %}
+      {% set customer_tag = '' %}
+   {% endif %}   
+
+
+## Get input - ondemand execution
+--> @c:new-block
+    --> @exec:get-input 
+    --> @dm:save name="temp-access-verify"
+
+## Process ondemand input if exists
+--> @c:new-block
+    --> @dm:recall name="temp-access-verify" and return_empty = "yes"
+    --> @dm:skip-block-if-shape row_count = 0
+    --> @dm:selectcolumns include="Others"
+    --> @dm:explode-json column="Others"
+    --> @dm:rename-columns cisco_crosswork_src_name='name'
+    --> @dm:save name='temp-cisco_crosswork_source_info'
+
+## Scheduled execution - query access verification status stream
+--> @c:new-block
+    --> @dm:recall name="temp-access-verify" and return_empty = "yes"
+    --> @dm:skip-block-if-shape row_count > 0
+    --> @dm:empty
+    {% if customer_tag %}
+       --> #dm:query-persistent-stream discovery_scope = 'yes' and collection_status = 'Success' and (customer_tag is '{{customer_tag}}') with-input name='cisco_crosswork_access_verification_status' and limit=0
+    {% else %}
+       --> #dm:query-persistent-stream discovery_scope = 'yes' and collection_status = 'Success' and (customer_tag is empty or customer_tag is 'None') with-input name='cisco_crosswork_access_verification_status' and limit=0
+    {% endif %}
+    --> @dm:selectcolumns exclude="limit|index|name|timestamp|count_|_RDA_Id"
+    --> @dm:rename-columns cisco_crosswork_src_name = 'bot_source_name'
+        --> @dm:rename-columns ip_address = 'asset_ip'
+    --> @dm:selectcolumns include="cisco_crosswork_src_name|ip_address|customer_tag|customer_id|discovery_scope"
+    --> @dm:save name='temp-cisco_crosswork_source_info'
+##Add customer context to the dataset
+--> @c:new-block
+    --> @dm:recall name='temp-cisco_crosswork_source_info'
+    --> @dm:eval customer_id="'{{customer_id}}'"
+    --> @dm:eval customer_tag="'{{customer_tag}}'"
+   --> @dm:save name='cisco_crosswork_source_info'
+
+
+## Cisco Crosswork Inventory Collection
+## Cisco Crosswork Source Credentials Input
+--> @c:new-block
+    --> @dm:recall name='cisco_crosswork_source_info'
+    --> @dm:skip-pipeline-if-shape row_count=0
+    --> @dm:save name='temp-cisco_crosswork_source_info'
+
+## Cisco Crosswork Inventory IP Range Feed
+--> @c:new-block
+    --> @dm:recall name='temp-cisco_crosswork_source_info'
+    --> @dm:selectcolumns include="cisco_crosswork_src_name|ip_address|customer_tag|customer_id"
+    --> @dm:map attr='discovery_scope' & func='strip'
+    --> @dm:map attr='discovery_scope' & func='lower'
+    --> @dm:save name='temp-crosswork-ip-feed'
+
+## ##
+## Cisco Crosswork Devices Information
+--> @c:data-loop dataset = 'temp-cisco_crosswork_source_info' & columns = 'cisco_crosswork_src_name,customer_id,customer_tag'
+    --> @dm:recall name = 'temp-crosswork-ip-feed'
+    --> @$cisco_crosswork_src_name:devices column_name='ip_address'  & concurrent_discovery = '100'
+    --> *exec:if-condition collection_status != 'Success'
+           --> @dm:eval customer_id = "'$customer_id'"
+       --> @dm:eval customer_tag = "'$customer_tag'"
+       --> *dm:filter * get source_ip as 'asset_id',collection_status,collection_timestamp,reason as 'collection_reason',customer_id,customer_tag
+       --> @dm:map attr = 'collection_timestamp' & func = 'ts_to_datetimestr' & unit = 'ms'
+       --> @dm:eval bot_source_name = "'$cisco_crosswork_src_name'"
+       --> @dm:eval bot_source_type = "'csico_crosswork'"
+       --> @dm:eval bot_name = "'devices'"
+       --> @dm:save name = 'temp-csico_crosswork_devices_info_failed_status'
+    --> @rn:write-stream name = 'asset_inventory_collection_status_stream'
+    --> @exec:end-if
+    --> *exec:if-condition collection_status = 'Success'
+       --> @dm:save name = 'temp-csico_crosswork_devices_info_inventory'
+       --> @dm:dedup columns = 'source_ip'
+           --> @dm:eval customer_id = "'$customer_id'"
+       --> @dm:eval customer_tag = "'$customer_tag'"
+       --> *dm:filter * get source_ip as 'asset_id',collection_status,collection_timestamp,reason as 'collection_reason',customer_id,customer_tag
+       --> @dm:map attr = 'collection_timestamp' & func = 'ts_to_datetimestr' & unit = 'ms'
+       --> @dm:eval bot_source_name = "'$cisco_crosswork_src_name'"
+       --> @dm:eval bot_source_type = "'csico_crosswork'"
+       --> @dm:eval bot_name = "'devices'"
+       --> @dm:save name = 'temp-csico_crosswork_devices_infor_success_status'
+    --> @rn:write-stream name = 'asset_inventory_collection_status_stream'
+    --> @exec:end-if
+
+## Cisco Crosswork Devices Data Processing
+--> @c:new-block
+    --> @dm:recall name = 'temp-csico_crosswork_devices_info_inventory'  & return_empty = 'yes'
+    --> *exec:if-shape num_rows > 0
+       --> *dm:safe-filter * get source_ip as 'crosswork_gui_ip',deviceAddress as 'ip_address',hostName as 'hostname',model as 'model',deviceDescription as 'description',deviceLocation as 'location',deviceName as 'host_name',deviceReachabilityStatus as 'device_status',deviceUpTime as 'uptime',productFamily as 'product_family',productSeries as 'product_series',productType as 'product_type',serialNumber as 'serialnumber',softwareType as 'software_type',softwareVersion as 'software_version',standByVersion as 'stand_by_version',macAddress as 'mac_address',managedAddress as 'mgmt_ip_address',adminStatus as 'status',creationTime as 'creation_time',entityId as 'entity_id',owningEntityID as 'owning_entity_id',vrfFeaturePresent as 'vrf_status',lifeCycleState as 'life_cycle_state',inventoryCollectionStatus as 'inventory_collection_status',inventoryCollectionTime as 'inventory_collection_time',collection_timestamp,collection_status,reason,customer_id,customer_tag
+       --> @dm:map attr = 'collection_timestamp' & func = 'ts_to_datetimestr' & unit = 'ms'
+       --> @dm:map attr = 'vrf_status' and func = 'lower'
+       --> @dm:map attr = 'mac_address' and func = 'lower'
+       --> @dm:map attr = 'entity_id' and func = 'lower'
+       --> @dm:map attr = 'owning_entity_id' and func = 'lower'
+       --> @dm:map attr = 'status' and func = 'lower'
+       --> @dm:map attr = 'life_cycle_state' and func = 'lower'
+       --> @dm:eval device_vendor = "'Cisco'"
+       --> @dm:eval device_type = "'Crosswork'"
+       --> @dm:eval asset_object = "'Devices'"
+       --> @dm:map from = 'crosswork_gui_ip,host_name,ip_address,entity_id' & to = 'unique_id' & func = 'join' & sep = '_'
+       --> @dm:dedup columns = 'unique_id'
+       --> @dm:save name = 'temp-crosswork_devices_processed_inventory'
+       --> @rn:write-stream name = 'crosswork-devices-inventory'
+    --> @exec:end-if
+
+## ##
+## Cisco Crosswork Devices nodes Information
+--> @c:data-loop dataset = 'temp-cisco_crosswork_source_info' & columns = 'cisco_crosswork_src_name,customer_id,customer_tag'
+    --> @dm:recall name = 'temp-crosswork-ip-feed'
+    --> @$cisco_crosswork_src_name:device-nodes column_name='ip_address'  & concurrent_discovery = '100'
+    --> *exec:if-condition collection_status != 'Success'
+       --> @dm:eval customer_id = "'$customer_id'"
+       --> @dm:eval customer_tag = "'$customer_tag'"
+       --> *dm:filter * get source_ip as 'asset_id',collection_status,collection_timestamp,reason as 'collection_reason',customer_id,customer_tag
+       --> @dm:map attr = 'collection_timestamp' & func = 'ts_to_datetimestr' & unit = 'ms'
+       --> @dm:eval bot_source_name = "'$cisco_crosswork_src_name'"
+       --> @dm:eval bot_source_type = "'csico_crosswork'"
+       --> @dm:eval bot_name = "'device-nodes'"
+       --> @dm:save name = 'temp-csico_crosswork_devices_nodes_info_failed_status'
+    --> @rn:write-stream name = 'asset_inventory_collection_status_stream'
+    --> @exec:end-if
+    --> *exec:if-condition collection_status = 'Success'
+       --> @dm:save name = 'temp-csico_crosswork_devices_nodes_info_inventory'
+       --> @dm:dedup columns = 'source_ip'
+       --> @dm:eval customer_id = "'$customer_id'"
+       --> @dm:eval customer_tag = "'$customer_tag'"
+       --> *dm:filter * get source_ip as 'asset_id',collection_status,collection_timestamp,reason as 'collection_reason',customer_id,customer_tag
+       --> @dm:map attr = 'collection_timestamp' & func = 'ts_to_datetimestr' & unit = 'ms'
+       --> @dm:eval bot_source_name = "'$cisco_crosswork_src_name'"
+       --> @dm:eval bot_source_type = "'csico_crosswork'"
+       --> @dm:eval bot_name = "'device-nodes'"  
+       --> @dm:save name = 'temp-csico_crosswork_devices_infor_success_status'
+    --> @rn:write-stream name = 'asset_inventory_collection_status_stream'
+    --> @exec:end-if
+
+## Cisco Crosswork Devices nodes Data Processing
+--> @c:new-block
+    --> @dm:recall name = 'temp-csico_crosswork_devices_nodes_info_inventory'  & return_empty = 'yes'
+    --> *exec:if-shape num_rows > 0
+       --> *dm:safe-filter * get source_ip as 'crosswork_gui_ip',inet_addr as 'ip_address',mask as 'netmask',host_name as 'host_name',manufacturer as 'manufacturer',product_family as 'product_family',product_series as 'product_series',product_type as 'product_type',software_type as 'software_type',software_version as 'software_version',operational_state as 'status',admin_state as 'admin_state',device_type as 'device_type',profile as 'profile_name',street as 'street',city as 'city',state as 'state',country as 'country',coordinates_latitude_value as 'latitude_value',coordinates_longitude_value as 'longitude_value',sys_desc as 'sys_description',capability as 'capability',sys_object_id as 'sys_object_id',syslog_format as 'syslog_format',uptime as 'uptime',uuid as 'uuid',connectivity_info as 'connectivity_info',ROBOT_PROVIDER_NSO_providers_NSO_provider_name as 'provider_name',ROBOT_PROVIDER_NSO_providers_nso_provider_node_id as 'provider_node_id',ROBOT_PROVIDER_NSO_providers_nso_provider_uuid as 'provider_uuid', collection_timestamp,collection_status,reason,customer_id,customer_tag
+       --> @dm:map attr = 'collection_timestamp' & func = 'ts_to_datetimestr' & unit = 'ms'
+       --> @dm:eval device_vendor = "'Cisco'"
+       --> @dm:eval device_type = "'Crosswork'"
+       --> @dm:eval asset_object = "'DevicesNodes'"
+       --> @dm:map from = 'crosswork_gui_ip,host_name,ip_address' & to = 'unique_id' & func = 'join' & sep = '_'
+       --> @dm:dedup columns = 'unique_id'
+       --> @dm:save name = 'temp-crosswork_devices_processed_inventory'
+       --> @rn:write-stream name = 'crosswork-devices-inventory'
+    --> @exec:end-if
+
+## ##
+## Cisco Crosswork Chassis Instances Information
+--> @c:data-loop dataset = 'temp-cisco_crosswork_source_info' & columns = 'cisco_crosswork_src_name,customer_id,customer_tag'
+    --> @dm:recall name = 'temp-crosswork-ip-feed'
+    --> @$cisco_crosswork_src_name:chassis-instances column_name='ip_address'  & concurrent_discovery = '100'
+    --> @dm:map from = 'eq.fdn' & to = 'device_name' & func = match & expr = '.*!ND=(?P<device_name>.*?)!' & _skip_errors = yes
+    --> @dm:fixcolumns
+    --> *exec:if-condition collection_status != 'Success'
+       --> @dm:eval customer_id = "'$customer_id'"
+       --> @dm:eval customer_tag = "'$customer_tag'"
+       --> *dm:filter * get source_ip as 'asset_id',collection_status,collection_timestamp,reason as 'collection_reason',customer_id,customer_tag
+       --> @dm:map attr = 'collection_timestamp' & func = 'ts_to_datetimestr' & unit = 'ms'
+       --> @dm:eval bot_source_name = "'$cisco_crosswork_src_name'"
+       --> @dm:eval bot_source_type = "'csico_crosswork'"
+       --> @dm:eval bot_name = "'chassis-instances'"
+       --> @dm:save name = 'temp-csico_crosswork_chassis_instances_info_failed_status'
+    --> @rn:write-stream name = 'asset_inventory_collection_status_stream'
+    --> @exec:end-if
+    --> *exec:if-condition collection_status = 'Success'
+       --> @dm:save name = 'temp-csico_crosswork_chassis_instances_info_inventory'
+       --> @dm:dedup columns = 'source_ip'
+       --> @dm:eval customer_id = "'$customer_id'"
+       --> @dm:eval customer_tag = "'$customer_tag'"
+       --> *dm:filter * get source_ip as 'asset_id',collection_status,collection_timestamp,reason as 'collection_reason',customer_id,customer_tag
+       --> @dm:map attr = 'collection_timestamp' & func = 'ts_to_datetimestr' & unit = 'ms'
+       --> @dm:eval bot_source_name = "'$cisco_crosswork_src_name'"
+       --> @dm:eval bot_source_type = "'csico_crosswork'"
+       --> @dm:eval bot_name = "'chassis-instances'"
+       --> @dm:save name = 'temp-csico_crosswork_chassis_instances_success_status'
+    --> @rn:write-stream name = 'asset_inventory_collection_status_stream'
+    --> @exec:end-if
+
+## Cisco Crosswork Chassis  Data Processing
+--> @c:new-block
+    --> @dm:recall name = 'temp-csico_crosswork_chassis_instances_info_inventory'  & return_empty = 'yes'
+    --> *exec:if-shape num_rows > 0
+       --> *dm:safe-filter * get eq_assembly_revision as 'assembly_revision',eq_clei_code as 'clei_code',eq_ent_physical_index as 'physical_index',eq_equipment_type as 'equipment_type',eq_hardware_version as 'hardware_version',eq_is_field_replaceable_unit as 'replaceable_unit',eq_is_physically_present as 'physically_present',eq_is_reporting_alarms_allowed as 'alarms',eq_manufactured_date as 'manufactured_date',eq_manufacturer as 'vendor',eq_operational_state_code as 'state',eq_part_number as 'part_number',eq_product_id as 'prodcut_id',eq_serial_number as 'serial_number',eq_service_state as 'service_state',fdtn_description as 'description',fdtn_name as 'chassis_name',source_ip as 'crosswork_gui_ip',device_name as 'host_name',collection_timestamp,collection_status,reason,customer_id,customer_tag
+       --> @dm:map attr = 'collection_timestamp' & func = 'ts_to_datetimestr' & unit = 'ms'
+       --> @dm:map attr = 'physically_present' and func = 'lower'
+       --> @dm:map attr = 'replaceable_unit' and func = 'lower'
+       --> @dm:eval device_vendor = "'Cisco'"
+       --> @dm:eval device_type = "'Crosswork'"
+       --> @dm:eval asset_object = "'Chassis'"
+       --> @dm:map from = 'crosswork_gui_ip,host_name,part_number,state' & to = 'unique_id' & func = 'join' & sep = '_'
+       --> @dm:dedup columns = 'unique_id'
+       --> @dm:save name = 'temp-crosswork_chassis_processed_inventory'
+       --> @rn:write-stream name = 'crosswork-devices-inventory'
+    --> @exec:end-if
+
+## ##
+## Cisco Crosswork physical-connectors Information
+--> @c:data-loop dataset = 'temp-cisco_crosswork_source_info' & columns = 'cisco_crosswork_src_name,customer_id,customer_tag'
+    --> @dm:recall name = 'temp-crosswork-ip-feed'
+    --> @$cisco_crosswork_src_name:physical-connectors column_name='ip_address'  & concurrent_discovery = '100'
+    --> @dm:map from = 'eq.fdn' & to = 'device_name' & func = match & expr = '.*!ND=(?P<device_name>.*?)!' & _skip_errors = yes
+    --> @dm:fixcolumns
+    --> *exec:if-condition collection_status != 'Success'
+       --> @dm:eval customer_id = "'$customer_id'"
+       --> @dm:eval customer_tag = "'$customer_tag'"
+       --> *dm:filter * get source_ip as 'asset_id',collection_status,collection_timestamp,reason as 'collection_reason',customer_id,customer_tag
+       --> @dm:map attr = 'collection_timestamp' & func = 'ts_to_datetimestr' & unit = 'ms'
+       --> @dm:eval bot_source_name = "'$cisco_crosswork_src_name'"
+       --> @dm:eval bot_source_type = "'csico_crosswork'"
+       --> @dm:eval bot_name = "'physical-connectors'"
+       --> @dm:save name = 'temp-csico_crosswork_physical_connectors_info_failed_status'
+    --> @rn:write-stream name = 'asset_inventory_collection_status_stream'
+    --> @exec:end-if
+    --> *exec:if-condition collection_status = 'Success'
+       --> @dm:save name = 'temp-csico_crosswork_physical_connectors_info_inventory'
+       --> @dm:dedup columns = 'source_ip'
+       --> @dm:eval customer_id = "'$customer_id'"
+       --> @dm:eval customer_tag = "'$customer_tag'"
+       --> *dm:filter * get source_ip as 'asset_id',collection_status,collection_timestamp,reason as 'collection_reason',customer_id,customer_tag
+       --> @dm:map attr = 'collection_timestamp' & func = 'ts_to_datetimestr' & unit = 'ms'
+       --> @dm:eval bot_source_name = "'$cisco_crosswork_src_name'"
+       --> @dm:eval bot_source_type = "'csico_crosswork'"
+       --> @dm:eval bot_name = "'physical-connectors'"
+       --> @dm:save name = 'temp-csico_crosswork_physical_connectors_success_status'
+    --> @rn:write-stream name = 'asset_inventory_collection_status_stream'
+    --> @exec:end-if
+
+## Cisco Crosswork physical-connectors Data Processing
+--> @c:new-block
+    --> @dm:recall name = 'temp-csico_crosswork_physical_connectors_info_inventory'  & return_empty = 'yes'
+    --> *exec:if-shape num_rows > 0
+       --> *dm:safe-filter * get com_response_message_com_header_com_firstIndex	as 'first_index',com_response_message_com_header_com_lastIndex as 'last_index',fdtn_description as 'description',fdtn_name as 'connection_interface_name',source_ip as 'crosswork_gui_ip',device_name as 'host_name',collection_timestamp,collection_status,reason,customer_id,customer_tag
+       --> @dm:map attr = 'collection_timestamp' & func = 'ts_to_datetimestr' & unit = 'ms'
+       ## --> @dm:map attr = 'physically_present' and func = 'lower'
+       ## --> @dm:map attr = 'replaceable_unit' and func = 'lower'
+       --> @dm:eval device_vendor = "'Cisco'"
+       --> @dm:eval device_type = "'Crosswork'"
+       --> @dm:eval asset_object = "'PhysicalConnectors'"
+       --> @dm:map from = 'crosswork_gui_ip,host_name,connection_interface_name' & to = 'unique_id' & func = 'join' & sep = '_'
+       --> @dm:dedup columns = 'unique_id'
+       --> @dm:save name = 'temp-crosswork_physical_connectors_processed_inventory'
+       --> @rn:write-stream name = 'crosswork-devices-inventory'
+    --> @exec:end-if
+
+## ##
+## Cisco Crosswork alarms Information
+--> @c:data-loop dataset = 'temp-cisco_crosswork_source_info' & columns = 'cisco_crosswork_src_name,customer_id,customer_tag'
+    --> @dm:recall name = 'temp-crosswork-ip-feed'
+    --> @$cisco_crosswork_src_name:alarms column_name='ip_address'  & concurrent_discovery = '100'
+    --> @dm:fixcolumns
+    --> *exec:if-condition collection_status != 'Success'
+       --> @dm:eval customer_id = "'$customer_id'"
+       --> @dm:eval customer_tag = "'$customer_tag'"
+       --> *dm:filter * get source_ip as 'asset_id',collection_status,collection_timestamp,reason as 'collection_reason',customer_id,customer_tag
+       --> @dm:map attr = 'collection_timestamp' & func = 'ts_to_datetimestr' & unit = 'ms'
+       --> @dm:eval bot_source_name = "'$cisco_crosswork_src_name'"
+       --> @dm:eval bot_source_type = "'csico_crosswork'"
+       --> @dm:eval bot_name = "'alarms'"
+       --> @dm:save name = 'temp-csico_crosswork_alarms_info_failed_status'
+
+    --> @rn:write-stream name = 'asset_inventory_collection_status_stream'
+    --> @exec:end-if
+    --> *exec:if-condition collection_status = 'Success'
+       --> @dm:save name = 'temp-csico_crosswork_alarms_info_inventory'
+       --> @dm:dedup columns = 'source_ip'
+       --> @dm:eval customer_id = "'$customer_id'"
+       --> @dm:eval customer_tag = "'$customer_tag'"
+       --> *dm:filter * get source_ip as 'asset_id',collection_status,collection_timestamp,reason as 'collection_reason',customer_id,customer_tag
+       --> @dm:map attr = 'collection_timestamp' & func = 'ts_to_datetimestr' & unit = 'ms'
+       --> @dm:eval bot_source_name = "'$cisco_crosswork_src_name'"
+       --> @dm:eval bot_source_type = "'csico_crosswork'"
+       --> @dm:eval bot_name = "'alarms'"
+       --> @dm:save name = 'temp-csico_crosswork_alarms_infor_success_status'
+
+    --> @rn:write-stream name = 'asset_inventory_collection_status_stream'
+    --> @exec:end-if
+
+## Cisco Crosswork Alarms Data Processing
+--> @c:new-block
+    --> @dm:recall name = 'temp-csico_crosswork_alarms_info_inventory'  & return_empty = 'yes'
+    --> *exec:if-shape num_rows > 0
+       --> *dm:safe-filter * get source_ip as 'crosswork_gui_ip',alm_ack_state as 'acknowledged_state',alm_business_key as 'business_key',alm_category as 'category',alm_cause_type as 'cause_type',alm_description as 'description',alm_node_ref as 'node_ref',alm_perceived_severity as 'severity',alm_probable_cause as 'probable_cause',alm_remote_interface_ip_address as 'device_ip_address',alm_service_impacting as 'service_impacting',alm_source_object_ref as 'object_ref',alm_system_received_time as 'received_time',alm_system_update_time as 'update_time',alm_uuid as 'uuid',collection_timestamp,collection_status,reason
+       --> @dm:map attr = 'collection_timestamp' & func = 'ts_to_datetimestr' & unit = 'ms'
+       --> @dm:eval device_vendor = "'Cisco'"
+       --> @dm:eval device_type = "'Crosswork'"
+       --> @dm:eval asset_object = "'Alarms'"
+       --> @dm:map from = 'crosswork_gui_ip,device_ip_address,uuid' & to = 'unique_id' & func = 'join' & sep = '_'
+       --> @dm:dedup columns = 'unique_id'
+       --> @dm:save name = 'temp-crosswork_alarms_processed_inventory'
+       --> @rn:write-stream name = 'crosswork-devices-inventory'
+    --> @exec:end-if
+
+## ##
+## Cisco Crosswork alarm-severity-config Information
+--> @c:data-loop dataset = 'temp-cisco_crosswork_source_info' & columns = 'cisco_crosswork_src_name,customer_id,customer_tag'
+    --> @dm:recall name = 'temp-crosswork-ip-feed'
+    --> @$cisco_crosswork_src_name:alarm-severity-config column_name='ip_address'  & concurrent_discovery = '100'
+    --> @dm:fixcolumns
+    --> *exec:if-condition collection_status != 'Success'
+       --> @dm:eval customer_id = "'$customer_id'"
+       --> @dm:eval customer_tag = "'$customer_tag'"
+       --> *dm:filter * get source_ip as 'asset_id',collection_status,collection_timestamp,reason as 'collection_reason',customer_id,customer_tag
+       --> @dm:map attr = 'collection_timestamp' & func = 'ts_to_datetimestr' & unit = 'ms'
+       --> @dm:eval bot_source_name = "'$cisco_crosswork_src_name'"
+       --> @dm:eval bot_source_type = "'csico_crosswork'"
+       --> @dm:eval bot_name = "'alarm-severity-config'"
+       --> @dm:save name = 'temp-csico_crosswork_alarm_severity_config_failed_status'
+    --> @rn:write-stream name = 'asset_inventory_collection_status_stream'
+    --> @exec:end-if
+    --> *exec:if-condition collection_status = 'Success'
+       --> @dm:save name = 'temp-csico_crosswork_alarm_severity_config_info_inventory'
+       --> @dm:dedup columns = 'source_ip'
+       --> @dm:eval customer_id = "'$customer_id'"
+       --> @dm:eval customer_tag = "'$customer_tag'"
+       --> *dm:filter * get source_ip as 'asset_id',collection_status,collection_timestamp,reason as 'collection_reason',customer_id,customer_tag
+       --> @dm:map attr = 'collection_timestamp' & func = 'ts_to_datetimestr' & unit = 'ms'
+       --> @dm:eval bot_source_name = "'$cisco_crosswork_src_name'"
+       --> @dm:eval bot_source_type = "'csico_crosswork'"
+       --> @dm:eval bot_name = "'alarm-severity-config'"
+
+       --> @dm:save name = 'temp-csico_crosswork_alarm_severity_config_success_status'
+    --> @rn:write-stream name = 'asset_inventory_collection_status_stream'
+    --> @exec:end-if
+
+## Cisco Crosswork alarm-severity-config Data Processing
+--> @c:new-block
+    --> @dm:recall name = 'temp-csico_crosswork_alarm_severity_config_info_inventory'  & return_empty = 'yes'
+    --> *exec:if-shape num_rows > 0
+       --> *dm:safe-filter * get source_ip as 'crosswork_gui_ip',defaultCategory as 'Category',eventTypeName as 'event_type_name',name as 'name',severity as 'severity',collection_timestamp,collection_status,reason
+       --> @dm:map attr = 'collection_timestamp' & func = 'ts_to_datetimestr' & unit = 'ms'
+       --> @dm:map attr = 'vrf_status' and func = 'lower'
+       --> @dm:eval device_vendor = "'Cisco'"
+       --> @dm:eval device_type = "'Crosswork'"
+       --> @dm:eval asset_object = "'AlarmSeverityConfig'"
+       --> @dm:map from = 'crosswork_gui_ip,name,severity' & to = 'unique_id' & func = 'join' & sep = '_'
+       --> @dm:dedup columns = 'unique_id'
+       --> @dm:save name = 'temp-crosswork_alarm_severity_config_processed_inventory'
+       --> @rn:write-stream name = 'crosswork-devices-inventory'
+    --> @exec:end-if
+
+## ##
+## Cisco Crosswork Network Nodes Information
+--> @c:data-loop dataset = 'temp-cisco_crosswork_source_info' & columns = 'cisco_crosswork_src_name,customer_id,customer_tag'
+    --> @dm:recall name = 'temp-crosswork-ip-feed'
+    --> @$cisco_crosswork_src_name:network-nodes column_name='ip_address'  & concurrent_discovery = '100'
+    --> @dm:fixcolumns
+    --> *exec:if-condition collection_status != 'Success'
+       --> @dm:eval customer_id = "'$customer_id'"
+       --> @dm:eval customer_tag = "'$customer_tag'"
+       --> *dm:filter * get source_ip as 'asset_id',collection_status,collection_timestamp,reason as 'collection_reason',customer_id,customer_tag
+       --> @dm:map attr = 'collection_timestamp' & func = 'ts_to_datetimestr' & unit = 'ms'
+       --> @dm:eval bot_source_name = "'$cisco_crosswork_src_name'"
+       --> @dm:eval bot_source_type = "'csico_crosswork'"
+       --> @dm:eval bot_name = "'network-nodes'"
+       --> @dm:save name = 'temp-csico_crosswork_network_nodes_failed_status'
+    --> @rn:write-stream name = 'asset_inventory_collection_status_stream'
+    --> @exec:end-if
+    --> *exec:if-condition collection_status = 'Success'
+       --> @dm:save name = 'temp-csico_crosswork_network_nodes_inventory'
+       --> @dm:dedup columns = 'source_ip'
+       --> @dm:eval customer_id = "'$customer_id'"
+       --> @dm:eval customer_tag = "'$customer_tag'"
+       --> *dm:filter * get source_ip as 'asset_id',collection_status,collection_timestamp,reason as 'collection_reason',customer_id,customer_tag
+       --> @dm:map attr = 'collection_timestamp' & func = 'ts_to_datetimestr' & unit = 'ms'
+       --> @dm:eval bot_source_name = "'$cisco_crosswork_src_name'"
+       --> @dm:eval bot_source_type = "'csico_crosswork'"
+       --> @dm:eval bot_name = "'network-nodes'"
+
+       --> @dm:save name = 'temp-csico_crosswork_network_nodes_success_status'
+    --> @rn:write-stream name = 'asset_inventory_collection_status_stream'
+    --> @exec:end-if
+
+## Cisco Crosswork Network Nodes Data Processing
+--> @c:new-block
+    --> @dm:recall name = 'temp-csico_crosswork_network_nodes_inventory'  & return_empty = 'yes'
+    --> *exec:if-shape num_rows > 0
+       --> *dm:safe-filter * get source_ip as 'crosswork_gui_ip',router_id as 'router_id',name as 'name',node_id	as 'node_id',tp_id as 'interface_id',
+               cisco_crosswork_l3_te_topology_node_pcep_sessions_pcc_address as 'l3_pcc_ip_address',
+               cisco_crosswork_l3_te_topology_node_pcep_sessions_pce_address as 'l3_pce_ip_address',
+               l3_termination_point_attributes_ip_address as 'l3_termination_point_ip_address',
+               ipv4_termination_point_attributes_l3_termination_point_attributes_unnumbered_id	as 'l3_termination_point_unnumbered_id',
+               prefix_cisco_crosswork_l3_te_topology_prefix_attributes_domain_id as 'l3_domain_id',
+               cisco_crosswork_l3_te_topology_node_pcep_sessions_capability_instantiate as 'l3_pcep_instantiate',
+               cisco_crosswork_l3_te_topology_node_pcep_sessions_capability_sr as 'l3_pcep_sr',
+               l2_termination_point_attributes_encapsulation_type as 'l2_encapsulation_type',
+               l2_termination_point_attributes_mac_address as 'l2_mac_address',
+               l2_termination_point_attributes_unnumbered_id as 'l2_unnumbered_id',
+               cisco_crosswork_ospf_topology_ospf_node_attributes_area_id as 'ospf_area_id',
+               cisco_crosswork_ospf_topology_ospf_node_attributes_ospf_router_id as 'ospf_router_id',
+               prefix_ietf_sr_mpls_topology_state_sr_mpls_algorithm as 'mpls_algorithm',
+               prefix_ietf_sr_mpls_topology_state_sr_mpls_algorithm_value as 'mpls_algorithm_value',
+               prefix_ietf_sr_mpls_topology_state_sr_mpls_is_local as 'mpls_is_local',
+               prefix_ietf_sr_mpls_topology_state_sr_mpls_is_node as 'mpls_is_node',
+               prefix_ietf_sr_mpls_topology_state_sr_mpls_range as 'mpls_range',
+               prefix_ietf_sr_mpls_topology_state_sr_mpls_start_sid as 'mpls_start_sid',
+               prefix_ietf_sr_mpls_topology_state_sr_mpls_value_type as 'mpls_value_type',
+               prefix_prefix as 'mpls_network_id',
+               ietf_sr_mpls_topology_state_sr_mpls_msd as 'sr_mpls_msd',
+               ietf_sr_mpls_topology_state_sr_mpls_srgb_lower_bound as 'sr_mpls_srgb_lower_bound',
+               ietf_sr_mpls_topology_state_sr_mpls_srgb_upper_bound as 'sr_mpls_srgb_upper_bound',
+               ietf_sr_mpls_topology_state_sr_mpls_srlb_lower_bound as 'sr_mpls_srlb_lower_bound',
+               ietf_sr_mpls_topology_state_sr_mpls_srlb_upper_bound as 'sr_mpls_srlb_upper_bound',
+               collection_timestamp,collection_status,reason,customer_id,customer_tag
+       --> @dm:map attr = 'collection_timestamp' & func = 'ts_to_datetimestr' & unit = 'ms'
+       --> @dm:map attr = 'l3_pcep_instantiate' and func = 'lower'
+       --> @dm:map attr = 'l3_pcep_sr' and func = 'lower'
+       --> @dm:map attr = 'l2_encapsulation_type' and func = 'lower'
+       --> @dm:map attr = 'l2_mac_address' and func = 'lower'
+       --> @dm:map attr = 'mpls_algorithm' and func = 'lower'
+       --> @dm:map attr = 'mpls_is_local' and func = 'lower'
+       --> @dm:map attr = 'mpls_is_node' and func = 'lower'
+       --> @dm:map attr = 'mpls_value_type' and func = 'lower'
+       --> @dm:eval device_vendor = "'Cisco'"
+       --> @dm:eval device_type = "'Crosswork'"
+       --> @dm:eval asset_object = "'NetworkNodes'"
+       --> @dm:map from = 'crosswork_gui_ip,router_id,node_id,interface_id' & to = 'unique_id' & func = 'join' & sep = '_'
+       --> @dm:dedup columns = 'unique_id'
+       --> @dm:save name = 'temp-crosswork_networknodes_processed_inventory'
+       --> @rn:write-stream name = 'crosswork-devices-inventory'
+    --> @exec:end-if
+
+## ##
+## Cisco Crosswork Network Link Information
+--> @c:data-loop dataset = 'temp-cisco_crosswork_source_info' & columns = 'cisco_crosswork_src_name,customer_id,customer_tag'
+    --> @dm:recall name = 'temp-crosswork-ip-feed'
+    --> @$cisco_crosswork_src_name:network-link column_name='ip_address'  & concurrent_discovery = '100'
+    --> @dm:fixcolumns
+    --> *exec:if-condition collection_status != 'Success'
+       --> @dm:eval customer_id = "'$customer_id'"
+       --> @dm:eval customer_tag = "'$customer_tag'"
+       --> *dm:filter * get source_ip as 'asset_id',collection_status,collection_timestamp,reason as 'collection_reason',customer_id,customer_tag
+       --> @dm:map attr = 'collection_timestamp' & func = 'ts_to_datetimestr' & unit = 'ms'
+       --> @dm:eval bot_source_name = "'$cisco_crosswork_src_name'"
+       --> @dm:eval bot_source_type = "'csico_crosswork'"
+       --> @dm:eval bot_name = "'network-link'"
+       --> @dm:save name = 'temp-csico_crosswork_network_link_failed_status'
+    --> @rn:write-stream name = 'asset_inventory_collection_status_stream'
+    --> @exec:end-if
+    --> *exec:if-condition collection_status = 'Success'
+       --> @dm:save name = 'temp-csico_crosswork_network_link_inventory'
+       --> @dm:dedup columns = 'source_ip'
+       --> @dm:eval customer_id = "'$customer_id'"
+       --> @dm:eval customer_tag = "'$customer_tag'"
+       --> *dm:filter * get source_ip as 'asset_id',collection_status,collection_timestamp,reason as 'collection_reason',customer_id,customer_tag
+       --> @dm:map attr = 'collection_timestamp' & func = 'ts_to_datetimestr' & unit = 'ms'
+       --> @dm:eval bot_source_name = "'$cisco_crosswork_src_name'"
+       --> @dm:eval bot_source_type = "'csico_crosswork'"
+       --> @dm:eval bot_name = "'network-link'"
+
+       --> @dm:save name = 'temp-csico_crosswork_network_link_success_status'
+    --> @rn:write-stream name = 'asset_inventory_collection_status_stream'
+    --> @exec:end-if
+
+## Cisco Crosswork Network Link Data Processing
+--> @c:new-block
+    --> @dm:recall name = 'temp-csico_crosswork_network_link_inventory'  & return_empty = 'yes'
+    --> *exec:if-shape num_rows > 0
+       --> *dm:safe-filter * get source_ip as 'crosswork_gui_ip',name as 'name',source_tp as 'source_interface_id',source_node as 'source_node_id',dest_tp as 'destination_interface_id',dest_node as 'destination_node_id',link_id as 'link_id',cisco_crosswork_l3_te_topology_l3_link_attributes_administrative_group as 'l3_administrative_group',cisco_crosswork_l3_te_topology_l3_link_attributes_domain_id as 'l3_domain_id',cisco_crosswork_l3_te_topology_l3_link_attributes_max_bandwidth_kbps as 'l3_max_bandwidth_kbps',cisco_crosswork_ospf_topology_ospf_link_attributes_area_id as 'osps_link_area_id',cisco_crosswork_ospf_topology_ospf_link_attributes_ospf_router_id as 'osps_router_id',
+               ietf_sr_mpls_topology_state_sr_mpls_advertise_protection as 'mpls_advertise_protection',ietf_sr_mpls_topology_state_sr_mpls_information_source as 'mpls_information_source',ietf_sr_mpls_topology_state_sr_mpls_msd as 'mpls_msd',ietf_sr_mpls_topology_state_sr_mpls_sids_address_family as 'mpls_sids_address_family',ietf_sr_mpls_topology_state_sr_mpls_sids_sid as 'mpls_sids_sid',            collection_timestamp,collection_status,reason,customer_tag,customer_id
+       --> @dm:map attr = 'collection_timestamp' & func = 'ts_to_datetimestr' & unit = 'ms'
+       --> @dm:eval device_vendor = "'Cisco'"
+       --> @dm:eval device_type = "'Crosswork'"
+       --> @dm:eval asset_object = "'NetworkLink'"
+       --> @dm:map from = 'crosswork_gui_ip,source_node_id,destination_node_id,link_id' & to = 'unique_id' & func = 'join' & sep = '_'
+       --> @dm:dedup columns = 'unique_id'
+       --> @dm:save name = 'temp-crosswork_network_termination_point_inventory'
+       --> @rn:write-stream name = 'crosswork-devices-inventory'
+    --> @exec:end-if
+
+## ##
+## Cisco Crosswork L2 VPN Services Information
+--> @c:data-loop dataset = 'temp-cisco_crosswork_source_info' & columns = 'cisco_crosswork_src_name,customer_id,customer_tag'
+    --> @dm:recall name = 'temp-crosswork-ip-feed'
+    --> @$cisco_crosswork_src_name:l2-vpn-services column_name='ip_address'  & concurrent_discovery = '100'
+    --> @dm:fixcolumns
+    --> *exec:if-condition collection_status != 'Success'
+       --> @dm:eval customer_id = "'$customer_id'"
+       --> @dm:eval customer_tag = "'$customer_tag'"
+       --> *dm:filter * get source_ip as 'asset_id',collection_status,collection_timestamp,reason as 'collection_reason',customer_id,customer_tag
+       --> @dm:map attr = 'collection_timestamp' & func = 'ts_to_datetimestr' & unit = 'ms'
+       --> @dm:eval bot_source_name = "'$cisco_crosswork_src_name'"
+       --> @dm:eval bot_source_type = "'csico_crosswork'"
+       --> @dm:eval bot_name = "'l2-vpn-services'"
+       --> @dm:save name = 'temp-csico_crosswork_l2_vpn_services_failed_status'
+    --> @rn:write-stream name = 'asset_inventory_collection_status_stream'
+    --> @exec:end-if
+    --> *exec:if-condition collection_status = 'Success'
+       --> @dm:save name = 'temp-csico_crosswork_l2_vpn_services_inventory'
+       --> @dm:dedup columns = 'source_ip'
+       --> @dm:eval customer_id = "'$customer_id'"
+       --> @dm:eval customer_tag = "'$customer_tag'"
+       --> *dm:filter * get source_ip as 'asset_id',collection_status,collection_timestamp,reason as 'collection_reason',customer_id,customer_tag
+       --> @dm:map attr = 'collection_timestamp' & func = 'ts_to_datetimestr' & unit = 'ms'
+       --> @dm:eval bot_source_name = "'$cisco_crosswork_src_name'"
+       --> @dm:eval bot_source_type = "'csico_crosswork'"
+       --> @dm:eval bot_name = "'l2-vpn-services'"
+
+       --> @dm:save name = 'temp-csico_crosswork_l2_vpn_services_success_status'
+    --> @rn:write-stream name = 'asset_inventory_collection_status_stream'
+    --> @exec:end-if
+
+## Cisco Crosswork L2 VPN Services Data Processing
+--> @c:new-block
+    --> @dm:recall name = 'temp-csico_crosswork_l2_vpn_services_inventory'  & return_empty = 'yes'
+    --> *exec:if-shape num_rows > 0
+       --> *dm:safe-filter * get source_ip as 'crosswork_gui_ip',vpn_id as 'vpn_id',vpn_node_vpn_node_id as 'vpn_node_id',vpn_type as 'vpn_type',component_name as 'vpn_active_device',devices as 'vpn_configured_devices',profile_name as 'vpn_profile_name',rule_name as 'vpn_rule_name',services as 'vpn_services',vpn_node_signaling_option_ldp_or_l2tp_pw_peer_list_vc_id as 'vpn_node_vc_id',vpn_node_vpn_network_accesses_vpn_network_access_id as 'vpn_node_access_id',vpn_node_vpn_network_accesses_vpn_network_access_interface_id as 'vpn_node_access_interface_id',monitoring_state as 'monitoing_state',component_state_modified_devices as 'vpn_state_modified_devices',component_state_modified_services as 'vpn_state_modified_services',component_state_name as 'active_state',component_state_status as 'status',component_state_when as 'current_state_time',log_entry_level as 'log_level',log_entry_message as 'log_message',log_entry_type as 'log_type',log_entry_when as 'log_time',vpn_node_signaling_option_ldp_or_l2tp_pw_peer_list_peer_addr as 'vpn_node_peer_addr',collection_timestamp,collection_status,reason,customer_id,customer_tag
+       --> @dm:map attr = 'collection_timestamp' & func = 'ts_to_datetimestr' & unit = 'ms'
+       --> @dm:eval device_vendor = "'Cisco'"
+       --> @dm:eval device_type = "'Crosswork'"
+       --> @dm:eval asset_object = "'l2vpnservices'"
+       --> @dm:map from = 'crosswork_gui_ip,vpn_id,vpn_node_id,vpn_active_device' & to = 'unique_id' & func = 'join' & sep = '_'
+       --> @dm:dedup columns = 'unique_id'
+       --> @dm:save name = 'temp-crosswork_l2_vpn_services_inventory'
+       --> @rn:write-stream name = 'crosswork-devices-inventory'
+    --> @exec:end-if
+
+## ##
+## Cisco Crosswork L2 VPN Services Underlay Transport Information
+--> @c:data-loop dataset = 'temp-cisco_crosswork_source_info' & columns = 'cisco_crosswork_src_name,customer_id,customer_tag'
+    --> @dm:recall name = 'temp-crosswork-ip-feed'
+    --> @$cisco_crosswork_src_name:l2-vpn-service-underlay-transport column_name='ip_address'  & concurrent_discovery = '100'
+    --> @dm:fixcolumns
+    --> *exec:if-condition collection_status != 'Success'
+       --> @dm:eval customer_id = "'$customer_id'"
+       --> @dm:eval customer_tag = "'$customer_tag'"
+       --> *dm:filter * get source_ip as 'asset_id',collection_status,collection_timestamp,reason as 'collection_reason',customer_id,customer_tag
+       --> @dm:map attr = 'collection_timestamp' & func = 'ts_to_datetimestr' & unit = 'ms'
+       --> @dm:eval bot_source_name = "'$cisco_crosswork_src_name'"
+       --> @dm:eval bot_source_type = "'csico_crosswork'"
+       --> @dm:eval bot_name = "'l2-vpn-service-underlay-transport'"
+       --> @dm:save name = 'temp-csico_crosswork_l2_vpn_service_underlay_transport_failed_status'
+    --> @rn:write-stream name = 'asset_inventory_collection_status_stream'
+    --> @exec:end-if
+    --> *exec:if-condition collection_status = 'Success'
+       --> @dm:save name = 'temp-csico_crosswork_l2_vpn_service_underlay_transport_inventory'
+       --> @dm:dedup columns = 'source_ip'
+       --> @dm:eval customer_id = "'$customer_id'"
+       --> @dm:eval customer_tag = "'$customer_tag'"
+       --> *dm:filter * get source_ip as 'asset_id',collection_status,collection_timestamp,reason as 'collection_reason',customer_id,customer_tag
+       --> @dm:map attr = 'collection_timestamp' & func = 'ts_to_datetimestr' & unit = 'ms'
+       --> @dm:eval bot_source_name = "'$cisco_crosswork_src_name'"
+       --> @dm:eval bot_source_type = "'csico_crosswork'"
+       --> @dm:eval bot_name = "'l2-vpn-service-underlay-transport'"
+
+       --> @dm:save name = 'temp-csico_crosswork_l2_vpn_service_underlay_transport_success_status'
+    --> @rn:write-stream name = 'asset_inventory_collection_status_stream'
+    --> @exec:end-if
+
+## Cisco Crosswork l2-vpn-service-underlay-transport Data Processing
+--> @c:new-block
+    --> @dm:recall name = 'temp-csico_crosswork_l2_vpn_service_underlay_transport_inventory'  & return_empty = 'yes'
+    --> *exec:if-shape num_rows > 0
+       --> *dm:safe-filter * get source_ip as 'crosswork_gui_ip',vpn_id as 'vpn_id',headend as 'start_point',endpoint as 'end_point',color as 'color_state',collection_timestamp,collection_status,reason,customer_tag,customer_id
+       --> @dm:map attr = 'collection_timestamp' & func = 'ts_to_datetimestr' & unit = 'ms'
+       --> @dm:eval device_vendor = "'Cisco'"
+       --> @dm:eval device_type = "'Crosswork'"
+       --> @dm:eval asset_object = "'l2-vpn-service-underlay-transport'"
+       --> @dm:map from = 'crosswork_gui_ip,vpn_id,start_point,end_point' & to = 'unique_id' & func = 'join' & sep = '_'
+       --> @dm:dedup columns = 'unique_id'
+       --> @dm:save name = 'temp-crosswork_l2_vpn_service_underlay_transport_inventory'
+       --> @rn:write-stream name = 'crosswork-devices-inventory'
+    --> @exec:end-if
+
+## ##
+## Cisco Crosswork network-description Information
+--> @c:data-loop dataset = 'temp-cisco_crosswork_source_info' & columns = 'cisco_crosswork_src_name,customer_id,customer_tag'
+    --> @dm:recall name = 'temp-crosswork-ip-feed'
+    --> @$cisco_crosswork_src_name:network-description column_name='ip_address'  & concurrent_discovery = '100'
+    --> @dm:fixcolumns
+    --> *exec:if-condition collection_status != 'Success'
+       --> @dm:eval customer_id = "'$customer_id'"
+       --> @dm:eval customer_tag = "'$customer_tag'"
+       --> *dm:filter * get source_ip as 'asset_id',collection_status,collection_timestamp,reason as 'collection_reason',customer_id,customer_tag
+       --> @dm:map attr = 'collection_timestamp' & func = 'ts_to_datetimestr' & unit = 'ms'
+       --> @dm:eval bot_source_name = "'$cisco_crosswork_src_name'"
+       --> @dm:eval bot_source_type = "'csico_crosswork'"
+       --> @dm:eval bot_name = "'network-description'"
+       --> @dm:save name = 'temp-csico_crosswork_network_description_failed_status'
+    --> @rn:write-stream name = 'asset_inventory_collection_status_stream'
+    --> @exec:end-if
+    --> *exec:if-condition collection_status = 'Success'
+       --> @dm:save name = 'temp-csico_crosswork_network_description_inventory'
+       --> @dm:dedup columns = 'source_ip'
+       --> @dm:eval customer_id = "'$customer_id'"
+       --> @dm:eval customer_tag = "'$customer_tag'"
+       --> *dm:filter * get source_ip as 'asset_id',collection_status,collection_timestamp,reason as 'collection_reason',customer_id,customer_tag
+       --> @dm:map attr = 'collection_timestamp' & func = 'ts_to_datetimestr' & unit = 'ms'
+       --> @dm:eval bot_source_name = "'$cisco_crosswork_src_name'"
+       --> @dm:eval bot_source_type = "'csico_crosswork'"
+       --> @dm:eval bot_name = "'network-description'"
+
+       --> @dm:save name = 'temp-csico_crosswork_network_description_success_status'
+    --> @rn:write-stream name = 'asset_inventory_collection_status_stream'
+    --> @exec:end-if
+
+## Cisco Crosswork network-description performance Data Processing
+--> @c:new-block
+    --> @dm:recall name = 'temp-csico_crosswork_network_description_inventory'  & return_empty = 'yes'
+    --> *exec:if-shape num_rows > 0
+       --> *dm:safe-filter * get source_ip as 'crosswork_gui_ip',name as 'device_name',network_id as 'network_id',node_id as 'network_node_id',router_id as 'router_id',tp_id as 'interface_id',metric1	as 'metrci_id1',metric2 as 'metrci_id2',source_node as 'source_node_id',source_tp as 'source_interface_id',dest_node as 'destination_node_id',dest_tp as 'destination_interface_id',cisco_crosswork_l3_te_topology_node_pcep_sessions_msd as 'l3_sessions',cisco_crosswork_l3_te_topology_l3_link_attributes_max_bandwidth_kbps as 'l3_bandwidth_kbps',l2_termination_point_attributes_unnumbered_id as 'l3_unnumbered_id',l3_termination_point_attributes_ip_address as 'l3_termination_ip',collection_timestamp,collection_status,reason,customer_tag,customer_id
+       --> @dm:map attr = 'collection_timestamp' & func = 'ts_to_datetimestr' & unit = 'ms'
+       --> @dm:eval device_vendor = "'Cisco'"
+       --> @dm:eval device_type = "'Crosswork'"
+       --> @dm:eval asset_object = "'Performance'"
+       --> @dm:map from = 'crosswork_gui_ip,router_id,network_id,interface_id,metrci_id1,metrci_id2,l3_unnumbered_id,l3_bandwidth_kbps' & to = 'unique_id' & func = 'join' & sep = '_'
+       --> @dm:dedup columns = 'unique_id'
+       --> @dm:save name = 'temp-crosswork_perfomance_data_inventory'
+       --> @dm:copy-columns from = "l3_bandwidth_kbps" and to = "l3_bandwidth_kbps_int"
+       --> @dm:to-type columns = "l3_bandwidth_kbps_int" and type = "int"
+       --> @rn:write-stream name = 'crosswork-devices-inventory'
+    --> @exec:end-if

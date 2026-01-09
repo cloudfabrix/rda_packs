@@ -1,0 +1,142 @@
+name: Cisco UCS Intersight
+label: Cisco UCS Intersight
+scope: system
+# Pack version needs to be conforming to <major>.<minor>.<micro> etc versioning.
+# More detailed spec for versioning: https://packaging.python.org/en/latest/specifications/version-specifiers/
+version: 8.1.0
+folder: /collection/cisco_ucs_intersight
+published_date: 2025-12-15
+publisher: Fabrix.ai
+
+
+fabric_services:
+  - name: api-server
+    version: ">=8.1.0.3"
+
+description: 
+   md: "./description.md"
+type: collection
+#launch_dashboard: cisco_ucs_intersight
+
+#Other packs that this solution requires to be deployed
+requires:
+  - name: Fabrix Inventory Collection Base Pack
+    version: ">=6.0.0"
+artifacts:
+  pstreams:
+    - name: intersight_access_verification_status
+      attributes:
+        retention_days: 7
+        unique_keys: ["asset_id"]
+      autocreate: true
+
+    - name: cisco_intersight_on_boarded_devices
+      attributes:
+        retention_days: 365
+        unique_keys: ["intersight_src_name"]
+      autocreate: true
+
+    - name: cisco_intersight_inventory
+      attributes:
+        retention_days: 365
+        unique_keys: ["unique_id"]
+      autocreate: true
+
+
+
+  dashboards:
+
+
+    - name: cisco_ucs_intersight_app
+      file: ./artifacts/dashboards/cisco_ucs_intersight_app.json
+      folder: IntersightPack
+    - name: cisco_ucs_intersight_configure_and_manage
+      file: ./artifacts/dashboards/cisco_ucs_intersight_configure_and_manage.json
+      folder: IntersightPack
+    - name: intersight_collection_and_access_status
+      file: ./artifacts/dashboards/intersight_collection_and_access_status.json
+      folder: IntersightPack
+    - name: cisco_intersight_inventory
+      file: ./artifacts/dashboards/cisco_intersight_inventory.json
+      folder: IntersightPack  
+      
+
+  pipelines:
+
+    - name: cisco_intersight_inventory
+      version: 2025.12.15.1
+      file: ./artifacts/pipelines/cisco_intersight_inventory.txt
+      folder: IntersightPack
+    - name: cisco_import_ucs_intersight
+      version: 2025.12.15.1
+      file: ./artifacts/pipelines/cisco_import_ucs_intersight.txt
+      folder: IntersightPack
+    - name: cisco_intersight_access_verification
+      version: 2025.12.15.1
+      file: ./artifacts/pipelines/cisco_intersight_access_verification.txt
+      folder: IntersightPack
+
+
+customer_level:
+
+  launch_locations:
+  - pstream_name: rda_packs_dynamic_groups_and_pages
+    dashboard_group_name: groupConfigure
+    dashboard_group_label: Management
+    dashboard_group_icon: "settings.svg"
+    dashboard_page_name: cisco_ucs_intersight_configure_and_manage
+    dashboard_page_label: Intersight Management
+    dashboard_page_icon: "settings.svg"
+  - pstream_name: rda_packs_dynamic_groups_and_pages
+    dashboard_group_name: groupStatus
+    dashboard_group_label: Status
+    dashboard_group_icon: "history.svg"
+    dashboard_page_name: intersight_collection_and_access_status
+    dashboard_page_label: Intersight Status
+    dashboard_page_icon: "library.svg"
+  - pstream_name: rda_packs_dynamic_groups_and_pages
+    dashboard_group_name: groupInventory
+    dashboard_group_label: Inventory
+    dashboard_group_icon: ""
+    dashboard_page_name: cisco_intersight_inventory
+    dashboard_page_label: Intersight Inventory
+    dashboard_page_icon: "library.svg"
+
+  artifacts:
+
+    blueprints:
+      - name: Cisco UCS Intersight Collection Multi tenant
+        file: ./artifacts/blueprints/cisco_ucs_intersight_multi_tenant.yaml
+
+
+single_tenant:
+
+  launch_dashboard: cisco_ucs_intersight_app
+  launch_locations:
+  - pstream_name: rda_packs_dynamic_groups_and_pages
+    dashboard_group_name: groupConfigure
+    dashboard_group_label: Management
+    dashboard_group_icon: "settings.svg"
+    dashboard_page_name: cisco_ucs_intersight_configure_and_manage
+    dashboard_page_label: Intersight Management
+    dashboard_page_icon: "settings.svg"
+  - pstream_name: rda_packs_dynamic_groups_and_pages
+    dashboard_group_name: groupStatus
+    dashboard_group_label: Status
+    dashboard_group_icon: "history.svg"
+    dashboard_page_name: intersight_collection_and_access_status
+    dashboard_page_label: Intersight Status
+    dashboard_page_icon: "library.svg"
+  - pstream_name: rda_packs_dynamic_groups_and_pages
+    dashboard_group_name: groupInventory
+    dashboard_group_label: Inventory
+    dashboard_group_icon: ""
+    dashboard_page_name: cisco_intersight_inventory
+    dashboard_page_label: Intersight Inventory
+    dashboard_page_icon: "library.svg"
+
+  artifacts:
+    blueprints:
+      - name: Cisco UCS Intersight Collection Single tenant
+        file: ./artifacts/blueprints/cisco_ucs_intersight_single_tenant.yaml
+

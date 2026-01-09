@@ -1,0 +1,165 @@
+{
+    "name": "host_os_topology",
+    "label": "Host OS Topology",
+    "description": "Host OS Topology",
+    "live_edit": true,
+    "version": "25.01.31.1",
+    "enabled": false,
+    "dashboard_type": "template",
+    "dashboard_folder": "HostOSInventory",
+    "dashboard_style": "auto",
+    "template_variables": {
+        "CUST_TAG": {
+            "contextId": "customerTag"
+        },
+        "CUSTOMER_NAME": {
+            "contextId": "customerName"
+        },
+        "CUSTOMER_ID": {
+            "contextId": "customerId"
+        },
+        "PROJECT_ID": {
+            "contextId": "project_id"
+        }
+    },
+    "dashboard_sections": [
+        {
+            "title": "Host OS Topology",
+            "widgets": [
+                {
+                    "title": "Topology View",
+                    "widget_type": "topology",
+                    "inMultiviewContainer": true,
+                    "register_search_endpoints": true,
+                    "reportId": "rda.saas.stack.view.topo",
+                    "context_attributes0": {
+                        "CHASSIS": [
+                            "parent_sn",
+                            "device_ip"
+                        ],
+                        "Edge": [
+                            "edge_ip",
+                            "edgeName",
+                            "serialNumber",
+                            "edge_id"
+                        ]
+                    },
+                    "limit_to_node_types": [
+                        "Host_OS",
+                        "OS_Service"
+                    ],
+                    "has_more_data_flag": false,
+                    "expand_all": true,
+                    "stack_type": "dynamic",
+                    "stack_definition": {
+                        "name": "Telco Stack",
+                        "description": "",
+                        "saved_time": "2023-09-12T21:08:31.418255",
+                        "is_dynamic": true,
+                        "hierarchical": true,
+                        "dynamic_nodes": {
+                            "stream": "cfx_rdaf_topology_nodes",
+                            "query": "layer is in ['Application Component','Compute'] and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                            "limit": 0,
+                            "sorting": null
+                        },
+                        "dynamic_relationships": {
+                            "stream": "cfx_rdaf_topology_edges",
+                            "limit": 0,
+                            "sorting": null
+                        }
+                    },
+                    "nodes_report": {
+                        "reportMetaData": {
+                            "sorting": true,
+                            "filtering": true,
+                            "title": "Nodes",
+                            "remote_searchable": false,
+                            "remote_searchable_cols": [
+                                "node_type",
+                                "node_label",
+                                "node_id",
+                                "host_os_ip",
+                                "hostname"
+                            ],
+                            "reportColumnDefinitionList": [
+                                {
+                                    "identifier": "node_label",
+                                    "title": "Name",
+                                    "key": false
+                                },
+                                {
+                                    "identifier": "node_type",
+                                    "title": "Type",
+                                    "key": false
+                                },
+                                {
+                                    "identifier": "hostname",
+                                    "key": false,
+                                    "title": "Host Name"
+                                },
+                                {
+                                    "identifier": "host_os_ip",
+                                    "title": "Host IP",
+                                    "key": false
+                                },
+                                {
+                                    "identifier": "node_id",
+                                    "key": true,
+                                    "hidden": true
+                                }
+                            ]
+                        }
+                    },
+                    "edges_report": {
+                        "reportId": "rda.saas.topology.edges.report",
+                        "reportMetaData": {
+                            "sorting": true,
+                            "filtering": true,
+                            "title": "Edges",
+                            "reportColumnDefinitionList": [
+                                {
+                                    "id": "left_id",
+                                    "identifier": "left_id",
+                                    "key": true,
+                                    "title": "Left Id",
+                                    "type": "TEXT",
+                                    "visible": false
+                                },
+                                {
+                                    "id": "left_label",
+                                    "identifier": "left_label",
+                                    "key": false,
+                                    "title": "Source",
+                                    "type": "TEXT",
+                                    "visible": true
+                                },
+                                {
+                                    "id": "right_id",
+                                    "identifier": "right_id",
+                                    "key": true,
+                                    "title": "Right Id",
+                                    "type": "TEXT",
+                                    "visible": false
+                                },
+                                {
+                                    "id": "right_label",
+                                    "identifier": "right_label",
+                                    "key": false,
+                                    "title": "Destination",
+                                    "type": "TEXT",
+                                    "visible": true
+                                }
+                            ],
+                            "actions": []
+                        }
+                    },
+                    "height": 12,
+                    "min_wdith": 12,
+                    "widget_id": "182287d8"
+                }
+            ]
+        }
+    ],
+    "saved_time": "2025-12-29T10:05:46.274066"
+}

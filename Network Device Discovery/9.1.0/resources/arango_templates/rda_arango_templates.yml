@@ -1,0 +1,250 @@
+queries:
+  SHORTEST_PATH_TEMPLATE: >
+    FOR node, edge IN ANY SHORTEST_PATH
+    @from TO @to GRAPH @graph
+    RETURN {
+      $NODE_ATTRIBUTES,
+      $EDGE_ATTRIBUTES
+    }
+
+  K_PATHS_TEMPLATE: >
+    FOR p IN 1..@depth ANY K_PATHS
+      @from TO @to GRAPH @graph
+      LIMIT @limit
+      RETURN {
+        nodes: (
+          FOR node IN p.vertices[*]
+            RETURN { $NODE_ATTRIBUTES } ),
+        edges: (
+          FOR edge IN p.edges[*]
+            RETURN { $EDGE_ATTRIBUTES } )
+      }
+
+  AUTO_DEPTH_TEMPLATE: >
+    FOR source IN @@collection
+      FILTER source.node_id == @from
+      LIMIT 1
+    FOR destination IN @@collection
+      FILTER destination.node_id == @to LIMIT 1
+    RETURN SUM(
+      FOR v, e IN ANY SHORTEST_PATH
+         source._id TO destination._id
+         GRAPH @graph
+         RETURN 1)-1
+
+  ALL_SHORTEST_PATH_TEMPLATE: >
+    LET paths = (
+      FOR path in any ALL_SHORTEST_PATHS
+        @from to @to GRAPH @graph
+        LIMIT @limit return path)
+
+    LET filtered_paths = (
+      FOR path IN paths
+        FILTER path.edges[*].link_type ALL IN  @include_link_types
+        RETURN path)
+
+    LET filtered_nodes = (
+      FOR path IN filtered_paths
+        FILTER path.vertices[*].node_type ALL NOT IN @exclude_node_types
+        RETURN {
+          nodes: (
+            FOR node IN path.vertices[*]
+              RETURN { $NODE_ATTRIBUTES } ),
+          edges: (
+            FOR edge IN path.edges[*]
+              RETURN { $EDGE_ATTRIBUTES } )
+        }  )
+
+    return filtered_nodes
+
+  K_SHORTEST_PATH_TEMPLATE: >
+    LET paths = (
+      FOR path in any K_SHORTEST_PATHS
+        @from to @to GRAPH @graph
+        LIMIT @limit return path)
+
+    LET filtered_nodes = (
+      FOR path IN paths
+        RETURN {
+          nodes: (
+            FOR node IN path.vertices[*]
+              RETURN { $NODE_ATTRIBUTES } ),
+          edges: (
+            FOR edge IN path.edges[*]
+              RETURN { $EDGE_ATTRIBUTES } )
+        }  )
+
+    return filtered_nodes
+
+  K_SHORTEST_PATH_TEMPLATE_INCLUDE_LINKS_EXCLUDE_NODES: >
+    LET paths = (
+      FOR path in any K_SHORTEST_PATHS
+        @from to @to GRAPH @graph
+        LIMIT @limit return path)
+
+    LET filtered_paths = (
+      FOR path IN paths
+        FILTER path.edges[*].link_type ALL IN  @include_link_types
+        RETURN path)
+
+    LET filtered_nodes = (
+      FOR path IN filtered_paths
+        FILTER path.vertices[*].node_type ALL NOT IN @exclude_node_types
+        RETURN {
+          nodes: (
+            FOR node IN path.vertices[*]
+              RETURN { $NODE_ATTRIBUTES } ),
+          edges: (
+            FOR edge IN path.edges[*]
+              RETURN { $EDGE_ATTRIBUTES } )
+        }  )
+
+    return filtered_nodes
+
+  K_SHORTEST_PATH_TEMPLATE_EXCLUDE_LINKS_INCLUDE_NODES: >
+    LET paths = (
+      FOR path in any K_SHORTEST_PATHS
+        @from to @to GRAPH @graph
+        LIMIT @limit return path)
+
+    LET filtered_paths = (
+      FOR path IN paths
+        FILTER path.edges[*].link_type ALL NOT IN @exclude_link_types
+        RETURN path)
+
+    LET filtered_nodes = (
+      FOR path IN filtered_paths
+        FILTER path.vertices[*].node_type ALL IN @include_node_types
+        RETURN {
+          nodes: (
+            FOR node IN path.vertices[*]
+              RETURN { $NODE_ATTRIBUTES } ),
+          edges: (
+            FOR edge IN path.edges[*]
+              RETURN { $EDGE_ATTRIBUTES } )
+        }  )
+
+    return filtered_nodes
+
+  K_SHORTEST_PATH_TEMPLATE_EXCLUDE_LINKS_EXCLUDE_NODES: >
+    LET paths = (
+      FOR path in any K_SHORTEST_PATHS
+        @from to @to GRAPH @graph
+        LIMIT @limit return path)
+
+    LET filtered_paths = (
+      FOR path IN paths
+        FILTER path.edges[*].link_type ALL NOT IN @exclude_link_types
+        RETURN path)
+
+    LET filtered_nodes = (
+      FOR path IN filtered_paths
+        FILTER path.vertices[*].node_type ALL NOT IN @exclude_node_types
+        RETURN {
+          nodes: (
+            FOR node IN path.vertices[*]
+              RETURN { $NODE_ATTRIBUTES } ),
+          edges: (
+            FOR edge IN path.edges[*]
+              RETURN { $EDGE_ATTRIBUTES } )
+        }  )
+
+    return filtered_nodes
+
+templates:
+  shortest_path_template:
+    query: SHORTEST_PATH_TEMPLATE
+    bind_variables:
+    - from
+    - to
+    - graph
+    has_nodes: true
+    has_edges: true
+    row_label: path_segment
+
+  all_shortest_paths_template:
+    query: ALL_SHORTEST_PATH_TEMPLATE
+    bind_variables:
+    - from
+    - to
+    - graph
+    - limit
+    - include_link_types
+    - exclude_node_types
+    has_nodes: true
+    has_edges: true
+    row_label: path
+
+  k_paths_template:
+    query: K_PATHS_TEMPLATE
+    bind_variables:
+    - depth
+    - from
+    - to
+    - graph
+    - limit
+    has_nodes: true
+    has_edges: true
+    row_label: path
+
+  get_auto_depth_template:
+    query: AUTO_DEPTH_TEMPLATE
+    bind_variables:
+    - from
+    - to
+    - graph
+    - "@collection"
+    has_nodes: true
+    has_edges: true
+
+  k_shortest_paths_template:
+    query: K_SHORTEST_PATH_TEMPLATE
+    bind_variables:
+    - from
+    - to
+    - graph
+    - limit
+    has_nodes: true
+    has_edges: true
+    row_label: path
+
+  k_shortest_paths_template_include_links_exclude_nodes:
+    query: K_SHORTEST_PATH_TEMPLATE_INCLUDE_LINKS_EXCLUDE_NODES
+    bind_variables:
+    - from
+    - to
+    - graph
+    - limit
+    - include_link_types
+    - exclude_node_types
+    has_nodes: true
+    has_edges: true
+    row_label: path
+
+  k_shortest_paths_template_exclude_links_include_nodes:
+    query: K_SHORTEST_PATH_TEMPLATE_EXCLUDE_LINKS_INCLUDE_NODES
+    bind_variables:
+    - from
+    - to
+    - graph
+    - limit
+    - exclude_link_types
+    - include_node_types
+    has_nodes: true
+    has_edges: true
+    row_label: path
+
+  k_shortest_paths_template_exclude_links_exclude_nodes:
+    query: K_SHORTEST_PATH_TEMPLATE_EXCLUDE_LINKS_EXCLUDE_NODES
+    bind_variables:
+    - from
+    - to
+    - graph
+    - limit
+    - exclude_link_types
+    - exclude_node_types
+    has_nodes: true
+    has_edges: true
+    row_label: path
+
+

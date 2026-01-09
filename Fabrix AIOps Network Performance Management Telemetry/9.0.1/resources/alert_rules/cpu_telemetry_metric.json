@@ -1,0 +1,55 @@
+{
+    "type": "metric",
+    "name": "cpu_telemetry_metric",
+    "enabled": true,
+    "schedule": {
+        "minutes": 15
+    },
+    "data": {
+        "stream": "rdaf_telegraf_metrics",
+        "groupby": [
+            "i_agent_host",
+            "name",
+            "i_projectid"
+        ],
+        "query": "(name == 'cpu') and i_input == 'Telemetry'"
+    },
+    "actions": [
+        {
+            "state": "OPEN",
+            "timestamp": "timestamp",
+            "threshold": "10000",
+            "agg_column": "m_total_cpu_five_minute",
+            "agg_func": "avg",
+            "repeat_count": 1,
+            "attributes": {
+                "severity": "CRITICAL",
+                "metric_name": "cpu_usage",
+                "metric_value_field": "m_total_cpu_five_minute_avg"
+            },
+            "notification": [
+                {
+                    "channel": "telegraf_telemetry_metrics"
+                }
+            ]
+        },
+        {
+            "state": "CLEAR",
+            "timestamp": "timestamp",
+            "agg_column": "m_total_cpu_five_minute",
+            "agg_func": "avg",
+            "threshold": "3148576",
+            "attributes": {
+                "severity": "INFO",
+                "metric_name": "cpu_usage",
+                "metric_value_field": "m_total_cpu_five_minute_avg"
+            },
+            "notification": [
+                {
+                    "channel": "telegraf_telemetry_metrics"
+                }
+            ]
+        }
+    ],
+    "saved_time": "2025-08-21T17:03:08.380879"
+}

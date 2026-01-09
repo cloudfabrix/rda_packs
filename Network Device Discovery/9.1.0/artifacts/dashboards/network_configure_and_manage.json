@@ -1,0 +1,1786 @@
+{
+    "name": "network_configure_and_manage",
+    "label": "Network Configure and Manage",
+    "description": "Network configure and management dashboard",
+    "version": "25.10.15.2",
+    "enabled": false,
+    "dashboard_type": "template",
+    "dashboard_folder": "NetworkDevicePack",
+    "dashboard_style": "auto",
+    "template_variables": {
+        "CUST_ID": {
+            "contextId": "customerId"
+        },
+        "PROJ_ID": {
+            "contextId": "projectId"
+        },
+        "CUST_TAG": {
+            "contextId": "customerTag"
+        }
+    },
+    "dashboard_filters": {
+        "time_filter": true,
+        "default_time_filter_labels": [
+            "Last 1 month"
+        ]
+    },
+    "live_edit": true,
+    "dashboard_sections": [
+        {
+            "title": "Network Credentials",
+            "widgets": [
+                {
+                    "title": "Network Discovery Credential Management",
+                    "widget_type": "tabular",
+                    "stream": "rda_secrets_meta",
+                    "extra_filter": "(type in ['snmp-cred','ssh-cred','device-snmp-v1v2','device-snmp-v3','device-host-ssh','network_device','diagnostictools'] and customerTag is '{{CUST_TAG}}') or (type in ['snmp-cred','ssh-cred','device-snmp-v1v2','device-snmp-v3','device-host-ssh','network_device','diagnostictools'] and customerTag is empty)",
+                    "extra_filter1": "type in ['snmp-cred','ssh-cred'] and (customerTag is '{{CUST_TAG}}' or customerTag is empty) ",
+                    "timebased": false,
+                    "remote_searchable_cols": [
+                        "name",
+                        "type",
+                        "typeDescription"
+                    ],
+                    "ts_column": "saved_time",
+                    "paginated": true,
+                    "height": 10,
+                    "min_wdith": 12,
+                    "columns": {
+                        "name": {
+                            "title": "Name",
+                            "key": true
+                        },
+                        "type": {
+                            "title": "Type",
+                            "key": true
+                        },
+                        "typeDescription": {
+                            "title": "description"
+                        },
+                        "has_credential_check": {
+                            "title": "Credential Check",
+                            "visible": false
+                        },
+                        "saved_time": {
+                            "title": "Saved Time",
+                            "type": "DATETIME"
+                        },
+                        "timestamp": {
+                            "title": "When",
+                            "type": "HUMANIZE_TIME_DELTA",
+                            "source-column": "saved_time",
+                            "sortable": false
+                        }
+                    },
+                    "custom_columns": [
+                        {
+                            "id": "rowStyleClass",
+                            "hidden": true,
+                            "visiblle": false,
+                            "expr": "'bg-fading-blue' if time_now_as_ms() - isoformat_to_ms(saved_time) <= 120000 else None"
+                        },
+                        {
+                            "id": "artifact_name",
+                            "label": "Artifact Name",
+                            "expr": "name",
+                            "key": true,
+                            "visible": false,
+                            "sortable": false
+                        },
+                        {
+                            "id": "artifact_type",
+                            "label": "Artifact Type",
+                            "expr": "'source'",
+                            "key": true,
+                            "visible": false,
+                            "sortable": false
+                        }
+                    ],
+                    "actions": [
+                        {
+                            "permission": "rda:credential:add",
+                            "title": "Add",
+                            "icon": "mdi mdi-plus",
+                            "type": "POPUP_FORM",
+                            "selectionType": "NONE",
+                            "identifier": "saas-service-action:vault-add",
+                            "api-endpoint": {
+                                "service-name": "saas-reports",
+                                "methodName": "getForm",
+                                "stringified-params": true,
+                                "parse-output": false,
+                                "params": [
+                                    {
+                                        "formId": "rda.saas.vault.add",
+                                        "extension_types": [
+                                            "device-snmp-v1v2",
+                                            "asset-discovery",
+                                            "device-snmp-v3",
+                                            "snmp-cred",
+                                            "device-host-ssh",
+                                            "ssh-cred",
+                                            "network_device"
+                                        ]
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "permission": "rda:credential:edit",
+                            "title": "Edit",
+                            "type": "POPUP_FORM",
+                            "selectionType": "SINGLE",
+                            "identifier": "saas-service-action:vault-edit",
+                            "api-endpoint": {
+                                "service-name": "saas-reports",
+                                "methodName": "getForm",
+                                "stringified-params": true,
+                                "parse-output": false,
+                                "params": [
+                                    {
+                                        "formId": "rda.saas.vault.edit"
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "permission": "rda:credential:view",
+                            "title": "View",
+                            "type": "POPUP_FORM",
+                            "selectionType": "SINGLE",
+                            "displayLabelColumnId": "name",
+                            "drillDownLinkField": "name",
+                            "identifier": "saas-service-action:vault-view",
+                            "api-endpoint": {
+                                "service-name": "saas-reports",
+                                "methodName": "getForm",
+                                "stringified-params": true,
+                                "parse-output": false,
+                                "params": [
+                                    {
+                                        "formId": "rda.saas.vault.view"
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "permission": "rda:credential:verify",
+                            "title": "Verify Credentials",
+                            "type": "POPUP_FORM",
+                            "selectionType": "SINGLE",
+                            "identifier": "saas-service-action:vault-edit",
+                            "actionCondition": {
+                                "actionControl": "HIDE_IF",
+                                "conditionalField": [
+                                    {
+                                        "conditionType": "EQUAL",
+                                        "conditionValue": "false",
+                                        "fieldId": "has_credential_check"
+                                    }
+                                ]
+                            },
+                            "api-endpoint": {
+                                "service-name": "saas-reports",
+                                "methodName": "getForm",
+                                "stringified-params": true,
+                                "parse-output": false,
+                                "params": [
+                                    {
+                                        "formId": "rda.saas.vault.validateConenctivity"
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "permission": "rda:credential:verify",
+                            "title": "Delete",
+                            "type": "POPUP_FORM",
+                            "selectionType": "SINGLE",
+                            "identifier": "saas-service-action:vault-delete",
+                            "api-endpoint": {
+                                "service-name": "saas-reports",
+                                "methodName": "getForm",
+                                "stringified-params": true,
+                                "parse-output": false,
+                                "params": [
+                                    {
+                                        "formId": "rda.saas.vault.delete"
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "widget_id": "01dc3a55"
+                }
+            ]
+        },
+        {
+            "title": "Device Discovery Targets",
+            "show_filters": true,
+            "widgets": [
+                {
+                    "title": "Discovery",
+                    "widget_type": "tabular",
+                    "duration_hours": 1080,
+                    "stream": "discovery",
+                    "stream0": "devices_to_discover",
+                    "filter0": "customer_id = '{{CUST_ID}}' and project_id = '{{PROJ_ID}}'",
+                    "extra_filter": "customer_tag is '{{CUST_TAG}}' or customer_tag is empty",
+                    "refreshOptions": {
+                        "refreshType": "Periodic",
+                        "refreshInterval": 30000
+                    },
+                    "remote_searchable": true,
+                    "remote_searchable_cols": [
+                        "device_ip",
+                        "discovery_scope"
+                    ],
+                    "ts_column": "timestamp",
+                    "paginated": true,
+                    "height": 10,
+                    "min_wdith": 12,
+                    "columns": {
+                        "device_ip": {
+                            "title": "IP Address",
+                            "key": true
+                        },
+                        "discovery_scope": {
+                            "title": "Discovery",
+                            "visible": true,
+                            "key": true,
+                            "htmlTemplateForRow": "{%raw%}<span class='badge' style='background-color: {{ row.discovery_status_color }}' > {{ row.discovery_scope_text }} </span>{%endraw%}"
+                        },
+                        "ospf": {
+                            "title": "OSPF",
+                            "visible": true,
+                            "key": true,
+                            "htmlTemplateForRow": "{%raw%}<span class='badge' style='background-color: {{ row.ospf_status_color }}' > {{ row.ospf_text }} </span>{%endraw%}"
+                        },
+                        "bgp": {
+                            "title": "BGP",
+                            "visible": true,
+                            "key": true,
+                            "htmlTemplateForRow": "{%raw%}<span class='badge' style='background-color: {{ row.bgp_status_color }}' > {{ row.bgp_text }} </span>{%endraw%}"
+                        },
+                        "isis": {
+                            "title": "ISIS",
+                            "visible": true,
+                            "key": true,
+                            "htmlTemplateForRow": "{%raw%}<span class='badge' style='background-color: {{ row.isis_status_color }}' > {{ row.isis_text }} </span>{%endraw%}"
+                        },
+                        "cdp": {
+                            "title": "CDP",
+                            "visible": true,
+                            "key": true,
+                            "htmlTemplateForRow": "{%raw%}<span class='badge' style='background-color: {{ row.cdp_status_color }}' > {{ row.cdp_text }} </span>{%endraw%}"
+                        },
+                        "lldp": {
+                            "title": "LLDP",
+                            "visible": true,
+                            "key": true,
+                            "htmlTemplateForRow": "{%raw%}<span class='badge' style='background-color: {{ row.lldp_status_color }}' > {{ row.lldp_text }} </span>{%endraw%}"
+                        },
+                        "customer_tag": {
+                            "title": "customer_tag",
+                            "key": true,
+                            "visible": false
+                        },
+                        "customer_id": {
+                            "title": "customer_id",
+                            "key": true,
+                            "visible": false
+                        },
+                        "timestamp": {
+                            "title": "Timestamp",
+                            "type": "DATETIME"
+                        },
+                        "_RDA_Id": {
+                            "title": "RDA ID",
+                            "key": true,
+                            "visible": false
+                        }
+                    },
+                    "custom_columns": [
+                        {
+                            "id": "discovery_status_color",
+                            "label": "Discovery Color",
+                            "key": false,
+                            "visible": false,
+                            "expr": "'#008000' if str(discovery_scope) in [ 'yes', 'True'] else '#FF0000'"
+                        },
+                        {
+                            "id": "discovery_scope_text",
+                            "label": "Discovery Text",
+                            "key": false,
+                            "visible": false,
+                            "expr": "'yes' if str(discovery_scope) in ['yes', 'True', 'true'] else 'no'"
+                        },
+                        {
+                            "id": "ospf_status_color",
+                            "label": "OSPF Color",
+                            "key": false,
+                            "visible": false,
+                            "expr": "'#008000' if str(ospf) in [ 'yes', 'True'] else '#FF0000'"
+                        },
+                        {
+                            "id": "ospf_text",
+                            "label": "OSPF Text",
+                            "key": false,
+                            "visible": false,
+                            "expr": "'yes' if str(ospf) in ['yes', 'True', 'true'] else 'no'"
+                        },
+                        {
+                            "id": "bgp_status_color",
+                            "label": "BGP Color",
+                            "key": false,
+                            "visible": false,
+                            "expr": "'#008000' if str(bgp) in [ 'yes', 'True'] else '#FF0000'"
+                        },
+                        {
+                            "id": "bgp_text",
+                            "label": "BGP Text",
+                            "key": false,
+                            "visible": false,
+                            "expr": "'yes' if str(bgp) in ['yes', 'True', 'true'] else 'no'"
+                        },
+                        {
+                            "id": "isis_status_color",
+                            "label": "ISIS Color",
+                            "key": false,
+                            "visible": false,
+                            "expr": "'#008000' if str(isis) in [ 'yes', 'True'] else '#FF0000'"
+                        },
+                        {
+                            "id": "isis_text",
+                            "label": "ISIS Text",
+                            "key": false,
+                            "visible": false,
+                            "expr": "'yes' if str(isis) in ['yes', 'True', 'true'] else 'no'"
+                        },
+                        {
+                            "id": "cdp_status_color",
+                            "label": "CDP Color",
+                            "key": false,
+                            "visible": false,
+                            "expr": "'#008000' if str(cdp) in [ 'yes', 'True'] else '#FF0000'"
+                        },
+                        {
+                            "id": "cdp_text",
+                            "label": "CDP Text",
+                            "key": false,
+                            "visible": false,
+                            "expr": "'yes' if str(cdp) in ['yes', 'True', 'true'] else 'no'"
+                        },
+                        {
+                            "id": "lldp_status_color",
+                            "label": "LLDP Color",
+                            "key": false,
+                            "visible": false,
+                            "expr": "'#008000' if str(lldp) in [ 'yes', 'True'] else '#FF0000'"
+                        },
+                        {
+                            "id": "lldp_text",
+                            "label": "LLDP Text",
+                            "key": false,
+                            "visible": false,
+                            "expr": "'yes' if str(lldp) in ['yes', 'True', 'true'] else 'no'"
+                        }
+                    ],
+                    "actions": [
+                        {
+                            "permission": "rda:github:view",
+                            "title": "Add Devices",
+                            "type": "POPUP_FORM",
+                            "selectionType": "NONE",
+                            "identifier": "saas-service-action:userdashboard-add-yaml",
+                            "api-endpoint": {
+                                "service-name": "saas-reports",
+                                "methodName": "getForm",
+                                "stringified-params": true,
+                                "parse-output": false,
+                                "params": [
+                                    {
+                                        "formId": "rda.saas.dynamic.form",
+                                        "formActionList": {
+                                            "formActions": [
+                                                {
+                                                    "actionLabel": "Add",
+                                                    "identifier": "Submit"
+                                                },
+                                                {
+                                                    "actionLabel": "Cancel",
+                                                    "identifier": "Cancel"
+                                                }
+                                            ]
+                                        },
+                                        "formDefinition": {
+                                            "id": "rda.saas.dynamic.form",
+                                            "refreshRequired": true,
+                                            "formFieldList": [
+                                                {
+                                                    "help": "IP Address of network device",
+                                                    "dataType": "string",
+                                                    "controlType": "TEXT_FIELD",
+                                                    "required": true,
+                                                    "editable": true,
+                                                    "label": "IP Address",
+                                                    "hidden": false,
+                                                    "fieldId": "device_ip"
+                                                },
+                                                {
+                                                    "fieldId": "discovery_scope",
+                                                    "label": "Add it to discovery?",
+                                                    "help": "Should this network device be part of discovery?",
+                                                    "dataType": "string",
+                                                    "hidden": false,
+                                                    "editable": true,
+                                                    "required": true,
+                                                    "lovValues": [
+                                                        {
+                                                            "identifier": "yes",
+                                                            "displayName": "Yes"
+                                                        },
+                                                        {
+                                                            "identifier": "no",
+                                                            "displayName": "No"
+                                                        }
+                                                    ],
+                                                    "controlType": "RADIO_BUTTON"
+                                                },
+                                                {
+                                                    "fieldId": "cdp",
+                                                    "label": "CDP",
+                                                    "help": "CDP",
+                                                    "dataType": "string",
+                                                    "hidden": false,
+                                                    "editable": true,
+                                                    "required": true,
+                                                    "lovValues": [
+                                                        {
+                                                            "identifier": "yes",
+                                                            "displayName": "Yes"
+                                                        },
+                                                        {
+                                                            "identifier": "no",
+                                                            "displayName": "No"
+                                                        }
+                                                    ],
+                                                    "controlType": "RADIO_BUTTON",
+                                                    "controlPropertyList": [
+                                                        {
+                                                            "attribute": "layout-group-id",
+                                                            "value": "TopologyCdp"
+                                                        },
+                                                        {
+                                                            "attribute": "layout-percent",
+                                                            "value": "16"
+                                                        }
+                                                    ]
+                                                },
+                                                {
+                                                    "fieldId": "lldp",
+                                                    "label": "LLDP",
+                                                    "help": "LLDP",
+                                                    "dataType": "string",
+                                                    "hidden": false,
+                                                    "editable": true,
+                                                    "required": true,
+                                                    "lovValues": [
+                                                        {
+                                                            "identifier": "yes",
+                                                            "displayName": "Yes"
+                                                        },
+                                                        {
+                                                            "identifier": "no",
+                                                            "displayName": "No"
+                                                        }
+                                                    ],
+                                                    "controlType": "RADIO_BUTTON",
+                                                    "controlPropertyList": [
+                                                        {
+                                                            "attribute": "layout-group-id",
+                                                            "value": "TopologyCdp"
+                                                        },
+                                                        {
+                                                            "attribute": "layout-percent",
+                                                            "value": "16"
+                                                        }
+                                                    ]
+                                                },
+                                                {
+                                                    "fieldId": "ospf",
+                                                    "label": "OSPF",
+                                                    "help": "OSPF",
+                                                    "dataType": "string",
+                                                    "hidden": false,
+                                                    "editable": true,
+                                                    "required": true,
+                                                    "lovValues": [
+                                                        {
+                                                            "identifier": "yes",
+                                                            "displayName": "Yes"
+                                                        },
+                                                        {
+                                                            "identifier": "no",
+                                                            "displayName": "No"
+                                                        }
+                                                    ],
+                                                    "controlType": "RADIO_BUTTON",
+                                                    "controlPropertyList": [
+                                                        {
+                                                            "attribute": "layout-group-id",
+                                                            "value": "TopologyFlags"
+                                                        },
+                                                        {
+                                                            "attribute": "layout-percent",
+                                                            "value": "16"
+                                                        }
+                                                    ]
+                                                },
+                                                {
+                                                    "fieldId": "bgp",
+                                                    "label": "BGP",
+                                                    "help": "BGP",
+                                                    "dataType": "string",
+                                                    "hidden": false,
+                                                    "editable": true,
+                                                    "required": true,
+                                                    "lovValues": [
+                                                        {
+                                                            "identifier": "yes",
+                                                            "displayName": "Yes"
+                                                        },
+                                                        {
+                                                            "identifier": "no",
+                                                            "displayName": "No"
+                                                        }
+                                                    ],
+                                                    "controlType": "RADIO_BUTTON",
+                                                    "controlPropertyList": [
+                                                        {
+                                                            "attribute": "layout-group-id",
+                                                            "value": "TopologyFlags"
+                                                        },
+                                                        {
+                                                            "attribute": "layout-percent",
+                                                            "value": "16"
+                                                        }
+                                                    ]
+                                                },
+                                                {
+                                                    "fieldId": "isis",
+                                                    "label": "ISIS",
+                                                    "help": "ISIS",
+                                                    "dataType": "string",
+                                                    "hidden": false,
+                                                    "editable": true,
+                                                    "required": true,
+                                                    "lovValues": [
+                                                        {
+                                                            "identifier": "yes",
+                                                            "displayName": "Yes"
+                                                        },
+                                                        {
+                                                            "identifier": "no",
+                                                            "displayName": "No"
+                                                        }
+                                                    ],
+                                                    "controlType": "RADIO_BUTTON",
+                                                    "controlPropertyList": [
+                                                        {
+                                                            "attribute": "layout-group-id",
+                                                            "value": "TopologyFlags"
+                                                        },
+                                                        {
+                                                            "attribute": "layout-percent",
+                                                            "value": "16"
+                                                        }
+                                                    ]
+                                                },
+                                                {
+                                                    "help": "customer_tag",
+                                                    "dataType": "string",
+                                                    "controlType": "TEXT_FIELD",
+                                                    "required": true,
+                                                    "editable": true,
+                                                    "label": "customer_tag",
+                                                    "hidden": true,
+                                                    "defaultValue": "{{CUST_TAG}}",
+                                                    "fieldId": "customer_tag"
+                                                },
+                                                {
+                                                    "help": "customer_id",
+                                                    "dataType": "string",
+                                                    "controlType": "TEXT_FIELD",
+                                                    "required": true,
+                                                    "editable": true,
+                                                    "label": "customer_id",
+                                                    "hidden": true,
+                                                    "defaultValue": "{{CUST_ID}}",
+                                                    "fieldId": "customer_id"
+                                                }
+                                            ]
+                                        },
+                                        "actions": [
+                                            {
+                                                "type": "UPDATE_PSTREAM",
+                                                "operation": "ADD",
+                                                "pstreamName": "discovery"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "permission": "rda:github:view",
+                            "title": "Import Devices",
+                            "type": "POPUP_FORM",
+                            "selectionType": "NONE",
+                            "identifier": "saas-service-action:userdashboard-add-yaml",
+                            "api-endpoint": {
+                                "service-name": "saas-reports",
+                                "methodName": "getForm",
+                                "stringified-params": true,
+                                "parse-output": false,
+                                "params": [
+                                    {
+                                        "formId": "rda.saas.dynamic.form",
+                                        "formDefinition": {
+                                            "id": "rda.saas.dynamic.form",
+                                            "refreshRequired": true,
+                                            "formFieldList": [
+                                                {
+                                                    "help": "CSV file format.The file should contain device_ip, discovery_scope, ospf, bgp, isis columns.",
+                                                    "dataType": "string",
+                                                    "required": true,
+                                                    "editable": true,
+                                                    "label": "NOTE: Required headers in CSV file: device_ip, discovery_scope, ospf, bgp, isis",
+                                                    "controlType": "LABEL",
+                                                    "hidden": false,
+                                                    "fieldId": "csv_format"
+                                                },
+                                                {
+                                                    "help": "Choose csv file to upload",
+                                                    "dataType": "string",
+                                                    "required": true,
+                                                    "editable": true,
+                                                    "label": "Choose file to upload",
+                                                    "controlType": "FILE_UPLOAD",
+                                                    "hidden": false,
+                                                    "fieldId": "fileUpload"
+                                                },
+                                                {
+                                                    "help": "Overwrite existing onboarded data",
+                                                    "required": false,
+                                                    "editable": true,
+                                                    "label": "Replace Data",
+                                                    "hidden": false,
+                                                    "fieldId": "replace",
+                                                    "dataType": "boolean",
+                                                    "controlType": "BOOLEAN_FIELD",
+                                                    "defaultValue": false,
+                                                    "controlPropertyList": [
+                                                        {
+                                                            "attribute": "layout-group-id",
+                                                            "value": "Features"
+                                                        },
+                                                        {
+                                                            "attribute": "layout-percent",
+                                                            "value": "25"
+                                                        }
+                                                    ]
+                                                },
+                                                {
+                                                    "help": "customer_tag",
+                                                    "dataType": "string",
+                                                    "controlType": "TEXT_FIELD",
+                                                    "required": true,
+                                                    "editable": true,
+                                                    "label": "customer_tag",
+                                                    "hidden": true,
+                                                    "defaultValue": "{{CUST_TAG}}",
+                                                    "fieldId": "customer_tag"
+                                                },
+                                                {
+                                                    "help": "customer_id",
+                                                    "dataType": "string",
+                                                    "controlType": "TEXT_FIELD",
+                                                    "required": true,
+                                                    "editable": true,
+                                                    "label": "customer_id",
+                                                    "hidden": true,
+                                                    "defaultValue": "{{CUST_ID}}",
+                                                    "fieldId": "customer_id"
+                                                }
+                                            ]
+                                        },
+                                        "actions": [
+                                            {
+                                                "type": "RUN_PIPELINE",
+                                                "pipelineName": "import-customer-devices",
+                                                "isSync": false,
+                                                "workerGroup": "{{CUST_TAG}}.*"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "permission": "rda:github:view",
+                            "title": "Edit Device",
+                            "type": "POPUP_FORM",
+                            "selectionType": "SINGLE",
+                            "identifier": "saas-service-action:userdashboard-add-yaml",
+                            "api-endpoint": {
+                                "service-name": "saas-reports",
+                                "methodName": "getForm",
+                                "stringified-params": true,
+                                "parse-output": false,
+                                "params": [
+                                    {
+                                        "formId": "rda.saas.dynamic.form",
+                                        "formActionList": {
+                                            "formActions": [
+                                                {
+                                                    "actionLabel": "Update",
+                                                    "identifier": "Submit"
+                                                },
+                                                {
+                                                    "actionLabel": "Cancel",
+                                                    "identifier": "Cancel"
+                                                }
+                                            ]
+                                        },
+                                        "formDefinition": {
+                                            "id": "rda.saas.dynamic.form",
+                                            "refreshRequired": true,
+                                            "formFieldList": [
+                                                {
+                                                    "help": "Name of Device",
+                                                    "dataType": "string",
+                                                    "controlType": "TEXT_FIELD",
+                                                    "required": false,
+                                                    "editable": false,
+                                                    "label": "Device Name",
+                                                    "hidden": false,
+                                                    "fieldId": "device_ip"
+                                                },
+                                                {
+                                                    "fieldId": "discovery_scope",
+                                                    "label": "Add it to discovery?",
+                                                    "help": "Should this network device be part of discovery?",
+                                                    "dataType": "string",
+                                                    "hidden": false,
+                                                    "editable": true,
+                                                    "required": true,
+                                                    "lovValues": [
+                                                        {
+                                                            "identifier": "yes",
+                                                            "displayName": "Yes"
+                                                        },
+                                                        {
+                                                            "identifier": "no",
+                                                            "displayName": "No"
+                                                        }
+                                                    ],
+                                                    "controlType": "RADIO_BUTTON"
+                                                },
+                                                {
+                                                    "fieldId": "ospf",
+                                                    "label": "OSPF",
+                                                    "help": "OSPF",
+                                                    "dataType": "string",
+                                                    "hidden": false,
+                                                    "editable": true,
+                                                    "required": true,
+                                                    "lovValues": [
+                                                        {
+                                                            "identifier": "yes",
+                                                            "displayName": "Yes"
+                                                        },
+                                                        {
+                                                            "identifier": "no",
+                                                            "displayName": "No"
+                                                        }
+                                                    ],
+                                                    "controlType": "RADIO_BUTTON",
+                                                    "controlPropertyList": [
+                                                        {
+                                                            "attribute": "layout-group-id",
+                                                            "value": "TopologyFlags"
+                                                        },
+                                                        {
+                                                            "attribute": "layout-percent",
+                                                            "value": "16"
+                                                        }
+                                                    ]
+                                                },
+                                                {
+                                                    "fieldId": "bgp",
+                                                    "label": "BGP",
+                                                    "help": "BGP",
+                                                    "dataType": "string",
+                                                    "hidden": false,
+                                                    "editable": true,
+                                                    "required": true,
+                                                    "lovValues": [
+                                                        {
+                                                            "identifier": "yes",
+                                                            "displayName": "Yes"
+                                                        },
+                                                        {
+                                                            "identifier": "no",
+                                                            "displayName": "No"
+                                                        }
+                                                    ],
+                                                    "controlType": "RADIO_BUTTON",
+                                                    "controlPropertyList": [
+                                                        {
+                                                            "attribute": "layout-group-id",
+                                                            "value": "TopologyFlags"
+                                                        },
+                                                        {
+                                                            "attribute": "layout-percent",
+                                                            "value": "16"
+                                                        }
+                                                    ]
+                                                },
+                                                {
+                                                    "fieldId": "isis",
+                                                    "label": "ISIS",
+                                                    "help": "ISIS",
+                                                    "dataType": "string",
+                                                    "hidden": false,
+                                                    "editable": true,
+                                                    "required": true,
+                                                    "lovValues": [
+                                                        {
+                                                            "identifier": "yes",
+                                                            "displayName": "Yes"
+                                                        },
+                                                        {
+                                                            "identifier": "no",
+                                                            "displayName": "No"
+                                                        }
+                                                    ],
+                                                    "controlType": "RADIO_BUTTON",
+                                                    "controlPropertyList": [
+                                                        {
+                                                            "attribute": "layout-group-id",
+                                                            "value": "TopologyFlags"
+                                                        },
+                                                        {
+                                                            "attribute": "layout-percent",
+                                                            "value": "16"
+                                                        }
+                                                    ]
+                                                },
+                                                {
+                                                    "fieldId": "cdp",
+                                                    "label": "CDP",
+                                                    "help": "CDP",
+                                                    "dataType": "string",
+                                                    "hidden": false,
+                                                    "editable": true,
+                                                    "required": true,
+                                                    "lovValues": [
+                                                        {
+                                                            "identifier": "yes",
+                                                            "displayName": "Yes"
+                                                        },
+                                                        {
+                                                            "identifier": "no",
+                                                            "displayName": "No"
+                                                        }
+                                                    ],
+                                                    "controlType": "RADIO_BUTTON",
+                                                    "controlPropertyList": [
+                                                        {
+                                                            "attribute": "layout-group-id",
+                                                            "value": "TopologyFlags"
+                                                        },
+                                                        {
+                                                            "attribute": "layout-percent",
+                                                            "value": "16"
+                                                        }
+                                                    ]
+                                                },
+                                                {
+                                                    "fieldId": "lldp",
+                                                    "label": "LLDP",
+                                                    "help": "LLDP",
+                                                    "dataType": "string",
+                                                    "hidden": false,
+                                                    "editable": true,
+                                                    "required": true,
+                                                    "lovValues": [
+                                                        {
+                                                            "identifier": "yes",
+                                                            "displayName": "Yes"
+                                                        },
+                                                        {
+                                                            "identifier": "no",
+                                                            "displayName": "No"
+                                                        }
+                                                    ],
+                                                    "controlType": "RADIO_BUTTON",
+                                                    "controlPropertyList": [
+                                                        {
+                                                            "attribute": "layout-group-id",
+                                                            "value": "TopologyFlags"
+                                                        },
+                                                        {
+                                                            "attribute": "layout-percent",
+                                                            "value": "16"
+                                                        }
+                                                    ]
+                                                }
+                                            ]
+                                        },
+                                        "actions": [
+                                            {
+                                                "type": "UPDATE_PSTREAM",
+                                                "pstreamName": "discovery",
+                                                "operation": "UPDATE",
+                                                "cfxql_query": "device_ip is '{%raw%}{{device_ip}}{%endraw%}'"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "permission": "rda:github:view",
+                            "title": "Delete Device",
+                            "type": "POPUP_FORM",
+                            "selectionType": "SINGLE",
+                            "identifier": "saas-service-action:userdashboard-add-yaml",
+                            "api-endpoint": {
+                                "service-name": "saas-reports",
+                                "methodName": "getForm",
+                                "stringified-params": true,
+                                "parse-output": false,
+                                "params": [
+                                    {
+                                        "formId": "rda.saas.dynamic.form",
+                                        "formActionList": {
+                                            "formActions": [
+                                                {
+                                                    "identifier": "Submit",
+                                                    "actionLabel": "Delete"
+                                                }
+                                            ]
+                                        },
+                                        "formDefinition": {
+                                            "id": "rda.saas.dynamic.form",
+                                            "refreshRequired": true,
+                                            "formFieldList": [
+                                                {
+                                                    "help": "Readonly field. Name of device to be deleted.",
+                                                    "dataType": "string",
+                                                    "controlType": "TEXT_FIELD",
+                                                    "required": false,
+                                                    "editable": false,
+                                                    "label": "Device Name",
+                                                    "hidden": false,
+                                                    "fieldId": "device_ip"
+                                                }
+                                            ]
+                                        },
+                                        "actions": [
+                                            {
+                                                "type": "UPDATE_PSTREAM",
+                                                "pstreamName": "discovery",
+                                                "operation": "DELETE",
+                                                "cfxql_query": "device_ip is '{%raw%}{{device_ip}}{%endraw%}'"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "widget_id": "4ed05ae9"
+                }
+            ]
+        },
+        {
+            "title": "Configure Artifacts",
+            "show_filters": true,
+            "widgets": [
+                {
+                    "title": "Datasets",
+                    "widget_type": "tabular",
+                    "stream": "rda_datasets_meta",
+                    "extra_filter": "(name in ['{{CUST_TAG}}_geo_location','{{CUST_TAG}}_access_verification_method'] or name in ['geo_location','access_verification_method'])",
+                    "duration_hours": 87600,
+                    "remote_searchable": true,
+                    "remote_searchable_cols": [
+                        "name",
+                        "folder",
+                        "format",
+                        "schema"
+                    ],
+                    "ts_column": "saved_time",
+                    "paginated": true,
+                    "height": 10,
+                    "min_wdith": 12,
+                    "columns": {
+                        "folder": {
+                            "title": "Folder"
+                        },
+                        "name": {
+                            "title": "Name",
+                            "key": true
+                        },
+                        "format": {
+                            "title": "Format"
+                        },
+                        "mem_size_mb": {
+                            "title": "Size (MB)"
+                        },
+                        "num_rows": {
+                            "title": "Rows"
+                        },
+                        "num_columns": {
+                            "title": "Columns"
+                        },
+                        "saved_time": {
+                            "title": "Dataset Saved",
+                            "type": "DATETIME"
+                        },
+                        "tags": {
+                            "title": "Tags",
+                            "type": "TEXT",
+                            "key": true
+                        },
+                        "dataset_tags": {
+                            "title": "Dataset Tags",
+                            "type": "TEXT"
+                        },
+                        "schema": {
+                            "title": "Schema"
+                        },
+                        "timestamp": {
+                            "title": "When",
+                            "type": "HUMANIZE_TIME_DELTA",
+                            "source-column": "saved_time",
+                            "sortable": false
+                        }
+                    },
+                    "custom_columns": [
+                        {
+                            "id": "artifact_name",
+                            "label": "Artifact Name",
+                            "expr": "name",
+                            "key": true,
+                            "visible": false,
+                            "sortable": false
+                        },
+                        {
+                            "id": "artifact_type",
+                            "label": "Artifact Type",
+                            "expr": "'dataset'",
+                            "key": true,
+                            "visible": false,
+                            "sortable": false
+                        }
+                    ],
+                    "actions": [
+                        {
+                            "permission": "rda:dataset:view",
+                            "title": "View Metadata",
+                            "type": "POPUP_FORM",
+                            "selectionType": "SINGLE",
+                            "identifier": "saas-service-action:dataset-view-metadata",
+                            "api-endpoint": {
+                                "service-name": "saas-reports",
+                                "methodName": "getForm",
+                                "stringified-params": false,
+                                "parse-output": true,
+                                "params": [
+                                    {
+                                        "formId": "rda.saas.dataset.metadata"
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "permission": "rda:dataset:view",
+                            "title": "View Data",
+                            "type": "POPUP_REPORT",
+                            "selectionType": "SINGLE",
+                            "displayLabelColumnId": "name",
+                            "drillDownLinkField": "name",
+                            "identifier": "saas-service-action:dataset-view-metadata",
+                            "paginated": true,
+                            "api-endpoint": {
+                                "service-name": "saas-reports",
+                                "methodName": "getReport",
+                                "stringified-params": false,
+                                "parse-output": false,
+                                "params": [
+                                    {
+                                        "reportId": "rda.saas.dataset.head100"
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "permission": "rda:dataset:view",
+                            "title": "View Data Types",
+                            "type": "POPUP_REPORT",
+                            "selectionType": "SINGLE",
+                            "identifier": "saas-service-action:dataset-view-datatypes",
+                            "api-endpoint": {
+                                "service-name": "saas-reports",
+                                "methodName": "getReport",
+                                "stringified-params": false,
+                                "parse-output": false,
+                                "params": [
+                                    {
+                                        "reportId": "rda.saas.dataset.datatypes"
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "permission": "rda:dataset:delete",
+                            "title": "Delete",
+                            "type": "POPUP_FORM",
+                            "selectionType": "SINGLE",
+                            "identifier": "saas-service-action:dataset-delete",
+                            "api-endpoint": {
+                                "service-name": "saas-reports",
+                                "methodName": "getForm",
+                                "stringified-params": false,
+                                "parse-output": true,
+                                "params": [
+                                    {
+                                        "formId": "rda.saas.dataset.delete"
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "permission": "rda:dataset:update",
+                            "title": "Manage Data",
+                            "type": "POPUP_REPORT",
+                            "selectionType": "SINGLE",
+                            "identifier": "saas-service-action:dataset-manage-data",
+                            "paginated": true,
+                            "api-endpoint": {
+                                "service-name": "saas-reports",
+                                "methodName": "getReport",
+                                "stringified-params": false,
+                                "parse-output": false,
+                                "params": [
+                                    {
+                                        "reportId": "rda.saas.dataset.data.table"
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "widget_id": "1f2ed2e5"
+                }
+            ],
+            "widget_id": "02abf055"
+        },
+        {
+            "title": "Run Discovery",
+            "show_filter": false,
+            "widgets": [
+                {
+                    "title": "Discovery Blueprint",
+                    "widget_type": "tabular",
+                    "stream": "rda_blueprints_meta",
+                    "extra_filter1": "name contains 'Network Device Discovery'",
+                    "extra_filter": "(name contains 'network_device_discovery' and name contains '{{CUST_TAG}}') or (name contains 'Network Device Discovery')",
+                    "duration_hours": 87600,
+                    "ts_column": "timestamp",
+                    "min_width": 12,
+                    "height": 3,
+                    "max_width": 12,
+                    "paginated": true,
+                    "refreshRequired": true,
+                    "timebased": false,
+                    "max_rows": 50,
+                    "remote_searchable": true,
+                    "remote_searchable_cols": [
+                        "id",
+                        "name",
+                        "comment",
+                        "category",
+                        "note",
+                        "url"
+                    ],
+                    "columns": {
+                        "name": {
+                            "title": "Name",
+                            "key": true
+                        },
+                        "id": {
+                            "title": "Id",
+                            "key": true
+                        },
+                        "comment": {
+                            "title": "Description"
+                        },
+                        "category": {
+                            "title": "Category",
+                            "key": true,
+                            "visible": false
+                        },
+                        "auto_deploy": {
+                            "title": "Auto Deploy",
+                            "visible": false
+                        },
+                        "note": {
+                            "title": "Note",
+                            "visible": false
+                        },
+                        "url": {
+                            "title": "URL",
+                            "key": true,
+                            "visible": false
+                        }
+                    },
+                    "custom_columns": [
+                        {
+                            "id": "enabled",
+                            "label": "Enabled",
+                            "expr": "'yes' if enabled else 'no'",
+                            "htmlTemplateForRow": "{%raw%}<span class='badge' style='background-color: {{ row.enableColor }}' > {{ row.enabled }} </span>{%endraw%}"
+                        },
+                        {
+                            "id": "enableColor",
+                            "label": "Enable Color",
+                            "expr": "['#4CAF50'] if enabled == 'yes' else ['#9E9E9E']",
+                            "hidden": true,
+                            "visible": false,
+                            "sortable": false
+                        },
+                        {
+                            "id": "warningColor",
+                            "label": "Warning Color",
+                            "expr": "['#FFA726'] if warnings > 0 else ['#03A9F4']",
+                            "hidden": true,
+                            "visible": false,
+                            "sortable": false
+                        },
+                        {
+                            "id": "errorColor",
+                            "label": "Error Color",
+                            "expr": "['#B71C1C'] if errors > 0  else ['#03A9F4']",
+                            "hidden": true,
+                            "visible": false,
+                            "sortable": false
+                        },
+                        {
+                            "id": "errors",
+                            "label": "Audit Errors",
+                            "htmlTemplateForRow": "{%raw%}<span class='badge' style='background-color: {{ row.errorColor }}' > {{ row.errors }} </span>{%endraw%}"
+                        },
+                        {
+                            "id": "warnings",
+                            "label": "Audit Warnings",
+                            "htmlTemplateForRow": "{%raw%}<span class='badge' style='background-color: {{ row.warningColor }}' > {{ row.warnings }} </span>{%endraw%}"
+                        },
+                        {
+                            "id": "artifact_name",
+                            "label": "Artifact Name",
+                            "expr": "id",
+                            "key": true,
+                            "visible": false,
+                            "sortable": false
+                        },
+                        {
+                            "id": "artifact_type",
+                            "label": "Artifact Type",
+                            "expr": "'blueprint'",
+                            "key": true,
+                            "visible": false,
+                            "sortable": false
+                        }
+                    ],
+                    "actions": [
+                        {
+                            "permission": "rda:deploymentspec:import",
+                            "title": "Dashboard",
+                            "type": "GO_TO_APP_STATE",
+                            "appName": "dynamic-dashboard",
+                            "selectionType": "SINGLE",
+                            "identifier": "saas-service-action:dspecs-view-dashboard",
+                            "drillDownLinkField": "name"
+                        },
+                        {
+                            "permission": "rda:deploymentspec:view",
+                            "title": "View",
+                            "type": "POPUP_FORM",
+                            "selectionType": "SINGLE",
+                            "identifier": "saas-service-action:dspecs-view-spec",
+                            "api-endpoint": {
+                                "service-name": "saas-reports",
+                                "methodName": "getForm",
+                                "stringified-params": false,
+                                "parse-output": false,
+                                "params": [
+                                    {
+                                        "formId": "rda.saas.deploymentspec.view"
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "permission": "rda:deploymentspec:edit",
+                            "title": "Edit",
+                            "type": "POPUP_FORM",
+                            "selectionType": "SINGLE",
+                            "identifier": "saas-service-action:dspecs-edit-spec",
+                            "api-endpoint": {
+                                "service-name": "saas-reports",
+                                "methodName": "getForm",
+                                "stringified-params": false,
+                                "parse-output": false,
+                                "params": [
+                                    {
+                                        "formId": "rda.saas.deploymentspec.edit"
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "permission": "rda:github:view",
+                            "title": "Run Access Verification",
+                            "type": "POPUP_FORM",
+                            "selectionType": "NONE",
+                            "identifier": "saas-service-action:userdashboard-add-yaml",
+                            "api-endpoint": {
+                                "service-name": "saas-reports",
+                                "methodName": "getForm",
+                                "stringified-params": true,
+                                "parse-output": false,
+                                "params": [
+                                    {
+                                        "formId": "rda.saas.dynamic.form",
+                                        "formActionList": {
+                                            "formActions": [
+                                                {
+                                                    "identifier": "Submit",
+                                                    "actionLabel": "Run"
+                                                }
+                                            ]
+                                        },
+                                        "formDefinition": {
+                                            "id": "rda.saas.dynamic.form",
+                                            "refreshRequired": true,
+                                            "formFieldList": [
+                                                {
+                                                    "help": "Do you want to Run the Access Check?",
+                                                    "dataType": "string",
+                                                    "controlType": "LABEL",
+                                                    "required": false,
+                                                    "editable": false,
+                                                    "label": "Do you want to Run the Access Check?",
+                                                    "hidden": false,
+                                                    "fieldId": "note"
+                                                },
+                                                {
+                                                    "fieldId": "ICMP",
+                                                    "label": "Run ICMP access check?",
+                                                    "help": "Run ICMP access check??",
+                                                    "dataType": "string",
+                                                    "hidden": false,
+                                                    "editable": true,
+                                                    "required": true,
+                                                    "lovValues": [
+                                                        {
+                                                            "identifier": "yes",
+                                                            "displayName": "Yes"
+                                                        },
+                                                        {
+                                                            "identifier": "no",
+                                                            "displayName": "No"
+                                                        }
+                                                    ],
+                                                    "controlType": "RADIO_BUTTON",
+                                                    "controlPropertyList": [
+                                                        {
+                                                            "attribute": "layout-group-id",
+                                                            "value": "ProtocolControl"
+                                                        },
+                                                        {
+                                                            "attribute": "layout-percent",
+                                                            "value": "16"
+                                                        }
+                                                    ]
+                                                },
+                                                {
+                                                    "fieldId": "SSH",
+                                                    "label": "Run SSH access check?",
+                                                    "help": "Run SSH access check??",
+                                                    "dataType": "string",
+                                                    "hidden": false,
+                                                    "editable": true,
+                                                    "required": true,
+                                                    "lovValues": [
+                                                        {
+                                                            "identifier": "yes",
+                                                            "displayName": "Yes"
+                                                        },
+                                                        {
+                                                            "identifier": "no",
+                                                            "displayName": "No"
+                                                        }
+                                                    ],
+                                                    "controlType": "RADIO_BUTTON",
+                                                    "controlPropertyList": [
+                                                        {
+                                                            "attribute": "layout-group-id",
+                                                            "value": "ProtocolControl"
+                                                        },
+                                                        {
+                                                            "attribute": "layout-percent",
+                                                            "value": "16"
+                                                        }
+                                                    ]
+                                                },
+                                                {
+                                                    "help": "Select network devices for which you want to run discovery",
+                                                    "dataType": "string",
+                                                    "required": true,
+                                                    "editable": true,
+                                                    "label": "Network Devices",
+                                                    "hidden": false,
+                                                    "fieldId": "Others",
+                                                    "controlType": "SELECTOR_TABLE",
+                                                    "controlPropertyList": [
+                                                        {
+                                                            "attribute": "column-key",
+                                                            "value": "device_ip"
+                                                        },
+                                                        {
+                                                            "attribute": "selection",
+                                                            "value": "MULTIPLE"
+                                                        }
+                                                    ],
+                                                    "widget": {
+                                                        "title": "Device Details",
+                                                        "timebased": false,
+                                                        "max_width": 12,
+                                                        "height": 8,
+                                                        "min_width": 12,
+                                                        "extra_filter": "(customer_tag contains '{{CUST_TAG}}' or customer_tag is empty)",
+                                                        "stream": "discovery",
+                                                        "ts_column": "timestamp",
+                                                        "sorting": [],
+                                                        "columns": {
+                                                            "device_ip": {
+                                                                "title": "IP Address",
+                                                                "key": true
+                                                            },
+                                                            "discovery_scope": {
+                                                                "title": "discovery",
+                                                                "key": true,
+                                                                "visible": false
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            ]
+                                        },
+                                        "actions": [
+                                            {
+                                                "type": "RUN_PIPELINE",
+                                                "pipelineName": "access_verification_main_pipeline",
+                                                "isSync": false,
+                                                "workerGroup": "{{CUST_TAG}}.*"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "permission": "rda:github:view",
+                            "title": "Run Discovery",
+                            "type": "POPUP_FORM",
+                            "selectionType": "NONE",
+                            "identifier": "saas-service-action:userdashboard-add-yaml",
+                            "api-endpoint": {
+                                "service-name": "saas-reports",
+                                "methodName": "getForm",
+                                "stringified-params": true,
+                                "parse-output": false,
+                                "params": [
+                                    {
+                                        "formId": "rda.saas.dynamic.form",
+                                        "formActionList": {
+                                            "formActions": [
+                                                {
+                                                    "identifier": "Submit",
+                                                    "actionLabel": "Run"
+                                                }
+                                            ]
+                                        },
+                                        "formDefinition": {
+                                            "id": "rda.saas.dynamic.form",
+                                            "refreshRequired": true,
+                                            "formFieldList": [
+                                                {
+                                                    "help": "Make sure access Verification is run for the devices you want to run discovery on",
+                                                    "dataType": "string",
+                                                    "required": true,
+                                                    "editable": true,
+                                                    "label": "NOTE: Make sure that access verification is completed for  devices for which discovery needs to be run.",
+                                                    "controlType": "LABEL",
+                                                    "hidden": false,
+                                                    "fieldId": "note_field"
+                                                },
+                                                {
+                                                    "help": "Select network devices for which you want to run discovery",
+                                                    "dataType": "string",
+                                                    "required": true,
+                                                    "editable": true,
+                                                    "label": "Network Devices",
+                                                    "hidden": false,
+                                                    "fieldId": "Others",
+                                                    "controlType": "SELECTOR_TABLE",
+                                                    "controlPropertyList": [
+                                                        {
+                                                            "attribute": "column-key",
+                                                            "value": "device_ip"
+                                                        },
+                                                        {
+                                                            "attribute": "selection",
+                                                            "value": "MULTIPLE"
+                                                        }
+                                                    ],
+                                                    "widget": {
+                                                        "title": "Device Details",
+                                                        "timebased": false,
+                                                        "max_width": 12,
+                                                        "height": 8,
+                                                        "min_width": 12,
+                                                        "extra_filter0": "type contains 'windows'",
+                                                        "extra_filter": "snmp_status = 'Success' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                                                        "stream": "network_access_verification_final",
+                                                        "ts_column": "timestamp",
+                                                        "sorting": [],
+                                                        "columns": {
+                                                            "ip_address": {
+                                                                "title": "IP Address",
+                                                                "key": true
+                                                            },
+                                                            "snmp_status": {
+                                                                "title": "SNMP Status",
+                                                                "key": true,
+                                                                "visible": false
+                                                            },
+                                                            "ssh_status": {
+                                                                "title": "SSH Status",
+                                                                "key": true,
+                                                                "visible": false
+                                                            },
+                                                            "icmp_status": {
+                                                                "title": "ICMP Status",
+                                                                "key": true,
+                                                                "visible": false
+                                                            },
+                                                            "discovery_scope": {
+                                                                "title": "discovery",
+                                                                "key": true,
+                                                                "visible": false
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            ]
+                                        },
+                                        "actions": [
+                                            {
+                                                "type": "RUN_PIPELINE",
+                                                "pipelineName": "ondemand_discovery_main",
+                                                "isSync": false,
+                                                "workerGroup": "{{CUST_TAG}}.*"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "permission": "rda:github:view",
+                            "title": "Run Topology",
+                            "type": "POPUP_FORM",
+                            "selectionType": "NONE",
+                            "identifier": "saas-service-action:userdashboard-add-yaml",
+                            "api-endpoint": {
+                                "service-name": "saas-reports",
+                                "methodName": "getForm",
+                                "stringified-params": true,
+                                "parse-output": false,
+                                "params": [
+                                    {
+                                        "formId": "rda.saas.dynamic.form",
+                                        "formActionList": {
+                                            "formActions": [
+                                                {
+                                                    "identifier": "Submit",
+                                                    "actionLabel": "Run"
+                                                }
+                                            ]
+                                        },
+                                        "formDefinition": {
+                                            "id": "rda.saas.dynamic.form",
+                                            "refreshRequired": true,
+                                            "formFieldList": [
+                                                {
+                                                    "help": "Make sure Discovery is run for the devices you want to run Topology on",
+                                                    "dataType": "string",
+                                                    "required": true,
+                                                    "editable": true,
+                                                    "label": "NOTE: Make sure that Run Discovery is completed for  devices for which Topology needs to be run.",
+                                                    "controlType": "LABEL",
+                                                    "hidden": false,
+                                                    "fieldId": "note_field"
+                                                }
+                                            ]
+                                        },
+                                        "actions": [
+                                            {
+                                                "type": "RUN_PIPELINE",
+                                                "pipelineName": "network_device_topology_calculation",
+                                                "isSync": false,
+                                                "workerGroup": "{{CUST_TAG}}.*"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "widget_id": "70200583"
+                },
+                {
+                    "title": "All Jobs",
+                    "widget_type": "tabular",
+                    "stream": "rda_system_job_tracker",
+                    "extra_filter0": "attributes_deployment_id is 'network_device_discovery'",
+                    "extra_filter": "pipeline_name in ['msp_customer_discovery_pipeline','ondemand_discovery_main','network_device_topology_calculation','access_verification_main_pipeline']",
+                    "refreshOptions": {
+                        "refreshType": "Periodic",
+                        "refreshInterval": 30000
+                    },
+                    "duration_hours": 87600,
+                    "ts_column": "timestamp",
+                    "min_width": 12,
+                    "height": 10,
+                    "max_width": 12,
+                    "paginated": true,
+                    "refreshRequired": true,
+                    "timebased": false,
+                    "max_rows": 10,
+                    "remote_searchable": true,
+                    "columns": {
+                        "jobid": {
+                            "title": "Job ID",
+                            "key": true
+                        },
+                        "pid": {
+                            "title": "PID",
+                            "key": true
+                        },
+                        "pod_id": {
+                            "title": "POD ID"
+                        },
+                        "pipeline_name": {
+                            "title": "Pipeline Name",
+                            "key": true,
+                            "visible": true
+                        },
+                        "attributes_pipeline_version": {
+                            "title": "Pipeline Version",
+                            "visible": false
+                        },
+                        "status": {
+                            "title": "Status",
+                            "visible": true
+                        },
+                        "reason": {
+                            "title": "Reason",
+                            "key": true,
+                            "visible": true
+                        },
+                        "start_time": {
+                            "title": "Job Created",
+                            "type": "DATETIME",
+                            "key": true,
+                            "visible": true
+                        },
+                        "ended_time": {
+                            "title": "Job Ended",
+                            "type": "DATETIME",
+                            "key": true,
+                            "visible": true
+                        },
+                        "age": {
+                            "title": "Duration",
+                            "key": true,
+                            "visible": true
+                        },
+                        "attributes_deployment_run_mode": {
+                            "title": "Run Mode",
+                            "key": true,
+                            "visible": false
+                        }
+                    },
+                    "custom_columns": [],
+                    "actions": [
+                        {
+                            "permission": "rda:jobs:view",
+                            "title": "View Traces",
+                            "type": "POPUP_REPORT",
+                            "selectionType": "SINGLE",
+                            "identifier": "saas-service-action:job-traces",
+                            "api-endpoint": {
+                                "service-name": "saas-reports",
+                                "methodName": "getReport",
+                                "stringified-params": false,
+                                "parse-output": false,
+                                "params": [
+                                    {
+                                        "reportId": "rda.saas.worker.traces"
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "permission": "rda:logs:view",
+                            "title": "View Logs",
+                            "type": "POPUP_REPORT",
+                            "selectionType": "SINGLE",
+                            "identifier": "saas-service-action:job-logs",
+                            "api-endpoint": {
+                                "service-name": "saas-reports",
+                                "methodName": "getReport",
+                                "stringified-params": false,
+                                "parse-output": false,
+                                "params": [
+                                    {
+                                        "reportId": "rda.saas.worker.logs"
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "widget_id": "0c070112"
+                }
+            ]
+        }
+    ],
+    "saved_time": "2025-12-22T18:11:37.004433"
+}

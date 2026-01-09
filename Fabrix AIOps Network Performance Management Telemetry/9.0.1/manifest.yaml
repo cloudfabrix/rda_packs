@@ -1,0 +1,104 @@
+name: Fabrix AIOps Network Performance Management Telemetry
+version: 9.0.1
+folder: /collection/network/fabrix_aiops_network_performance_management_telemetry
+published_date: 2025-12-30
+publisher: Fabrix.ai
+label: Fabrix AIOps Network Performance Management Telemetry
+scope: system
+description:
+  value: ""
+  md: ./description.md
+type: collection
+requires:
+  - name: Network Device Discovery
+    version: ">=9.0.0"
+    auto_install_requires: true
+
+fabric_services:
+ - name: worker
+   version: ">=8.1.0"
+ - name: api-server
+   version: ">=8.1.0"
+  
+
+artifacts:
+  pstreams:
+    - name: rdaf_telegraf_metrics
+      remove_on_deactivation: false
+      
+  dashboards:
+    - name: kpi-workbench-telemetry
+      file: ./artifacts/dashboards/kpi-workbench-telemetry.json
+    - name: preview_kpi_telemetry_dashboard
+      file: ./artifacts/dashboards/preview_kpi_telemetry_dashboard.json
+    - name: telemetry_metrics_navigator
+      file: ./artifacts/dashboards/telemetry_metrics_navigator.json
+  
+
+  
+customer_level:  
+  launch_locations:
+
+  - pstream_name: rda_packs_dynamic_groups_and_pages
+    dashboard_group_name: groupMetrics 
+    dashboard_group_label: Metrics
+    dashboard_group_icon: "insights.svg"
+    dashboard_page_name: kpi-workbench-telemetry
+    dashboard_page_label: "Telemetry Workbench"
+    dashboard_page_icon: "insights.svg"
+  
+  - pstream_name: rda_packs_dynamic_groups_and_pages
+    dashboard_group_name: groupMetrics 
+    dashboard_group_label: Configuration
+    dashboard_group_icon: "settings.svg"
+    dashboard_page_name: telemetry_metrics_navigator
+    dashboard_page_label: "Telemetry Metrics Navigator"
+    dashboard_page_icon: "settings.svg"
+
+  
+
+  artifacts:
+
+    endpoints:
+      - name: asm_telemetry
+        file: ./artifacts/endpoints/asm_telemetry.json
+      
+    mappings:
+      - name: asm_telemetry_log_mapper
+        file: ./artifacts/mappings/asm_telemetry_log_mapper.json
+      - name: asm_telemetry_metrics_mapper
+        file: ./artifacts/mappings/asm_telemetry_metrics_mapper.json
+
+    
+single_tenant:
+  launch_dashboard: network_discovery_main_app  
+  launch_locations:
+
+  - pstream_name: rda_packs_dynamic_groups_and_pages
+    dashboard_group_name: groupMetrics 
+    dashboard_group_label: Metrics
+    dashboard_group_icon: "insights.svg"
+    dashboard_page_name: kpi-workbench-telemetry
+    dashboard_page_label: "Telemetry Workbench"
+    dashboard_page_icon: "insights.svg"
+  - pstream_name: rda_packs_dynamic_groups_and_pages
+    dashboard_group_name: groupMetrics 
+    dashboard_group_label: Metrics
+    dashboard_group_icon: "settings.svg"
+    dashboard_page_name: telemetry_metrics_navigator
+    dashboard_page_label: "Telemetry Metrics Navigator"
+    dashboard_page_icon: "settings.svg"
+  
+    
+  artifacts:
+    endpoints:
+      - name: asm_telemetry
+        file: ./artifacts/endpoints/asm_telemetry.json
+      
+    mappings:
+      - name: asm_telemetry_log_mapper
+        file: ./artifacts/mappings/asm_telemetry_log_mapper.json
+      - name: asm_telemetry_metrics_mapper
+        file: ./artifacts/mappings/asm_telemetry_metrics_mapper.json
+    
+    

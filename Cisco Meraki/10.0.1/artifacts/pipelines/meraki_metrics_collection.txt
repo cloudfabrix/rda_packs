@@ -1,0 +1,391 @@
+%% stream = no and limit = 0
+%% import_src_type = "cisco-meraki"
+%%template_type="jinja"
+
+%%start_inline_object name="context_dynamic_form" and type="data" and format="json"
+{
+    "formFieldList": [
+        {
+            "fieldId": "customer_tag",
+            "label": "Tag of the customer",
+            "required": false,
+            "dataType": "string"
+        }
+    ]
+}
+%%end_inline_object
+@dm:empty
+    --> @dm:save name = "temp-customer-context"
+
+{% set row = "" %}
+
+   {% if customer_tag %}
+      {% set customer_id = customer_id %}
+      {% set customer_tag = customer_tag %}
+      {% set customerTag = customer_tag %}
+   {% elif customerTag %}
+      {% set customer_id = customer_id %}
+      {% set customer_tag = customerTag %}
+   {% else %}
+      {% set customer_id = '' %}
+      {% set customer_tag = '' %}
+   {% endif %}
+
+--> @c:new-block
+    --> @exec:get-input
+    --> @dm:selectcolumns include = "Others"
+    ## --> @dm:skip-pipeline-if-shape column_count = 0
+    --> @dm:explode-json column="Others"
+    --> @dm:rename-columns meraki_src_name = 'name'
+    --> @dm:save name = 'temp-variable-dataset'
+    ##--> @dm:save name = 'meraki-variable-dataset'
+
+--> @c:new-block
+    --> @dm:recall name = 'temp-variable-dataset' and return_empty = "yes"
+    --> *exec:if-shape num_rows = 0
+       --> @dm:empty
+       
+       {% if customer_tag %} 
+         --> #dm:query-persistent-stream type contains 'cisco-meraki' and customerTag contains '{{customer_tag}}' with-input name = 'rda_secrets_meta' and limit= 0
+       {% else %}
+         --> #dm:query-persistent-stream type contains 'cisco-meraki' and customerTag is empty with-input name = 'rda_secrets_meta' and limit= 0
+       {% endif %}  
+       --> @dm:rename-columns meraki_src_name = 'name'
+       --> @dm:save name = 'temp-meraki-sources'
+       --> @exec:for-loop num_rows = 1
+          ##--> #dm:query-persistent-stream meraki_src_name contains {{'{{row.bot_source_name}}'}} and discovery_scope = 'yes' and customer_tag is '{{customer_tag}}' with-input name = 'meraki_on_boarded_devices' and limit= 0
+          {% if customer_tag %} 
+            --> #dm:query-persistent-stream meraki_src_name is '{%-raw-%}{{row["meraki_src_name"]}}{%-endraw-%}'  and customer_tag is '{{customer_tag}}' with-input name = 'meraki_on_boarded_devices' and limit= 0
+          {% else %}    
+            --> #dm:query-persistent-stream meraki_src_name is '{%-raw-%}{{row["meraki_src_name"]}}{%-endraw-%}'  and customer_tag is empty with-input name = 'meraki_on_boarded_devices' and limit= 0
+          {% endif %}   
+          --> @dm:save name = 'temp-variable-dataset-interim' & append='yes' & return_appended_dataset = 'yes'
+          ##-->@dm:save name = 'variable-dataset-meraki'
+       --> @exec:end-loop
+       --> @dm:recall name = 'temp-variable-dataset-interim' and return_empty = "yes"
+       --> *exec:if-shape num_rows = 0    
+         --> @dm:recall name = 'temp-meraki-sources' and return_empty = "yes"
+         -->@dm:eval  discovery_scope = "'yes'"
+         --> @dm:save name = 'temp-variable-dataset'
+       --> @exec:end-if
+      
+       --> *exec:if-shape num_rows > 0     
+        --> *dm:safe-filter discovery_scope == 'yes' 
+         ##-->@dm:eval  discovery_scope = "'yes'"
+         ##--> @dm:rename-columns meraki_src_name = 'name'
+         --> @dm:save name = 'temp-variable-dataset'
+      --> @exec:end-if
+    
+    --> @exec:end-if
+
+##Add customer context to the dataset
+--> @c:new-block
+    --> @dm:recall name = 'temp-variable-dataset' and return_empty = "yes"
+    --> @dm:eval customer_id =  "'{{ customer_id }}'"
+    --> @dm:eval customer_tag =  "'{{ customer_tag }}'"
+   --> @dm:save name = 'temp-variable-dataset'
+    ## --> @dm:save name = 'meraki-variable-cust'
+
+
+--> @c:data-loop dataset='temp-variable-dataset' & columns = 'meraki_src_name,customer_id,customer_tag'
+
+--> @$meraki_src_name:clients
+    --> @dm:eval customer_id = "'$customer_id'"
+    --> @dm:eval customer_tag = "'$customer_tag'"
+    --> @dm:eval bot_source_name = "'$meraki_src_name'"
+    --> @dm:eval bot_source_type = "'meraki'"
+    --> @dm:eval bot_name = "'clients'"
+    --> @rn:write-stream name = 'meraki-asset-inventory-collection-status-stream'
+    --> *dm:filter usage_total is not empty and usage_recv is not empty and usage_sent is not empty
+    --> @dm:skip-block-if-shape row_count='0'
+    --> @dm:save name = "temp-clients-metrics-data"  and append = "yes"
+
+## Ingesting client metric data into stream
+--> @c:simple-loop loop_var="usage_total,usage_recv,usage_sent"
+    --> @dm:recall name="temp-clients-metrics-data" and return_empty = "yes"
+    --> *dm:filter $loop_var is not None
+    --> @dm:eval-multi-proc metric_category="'Clients'"
+    --> @dm:eval-multi-proc metric_name="'$loop_var'"
+    --> @dm:eval-multi-proc value="$loop_var"
+    --> @dm:selectcolumns include='id|ip|mac|ssid|usage_total|usage_recv|usage_sent|collection_timestamp|metric_category|metric_name|value|customer_tag|customer_id'
+    --> @rn:write-stream name="meraki_metrics"
+
+--> @c:data-loop dataset='temp-variable-dataset' & columns = 'meraki_src_name,customer_id,customer_tag'
+
+    --> @$meraki_src_name:client-application-usage
+    --> @dm:save name = "temp-client-application-usage"
+    --> @dm:eval customer_id = "'$customer_id'"
+    --> @dm:eval customer_tag = "'$customer_tag'"
+    --> @dm:eval bot_source_name = "'$meraki_src_name'"
+    --> @dm:eval bot_source_type = "'meraki'"
+    --> @dm:eval bot_name = "'client-application-usage'"
+    --> @rn:write-stream name = 'meraki-asset-inventory-collection-status-stream'
+    --> *dm:filter sent is not empty and received is not empty
+    --> @dm:skip-block-if-shape row_count='0'
+    --> @dm:save name = "temp-client-application-usage-data" and append = "yes"
+
+## Ingesting client metric data into stream
+--> @c:simple-loop loop_var="received,sent"
+    --> @dm:recall name="temp-client-application-usage-data" and return_empty = "yes"
+    --> *dm:filter $loop_var is not None
+    --> @dm:eval-multi-proc metric_category="'client-application-usage'"
+    --> @dm:eval-multi-proc metric_name="'$loop_var'"
+    --> @dm:eval-multi-proc value="$loop_var"
+    --> @dm:selectcolumns include='sent|received|application|clientIp|clientId|clientMac|orgId|networkId|collection_timestamp|metric_category|metric_name|value|customer_tag|customer_id'
+    --> @rn:write-stream name="meraki_metrics"
+
+--> @c:data-loop dataset='temp-variable-dataset' & columns = 'meraki_src_name,customer_id,customer_tag'
+
+    --> @$meraki_src_name:client-bandwidth-usage-history
+    --> @dm:eval customer_id = "'$customer_id'"
+    --> @dm:eval customer_tag = "'$customer_tag'"
+    --> @dm:eval bot_source_name = "'$meraki_src_name'"
+    --> @dm:eval bot_source_type = "'meraki'"
+    --> @dm:eval bot_name = "'client-bandwidth-usage-history'"
+    --> @rn:write-stream name = 'meraki-asset-inventory-collection-status-stream'
+    --> *dm:filter total is not empty and downstream is not empty and upstream is not empty
+    --> @dm:skip-block-if-shape row_count='0'
+    --> @dm:save name = "temp-client-bandwidth-usage-history" and append = "yes"
+
+## Ingesting client metric data into stream
+--> @c:simple-loop loop_var="total,upstream,downstream"
+    --> @dm:recall name="temp-client-bandwidth-usage-history" and return_empty = "yes"
+    --> *dm:filter $loop_var is not None
+    --> @dm:eval-multi-proc metric_category="'client-bandwidth-usage'"
+    --> @dm:eval-multi-proc metric_name="'$loop_var'"
+    --> @dm:eval-multi-proc value="$loop_var"
+    --> @dm:selectcolumns include='total|downstream|upstream|orgId|networkId|collection_timestamp|metric_category|metric_name|value|customer_tag|customer_id'
+    --> @rn:write-stream name="meraki_metrics"
+
+--> @c:data-loop dataset='temp-variable-dataset' & columns = 'meraki_src_name,customer_id,customer_tag'
+
+    --> @$meraki_src_name:device-status
+    --> @dm:eval customer_id = "'$customer_id'"
+    --> @dm:eval customer_tag = "'$customer_tag'"
+    --> @dm:eval bot_source_name = "'$meraki_src_name'"
+    --> @dm:eval bot_source_type = "'meraki'"
+    --> @dm:eval bot_name = "'device-status'"
+    --> @rn:write-stream name = 'meraki-asset-inventory-collection-status-stream'
+    --> @dm:eval device_status="1 if status=='online' else 0"
+    --> *dm:filter device_status is not empty
+    --> @dm:skip-block-if-shape row_count='0'
+    --> @dm:save name = "temp-device-status" and append = "yes"
+
+## Ingesting client metric data into stream
+--> @c:simple-loop loop_var="device_status"
+    --> @dm:recall name="temp-device-status" and return_empty = "yes"
+    --> *dm:filter $loop_var is not None
+    --> @dm:eval-multi-proc metric_category="'device-status'"
+    --> @dm:eval-multi-proc metric_name="'$loop_var'"
+    --> @dm:eval-multi-proc value="$loop_var"
+    --> @dm:selectcolumns include='device_status|serial|name|mac|publicIp|networkId|status|orgId|collection_timestamp|metric_category|metric_name|value|customer_tag|customer_id'
+    --> @rn:write-stream name="meraki_metrics"
+
+--> @c:data-loop dataset='temp-variable-dataset' & columns = 'meraki_src_name,customer_id,customer_tag'
+
+    --> @$meraki_src_name:device-system-memory-usage
+    --> @dm:eval customer_id = "'$customer_id'"
+    --> @dm:eval customer_tag = "'$customer_tag'"
+    --> @dm:eval bot_source_name = "'$meraki_src_name'"
+    --> @dm:eval bot_source_type = "'meraki'"
+    --> @dm:eval bot_name = "'device-system-memory-usage'"
+    --> @rn:write-stream name = 'meraki-asset-inventory-collection-status-stream'
+    --> *dm:filter used_percentages_maximum is not empty
+    --> @dm:skip-block-if-shape row_count='0'
+    --> @dm:save name = "temp-device-system-memory-usage" and append = "yes"
+
+## Ingesting client metric data into stream
+--> @c:simple-loop loop_var="used_percentages_maximum"
+    --> @dm:recall name="temp-device-system-memory-usage" and return_empty = "yes"
+    --> *dm:filter $loop_var is not None
+    --> @dm:eval-multi-proc metric_category="'device-system-memory-usage'"
+    --> @dm:eval-multi-proc metric_name="'$loop_var'"
+    --> @dm:eval-multi-proc value="$loop_var"
+    --> @dm:selectcolumns include='used_percentages_maximum|serial|model|orgId|id|mac|name|collection_timestamp|metric_category|metric_name|value|customer_tag|customer_id'
+    --> @rn:write-stream name="meraki_metrics"
+
+--> @c:data-loop dataset='temp-variable-dataset' & columns = 'meraki_src_name,customer_id,customer_tag'
+
+    --> @$meraki_src_name:device-uplink-loss-latency
+    --> @dm:eval customer_id = "'$customer_id'"
+    --> @dm:eval customer_tag = "'$customer_tag'"
+    --> @dm:eval bot_source_name = "'$meraki_src_name'"
+    --> @dm:eval bot_source_type = "'meraki'"
+    --> @dm:eval bot_name = "'device-uplink-loss-latency'"
+    --> @rn:write-stream name = 'meraki-asset-inventory-collection-status-stream'
+    --> *dm:filter lossPercent is not empty and latencyMs is not empty
+    --> @dm:skip-block-if-shape row_count='0'
+    --> @dm:save name = "temp-device-uplink-loss-latency" and append = "yes"
+
+## Ingesting client metric data into stream
+--> @c:simple-loop loop_var="lossPercent,latencyMs"
+    --> @dm:recall name="temp-device-uplink-loss-latency" and return_empty = "yes"
+    --> *dm:filter $loop_var is not None
+    --> @dm:eval-multi-proc metric_category="'device-uplink-loss-latency'"
+    --> @dm:eval-multi-proc metric_name="'$loop_var'"
+    --> @dm:eval-multi-proc value="$loop_var"
+    --> @dm:selectcolumns include='networkId|uplink|serial|ip|collection_timestamp|metric_category|metric_name|value|customer_tag|customer_id'
+    
+    --> @rn:write-stream name="meraki_metrics"
+
+
+
+
+--> @c:data-loop dataset='temp-variable-dataset' & columns = 'meraki_src_name,customer_id,customer_tag'
+
+    --> @$meraki_src_name:vpn-status
+     --> @dm:eval customer_id = "'$customer_id'"
+    --> @dm:eval customer_tag = "'$customer_tag'"
+    --> @dm:eval bot_source_name = "'$meraki_src_name'"
+    --> @dm:eval bot_source_type = "'meraki'"
+    --> @dm:eval bot_name = "'vpn-status'"
+    --> @rn:write-stream name = 'meraki-asset-inventory-collection-status-stream'
+    --> *dm:filter deviceStatus is not empty
+    --> @dm:skip-block-if-shape row_count='0'
+    --> @dm:eval device_status="1 if deviceStatus=='online' else 0"
+    --> @dm:save name = "temp-vpn-status" and append = "yes"
+
+## Ingesting device status metric data into stream
+--> @c:simple-loop loop_var="device_status"
+    --> @dm:recall name="temp-vpn-status" and return_empty = "yes"
+    --> *dm:filter $loop_var is not None
+    --> @dm:eval-multi-proc metric_category="'vpn-status'"
+    --> @dm:eval-multi-proc metric_name="'$loop_var'"
+    --> @dm:eval-multi-proc value="$loop_var"
+    --> @dm:selectcolumns include='networkId|device_status|networkName|deviceStatus|collection_timestamp|metric_category|metric_name|value|customer_tag|customer_id'
+    
+    --> @rn:write-stream name="meraki_metrics"
+
+--> @c:data-loop dataset='temp-variable-dataset' & columns = 'meraki_src_name,customer_id,customer_tag'
+
+    --> @$meraki_src_name:client-count
+     --> @dm:eval customer_id = "'$customer_id'"
+    --> @dm:eval customer_tag = "'$customer_tag'"
+    --> @dm:eval bot_source_name = "'$meraki_src_name'"
+    --> @dm:eval bot_source_type = "'meraki'"
+    --> @dm:eval bot_name = "'client-count'"
+    --> @rn:write-stream name = 'meraki-asset-inventory-collection-status-stream'
+    --> *dm:filter counts_total is not empty
+    --> @dm:skip-block-if-shape row_count='0'
+    --> @dm:rename-columns client_count="counts_total"
+    --> @dm:save name = "temp-client-count" and append = "yes"
+
+## Ingesting client count metric data into stream
+--> @c:simple-loop loop_var="client_count"
+    --> @dm:recall name="temp-client-count" and return_empty = "yes"
+    --> *dm:filter $loop_var is not None
+    --> @dm:eval-multi-proc metric_category="'client-count'"
+    --> @dm:eval-multi-proc metric_name="'$loop_var'"
+    --> @dm:eval-multi-proc value="$loop_var"
+    --> @dm:selectcolumns include='client_count|collection_timestamp|metric_category|metric_name|value|customer_tag|customer_id'
+    
+    --> @rn:write-stream name="meraki_metrics"
+
+--> @c:data-loop dataset='temp-variable-dataset' & columns = 'meraki_src_name,customer_id,customer_tag'
+
+    --> @$meraki_src_name:ap-radio-status
+     --> @dm:eval customer_id = "'$customer_id'"
+    --> @dm:eval customer_tag = "'$customer_tag'"
+    --> @dm:eval bot_source_name = "'$meraki_src_name'"
+    --> @dm:eval bot_source_type = "'meraki'"
+    --> @dm:eval bot_name = "'ap-radio-status'"
+    --> @rn:write-stream name = 'meraki-asset-inventory-collection-status-stream'
+    --> *dm:filter channel is not empty
+    --> @dm:skip-block-if-shape row_count='0'
+    --> @dm:save name = "temp-ap-radio-status" and append = "yes"
+ 
+## Ingesting ap-radio metric data into stream
+--> @c:simple-loop loop_var="channel"
+    --> @dm:recall name="temp-ap-radio-status" and return_empty = "yes"
+    --> *dm:filter $loop_var is not None
+    --> @dm:eval-multi-proc metric_category="'ap-radio-status'"
+    --> @dm:eval-multi-proc metric_name="'$loop_var'"
+    --> @dm:eval-multi-proc value="$loop_var"
+    --> @dm:selectcolumns include='channel|ssidName|enabled|band|bssid|networkId|orgId|serialId|clientIp|channelWidth|collection_timestamp|metric_category|metric_name|value|customer_tag|customer_id'
+    
+    --> @rn:write-stream name="meraki_metrics"
+
+--> @c:data-loop dataset='temp-variable-dataset' & columns = 'meraki_src_name,customer_id,customer_tag'
+
+    --> @$meraki_src_name:appliance-uplink-usage-history
+     --> @dm:eval customer_id = "'$customer_id'"
+    --> @dm:eval customer_tag = "'$customer_tag'"
+    --> @dm:eval bot_source_name = "'$meraki_src_name'"
+    --> @dm:eval bot_source_type = "'meraki'"
+    --> @dm:eval bot_name = "'appliance-uplink-usage-history'"
+    --> @rn:write-stream name = 'meraki-asset-inventory-collection-status-stream'
+    --> *dm:filter sent is not empty and received is not empty
+    --> @dm:skip-block-if-shape row_count='0'
+    --> @dm:save name = "temp-appliance-uplink-usage-history" and append = "yes"
+
+## Ingesting appliance-uplink-usage-history metric data into stream
+--> @c:simple-loop loop_var="sent,received"
+    --> @dm:recall name="temp-appliance-uplink-usage-history" and return_empty = "yes"
+    --> *dm:filter $loop_var is not None
+    --> @dm:eval-multi-proc metric_category="'appliance-uplink-usage-history'"
+    --> @dm:eval-multi-proc metric_name="'$loop_var'"
+    --> @dm:eval-multi-proc value="$loop_var"
+    --> @dm:selectcolumns include='received|sent|interface|networkId|orgId|collection_timestamp|metric_category|metric_name|value|customer_tag|customer_id'
+    
+    --> @rn:write-stream name="meraki_metrics"
+    --> @dm:empty
+    --> @dm:save name = "temp-utilization"
+
+
+
+ --> @c:simple-loop loop_var="2.4,5,6"
+  --> @dm:recall name = "temp-variable-dataset" and return_empty = "yes"
+  --> @dm:eval band = "$loop_var"
+   --> @dm:save name = "temp-variable-band-dataset" & append = "yes"
+
+--> @c:data-loop dataset='temp-variable-band-dataset' & columns = 'meraki_src_name,customer_id,customer_tag,band'
+
+    --> @$meraki_src_name:utilization band="$band"
+    --> @dm:eval customer_id = "'$customer_id'"
+    --> @dm:eval customer_tag = "'$customer_tag'"
+    --> @dm:eval bot_source_name = "'$meraki_src_name'"
+    --> @dm:eval bot_source_type = "'meraki'"
+    --> @dm:eval bot_name = "'utilization'"
+    --> @rn:write-stream name = 'meraki-asset-inventory-collection-status-stream'
+    --> *dm:filter collection_status !="Failed"
+    --> *dm:filter utilizationTotal is not empty
+    --> @dm:skip-block-if-shape row_count='0'
+    --> @dm:rename-columns channel_utilization="utilizationTotal"
+    --> @dm:save name = "temp-utilization" and append="yes"
+
+## Ingesting utilization metric data into stream
+--> @c:simple-loop loop_var="channel_utilization"
+    --> @dm:recall name="temp-utilization" and return_empty = "yes"
+    --> @dm:skip-block-if-shape row_count='0'
+    --> *dm:filter $loop_var is not None
+    --> @dm:eval-multi-proc metric_category="'utilization'"
+    --> @dm:eval-multi-proc metric_name="'$loop_var'"
+    --> @dm:eval-multi-proc value="$loop_var"
+    --> @dm:selectcolumns include='channel_utilization|band|clientId|networkId|orgId|collection_timestamp|metric_category|metric_name|value|customer_tag|customer_id'
+    --> @rn:write-stream name="meraki_metrics"
+
+
+--> @c:data-loop dataset='temp-variable-dataset' & columns = 'meraki_src_name,customer_id,customer_tag'
+
+    --> @$meraki_src_name:events
+     --> @dm:eval customer_id = "'$customer_id'"
+    --> @dm:eval customer_tag = "'$customer_tag'"
+    --> @dm:eval bot_source_name = "'$meraki_src_name'"
+    --> @dm:eval bot_source_type = "'meraki'"
+    --> @dm:eval bot_name = "'events'"
+    --> @rn:write-stream name = 'meraki-asset-inventory-collection-status-stream'
+    --> @dm:add-missing-columns columns = "type"  & value = "None"
+    --> *dm:filter type is not empty
+    --> @dm:skip-block-if-shape row_count='0'
+    --> @dm:save name = "temp-events" and append = "yes"
+
+## Ingesting events metric data into stream
+--> @c:simple-loop loop_var="type"
+    --> @dm:recall name="temp-events" and return_empty = "yes"
+    --> @dm:add-missing-columns columns = "$loop_var"  & value = "None"
+    --> *dm:filter $loop_var is not None
+    --> @dm:eval-multi-proc metric_category="'events'"
+    --> @dm:eval-multi-proc metric_name="'$loop_var'"
+    --> @dm:eval-multi-proc value="$loop_var"
+    --> @dm:selectcolumns include='networkId|type|clientId|clientMac|category|deviceSerial|deviceName|ip|router|productType|collection_timestamp|metric_category|metric_name|value|customer_tag|customer_id'
+    --> @rn:write-stream name="meraki_metrics"

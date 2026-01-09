@@ -1,0 +1,30 @@
+name: CrossWork Inventory Collection
+id: cisco_crosswork
+version: 2024021201031903
+category: ITSM
+comment: crosswrok
+enabled: true
+type: Scheduled
+provider: CloudFabrix Software, Inc.
+attrs: {
+   
+}
+run_context: {
+    
+}
+scheduled_pipelines:
+
+    -   name: cisco_crosswork_access_verification
+        label: crosswork_access_verification
+        version: '*'
+        site: .*
+        site_type: regex
+        cron_expression: 0 0 * * *
+    -   name: crosswork_inventory_pipeline
+        label: crosswork_inventory
+        version: '*'
+        site: .*
+        site_type: regex
+        cron_expression: 15 0 * * *
+
+saved_time: '2024-03-01T07: 14: 16.390898'

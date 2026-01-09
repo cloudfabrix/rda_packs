@@ -1,0 +1,552 @@
+name: Network Device Discovery
+version: 9.1.0
+folder: /collection/network/network_device_discovery
+published_date: 2026-01-06
+publisher: Fabrix.ai
+label: Network device data collection
+scope: system
+description: 
+  value: ""
+  md: "./description.md"
+
+type: collection
+
+# Other packs that this solution requires to be deployed
+requires:
+   - name: Fabrix Inventory Collection Base Pack
+     version: ">=7.2.1"
+
+fabric_services:
+ - name: worker
+   version: ">=8.1.0"
+ - name: api-server
+   version: ">=8.1.0"
+
+artifacts:
+  credentials:
+    - name: asset-discovery
+      type: asset-discovery
+      remove_on_deactivation: true
+    - name: diagnostictools
+      type: diagnostictools
+      remove_on_deactivation: true
+    - name: graph
+      type: graphdb
+      remove_on_deactivation: true
+    
+
+  pstreams:
+    
+    - name: network_device_interfaces
+      attributes:
+        unique_keys: [ "unique_id","customer_tag"]
+      autocreate: true
+      remove_on_deactivation: true
+
+    - name: network_device_inventory
+      attributes:
+        unique_keys: [ "unique_id","customer_tag"]
+      autocreate: true
+      remove_on_deactivation: true
+    - name: network_devices_cdp
+      attributes:
+        unique_keys: [ "unique_id","customer_tag"]
+      autocreate: true
+      remove_on_deactivation: true
+    - name: network_access_verification
+      attributes:
+        unique_keys: [ "ip_address","protocol","used_cred","customer_tag"]
+      autocreate: true
+      remove_on_deactivation: true
+    - name: discovery_logs
+      attributes:
+        unique_keys: [ "unique_id","customer_tag"]
+      autocreate: true
+      remove_on_deactivation: true
+    - name: discovery
+      attributes:
+        unique_keys: ["device_ip","customer_tag"]
+        retention_days: 60
+        search_case_insensitive: true
+        _settings: 
+          "number_of_shards": 3
+          "number_of_replicas": 1
+          "refresh_interval": "30s"
+      remove_on_deactivation: true
+    
+    - name: routing_protocol_data
+      attributes:
+        unique_keys: ["collection_status","profile","source_ip"]
+      autocreate: true
+      remove_on_deactivation: true
+    
+    - name: network_access_verification_final
+      attributes:
+        unique_keys: ["ip_address","customer_tag"]
+      autocreate: true
+      remove_on_deactivation: true
+    
+    - name: discovery_status
+      attributes:
+        retention_days: 7
+      autocreate: true
+      remove_on_deactivation: true
+
+  datasets: 
+    - name: ifTypeLabel_dict
+      data_file: ./data/ifTypeLabel_dict.csv
+      folder: NetworkDevicePack
+      remove_on_deactivation: true
+    
+
+  pipelines:
+    - name: access_verification_main_pipeline
+      folder: NetworkDevicePack
+      version: 2025.12.31.1
+      file: ./artifacts/pipelines/access_verification_main_pipeline.txt
+      remove_on_deactivation: true
+    - name: cisco_discovery_main_pipeline
+      folder: NetworkDevicePack
+      version: 2025.12.31.1
+      file: ./artifacts/pipelines/cisco_discovery_main_pipeline.txt
+      remove_on_deactivation: true
+    - name: discovery_main_pipeline
+      folder: NetworkDevicePack
+      version: 2025.12.31.1
+      file: ./artifacts/pipelines/discovery_main_pipeline.txt
+      remove_on_deactivation: true
+    - name: fortinet_discovery_main_pipeline
+      folder: NetworkDevicePack
+      version: 2025.12.31.1
+      file: ./artifacts/pipelines/fortinet_discovery_main_pipeline.txt
+      remove_on_deactivation: true
+    - name: juniper_discovery_main_pipeline
+      folder: NetworkDevicePack
+      version: 2025.12.31.1
+      file: ./artifacts/pipelines/juniper_discovery_main_pipeline.txt
+      remove_on_deactivation: true
+    - name: ondemand_discovery_main
+      folder: NetworkDevicePack
+      version: 2025.12.31.1
+      file: ./artifacts/pipelines/ondemand_discovery_main.txt
+      remove_on_deactivation: true
+    - name: network_device_topology_calculation
+      folder: NetworkDevicePack
+      version: 2025.12.31.1
+      file: ./artifacts/pipelines/network_device_topology_calculation.txt
+      remove_on_deactivation: true
+    - name: import-customer-devices
+      folder: NetworkDevicePack
+      version: 2025.12.31.1
+      file: ./artifacts/pipelines/import-customer-devices.txt
+      remove_on_deactivation: true
+    - name: other_vendors_discovery_main_pipeline
+      folder: NetworkDevicePack
+      version: 2025.12.31.1
+      file: ./artifacts/pipelines/other_vendors_discovery_main_pipeline.txt
+      remove_on_deactivation: true
+    - name: network_access_verification_pipeline
+      folder: NetworkDevicePack
+      version: 2025.12.31.1
+      file: ./artifacts/pipelines/network_access_verification_pipeline.txt
+      remove_on_deactivation: true
+    - name: cdp_topology_calculation
+      folder: NetworkDevicePack
+      version: 2025.12.31.1
+      file: ./artifacts/pipelines/cdp_topology_calculation.txt
+      remove_on_deactivation: true
+    - name: lldp_topology_calculation
+      folder: NetworkDevicePack
+      version: 2025.12.31.1
+      file: ./artifacts/pipelines/lldp_topology_calculation.txt
+      remove_on_deactivation: true
+    - name: ospf_topology_calculation
+      folder: NetworkDevicePack
+      version: 2025.12.31.1
+      file: ./artifacts/pipelines/ospf_topology_calculation.txt
+      remove_on_deactivation: true
+    - name: bgp_topology_calculation
+      folder: NetworkDevicePack
+      version: 2025.12.31.1
+      file: ./artifacts/pipelines/bgp_topology_calculation.txt
+      remove_on_deactivation: true
+    - name: isis_topology_calculation
+      folder: NetworkDevicePack
+      version: 2025.12.31.1
+      file: ./artifacts/pipelines/isis_topology_calculation.txt
+      remove_on_deactivation: true
+    - name: discovery_collection
+      folder: NetworkDevicePack
+      version: 2025.12.31.1
+      file: ./artifacts/pipelines/discovery_collection.txt
+      remove_on_deactivation: true
+
+  dashboards:
+    - name: network_device
+      file: ./artifacts/dashboards/network_device.json
+      remove_on_deactivation: true
+    - name: alert_device_app
+      file: ./artifacts/dashboards/alert_device_app.json
+      remove_on_deactivation: true
+    - name: customer_access_status_failed_devices
+      file: ./artifacts/dashboards/customer_access_status_failed_devices.json
+      remove_on_deactivation: true
+    - name: customer_access_status
+      file: ./artifacts/dashboards/customer_access_status.json
+      remove_on_deactivation: true
+    - name: customer_asset_navigator
+      file: ./artifacts/dashboards/customer_asset_navigator.json
+      remove_on_deactivation: true
+    - name: customer_discovery_runs_details_failed
+      file: ./artifacts/dashboards/customer_discovery_runs_details_failed.json
+      remove_on_deactivation: true
+    - name: customer_discovery_runs_details_success
+      file: ./artifacts/dashboards/customer_discovery_runs_details_success.json
+      remove_on_deactivation: true
+    - name: customer_discovery_runs
+      file: ./artifacts/dashboards/customer_discovery_runs.json
+      remove_on_deactivation: true
+    - name: customer_discovery
+      file: ./artifacts/dashboards/customer_discovery.json
+      remove_on_deactivation: true
+    - name: node_details_app
+      file: ./artifacts/dashboards/node_details_app.json
+      remove_on_deactivation: true
+    - name: customer_topology
+      file: ./artifacts/dashboards/customer_topology.json
+      remove_on_deactivation: true
+    - name: customer_topology_old
+      file: ./artifacts/dashboards/customer_topology_old.json
+      remove_on_deactivation: true
+    - name: network_assets_inventory
+      file: ./artifacts/dashboards/network_assets_inventory.json
+      remove_on_deactivation: true
+    - name: topology_geomap_dashboard
+      file: ./artifacts/dashboards/topology_geomap_dashboard.json
+      remove_on_deactivation: true
+    - name: device_inventory_from_alerts
+      file: ./artifacts/dashboards/device_inventory_from_alerts.json
+      remove_on_deactivation: true
+    - name: logs
+      file: ./artifacts/dashboards/logs.json
+      remove_on_deactivation: true
+    - name: cdp_neighbours
+      file: ./artifacts/dashboards/cdp_neighbours.json
+      remove_on_deactivation: true
+    - name: device_inventory_from_alert_deleteme
+      file: ./artifacts/dashboards/device_inventory_from_alert_deleteme.json
+      remove_on_deactivation: true
+    - name: network_inventory
+      file: ./artifacts/dashboards/network_inventory.json
+      remove_on_deactivation: true
+    - name: network_collection_and_access_status
+      file: ./artifacts/dashboards/network_collection_and_access_status.json
+      remove_on_deactivation: true
+    - name: network_configure_and_manage
+      file: ./artifacts/dashboards/network_configure_and_manage.json
+      remove_on_deactivation: true
+    - name: network_discovery_main_app
+      file: ./artifacts/dashboards/network_discovery_main_app.json
+      remove_on_deactivation: true
+    - name: customer_discovery_runs_details_duplicates
+      file: ./artifacts/dashboards/customer_discovery_runs_details_duplicates.json
+      remove_on_deactivation: true
+    - name: customer_discovery_runs_details_total_devices
+      file: ./artifacts/dashboards/customer_discovery_runs_details_total_devices.json
+      remove_on_deactivation: true
+    - name: topology-workbench
+      file: ./artifacts/dashboards/topology-workbench.json
+      remove_on_deactivation: true
+    - name: preview_topology_dashboard
+      file: ./artifacts/dashboards/preview_topology_dashboard.json
+      remove_on_deactivation: true
+    - name: topology_node_details
+      file: ./artifacts/dashboards/topology_node_details.json
+      remove_on_deactivation: true
+    - name: customer_access_status_icmp
+      file: ./artifacts/dashboards/customer_access_status_icmp.json
+      remove_on_deactivation: true
+
+  textfsms:
+    - name: cisco_ios_show_ip_interface_brief
+      version: 2025.10.05
+      folder: Cisco_IOS
+      description: Template for parsing show ip interface brief for cisco ios devices
+      template_file: ./artifacts/textfsms/cisco_ios_show_ip_interface_brief.textfsm 
+      remove_on_deactivation: true  
+    - name: cisco_xr_show_ip_interface_brief
+      version: 2025.10.05
+      folder: Cisco_XR
+      description: Template for parsing show ip interface brief for cisco xr devices
+      template_file: ./artifacts/textfsms/cisco_xr_show_ip_interface_brief.textfsm 
+      remove_on_deactivation: true  
+    - name: cisco_ios_show_ip_ospf_neighbor_detail
+      version: 2025.10.05
+      folder: Cisco_IOS
+      description: Template for parsing show ip ospf neighbor detail for cisco ios devices
+      template_file: ./artifacts/textfsms/cisco_ios_show_ip_ospf_neighbor_detail.textfsm 
+      remove_on_deactivation: true  
+    - name: cisco_xr_show_ip_ospf_neighbor_detail
+      version: 2025.10.05
+      folder: Cisco_XR
+      description: Template for parsing show ip ospf neighbor detail for cisco xr devices
+      template_file: ./artifacts/textfsms/cisco_xr_show_ip_ospf_neighbor_detail.textfsm 
+      remove_on_deactivation: true  
+    # - name: cisco_ios_show_cdp_neighbor_detail
+    #   version: 2025.10.05
+    #   folder: Cisco_IOS
+    #   description: Template for parsing show cdp neighbor detail for cisco ios devices
+    #   template_file: ./artifacts/textfsms/cisco_ios_show_cdp_neighbor_detail.textfsm 
+    #   remove_on_deactivation: true  
+    # - name: cisco_xr_show_cdp_neighbor_detail
+    #   version: 2025.10.05
+    #   folder: Cisco_XR
+    #   description: Template for parsing show cdp neighbor detail for cisco xr devices
+    #   template_file: ./artifacts/textfsms/cisco_xr_show_cdp_neighbor_detail.textfsm 
+    #   remove_on_deactivation: true  
+    - name: cisco_ios_show_ip_bgp_neighbors_1
+      version: 2025.10.05
+      folder: Cisco_IOS
+      description: Template for parsing show ip bgp neighbors for cisco ios devices
+      template_file: ./artifacts/textfsms/cisco_ios_show_ip_bgp_neighbors_1.textfsm 
+      remove_on_deactivation: true  
+    - name: cisco_xr_show_ip_bgp_neighbors_1
+      version: 2025.10.05
+      folder: Cisco_XR
+      description: Template for parsing show ip bgp neighbors for cisco xr devices
+      template_file: ./artifacts/textfsms/cisco_xr_show_ip_bgp_neighbors_1.textfsm 
+      remove_on_deactivation: true  
+    - name: cisco_ios_show_ip_ospf_include_id
+      version: 2025.10.05
+      folder: Cisco_IOS
+      description: Template for parsing show ip bgp neighbors for cisco ios devices
+      template_file: ./artifacts/textfsms/cisco_ios_show_ip_ospf_include_id.textfsm 
+      remove_on_deactivation: true  
+    - name: cisco_xr_show_ip_ospf_include_id
+      version: 2025.10.05
+      folder: Cisco_XR
+      description: Template for parsing show ip bgp neighbors for cisco xr devices
+      template_file: ./artifacts/textfsms/cisco_xr_show_ip_ospf_include_id.textfsm 
+      remove_on_deactivation: true  
+    - name: cisco_ios_show_ip_ospf_interface_brief
+      version: 2025.10.05
+      folder: Cisco_IOS
+      description: Template for parsing show ip ospf interface brief for cisco ios devices
+      template_file: ./artifacts/textfsms/cisco_ios_show_ip_ospf_interface_brief.textfsm 
+      remove_on_deactivation: true  
+    - name: cisco_xr_show_ip_ospf_interface_brief
+      version: 2025.10.05
+      folder: Cisco_XR
+      description: Template for parsing show ip ospf interface brief for cisco xr devices
+      template_file: ./artifacts/textfsms/cisco_xr_show_ip_ospf_interface_brief.textfsm 
+      remove_on_deactivation: true  
+    - name: cisco_ios_show_isis_neighbors_detail
+      version: 2025.10.05
+      folder: Cisco_IOS
+      description: Template for parsing show isis neighbors detail for cisco ios devices
+      template_file: ./artifacts/textfsms/cisco_ios_show_isis_neighbors_detail.textfsm  
+      remove_on_deactivation: true  
+    - name: cisco_xr_show_isis_neighbors_detail
+      version: 2025.10.05
+      folder: Cisco_XR
+      description: Template for parsing show isis neighbors detail for cisco xr devices
+      template_file: ./artifacts/textfsms/cisco_xr_show_isis_neighbors_detail.textfsm 
+      remove_on_deactivation: true  
+
+      
+customer_level:
+  
+  launch_locations:
+  ##- pstream_name: rda_packs_dynamic_groups_and_pages
+  ##  dashboard_group_name: groupDiscovery
+  ##  dashboard_group_label: Device Onboarding
+  ##  dashboard_group_icon: "asset.svg"
+  ##  dashboard_page_name: network_collection_and_access_status
+  ##  dashboard_page_label: "Network Status"
+  ##  dashboard_page_icon: "asset.svg"
+  
+
+  - pstream_name: rda_packs_dynamic_groups_and_pages
+    dashboard_group_name: groupTopo
+    dashboard_group_label: Topology
+    dashboard_group_icon: ""
+    dashboard_page_name: customer_asset_navigator
+    dashboard_page_label: Network Asset Navigator
+    dashboard_page_icon: "topology.svg"
+  
+  - pstream_name: rda_packs_dynamic_groups_and_pages
+    dashboard_group_name: groupTopo
+    dashboard_group_label: Topology
+    dashboard_group_icon: ""
+    dashboard_page_name: topology-workbench
+    dashboard_page_label: Path Visualization
+    dashboard_page_icon: "topology.svg"
+
+  - pstream_name: rda_packs_dynamic_groups_and_pages
+    dashboard_group_name: groupTopo
+    dashboard_group_label: Topology
+    dashboard_group_icon: ""
+    dashboard_page_name: customer_topology
+    dashboard_page_label: Network Topology
+    dashboard_page_icon: "topology.svg"
+
+  ##- pstream_name: rda_packs_dynamic_groups_and_pages
+  ##  dashboard_group_name: groupTopo
+  ##  dashboard_group_label: Topology
+  ##  dashboard_group_icon: ""
+  ##  dashboard_page_name: customer_topology_old
+  ##  dashboard_page_label: Network Topology V1
+  ##  dashboard_page_icon: "topology.svg"
+
+  
+  ##- pstream_name: rda_packs_dynamic_groups_and_pages
+  ##  dashboard_group_name: groupDiscovery
+  ##  dashboard_group_label: Network Device Onboarding
+  ##  dashboard_group_icon: ""
+  ##  dashboard_page_name: customer_discovery
+  ##  dashboard_page_label: Devices Onboarding
+  ##  dashboard_page_icon: "hardware.svg"
+
+  - pstream_name: rda_packs_dynamic_groups_and_pages
+    dashboard_group_name: groupInventory
+    dashboard_group_label: Inventory
+    dashboard_group_icon: ""
+    dashboard_page_name: network_assets_inventory
+    dashboard_page_label: Network Assets
+    dashboard_page_icon: "hardware.svg"
+
+  - pstream_name: rda_packs_dynamic_groups_and_pages
+    dashboard_group_name: groupInventory
+    dashboard_group_label: Inventory
+    dashboard_group_icon: ""
+    dashboard_page_name: network_device
+    dashboard_page_label: Network Devices
+    dashboard_page_icon: "hardware.svg"  
+
+  - pstream_name: rda_packs_dynamic_groups_and_pages
+    dashboard_group_name: groupDiscovery
+    dashboard_group_label: Device Onboarding
+    dashboard_group_icon: ""
+    dashboard_page_name: customer_discovery_runs
+    dashboard_page_label: Network Discovery Runs
+    dashboard_page_icon: "diagnostic.svg"
+
+  - pstream_name: rda_packs_dynamic_groups_and_pages
+    dashboard_group_name: groupDiscovery
+    dashboard_group_label: Device Onboarding
+    dashboard_group_icon: ""
+    dashboard_page_name: customer_access_status_icmp
+    dashboard_page_label: Network Access Check
+    dashboard_page_icon: "hardware.svg"
+
+  - pstream_name: rda_packs_dynamic_groups_and_pages
+    dashboard_group_name: groupDiscovery
+    dashboard_group_label: Device Onboarding
+    dashboard_group_icon: "asset.svg"
+    dashboard_page_name: network_configure_and_manage
+    dashboard_page_label: "Network Management"
+    dashboard_page_icon: "asset.svg"
+
+    
+  artifacts:
+
+    blueprints:
+        - name: network_device_discovery
+          file: ./artifacts/blueprints/network_device_discovery.yaml
+          remove_on_deactivation: true
+
+    datasets: 
+      - name: geo_location
+        data_file: ./data/geo_location.csv
+        folder: NetworkDevicePack
+        remove_on_deactivation: true
+      - name: access_verification_method
+        data_file: ./data/access_verification_method.csv
+        folder: NetworkDevicePack
+        remove_on_deactivation: true
+
+single_tenant:
+  launch_dashboard: network_discovery_main_app
+  launch_locations:
+    - pstream_name: rda_packs_dynamic_groups_and_pages
+      dashboard_group_name: groupAssetNavigator
+      dashboard_group_label: Asset Navigator
+      dashboard_group_icon: "asset.svg"
+      dashboard_page_name: customer_asset_navigator
+      dashboard_page_label: "Network Asset Navigator"
+      dashboard_page_icon: "asset.svg"
+    - pstream_name: rda_packs_dynamic_groups_and_pages
+      dashboard_group_name: groupTopo
+      dashboard_group_label: Topology
+      dashboard_group_icon: "topology.svg"
+      dashboard_page_name: topology-workbench
+      dashboard_page_label: Path Visualization
+      dashboard_page_icon: "asset.svg"
+    - pstream_name: rda_packs_dynamic_groups_and_pages
+      dashboard_group_name: groupTopo
+      dashboard_group_label: Topology
+      dashboard_group_icon: "topology.svg"
+      dashboard_page_name: customer_topology
+      dashboard_page_label: Network Topology
+      dashboard_page_icon: "asset.svg"
+    ##- pstream_name: rda_packs_dynamic_groups_and_pages
+    ##  dashboard_group_name: groupTopo
+    ##  dashboard_group_label: Topology
+    ##  dashboard_group_icon: "topology.svg"
+    ##  dashboard_page_name: customer_topology_old
+    ##  dashboard_page_label: Network Topology V1
+    ##  dashboard_page_icon: "topology.svg"
+    - pstream_name: rda_packs_dynamic_groups_and_pages
+      dashboard_group_name: groupInventory
+      dashboard_group_label: Inventory
+      dashboard_group_icon: "asset.svg"
+      dashboard_page_name: network_assets_inventory
+      dashboard_page_label: Network Assets
+      dashboard_page_icon: "asset.svg"
+    - pstream_name: rda_packs_dynamic_groups_and_pages
+      dashboard_group_name: groupInventory
+      dashboard_group_label: Inventory
+      dashboard_group_icon: "asset.svg"
+      dashboard_page_name: network_device
+      dashboard_page_label: Network Devices
+      dashboard_page_icon: "asset.svg"
+    - pstream_name: rda_packs_dynamic_groups_and_pages
+      dashboard_group_name: groupStatus
+      dashboard_group_label: Status
+      dashboard_group_icon: "library.svg"
+      dashboard_page_name: customer_discovery_runs
+      dashboard_page_label: Network Discovery Status
+      dashboard_page_icon: "library.svg" 
+    - pstream_name: rda_packs_dynamic_groups_and_pages
+      dashboard_group_name: groupStatus
+      dashboard_group_label: Status
+      dashboard_group_icon: "library.svg"
+      dashboard_page_name: customer_access_status_icmp
+      dashboard_page_label: Network Access Status
+      dashboard_page_icon: "library.svg" 
+    - pstream_name: rda_packs_dynamic_groups_and_pages
+      dashboard_group_name: groupConfigure
+      dashboard_group_label: Configure and Manage
+      dashboard_group_icon: "library.svg"
+      dashboard_page_name: network_configure_and_manage
+      dashboard_page_label: Network Management
+      dashboard_page_icon: "library.svg"
+  artifacts:
+    
+    blueprints:
+      - name: Network Device Discovery
+        file: ./artifacts/blueprints/network_device_discovery_single_tenant.yaml
+        remove_on_deactivation: true
+
+    datasets: 
+      - name: geo_location
+        data_file: ./data/geo_location.csv
+        folder: NetworkDevicePack
+        remove_on_deactivation: true
+      - name: access_verification_method
+        data_file: ./data/access_verification_method.csv
+        folder: NetworkDevicePack
+        remove_on_deactivation: true
+   
+     
+        

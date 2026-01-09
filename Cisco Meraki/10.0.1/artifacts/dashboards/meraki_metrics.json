@@ -1,0 +1,283 @@
+{
+    "name": "meraki_metrics",
+    "label": "Meraki Metrics",
+    "description": "Meraki Metrics",
+    "dashboard_folder": "Meraki",
+    "version": "18.1.1.1",
+    "enabled": false,
+    "live_edit": true,
+    "stream": "meraki_metrics",
+    "dashboard_type": "template",
+    "dashboard_filters": {
+        "time_filter": true,
+        "extra_filter": "(customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+        "default_time_filter_labels": [
+            "Last 1 week"
+        ]
+    },
+    "template_variables": {
+        "CUST_ID": {
+            "contextId": "customerId"
+        },
+        "PROJ_ID": {
+            "contextId": "projectId"
+        },
+        "CUST_TAG": {
+            "contextId": "customerTag"
+        }
+    },
+    "dashboard_sections": [
+        {
+            "title": "meraki",
+            "show_filter": true,
+            "widgets": [
+                {
+                    "title": "Client Data Usage (Mbps)",
+                    "widget_type": "timeseries",
+                    "stream": "meraki_metrics",
+                    "ts_column": "collection_timestamp",
+                    "extra_filter": "metric_category contains 'Clients' and metric_name is not None and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "max_width": 6,
+                    "height": 6,
+                    "min_width": 6,
+                    "chartProperties": {
+                        "yAxisLabel": "Mbps",
+                        "xAxisLabel": "Network",
+                        "legendLocation": "bottom"
+                    },
+                    "converting": {
+                        "unit": "bytes"
+                    },
+                    "interval": "60m",
+                    "series_spec": [
+                        {
+                            "column": "value",
+                            "agg": "max",
+                            "type": "int"
+                        }
+                    ],
+                    "group_by": "metric_name",
+                    "widget_id": "b9260436"
+                },
+                {
+                    "title": "Top 10 Applications Usage by Client",
+                    "widget_type": "timeseries",
+                    "stream": "meraki_metrics",
+                    "ts_column": "collection_timestamp",
+                    "extra_filter": "metric_category contains 'client-application-usage' and metric_name is not None and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "max_width": 6,
+                    "height": 6,
+                    "min_width": 6,
+                    "chartProperties": {
+                        "yAxisLabel": "Count",
+                        "xAxisLabel": null,
+                        "legendLocation": "right"
+                    },
+                    "converting": {
+                        "unit": "kilobytes"
+                    },
+                    "interval": "60m",
+                    "group_selection": {
+                        "column": "value",
+                        "agg": "max",
+                        "limit": 10,
+                        "orderby": "desc"
+                    },
+                    "series_spec": [
+                        {
+                            "column": "value",
+                            "agg": "max",
+                            "type": "int"
+                        }
+                    ],
+                    "group_by": "application",
+                    "widget_id": "97f457c7"
+                },
+                {
+                    "title": "Client Bandwidth Usage History",
+                    "widget_type": "timeseries",
+                    "stream": "meraki_metrics",
+                    "ts_column": "collection_timestamp",
+                    "extra_filter": "metric_category contains 'client-bandwidth-usage' and metric_name is not None and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "max_width": 6,
+                    "height": 6,
+                    "min_width": 6,
+                    "chartProperties": {
+                        "yAxisLabel": "Count",
+                        "xAxisLabel": null,
+                        "legendLocation": "bottom"
+                    },
+                    "interval": "60m",
+                    "series_spec": [
+                        {
+                            "column": "value",
+                            "agg": "max",
+                            "type": "int"
+                        }
+                    ],
+                    "group_by": "metric_name",
+                    "widget_id": "f0b3a626"
+                },
+                {
+                    "title": "Network Status",
+                    "widget_type": "timeseries",
+                    "stream": "meraki_metrics",
+                    "ts_column": "collection_timestamp",
+                    "extra_filter": "metric_category contains 'device-status' and metric_name is not None and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "max_width": 6,
+                    "height": 6,
+                    "min_width": 6,
+                    "chartProperties": {
+                        "yAxisLabel": "Status",
+                        "xAxisLabel": "Network",
+                        "legendLocation": "bottom"
+                    },
+                    "interval": "60m",
+                    "series_spec": [
+                        {
+                            "column": "value",
+                            "agg": "max",
+                            "type": "int"
+                        }
+                    ],
+                    "group_by": "publicIp",
+                    "widget_id": "efb4fa8d"
+                },
+                {
+                    "title": "Device Uplink Latency Over Time",
+                    "widget_type": "timeseries",
+                    "stream": "meraki_metrics",
+                    "ts_column": "collection_timestamp",
+                    "extra_filter": "metric_category contains 'device-uplink-loss-latency' and metric_name is 'latencyMs' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "max_width": 6,
+                    "height": 6,
+                    "min_width": 6,
+                    "chartProperties": {
+                        "yAxisLabel": "Count",
+                        "xAxisLabel": null,
+                        "legendLocation": "bottom"
+                    },
+                    "interval": "60m",
+                    "series_spec": [
+                        {
+                            "column": "value",
+                            "agg": "avg",
+                            "type": "int"
+                        }
+                    ],
+                    "group_by": [
+                        "serial",
+                        "uplink"
+                    ],
+                    "widget_id": "5ce31384"
+                },
+                {
+                    "title": "Client VPN Auth Events Over Time",
+                    "widget_type": "timeseries",
+                    "stream": "meraki_metrics",
+                    "ts_column": "collection_timestamp",
+                    "extra_filter": "metric_category contains 'events' and metric_name is not None and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "max_width": 6,
+                    "height": 6,
+                    "min_width": 6,
+                    "chartProperties": {
+                        "yAxisLabel": "Count",
+                        "xAxisLabel": null,
+                        "legendLocation": "right"
+                    },
+                    "interval": "60m",
+                    "series_spec": [
+                        {
+                            "column": "type",
+                            "agg": "value_count"
+                        }
+                    ],
+                    "group_by": "category",
+                    "widget_id": "8a32451f"
+                },
+                {
+                    "title": "Client VPN Auth Events Over Time",
+                    "widget_type": "timeseries",
+                    "stream": "meraki_metrics",
+                    "ts_column": "collection_timestamp",
+                    "extra_filter": "metric_category contains 'device-system-memory-usage' and metric_name is not None and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "max_width": 6,
+                    "height": 6,
+                    "min_width": 6,
+                    "chartProperties": {
+                        "yAxisLabel": "Count",
+                        "xAxisLabel": null,
+                        "legendLocation": "bottom"
+                    },
+                    "interval": "60m",
+                    "series_spec": [
+                        {
+                            "column": "value",
+                            "agg": "avg",
+                            "type": "int"
+                        }
+                    ],
+                    "group_by": "metric_name",
+                    "widget_id": "2120b456"
+                },
+                {
+                    "title": "Total Network Usage (Upstream vs. Downstream)",
+                    "widget_type": "timeseries",
+                    "stream": "meraki_metrics",
+                    "ts_column": "collection_timestamp",
+                    "extra_filter": "metric_category contains 'client-bandwidth-usage' and (metric_name is 'downstream' or metric_name is 'upstream') and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "max_width": 6,
+                    "height": 6,
+                    "min_width": 6,
+                    "chartProperties": {
+                        "yAxisLabel": "Mbps",
+                        "xAxisLabel": "Time",
+                        "legendLocation": "bottom"
+                    },
+                    "converting": {
+                        "unit": "bytes"
+                    },
+                    "interval": "60m",
+                    "series_spec": [
+                        {
+                            "column": "value",
+                            "agg": "sum",
+                            "type": "float"
+                        }
+                    ],
+                    "group_by": "metric_name",
+                    "widget_id": "a1b2c3d4e5f6"
+                },
+                {
+                    "title": "Data Usage Trends by Network",
+                    "widget_type": "timeseries",
+                    "stream": "meraki_metrics",
+                    "ts_column": "collection_timestamp",
+                    "extra_filter": "metric_category contains 'client-bandwidth-usage' and metric_name is 'total' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "max_width": 12,
+                    "height": 6,
+                    "min_width": 6,
+                    "chartProperties": {
+                        "yAxisLabel": "Total Usage (GB)",
+                        "xAxisLabel": "Time",
+                        "legendLocation": "right"
+                    },
+                    "converting": {
+                        "unit": "megabytes"
+                    },
+                    "interval": "60m",
+                    "series_spec": [
+                        {
+                            "column": "value",
+                            "agg": "sum",
+                            "type": "float"
+                        }
+                    ],
+                    "group_by": "networkId",
+                    "widget_id": "f6e5d4c3b2a1"
+                }
+            ]
+        }
+    ],
+    "saved_time": "2025-12-30T13:15:52.068224"
+}

@@ -1,0 +1,104 @@
+name: Fabrix AIOps Network Performance Management SNMP
+version: 9.0.1
+folder: /collection/network/fabrix_aiops_network_performance_management_snmp
+published_date: 2025-12-30
+publisher: Fabrix.ai
+label: Fabrix AIOps Network Performance Management SNMP
+scope: system
+description:
+  value: ""
+  md: ./description.md
+type: collection
+requires:
+  - name: Network Device Discovery
+    version: ">=9.0.1"
+    auto_install_requires: true
+  
+fabric_services:
+ - name: worker
+   version: ">=8.1.0"
+ - name: api-server
+   version: ">=8.1.0"
+ 
+
+
+artifacts:
+  pstreams:
+    - name: rdaf_telegraf_metrics
+      remove_on_deactivation: false
+            
+      
+  dashboards:
+    - name: kpi-workbench
+      file: ./artifacts/dashboards/kpi-workbench.json
+    - name: preview_kpi_dashboard
+      file: ./artifacts/dashboards/preview_kpi_dashboard.json
+    - name: snmp_metrics_navigator
+      file: ./artifacts/dashboards/snmp_metrics_navigator.json
+    
+  
+
+customer_level:  
+  launch_locations:
+
+  - pstream_name: rda_packs_dynamic_groups_and_pages
+    dashboard_group_name: groupMetrics 
+    dashboard_group_label: Metrics
+    dashboard_group_icon: "insights.svg"
+    dashboard_page_name: kpi-workbench
+    dashboard_page_label: "Metrics Workbench"
+    dashboard_page_icon: "insights.svg"
+  
+  - pstream_name: rda_packs_dynamic_groups_and_pages
+    dashboard_group_name: groupMetrics 
+    dashboard_group_label: SNMP Metrics Navigator
+    dashboard_group_icon: "settings.svg"
+    dashboard_page_name: snmp_metrics_navigator
+    dashboard_page_label: "SNMP Metrics Navigator"
+    dashboard_page_icon: "settings.svg"
+
+  artifacts:
+  
+    endpoints:
+      - name: asm_snmp
+        file: ./artifacts/endpoints/asm_snmp.json
+      
+    mappings:
+      - name: asm_snmp_log_mapper
+        file: ./artifacts/mappings/asm_snmp_log_mapper.json
+      - name: asm_snmp_metrics_mapper
+        file: ./artifacts/mappings/asm_snmp_metrics_mapper.json
+
+ 
+single_tenant:
+  launch_dashboard: network_discovery_main_app  
+  launch_locations:
+
+  - pstream_name: rda_packs_dynamic_groups_and_pages
+    dashboard_group_name: groupMetrics 
+    dashboard_group_label: Metrics
+    dashboard_group_icon: "insights.svg"
+    dashboard_page_name: kpi-workbench
+    dashboard_page_label: "Metrics Workbench"
+    dashboard_page_icon: "insights.svg"
+  
+  - pstream_name: rda_packs_dynamic_groups_and_pages
+    dashboard_group_name: groupMetrics 
+    dashboard_group_label: Metrics
+    dashboard_group_icon: "settings.svg"
+    dashboard_page_name: snmp_metrics_navigator
+    dashboard_page_label: "SNMP Metrics Navigator"
+    dashboard_page_icon: "settings.svg"
+
+  artifacts:
+    endpoints:
+      - name: asm_snmp
+        file: ./artifacts/endpoints/asm_snmp.json
+      
+    mappings:
+      - name: asm_snmp_log_mapper
+        file: ./artifacts/mappings/asm_snmp_log_mapper.json
+      - name: asm_snmp_metrics_mapper
+        file: ./artifacts/mappings/asm_snmp_metrics_mapper.json
+    
+ 

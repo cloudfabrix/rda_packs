@@ -1,0 +1,56 @@
+{
+    "type": "metric",
+    "name": "memory_telemetry_metric",
+    "enabled": true,
+    "schedule": {
+        "minutes": 15
+    },
+    "data": {
+        "stream": "rdaf_telegraf_metrics",
+        "groupby": [
+            "i_agent_host",
+            "name",
+            "i_memory_pool_name",
+            "i_projectid"
+        ],
+        "query": "(name == 'memory_usage') and i_input == 'Telemetry'"
+    },
+    "actions": [
+        {
+            "state": "OPEN",
+            "timestamp": "timestamp",
+            "threshold": "10000",
+            "agg_column": "m_used_memory",
+            "agg_func": "avg",
+            "repeat_count": 1,
+            "attributes": {
+                "severity": "CRITICAL",
+                "metric_name": "memory_usage",
+                "metric_value_field": "m_used_memory_avg"
+            },
+            "notification": [
+                {
+                    "channel": "telegraf_telemetry_metrics"
+                }
+            ]
+        },
+        {
+            "state": "CLEAR",
+            "timestamp": "timestamp",
+            "agg_column": "m_used_memory",
+            "agg_func": "avg",
+            "threshold": "3148576",
+            "attributes": {
+                "severity": "INFO",
+                "metric_name": "memory_usage",
+                "metric_value_field": "m_used_memory_avg"
+            },
+            "notification": [
+                {
+                    "channel": "telegraf_telemetry_metrics"
+                }
+            ]
+        }
+    ],
+    "saved_time": "2025-08-21T17:03:08.380879"
+}

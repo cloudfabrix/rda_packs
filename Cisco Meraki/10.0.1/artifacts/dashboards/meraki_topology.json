@@ -1,0 +1,309 @@
+{
+    "name": "meraki_topology",
+    "label": "Meraki Topology",
+    "description": "Meraki Topology",
+    "live_edit": true,
+    "version": "24.07.22.2",
+    "enabled": false,
+    "dashboard_type": "template",
+    "dashboard_folder": "Onboarding",
+    "dashboard_style": "auto",
+    "template_variables": {
+        "CUST_TAG": {
+            "contextId": "customerTag"
+        },
+        "CUSTOMER_NAME": {
+            "contextId": "customerName"
+        },
+        "CUSTOMER_ID": {
+            "contextId": "customerId"
+        },
+        "PROJECT_ID": {
+            "contextId": "project_id"
+        }
+    },
+    "dashboard_sections": [
+        {
+            "title": "Meraki Topology",
+            "widgets": [
+                {
+                    "title": "Topology View",
+                    "widget_type": "topology",
+                    "inMultiviewContainer": true,
+                    "register_search_endpoints": true,
+                    "reportId": "rda.saas.stack.view.topo",
+                    "context_attributes": {
+                        "CHASSIS": [
+                            "parent_sn",
+                            "device_ip"
+                        ],
+                        "Edge": [
+                            "edge_ip",
+                            "edgeName",
+                            "serialNumber",
+                            "edge_id"
+                        ]
+                    },
+                    "limit_to_node_types0": [
+                        "Access_Points",
+                        "Networks"
+                    ],
+                    "has_more_data_flag": false,
+                    "expand_all": true,
+                    "stack_type": "dynamic",
+                    "stack_definition": {
+                        "name": "Telco Stack",
+                        "description": "",
+                        "saved_time": "2023-09-12T21:08:31.418255",
+                        "is_dynamic": true,
+                        "hierarchical": true,
+                        "dynamic_nodes": {
+                            "stream": "graphdb://cfx_rdaf_topology/cfx_rdaf_topology_nodes",
+                            "query": "layer is 'Meraki' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty or customer_tag is '')"
+                        },
+                        "dynamic_relationships": {
+                            "stream": "graphdb://cfx_rdaf_topology/cfx_rdaf_topology_edges",
+                            "graph_name": "cfx_rdaf_topology_graph",
+                            "query": "(customer_tag is '{{CUST_TAG}}' or customer_tag is empty or customer_tag is '')",
+                            "relation_map": "rdaf_topology_relationships"
+                        },
+                        "dynamic_nodes0": {
+                            "stream": "vmanage_nodes",
+                            "limit": 0,
+                            "sorting": null,
+                            "query": "IP contains '102'"
+                        },
+                        "dynamic_relationships0": {
+                            "stream": "vmanage_edges",
+                            "limit": 0,
+                            "sorting": null
+                        }
+                    },
+                    "nodes_report": {
+                        "reportMetaData": {
+                            "sorting": true,
+                            "filtering": true,
+                            "title": "Nodes",
+                            "remote_searchable": false,
+                            "remote_searchable_cols": [
+                                "name",
+                                "node_label",
+                                "node_id",
+                                "serialNumber",
+                                "node_type"
+                            ],
+                            "color_columns": [
+                                "edgeState",
+                                "activationState"
+                            ],
+                            "color_map": {
+                                "OFFLINE": "#B71C1C",
+                                "NEVER_ACTIVATED": "#E53935",
+                                "CONNECTED": "#4CAF50",
+                                "ACTIVATED": "#4CAF50",
+                                "PENDING": "#ffd54f",
+                                "REACTIVATION_PENDING": "#ffd54f"
+                            },
+                            "reportColumnDefinitionList1": [
+                                {
+                                    "identifier1": "ip_addr",
+                                    "key": false,
+                                    "title": "IP Address (AP)"
+                                },
+                                {
+                                    "identifier1": "ip",
+                                    "key": false,
+                                    "title": "IP Address (Endpoint)"
+                                },
+                                {
+                                    "identifier": "networkName",
+                                    "key": false,
+                                    "title": "Network Name"
+                                },
+                                {
+                                    "identifier1": "dhcpHostname",
+                                    "key": false,
+                                    "title": "DHCP Hostname"
+                                },
+                                {
+                                    "identifier1": "user",
+                                    "key": false,
+                                    "title": "Endpoint User"
+                                }
+                            ],
+                            "reportColumnDefinitionList": [
+                                {
+                                    "identifier": "node_label",
+                                    "title": "Name",
+                                    "key": false
+                                },
+                                {
+                                    "identifier": "name",
+                                    "hidden": true,
+                                    "key": false
+                                },
+                                {
+                                    "identifier": "node_type",
+                                    "title": "Type",
+                                    "key": false
+                                },
+                                {
+                                    "identifier": "node_id",
+                                    "key": true,
+                                    "hidden": true
+                                },
+                                {
+                                    "identifier": "mac",
+                                    "key": false,
+                                    "title": "MAC"
+                                },
+                                {
+                                    "identifier": "serial",
+                                    "key": false,
+                                    "title": "Serial Number"
+                                }
+                            ]
+                        }
+                    },
+                    "edges_report": {
+                        "reportId": "rda.saas.topology.edges.report",
+                        "group_filters": [
+                            {
+                                "title": "Relations",
+                                "group_by": [
+                                    "relation_type"
+                                ]
+                            },
+                            {
+                                "title": "Links",
+                                "group_by": [
+                                    "link_type"
+                                ]
+                            }
+                        ],
+                        "reportMetaData": {
+                            "sorting": true,
+                            "filtering": true,
+                            "title": "Edges",
+                            "reportColumnDefinitionList": [
+                                {
+                                    "hidden": false,
+                                    "id": "left_id",
+                                    "identifier": "left_id",
+                                    "key": true,
+                                    "title": "Left Id",
+                                    "type": "TEXT",
+                                    "visible": false
+                                },
+                                {
+                                    "hidden": false,
+                                    "id": "left_label",
+                                    "identifier": "left_label",
+                                    "key": false,
+                                    "title": "Source",
+                                    "type": "TEXT",
+                                    "visible": true
+                                },
+                                {
+                                    "hidden": false,
+                                    "id": "right_id",
+                                    "identifier": "right_id",
+                                    "key": true,
+                                    "title": "Right Id",
+                                    "type": "TEXT",
+                                    "visible": false
+                                },
+                                {
+                                    "hidden": false,
+                                    "id": "right_label",
+                                    "identifier": "right_label",
+                                    "key": false,
+                                    "title": "Destination",
+                                    "type": "TEXT",
+                                    "visible": true
+                                },
+                                {
+                                    "hidden": false,
+                                    "id": "link_type",
+                                    "identifier": "link_type",
+                                    "key": false,
+                                    "title": "Link",
+                                    "type": "TEXT",
+                                    "visible": true
+                                },
+                                {
+                                    "hidden": false,
+                                    "id": "relation_type",
+                                    "identifier": "relation_type",
+                                    "key": false,
+                                    "title": "Relation",
+                                    "type": "TEXT",
+                                    "visible": true
+                                },
+                                {
+                                    "identifier": "name",
+                                    "hidden": true,
+                                    "key": false,
+                                    "visible": false
+                                },
+                                {
+                                    "identifier": "node_type",
+                                    "title": "Type",
+                                    "visible": false,
+                                    "key": false
+                                },
+                                {
+                                    "identifier": "networkId",
+                                    "key": false,
+                                    "visible": false,
+                                    "title": "Network ID"
+                                },
+                                {
+                                    "identifier": "serial",
+                                    "key": false,
+                                    "visible": false,
+                                    "title": "Serial Number"
+                                },
+                                {
+                                    "identifier": "ip_addr",
+                                    "key": false,
+                                    "visible": false,
+                                    "title": "IP Address (AP)"
+                                },
+                                {
+                                    "identifier": "ip",
+                                    "key": false,
+                                    "visible": false,
+                                    "title": "IP Address (Endpoint)"
+                                },
+                                {
+                                    "identifier": "networkName",
+                                    "key": false,
+                                    "visible": false,
+                                    "title": "Network Name"
+                                },
+                                {
+                                    "identifier": "dhcpHostname",
+                                    "key": false,
+                                    "visible": false,
+                                    "title": "DHCP Hostname"
+                                },
+                                {
+                                    "identifier": "user",
+                                    "key": false,
+                                    "visible": false,
+                                    "title": "Endpoint User"
+                                }
+                            ],
+                            "actions": []
+                        }
+                    },
+                    "height": 12,
+                    "min_wdith": 12,
+                    "widget_id": "182287d8"
+                }
+            ]
+        }
+    ],
+    "saved_time": "2025-12-09T11:55:14.164644"
+}

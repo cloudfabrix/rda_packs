@@ -1,0 +1,1322 @@
+{
+    "name": "cisco_intersight_inventory",
+    "label": "Cisco Intersight Inventory",
+    "description": "Cisco Intersight Inventory Dashboard",
+    "version": "2025.12.15.1",
+    "enabled": true,
+    "dashboard_folder": "Cisco_Intersight",
+    "dashboard_style": "tabbed",
+    "dashboard_type": "template",
+    "custom_context": {
+        "rda-dashboard-live-edit": true
+    },
+    "template_variables": {
+        "CUST_ID": {
+            "contextId": "customerId"
+        },
+        "PROJ_ID": {
+            "contextId": "projectId"
+        },
+        "CUST_TAG": {
+            "contextId": "customerTag"
+        }
+    },
+    "dashboard_filters": {
+        "time_filter": true,
+        "default_time_filter_labels": [
+            "Last 1 month"
+        ],
+        "columns_filter": [
+            {
+                "id": "intersight_name",
+                "label": "Intersight IP Address",
+                "type": "TEXT"
+            },
+            {
+                "id": "hx_cluster_name",
+                "label": "HX Cluster Name",
+                "type": "TEXT"
+            },
+            {
+                "id": "server_name",
+                "label": "Server Name",
+                "type": "TEXT"
+            }
+        ],
+        "group_filters": [
+            {
+                "stream": "cisco_intersight_inventory",
+                "extra_filter": "asset_object = 'HxCluster' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                "title": "Intersight Name",
+                "limit": 200,
+                "group_by": [
+                    "intersight_name"
+                ],
+                "ts_column": "collection_timestamp",
+                "agg": "cardinality",
+                "column": "_id",
+                "type": "int"
+            },
+            {
+                "stream": "cisco_intersight_inventory",
+                "extra_filter": "asset_object = 'HxCluster' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                "title": "HX Cluster Name",
+                "limit": 200,
+                "group_by": [
+                    "hx_cluster_name"
+                ],
+                "ts_column": "collection_timestamp",
+                "agg": "cardinality",
+                "column": "_id",
+                "type": "int"
+            },
+            {
+                "stream": "cisco_intersight_inventory",
+                "extra_filter": "asset_object = 'Server' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                "title": "Server Name",
+                "limit": 200,
+                "group_by": [
+                    "server_name"
+                ],
+                "ts_column": "collection_timestamp",
+                "agg": "cardinality",
+                "column": "_id",
+                "type": "int"
+            }
+        ]
+    },
+    "dashboard_sections": [
+        {
+            "title": "HX Cluster",
+            "show_filter": true,
+            "widgets": [
+                {
+                    "title": "HX Clusters",
+                    "widget_type": "custom_counter",
+                    "stream": "cisco_intersight_inventory",
+                    "ts_column": "timestamp",
+                    "extra_filter": "asset_object == 'HxCluster' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "column": "hx_cluster_name",
+                    "agg": "value_count",
+                    "style": {
+                        "color-list": [
+                            "#334FFF"
+                        ]
+                    },
+                    "min_width": 3,
+                    "height": 4,
+                    "max_width": 5,
+                    "type": "str",
+                    "widget_id": "a6fd3618"
+                },
+                {
+                    "title": "HX Nodes",
+                    "widget_type": "custom_counter",
+                    "stream": "cisco_intersight_inventory",
+                    "ts_column": "timestamp",
+                    "extra_filter": "asset_object == 'HxCluster' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "column": "hx_cluster_nodes",
+                    "agg": "value_count",
+                    "style": {
+                        "color-list": [
+                            "#334FFF"
+                        ]
+                    },
+                    "min_width": 3,
+                    "height": 4,
+                    "max_width": 5,
+                    "type": "str",
+                    "widget_id": "73c4c7e4"
+                },
+                {
+                    "widget_type": "pie_chart",
+                    "title": "Cluster State",
+                    "stream": "cisco_intersight_inventory",
+                    "ts_column": "collection_timestamp",
+                    "extra_filter": "asset_object == 'HxCluster' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "column": "_id",
+                    "limit": 100,
+                    "agg": "value_count",
+                    "group_by": [
+                        "hx_cluster_state"
+                    ],
+                    "type": "str",
+                    "min_width": 3,
+                    "height": 4,
+                    "max_width": 4,
+                    "widget_id": "4063716e"
+                },
+                {
+                    "widget_type": "pie_chart",
+                    "title": "Cluster Purpose",
+                    "stream": "cisco_intersight_inventory",
+                    "ts_column": "collection_timestamp",
+                    "extra_filter": "asset_object == 'HxCluster' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "column": "_id",
+                    "limit": 100,
+                    "agg": "value_count",
+                    "group_by": [
+                        "hx_cluster_purpose"
+                    ],
+                    "type": "str",
+                    "min_width": 3,
+                    "height": 4,
+                    "max_width": 4,
+                    "widget_id": "d456664f"
+                },
+                {
+                    "widget_type": "pie_chart",
+                    "title": "Cluster State",
+                    "stream": "cisco_intersight_inventory",
+                    "ts_column": "collection_timestamp",
+                    "extra_filter": "asset_object == 'HxCluster' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "column": "_id",
+                    "limit": 100,
+                    "agg": "value_count",
+                    "group_by": [
+                        "hx_cluster_state"
+                    ],
+                    "type": "str",
+                    "min_width": 3,
+                    "height": 4,
+                    "max_width": 4,
+                    "widget_id": "f572c4a0"
+                },
+                {
+                    "widget_type": "pie_chart",
+                    "title": "Cluster Version",
+                    "stream": "cisco_intersight_inventory",
+                    "ts_column": "collection_timestamp",
+                    "extra_filter": "asset_object == 'HxCluster' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "column": "_id",
+                    "limit": 100,
+                    "agg": "value_count",
+                    "group_by": [
+                        "hx_version"
+                    ],
+                    "type": "str",
+                    "min_width": 3,
+                    "height": 4,
+                    "max_width": 4,
+                    "widget_id": "84a2858c"
+                },
+                {
+                    "widget_type": "pie_chart",
+                    "title": "Node Role Version",
+                    "stream": "cisco_intersight_inventory",
+                    "ts_column": "collection_timestamp",
+                    "extra_filter": "asset_object == 'HxNodes' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "column": "_id",
+                    "limit": 100,
+                    "agg": "value_count",
+                    "group_by": [
+                        "role"
+                    ],
+                    "type": "str",
+                    "min_width": 3,
+                    "height": 4,
+                    "max_width": 4,
+                    "widget_id": "ae6e3f91"
+                },
+                {
+                    "widget_type": "pie_chart",
+                    "title": "Node Status",
+                    "stream": "cisco_intersight_inventory",
+                    "ts_column": "collection_timestamp",
+                    "extra_filter": "asset_object == 'HxNodes' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "column": "_id",
+                    "limit": 100,
+                    "agg": "value_count",
+                    "group_by": [
+                        "node_status"
+                    ],
+                    "type": "str",
+                    "min_width": 3,
+                    "height": 4,
+                    "max_width": 4,
+                    "widget_id": "1fc36493"
+                },
+                {
+                    "widget_type": "tabular",
+                    "title": "HX Cluster Details",
+                    "stream": "cisco_intersight_inventory",
+                    "extra_filter": "asset_object == 'HxCluster' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "ts_column": "collection_timestamp",
+                    "sorting": [],
+                    "resizableColumns": false,
+                    "paginated": true,
+                    "virtual_scrolling": false,
+                    "showRowSummary": true,
+                    "max_rows": 200,
+                    "columns": {
+                        "intersight_name": "Intersight Name",
+                        "hx_cluster_name": "HX Cluster Name",
+                        "hx_cluster_nodes": "HX Cluster Nodes",
+                        "hx_cluster_purpose": "Purpose",
+                        "hx_cluster_state": "State",
+                        "hx_cluster_type": "Cluster Type",
+                        "hx_version": "Version",
+                        "hx_build_version": "Build",
+                        "deployment_type": "Deployment Type",
+                        "total_capacity": "Total Capacity GB",
+                        "used_capacity": "Used Capacity GB",
+                        "free_capacity": "Free Capacity GB",
+                        "utilization_percentage": "Utlization %",
+                        "total_savings": "SavingS %",
+                        "deduplication_savings": "Dedup Savings %",
+                        "uptime": "Uptime",
+                        "downtime": "Downtime",
+                        "upgrade_status": "Upgrade Status",
+                        "uplink_speed": "Uplink Speed",
+                        "mgmt_ip_address": "Mgmt IP",
+                        "mgmt_gateway": "Mgmt Gateway",
+                        "mgmt_netmask": "Mgmt Netmask",
+                        "mgmt_vlan": "Mgmt Vlan",
+                        "data_ip_address": "Data IP",
+                        "data_gateway": "Data Gateway",
+                        "data_netmask": "Data NetMask",
+                        "data_vlan": "Data Vlan",
+                        "time_zone": "Time Zone",
+                        "ntp_servers": "NTP Servers",
+                        "dns_servers": "DNS Servers",
+                        "drive_type": "Drive Type",
+                        "storage_capactiy": "Storage Capactiy GB",
+                        "storage_ip_pools": "Storage Pool IP",
+                        "storage_node_count": "Storage Nodes",
+                        "replication_factor": "Replication Copies",
+                        "replication_support": "Replication Support",
+                        "space_status": "Space Status",
+                        "encryption_support": "Encryption Support",
+                        "iscsi_support": "iscsi Support",
+                        "access_policy": "Access Policy",
+                        "active_nodes": "Active Nodes",
+                        "alarm_health_summary": "Alarm Summary",
+                        "alarm_info": "Alaram Info",
+                        "alarm_warning": "Alarm Warning",
+                        "hypervisor_type": "Hypervisor Type",
+                        "hypervisor_version": "Hpervisor Version",
+                        "vcenter_access_point": "Vcenter IP",
+                        "vcenter_cluster_datacenter_id": "vCetner Datacenter ID",
+                        "vcenter_cluster_datacenter_name": "vCenter Datacenter Name",
+                        "vcenter_cluster_id": "vCenter Cluster",
+                        "vcenter_cluster_name": "vCenter Cluster Name",
+                        "vm_count": "VM's",
+                        "vm_network_vlans": "VM VLANS",
+                        "asset_object": "Object Type",
+                        "collection_status": "Collection Status",
+                        "collection_timestamp": {
+                            "title": "Collection Timestamp",
+                            "type": "DATETIME"
+                        }
+                    },
+                    "widget_id": "ff817f92"
+                },
+                {
+                    "widget_type": "tabular",
+                    "title": "HX Node Details",
+                    "stream": "cisco_intersight_inventory",
+                    "extra_filter": "asset_object == 'HxNodes' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "ts_column": "collection_timestamp",
+                    "sorting": [],
+                    "resizableColumns": false,
+                    "paginated": true,
+                    "virtual_scrolling": false,
+                    "showRowSummary": true,
+                    "max_rows": 200,
+                    "columns": {
+                        "intersight_name": "Intersight Name",
+                        "node_name": "Node Name",
+                        "node_serial": "Serial",
+                        "node_status": "Status",
+                        "node_maintenance_mode": "Maintenance Mode",
+                        "node_version": "Version",
+                        "build_number": "Build",
+                        "ip_address": "IP Address",
+                        "mgnt_ip": "MGMT IP",
+                        "data_ip": "Data IP",
+                        "model_number": "Model",
+                        "role": "Role",
+                        "version": "Node Version",
+                        "Hypervisor": "Type",
+                        "hpervisor_ip": "Hyperviso IP",
+                        "empty_slots": "Empty Slot",
+                        "hx_cluster_name": "HX Cluster Name",
+                        "vm_network_vlans": "VM VLANS",
+                        "asset_object": "Object Type",
+                        "collection_status": "Collection Status",
+                        "collection_timestamp": {
+                            "title": "Collection Timestamp",
+                            "type": "DATETIME"
+                        }
+                    },
+                    "widget_id": "b955776b"
+                }
+            ]
+        },
+        {
+            "title": "Servers",
+            "show_filter": true,
+            "widgets": [
+                {
+                    "title": "Blade",
+                    "widget_type": "custom_counter",
+                    "stream": "cisco_intersight_inventory",
+                    "ts_column": "timestamp",
+                    "extra_filter": "asset_object == 'Server' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "column": "server_name",
+                    "agg": "value_count",
+                    "style": {
+                        "color-list": [
+                            "#334FFF"
+                        ]
+                    },
+                    "min_width": 3,
+                    "height": 4,
+                    "max_width": 5,
+                    "type": "str",
+                    "widget_id": "5948304f"
+                },
+                {
+                    "widget_type": "pie_chart",
+                    "title": "Server Status",
+                    "stream": "cisco_intersight_inventory",
+                    "ts_column": "collection_timestamp",
+                    "extra_filter": "asset_object == 'Server' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "column": "_id",
+                    "limit": 100,
+                    "agg": "value_count",
+                    "group_by": [
+                        "server_status"
+                    ],
+                    "type": "str",
+                    "min_width": 3,
+                    "height": 4,
+                    "max_width": 4,
+                    "widget_id": "e6191565"
+                },
+                {
+                    "widget_type": "pie_chart",
+                    "title": "Power Status",
+                    "stream": "cisco_intersight_inventory",
+                    "ts_column": "collection_timestamp",
+                    "extra_filter": "asset_object == 'Server' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "column": "_id",
+                    "limit": 100,
+                    "agg": "value_count",
+                    "group_by": [
+                        "power_status"
+                    ],
+                    "type": "str",
+                    "min_width": 3,
+                    "height": 4,
+                    "max_width": 4,
+                    "widget_id": "f8d11830"
+                },
+                {
+                    "widget_type": "pie_chart",
+                    "title": "Platform Type",
+                    "stream": "cisco_intersight_inventory",
+                    "ts_column": "collection_timestamp",
+                    "extra_filter": "asset_object == 'Server' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "column": "_id",
+                    "limit": 100,
+                    "agg": "value_count",
+                    "group_by": [
+                        "platform_type"
+                    ],
+                    "type": "str",
+                    "min_width": 3,
+                    "height": 4,
+                    "max_width": 4,
+                    "widget_id": "d32c8424"
+                },
+                {
+                    "widget_type": "tabular",
+                    "title": "Server Details",
+                    "stream": "cisco_intersight_inventory",
+                    "extra_filter": "asset_object == 'Server' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "ts_column": "collection_timestamp",
+                    "sorting": [],
+                    "resizableColumns": false,
+                    "paginated": true,
+                    "virtual_scrolling": false,
+                    "showRowSummary": true,
+                    "max_rows": 200,
+                    "columns": {
+                        "intersight_name": "Intersight Name",
+                        "server_name": "Name",
+                        "serial": "Serial",
+                        "server_profile": "Profile",
+                        "server_status": "Status",
+                        "server_uuid": "Server UUID",
+                        "rack_unit": "Rack Name",
+                        "model": "Model",
+                        "power_status": "Power Status",
+                        "mgmt_ip_address": "MGMT IP",
+                        "mgmt_mode": "MGMT Mode",
+                        "total_memory": "Memory GB",
+                        "memory_speed_mhz": "Memory Speed",
+                        "total_cpus": "CPU's",
+                        "total_cores": "Cores",
+                        "total_cores_enabled": "Cores Enabled",
+                        "total_threads": "Threads",
+                        "total_adaptors": "Adaptors",
+                        "total_eth_ports": "ETH Ports",
+                        "total_fc_ports": "FC Ports",
+                        "total_alerts": "Alerts",
+                        "admin_power_state": "Admin Power State",
+                        "bmc_inventory_state": "BMC State",
+                        "kvm_state": "KVM State",
+                        "kvm_vendor": "KVM Vendor",
+                        "platform_type": "Platform Type",
+                        "vendor": "Vendor",
+                        "asset_object": "Object Type",
+                        "collection_status": "Collection Status",
+                        "collection_timestamp": {
+                            "title": "Collection Timestamp",
+                            "type": "DATETIME"
+                        }
+                    },
+                    "widget_id": "ee5a01e1"
+                }
+            ]
+        },
+        {
+            "title": "CPU",
+            "show_filter": true,
+            "widgets": [
+                {
+                    "title": "CPU",
+                    "widget_type": "custom_counter",
+                    "stream": "cisco_intersight_inventory",
+                    "ts_column": "timestamp",
+                    "extra_filter": "asset_object == 'CPU' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "column": "pid",
+                    "agg": "value_count",
+                    "style": {
+                        "color-list": [
+                            "#334FFF"
+                        ]
+                    },
+                    "min_width": 3,
+                    "height": 4,
+                    "max_width": 5,
+                    "type": "str",
+                    "widget_id": "82f264e0"
+                },
+                {
+                    "widget_type": "pie_chart",
+                    "title": "Model",
+                    "stream": "cisco_intersight_inventory",
+                    "ts_column": "collection_timestamp",
+                    "extra_filter": "asset_object == 'CPU' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "column": "_id",
+                    "limit": 100,
+                    "agg": "value_count",
+                    "group_by": [
+                        "model"
+                    ],
+                    "type": "str",
+                    "min_width": 3,
+                    "height": 4,
+                    "max_width": 4,
+                    "widget_id": "d2f71483"
+                },
+                {
+                    "widget_type": "pie_chart",
+                    "title": "State",
+                    "stream": "cisco_intersight_inventory",
+                    "ts_column": "collection_timestamp",
+                    "extra_filter": "asset_object == 'CPU' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "column": "_id",
+                    "limit": 100,
+                    "agg": "value_count",
+                    "group_by": [
+                        "oper_state"
+                    ],
+                    "type": "str",
+                    "min_width": 3,
+                    "height": 4,
+                    "max_width": 4,
+                    "widget_id": "d2f57159"
+                },
+                {
+                    "widget_type": "pie_chart",
+                    "title": "Vendor",
+                    "stream": "cisco_intersight_inventory",
+                    "ts_column": "collection_timestamp",
+                    "extra_filter": "asset_object == 'CPU' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "column": "_id",
+                    "limit": 100,
+                    "agg": "value_count",
+                    "group_by": [
+                        "vendor"
+                    ],
+                    "type": "str",
+                    "min_width": 3,
+                    "height": 4,
+                    "max_width": 4,
+                    "widget_id": "dd3577c3"
+                },
+                {
+                    "widget_type": "tabular",
+                    "title": "CPU Details",
+                    "stream": "cisco_intersight_inventory",
+                    "extra_filter": "asset_object == 'CPU' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "ts_column": "collection_timestamp",
+                    "sorting": [],
+                    "resizableColumns": false,
+                    "paginated": true,
+                    "virtual_scrolling": false,
+                    "showRowSummary": true,
+                    "max_rows": 200,
+                    "columns": {
+                        "intersight_name": "Intersight Name",
+                        "server_name": "Server Name",
+                        "rack_unit": "Rack Unit",
+                        "processor_id": "Processor ID",
+                        "serial": "Serial",
+                        "total_cores": "Cores",
+                        "total_cores_enabled": "Cores Enabled",
+                        "total_threads": "Threads",
+                        "cpu_speed": "Speed",
+                        "architecture": "Architecture",
+                        "model": "Model",
+                        "part_number": "Part Number",
+                        "pid": "Name",
+                        "description": "Description",
+                        "oper_state": "State",
+                        "power_status": "Power Status",
+                        "vendor": "Vendor",
+                        "asset_object": "Object Type",
+                        "collection_status": "Collection Status",
+                        "collection_timestamp": {
+                            "title": "Collection Timestamp",
+                            "type": "DATETIME"
+                        }
+                    },
+                    "widget_id": "02ffe7ac"
+                }
+            ]
+        },
+        {
+            "title": "Memory",
+            "show_filter": true,
+            "widgets": [
+                {
+                    "title": "Memory",
+                    "widget_type": "custom_counter",
+                    "stream": "cisco_intersight_inventory",
+                    "ts_column": "timestamp",
+                    "extra_filter": "asset_object == 'Memory' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "column": "device_moid",
+                    "agg": "value_count",
+                    "style": {
+                        "color-list": [
+                            "#334FFF"
+                        ]
+                    },
+                    "min_width": 3,
+                    "height": 4,
+                    "max_width": 5,
+                    "type": "str",
+                    "widget_id": "0b314fac"
+                },
+                {
+                    "widget_type": "pie_chart",
+                    "title": "State",
+                    "stream": "cisco_intersight_inventory",
+                    "ts_column": "collection_timestamp",
+                    "extra_filter": "asset_object == 'Memory' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "column": "_id",
+                    "limit": 100,
+                    "agg": "value_count",
+                    "group_by": [
+                        "presence"
+                    ],
+                    "type": "str",
+                    "min_width": 3,
+                    "height": 4,
+                    "max_width": 4,
+                    "widget_id": "a25b1c9a"
+                },
+                {
+                    "widget_type": "pie_chart",
+                    "title": "Model",
+                    "stream": "cisco_intersight_inventory",
+                    "ts_column": "collection_timestamp",
+                    "extra_filter": "asset_object == 'Memory' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "column": "_id",
+                    "limit": 100,
+                    "agg": "value_count",
+                    "group_by": [
+                        "model"
+                    ],
+                    "type": "str",
+                    "min_width": 3,
+                    "height": 4,
+                    "max_width": 4,
+                    "widget_id": "c53b392c"
+                },
+                {
+                    "widget_type": "tabular",
+                    "title": "Memory Details",
+                    "stream": "cisco_intersight_inventory",
+                    "extra_filter": "asset_object == 'Memory' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "ts_column": "collection_timestamp",
+                    "sorting": [],
+                    "resizableColumns": false,
+                    "paginated": true,
+                    "virtual_scrolling": false,
+                    "showRowSummary": true,
+                    "max_rows": 200,
+                    "columns": {
+                        "intersight_name": "Intersight Name",
+                        "location": "Location",
+                        "memory_id": "Meomory ID",
+                        "array_id": "Array ID",
+                        "bank": "Bank",
+                        "presence": "Presence",
+                        "visibility": "Visibility",
+                        "type": "Type",
+                        "capacity_mb": "Size",
+                        "clock_speed": "Speed",
+                        "description": "Description",
+                        "speed": "Speed",
+                        "thermal_state": "Thermal State",
+                        "server_name": "Server Name",
+                        "rack_unit": "Rack Unit",
+                        "vendor": "Vendor",
+                        "model": "Model",
+                        "part_number": "Part Number",
+                        "dimm_serial": "DIMM Serial",
+                        "pid": "PID",
+                        "latency": "Latency",
+                        "asset_object": "Object Type",
+                        "collection_status": "Collection Status",
+                        "collection_timestamp": {
+                            "title": "Collection Timestamp",
+                            "type": "DATETIME"
+                        }
+                    },
+                    "widget_id": "e277d6a9"
+                }
+            ]
+        },
+        {
+            "title": "Firmware",
+            "show_filter": true,
+            "widgets": [
+                {
+                    "title": "Firmware",
+                    "widget_type": "custom_counter",
+                    "stream": "cisco_intersight_inventory",
+                    "ts_column": "timestamp",
+                    "extra_filter": "asset_object == 'FW' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "column": "fw_moid",
+                    "agg": "value_count",
+                    "style": {
+                        "color-list": [
+                            "#334FFF"
+                        ]
+                    },
+                    "min_width": 3,
+                    "height": 4,
+                    "max_width": 5,
+                    "type": "str",
+                    "widget_id": "8a66ed78"
+                },
+                {
+                    "widget_type": "pie_chart",
+                    "title": "FirmWare ID",
+                    "stream": "cisco_intersight_inventory",
+                    "ts_column": "collection_timestamp",
+                    "extra_filter": "asset_object == 'FW' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "column": "_id",
+                    "limit": 100,
+                    "agg": "value_count",
+                    "group_by": [
+                        "firmware_id"
+                    ],
+                    "type": "str",
+                    "min_width": 3,
+                    "height": 4,
+                    "max_width": 4,
+                    "widget_id": "d83b93d6"
+                },
+                {
+                    "widget_type": "pie_chart",
+                    "title": "Component Type",
+                    "stream": "cisco_intersight_inventory",
+                    "ts_column": "collection_timestamp",
+                    "extra_filter": "asset_object == 'FW' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "column": "_id",
+                    "limit": 100,
+                    "agg": "value_count",
+                    "group_by": [
+                        "component"
+                    ],
+                    "type": "str",
+                    "min_width": 3,
+                    "height": 4,
+                    "max_width": 4,
+                    "widget_id": "2c86b629"
+                },
+                {
+                    "widget_type": "pie_chart",
+                    "title": "Device Type",
+                    "stream": "cisco_intersight_inventory",
+                    "ts_column": "collection_timestamp",
+                    "extra_filter": "asset_object == 'FW' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "column": "_id",
+                    "limit": 100,
+                    "agg": "value_count",
+                    "group_by": [
+                        "type"
+                    ],
+                    "type": "str",
+                    "min_width": 3,
+                    "height": 4,
+                    "max_width": 4,
+                    "widget_id": "7ca8df02"
+                },
+                {
+                    "widget_type": "tabular",
+                    "title": "FirmWare Details",
+                    "stream": "cisco_intersight_inventory",
+                    "extra_filter": "asset_object == 'FW' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "ts_column": "collection_timestamp",
+                    "sorting": [],
+                    "resizableColumns": false,
+                    "paginated": true,
+                    "virtual_scrolling": false,
+                    "showRowSummary": true,
+                    "max_rows": 200,
+                    "columns": {
+                        "intersight_name": "Intersight Name",
+                        "firmware_id": "Firmware ID",
+                        "component": "Component",
+                        "component_type": "Component Type",
+                        "type": "Device Type",
+                        "version": "Version",
+                        "serial": "Server Serial",
+                        "server_name": "Server Name",
+                        "rack_unit": "Rack Unit",
+                        "biosunit_objecttype": "BIOS Unit",
+                        "management_controller": "Mgmt Controller",
+                        "package_version": "Package Version",
+                        "pci_swtich": "Swtich",
+                        "vendor": "Vendor",
+                        "asset_object": "Object Type",
+                        "collection_status": "Collection Status",
+                        "collection_timestamp": {
+                            "title": "Collection Timestamp",
+                            "type": "DATETIME"
+                        }
+                    },
+                    "widget_id": "10e2c368"
+                }
+            ]
+        },
+        {
+            "title": "Network",
+            "show_filter": true,
+            "widgets": [
+                {
+                    "title": "Networks's",
+                    "widget_type": "custom_counter",
+                    "stream": "cisco_intersight_inventory",
+                    "ts_column": "timestamp",
+                    "extra_filter": "asset_object == 'Network' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "column": "interface_name",
+                    "agg": "value_count",
+                    "style": {
+                        "color-list": [
+                            "#334FFF"
+                        ]
+                    },
+                    "min_width": 3,
+                    "height": 4,
+                    "max_width": 5,
+                    "type": "str",
+                    "widget_id": "5b427821"
+                },
+                {
+                    "widget_type": "pie_chart",
+                    "title": "Network State",
+                    "stream": "cisco_intersight_inventory",
+                    "ts_column": "collection_timestamp",
+                    "extra_filter": "asset_object == 'Network' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "column": "_id",
+                    "limit": 100,
+                    "agg": "value_count",
+                    "group_by": [
+                        "oper_state"
+                    ],
+                    "type": "str",
+                    "min_width": 3,
+                    "height": 4,
+                    "max_width": 4,
+                    "widget_id": "8a783169"
+                },
+                {
+                    "title": "Swtich's",
+                    "widget_type": "custom_counter",
+                    "stream": "cisco_intersight_inventory",
+                    "ts_column": "timestamp",
+                    "extra_filter": "asset_object == 'Switch' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "column": "switch_name",
+                    "agg": "value_count",
+                    "style": {
+                        "color-list": [
+                            "#334FFF"
+                        ]
+                    },
+                    "min_width": 3,
+                    "height": 4,
+                    "max_width": 5,
+                    "type": "str",
+                    "widget_id": "e65bed3d"
+                },
+                {
+                    "widget_type": "pie_chart",
+                    "title": "Switch State",
+                    "stream": "cisco_intersight_inventory",
+                    "ts_column": "collection_timestamp",
+                    "extra_filter": "asset_object == 'Switch' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "column": "_id",
+                    "limit": 100,
+                    "agg": "value_count",
+                    "group_by": [
+                        "operability"
+                    ],
+                    "type": "str",
+                    "min_width": 3,
+                    "height": 4,
+                    "max_width": 4,
+                    "widget_id": "90bff8c8"
+                },
+                {
+                    "title": "Physical Interface's",
+                    "widget_type": "custom_counter",
+                    "stream": "cisco_intersight_inventory",
+                    "ts_column": "timestamp",
+                    "extra_filter": "asset_object == 'ETH' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "column": "admin_state",
+                    "agg": "value_count",
+                    "style": {
+                        "color-list": [
+                            "#334FFF"
+                        ]
+                    },
+                    "min_width": 3,
+                    "height": 4,
+                    "max_width": 5,
+                    "type": "str",
+                    "widget_id": "f67bf9ef"
+                },
+                {
+                    "widget_type": "pie_chart",
+                    "title": "Physcial State",
+                    "stream": "cisco_intersight_inventory",
+                    "ts_column": "collection_timestamp",
+                    "extra_filter": "asset_object == 'ETH' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "column": "_id",
+                    "limit": 100,
+                    "agg": "value_count",
+                    "group_by": [
+                        "oper_state"
+                    ],
+                    "type": "str",
+                    "min_width": 3,
+                    "height": 4,
+                    "max_width": 4,
+                    "widget_id": "0568e68a"
+                },
+                {
+                    "widget_type": "pie_chart",
+                    "title": "Physcial Admin State",
+                    "stream": "cisco_intersight_inventory",
+                    "ts_column": "collection_timestamp",
+                    "extra_filter": "asset_object == 'ETH' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "column": "_id",
+                    "limit": 100,
+                    "agg": "value_count",
+                    "group_by": [
+                        "admin_state"
+                    ],
+                    "type": "str",
+                    "min_width": 3,
+                    "height": 4,
+                    "max_width": 4,
+                    "widget_id": "1db4d19d"
+                },
+                {
+                    "widget_type": "pie_chart",
+                    "title": "Physcial Port Speed",
+                    "stream": "cisco_intersight_inventory",
+                    "ts_column": "collection_timestamp",
+                    "extra_filter": "asset_object == 'ETH' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "column": "_id",
+                    "limit": 100,
+                    "agg": "value_count",
+                    "group_by": [
+                        "oper_speed"
+                    ],
+                    "type": "str",
+                    "min_width": 3,
+                    "height": 4,
+                    "max_width": 4,
+                    "widget_id": "a6987e4a"
+                },
+                {
+                    "widget_type": "tabular",
+                    "title": "Swtich Details",
+                    "stream": "cisco_intersight_inventory",
+                    "extra_filter": "asset_object == 'Switch' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "ts_column": "collection_timestamp",
+                    "sorting": [],
+                    "resizableColumns": false,
+                    "paginated": true,
+                    "virtual_scrolling": false,
+                    "showRowSummary": true,
+                    "max_rows": 200,
+                    "height": 6,
+                    "columns": {
+                        "intersight_name": "Intersight Name",
+                        "switch_id": "ID",
+                        "switch_mode": "Mode",
+                        "switch_name": "Name",
+                        "switch_profile_name": "Profile Name",
+                        "switch_serial": "Serial",
+                        "switch_type": "Type",
+                        "total_memory": "Memory GB",
+                        "ip_address": "IP Address",
+                        "netmask": "Netmask",
+                        "gateway": "GateWay",
+                        "mac_address": "MAC Address",
+                        "management_mode": "MGMT Mode",
+                        "model": "Model",
+                        "operability": "State",
+                        "slot_id": "Slot ID",
+                        "vendor": "Vendor",
+                        "thermal_state": "Thermal State",
+                        "uptime": "Uptime",
+                        "version": "Version",
+                        "health": "Health State",
+                        "evac_state": "Evac State",
+                        "fault_summary": "Faults",
+                        "fc_port_channels": "FC Port Channels",
+                        "fc_switch_mode": "FC Switch Mode",
+                        "asset_object": "Object Type",
+                        "collection_status": "Collection Status",
+                        "collection_timestamp": {
+                            "title": "Collection Timestamp",
+                            "type": "DATETIME"
+                        }
+                    },
+                    "widget_id": "00c8f672"
+                },
+                {
+                    "widget_type": "tabular",
+                    "title": "Network Details",
+                    "stream": "cisco_intersight_inventory",
+                    "extra_filter": "asset_object == 'Network' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "ts_column": "collection_timestamp",
+                    "sorting": [],
+                    "resizableColumns": false,
+                    "paginated": true,
+                    "virtual_scrolling": false,
+                    "showRowSummary": true,
+                    "max_rows": 200,
+                    "columns": {
+                        "intersight_name": "Intersight Name",
+                        "interface_name": "Interface Name",
+                        "interface_id": "Interface ID",
+                        "eth_id": "Network ID",
+                        "Host_eth_interface_id": "Host ETH Interface ID",
+                        "mac_address": "MAC Address",
+                        "oper_state": "State",
+                        "operability": "Operability",
+                        "admin_state": "Admin State",
+                        "pci_addrs": "PCI Address",
+                        "qing_enabled": "Qing Enabled",
+                        "qing_vlan": "VLAN",
+                        "server_name": "Server Name",
+                        "rack_unit": "Rack Unit",
+                        "vif_id": "VIF ID",
+                        "asset_object": "Object Type",
+                        "collection_status": "Collection Status",
+                        "collection_timestamp": {
+                            "title": "Collection Timestamp",
+                            "type": "DATETIME"
+                        }
+                    },
+                    "widget_id": "a9bb809d"
+                },
+                {
+                    "widget_type": "tabular",
+                    "title": "Phynsical Interface Details",
+                    "stream": "cisco_intersight_inventory",
+                    "extra_filter": "asset_object == 'ETH' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "ts_column": "collection_timestamp",
+                    "sorting": [],
+                    "resizableColumns": false,
+                    "paginated": true,
+                    "virtual_scrolling": false,
+                    "showRowSummary": true,
+                    "max_rows": 200,
+                    "columns": {
+                        "intersight_name": "Intersight Name",
+                        "port_id": "Port ID",
+                        "port_ids": "Port Name",
+                        "port_channel_id": "Port Channel ID",
+                        "port_type": "Port Type",
+                        "mac_address": "Mac Address",
+                        "mode": "Mode",
+                        "oper_speed": "Speed",
+                        "oper_state": "State",
+                        "admin_speed": "Admin Speed",
+                        "admin_state": "Admin State",
+                        "slot_id": "Slot ID",
+                        "switch_id": "Switch ID",
+                        "switch_name": "Switch Name",
+                        "eth_name": "ETH Name",
+                        "component_type": "Component Type",
+                        "license_state": "License",
+                        "peer_interface": "Peer Interface",
+                        "role": "Role",
+                        "user_label": "User Label",
+                        "asset_object": "Object Type",
+                        "collection_status": "Collection Status",
+                        "collection_timestamp": {
+                            "title": "Collection Timestamp",
+                            "type": "DATETIME"
+                        }
+                    },
+                    "widget_id": "e4c2f2d0"
+                }
+            ]
+        },
+        {
+            "title": "Storage",
+            "show_filter": true,
+            "widgets": [
+                {
+                    "title": "HBA",
+                    "widget_type": "custom_counter",
+                    "stream": "cisco_intersight_inventory",
+                    "ts_column": "timestamp",
+                    "extra_filter": "asset_object == 'HBA' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "column": "hba_name",
+                    "agg": "value_count",
+                    "style": {
+                        "color-list": [
+                            "#334FFF"
+                        ]
+                    },
+                    "min_width": 3,
+                    "height": 4,
+                    "max_width": 5,
+                    "type": "str",
+                    "widget_id": "060ce0ac"
+                },
+                {
+                    "widget_type": "pie_chart",
+                    "title": "HBA Model",
+                    "stream": "cisco_intersight_inventory",
+                    "ts_column": "collection_timestamp",
+                    "extra_filter": "asset_object == 'HBA' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "column": "_id",
+                    "limit": 100,
+                    "agg": "value_count",
+                    "group_by": [
+                        "model"
+                    ],
+                    "type": "str",
+                    "min_width": 3,
+                    "height": 4,
+                    "max_width": 4,
+                    "widget_id": "d2d03ef2"
+                },
+                {
+                    "title": "Disk",
+                    "widget_type": "custom_counter",
+                    "stream": "cisco_intersight_inventory",
+                    "ts_column": "timestamp",
+                    "extra_filter": "asset_object == 'Storage' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "column": "disk_id",
+                    "agg": "value_count",
+                    "style": {
+                        "color-list": [
+                            "#334FFF"
+                        ]
+                    },
+                    "min_width": 3,
+                    "height": 4,
+                    "max_width": 5,
+                    "type": "str",
+                    "widget_id": "92c613ce"
+                },
+                {
+                    "widget_type": "pie_chart",
+                    "title": "Disk State",
+                    "stream": "cisco_intersight_inventory",
+                    "ts_column": "collection_timestamp",
+                    "extra_filter": "asset_object == 'Storage' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "column": "_id",
+                    "limit": 100,
+                    "agg": "value_count",
+                    "group_by": [
+                        "disk_state"
+                    ],
+                    "type": "str",
+                    "min_width": 3,
+                    "height": 4,
+                    "max_width": 4,
+                    "widget_id": "75605f9d"
+                },
+                {
+                    "widget_type": "pie_chart",
+                    "title": "Disk Type",
+                    "stream": "cisco_intersight_inventory",
+                    "ts_column": "collection_timestamp",
+                    "extra_filter": "asset_object == 'Storage' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "column": "_id",
+                    "limit": 100,
+                    "agg": "value_count",
+                    "group_by": [
+                        "storage_type"
+                    ],
+                    "type": "str",
+                    "min_width": 3,
+                    "height": 4,
+                    "max_width": 4,
+                    "widget_id": "59bf3fda"
+                },
+                {
+                    "widget_type": "pie_chart",
+                    "title": "Disk Presence",
+                    "stream": "cisco_intersight_inventory",
+                    "ts_column": "collection_timestamp",
+                    "extra_filter": "asset_object == 'Storage' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "column": "_id",
+                    "limit": 100,
+                    "agg": "value_count",
+                    "group_by": [
+                        "presence"
+                    ],
+                    "type": "str",
+                    "min_width": 3,
+                    "height": 4,
+                    "max_width": 4,
+                    "widget_id": "f1815cb0"
+                },
+                {
+                    "widget_type": "pie_chart",
+                    "title": "Drive State",
+                    "stream": "cisco_intersight_inventory",
+                    "ts_column": "collection_timestamp",
+                    "extra_filter": "asset_object == 'Storage' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "column": "_id",
+                    "limit": 100,
+                    "agg": "value_count",
+                    "group_by": [
+                        "drive_state"
+                    ],
+                    "type": "str",
+                    "min_width": 3,
+                    "height": 4,
+                    "max_width": 4,
+                    "widget_id": "ce3e5a48"
+                },
+                {
+                    "widget_type": "tabular",
+                    "title": "HBA Details",
+                    "stream": "cisco_intersight_inventory",
+                    "extra_filter": "asset_object == 'HBA' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "ts_column": "collection_timestamp",
+                    "sorting": [],
+                    "resizableColumns": false,
+                    "paginated": true,
+                    "virtual_scrolling": false,
+                    "showRowSummary": true,
+                    "max_rows": 200,
+                    "columns": {
+                        "intersight_name": "Intersight Name",
+                        "hba_name": "HBA Name",
+                        "hba_serial": "HBA Serial",
+                        "host_fc_interface_id": "Host FC interface ID",
+                        "wwnn": "WWNN",
+                        "wwpn": "WWPN",
+                        "model": "Model",
+                        "vendor": "Vendor",
+                        "admin_state": "State",
+                        "oper_state": "Status",
+                        "operability": "Operability",
+                        "pin_group_name": "PIN Group Name",
+                        "pinned_interface": "Pinned Interface",
+                        "presence": "Presence",
+                        "asset_object": "Object Type",
+                        "collection_status": "Collection Status",
+                        "collection_timestamp": {
+                            "title": "Collection Timestamp",
+                            "type": "DATETIME"
+                        }
+                    },
+                    "widget_id": "30db8e33"
+                },
+                {
+                    "widget_type": "tabular",
+                    "title": "Disk Details",
+                    "stream": "cisco_intersight_inventory",
+                    "extra_filter": "asset_object == 'Storage' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "ts_column": "collection_timestamp",
+                    "sorting": [],
+                    "resizableColumns": false,
+                    "paginated": true,
+                    "virtual_scrolling": false,
+                    "showRowSummary": true,
+                    "max_rows": 200,
+                    "columns": {
+                        "intersight_name": "Intersight Name",
+                        "device_moid": "Disk UUID",
+                        "disk_id": "Disk ID",
+                        "storage_type": "Storage Type",
+                        "server_name": "Server Name",
+                        "rack_unit": "Rack Unit",
+                        "disk_state": "Disk State",
+                        "presence": "Presence",
+                        "protocol": "Protocol",
+                        "drive_state": "Drive State",
+                        "disabled_for_removal": "Removel State",
+                        "disk_name": "Disk Name",
+                        "disk_serial": "Disk Serial",
+                        "disk_slot": "Disk Slot",
+                        "disk_type": "Disk Type",
+                        "drive_cache": "Drive Cache",
+                        "drive_firmware": "Drive Firmware",
+                        "drive_security": "Drive Security",
+                        "size": "Size",
+                        "stripe_size": "Strip Size",
+                        "raw_size": "RAW Size",
+                        "vendor": "Vendor",
+                        "model": "Model",
+                        "encryption_status": "Encryption Status",
+                        "failure_predicted": "Failure Predicted",
+                        "hot_spare_type": "Hot Spare",
+                        "hw_version": "HW Version",
+                        "asset_object": "Object Type",
+                        "collection_status": "Collection Status",
+                        "collection_timestamp": {
+                            "title": "Collection Timestamp",
+                            "type": "DATETIME"
+                        }
+                    },
+                    "widget_id": "e3161909"
+                }
+            ]
+        }
+    ],
+    "saved_time": "2025-12-30T10:02:49.280772"
+}

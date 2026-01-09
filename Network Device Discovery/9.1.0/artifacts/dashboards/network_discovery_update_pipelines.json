@@ -1,0 +1,341 @@
+{
+    "name": "network_discovery_update_pipelines",
+    "label": "Network Discovery Update Credentials in Pipelines",
+    "description": "Network Discovery Set Credentials in Pipelines",
+    "version": "24.9.20.1",
+    "enabled": false,
+    "dashboard_style": "auto",
+    "dashboard_folder": "NetworkDevicePack",
+    "dashboard_filters": {
+        "time_filter": false,
+        "group_filters": [
+            
+        ],
+        "columns_filter": [
+        ]
+    },
+    "dashboard_sections": [
+        {
+            "title": "Linux",
+            "show_filter": false,
+            "widgets": [
+                {
+                    "title": "Published Pipelines",
+                    "widget_type": "tabular",
+                    "stream": "rda_pipelines_meta",
+                    "extra_filter": "name in ['msp_customer_discovery_pipeline','access_verification_main_pipeline']",
+                    "refreshOptions": {
+                        "refreshType": "Periodic",
+                        "refreshInterval": 30000
+                    },
+                    "duration_hours": 87600,
+                    "remote_searchable": true,
+                    "remote_searchable_cols": [
+                        "name",
+                        "folder",
+                        "category",
+                        "usecase",
+                        "version",
+                        "versions",
+                        "report_type"
+                    ],
+                    "ts_column": "saved_time",
+                    "paginated": true,
+                    "height": 4,
+                    "min_wdith": 12,
+                    "columns": {
+                        "folder": {
+                            "title": "Folder",
+                            "key": true
+                        },
+                        "name": {
+                            "title": "Name",
+                            "key": true
+                        },
+                        "pipeline_name": {
+                            "title": "Pipeline Name",
+                            "key": true,
+                            "visible": false
+                        },
+                        "category": {
+                            "title": "Category",
+                            "key": true,
+                            "visible": false
+                        },
+                        "usecase": {
+                            "title": "Usecase",
+                            "key": true,
+                            "visible": false
+                        },
+                        "version": {
+                            "title": "Latest Version",
+                            "key": true
+                        },
+                        "versions": {
+                            "title": "Versions",
+                            "visible": false
+                        },
+                        "saved_time": {
+                            "title": "Saved Time",
+                            "type": "DATETIME"
+                        },
+                        "timestamp": {
+                            "title": "When",
+                            "type": "HUMANIZE_TIME_DELTA",
+                            "source-column": "saved_time",
+                            "sortable": false
+                        },
+                        "is_draft": {
+                            "title": "Is Draft",
+                            "key": true,
+                            "type": "FIXED_VALUE",
+                            "value": false,
+                            "visible": false,
+                            "sortable": false
+                        },
+                        "report_type": {
+                            "title": "Report Type",
+                            "key": true,
+                            "visible": false
+                        }
+                    },
+                    "custom_columns": [
+                        {
+                            "id": "pipeline_name",
+                            "label": "Pipe Name",
+                            "expr": "name",
+                            "key": true,
+                            "visible": false,
+                            "sortable": false
+                        },
+                        {
+                            "id": "artifact_name",
+                            "label": "Artifact Name",
+                            "expr": "name",
+                            "key": true,
+                            "visible": false,
+                            "sortable": false
+                        },
+                        {
+                            "id": "artifact_type",
+                            "label": "Artifact Type",
+                            "expr": "'published_pipeline'",
+                            "key": true,
+                            "visible": false,
+                            "sortable": false
+                        }
+                    ],
+                    "actions": [
+                        {
+                            "permission": "rda:pipeline:view",
+                            "title": "View Pipeline",
+                            "type": "POPUP_FORM",
+                            "drillDownLinkField": "name",
+                            "selectionType": "SINGLE",
+                            "identifier": "saas-service-action:view-pipeline",
+                            "api-endpoint": {
+                                "service-name": "saas-reports",
+                                "methodName": "getForm",
+                                "stringified-params": true,
+                                "parse-output": false,
+                                "params": [
+                                    {
+                                        "formId": "rda.saas.pipeline.view"
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "permission": "rda:pipeline:edit",
+                            "title": "Edit Pipeline",
+                            "type": "POPUP_FORM",
+                            "drillDownLinkField": "name",
+                            "selectionType": "SINGLE",
+                            "identifier": "saas-service-action:edit-pipeline",
+                            "api-endpoint": {
+                                "service-name": "saas-reports",
+                                "methodName": "getForm",
+                                "stringified-params": true,
+                                "parse-output": false,
+                                "params": [
+                                    {
+                                        "formId": "rda.saas.pipeline.edit"
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "widget_id": "182287d8"
+                },
+                {
+                    "title": "Draft Pipelines",
+                    "widget_type": "tabular",
+                    "stream": "rda_draft_pipelines_meta",
+                    "extra_filter": "name in ['msp_customer_discovery_pipeline','access_verification_main_pipeline']",
+                    "refreshOptions": {
+                        "refreshType": "Periodic",
+                        "refreshInterval": 30000
+                    },
+                    "duration_hours": 87600,
+                    "remote_searchable": true,
+                    "ts_column": "saved_time",
+                    "remote_searchable_cols": [
+                        "name",
+                        "folder",
+                        "category",
+                        "usecase",
+                        "version",
+                        "versions",
+                        "report_type"
+                    ],
+                    "columns": {
+                        "folder": {
+                            "title": "Folder"
+                        },
+                        "name": {
+                            "title": "Name",
+                            "key": true
+                        },
+                        "pipeline_name": {
+                            "label": "Pipeline Name",
+                            "key": true,
+                            "visible": false
+                        },
+                        "category": {
+                            "title": "Category",
+                            "key": true,
+                            "visible": false
+                        },
+                        "usecase": {
+                            "title": "Usecase",
+                            "key": true,
+                            "visible": false
+                        },
+                        "version": {
+                            "title": "Latest Version",
+                            "key": true
+                        },
+                        "versions": {
+                            "title": "Versions",
+                            "visible": false
+                        },
+                        "saved_time": {
+                            "title": "Saved Time",
+                            "type": "DATETIME"
+                        },
+                        "timestamp": {
+                            "title": "When",
+                            "type": "HUMANIZE_TIME_DELTA",
+                            "source-column": "saved_time",
+                            "sortable": false
+                        },
+                        "is_draft": {
+                            "title": "Is Draft",
+                            "key": true,
+                            "type": "FIXED_VALUE",
+                            "value": true,
+                            "visible": false,
+                            "sortable": false
+                        },
+                        "report_type": {
+                            "title": "Report Type",
+                            "key": true,
+                            "visible": false
+                        }
+                    },
+                    "custom_columns": [
+                        {
+                            "id": "pipeline_name",
+                            "label": "Pipe Name",
+                            "expr": "name",
+                            "key": true,
+                            "visible": false,
+                            "sortable": false
+                        },
+                        {
+                            "id": "artifact_name",
+                            "label": "Artifact Name",
+                            "expr": "name",
+                            "key": true,
+                            "visible": false,
+                            "sortable": false
+                        },
+                        {
+                            "id": "artifact_type",
+                            "label": "Artifact Type",
+                            "expr": "'draft_pipeline'",
+                            "key": true,
+                            "visible": false,
+                            "sortable": false
+                        }
+                    ],
+                    "paginated": true,
+                    "actions": [
+                        
+                        {
+                            "permission": "rda:pipeline:view",
+                            "title": "View Pipeline",
+                            "type": "POPUP_FORM",
+                            "drillDownLinkField": "name",
+                            "selectionType": "SINGLE",
+                            "identifier": "saas-service-action:view-pipeline",
+                            "api-endpoint": {
+                                "service-name": "saas-reports",
+                                "methodName": "getForm",
+                                "stringified-params": true,
+                                "parse-output": false,
+                                "params": [
+                                    {
+                                        "formId": "rda.saas.pipeline.view"
+                                    }
+                                ]
+                            }
+                        },
+                        
+                        {
+                            "permission": "rda:pipeline:edit",
+                            "title": "Edit Pipeline",
+                            "type": "POPUP_FORM",
+                            "drillDownLinkField": "name",
+                            "selectionType": "SINGLE",
+                            "identifier": "saas-service-action:edit-pipeline",
+                            "api-endpoint": {
+                                "service-name": "saas-reports",
+                                "methodName": "getForm",
+                                "stringified-params": true,
+                                "parse-output": false,
+                                "params": [
+                                    {
+                                        "formId": "rda.saas.pipeline.edit"
+                                    }
+                                ]
+                            }
+                        },
+                        
+                        {
+                            "permission": "rda:pipeline:publish",
+                            "title": "Publish",
+                            "type": "POPUP_FORM",
+                            "selectionType": "SINGLE",
+                            "identifier": "saas-service-action:publish-pipeline",
+                            "api-endpoint": {
+                                "service-name": "saas-reports",
+                                "methodName": "getForm",
+                                "stringified-params": true,
+                                "parse-output": false,
+                                "params": [
+                                    {
+                                        "formId": "rda.saas.pipeline.publish"
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "height": 4,
+                    "min_wdith": 12
+                   
+                }
+            ]
+        }
+    ]
+}
