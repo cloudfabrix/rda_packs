@@ -23,6 +23,7 @@ Fabrix.ai Extended Network Device Discovery supports SNMP- and SSH-based discove
 | SonicWall | TZ, NSa, NSsp firewall families | SonicOS |
 | Versa Networks | Secure SD-WAN, branch/WAN edge, CSG appliances | VOS |
 | Alcatel-Lucent Enterprise | OmniSwitch campus switches, OmniAccess wireless, OmniVista-managed environments | |
+| H3C Technologies | S12500X-AF series Switches, S98XX, S68XX, S10500X | |
 
 
 This pack is designed for inventory collection for Extended Network Devices using standard SNMP mibs.

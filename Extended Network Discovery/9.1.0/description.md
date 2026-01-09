@@ -6,17 +6,16 @@ Fabrix.ai Extended Network Device Discovery supports SNMP- and SSH-based discove
 | Network Vendor | Platforms / Hardware | OS |
 |---|---|---|
 | Cisco | Catalyst switches, Nexus switches, ISR / ASR / NCS routers, Catalyst 8000 SD-WAN edge platforms, Catalyst 9800 wireless controllers, Meraki MR / MS / MX, Secure Firewall / Firepower | IOS, IOS XE, IOS XR, NX-OS, Meraki cloud platform, Secure Firewall Threat Defense, FXOS |
-| Juniper Networks | EX, QFX, MX, ACX, PTX, SRX, Mist-managed wireless | Junos, Mist cloud platform |
+| Juniper Networks | EX, QFX, MX, ACX, PTX, SRX, Mist-managed wireless | JUNOS |
 | HPE Aruba Networking | CX campus/data-center switches, wireless APs, gateways, controllers | AOS-CX, ArubaOS, AOS 10 |
-| Extreme Networks | ExtremeSwitching campus/data-center switches, fabric deployments, wireless infrastructure | Switch Engine, Fabric Engine, ExtremeCloud IQ |
+| Extreme Networks | ExtremeSwitching campus/data-center switches, fabric deployments, wireless infrastructure | ExtremeXOS |
 | Ubiquiti | UniFi switches, UniFi cloud gateways, UniFi access points, UISP routers | UniFi OS, UISP platform |
 | Fortinet | FortiGate, FortiSwitch, FortiAP | FortiOS, FortiSwitchOS |
 | Palo Alto Networks | PA-Series next-generation firewalls, Panorama-managed security environments | PAN-OS |
 | Arista | Campus switches, data-center/cloud switches | EOS |
 | Dell | PowerSwitch N-Series, S-Series, Z-Series | SmartFabric OS10, OS6, OS9 |
 | RUCKUS / CommScope | ICX switches, RUCKUS APs, SmartZone / RUCKUS One-managed WLAN | ICX switch software, SmartZone, RUCKUS One |
-| Nokia | 7210 SAS, 7250 IXR, 7450 ESS, 7705 SAR, 7750 SR, 7950 XRS | SR OS, SR Linux |
-| Ericsson | Router 6000 family | Ericsson Router 6000 platform software |
+| Nokia | 7XXX Family SR, XRS, IXR, SIR etc.  | SR OS, SR Linux |
 | Ciena | 3900 family service-delivery / packet platforms | SAOS |
 | Check Point | Quantum Security Gateways | Gaia |
 | F5 | BIG-IP appliances, virtual editions, application delivery platforms | TMOS |
@@ -24,6 +23,7 @@ Fabrix.ai Extended Network Device Discovery supports SNMP- and SSH-based discove
 | SonicWall | TZ, NSa, NSsp firewall families | SonicOS |
 | Versa Networks | Secure SD-WAN, branch/WAN edge, CSG appliances | VOS |
 | Alcatel-Lucent Enterprise | OmniSwitch campus switches, OmniAccess wireless, OmniVista-managed environments | |
+| H3C Technologies | S12500X-AF series Switches, S98XX, S68XX, S10500X | |
 
 
 This pack is designed for inventory collection for Extended Network Devices using standard SNMP mibs.
