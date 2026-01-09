@@ -3,7 +3,7 @@
   
 Fabrix.ai Extended Network Device Discovery supports SNMP- and SSH-based discovery of multi-vendor enterprise and service-provider IP network infrastructure, including campus and branch switches, routers, SD-WAN edges, wireless infrastructure, security gateways, ADC/load-balancing platforms, and IP/MPLS service-edge devices across leading network vendors. In addition to protocol-based discovery and inventory collection, the pack can use SSH login to gather device CLI output and internally leverages TextFSM templates to parse commands and extract device features, configurations, and operational parameters. Discovery depth can vary by platform based on enabled protocols, exposed MIBs, device credentials, CLI access, and available parsing coverage. 
   
-| Network Vendor | Platforms / Hardware | OS |
+| Network Vendor | Example Platforms/Hardware | OS |
 |---|---|---|
 | Cisco | Catalyst switches, Nexus switches, ISR / ASR / NCS routers, Catalyst 8000 SD-WAN edge platforms, Catalyst 9800 wireless controllers, Meraki MR / MS / MX, Secure Firewall / Firepower | IOS, IOS XE, IOS XR, NX-OS, Meraki cloud platform, Secure Firewall Threat Defense, FXOS |
 | Juniper Networks | EX, QFX, MX, ACX, PTX, SRX, Mist-managed wireless | JUNOS |
