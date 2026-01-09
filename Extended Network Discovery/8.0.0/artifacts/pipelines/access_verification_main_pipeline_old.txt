@@ -1,0 +1,122 @@
+%% stream = no and limit = 0
+%% template_type="jinja"
+##%% import_src_type = "diagnostictools"
+
+@dm:empty
+    --> @dm:save name = "temp-customer-context"
+
+## {% set row = "" %}
+{% if customer_tag %} 
+   {% set customer_id = customer_id %}
+   {% set customer_tag = customer_tag %}
+   {% set customerTag = customer_tag %}
+{% elif customerTag %} 
+   {% set customer_id = customer_id %}
+   {% set customer_tag = customerTag %}
+{% else %}
+   {% set customer_id = '' %}
+   {% set customer_tag = '' %}
+{% endif %}   
+
+## access
+--> @dm:empty
+    --> @dm:save name="temp-access-verify"
+
+--> @c:new-block
+    --> @exec:get-input
+   ##--> @dm:save name="access-verify"
+    
+    --> @dm:save name="temp-access-verify"
+
+--> @c:flex-block
+    --> @dm:empty
+    --> @exec:define-function name = 'test-func'
+       --> @exec:run-pipeline name="nw_access_verification"
+    --> @exec:end-function
+
+-->  @c:new-block     
+##--> @dm:recall name="temp-access-verify"
+## -->  *exec:if-condition     customer_tag is not empty
+           -->  @dm:empty 
+           {% if customer_tag %}   
+           -->  #dm:query-persistent-stream     type in ['snmp-cred'] and (customerTag contains '{{customer_tag}}') with-input name = 'rda_secrets_meta' and limit= 0
+            {% else %}
+           -->  #dm:query-persistent-stream     type in ['snmp-cred'] and (customerTag is empty) with-input name = 'rda_secrets_meta' and limit= 0
+            {% endif %}
+           --> @dm:eval key ="'key'"  
+           --> @dm:eval snmp_cred_name = "name if type in ['snmp-cred'] else None" 
+           --> @dm:eval ssh_cred_name = "name if type in ['ssh-cred'] else None" 
+           ##-->@dm:rename-columns cred_name = "name"          
+-->  @dm:save     name = 'temp-creds'
+##-->  @dm:save     name = 'test-creds2'   
+  
+--> @c:new-block
+    --> @dm:recall name="temp-access-verify"
+    --> @dm:skip-block-if-shape row_count = 0
+    --> @dm:selectcolumns include = "Others|customer_tag|customer_id"
+    ## --> @dm:eval Others = 'Others.replace("\'", "\"")'
+    --> @dm:explode-json column="Others"
+    --> @dm:eval key ="'key'"
+    --> @dm:eval pipeline_name="'nw_access_verification'"
+    ##--> @dm:save name = "access-ondemand"
+    ##--> @dm:eval customer_tag ="'{{customer_tag}}'"
+      ##--> @dm:eval customer_id ="'{{customer_id}}'"
+    --> @dm:enrich dict = "temp-creds" & src_key_cols = "key" & dict_key_cols="key" & enrich_cols = "snmp_cred_name,ssh_cred_name"
+
+    --> @dm:save name="temp-network-access-verification-pipeline"
+ ##--> @dm:save name="network-access-verification-pipeline"
+--> @c:new-block
+    --> @dm:recall name="temp-access-verify"
+    --> @dm:skip-block-if-shape row_count > 0
+   
+      
+ {% if customer_tag %} 
+           -->  #dm:query-persistent-stream     device_ip is not empty and (customer_tag is '{{customer_tag}}') with-input name = "discovery" & limit = "0"
+{% else %}
+           -->  #dm:query-persistent-stream     device_ip is not empty and (customer_tag is empty or customer_tag is 'None') with-input name = "discovery" & limit = "0"
+    {% endif %}
+
+ ##--> @dm:save name = "test_sch-devices"
+-->  *dm:filter     device_ip not in ['nan', 'not available']
+-->  @dm:dedup     columns= "device_ip"
+-->  @dm:eval     key ="'key'"
+-->  @dm:eval     pattern = "customer_tag+'_snmp-cred'"
+    ## --> @dm:save name = 'access-ip-list'
+-->  @dm:enrich     dict = "temp-creds" & src_key_cols = "key" & dict_key_cols="key" & enrich_cols = "snmp_cred_name,ssh_cred_name"
+    -->@dm:eval pipeline_name="'nw_access_verification'" 
+    -->@dm:eval ondemand_access = "'no'"
+    --> @dm:save name="temp-network-access-verification-pipeline" 
+    ##-->@dm:save name="test-access-context-nw" 
+ 
+
+--> @c:new-block
+    --> @dm:recall name="temp-network-access-verification-pipeline"
+    --> @exec:run-pipeline-by-row pipeline_col="pipeline_name" and pipeline_type = "Published" and save_output="yes"
+    --> @dm:save name="temp-network-access-verification-pipeline-run-status"
+    ##--> @dm:save name="network-access-verification-pipeline-run-status"
+
+--> @c:new-block
+    --> @dm:recall name="temp-network-access-verification-pipeline-run-status"
+    --> *dm:filter pipline_exec_failure_reason is not null
+    --> @dm:skip-block-if-shape row_count= 0
+    --> @dm:eval status = '"Access Verification failed due to error: "+pipline_exec_failure_reason '
+    --> @dm:eval timestamp = "time_now_as_isoformat()"
+    --> @dm:eval key='"key"'
+    
+    --> @dm:selectcolumns include="status|key|source|timestamp|customer_tag|customer_id"
+    --> @dm:save name = "temp-network_access_verification_status" & append = "yes"
+    --> @rn:write-stream name= "network_access_verification"
+
+--> @c:new-block
+    --> @dm:recall name="temp-network-access-verification-pipeline-run-status"
+    --> *dm:filter pipeline_exec_output is not null
+    --> @dm:skip-pipeline-if-shape row_count = 0
+    --> *exec:if-shape num_rows != 0
+       --> *dm:safe-filter * get pipline_exec_status , pipeline_exec_output
+       --> @dm:explode-json column="pipeline_exec_output"
+       --> @dm:save name="temp-network_access_verification_status"
+    --> @exec:end-if
+
+--> @c:new-block
+    --> @dm:recall name = "temp-network_access_verification_status"
+

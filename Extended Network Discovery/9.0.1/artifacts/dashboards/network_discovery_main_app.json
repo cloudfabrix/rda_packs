@@ -1,0 +1,48 @@
+{
+    "name": "network_discovery_main_app",
+    "label": "Network Analytics",
+    "description": "Network discovery App",
+    "dashboard_folder": "NetworkDevicePack",
+    "version": "4.0.0",
+    "enabled": true,
+    "dashboard_type": "app",
+    "enable_storyboard": false,
+    "live_edit": true,
+    "custom_context": {
+        "rda-dashboard-live-edit": true
+    },
+    "dashboard_filters": {
+        "time_filter": true,
+        "columns_filter": []
+    },
+    "dashboard_generator": {
+        "attachment": "add_pages_for_activated_single_packs"
+    },
+    "dashboard_sections": [],
+    "dashboard_groups": {
+        "groupViewData": {
+            "icon": "asset.svg",
+            "label": "Inventory"
+        },
+        "groupAlerts": {
+            "icon": "alert.svg",
+            "label": "Alerts"
+        },
+        "groupCollection": {
+            "icon": "overall.svg",
+            "label": "Events"
+        },
+        "groupMetrics": {
+            "icon": "insights.svg",
+            "label": "Metrics Workbench"
+        }
+    },
+    "dashboard_pages": [],
+    "saved_time": "2025-10-27T10:50:01.520942",
+    "attachments": [
+        {
+            "name": "add_pages_for_activated_single_packs",
+            "value": "{%- set existing_groups = dashboard[\"dashboard_groups\"] -%}\n{%- set existing_pages = dashboard[\"dashboard_pages\"] | map(attribute='name') | list -%}\n\n{%- set d_groups = {} -%}\n{%- set d_pages_by_group = {} -%}\n{%- set filtered_dlist = [] -%}\n{%- set highest_version_by_pack = {} -%}\n\n{%- set dlist = engine.query_stream_data(\n    stream=\"rda_packs_dynamic_groups_and_pages\",\n    cfxql_query=\"customer_tag is empty and dashboard_group_label is not 'Multi Network Discovery'\"\n) or [] -%}\n\n{# ---------------- Semantic version filtering ---------------- #}\n{%- for row in dlist -%}\n    {%- set pid = row.pack_id|string -%}\n    {%- set ver = row.pack_version|string -%}\n    {%- set ver_parts = ver.split('.') | map('int') | list -%}\n\n    {%- if pid not in highest_version_by_pack -%}\n        {%- set _ = highest_version_by_pack.update({pid: ver_parts}) -%}\n        {%- set _ = filtered_dlist.append(row) -%}\n    {%- else -%}\n        {%- set existing_ver_parts = highest_version_by_pack[pid] -%}\n        {%- set is_higher = false -%}\n\n        {%- if ver_parts[0] > existing_ver_parts[0] -%}\n            {%- set is_higher = true -%}\n        {%- elif ver_parts[0] == existing_ver_parts[0] -%}\n            {%- if ver_parts[1] > existing_ver_parts[1] -%}\n                {%- set is_higher = true -%}\n            {%- elif ver_parts[1] == existing_ver_parts[1] -%}\n                {%- if ver_parts[2] > existing_ver_parts[2] -%}\n                    {%- set is_higher = true -%}\n                {%- endif -%}\n            {%- endif -%}\n        {%- endif -%}\n\n        {%- if is_higher -%}\n            {%- set _ = highest_version_by_pack.update({pid: ver_parts}) -%}\n            {%- set _ = filtered_dlist.clear() -%}\n            {%- set _ = filtered_dlist.append(row) -%}\n        {%- elif ver_parts == existing_ver_parts -%}\n            {%- set _ = filtered_dlist.append(row) -%}\n        {%- endif -%}\n    {%- endif -%}\n{%- endfor -%}\n\n{# ---------------- Build groups and pages ---------------- #}\n{%- for i in filtered_dlist -%}\n    {%- set page_name = i.dashboard_page_name -%}\n    {%- if \"device_syslog_from_alert_fault\" not in page_name\n          and \"device_SNMP_Traps_from_alerts_fault\" not in page_name\n          and \"device_incidents_from_alerts\" not in page_name\n          and \"device_alerts_from_alert_fault\" not in page_name\n          and not page_name.startswith(\"multi\") -%}\n\n        {%- set gname = i.dashboard_group_name -%}\n        {%- if gname not in d_groups -%}\n            {%- set _ = d_groups.update({\n                gname: {\"icon\": i.dashboard_group_icon, \"label\": i.dashboard_group_label}\n            }) -%}\n        {%- endif -%}\n\n        {%- set page = {\n            \"name\": i.dashboard_page_name,\n            \"label\": i.dashboard_page_label,\n            \"icon\": i.dashboard_page_icon,\n            \"group\": gname\n        } -%}\n\n        {%- if gname not in d_pages_by_group -%}\n            {%- set _ = d_pages_by_group.update({gname: [page]}) -%}\n        {%- else -%}\n            {%- set existing_names = d_pages_by_group[gname] | map(attribute=\"name\") | list -%}\n            {%- if page.name not in existing_names -%}\n                {%- set _ = d_pages_by_group[gname].append(page) -%}\n            {%- endif -%}\n        {%- endif -%}\n\n    {%- endif -%}\n{%- endfor -%}\n\n{# ---------------- Merge groups ---------------- #}\n{%- for gname, gdata in d_groups.items() -%}\n    {%- set existing_group_names = existing_groups | map(attribute='g_name') | list -%}\n    {%- if gname not in existing_group_names -%}\n        {%- set _ = dashboard[\"dashboard_groups\"].update({gname: {\"icon\": gdata.icon, \"label\": gdata.label}}) -%}\n    {%- endif -%}\n{%- endfor -%}\n\n{# ---------------- Merge pages ---------------- #}\n{%- for gname, plist in d_pages_by_group.items() -%}\n    {%- for page in plist -%}\n        {%- if page.name not in existing_pages -%}\n            {%- set _ = dashboard[\"dashboard_pages\"].append(page) -%}\n        {%- endif -%}\n    {%- endfor -%}\n{%- endfor -%}\n"
+        }
+    ]
+}

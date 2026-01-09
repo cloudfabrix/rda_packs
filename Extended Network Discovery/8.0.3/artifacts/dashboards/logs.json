@@ -1,0 +1,97 @@
+{
+    "name": "logs",
+    "label": "Logs",
+    "description": "Discovery Logs",
+    "dashboard_folder": "NetworkDevicePack",
+    "version": "1.0.3",
+    "enabled": false,
+    "dashboard_type": "template",
+    "live_edit": true,
+    "template_variables": {
+        "CUST_ID": {
+            "contextId": "customerId"
+        },
+        "PROJ_ID": {
+            "contextId": "project_id"
+        },
+        "CUST_TAG": {
+            "contextId": "customerTag"
+        },
+        "JOB_ID": {
+            "contextId": "jobid"
+        }
+    },
+    "dashboard_filters": {
+        "time_filter": true,
+        "extra_filter0": "ingestion_id is '{{FILENAME}}' and source contains 'Logs' and and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+        "default_time_filter_labels0": [
+            "Last 1 month"
+        ],
+        "columns_filter": [
+            {
+                "id": "timestamp",
+                "label": "Timestamp",
+                "type": "DATETIME"
+            }
+        ],
+        "group_filters": []
+    },
+    "dashboard_sections": [
+        {
+            "title": "Onboarded Devices",
+            "show_filter": true,
+            "widgets": [
+                {
+                    "title": "Discovery Logs",
+                    "widget_type": "tabular",
+                    "stream": "discovery_logs",
+                    "extra_filter0": "customer_tag is '{{CUST_TAG}}'",
+                    "extra_filter": "(jobname contains '{{CUST_TAG}}' or jobname is empty or jobname contains 'job') and jobid is '{{JOB_ID}}'",
+                    "duration_hours": 1080,
+                    "height": 4,
+                    "paginated": false,
+                    "max_width": 12,
+                    "min_width": 12,
+                    "sorting": [
+                        {
+                            "timestamp": "desc"
+                        }
+                    ],
+                    "columns": {
+                        "target_ip": {
+                            "title": "IP Address",
+                            "type": "TEXT"
+                        },
+                        "collection_status": {
+                            "title": "Status",
+                            "type": "DATETIME"
+                        },
+                        "collection_timestamp": {
+                            "title": "Discovery Start Time",
+                            "type": "DATETIME"
+                        },
+                        "discovery_end_time": {
+                            "title": "Discovery End Time",
+                            "type": "DATETIME"
+                        },
+                        "discovery_status": {
+                            "title": "Discovery Status",
+                            "type": "TEXT"
+                        },
+                        "logs": {
+                            "title": "Reason",
+                            "type": "TEXT"
+                        },
+                        "jobid": {
+                            "title": "Job Id",
+                            "type": "TEXT",
+                            "hidden": true
+                        }
+                    },
+                    "widget_id": "7a63dacd"
+                }
+            ]
+        }
+    ],
+    "saved_time": "2025-04-16T05:09:13.235055"
+}

@@ -1,0 +1,161 @@
+{
+    "name": "network_discovery_main_app",
+    "label": "Network discovery Main App",
+    "description": "Network discovery App",
+    "dashboard_folder": "NetworkDevicePack",
+    "version": "4.0.0",
+    "enabled": true,
+    "dashboard_type": "app",
+    "enable_storyboard": false,
+    "live_edit": true,
+    "custom_context": {
+        "rda-dashboard-live-edit": true
+    },
+    "dashboard_filters": {
+        "time_filter": true,
+        "default_time_filter_labels": [
+            "All Time"
+        ]
+    },
+    "context_enrichment": [
+        {
+            "stream": "rda_packs_meta",
+            "enrich_columns": [
+                "name"
+                
+            ],
+            "rename_columns": {
+                "name": "pack_performance_snmp"
+               
+            },
+            "query_template": "(name is 'Fabrix AIOps Network Performance Management SNMP' and single_tenant_status is 'ACTIVATED')"
+        },
+        {
+            "stream": "rda_packs_meta",
+            "enrich_columns": [
+                "name"
+            ],
+            "rename_columns": {
+                "name": "pack_performance_telemetry"
+            },
+            "query_template": "(name is 'Fabrix AIOps Network Performance Management Telemetry' and single_tenant_status is 'ACTIVATED')"
+        },
+        {
+            "stream": "rda_packs_meta",
+            "enrich_columns": [
+                "name"
+            ],
+            "rename_columns": {
+                "name": "pack_fault_snmp"
+            },
+            "query_template": "(name is 'Fabrix AIOPs snmp' & single_tenant_status is 'ACTIVATED')"
+        },
+        
+        {
+            "stream": "rda_packs_meta",
+            "enrich_columns": [
+                "name"
+            ],
+            "rename_columns": {
+                "name": "pack_fault_syslog"
+            },
+            "query_template": "(name is 'Fabrix AIOPs syslogs' & single_tenant_status is 'ACTIVATED')"
+        }
+    ],
+    "dashboard_groups": {
+        "groupViewData": {
+            "icon": "asset.svg",
+            "label": "Inventory"
+        },
+        "groupAlerts": {
+            "icon": "alert.svg",
+            "label": "Alerts"
+        },
+        "groupCollection": {
+            "icon": "overall.svg",
+            "label": "Events"
+        },
+        "groupMetrics": {
+            "icon": "insights.svg",
+            "label": "Metrics Workbench"
+        }
+    },
+    "dashboard_pages": [
+        {
+            "name": "network_configure_and_manage",
+            "label": "Configure and Manage",
+            "icon": "settings.svg"
+        },
+        {
+            "name": "network_collection_and_access_status",
+            "label": "Status",
+            "icon": "history.svg"
+        },
+        {
+            "name": "network_device",
+            "label": "Network Devices",
+            "icon": "hardware.svg",
+            "group": "groupViewData"
+        },
+        {
+            "name": "network_assets_inventory",
+            "label": "Network Assets",
+            "icon": "hardware.svg",
+            "group": "groupViewData"
+        },
+        {
+            "name": "customer_topology",
+            "label": "Topology",
+            "icon": "Analytics.svg"
+        },
+        {
+            "name": "customer_asset_navigator",
+            "label": "Asset Navigator",
+            "icon": "stack.svg"
+        },
+        {
+            "name": "customer_oia_alerts_fault",
+            "label": "All Alerts",
+            "icon": "alert.svg",
+            "group": "groupAlerts",
+            "context_filter": "pack_fault_snmp contains 'Fabrix AIOPs snmp' or pack_fault_syslog contains 'Fabrix AIOPs syslogs'"
+        },
+        {
+            "name": "customer_syslogs",
+            "label": "Syslogs",
+            "icon": "trace.svg",
+            "group": "groupCollection",
+            "context_filter": "pack_fault_syslog contains 'Fabrix AIOPs syslogs'"
+        },
+        {
+            "name": "customer_SNMP_Traps",
+            "label": "SNMP Traps",
+            "icon": "trace.svg",
+            "group": "groupCollection",
+            "context_filter": "pack_fault_snmp contains 'Fabrix AIOPs snmp'"
+        },
+        {
+            "name": "kpi-workbench",
+            "label": "SNMP Metrics Workbench",
+            "custom_context": {
+                "formEndpoint": "dynamic_form.preview_kpi_dashboard",
+                "previewEndpoint": "preview_kpi_dashboard"
+            },
+            "icon": "insights.svg",
+            "group": "groupMetrics",
+            "context_filter": "pack_performance_snmp contains 'Fabrix AIOps Network Performance Management SNMP'"
+        },
+        {
+            "name": "kpi-workbench",
+            "label": "Telemetry Workbench",
+            "custom_context": {
+                "formEndpoint": "dynamic_form.preview_kpi_dashboard",
+                "previewEndpoint": "preview_kpi_dashboard"
+            },
+            "icon": "insights.svg",
+            "group": "groupMetrics",
+            "context_filter": "pack_performance_telemetry contains 'Fabrix AIOps Network Performance Management Telemetry'"
+        }
+    ],
+    "saved_time": "2025-04-15T04:51:56.521346"
+}

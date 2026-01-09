@@ -1,0 +1,14 @@
+Value NEIGHBOR_ID (\d+\.\d+\.\d+\.\d+)
+Value PRIORITY (\d+)
+Value STATE (\S+(?:/\S+)?)
+Value DEAD_TIME (\d+:\d+:\d+)
+Value ADDRESS (\d+\.\d+\.\d+\.\d+)
+Value INTERFACE (\S+)
+Value NEIGHBOR_UPTIME (\S+)
+
+Start
+  ^Neighbor\s+${NEIGHBOR_ID},\s+interface\s+address\s+${ADDRESS}
+  ^\s+In\s+the\s+area\s+\d+\s+via\s+interface\s+${INTERFACE}
+  ^\s+Neighbor\s+priority\s+is\s+${PRIORITY},\s+State\s+is\s+${STATE},
+  ^\s+Dead\s+timer\s+due\s+in\s+${DEAD_TIME}
+  ^\s+Neighbor\s+is\s+up\s+for\s+${NEIGHBOR_UPTIME} -> Record

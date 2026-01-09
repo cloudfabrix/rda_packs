@@ -1,0 +1,50 @@
+{
+    "name": "network_discovery_main_app",
+    "label": "Network discovery Main App",
+    "description": "Network discovery App",
+    "dashboard_folder": "NetworkDevicePack",
+    "version": "4.0.0",
+    "enabled": true,
+    "dashboard_type": "app",
+    "enable_storyboard": false,
+    "live_edit": true,
+    "custom_context": {
+        "rda-dashboard-live-edit": true
+    },
+    "dashboard_filters": {
+        "time_filter": true,
+        "columns_filter": []
+    },
+    "dashboard_generator": {
+        "attachment": "add_pages_for_activated_single_packs"
+    },
+    "dashboard_sections": [],
+    "dashboard_groups": {
+        "groupViewData": {
+            "icon": "asset.svg",
+            "label": "Inventory"
+        },
+        "groupAlerts": {
+            "icon": "alert.svg",
+            "label": "Alerts"
+        },
+        "groupCollection": {
+            "icon": "overall.svg",
+            "label": "Events"
+        },
+        "groupMetrics": {
+            "icon": "insights.svg",
+            "label": "Metrics Workbench"
+        }
+    },
+    "dashboard_pages": [
+        
+    ],
+    "saved_time": "2025-04-28T15:37:57.171439",
+    "attachments": [
+        {
+            "name": "add_pages_for_activated_single_packs",
+            "value": "{%- set existing_groups = dashboard[\"dashboard_groups\"] -%}\n{%- set existing_pages = dashboard[\"dashboard_pages\"] | map(attribute=\"name\") | list -%}\n{%- set group_names = [] -%}\n{%- set d_groups = [] -%}\n{%- set d_pages = [] -%}\n\n{%- set dlist = engine.query_stream_data(stream=\"rda_packs_dynamic_groups_and_pages\") -%}\n\n{%- if dlist -%}\n\n    {%- for i in dlist -%}\n        {%- set name = i[\"dashboard_page_name\"] -%}\n        {%- if \"device_syslog_from_alert_fault\" not in name and \"device_SNMP_Traps_from_alerts_fault\" not in name and \"device_alerts_from_alert_fault\" not in name -%}\n\n            {# Add unique dashboard group #}\n            {%- if i[\"dashboard_group_name\"] not in group_names -%}\n                {%- set _ = group_names.append(i[\"dashboard_group_name\"]) -%}\n                {%- set dgroup = {\n                    \"g_name\": i[\"dashboard_group_name\"],\n                    \"g_label\": i[\"dashboard_group_label\"],\n                    \"g_icon\": i[\"dashboard_group_icon\"]\n                } -%}\n                {%- set _ = d_groups.append(dgroup) -%}\n            {%- endif -%}\n\n            {# Add dashboard page if not already present #}\n            {%- if i[\"dashboard_page_name\"] not in existing_pages -%}\n                {%- set dpage = {\n                    \"name\": i[\"dashboard_page_name\"],\n                    \"label\": i[\"dashboard_page_label\"],\n                    \"icon\": i[\"dashboard_page_icon\"],\n                    \"group\": i[\"dashboard_page_group\"]\n                } -%}\n                {%- set _ = d_pages.append(dpage) -%}\n            {%- endif -%}\n\n        {%- endif -%}\n    {%- endfor -%}\n\n    {# Update dashboard groups #}\n    {%- for group in d_groups -%}\n        {%- if group.g_name not in existing_groups | map(attribute='g_name') | list -%}\n            {%- set _ = dashboard[\"dashboard_groups\"].update({\n                group.g_name: {\n                    \"icon\": group.g_icon,\n                    \"label\": group.g_label\n                }\n            }) -%}\n        {%- endif -%}\n    {%- endfor -%}\n\n    {# Update dashboard pages #}\n    {%- for page in d_pages -%}\n        {%- set _ = dashboard[\"dashboard_pages\"].append({\n            \"name\": page.name,\n            \"label\": page.label,\n            \"icon\": page.icon,\n            \"group\": page.group\n        }) -%}\n    {%- endfor -%}\n\n{%- endif -%}\n"
+        }
+    ]
+}

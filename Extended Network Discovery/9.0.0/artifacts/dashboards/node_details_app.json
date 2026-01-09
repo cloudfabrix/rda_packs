@@ -1,0 +1,68 @@
+{
+    "name": "node_details_app",
+    "label": "Node Details App",
+    "description": "Node Details App",
+    "dashboard_folder": "NetworkDevicePack",
+    "context_label_id": "a_asset_name",
+    "version": "24.1.13.2",
+    "debug": true,
+    "enabled": true,
+    "dashboard_generator": {
+        "attachment": "add_pages_for_activated_fault_packs"
+    },
+    "custom_context": {
+        "rda-dashboard-live-edit": true
+    },
+    "context_enrichment": [
+        {
+            "stream": "cfx_rdaf_topology_nodes",
+            "stream0": "mp_nodes",
+            "enrich_columns": [
+                "node_type",
+                "host_name",
+                "node_label",
+                "device_hostname_short"
+            ],
+            "query_template0": "project_id = '$project_id' and customer_tag = '$customer_tag' and (device_ip = '$device_ip' or edge_ip is '$edge_ip')",
+            "query_template": "(device_ip = '$device_ip' or edge_ip is '$edge_ip')",
+            "defaultValues": {}
+        }
+    ],
+    "dashboard_sections": [
+        {
+            "title": "Org Ops"
+        }
+    ],
+    "dashboard_type": "app",
+    "dashboard_groups": {
+        "from_to": {
+            "icon": "alert.svg",
+            "label": "Alerts"
+        },
+        "topo": {
+            "icon": "topology.svg",
+            "label": "Topology"
+        }
+    },
+    "dashboard_pages": [
+        {
+            "name": "device_inventory_from_alerts",
+            "label": "Inventory",
+            "icon": "alert.svg",
+            "context_filter": "node_type is 'CHASSIS'"
+        },
+        {
+            "name": "topology_geomap_dashboard",
+            "label": "Topology",
+            "icon": "stack.svg",
+            "context_filter": "node_type is 'CHASSIS'"
+        }
+    ],
+    "saved_time": "2025-07-04T06:58:27.567483",
+    "attachments": [
+        {
+            "name": "add_pages_for_activated_fault_packs",
+            "value": "{%- set existing_groups = dashboard[\"dashboard_groups\"] -%}\n{%- set existing_pages = dashboard[\"dashboard_pages\"] | map(attribute=\"name\") | list -%}\n{%- set ns = namespace(d_pages_dict={}, d_groups_dict={}) -%}\n{%- set customer_tag = customerTag -%}\n\n{%- set dlist = engine.query_stream_data(stream=\"rda_packs_dynamic_groups_and_pages\") -%}\n\n{%- if dlist -%}\n\n    {%- for i in dlist -%}\n        {%- set page_name = i[\"dashboard_page_name\"] -%}\n        {%- if \"device_SNMP_Traps_from_alerts_fault\" in page_name or \n               \"device_syslog_from_alert_fault\" in page_name or\n               \"device_incidents_from_alerts\" in page_name or \n               \"device_alerts_from_alert_fault\" in page_name -%}\n\n            {# Simulate group collection via dict key #}\n            {%- if i[\"dashboard_group_name\"] not in ns.d_groups_dict -%}\n                {%- set _ = ns.d_groups_dict.update({ i[\"dashboard_group_name\"]: {\n                    \"g_name\": i[\"dashboard_group_name\"],\n                    \"g_label\": i[\"dashboard_group_label\"],\n                    \"g_icon\": i[\"dashboard_group_icon\"]\n                }}) -%}\n            {%- endif -%}\n\n            {# Only add page if it doesn't already exist #}\n            {%- if i[\"dashboard_page_name\"] not in existing_pages and i[\"dashboard_page_name\"] not in ns.d_pages_dict -%}\n                {%- set _ = ns.d_pages_dict.update({ i[\"dashboard_page_name\"]: {\n                    \"name\": i[\"dashboard_page_name\"],\n                    \"label\": i[\"dashboard_page_label\"],\n                    \"icon\": i[\"dashboard_page_icon\"],\n                    \"group\": i[\"dashboard_page_group\"]\n                }}) -%}\n            {%- endif -%}\n\n        {%- endif -%}\n    {%- endfor -%}\n\n    {# Update dashboard groups #}\n    {%- for group in ns.d_groups_dict.values() -%}\n        {%- if group.g_name not in existing_groups | map(attribute='g_name') | list -%}\n            {%- set _ = dashboard[\"dashboard_groups\"].update({\n                group.g_name: {\n                    \"icon\": group.g_icon,\n                    \"label\": group.g_label\n                }\n            }) -%}\n        {%- endif -%}\n    {%- endfor -%}\n\n    {# Update dashboard pages #}\n    {%- for page in ns.d_pages_dict.values() -%}\n        {%- set _ = dashboard[\"dashboard_pages\"].append({\n            \"name\": page.name,\n            \"label\": page.label,\n            \"icon\": page.icon,\n            \"group\": page.group\n        }) -%}\n    {%- endfor -%}\n\n{%- endif -%}\n"
+        }
+    ]
+}

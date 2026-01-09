@@ -1,0 +1,129 @@
+%% stream = no and limit = 0
+
+##%% import_src_type = "diagnostictools"
+@dm:empty
+    --> @dm:save name="temp-access-verify"
+
+## ondemand access ip list
+--> @c:new-block
+    --> @exec:get-input
+    --> @dm:add-missing-columns columns = "customer_tag,customer_id"
+    --> @dm:save name="temp-access-verify"
+    ##--> @dm:save name="test-access-verify"
+    ## --> @dm:save name="test-access-verify" and append = "yes"
+    --> @dm:selectcolumns exclude = "key"
+    --> @dm:skip-block-if-shape column_count = 1
+    --> @dm:add-missing-columns columns = "customer_tag,customer_id"
+    --> *dm:filter device_ip not in ['nan', 'not available']
+    --> @dm:dedup columns= "device_ip"
+    --> @dm:eval key ="'key'"
+    ## --> @dm:eval pattern = "customer_tag+'_snmp-cred'"
+    ## --> @dm:eval cred_pattern = "pattern if customer_tag else 'snmp-cred'"
+    --> @dm:save name = 'temp-ip-list'
+    ##--> @dm:save name = 'test-ip-list'
+
+## ssh_cred_name
+--> @c:new-block
+    --> @dm:recall name = 'temp-ip-list'
+    --> *dm:filter snmp_cred_name is not empty
+    --> @dm:save name = 'temp-snmp-cred'
+
+--> @c:new-block
+    --> @dm:recall name = 'temp-ip-list'
+    --> *dm:filter ssh_cred_name is not empty
+    --> @dm:save name = 'temp-ssh-cred'
+
+## --> @dm:save name = 'ip-list-access'
+## scheduled Devices Ip List
+## --> @c:new-block
+## --> @dm:recall name="temp-access-verify"
+## -->*dm:filter ondemand_access is 'no'
+## ##--> @dm:selectcolumns exclude = "pipeline_name|customer_tag|customer_id|key"
+## --> @dm:skip-block-if-shape column_count = 0
+## --> @dm:empty
+## --> *exec:if-condition customer_tag is not empty
+## --> #dm:query-persistent-stream device_ip is not empty and (customer_tag is '{{customer_tag}}') with-input name = "discovery" & ## limit = "0"
+## --> @exec:end-if
+## --> *exec:if-condition customer_tag is empty
+## --> #dm:query-persistent-stream device_ip is not empty and (customer_tag is empty) with-input name = "discovery" & limit = "0"
+## --> @exec:end-if
+## --> @dm:selectcolumns exclude = "Site|Pipeline|Bot"
+## --> @dm:fail-if-shape column_count = 3
+## ## --> @dm:save name = "onboard_devices"
+## --> *dm:filter device_ip not in ['nan', 'not available']
+## --> @dm:dedup columns= "device_ip"
+## --> @dm:eval key ="'key'"
+## --> @dm:eval pattern = "customer_tag+'_snmp-cred'"
+## ## --> @dm:save name = 'access-ip-list'
+## --> @dm:enrich dict = "temp-access-verify" & src_key_cols = "key" & dict_key_cols="key" & enrich_cols = "name"
+## --> @dm:save name = 'temp-ip-list'
+## --> @dm:save name = 'test-sch-ip-list'
+## Access Verification for Devices
+--> @c:new-block
+
+--> @c:data-loop columns="snmp_cred_name" and dataset ="temp-snmp-cred"
+    --> @dm:recall name="temp-ip-list"
+    --> @dm:skip-pipeline-if-shape row_count=0
+    ## --> @snmp:snmp-get ip_column = "device_ip" & oids = "1.3.6.1.2.1.1.5.0"
+    --> @diagnostictools:snmp ip_column = "device_ip" &  concurrent_discovery = 100 & secret_names = "$snmp_cred_name"
+    ## --> @dm:enrich dict = "temp-ip-list" & src_key_cols = "key" & dict_key_cols="key" & enrich_cols = "customer_tag,customer_id"
+    --> @dm:save name ="temp-snmp"
+    ##--> @dm:save name ="test-snmp-access"
+
+## devices with Success
+--> @c:new-block
+    --> @dm:recall name ="temp-snmp"
+    --> *dm:filter collection_status = 'Success'
+    --> @dm:rename-columns used_cred = "secret"
+    ## --> @dm:eval protocol = "mib_name.split('-')[0].lower() if 'snmp' in mib_name.lower() else 'snmp'"
+    --> @dm:eval protocol="'snmp'"
+    --> @dm:rename-columns ip_address  = "target_ip"
+    --> @dm:eval reason = "'Not Available' if len(reason) == 0 else reason"
+    --> @dm:manipulate-string from="ip_address,protocol" and func="concat_columns" and to="unique_id"
+    --> @dm:save name ="temp-snmp-success"
+
+--> @c:new-block
+    --> @dm:recall name = "temp-snmp"
+    --> @dm:eval protocol="'snmp'"
+    --> *dm:filter collection_status != 'Success'
+    --> @dm:rename-columns used_cred = "secret"
+    --> @dm:eval used_cred="'Not Available' if collection_status=='Failed' else used_cred"
+    --> @dm:rename-columns ip_address  = "target_ip"
+    --> @dm:eval reason = "'Not Available' if len(reason) == 0 else reason"
+    --> @dm:manipulate-string from="ip_address,protocol" and func="concat_columns" and to="unique_id"
+    --> @dm:save name ="temp-snmp-failed"
+
+--> @c:new-block
+    --> @dm:concat names="temp-snmp-success|temp-snmp-failed"
+    --> @dm:eval key = "'key'"
+    ## --> @dm:enrich dict="temp-access-verify" and src_key_cols="key" and dict_key_cols="key" and enrich_cols="customer_tag,customer_id"
+    --> @dm:enrich-conditional dict is 'temp-access-verify' and condition is 'customer_tag is not empty' and enrich_cols = "customer_tag,customer_id,project_id"
+    --> @dm:save name ="temp-snmp-status"
+    ##--> @dm:save name = "snmp-access-status"
+    --> @rn:write-stream name="network_access_verification"
+
+## --> @rn:write-stream name="network_access_verification"
+## ssh access verification
+--> @c:new-block
+
+## --> @dm:empty
+## --> @dm:addrow device_ip = "10.95.158.251"
+## --> @dm:addrow device_ip = "10.95.158.248"
+--> @c:data-loop columns="ssh_cred_name" and dataset ="temp-ssh-cred"
+    --> @dm:recall name="temp-ip-list"
+    --> @diagnostictools:ssh-access-check ip_column = "device_ip"  & secret_names = "$ssh_cred_name"
+    --> @dm:rename-columns used_cred = "secret"
+    --> @dm:rename-columns ip_address = "target_ip"
+    --> @dm:eval protocol="'ssh'"
+    --> @dm:manipulate-string from="ip_address,protocol" and func="concat_columns" and to="unique_id"
+    --> @dm:save name = "temp-ssh"
+    --> @dm:eval key = "'key'"
+    ## --> @dm:enrich dict="temp-access-verify" and src_key_cols="key" and dict_key_cols="key" and enrich_cols="customer_tag,customer_id,project_id"
+    --> @dm:enrich-conditional dict is 'temp-access-verify' and condition is 'customer_tag is not empty' and enrich_cols = "customer_tag,customer_id,project_id"
+    ## --> @dm:save name = "ssh-access-status"
+    ## --> @c:new-block
+    ## --> @dm:concat names="temp-snmp-status|temp-ssh"
+    ## --> @dm:save name ="temp-snmp-ssh-status"
+    ## --> @dm:save name ="snmp_update_output"
+    --> @rn:write-stream name="network_access_verification"
+

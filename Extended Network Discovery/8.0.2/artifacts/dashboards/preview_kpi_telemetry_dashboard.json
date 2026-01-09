@@ -1,0 +1,503 @@
+{
+    "name": "preview_kpi_telemetry_dashboard",
+    "label": "KPI Workbench",
+    "description": "KPI Workbench",
+    "dashboard_folder": "NetworkDevicePack",
+    "enabled": true,
+    "dashboard_type": "template",
+    "exportable": false,
+    "live_edit": true,
+    "template_variables": {
+        "CUST_ID": {
+            "contextId": "customerId"
+        },
+        "PROJ_ID": {
+            "contextId": "projectId"
+        },
+        "PROJ_ID_SINGLE": {
+            "contextId": "project_id"
+        },
+        "CUST_TAG": {
+            "contextId": "customerTag"
+        }
+    },
+    "dashboard_filters": {
+        "time_filter": false,
+        "extra_filter": "i_projectid in {{PROJ_ID}} and i_input is 'Telemetry'",
+        "default_time_filter_non_removable": false,
+        "show_default_time_filter": true,
+        "default_time_filter_labels": [
+            "Last 1 month"
+        ]
+    },
+    "dashboard_sections": [
+        {
+            "title": "KPI Dashboard",
+            "show_filter": true,
+            "widgets": [
+                {
+                    "title": "Time Series",
+                    "widget_type": "timeseries",
+                    "stream": "rdaf_network_device_telemetry_metrics",
+                    "extra_filter": "i_projectid in {{PROJ_ID}} and i_input is 'Telemetry'",
+                    "metric_source": "telegraf",
+                    "ts_column": "timestamp",
+                    "duration_hours": 96,
+                    "max_width": 6,
+                    "height": 6,
+                    "min_width": 12,
+                    "formatter": "DescriptiveCountFormatter",
+                    "chartProperties": {
+                        "yAxisLabel": "Value",
+                        "xAxisLabel": "Timestamp",
+                        "legendLocation": "right",
+                        "mode": "zoom",
+                        "options": {
+                            "axes": {
+                                "display": false
+                            }
+                        }
+                    },
+                    "interval": "5Min",
+                    "group_by": [
+                        "name"
+                    ],
+                    "series_spec": [
+                        {
+                            "column": "value",
+                            "agg": "max",
+                            "type": "long"
+                        }
+                    ],
+                    "widget_id": "21e2dc4e"
+                }
+            ]
+        }
+    ],
+    "dynamic_form": {
+        "formData": {},
+        "formDefinition": {
+            "id": "kpi.benchmark.json",
+            "refreshRequired": true,
+            "formFieldList": [
+                {
+                    "fieldId": "i_source",
+                    "label": "Device",
+                    "help": "Devices Monitored",
+                    "key_attribute": true,
+                    "required": true,
+                    "controlType": "SELECTOR_DIALOG",
+                    "selectionType": "MULTIPLE",
+                    "pstream": "rdaf_network_device_telemetry_metrics",
+                    "extra_filter": "i_projectid in {{PROJ_ID}} and i_input is 'Telemetry'",
+                    "query_attributes": [
+                        "i_source"
+                    ],
+                    "include_context_in_query0": true,
+                    "include_context_keys0": [
+                        "project_id"
+                    ],
+                    "server-validation": {
+                        "clear_attributes": [
+                            "i_name",
+                            "name",
+                            "i_memory_pool_name"
+                        ],
+                        "read_attributes": [
+                            "i_source",
+                            "name",
+                            "i_name",
+                            "i_memory_pool_name"
+                        ]
+                    }
+                },
+                {
+                    "fieldId": "name",
+                    "label": "KPI Group",
+                    "help": "KPI Group",
+                    "required": true,
+                    "controlType": "SELECTOR_DIALOG",
+                    "selectionType": "SINGLE",
+                    "pstream": "rdaf_network_device_telemetry_metrics",
+                    "extra_filter": "i_projectid in {{PROJ_ID}} and i_input is 'Telemetry'",
+                    "key_attribute": true,
+                    "query_attributes": [
+                        "i_source",
+                        "name"
+                    ],
+                    "server-validation": {
+                        "clear_attributes": [
+                            "kpi",
+                            "i_name",
+                            "i_memory_pool_name"
+                        ],
+                        "read_attributes": [
+                            "i_name",
+                            "i_memory_pool_name",
+                            "kpi"
+                        ]
+                    }
+                },
+                {
+                    "fieldId": "i_name",
+                    "label": "Interface Name",
+                    "help": "Interface Name",
+                    "hidden": true,
+                    "key_attribute": true,
+                    "controlType": "SELECTOR_DIALOG",
+                    "selectionType": "MULTIPLE",
+                    "pstream": "rdaf_network_device_telemetry_metrics",
+                    "extra_filter": "i_projectid in {{PROJ_ID}} and i_input is 'Telemetry'",
+                    "query_attributes": [
+                        "i_source",
+                        "i_name",
+                        "name"
+                    ],
+                    "include_context_in_query0": true,
+                    "include_context_keys0": [
+                        "project_id"
+                    ],
+                    "additional_display_attributes": [
+                        {
+                            "fieldId": "i_source",
+                            "label": "Device Hostname",
+                            "key_attribute": false,
+                            "hide_field": false,
+                            "table_key_attribute": true
+                        }
+                    ],
+                    "server-validation": {
+                        "clear_attributes": [
+                            "kpi"
+                        ],
+                        "read_attributes": [
+                            "kpi"
+                        ]
+                    },
+                    "actionCondition": {
+                        "actionControl": "SHOW_IF",
+                        "conditionalField": [
+                            {
+                                "conditionType": "IN",
+                                "conditionValue": "interface",
+                                "fieldId": "name"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "fieldId": "i_memory_pool_name",
+                    "label": "Memory Pool Name",
+                    "help": "Memory Pool Name",
+                    "hidden": true,
+                    "key_attribute": true,
+                    "controlType": "SELECTOR_DIALOG",
+                    "selectionType": "MULTIPLE",
+                    "pstream": "rdaf_network_device_telemetry_metrics",
+                    "extra_filter": "i_projectid in {{PROJ_ID}} and i_input is 'Telemetry'",
+                    "query_attributes": [
+                        "i_source",
+                        "i_memory_pool_name",
+                        "name"
+                    ],
+                    "include_context_in_query0": true,
+                    "include_context_keys0": [
+                        "project_id"
+                    ],
+                    "additional_display_attributes": [
+                        {
+                            "fieldId": "i_source",
+                            "label": "Device Hostname",
+                            "key_attribute": false,
+                            "hide_field": false,
+                            "table_key_attribute": true
+                        }
+                    ],
+                    "server-validation": {
+                        "clear_attributes": [
+                            "kpi"
+                        ],
+                        "read_attributes": [
+                            "kpi"
+                        ]
+                    },
+                    "actionCondition": {
+                        "actionControl": "SHOW_IF",
+                        "conditionalField": [
+                            {
+                                "conditionType": "IN",
+                                "conditionValue": "memory",
+                                "fieldId": "name"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "fieldId": "kpi",
+                    "label": "KPI",
+                    "help": "KPI List",
+                    "isList": true,
+                    "required": true,
+                    "dynamic_field_data": true,
+                    "controlType": "SELECTOR_DIALOG",
+                    "selectionType": "MULTIPLE",
+                    "pstream": "rdaf_network_device_telemetry_metrics",
+                    "extra_filter": "i_projectid in {{PROJ_ID}} and i_input is 'Telemetry'",
+                    "key_attribute": true,
+                    "query_attributes": [
+                        "i_source",
+                        "i_subscription",
+                        "name"
+                    ],
+                    "server-validation": {
+                        "read_attributes": [
+                            "duration"
+                        ]
+                    }
+                },
+                {
+                    "fieldId": "precision",
+                    "label": "Rollup Precision",
+                    "help": "Rollup Precision",
+                    "dataType": "string",
+                    "hidden": false,
+                    "editable": true,
+                    "required": true,
+                    "controlType": "COMBO_BOX",
+                    "lovValues": [
+                        {
+                            "identifier": "i_source",
+                            "displayName": "Device"
+                        },
+                        {
+                            "identifier": "i_source,i_name",
+                            "displayName": "Interface Name"
+                        },
+                        {
+                            "identifier": "i_source,i_memory_pool_name",
+                            "displayName": "Memory Pool Name"
+                        }
+                    ]
+                },
+                {
+                    "fieldId": "function",
+                    "label": "Function",
+                    "help": "Function",
+                    "dataType": "string",
+                    "hidden": false,
+                    "editable": true,
+                    "required": true,
+                    "controlType": "COMBO_BOX",
+                    "lovValues": [
+                        {
+                            "identifier": "avg",
+                            "displayName": "Average"
+                        },
+                        {
+                            "identifier": "max",
+                            "displayName": "Maximum"
+                        },
+                        {
+                            "identifier": "min",
+                            "displayName": "Minimum"
+                        },
+                        {
+                            "identifier": "delta",
+                            "displayName": "Delta"
+                        }
+                    ]
+                },
+                {
+                    "fieldId": "duration",
+                    "label": "Duration",
+                    "help": "Duration",
+                    "dataType": "string",
+                    "hidden": false,
+                    "editable": true,
+                    "required": true,
+                    "controlType": "COMBO_BOX",
+                    "lovValues": [
+                        {
+                            "identifier": "`timestamp` is after -24 hours",
+                            "displayName": "1 Day"
+                        },
+                        {
+                            "identifier": "`timestamp` is after -48 hours",
+                            "displayName": "2 Days"
+                        },
+                        {
+                            "identifier": "`timestamp` is after -72 hours",
+                            "displayName": "3 Days"
+                        },
+                        {
+                            "identifier": "`timestamp` is after -1 week",
+                            "displayName": "1 week"
+                        }
+                    ]
+                },
+                {
+                    "fieldId": "legendLocation",
+                    "label": "Legend Location",
+                    "help": "Legend Location",
+                    "dataType": "string",
+                    "hidden": false,
+                    "editable": true,
+                    "required": true,
+                    "controlType": "COMBO_BOX",
+                    "lovValues": [
+                        {
+                            "identifier": "right",
+                            "displayName": "Right"
+                        },
+                        {
+                            "identifier": "left",
+                            "displayName": "Left"
+                        },
+                        {
+                            "identifier": "top",
+                            "displayName": "Top"
+                        },
+                        {
+                            "identifier": "bottom",
+                            "displayName": "Bottom"
+                        }
+                    ]
+                },
+                {
+                    "fieldId": "interval",
+                    "label": "Interval",
+                    "help": "Interval",
+                    "dataType": "string",
+                    "hidden": false,
+                    "editable": true,
+                    "required": true,
+                    "controlType": "COMBO_BOX",
+                    "lovValues": [
+                        {
+                            "identifier": "auto",
+                            "displayName": "Auto"
+                        },
+                        {
+                            "identifier": "5Min",
+                            "displayName": "5 Minutes"
+                        },
+                        {
+                            "identifier": "15Min",
+                            "displayName": "15 Minutes"
+                        },
+                        {
+                            "identifier": "1H",
+                            "displayName": "1 Hour"
+                        }
+                    ]
+                }
+            ],
+            "formActionList": {
+                "formActions": [
+                    {
+                        "api-endpoint": {
+                            "methodName": "submitForm",
+                            "parse-output": false,
+                            "params": [
+                                {
+                                    "formData": {},
+                                    "formId": "kpi.benchmark.json"
+                                }
+                            ],
+                            "service-name": "saas-reports",
+                            "stringified-params": true
+                        },
+                        "actionLabel": "Save",
+                        "type": "SUBMIT",
+                        "identifier": "Submit"
+                    },
+                    {
+                        "actionLabel": "Cancel",
+                        "type": "CANCEL",
+                        "identifier": "Cancel"
+                    }
+                ]
+            }
+        }
+    },
+    "dynamic_field_data_mapping": {
+        "interface": [
+            {
+                "name": "InOctets",
+                "value": "m_in_octets",
+                "unit": "counter"
+            },
+            {
+                "name": "OutOctets",
+                "value": "m_out_octets",
+                "unit": "counter"
+            },
+            {
+                "name": "InDiscards",
+                "value": "m_in_discards",
+                "unit": "counter"
+            },
+            {
+                "name": "OutDiscards",
+                "value": "m_out_discards",
+                "unit": "counter"
+            },
+            {
+                "name": "InErrors",
+                "value": "m_in_errors",
+                "unit": "counter"
+            },
+            {
+                "name": "OutErrors",
+                "value": "m_out_errors",
+                "unit": "counter"
+            }
+        ],
+        "memory_usage": [
+            {
+                "name": "Memory Reserved",
+                "value": "m_used_memory",
+                "unit": "MB"
+            }
+        ],
+        "cpu_utilization": [
+            {
+                "name": "CPU Usage",
+                "value": "m_five_seconds",
+                "unit": "Percentage"
+            }
+        ],
+        "fan_state": [
+            {
+                "name": "Speed",
+                "value": "m_speed"
+            }
+        ],
+        "temperature": [
+            {
+                "name": "Temperatures Instant",
+                "value": "m_instant",
+                "unit": "Celsius"
+            }
+        ],
+        "power_supply": [
+            {
+                "name": "Input Voltage",
+                "value": "m_input_voltage"
+            },
+            {
+                "name": "Output Voltage",
+                "value": "m_output_voltage"
+            },
+            {
+                "name": "Input Current",
+                "value": "m_input_current"
+            },
+            {
+                "name": "Output Current",
+                "value": "m_output_current"
+            }
+        ]
+    },
+    "saved_time": "2025-04-29T14:27:33.656637"
+}

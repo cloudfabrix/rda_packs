@@ -1,0 +1,57 @@
+%% stream = no and limit = 0
+
+@dm:empty
+    --> #dm:query-persistent-stream status = 'Success' and customer_id is "{{project_id}}"
+            with-input name = "discovery" & limit = "0"
+    --> @dm:eval current_time ='int(time_now_as_ms())'
+    --> @dm:eval customer_tag ="'{{customer_tag}}'"
+    --> @dm:eval customer_id ="'{{customer_id}}'"
+    --> @dm:save name = "temp-discovery"
+    --> @dm:eval current_time ='int(time_now_as_ms())'
+    --> @dm:rename-columns discovery_enabled = "discovery_scope"
+    --> @dm:eval ds_name="customer_tag+'_discovery'"
+    --> @dm:eval ondemand_discovery ="'no'"
+    --> @dm:copy-columns from="current_time" and to="new_current_time"
+    --> @dm:to-type columns="new_current_time,ds_name,device_ip" and type="str"
+    --> @dm:manipulate-string from="new_current_time,ds_name,device_ip" and func="concat_columns" and to="ingestion_id"
+    --> @dm:map from = 'ingestion_id' & to = 'ingestion_id' & func = 'md5'
+    ## --> @dm:add-missing-columns columns="discovery_enabled" and value="yes"
+    --> @dm:eval pipeline_name="'discovery_main_pipeline'"
+    --> @dm:save name="temp-customer-details"
+    --> @dm:add-missing-columns columns="credential_pattern"
+    --> @dm:fixnull columns="credential_pattern"
+    --> @dm:eval credential_pattern="customer_tag+'.*'"
+    --> @dm:selectcolumns exclude= "device_ip|count_|_RDA_Id|timestamp|key"
+    --> @dm:dedup columns = "ds_name"
+    --> @dm:save name="main_discovery_mlt"
+    --> @exec:run-pipeline-by-row-multi-proc pipeline_col="pipeline_name" and save_output="yes"
+    --> @dm:save name="main_discovery_result_mlt"
+    --> @dm:save name="temp-run_discovery-result"
+
+--> @c:new-block
+    --> @dm:recall name="temp-run_discovery-result"
+    --> *dm:filter pipline_exec_failure_reason is not null
+    --> @dm:skip-block-if-shape row_count= 0
+    --> @dm:eval status = '"Discovery failed due to error: "+pipline_exec_failure_reason '
+    --> @dm:replace-data columns="status" and expr="Input dataframe to met failure criteria '{}'. Aborting" and replace="Data collection failed"
+    --> @dm:eval key='"key"'
+    --> @dm:eval source ="'Logs'"
+    --> @dm:eval unique_id = "ingestion_id+'_'+status"
+    --> @dm:selectcolumns include="status|unique_id|key|source|ingestion_id|customer_id|customer_tag"
+    --> @rn:write-stream name= "discovery_run_details"
+
+--> @c:new-block
+    --> @dm:recall name="temp-run_discovery-result"
+    --> *dm:filter pipline_exec_failure_reason is not null
+    --> @dm:skip-block-if-shape row_count=0
+    --> @dm:eval source  ="'Counts'"
+    ## --> @dm:add-missing-columns columns="discovery_end_time"
+    --> @dm:eval discovery_end_time = "int(time_now_as_ms())"
+    --> @dm:eval discovery_status ="'Failed'"
+    --> @dm:copy-columns from="current_time" and to="discovery_time"
+    --> @dm:copy-columns from="current_time" and to="new_current_time"
+    --> @dm:to-type columns="new_current_time" and type="str"
+    --> @dm:eval unique_id = "new_current_time+'_'+ingestion_id+'_'+source"
+    --> @dm:selectcolumns include="source|unique_id|ingestion_id|discovery_time|discovery_end_time|discovery_status|customer_id|customer_tag"
+    --> @rn:write-stream name= "discovery_run_details"
+

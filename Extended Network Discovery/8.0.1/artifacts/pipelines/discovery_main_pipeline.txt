@@ -1,0 +1,164 @@
+%% stream = no and limit = 0
+
+## %% import_src_type = "asset-discovery"
+@exec:get-input
+    --> @dm:eval key="'key'"
+    ## --> @dm:eval credential_pattern = "customer_tag+'.*'"
+    --> @dm:save name="temp-input-org-details"
+
+## --> @dm:save name="discovery-input-org-details"
+## asset-disovery bot
+## --> @c:data-loop columns="customer_tag,name" and dataset ="temp-input-org-details"
+--> @c:new-block
+    --> @dm:recall name="temp-input-org-details"
+    --> @dm:dedup columns = 'device_ip'
+    ##--> @dm:save name="discovery-input-org-details"
+    ## --> @asset-discovery:collector seed_addresses_col is device_ip and collection_group_rules is "default" and extended_inventory = True and cli_access = True and jobname = "$customer_tag" and credential_patterns =  "$name" and  credential_types = "snmp-cred,device-snmp-v3,device-host-ssh,device-snmpv1v2" and status_stream = "asset_inventory_collection_status_stream"
+    ## credential_types = "snmp-cred,device-snmp-v3,device-host-ssh,device-snmpv1v2" 
+    --> @asset-discovery:collector seed_addresses_col is device_ip and collection_group_rules is "default" and extended_inventory = True and cli_access = True and jobname = "{{row.customer_tag}}" and status_stream = "asset_inventory_collection_status_stream"
+    --> *dm:filter collection_status = 'Success'
+    ## --> @dm:save name = "asset-discovery-output"
+    --> @dm:save name = "temp-asset-discovery-output" & append = "yes"
+    ## --> @dm:enrich-conditional dict is 'temp-input-org-details' and condition is 'device_ip == "$target_ip"'
+    ## --> *dm:filter device_ip is not empty
+    --> @dm:selectcolumns exclude = "^device_ip$|^discovery_scope$|^key$|^ds_name$|^name$"
+    --> @dm:save name = "temp-collection-status"
+
+## asset discovery collection
+--> @c:new-block
+    --> @dm:recall name = "temp-asset-discovery-output"
+    --> @dm:to-type columns = "is_duplicate" & type = "str"
+    --> *dm:filter is_duplicate not in  ['True','true','TRUE']
+    ## --> @dm:save name = "asset-discovery-output-duplicate"
+    --> @dm:skip-pipeline-if-shape row_count= 0
+    ## --> @dm:enrich-conditional dict is 'temp-input-org-details' and condition is 'device_ip == "$target_ip"'
+    ## --> *dm:filter device_ip is not empty
+    --> @dm:selectcolumns exclude = "^device_ip$|^discovery_scope$|^key$|^ds_name$|^name$"
+    --> @dm:eval path = "'inventory_collection/outputs/'+jobid+'/'+target_ip+'.json'"
+    --> @asset-discovery:get-collection-files path_column = "path" &            groups="base,system,entityPhysical,interfaces,entAliasMappingTable,cdpGlobal,ipAddrTable,cdpCache,cli_show_ether_channel_summary,management-target,snmpEngineDetails,lldpRemTable,base.credential-id,ipNetToMediaTable,dot1dTpFdbTablemacprocess"
+    ## --> @dm:save name="Group-base-all"
+    --> @dm:selectcolumns include = "asset_ip|groupname|output|reason|jobid|path"
+    --> @dm:explode-json column='output'
+    --> @dm:selectcolumns include = "target|data|groupname|asset_ip|reason|jobid|path"
+    --> @dm:save name = "temp-group-data"
+
+## --> @dm:save name = "group-data"
+--> @c:new-block
+    --> @dm:set-tracing-context __block__="parse base"
+    --> @dm:recall name="temp-group-data"
+    --> *dm:filter groupname is "base"
+    --> @dm:explode-json column = 'data'
+    ## --> @dm:selectcolumns include="base|target"
+    --> @dm:save name="temp-Group-base"
+
+## --> @dm:save name="Group-base"
+--> @c:new-block
+    --> @dm:set-tracing-context __block__="get vendor"
+    --> @dm:recall name="temp-Group-base"
+    --> @dm:add-missing-columns columns="systemVendorID,sysObjectID"
+    ## --> @dm:selectcolumns include = "systemVendorName|systemVendorID|target|sysObjectID|reason"
+    ## --> @dm:save name = "system-vendor"
+    --> @dm:add-missing-columns columns = "vendor"
+    --> *dm:filter systemVendorID is not null
+    --> @dm:to-type columns = "systemVendorID" & type = "str"
+    --> @dm:eval vendor='"Juniper Networks, Inc." if systemVendorID in ["2636", "2636.0"] else "Cisco" if systemVendorID in ["9","9.0"] else "Vyatta" if systemVendorID in ["74", "74.0"] else "Fortinet" if systemVendorID in ["12356", "12356.0"] else "Viptela" if systemVendorID in ["41916", "41916.0"] else vendor'
+    ## --> @dm:to-type columns = "systemVendorID" and type = "str"
+    --> @dm:to-type columns = "sysObjectID" and type = "str"
+    --> *dm:filter target is not null
+    --> @dm:save name = "temp-vendor-data"
+
+## --> @dm:save name = "vendor-data"
+## Run cisco main
+--> @c:new-block
+
+--> @c:data-loop columns="customer_id,customer_tag,discovery_enabled" and dataset="temp-input-org-details"
+    --> @dm:recall name = "temp-vendor-data"
+    --> *dm:filter systemVendorID in ["9","9.0"] and sysObjectID not in ['1.3.6.1.4.1.9.1.1348']
+    --> @dm:skip-block-if-shape row_count=0
+    --> @dm:eval key="'key'"
+    --> @dm:eval customer_id="'$customer_id'"
+    --> @dm:eval customer_tag="'$customer_tag'"
+    ## --> @dm:eval project_id="'$project_id'"
+    ## --> @dm:eval ingestion_id="'$ingestion_id'"
+    --> @dm:eval discovery_enabled="'$discovery_enabled'"
+    ## --> @dm:enrich dict	 = "temp-input-org-details" and src_key_cols	 = "key" and dict_key_cols	="key" and enrich_cols	="ingestion_id,discovery_enabled,project_id,customer_tag,customer_id"
+    --> @exec:run-pipeline name ="cisco_discovery_main_pipeline" & ignore_failures = "no"
+
+## --> @exec:run-pipeline-multi-proc name="cisco_discovery_main_pipeline"
+## --> @dm:save name = "asset-cisco-data"
+## --> @dm:save name = "temp-cisco-data"
+## Run juniper main
+--> @c:new-block
+
+--> @c:data-loop columns="customer_id,customer_tag,discovery_enabled" and dataset="temp-input-org-details"
+    --> @dm:recall name = "temp-vendor-data"
+    --> *dm:filter systemVendorID in ["2636", "2636.0"]
+    --> @dm:skip-block-if-shape row_count=0
+    --> @dm:eval key="'key'"
+    --> @dm:eval customer_id="'$customer_id'"
+    --> @dm:eval customer_tag="'$customer_tag'"
+    --> @dm:eval discovery_enabled="'$discovery_enabled'"
+    ## --> @dm:eval project_id="'$project_id'"
+    ## --> @dm:eval ingestion_id="'$ingestion_id'"
+    ## --> @dm:enrich dict	 = "temp-input-org-details" and src_key_cols	 = "key" and dict_key_cols	="key" and enrich_cols	="ingestion_id,discovery_enabled"
+    --> @exec:run-pipeline name ="juniper_discovery_main_pipeline" & ignore_failures = "no"
+
+## --> @exec:run-pipeline-multi-proc name="juniper_discovery_main_pipeline"
+## --> @dm:save name = "temp-juniper-data"
+## Run vyatta main
+## --> @c:data-loop columns="Minio_location" and dataset="temp-discovery-results"
+## --> @dm:set-tracing-context __block__="get vendor Vyatta"
+## --> @dm:recall name="temp-ips_to_process"
+## --> *dm:filter systemVendorID in ["74", "74.0"]
+## --> @dm:eval ec_zip_file_loc_pipeinput='"$Minio_location"'
+## --> @dm:add-missing-columns columns="required_groups" and value="possible-duplicate,management-target,base.data,system.data,ipAddrTable.data,snmpEngineDetails.data,jnxContentsTable.data,cli_show_chasis_hardware.data,cli_show_version_juniper.data,jsystem.data,base.start-time,interfaces.data,entAliasMappingTable.data"
+## --> @dm:skip-block-if-shape row_count=0
+## --> @dm:eval key="'key'"
+## --> @dm:enrich dict	 = "temp-input-org-details" and src_key_cols	 = "key" and dict_key_cols	="key" and enrich_cols	="customer_tag,customer_id,project_id,ingestion_id"
+## --> @exec:run-pipeline name ="vyatta_discovery_main_pipeline" & ignore_failures = "no"
+## --> @dm:save name="temp-vyatta_data"
+## Run fortinet main
+--> @c:new-block
+
+--> @c:data-loop columns="customer_id,customer_tag,discovery_enabled" and dataset="temp-input-org-details"
+    --> @dm:recall name = "temp-vendor-data"
+    --> *dm:filter systemVendorID in ["12356", "12356.0"]
+    --> @dm:skip-block-if-shape row_count=0
+    --> @dm:eval key="'key'"
+    --> @dm:eval customer_id="'$customer_id'"
+    --> @dm:eval customer_tag="'$customer_tag'"
+    --> @dm:eval discovery_enabled="'$discovery_enabled'"
+    ## --> @dm:eval project_id="'$project_id'"
+    ## --> @dm:eval ingestion_id="'$ingestion_id'"
+    ## --> @dm:enrich dict	 = "temp-input-org-details" and src_key_cols	 = "key" and dict_key_cols	="key" and enrich_cols	="ingestion_id,discovery_enabled"
+    --> @exec:run-pipeline name ="fortinet_discovery_main_pipeline" & ignore_failures = "no"
+
+## --> @exec:run-pipeline-multi-proc name="fortinet_discovery_main_pipeline"
+## --> @dm:save name = "temp-fortinet_data"
+## Run Viptela main
+## --> @c:data-loop columns="Minio_location" and dataset="temp-discovery-results"
+## --> @dm:set-tracing-context __block__="get vendor Viptela"
+## --> @dm:recall name="temp-ips_to_process"
+## --> *dm:filter systemVendorID in ["41916", "41916.0"]
+## --> @dm:eval ec_zip_file_loc_pipeinput='"$Minio_location"'
+## --> @dm:skip-block-if-shape row_count=0
+## --> @dm:eval key="'key'"
+## --> @dm:enrich dict = "temp-input-org-details" and src_key_cols = "key" and dict_key_cols ="key" and enrich_cols ="customer_tag,customer_id,project_id,ingestion_id"
+## --> @exec:run-pipeline name ="viptela_discovery_main_pipeline" & ignore_failures = "no"
+## --> @dm:save name = "temp-viptela_data"
+## Run other Vendors main
+--> @c:new-block
+
+--> @c:data-loop columns="customer_id,customer_tag,discovery_enabled" and dataset="temp-input-org-details"
+    --> @dm:recall name = "temp-vendor-data"
+    --> *dm:filter systemVendorID not in ["2636", "2636.0","41916","41916.0","12356", "12356.0","74", "74.0","9","9.0"] and systemVendorID not null
+    --> @dm:skip-block-if-shape row_count=0
+    --> @dm:eval key="'key'"
+    --> @dm:eval customer_id="'$customer_id'"
+    --> @dm:eval customer_tag="'$customer_tag'"
+    --> @dm:eval discovery_enabled="'$discovery_enabled'"
+    ## --> @dm:eval project_id="'$project_id'"
+    ## --> @dm:eval ingestion_id="'$ingestion_id'"
+    ##--> @dm:enrich dict	 = "temp-input-org-details" and src_key_cols	 = "key" and dict_key_cols	="key" and enrich_cols	="discovery_enabled"
+    --> @exec:run-pipeline name ="other_vendors_discovery_main_pipeline" & ignore_failures = "no"
+
