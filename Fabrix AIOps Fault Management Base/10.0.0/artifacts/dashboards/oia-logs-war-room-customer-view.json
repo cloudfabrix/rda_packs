@@ -1,0 +1,644 @@
+{
+    "name": "oia-logs-war-room-customer-view",
+    "label": "War Room - Customer View",
+    "description": "War Room - Customer View",
+    "enabled": true,
+    "version": "2024.6.17.2",
+    "dashboard_type": "template",
+    "template_variables": {
+        "LOG_OT": {
+            "contextId": "rda_gw_timestamp"
+        },
+        "CUSTOMER_ID": {
+            "contextId": "customer_id"
+        }
+    },
+    "dashboard_filters": {
+        "time_filter": true,
+        "default_time_range": {
+            "from_time": "{{LOG_OT}}",
+            "from_time_delta_hours": -24,
+            "to_time": "{{LOG_OT}}",
+            "to_time_delta_hours": 24,
+            "label": "Time Range"
+        }
+    },
+    "stream_query_mapping": {
+        "oia-alerts-stream": {
+            "rda_gw_timestamp": "a_created_ts"
+        },
+        "oia-ml-metrics-regression-output": {
+            "rda_gw_timestamp": "timestamp"
+        },
+        "change_requests_stream": {
+            "rda_gw_timestamp": "timestamp"
+        },
+        "oia-incidents-stream": {
+            "rda_gw_timestamp": "i_created_ts"
+        }
+    },
+    "dashboard_sections": [
+        {
+            "title": "Customer View",
+            "show_filter": true,
+            "widgets": [
+                {
+                    "widget_type": "label",
+                    "label": "<h3 style='text-align: center;'>Log Time: {%raw%} {{' {{ '}} {%endraw%} toDateTimeString({{ LOG_OT }}) {%raw%} {{ '}}' }} {%endraw%} </h3>",
+                    "advanced": true,
+                    "min_width": 12,
+                    "max_width": 12,
+                    "height": 1,
+                    "widget_id": "5ae002f1"
+                },
+                {
+                    "title": "Link Up/Down Alerts",
+                    "widget_type": "counter",
+                    "min_width": 2.4,
+                    "max_width": 2.4,
+                    "height": 4,
+                    "stream": "oia-alerts-stream",
+                    "ts_column": "a_created_ts",
+                    "extra_filter": "a_message contains 'link'",
+                    "sparkline": {
+                        "interval": "1h"
+                    },
+                    "column": "count_",
+                    "agg": "sum",
+                    "type": "int",
+                    "widget_id": "42b0d069"
+                },
+                {
+                    "title": "BGP Alerts",
+                    "widget_type": "counter",
+                    "min_width": 2.4,
+                    "max_width": 2.4,
+                    "height": 4,
+                    "stream": "oia-alerts-stream",
+                    "ts_column": "a_created_ts",
+                    "extra_filter": "a_message contains 'BGP'",
+                    "sparkline": {
+                        "interval": "1h"
+                    },
+                    "column": "count_",
+                    "agg": "sum",
+                    "type": "int",
+                    "widget_id": "42b0d069"
+                },
+                {
+                    "title": "OSPF Alerts",
+                    "widget_type": "counter",
+                    "min_width": 2.4,
+                    "max_width": 2.4,
+                    "height": 4,
+                    "stream": "oia-alerts-stream",
+                    "ts_column": "a_created_ts",
+                    "extra_filter": "a_message contains 'OSPF'",
+                    "sparkline": {
+                        "interval": "1h"
+                    },
+                    "column": "count_",
+                    "agg": "sum",
+                    "type": "int",
+                    "widget_id": "42b0d069"
+                },
+                {
+                    "title": "Patch Changes",
+                    "widget_type": "counter",
+                    "min_width": 2.4,
+                    "max_width": 2.4,
+                    "height": 4,
+                    "stream": "change_requests_stream",
+                    "ts_column": "timestamp",
+                    "extra_filter": "message contains 'patch'",
+                    "sparkline": {
+                        "interval": "1h"
+                    },
+                    "column": "count_",
+                    "agg": "sum",
+                    "type": "int",
+                    "widget_id": "42b0d069"
+                },
+                {
+                    "title": "Change Requests",
+                    "widget_type": "counter",
+                    "min_width": 2.4,
+                    "max_width": 2.4,
+                    "height": 4,
+                    "stream": "change_requests_stream",
+                    "ts_column": "timestamp",
+                    "extra_filter0": "message contains 'config'",
+                    "sparkline": {
+                        "interval": "1h"
+                    },
+                    "column": "count_",
+                    "agg": "sum",
+                    "type": "int",
+                    "widget_id": "42b0d069"
+                },
+                {
+                    "title": "Events Timeline",
+                    "widget_type": "timeseries",
+                    "stream": "oia-alerts-stream",
+                    "ts_column": "a_created_ts",
+                    "max_width": 12,
+                    "height": 8,
+                    "min_width": 12,
+                    "fixTimeWindow": true,
+                    "chartProperties": {
+                        "yAxisLabel": "Alert Count",
+                        "xAxisLabel": "Time",
+                        "legendLocation": "none"
+                    },
+                    "static_markers": [
+                        {
+                            "timestamp": "{{LOG_OT}}",
+                            "message": "Log Time",
+                            "color": "#B71C1C"
+                        }
+                    ],
+                    "alert_markers": [
+                        {
+                            "stream": "change_requests_stream",
+                            "ts_column": "timestamp",
+                            "type": "circle",
+                            "message_column": "message",
+                            "severity_column": "severity"
+                        },
+                        {
+                            "stream": "oia-alerts-stream",
+                            "ts_column": "a_created_ts",
+                            "type": "triangle",
+                            "message_column": "a_message",
+                            "severity_column": "a_severity"
+                        },
+                        {
+                            "stream": "oia-ml-metrics-regression-output",
+                            "ts_column": "timestamp",
+                            "type": "square",
+                            "message_column": "marker_message",
+                            "extra_filter": "anomalies_severity is 'High' and anomalies_type is 'Upper'",
+                            "severity_column": "anomalies_severity",
+                            "columns": [
+                                "asset_id",
+                                "metric_id",
+                                "metric_label",
+                                "asset_name",
+                                "metric_source",
+                                "timestamp",
+                                "job_name",
+                                "unit",
+                                "stream_name"
+                            ],
+                            "action": {
+                                "appName": "user-dashboard/rca_regression_dashboard",
+                                "permission": "ml:ml-jobs:viewSampledata",
+                                "identifier": "ViewRegressionDashboard",
+                                "selectionType": "SINGLE",
+                                "stateName": "app.featureapp",
+                                "title": "View Regression Dashboard",
+                                "type": "GO_TO_APP_STATE"
+                            }
+                        },
+                        {
+                            "stream": "oia-logs-regression-output",
+                            "ts_column": "timestamp",
+                            "type": "circle",
+                            "message_column": "asset_id",
+                            "extra_filter": "anomalies_severity is 'High' and anomalies_type is 'Upper'",
+                            "severity_column": "anomalies_severity",
+                            "columns": [
+                                "asset_id",
+                                "asset_name",
+                                "timestamp",
+                                "job_name",
+                                "stream_name"
+                            ],
+                            "action": {
+                                "appName": "user-dashboard/rca_regression_dashboard",
+                                "permission": "ml:ml-jobs:viewSampledata",
+                                "identifier": "ViewRegressionDashboard",
+                                "selectionType": "SINGLE",
+                                "stateName": "app.featureapp",
+                                "title": "View Regression Dashboard",
+                                "type": "GO_TO_APP_STATE"
+                            }
+                        }
+                    ],
+                    "interval": "1min",
+                    "series_spec": [
+                        {
+                            "label": "Alerts",
+                            "column": "a_id",
+                            "agg": "value_count",
+                            "type": "int"
+                        }
+                    ],
+                    "widget_id": "121762cf"
+                },
+                {
+                    "title": "Metric Anomalies",
+                    "widget_type": "multi_bar_chart",
+                    "stream": "oia-ml-metrics-regression-output",
+                    "ts_column": "timestamp",
+                    "chartProperties": {
+                        "yAxisLabel": "Anomalies (%)",
+                        "xAxisLabel": "Metric Name",
+                        "stacked": false,
+                        "legendLocation": "none",
+                        "orientation": "vertical"
+                    },
+                    "group_by": [
+                        "asset_id",
+                        "metric_label"
+                    ],
+                    "descending_order": true,
+                    "others_spec": {
+                        "limit": 4,
+                        "show_others": false
+                    },
+                    "column": "anomalies_percent",
+                    "agg": "max",
+                    "type": "float",
+                    "widget_id": "f4786acb"
+                },
+                {
+                    "title": "Change Requests",
+                    "widget_type": "tabular",
+                    "min_width": 6,
+                    "max_width": 6,
+                    "height": 5,
+                    "timebased": false,
+                    "stream": "change_requests_stream",
+                    "ts_column": "timestamp",
+                    "columns": {
+                        "timestamp": {
+                            "title": "Time",
+                            "type": "DATETIME"
+                        },
+                        "message": {
+                            "title": "Change Description",
+                            "type": "TEXT"
+                        }
+                    },
+                    "widget_id": "31e2f2ed"
+                },
+                {
+                    "widget_type": "pie_chart",
+                    "title": "Alerts by Severity",
+                    "stream": "oia-alerts-stream",
+                    "ts_column": "a_created_ts",
+                    "extra_filter": "customer_id is '{{CUSTOMER_ID}}'",
+                    "min_width": 3,
+                    "height": 4,
+                    "max_width": 3,
+                    "column": "a_id",
+                    "agg": "value_count",
+                    "group_by": [
+                        "a_severity"
+                    ],
+                    "type": "str",
+                    "style": {
+                        "color-map": {
+                            "SEVERE": [
+                                "#B71C1C",
+                                "#ffffff"
+                            ],
+                            "CRITICAL": [
+                                "#E53935",
+                                "#ffffff"
+                            ],
+                            "MAJOR": [
+                                "#F57C00",
+                                "#ffffff"
+                            ],
+                            "MINOR": [
+                                "#FFA726",
+                                "#ffffff"
+                            ],
+                            "WARNING": [
+                                "#FFD54F",
+                                "#ffffff"
+                            ],
+                            "NOTIFICATION": [
+                                "#4DD0E1",
+                                "#ffffff"
+                            ],
+                            "INFORMATION": [
+                                "#03A9F4",
+                                "#ffffff"
+                            ]
+                        }
+                    },
+                    "widget_id": "cb0706e6"
+                },
+                {
+                    "title": "Alert Trend",
+                    "widget_type": "timeseries",
+                    "stream": "oia-alerts-stream",
+                    "ts_column": "a_created_ts",
+                    "max_width": 9,
+                    "height": 4,
+                    "min_width": 9,
+                    "fixTimeWindow": true,
+                    "extra_filter": "customer_id is '{{CUSTOMER_ID}}'",
+                    "chartProperties": {
+                        "yAxisLabel": "Count",
+                        "xAxisLabel": "Time",
+                        "legendLocation": "top"
+                    },
+                    "interval": "1H",
+                    "group_by": [
+                        "a_severity"
+                    ],
+                    "static_markers": [
+                        {
+                            "timestamp": "{{LOG_OT}}",
+                            "message": "Log Time",
+                            "color": "#B71C1C"
+                        }
+                    ],
+                    "series_spec": [
+                        {
+                            "column": "a_id",
+                            "agg": "value_count",
+                            "type": "int"
+                        }
+                    ],
+                    "style": {
+                        "color-map": {
+                            "SEVERE": [
+                                "#B71C1C",
+                                "#ffffff"
+                            ],
+                            "CRITICAL": [
+                                "#E53935",
+                                "#ffffff"
+                            ],
+                            "MAJOR": [
+                                "#F57C00",
+                                "#ffffff"
+                            ],
+                            "MINOR": [
+                                "#FFA726",
+                                "#ffffff"
+                            ],
+                            "WARNING": [
+                                "#FFD54F",
+                                "#ffffff"
+                            ],
+                            "NOTIFICATION": [
+                                "#4DD0E1",
+                                "#ffffff"
+                            ],
+                            "INFORMATION": [
+                                "#03A9F4",
+                                "#ffffff"
+                            ]
+                        }
+                    },
+                    "widget_id": "c29bb686"
+                },
+                {
+                    "widget_type": "pie_chart",
+                    "title": "Incidents By Priority",
+                    "stream": "oia-incidents-stream",
+                    "ts_column": "i_created_ts",
+                    "extra_filter": "customer_id is '{{CUSTOMER_ID}}'",
+                    "min_width": 3,
+                    "height": 4,
+                    "max_width": 3,
+                    "column": "incident_id",
+                    "agg": "value_count",
+                    "group_by": [
+                        "i_priority_label"
+                    ],
+                    "style": {
+                        "color-map": {
+                            "Critical": [
+                                "#B71C1C",
+                                "#ffffff"
+                            ],
+                            "High": [
+                                "#FFA726",
+                                "#ffffff"
+                            ],
+                            "Moderate": [
+                                "#90CAF9",
+                                "#ffffff"
+                            ],
+                            "Low": [
+                                "#4DD0E1",
+                                "#ffffff"
+                            ],
+                            "Planning": [
+                                "#4FC3F7",
+                                "#ffffff"
+                            ]
+                        }
+                    },
+                    "type": "str",
+                    "widget_id": "cb0706e6"
+                },
+                {
+                    "title": "Incident Trend",
+                    "widget_type": "timeseries",
+                    "stream": "oia-incidents-stream",
+                    "ts_column": "i_created_ts",
+                    "max_width": 9,
+                    "height": 4,
+                    "min_width": 9,
+                    "fixTimeWindow": true,
+                    "extra_filter": "customer_id is '{{CUSTOMER_ID}}'",
+                    "chartProperties": {
+                        "yAxisLabel": "Count",
+                        "xAxisLabel": "Time",
+                        "legendLocation": "top"
+                    },
+                    "interval": "1H",
+                    "group_by": [
+                        "i_priority_label"
+                    ],
+                    "static_markers": [
+                        {
+                            "timestamp": "{{LOG_OT}}",
+                            "message": "Log Time",
+                            "color": "#B71C1C"
+                        }
+                    ],
+                    "series_spec": [
+                        {
+                            "column": "incident_id",
+                            "agg": "value_count",
+                            "type": "int"
+                        }
+                    ],
+                    "style": {
+                        "color-map": {
+                            "Critical": [
+                                "#B71C1C",
+                                "#ffffff"
+                            ],
+                            "High": [
+                                "#FFA726",
+                                "#ffffff"
+                            ],
+                            "Moderate": [
+                                "#FFD54F",
+                                "#ffffff"
+                            ],
+                            "Low": [
+                                "#90CAF9",
+                                "#ffffff"
+                            ],
+                            "Planning": [
+                                "#4FC3F7",
+                                "#ffffff"
+                            ]
+                        }
+                    },
+                    "widget_id": "c29bb686"
+                },
+                {
+                    "widget_type": "pie_chart",
+                    "title": "Syslogs By Severity",
+                    "ts_column": "rda_gw_timestamp",
+                    "stream": "syslog_udp_event_stream_all",
+                    "min_width": 3,
+                    "height": 4,
+                    "max_width": 3,
+                    "duration_hours0": 10000,
+                    "column": "count_",
+                    "agg": "sum",
+                    "group_by": [
+                        "syslog_severity"
+                    ],
+                    "type": "int",
+                    "style": {
+                        "color-map": {
+                            "SEVERE": [
+                                "#B71C1C",
+                                "#ffffff"
+                            ],
+                            "CRITICAL": [
+                                "#E53935",
+                                "#ffffff"
+                            ],
+                            "MAJOR": [
+                                "#F57C00",
+                                "#ffffff"
+                            ],
+                            "MINOR": [
+                                "#FFA726",
+                                "#ffffff"
+                            ],
+                            "WARNING": [
+                                "#FFD54F",
+                                "#ffffff"
+                            ]
+                        }
+                    },
+                    "widget_id": "ed85e796"
+                },
+                {
+                    "title": "Syslogs",
+                    "widget_type": "timeseries",
+                    "max_width": 9,
+                    "height": 4,
+                    "min_width": 9,
+                    "ts_column": "rda_gw_timestamp",
+                    "show-markers": true,
+                    "fixTimeWindow": true,
+                    "stream": "syslog_udp_event_stream_all",
+                    "group_by": [
+                        "syslog_severity"
+                    ],
+                    "style": {
+                        "color-map": {
+                            "SEVERE": [
+                                "#B71C1C",
+                                "#ffffff"
+                            ],
+                            "CRITICAL": [
+                                "#E53935",
+                                "#ffffff"
+                            ],
+                            "MAJOR": [
+                                "#F57C00",
+                                "#ffffff"
+                            ],
+                            "MINOR": [
+                                "#FFA726",
+                                "#ffffff"
+                            ],
+                            "WARNING": [
+                                "#FFD54F",
+                                "#ffffff"
+                            ]
+                        }
+                    },
+                    "chartProperties": {
+                        "xAxisLabel": "Timestamp",
+                        "yAxisLabel": "Count",
+                        "legendLocation": "none",
+                        "xAxisTickOrientation": "STAGGERED",
+                        "options": {
+                            "elements": {
+                                "line": {
+                                    "borderWidth": 1
+                                },
+                                "point": {
+                                    "radius": 2,
+                                    "hitRadius": 3,
+                                    "hoverRadius": 3
+                                }
+                            }
+                        }
+                    },
+                    "static_markers": [
+                        {
+                            "timestamp": "{{LOG_OT}}",
+                            "message": "Log Time",
+                            "color": "#B71C1C"
+                        }
+                    ],
+                    "series_spec": [
+                        {
+                            "column": "count_",
+                            "agg": "sum",
+                            "type": "int"
+                        }
+                    ],
+                    "widget_id": "7ee88e42"
+                },
+                {
+                    "title": "Syslogs",
+                    "widget_type": "tabular",
+                    "stream": "syslog_udp_event_stream_all",
+                    "min_width": 12,
+                    "height": 6,
+                    "max_width": 12,
+                    "ts_column": "rda_gw_timestamp",
+                    "resizableColumns": true,
+                    "duration_hours": 100000,
+                    "remote_searchable": true,
+                    "remote_searchable_cols": [
+                        "message"
+                    ],
+                    "columns": {
+                        "rda_gw_timestamp": {
+                            "title": "Event Time",
+                            "type": "DATETIME"
+                        },
+                        "rda_gw_client_ip": "IP Address",
+                        "hostname": "Host",
+                        "raw": "Message",
+                        "syslog_severity": "Severity"
+                    },
+                    "widget_id": "3d7466a3"
+                }
+            ]
+        }
+    ],
+    "saved_time": "2024-06-21T18:24:04.873294"
+}

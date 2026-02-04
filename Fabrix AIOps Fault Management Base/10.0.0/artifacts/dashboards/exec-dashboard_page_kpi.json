@@ -1,0 +1,290 @@
+{
+    "id": "user-dashboard-exec-dashboard_page_kpi",
+    "name": "exec-dashboard_page_kpi",
+    "description": "Executive Dashboard, Page: KPI",
+    "label": "Executive Dashboard, Page: KPI",
+    "enabled": true,
+    "dashboard_type": "template",
+    "dashboard_style": "auto",
+    "template_variables": {
+        "STACK_NAME": {
+            "default": "Online_Banking_Stack",
+            "contextId": "stack_name"
+        }
+    },
+    "custom_context": {
+        "alert-context": true
+    },
+    "dashboard_filters": {
+        "time_filter": true,
+        "columns_filter": [
+            {
+                "id": "incident_id",
+                "label": "Incident ID",
+                "type": "TEXT"
+            },
+            {
+                "id": "i_created_ts",
+                "label": "Created",
+                "type": "DATETIME"
+            }
+        ],
+        "default_time_filter_labels": [
+            "Last 24 hours"
+        ]
+    },
+    "dashboard_sections": [
+        {
+            "title": "KPIs",
+            "show_filter": true,
+            "widgets": [
+                {
+                    "widget_type": "custom_counter",
+                    "title": "P1 Incidents (Open)",
+                    "stream": "oia-incidents-stream",
+                    "ts_column": "timestamp",
+                    "min_width": 3,
+                    "extra_filter": "(i_state is 'Open' or i_state is 'Assigned') and (i_priority is '1' and i_priority_label is 'Critical')",
+                    "height": 3,
+                    "max_width": 3,
+                    "style": {
+                        "color-list": [
+                            "#e53935"
+                        ]
+                    },
+                    "sparkline": {
+                        "interval": "1h"
+                    },
+                    "agg": "cardinality",
+                    "column": "incident_id.keyword",
+                    "type": "int",
+                    "widget_id": "1946665b"
+                },
+                {
+                    "title": "P1 Incidents Trend",
+                    "widget_type": "timeseries",
+                    "stream": "oia-incidents-stream",
+                    "extra_filter": "i_priority is '1' and i_priority_label is 'Critical'",
+                    "ts_column": "timestamp",
+                    "max_width": 9,
+                    "height": 3,
+                    "min_width": 9,
+                    "chartProperties": {
+                        "yAxisLabel": "Count",
+                        "xAxisLabel": null,
+                        "legendLocation": "bottom"
+                    },
+                    "interval": "15Min",
+                    "series_spec": [
+                        {
+                            "column": "count_",
+                            "agg": "sum",
+                            "type": "int"
+                        }
+                    ],
+                    "widget_id": "d3a88011"
+                },
+                {
+                    "title": "Noise Reduction",
+                    "widget_type": "expression_counter",
+                    "expression": "(((total_alerts - total_tickets)/total_alerts) * 100) if total_alerts else 0",
+                    "unit": "%",
+                    "max_width": 2,
+                    "height": 3,
+                    "min_width": 2,
+                    "segments": [
+                        {
+                            "variable": "total_tickets",
+                            "stream": "oia-alerts-kpi-stream",
+                            "ts_column": "timestamp",
+                            "duration_hours": 24,
+                            "column": "total_incidents",
+                            "extra_filter": "kpi_name  in ['noise_reduction_daily']",
+                            "agg": "sum",
+                            "type": "int"
+                        },
+                        {
+                            "variable": "total_alerts",
+                            "stream": "oia-alerts-kpi-stream",
+                            "ts_column": "timestamp",
+                            "duration_hours": 24,
+                            "column": "total_alerts",
+                            "extra_filter": "kpi_name  in ['noise_reduction_daily']",
+                            "agg": "sum",
+                            "type": "int"
+                        }
+                    ],
+                    "widget_id": "7f935de8"
+                },
+                {
+                    "title": "Noise Reduction Hourly Trend",
+                    "widget_type": "timeseries",
+                    "stream": "oia-alerts-kpi-stream",
+                    "extra_filter": "kpi_name  in ['noise_reduction_daily']",
+                    "ts_column": "timestamp",
+                    "interval": "15Min",
+                    "max_width": 4,
+                    "height": 3,
+                    "min_width": 4,
+                    "chartProperties": {
+                        "yAxisLabel": "Count",
+                        "xAxisLabel": null,
+                        "legendLocation": "bottom"
+                    },
+                    "series_spec": [
+                        {
+                            "column": "kpi_value",
+                            "agg": "mean",
+                            "type": "int"
+                        }
+                    ],
+                    "widget_id": "d3a88001"
+                },
+                {
+                    "title": "Self Healed Incidents",
+                    "widget_type": "expression_counter",
+                    "expression": "((auto_resolved/total_tickets) * 100) if total_tickets else 0",
+                    "unit": "%",
+                    "max_width": 3,
+                    "height": 3,
+                    "min_width": 3,
+                    "segments": [
+                        {
+                            "variable": "auto_resolved",
+                            "stream": "oia-incidents-stream",
+                            "extra_filter": "i_resolution_code in ['Auto Cleared','Alert Watch'] and i_state in ['Resolved','Closed']",
+                            "ts_column": "timestamp",
+                            "column": "count_",
+                            "agg": "sum",
+                            "type": "int"
+                        },
+                        {
+                            "variable": "total_tickets",
+                            "stream": "oia-incidents-stream",
+                            "ts_column": "timestamp",
+                            "column": "count_",
+                            "agg": "sum",
+                            "type": "int"
+                        }
+                    ],
+                    "widget_id": "7f935de8"
+                },
+                {
+                    "title": "MTTR",
+                    "widget_type": "expression_counter",
+                    "expression": "minutes/(1000*60*num) if num and minutes else 0 ",
+                    "unit": "Mins",
+                    "max_width": 3,
+                    "height": 3,
+                    "min_width": 3,
+                    "segments": [
+                        {
+                            "variable": "minutes",
+                            "stream": "oia-incidents-stream",
+                            "ts_column": "timestamp",
+                            "column": "i_ttr_millis",
+                            "agg": "sum",
+                            "type": "int"
+                        },
+                        {
+                            "variable": "num",
+                            "stream": "oia-incidents-stream",
+                            "ts_column": "timestamp",
+                            "column": "count_",
+                            "agg": "sum",
+                            "type": "int"
+                        }
+                    ],
+                    "widget_id": "7f935ee8"
+                },
+                {
+                    "widget_type": "alert_heatmap",
+                    "title": "Alert HeatMap",
+                    "stream": "oia-alerts-stream",
+                    "raised_column": "a_raised_ts",
+                    "state_column": "a_status",
+                    "cleared_column": "a_created_ts",
+                    "severity_column": "a_severity",
+                    "window_hours": 24,
+                    "num_cells": 24,
+                    "height": 6,
+                    "max_width": 9,
+                    "group_by": [
+                        "a_asset_ip_address"
+                    ],
+                    "widget_id": "5f2d2885"
+                },
+                {
+                    "title": "Top Noisy Alert Sources",
+                    "widget_type": "multi_bar_chart",
+                    "stream": "oia-alerts-stream",
+                    "extra_filter": "count_ > 0 and a_source_systemname not in ['Alert Group']",
+                    "ts_column": "timestamp",
+                    "max_width": 6,
+                    "height": 6,
+                    "min_width": 3,
+                    "chartProperties": {
+                        "yAxisLabel": null,
+                        "xAxisLabel": "Count",
+                        "stacked": true,
+                        "legendLocation": "none",
+                        "orientation": "horizontal"
+                    },
+                    "group_by": [
+                        "a_source_systemname",
+                        "a_en_node_type"
+                    ],
+                    "column": "count_",
+                    "agg": "sum",
+                    "type": "int",
+                    "widget_id": "2d7432a3"
+                },
+                {
+                    "widget_type": "custom_counter",
+                    "title": "Priority Incidents Handled By L1-Team",
+                    "stream": "oia-incidents-stream",
+                    "ts_column": "timestamp",
+                    "min_width": 4,
+                    "extra_filter": "i_priority in ['1', '2'] and i_priority_label in ['Critical', 'High'] and i_assigned_to = 'l1user@cfx.com'",
+                    "height": 3,
+                    "max_width": 6,
+                    "style": {
+                        "color-list": [
+                            "#e53935"
+                        ]
+                    },
+                    "sparkline": {
+                        "interval": "1h"
+                    },
+                    "agg": "cardinality",
+                    "column": "incident_id.keyword",
+                    "type": "int",
+                    "widget_id": "1946665b"
+                },
+                {
+                    "widget_type": "custom_counter",
+                    "title": "Priority Incidents Handled By L2-Team",
+                    "stream": "oia-incidents-stream",
+                    "ts_column": "timestamp",
+                    "min_width": 4,
+                    "extra_filter": "i_priority in ['1', '2'] and i_priority_label in ['Critical', 'High']   and i_assigned_to = 'l2user@cfx.com'",
+                    "height": 3,
+                    "max_width": 6,
+                    "style": {
+                        "color-list": [
+                            "#e53935"
+                        ]
+                    },
+                    "sparkline": {
+                        "interval": "1h"
+                    },
+                    "agg": "cardinality",
+                    "column": "incident_id.keyword",
+                    "type": "int",
+                    "widget_id": "1946665b"
+                }
+            ]
+        }
+    ],
+    "saved_time": "2023-02-10T07:24:53.344837"
+}
