@@ -1,0 +1,220 @@
+name: Fabrix AIOps ML
+label: Fabrix AIOps ML
+scope: system
+# Pack version needs to be conforming to <major>.<minor>.<micro> etc versioning.
+# More detailed spec for versioning: https://packaging.python.org/en/latest/specifications/version-specifiers/
+version: 9.0.1
+folder: /collection/ml_oia_pack
+published_date: 2025-06-30
+publisher: Fabrix.ai
+# Description of the package. Supports HTML/markdown/plain text
+# Either can provide description as an inline string in this file
+# or have description.html and description.md and give corresponding file paths instead.
+# If description is provided by multiple ways, the order of precedence is description.md > description.html > description.value
+
+description:
+   md: "./description.md"
+# Type could be collection/feature
+type: collection
+
+
+fabric_services:
+  - name: api-server
+    version: ">=8.1.0"
+    
+# Other packs that this solution requires to be deployed
+
+requires:
+  - name: Fabrix Inventory Collection Base Pack
+    version: ">=6.0.0"
+  - name: Fabrix AIOps Fault Management Base
+    version: ">=8.0.2"
+
+artifacts:
+
+  pstreams:
+    - name: ml-clusters
+      attributes:
+        retention_days: 300
+      autocreate: true
+
+    - name: ml-jobs
+      attributes:
+        unique_keys: ["id","versionId"]
+        "computed_columns": {}
+        retention_days: 300
+      autocreate: true
+
+    - name: ml-versions
+      attributes:
+        unique_keys: ["versionId"]
+        "computed_columns": {}
+        retention_days: 300
+      autocreate: true
+
+    - name: ml-experiments
+      attributes:
+        unique_keys: ["experimentId"]
+        "computed_columns": {}
+        retention_days: 300
+      autocreate: true
+    
+    - name: ml-model-meta
+      attributes:
+        unique_keys: ["versionId"]
+        "computed_columns": {}
+        retention_days: 300
+      autocreate: true
+
+  dashboards:
+
+    - name: ml-clusters
+      file: ./artifacts/dashboards/ml-clusters.json
+      folder: MlOIAPack
+
+    - name: ml-app
+      file: ./artifacts/dashboards/ml-app.json
+      folder: MlOIAPack
+
+#    - name: ml_oia_configure_and_manage
+#      file: ./artifacts/dashboards/ml_oia_configure_and_manage.json
+#      folder: MlOIAPack
+
+    - name: ml-regression-model-monitor
+      file: ./artifacts/dashboards/ml-regression-model-monitor.json
+      folder: MlOIAPack
+
+    - name: ml-experiments-template
+      file: ./artifacts/dashboards/ml-experiments-template.json
+      folder: MlOIAPack
+
+  pipelines:
+
+    - name: genai-incident-recommendation-parent
+      version: 2024.03.19.1
+      file: ./artifacts/pipelines/genai-incident-recommendation-parent.txt
+      folder: MlOIAPack
+      skip_validation: true
+
+    - name: ml-metrics-selection
+      version: 2024.03.19.1
+      file: ./artifacts/pipelines/ml-metrics-selection.txt
+      folder: MlOIAPack
+      skip_validation: true
+
+    - name: genai-incident-recommendation-child
+      version: 2024.03.19.1
+      file: ./artifacts/pipelines/genai-incident-recommendation-child.txt
+      folder: MlOIAPack
+      skip_validation: true
+
+    - name: ml-db-data-migration
+      version: 2026.01.07.01
+      file: ./artifacts/pipelines/ml-db-data-migration.txt
+      folder: MlOIAPack
+      skip_validation: true
+
+customer_level:
+
+  launch_locations:
+
+#    - pstream_name: rda_packs_dynamic_groups_and_pages
+#      dashboard_group_name: groupDiscovery
+#      dashboard_group_label: Onboarding
+#      dashboard_group_icon: "library.svg"
+#      dashboard_page_name: ml_oia_configure_and_manage
+#      dashboard_page_label: ML OIA Configure and Manage
+#      dashboard_page_icon: "library.svg"
+#    - pstream_name: rda_packs_dynamic_groups_and_pages
+#      dashboard_group_name: groupInventory
+#      dashboard_group_label: Inventory
+#      dashboard_group_icon: ""
+#      dashboard_page_name: ml-clusters
+#      dashboard_page_label: ML Clusters
+#      dashboard_page_icon: "library.svg"
+    - pstream_name: rda_packs_dynamic_groups_and_pages
+      dashboard_group_name: groupInventory
+      dashboard_group_label: Inventory
+      dashboard_group_icon: ""
+      dashboard_page_name: ml-experiments-template
+      dashboard_page_label: ML Experiments Template
+      dashboard_page_icon: "library.svg" 
+#    - pstream_name: rda_packs_dynamic_groups_and_pages
+#      dashboard_group_name: groupInventory
+#      dashboard_group_label: Inventory
+#      dashboard_group_icon: ""
+#      dashboard_page_name: ml-regression-model-monitor
+#      dashboard_page_label: ML Regression Model Monitor
+#      dashboard_page_icon: "library.svg"
+    - pstream_name: rda_packs_dynamic_groups_and_pages
+      dashboard_group_name: groupInventory
+      dashboard_group_label: Inventory
+      dashboard_group_icon: ""
+      dashboard_page_name: rda-mgmt-page-pipelines
+      dashboard_page_label: rda-mgmt-page-pipelines
+      dashboard_page_icon: "pipeline.svg"
+    - pstream_name: rda_packs_dynamic_groups_and_pages
+      dashboard_group_name: groupInventory
+      dashboard_group_label: Inventory
+      dashboard_group_icon: ""
+      dashboard_page_name: rda-mgmt-page-credentials
+      dashboard_page_label: rda-mgmt-page-credentials
+      dashboard_page_icon: "credentials.svg"
+  artifacts:
+
+    blueprints:
+      - name: GenAI Incident Recommendation Multi Tenant
+        file: ./artifacts/blueprints/genai_incident_recommendation_multi_tenant.yaml
+
+      - name: ML Metric Selection For IRM Multi Tenant
+        file: ./artifacts/blueprints/ml_metric_selection_for_irm_multi_tenant.yaml
+
+single_tenant:
+
+  launch_dashboard: ml-app
+  launch_locations:
+#    - pstream_name: rda_packs_dynamic_groups_and_pages
+#      dashboard_group_name: groupInventory
+#      dashboard_group_label: Inventory
+#      dashboard_group_icon: ""
+#      dashboard_page_name: ml-clusters
+#      dashboard_page_label: ML Clusters
+#      dashboard_page_icon: "library.svg"
+    - pstream_name: rda_packs_dynamic_groups_and_pages
+      dashboard_group_name: groupInventory
+      dashboard_group_label: Inventory
+      dashboard_group_icon: ""
+      dashboard_page_name: ml-experiments-template
+      dashboard_page_label: Experiments
+      dashboard_page_icon: "library.svg"
+    - pstream_name: rda_packs_dynamic_groups_and_pages
+      dashboard_group_name: groupInventory
+      dashboard_group_label: Inventory
+      dashboard_group_icon: ""
+      dashboard_page_name: rda-mgmt-page-pipelines
+      dashboard_page_label: Pipelines
+      dashboard_page_icon: "pipeline.svg"
+    - pstream_name: rda_packs_dynamic_groups_and_pages
+      dashboard_group_name: groupInventory
+      dashboard_group_label: Inventory
+      dashboard_group_icon: ""
+      dashboard_page_name: rda-mgmt-page-credentials
+      dashboard_page_label: Credentials
+      dashboard_page_icon: "credentials.svg"
+#    - pstream_name: rda_packs_dynamic_groups_and_pages
+#      dashboard_group_name: groupInventory
+#      dashboard_group_label: Inventory
+#      dashboard_group_icon: ""
+#      dashboard_page_name: ml-regression-model-monitor
+#      dashboard_page_label: ML Regression Model Monitor
+#      dashboard_page_icon: "library.svg"
+
+  artifacts:
+
+    blueprints:
+      - name: GenAI Incident Recommendation
+        file: ./artifacts/blueprints/genai_incident_recommendation.yaml
+
+      - name: ML Metric Selection For IRM
+        file: ./artifacts/blueprints/ml_metric_selection_for_irm.yaml
+  

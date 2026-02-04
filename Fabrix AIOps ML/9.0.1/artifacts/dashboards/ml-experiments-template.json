@@ -1,0 +1,1284 @@
+{
+    "name": "ml-experiments-template",
+    "label": "ML Experiments Dashboard",
+    "description": "ML Experiments Dashboard",
+    "version": "23.3.4.1",
+    "enabled": true,
+    "debug": true,
+    "dashboard_style": "tabbed",
+    "stream": "ml-experiments",
+    "dashboard_type": "template",
+    "template_variables": {
+        "PROJECT_ID": {
+            "default": [
+                "4981a70a-cd44-11ed-8067-0242ac170007"
+            ],
+            "contextId": "USER_PROJECTS"
+        },
+        "CUSTOMER_ID": {
+            "default": "4981a70a-cd44-11ed-8067-0242ac170007",
+            "contextId": "customerId"
+        }
+    },
+    "status_poller": {
+        "stream": "ml-experiments",
+        "frequency": 15,
+        "columns": [
+            "timestamp"
+        ],
+        "sorting": [
+            {
+                "timestamp": "desc"
+            }
+        ],
+        "query": "timestamp is after '$timestamp'",
+        "defaults": {
+            "timestamp": "$UTCNOW"
+        },
+        "action": "refresh"
+    },
+    "dashboard_filters": {
+        "time_filter": true,
+        "default_time_filter_non_removable": true,
+        "show_default_time_filter": false,
+        "extra_filter": "projectId in {{PROJECT_ID}} and status is not-in 'DELETED'",
+        "additional_datetime_column_filters": [
+            {
+                "id": "createdAt",
+                "label": "Created At"
+            },
+            {
+                "id": "updatedAt",
+                "label": "Updated At"
+            }
+        ],
+        "columns_filter": [
+            {
+                "id": "customerId",
+                "label": "Customer Id",
+                "type": "TEXT"
+            },
+            {
+                "id": "projectId",
+                "label": "Organizations",
+                "type": "TEXT"
+            },
+            {
+                "id": "name",
+                "label": "Name",
+                "type": "TEXT"
+            },
+            {
+                "id": "description",
+                "label": "Description",
+                "type": "TEXT"
+            },
+            {
+                "id": "dataType",
+                "label": "Data Context",
+                "type": "TEXT"
+            },
+            {
+                "id": "status",
+                "label": "Status",
+                "type": "TEXT"
+            },
+            {
+                "id": "startedAt",
+                "label": "Started At",
+                "type": "DATETIME"
+            },
+            {
+                "id": "lastTrainedAt",
+                "label": "Last Trained At",
+                "type": "DATETIME"
+            },
+            {
+                "id": "schedulerStatus",
+                "label": "Scheduler",
+                "type": "TEXT"
+            },
+            {
+                "id": "retrainVersion",
+                "label": "Retrain Schedule Version",
+                "type": "TEXT"
+            },
+            {
+                "id": "message",
+                "label": "Message",
+                "type": "TEXT"
+            }
+        ],
+        "default_time_filter_labels": [
+            "Last 24 hours"
+        ],
+        "group_filters": [
+            {
+                "stream": "ml-experiments",
+                "title": "Name",
+                "group_by": [
+                    "name"
+                ],
+                "ts_column": "createdAt",
+                "agg": "value_count",
+                "column": "name",
+                "type": "str"
+            },
+            {
+                "stream": "ml-experiments",
+                "title": "Pipeline Type",
+                "group_by": [
+                    "pipelineType"
+                ],
+                "ts_column": "createdAt",
+                "agg": "value_count",
+                "column": "name",
+                "type": "str"
+            },
+            {
+                "stream": "ml-experiments",
+                "title": "Insights",
+                "group_by": [
+                    "insights"
+                ],
+                "ts_column": "createdAt",
+                "agg": "value_count",
+                "column": "name",
+                "type": "str"
+            },
+            {
+                "stream": "ml-experiments",
+                "title": "Scheduler",
+                "group_by": [
+                    "schedulerStatus"
+                ],
+                "ts_column": "createdAt",
+                "agg": "value_count",
+                "column": "name",
+                "type": "str"
+            },
+            {
+                "stream": "ml-experiments",
+                "title": "Status",
+                "group_by": [
+                    "status"
+                ],
+                "ts_column": "createdAt",
+                "agg": "value_count",
+                "column": "name",
+                "type": "str"
+            }
+        ]
+    },
+    "dashboard_sections": [
+        {
+            "title": "Regression",
+            "show_filter": true,
+            "widgets": [
+                {
+                    "title": "Regression Experiment",
+                    "widget_type": "tabular",
+                    "stream": "ml-experiments",
+                    "ts_column": "createdAt",
+                    "extra_filter": "pipelineType is 'Regression'",
+                    "min_width": 12,
+                    "height": 12,
+                    "max_width": 12,
+                    "paginated": true,
+                    "refreshRequired": true,
+                    "max_rows": 50,
+                    "columns": {
+                        "experimentId": {
+                            "title": "id",
+                            "key": true,
+                            "visible": false
+                        },
+                        "projectId": {
+                            "title": "Project Id",
+                            "visible": false,
+                            "key": true
+                        },
+                        "customerId": {
+                            "title": "Customer Id",
+                            "visible": false,
+                            "key": true
+                        },
+                        "name": {
+                            "title": "Name",
+                            "key": true,
+                            "visible": true
+                        },
+                        "description": {
+                            "title": "Description",
+                            "key": false,
+                            "visible": true
+                        },
+                        "pipelineType": {
+                            "title": "Pipeline Type",
+                            "key": true,
+                            "visible": false
+                        },
+                        "dataType": {
+                            "title": "Data Context",
+                            "key": false,
+                            "visible": true
+                        },
+                        "status_color": {
+                            "type": "COLOR-MAP",
+                            "source-column": "status",
+                            "color-map": {
+                                "CREATED": "#9E9E9E",
+                                "INITIALIZING": "#C2BC1D",
+                                "STARTED": "#C2BC1D",
+                                "STARTING": "#C2BC1D",
+                                "TRAINING": "#C2BC1D",
+                                "COMPLETED": "#03A9F4",
+                                "ACTIVE": "#03A9F4",
+                                "INACTIVE": "#03A9F4",
+                                "FAILED": "#B71C1C"
+                            }
+                        },
+                        "status": {
+                            "title": "Status",
+                            "key": true,
+                            "htmlTemplateForRow": "<span class='badge' style='background-color: {{'{{ row.status_color }}'}}' > {{'{{ row.status }}'}} </span>",
+                            "visible": true
+                        },
+                        "startedAt": {
+                            "title": "Started At",
+                            "type": "DATETIME"
+                        },
+                        "lastTrainedAt": {
+                            "title": "Last Trained At",
+                            "type": "DATETIME"
+                        },
+                        "schedulerStatus": {
+                            "title": "Scheduler",
+                            "key": false,
+                            "visible": true,
+                            "ui-properties": {
+                                "valueMap": {
+                                    "formatDetails": [
+                                        {
+                                            "formatKey": "Disable",
+                                            "formatVal": "Disable",
+                                            "editLabel": "Disable",
+                                            "formatIcon": "cross.svg",
+                                            "iconType": "IMG"
+                                        },
+                                        {
+                                            "formatKey": "Enable",
+                                            "formatVal": "Enable",
+                                            "formatIcon": "check.svg",
+                                            "editLabel": "Enable",
+                                            "iconType": "IMG"
+                                        }
+                                    ],
+                                    "cellPresent": "ICON",
+                                    "editPresent": "ICON_LABEL"
+                                }
+                            }
+                        },
+                        "insights": {
+                            "title": "Insights",
+                            "key": true,
+                            "visible": true,
+                            "ui-properties": {
+                                "valueMap": {
+                                    "formatDetails": [
+                                        {
+                                            "formatKey": "Disable",
+                                            "formatVal": "Disable",
+                                            "editLabel": "Disable",
+                                            "formatIcon": "cross.svg",
+                                            "iconType": "IMG"
+                                        },
+                                        {
+                                            "formatKey": "Enable",
+                                            "formatVal": "Enable",
+                                            "formatIcon": "check.svg",
+                                            "editLabel": "Enable",
+                                            "iconType": "IMG"
+                                        }
+                                    ],
+                                    "cellPresent": "ICON",
+                                    "editPresent": "ICON_LABEL"
+                                }
+                            }
+                        },
+                        "retrainVersion": {
+                            "title": "Retrain Schedule Version",
+                            "key": true,
+                            "visible": true
+                        },
+                        "predictVersion": {
+                            "title": "Prediction Schedule Version",
+                            "key": true,
+                            "visible": true
+                        },
+                        "message": {
+                            "title": "Message",
+                            "type": "TEXT",
+                            "key": false,
+                            "visible": true
+                        },
+                        "published_pipeline_name": {
+                            "title": "Published Pipeline Name",
+                            "type": "TEXT",
+                            "key": true,
+                            "visible": false
+                        },
+                        "published_pipeline_version": {
+                            "title": "Published Pipeline Version",
+                            "type": "TEXT",
+                            "key": true,
+                            "visible": false
+                        },
+                        "rowContext": {
+                            "title": "Hidden Row Context",
+                            "key": true,
+                            "visible": false
+                        }
+                    },
+                    "actions": [
+                        {
+                            "title": "Add Experiment",
+                            "type": "POPUP_FORM",
+                            "permission": "oia:mlpipeline:*",
+                            "selectionType": "NONE",
+                            "identifier": "ml-config:cfx.experiments.add",
+                            "api-endpoint": {
+                                "service-name": "ml-config",
+                                "methodName": "invokeAppApi:getFormById",
+                                "stringified-params": true,
+                                "parse-output": false,
+                                "params": [
+                                    {
+                                        "form_id": "cfx.experiments.add",
+                                        "pipelineType": "regression",
+                                        "context": {},
+                                        "action-type": "add"
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "title": "Delete Experiments",
+                            "type": "POPUP_FORM",
+                            "permission": "oia:mlpipeline:*",
+                            "selectionType": "NONE",
+                            "identifier": "ml-config:cfx.bulk.experiment.delete",
+                            "api-endpoint": {
+                                "service-name": "ml-config",
+                                "methodName": "invokeAppApi:getFormById",
+                                "stringified-params": true,
+                                "parse-output": false,
+                                "params": [
+                                    {
+                                        "form_id": "cfx.bulk.experiment.delete",
+                                        "pipelineType": "regression",
+                                        "context": {}
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "title": "Execute",
+                            "type": "POPUP_FORM",
+                            "permission": "oia:mlpipeline:*",
+                            "selectionType": "SINGLE",
+                            "identifier": "ml-config:cfx.experiments.execute",
+                            "api-endpoint": {
+                                "service-name": "ml-config",
+                                "namespace": "io.cfx.dimensions.app",
+                                "methodName": "invokeAppApi:getFormById",
+                                "stringified-params": true,
+                                "parse-output": false,
+                                "params": [
+                                    {
+                                        "form_id": "cfx.experiments.execute",
+                                        "context": {}
+                                    }
+                                ]
+                            },
+                            "actionConditions": {
+                                "actionControl": "SHOW_IF",
+                                "operator": "OR",
+                                "actionCondition": [
+                                    {
+                                        "conditionalField": [
+                                            {
+                                                "conditionType": "NOT_EQUAL",
+                                                "conditionValue": "CREATING",
+                                                "fieldId": "status"
+                                            },
+                                            {
+                                                "conditionType": "NOT_EQUAL",
+                                                "conditionValue": "ACTIVE",
+                                                "fieldId": "status"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "title": "View Jobs",
+                            "type": "GO_TO_APP_STATE",
+                            "permission": "oia:mlpipeline:*",
+                            "selectionType": "SINGLE",
+                            "stateName": "app.featureapp",
+                            "appName": "ml-jobs",
+                            "drillDownLinkField": "name",
+                            "drillDownContext": "id",
+                            "displayLabelColumnId": "name"
+                        },
+                        {
+                            "title": "View Insights",
+                            "type": "GO_TO_APP_STATE",
+                            "permission": "oia:mlpipeline:*",
+                            "selectionType": "SINGLE",
+                            "stateName": "app.featureapp",
+                            "appName": "ml-insights",
+                            "actionCondition": {
+                                "actionControl": "SHOW_IF",
+                                "operator": "AND",
+                                "conditionalField": [
+                                    {
+                                        "conditionType": "EQUAL",
+                                        "conditionValue": "Enable",
+                                        "fieldId": "insights"
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "title": "Prediction Scheduler Configuration",
+                            "type": "POPUP_FORM",
+                            "selectionType": "SINGLE",
+                            "permission": "oia:mlpipeline:*",
+                            "identifier": "ml-config:cfx.job.prediction.scheduler",
+                            "api-endpoint": {
+                                "service-name": "ml-config",
+                                "namespace": "io.cfx.dimensions.app",
+                                "methodName": "invokeAppApi:getFormById",
+                                "stringified-params": true,
+                                "parse-output": false,
+                                "params": [
+                                    {
+                                        "form_id": "cfx.job.prediction.scheduler",
+                                        "context": {}
+                                    }
+                                ]
+                            },
+                            "actionCondition": {
+                                "actionControl": "SHOW_IF",
+                                "operator": "AND",
+                                "conditionalField": [
+                                    {
+                                        "conditionType": "EQUAL",
+                                        "conditionValue": "Regression",
+                                        "fieldId": "pipelineType"
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "title": "Retraining Scheduler Configuration",
+                            "type": "POPUP_FORM",
+                            "selectionType": "SINGLE",
+                            "permission": "oia:mlpipeline:*",
+                            "identifier": "ml-config:cfx.job.retrain.scheduler",
+                            "api-endpoint": {
+                                "service-name": "ml-config",
+                                "namespace": "io.cfx.dimensions.app",
+                                "methodName": "invokeAppApi:getFormById",
+                                "stringified-params": true,
+                                "parse-output": false,
+                                "params": [
+                                    {
+                                        "form_id": "cfx.job.retrain.scheduler",
+                                        "context": {}
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "title": "Disable Schedules",
+                            "type": "POPUP_FORM",
+                            "selectionType": "SINGLE",
+                            "permission": "oia:mlpipeline:*",
+                            "identifier": "ml-config:cfx.job.disable.schedule",
+                            "api-endpoint": {
+                                "service-name": "ml-config",
+                                "namespace": "io.cfx.dimensions.app",
+                                "methodName": "invokeAppApi:getFormById",
+                                "stringified-params": true,
+                                "parse-output": false,
+                                "params": [
+                                    {
+                                        "form_id": "cfx.job.disable.schedule",
+                                        "context": {}
+                                    }
+                                ]
+                            },
+                            "actionCondition": {
+                                "actionControl": "SHOW_IF",
+                                "operator": "AND",
+                                "conditionalField": [
+                                    {
+                                        "conditionType": "EQUAL",
+                                        "conditionValue": "Enable",
+                                        "fieldId": "schedulerStatus"
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "title": "Delete",
+                            "type": "POPUP_FORM",
+                            "icon": "mdi mdi-plus",
+                            "permission": "oia:mlpipeline:*",
+                            "selectionType": "SINGLE",
+                            "identifier": "ml-config:cfx.experiments.delete",
+                            "api-endpoint": {
+                                "service-name": "ml-config",
+                                "namespace": "io.cfx.dimensions.app",
+                                "methodName": "invokeAppApi:getFormById",
+                                "stringified-params": true,
+                                "parse-output": false,
+                                "params": [
+                                    {
+                                        "form_id": "cfx.experiments.delete",
+                                        "context": {}
+                                    }
+                                ]
+                            },
+                            "actionConditions": {
+                                "actionControl": "SHOW_IF",
+                                "operator": "OR",
+                                "actionCondition": [
+                                    {
+                                        "conditionalField": [
+                                            {
+                                                "conditionType": "NOT_EQUAL",
+                                                "conditionValue": "ACTIVE",
+                                                "fieldId": "status"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "widget_id": "41cad559"
+                }
+            ]
+        },
+        {
+            "title": "Clustering",
+            "show_filter": true,
+            "widgets": [
+                {
+                    "title": "Clustering Experiment",
+                    "widget_type": "tabular",
+                    "stream": "ml-experiments",
+                    "ts_column": "createdAt",
+                    "min_width": 12,
+                    "height": 12,
+                    "max_width": 12,
+                    "paginated": true,
+                    "refreshRequired": true,
+                    "extra_filter": "pipelineType is 'Clustering'",
+                    "max_rows": 50,
+                    "columns": {
+                        "experimentId": {
+                            "title": "id",
+                            "key": true,
+                            "visible": false
+                        },
+                        "projectId": {
+                            "title": "Project Id",
+                            "visible": false,
+                            "key": true
+                        },
+                        "customerId": {
+                            "title": "Customer Id",
+                            "visible": false,
+                            "key": true
+                        },
+                        "name": {
+                            "title": "Name",
+                            "key": true,
+                            "visible": true
+                        },
+                        "description": {
+                            "title": "Description",
+                            "key": false,
+                            "visible": true
+                        },
+                        "pipelineType": {
+                            "title": "Pipeline Type",
+                            "key": true,
+                            "visible": true
+                        },
+                        "dataType": {
+                            "title": "Data Context",
+                            "key": false,
+                            "visible": true
+                        },
+                        "status_color": {
+                            "type": "COLOR-MAP",
+                            "source-column": "status",
+                            "color-map": {
+                                "CREATED": "#9E9E9E",
+                                "INITIALIZING": "#C2BC1D",
+                                "STARTED": "#C2BC1D",
+                                "STARTING": "#C2BC1D",
+                                "TRAINING": "#C2BC1D",
+                                "COMPLETED": "#03A9F4",
+                                "ACTIVE": "#03A9F4",
+                                "INACTIVE": "#03A9F4",
+                                "FAILED": "#B71C1C"
+                            }
+                        },
+                        "status": {
+                            "title": "Status",
+                            "key": true,
+                            "htmlTemplateForRow": "<span class='badge' style='background-color: {{'{{ row.status_color }}'}}' > {{'{{ row.status }}'}} </span>",
+                            "visible": true
+                        },
+                        "createdAt": {
+                            "title": "Started At",
+                            "type": "DATETIME"
+                        },
+                        "lastTrainedAt": {
+                            "title": "Last Trained At",
+                            "type": "DATETIME"
+                        },
+                        "schedulerStatus": {
+                            "title": "Scheduler",
+                            "key": false,
+                            "visible": true,
+                            "ui-properties": {
+                                "valueMap": {
+                                    "formatDetails": [
+                                        {
+                                            "formatKey": "Disable",
+                                            "formatVal": "Disable",
+                                            "editLabel": "Disable",
+                                            "formatIcon": "cross.svg",
+                                            "iconType": "IMG"
+                                        },
+                                        {
+                                            "formatKey": "Enable",
+                                            "formatVal": "Enable",
+                                            "formatIcon": "check.svg",
+                                            "editLabel": "Enable",
+                                            "iconType": "IMG"
+                                        }
+                                    ],
+                                    "cellPresent": "ICON",
+                                    "editPresent": "ICON_LABEL"
+                                }
+                            }
+                        },
+                        "retrainVersion": {
+                            "title": "Retrain Schedule Version",
+                            "key": true,
+                            "visible": true
+                        },
+                        "message": {
+                            "title": "Message",
+                            "type": "TEXT",
+                            "key": false,
+                            "visible": true
+                        },
+                        "published_pipeline_name": {
+                            "title": "Published Pipeline Name",
+                            "type": "TEXT",
+                            "key": true,
+                            "visible": false
+                        },
+                        "published_pipeline_version": {
+                            "title": "Published Pipeline Version",
+                            "type": "TEXT",
+                            "key": true,
+                            "visible": false
+                        },
+                        "rowContext": {
+                            "title": "Hidden Row Context",
+                            "key": true,
+                            "visible": false
+                        }
+                    },
+                    "actions": [
+                        {
+                            "title": "Add Experiment",
+                            "type": "POPUP_FORM",
+                            "permission": "oia:mlpipeline:*",
+                            "selectionType": "NONE",
+                            "identifier": "ml-config:cfx.experiments.add",
+                            "api-endpoint": {
+                                "service-name": "ml-config",
+                                "methodName": "invokeAppApi:getFormById",
+                                "stringified-params": true,
+                                "parse-output": false,
+                                "params": [
+                                    {
+                                        "form_id": "cfx.experiments.add",
+                                        "pipelineType": "clustering",
+                                        "context": {},
+                                        "action-type": "add"
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "title": "Delete Experiments",
+                            "type": "POPUP_FORM",
+                            "permission": "oia:mlpipeline:*",
+                            "selectionType": "NONE",
+                            "identifier": "ml-config:cfx.bulk.experiment.delete",
+                            "api-endpoint": {
+                                "service-name": "ml-config",
+                                "methodName": "invokeAppApi:getFormById",
+                                "stringified-params": true,
+                                "parse-output": false,
+                                "params": [
+                                    {
+                                        "form_id": "cfx.bulk.experiment.delete",
+                                        "pipelineType": "clustering"
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "title": "Execute",
+                            "type": "POPUP_FORM",
+                            "permission": "oia:mlpipeline:*",
+                            "selectionType": "SINGLE",
+                            "identifier": "ml-config:cfx.experiments.execute",
+                            "api-endpoint": {
+                                "service-name": "ml-config",
+                                "namespace": "io.cfx.dimensions.app",
+                                "methodName": "invokeAppApi:getFormById",
+                                "stringified-params": true,
+                                "parse-output": false,
+                                "params": [
+                                    {
+                                        "form_id": "cfx.experiments.execute",
+                                        "context": {}
+                                    }
+                                ]
+                            },
+                            "actionConditions": {
+                                "actionControl": "SHOW_IF",
+                                "operator": "OR",
+                                "actionCondition": [
+                                    {
+                                        "conditionalField": [
+                                            {
+                                                "conditionType": "NOT_EQUAL",
+                                                "conditionValue": "CREATING",
+                                                "fieldId": "status"
+                                            },
+                                            {
+                                                "conditionType": "NOT_EQUAL",
+                                                "conditionValue": "ACTIVE",
+                                                "fieldId": "status"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "title": "View Jobs",
+                            "type": "GO_TO_APP_STATE",
+                            "permission": "oia:mlpipeline:*",
+                            "selectionType": "SINGLE",
+                            "stateName": "app.featureapp",
+                            "appName": "ml-jobs",
+                            "drillDownLinkField": "name",
+                            "drillDownContext": "id",
+                            "displayLabelColumnId": "name"
+                        },
+                        {
+                            "title": "Prediction Scheduler Configuration",
+                            "type": "POPUP_FORM",
+                            "selectionType": "SINGLE",
+                            "permission-resource": "ml:ml-experiments:bulkDelete",
+                            "identifier": "ml-config:cfx.job.prediction.scheduler",
+                            "api-endpoint": {
+                                "service-name": "ml-config",
+                                "namespace": "io.cfx.dimensions.app",
+                                "methodName": "invokeAppApi:getFormById",
+                                "stringified-params": true,
+                                "parse-output": false,
+                                "params": [
+                                    {
+                                        "form_id": "cfx.job.prediction.scheduler",
+                                        "context": {}
+                                    }
+                                ]
+                            },
+                            "actionCondition": {
+                                "actionControl": "SHOW_IF",
+                                "operator": "AND",
+                                "conditionalField": [
+                                    {
+                                        "conditionType": "EQUAL",
+                                        "conditionValue": "Regression",
+                                        "fieldId": "pipelineType"
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "title": "Retraining Scheduler Configuration",
+                            "type": "POPUP_FORM",
+                            "selectionType": "SINGLE",
+                            "permission": "oia:mlpipeline:*",
+                            "identifier": "ml-config:cfx.job.retrain.scheduler",
+                            "api-endpoint": {
+                                "service-name": "ml-config",
+                                "namespace": "io.cfx.dimensions.app",
+                                "methodName": "invokeAppApi:getFormById",
+                                "stringified-params": true,
+                                "parse-output": false,
+                                "params": [
+                                    {
+                                        "form_id": "cfx.job.retrain.scheduler",
+                                        "context": {}
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "title": "Disable Schedules",
+                            "type": "POPUP_FORM",
+                            "selectionType": "SINGLE",
+                            "permission": "oia:mlpipeline:*",
+                            "identifier": "ml-config:cfx.job.disable.schedule",
+                            "api-endpoint": {
+                                "service-name": "ml-config",
+                                "namespace": "io.cfx.dimensions.app",
+                                "methodName": "invokeAppApi:getFormById",
+                                "stringified-params": true,
+                                "parse-output": false,
+                                "params": [
+                                    {
+                                        "form_id": "cfx.job.disable.schedule",
+                                        "context": {}
+                                    }
+                                ]
+                            },
+                            "actionCondition": {
+                                "actionControl": "SHOW_IF",
+                                "operator": "AND",
+                                "conditionalField": [
+                                    {
+                                        "conditionType": "EQUAL",
+                                        "conditionValue": "Enable",
+                                        "fieldId": "schedulerStatus"
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "title": "Delete",
+                            "type": "POPUP_FORM",
+                            "icon": "mdi mdi-plus",
+                            "permission": "oia:mlpipeline:*",
+                            "selectionType": "SINGLE",
+                            "identifier": "ml-config:cfx.experiments.delete",
+                            "api-endpoint": {
+                                "service-name": "ml-config",
+                                "namespace": "io.cfx.dimensions.app",
+                                "methodName": "invokeAppApi:getFormById",
+                                "stringified-params": true,
+                                "parse-output": false,
+                                "params": [
+                                    {
+                                        "form_id": "cfx.experiments.delete",
+                                        "context": {}
+                                    }
+                                ]
+                            },
+                            "actionConditions": {
+                                "actionControl": "SHOW_IF",
+                                "operator": "OR",
+                                "actionCondition": [
+                                    {
+                                        "conditionalField": [
+                                            {
+                                                "conditionType": "NOT_EQUAL",
+                                                "conditionValue": "ACTIVE",
+                                                "fieldId": "status"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "widget_id": "6b7134a6"
+                }
+            ]
+        },
+        {
+            "title": "Classification",
+            "show_filter": true,
+            "widgets": [
+                {
+                    "title": "Classification Experiment",
+                    "widget_type": "tabular",
+                    "stream": "ml-experiments",
+                    "ts_column": "createdAt",
+                    "min_width": 12,
+                    "height": 12,
+                    "max_width": 12,
+                    "paginated": true,
+                    "refreshRequired": true,
+                    "extra_filter": "pipelineType is 'Classification'",
+                    "max_rows": 50,
+                    "columns": {
+                        "experimentId": {
+                            "title": "id",
+                            "key": true,
+                            "visible": false
+                        },
+                        "projectId": {
+                            "title": "Project Id",
+                            "visible": false,
+                            "key": true
+                        },
+                        "customerId": {
+                            "title": "Customer Id",
+                            "visible": false,
+                            "key": true
+                        },
+                        "name": {
+                            "title": "Name",
+                            "key": true,
+                            "visible": true
+                        },
+                        "description": {
+                            "title": "Description",
+                            "key": false,
+                            "visible": true
+                        },
+                        "pipelineType": {
+                            "title": "Pipeline Type",
+                            "key": true,
+                            "visible": true
+                        },
+                        "dataType": {
+                            "title": "Data Context",
+                            "key": false,
+                            "visible": true
+                        },
+                        "status_color": {
+                            "type": "COLOR-MAP",
+                            "source-column": "status",
+                            "color-map": {
+                                "CREATED": "#9E9E9E",
+                                "INITIALIZING": "#C2BC1D",
+                                "STARTED": "#C2BC1D",
+                                "STARTING": "#C2BC1D",
+                                "TRAINING": "#C2BC1D",
+                                "COMPLETED": "#03A9F4",
+                                "ACTIVE": "#03A9F4",
+                                "INACTIVE": "#03A9F4",
+                                "FAILED": "#B71C1C"
+                            }
+                        },
+                        "status": {
+                            "title": "Status",
+                            "key": true,
+                            "htmlTemplateForRow": "<span class='badge' style='background-color: {{'{{ row.status_color }}'}}' > {{'{{ row.status }}'}} </span>",
+                            "visible": true
+                        },
+                        "createdAt": {
+                            "title": "Started At",
+                            "type": "DATETIME"
+                        },
+                        "lastTrainedAt": {
+                            "title": "Last Trained At",
+                            "type": "DATETIME"
+                        },
+                        "schedulerStatus": {
+                            "title": "Scheduler",
+                            "key": false,
+                            "visible": true,
+                            "ui-properties": {
+                                "valueMap": {
+                                    "formatDetails": [
+                                        {
+                                            "formatKey": "Disable",
+                                            "formatVal": "Disable",
+                                            "editLabel": "Disable",
+                                            "formatIcon": "cross.svg",
+                                            "iconType": "IMG"
+                                        },
+                                        {
+                                            "formatKey": "Enable",
+                                            "formatVal": "Enable",
+                                            "formatIcon": "check.svg",
+                                            "editLabel": "Enable",
+                                            "iconType": "IMG"
+                                        }
+                                    ],
+                                    "cellPresent": "ICON",
+                                    "editPresent": "ICON_LABEL"
+                                }
+                            }
+                        },
+                        "retrainVersion": {
+                            "title": "Retrain Schedule Version",
+                            "key": true,
+                            "visible": true
+                        },
+                        "message": {
+                            "title": "Message",
+                            "type": "TEXT",
+                            "key": false,
+                            "visible": true
+                        },
+                        "published_pipeline_name": {
+                            "title": "Published Pipeline Name",
+                            "type": "TEXT",
+                            "key": true,
+                            "visible": false
+                        },
+                        "published_pipeline_version": {
+                            "title": "Published Pipeline Version",
+                            "type": "TEXT",
+                            "key": true,
+                            "visible": false
+                        },
+                        "rowContext": {
+                            "title": "Hidden Row Context",
+                            "key": true,
+                            "visible": false
+                        }
+                    },
+                    "actions": [
+                        {
+                            "title": "Add Experiment",
+                            "type": "POPUP_FORM",
+                            "permission": "oia:mlpipeline:*",
+                            "selectionType": "NONE",
+                            "identifier": "ml-config:cfx.experiments.add",
+                            "api-endpoint": {
+                                "service-name": "ml-config",
+                                "methodName": "invokeAppApi:getFormById",
+                                "stringified-params": true,
+                                "parse-output": false,
+                                "params": [
+                                    {
+                                        "form_id": "cfx.experiments.add",
+                                        "pipelineType": "classification",
+                                        "context": {},
+                                        "action-type": "add"
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "title": "Delete Experiments",
+                            "type": "POPUP_FORM",
+                            "permission": "oia:mlpipeline:*",
+                            "selectionType": "NONE",
+                            "identifier": "ml-config:cfx.bulk.experiment.delete",
+                            "api-endpoint": {
+                                "service-name": "ml-config",
+                                "methodName": "invokeAppApi:getFormById",
+                                "stringified-params": true,
+                                "parse-output": false,
+                                "params": [
+                                    {
+                                        "form_id": "cfx.bulk.experiment.delete",
+                                        "pipelineType": "classification"
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "title": "Execute",
+                            "type": "POPUP_FORM",
+                            "permission": "oia:mlpipeline:*",
+                            "selectionType": "SINGLE",
+                            "identifier": "ml-config:cfx.experiments.execute",
+                            "api-endpoint": {
+                                "service-name": "ml-config",
+                                "namespace": "io.cfx.dimensions.app",
+                                "methodName": "invokeAppApi:getFormById",
+                                "stringified-params": true,
+                                "parse-output": false,
+                                "params": [
+                                    {
+                                        "form_id": "cfx.experiments.execute",
+                                        "context": {}
+                                    }
+                                ]
+                            },
+                            "actionConditions": {
+                                "actionControl": "SHOW_IF",
+                                "operator": "OR",
+                                "actionCondition": [
+                                    {
+                                        "conditionalField": [
+                                            {
+                                                "conditionType": "NOT_EQUAL",
+                                                "conditionValue": "CREATING",
+                                                "fieldId": "status"
+                                            },
+                                            {
+                                                "conditionType": "NOT_EQUAL",
+                                                "conditionValue": "ACTIVE",
+                                                "fieldId": "status"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "title": "View Jobs",
+                            "type": "GO_TO_APP_STATE",
+                            "permission": "oia:mlpipeline:*",
+                            "selectionType": "SINGLE",
+                            "stateName": "app.featureapp",
+                            "appName": "ml-jobs",
+                            "drillDownLinkField": "name",
+                            "drillDownContext": "id",
+                            "displayLabelColumnId": "name"
+                        },
+                        {
+                            "title": "Prediction Scheduler Configuration",
+                            "type": "POPUP_FORM",
+                            "selectionType": "SINGLE",
+                            "permission-resource": "ml:ml-experiments:bulkDelete",
+                            "identifier": "ml-config:cfx.job.prediction.scheduler",
+                            "api-endpoint": {
+                                "service-name": "ml-config",
+                                "namespace": "io.cfx.dimensions.app",
+                                "methodName": "invokeAppApi:getFormById",
+                                "stringified-params": true,
+                                "parse-output": false,
+                                "params": [
+                                    {
+                                        "form_id": "cfx.job.prediction.scheduler",
+                                        "context": {}
+                                    }
+                                ]
+                            },
+                            "actionCondition": {
+                                "actionControl": "SHOW_IF",
+                                "operator": "AND",
+                                "conditionalField": [
+                                    {
+                                        "conditionType": "EQUAL",
+                                        "conditionValue": "Regression",
+                                        "fieldId": "pipelineType"
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "title": "Retraining Scheduler Configuration",
+                            "type": "POPUP_FORM",
+                            "selectionType": "SINGLE",
+                            "permission": "oia:mlpipeline:*",
+                            "identifier": "ml-config:cfx.job.retrain.scheduler",
+                            "api-endpoint": {
+                                "service-name": "ml-config",
+                                "namespace": "io.cfx.dimensions.app",
+                                "methodName": "invokeAppApi:getFormById",
+                                "stringified-params": true,
+                                "parse-output": false,
+                                "params": [
+                                    {
+                                        "form_id": "cfx.job.retrain.scheduler",
+                                        "context": {}
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "title": "Disable Schedules",
+                            "type": "POPUP_FORM",
+                            "selectionType": "SINGLE",
+                            "permission": "oia:mlpipeline:*",
+                            "identifier": "ml-config:cfx.job.disable.schedule",
+                            "api-endpoint": {
+                                "service-name": "ml-config",
+                                "namespace": "io.cfx.dimensions.app",
+                                "methodName": "invokeAppApi:getFormById",
+                                "stringified-params": true,
+                                "parse-output": false,
+                                "params": [
+                                    {
+                                        "form_id": "cfx.job.disable.schedule",
+                                        "context": {}
+                                    }
+                                ]
+                            },
+                            "actionCondition": {
+                                "actionControl": "SHOW_IF",
+                                "operator": "AND",
+                                "conditionalField": [
+                                    {
+                                        "conditionType": "EQUAL",
+                                        "conditionValue": "Enable",
+                                        "fieldId": "schedulerStatus"
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "title": "Delete",
+                            "type": "POPUP_FORM",
+                            "icon": "mdi mdi-plus",
+                            "permission": "oia:mlpipeline:*",
+                            "selectionType": "SINGLE",
+                            "identifier": "ml-config:cfx.experiments.delete",
+                            "api-endpoint": {
+                                "service-name": "ml-config",
+                                "namespace": "io.cfx.dimensions.app",
+                                "methodName": "invokeAppApi:getFormById",
+                                "stringified-params": true,
+                                "parse-output": false,
+                                "params": [
+                                    {
+                                        "form_id": "cfx.experiments.delete",
+                                        "context": {}
+                                    }
+                                ]
+                            },
+                            "actionConditions": {
+                                "actionControl": "SHOW_IF",
+                                "operator": "OR",
+                                "actionCondition": [
+                                    {
+                                        "conditionalField": [
+                                            {
+                                                "conditionType": "NOT_EQUAL",
+                                                "conditionValue": "ACTIVE",
+                                                "fieldId": "status"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "widget_id": "7b9601ae"
+                }
+            ]
+        }
+    ],
+    "saved_time": "2025-05-19T12:28:52.108333"
+}

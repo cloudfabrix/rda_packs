@@ -1,0 +1,350 @@
+{
+    "name": "ml-regression-model-monitor",
+    "label": "Model Monitoring Dashboard",
+    "description": "Model Monitoring Dashboard for Regression Experiments",
+    "enabled": true,
+    "dashboard_style": "auto",
+    "dashboard_type": "template",
+    "template_variables": {
+        "EXPERIMENT": {
+            "default": "test",
+            "contextId": "experimentName"
+        },
+        "JOB": {
+            "default": "default",
+            "contextId": "jobId"
+        },
+        "VERSION": {
+            "default": "v0",
+            "contextId": "versionName"
+        }
+    },
+    "dashboard_filters": {
+        "time_filter": false,
+        "columns_filter": []
+    },
+    "dashboard_sections": [
+        {
+            "title": "Analytics",
+            "show_filter": true,
+            "scope_filter": "experimentName is '{{EXPERIMENT}}' and jobName is '{{JOB}}' and versionName is '{{VERSION}}'",
+            "widgets": [
+                {
+                    "title": "Train Mean Error",
+                    "widget_type": "expression_counter",
+                    "expression": "total_error/sample if sample else 0",
+                    "max_width": 4,
+                    "min_width": 4,
+                    "height": 3,
+                    "segments": [
+                        {
+                            "variable": "sample",
+                            "stream": "ml-regression-training-data",
+                            "ts_column": "timestamp",
+                            "duration_hours": 10000,
+                            "group_by": [
+                                "jobName"
+                            ],
+                            "column": "count_",
+                            "agg": "sum",
+                            "type": "int"
+                        },
+                        {
+                            "variable": "total_error",
+                            "stream": "ml-regression-training-data",
+                            "ts_column": "timestamp",
+                            "duration_hours": 10000,
+                            "group_by": [
+                                "jobName"
+                            ],
+                            "column": "error",
+                            "agg": "sum",
+                            "type": "int"
+                        }
+                    ],
+                    "widget_id": "9b118f95"
+                },
+                {
+                    "title": "Train RMSE",
+                    "widget_type": "expression_counter",
+                    "expression": "(total_squared_error/sample) ** 0.5 if sample else 0",
+                    "max_width": 4,
+                    "min_width": 4,
+                    "height": 3,
+                    "segments": [
+                        {
+                            "variable": "sample",
+                            "stream": "ml-regression-training-data",
+                            "ts_column": "timestamp",
+                            "duration_hours": 10000,
+                            "group_by": [
+                                "jobName"
+                            ],
+                            "column": "count_",
+                            "agg": "sum",
+                            "type": "int"
+                        },
+                        {
+                            "variable": "total_squared_error",
+                            "stream": "ml-regression-training-data",
+                            "ts_column": "timestamp",
+                            "duration_hours": 10000,
+                            "group_by": [
+                                "jobName"
+                            ],
+                            "column": "squared_error",
+                            "agg": "sum",
+                            "type": "int"
+                        }
+                    ],
+                    "widget_id": "d181cfed"
+                },
+                {
+                    "title": "Train MAPE",
+                    "widget_type": "expression_counter",
+                    "expression": "total_absolute_percent_error/sample if sample else 0",
+                    "unit": "%",
+                    "max_width": 4,
+                    "min_width": 4,
+                    "height": 3,
+                    "segments": [
+                        {
+                            "variable": "sample",
+                            "stream": "ml-regression-training-data",
+                            "ts_column": "timestamp",
+                            "duration_hours": 10000,
+                            "group_by": [
+                                "jobName"
+                            ],
+                            "column": "count_",
+                            "agg": "sum",
+                            "type": "int"
+                        },
+                        {
+                            "variable": "total_absolute_percent_error",
+                            "stream": "ml-regression-training-data",
+                            "ts_column": "timestamp",
+                            "duration_hours": 10000,
+                            "group_by": [
+                                "jobName"
+                            ],
+                            "column": "absolute_percent_error",
+                            "agg": "sum",
+                            "type": "int"
+                        }
+                    ],
+                    "widget_id": "e6b2a4df"
+                },
+                {
+                    "title": "Live Mean Error",
+                    "widget_type": "expression_counter",
+                    "expression": "total_error/sample if sample else 0",
+                    "max_width": 4,
+                    "min_width": 4,
+                    "height": 3,
+                    "segments": [
+                        {
+                            "variable": "sample",
+                            "stream": "ml-regression-live-data",
+                            "extra_filter": "value is not None and is_live equals 1",
+                            "ts_column": "timestamp",
+                            "duration_hours": 10000,
+                            "group_by": [
+                                "jobName"
+                            ],
+                            "column": "count_",
+                            "agg": "sum",
+                            "type": "int"
+                        },
+                        {
+                            "variable": "total_error",
+                            "stream": "ml-regression-live-data",
+                            "extra_filter": "value is not None and is_live equals 1",
+                            "ts_column": "timestamp",
+                            "duration_hours": 10000,
+                            "group_by": [
+                                "jobName"
+                            ],
+                            "column": "error",
+                            "agg": "sum",
+                            "type": "int"
+                        }
+                    ],
+                    "widget_id": "6fb616a6"
+                },
+                {
+                    "title": "Live RMSE",
+                    "widget_type": "expression_counter",
+                    "expression": "(total_squared_error/sample) ** 0.5 if sample else 0",
+                    "max_width": 4,
+                    "min_width": 4,
+                    "height": 3,
+                    "segments": [
+                        {
+                            "variable": "sample",
+                            "stream": "ml-regression-live-data",
+                            "extra_filter": "value is not None and is_live equals 1",
+                            "ts_column": "timestamp",
+                            "duration_hours": 10000,
+                            "group_by": [
+                                "jobName"
+                            ],
+                            "column": "count_",
+                            "agg": "sum",
+                            "type": "int"
+                        },
+                        {
+                            "variable": "total_squared_error",
+                            "stream": "ml-regression-live-data",
+                            "extra_filter": "value is not None and is_live equals 1",
+                            "ts_column": "timestamp",
+                            "duration_hours": 10000,
+                            "group_by": [
+                                "jobName"
+                            ],
+                            "column": "squared_error",
+                            "agg": "sum",
+                            "type": "int"
+                        }
+                    ],
+                    "widget_id": "95fe9378"
+                },
+                {
+                    "title": "Live MAPE",
+                    "widget_type": "expression_counter",
+                    "expression": "total_absolute_percent_error/sample if sample else 0",
+                    "unit": "%",
+                    "max_width": 4,
+                    "min_width": 4,
+                    "height": 3,
+                    "segments": [
+                        {
+                            "variable": "sample",
+                            "stream": "ml-regression-live-data",
+                            "extra_filter": "value is not None and is_live equals 1",
+                            "ts_column": "timestamp",
+                            "duration_hours": 10000,
+                            "group_by": [
+                                "jobName"
+                            ],
+                            "column": "count_",
+                            "agg": "sum",
+                            "type": "int"
+                        },
+                        {
+                            "variable": "total_absolute_percent_error",
+                            "stream": "ml-regression-live-data",
+                            "extra_filter": "value is not None and is_live equals 1",
+                            "ts_column": "timestamp",
+                            "duration_hours": 10000,
+                            "group_by": [
+                                "jobName"
+                            ],
+                            "column": "absolute_percent_error",
+                            "agg": "sum",
+                            "type": "int"
+                        }
+                    ],
+                    "widget_id": "e5c96668"
+                },
+                {
+                    "title": "Live Upper Anomalies",
+                    "widget_type": "counter",
+                    "max_width": 6,
+                    "min_width": 4,
+                    "height": 3,
+                    "stream": "ml-regression-live-data",
+                    "extra_filter": "anomaly_type is 1 and is_live equals 1",
+                    "ts_column": "timestamp",
+                    "duration_hours": 10000,
+                    "column": "count_",
+                    "agg": "sum",
+                    "type": "int",
+                    "widget_id": "02be1e20"
+                },
+                {
+                    "title": "Live Lower Anomalies",
+                    "widget_type": "counter",
+                    "max_width": 6,
+                    "min_width": 4,
+                    "height": 3,
+                    "stream": "ml-regression-live-data",
+                    "extra_filter": "anomaly_type is -1 and is_live equals 1",
+                    "ts_column": "timestamp",
+                    "duration_hours": 10000,
+                    "column": "count_",
+                    "agg": "sum",
+                    "type": "int",
+                    "widget_id": "ed19ced6"
+                },
+                {
+                    "title": "Live Missing Values",
+                    "widget_type": "counter",
+                    "max_width": 6,
+                    "min_width": 4,
+                    "height": 3,
+                    "stream": "ml-regression-live-data",
+                    "ts_column": "timestamp",
+                    "extra_filter": "value is None and is_live equals 1",
+                    "duration_hours": 10000,
+                    "column": "timestamp",
+                    "agg": "value_count",
+                    "type": "int",
+                    "widget_id": "d6beb0a4"
+                },
+                {
+                    "title": "Live Anomalies Trend",
+                    "widget_type": "timeseries",
+                    "stream": "ml-regression-live-data",
+                    "extra_filter": "anomaly_type in [1,-1] and is_live equals 1",
+                    "ts_column": "timestamp",
+                    "duration_hours": 10000,
+                    "max_width": 12,
+                    "height": 6,
+                    "min_width": 6,
+                    "chartProperties": {
+                        "yAxisLabel": "Count",
+                        "xAxisLabel": "Timestamp",
+                        "legendLocation": "bottom"
+                    },
+                    "interval": "1H",
+                    "group_by": [
+                        "jobName"
+                    ],
+                    "series_spec": [
+                        {
+                            "column": "count_",
+                            "agg": "sum",
+                            "type": "int",
+                            "label": "Anomaly"
+                        }
+                    ],
+                    "widget_id": "608d3438"
+                },
+                {
+                    "title": "Live Missing Values",
+                    "widget_type": "tabular",
+                    "stream": "ml-regression-live-data",
+                    "query": "value is None and is_live equals 1",
+                    "min_width": 6,
+                    "height": 6,
+                    "max_width": 6,
+                    "paginated": true,
+                    "max_rows": 50,
+                    "sorting": [
+                        {
+                            "timestamp": "desc"
+                        }
+                    ],
+                    "columns": {
+                        "timestamp": "Timestamp",
+                        "model_upper_bound": "UpperBound",
+                        "model_lower_bound": "LowerBound"
+                    },
+                    "widget_id": "94a3fc11"
+                }
+            ]
+        }
+    ],
+    "saved_time": "2025-05-19T12:28:57.659051"
+}

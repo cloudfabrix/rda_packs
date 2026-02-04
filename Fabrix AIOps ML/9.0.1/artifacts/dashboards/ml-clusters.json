@@ -1,0 +1,220 @@
+{
+    "name": "ml-clusters",
+    "label": "Clusters Dashboard",
+    "description": "Clusters Dashboard",
+    "enabled": true,
+    "debug": true,
+    "dashboard_style": "auto",
+    "status_poller": {},
+    "dashboard_filters": {
+        "time_filter": true,
+        "columns_filter": [
+            {
+                "id": "label",
+                "label": "Cluster Label",
+                "type": "TEXT"
+            },
+            {
+                "id": "score",
+                "label": "Score(%)",
+                "type": "TEXT"
+            },
+            {
+                "id": "alertCount",
+                "label": "Training Data",
+                "type": "TEXT"
+            },
+            {
+                "id": "message",
+                "label": "Typical Message",
+                "type": "TEXT"
+            }
+        ]
+    },
+    "dashboard_type": "template",
+    "template_variables": {
+        "JOB_ID": {
+            "default": "fin-db01",
+            "contextId": "job_id"
+        }
+    },
+    "dashboard_sections": [
+        {
+            "title": "Cluster Results",
+            "show_filter": true,
+            "widgets": [
+                {
+                    "title": "Total Clusters",
+                    "widget_type": "counter",
+                    "stream": "ml-clusters",
+                    "ts_column": "createdAt",
+                    "extra_filter": "jobId is '{{JOB_ID}}'",
+                    "duration_hours": 10000,
+                    "column": "label",
+                    "agg": "value_count",
+                    "type": "str",
+                    "widget_id": "02be1e20"
+                },
+                {
+                    "title": "Confidence Score",
+                    "widget_type": "expression_counter",
+                    "expression": "sum",
+                    "unit": "%",
+                    "segments": [
+                        {
+                            "variable": "sum",
+                            "stream": "ml-clusters",
+                            "ts_column": "createdAt",
+                            "extra_filter": "jobId is '{{JOB_ID}}'and label not equals 'Anomalies'",
+                            "duration_hours": 10000,
+                            "agg": "avg",
+                            "column": "score",
+                            "group_by": [
+                                "label"
+                            ],
+                            "type": "int"
+                        }
+                    ],
+                    "widget_id": "b7c11ec8"
+                },
+                {
+                    "widget_type": "pie_chart",
+                    "title": "All Clusters",
+                    "stream": "ml-clusters",
+                    "ts_column": "createdAt",
+                    "extra_filter": "jobId is '{{JOB_ID}}'",
+                    "duration_hours": 10000,
+                    "agg": "sum",
+                    "column": "alertCount",
+                    "group_by": [
+                        "label"
+                    ],
+                    "type": "str",
+                    "min_width": 6,
+                    "height": 4,
+                    "max_width": 6,
+                    "widget_id": "969c363d",
+                    "style": {
+                        "color-map": {
+                            "Anomalies": [
+                                "#ef5350",
+                                "#ffffff"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "title": "Cluster Results",
+                    "widget_type": "tabular",
+                    "min_width": 12,
+                    "height": 12,
+                    "max_width": 12,
+                    "stream": "ml-clusters",
+                    "duration_hours": 10000,
+                    "ts_column": "createdAt",
+                    "extra_filter": "jobId is '{{JOB_ID}}'",
+                    "columns": {
+                        "id": {
+                            "title": "ID",
+                            "key": true,
+                            "visible": false
+                        },
+                        "label": {
+                            "title": "Cluster Label",
+                            "key": true,
+                            "type": "TEXT"
+                        },
+                        "message": {
+                            "title": "Typical Message",
+                            "key": true,
+                            "type": "TEXT"
+                        },
+                        "alertCount": {
+                            "title": "Training Data",
+                            "key": true,
+                            "value": "alert-clustering-template",
+                            "type": "TEXT"
+                        },
+                        "score": {
+                            "title": "Score(%)",
+                            "key": true,
+                            "type": "TEXT"
+                        }
+                    },
+                    "actions": [
+                        {
+                            "title": "View Sample Data",
+                            "type": "POPUP_REPORT",
+                            "selectionType": "SINGLE",
+                            "drillDownLinkField": "alertCount",
+                            "permission": "oia:mlpipeline:*",
+                            "identifier": "ml-config:cfx.clusters.sample.alerts",
+                            "api-endpoint": {
+                                "service-name": "ml-config",
+                                "namespace": "io.cfx.dimensions.app",
+                                "methodName": "invokeAppApi:getClusterSampleAlerts",
+                                "stringified-params": true,
+                                "useReportContext": true,
+                                "parse-output": false,
+                                "params": [
+                                    {
+                                        "context": {},
+                                        "filters": []
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "title": "Edit",
+                            "type": "POPUP_FORM",
+                            "icon": "mdi mdi-plus",
+                            "selectionType": "SINGLE",
+                            "permission": "oia:mlpipeline:*",
+                            "identifier": "ml-config:cfx.clusters.label.change",
+                            "api-endpoint": {
+                                "service-name": "ml-config",
+                                "namespace": "io.cfx.dimensions.app",
+                                "methodName": "invokeAppApi:getFormById",
+                                "stringified-params": true,
+                                "parse-output": false,
+                                "params": [
+                                    {
+                                        "form_id": "cfx.clusters.label.change",
+                                        "context": {}
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "title": "Edit Cluster Label",
+                            "type": "POPUP_FORM",
+                            "selectionType": "NONE",
+                            "permission": "oia:mlpipeline:*",
+                            "identifier": "ml-config:cfx.bulk.cluster.label",
+                            "api-endpoint": {
+                                "service-name": "ml-config",
+                                "namespace": "io.cfx.dimensions.app",
+                                "methodName": "invokeAppApi:getFormById",
+                                "stringified-params": true,
+                                "parse-output": false,
+                                "params": [
+                                    {
+                                        "form_id": "cfx.bulk.cluster.label",
+                                        "context": {}
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "sorting": [
+                        {
+                            "label": "asc"
+                        }
+                    ],
+                    "widget_id": "31e2f2ed"
+                }
+            ]
+        }
+    ],
+    "saved_time": "2025-12-17T10:59:57.449399"
+}
