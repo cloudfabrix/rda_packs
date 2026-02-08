@@ -2,7 +2,7 @@
     "name": "oia-topology-node-details",
     "label": "Node Details for Topology with alerts",
     "description": "Node Details for Topology with alerts",
-    "version": "25.07.09",
+    "version": "26.02.04",
     "enabled": true,
     "exportable": false,
     "dashboard_style": "auto",
@@ -55,7 +55,7 @@
             "label": "Time Range"
         },
         "columns_filter": [],
-        "extra_filter": "a_source_systemname is not-in 'Alert Group' and a_correlation_status not-in 'AGGREGATE' and project_id is '{{PROJECT_ID}}'"
+        "extra_filter": "a_source_systemname is not-in 'Alert Group' and a_correlation_status not-in 'AGGREGATE'"
     },
     "import": [
         {
@@ -88,11 +88,11 @@
                         }
                     ],
                     "stream": "oia-alerts-stream",
-                    "ts_column": "a_updated_ts",
+                    "ts_column": "a_created_ts",
                     "paginated": true,
                     "resizableColumns": false,
                     "remote_searchable": false,
-                    "extra_filter": "((a_incident_id is '{{INCIDENT_ID}}') or (a_incident_id is '{{A_INCIDENT_ID}}')) and a_source_systemname is not 'Alert Group' and a_correlation_status not-in 'AGGREGATE' and a_en_node_id is '{{NODE_ID}}'",
+                    "extra_filter": "a_source_systemname is not 'Alert Group' and a_correlation_status not-in 'AGGREGATE' and a_en_node_id is '{{NODE_ID}}'",
                     "query": "*",
                     "duration_hours": 2160,
                     "columns": {
@@ -140,11 +140,11 @@
                         }
                     ],
                     "stream": "oia-alerts-stream",
-                    "ts_column": "a_updated_ts",
+                    "ts_column": "a_created_ts",
                     "paginated": true,
                     "resizableColumns": false,
                     "remote_searchable": false,
-                    "extra_filter": "((a_incident_id is not '{{INCIDENT_ID}}') or (a_incident_id is not '{{A_INCIDENT_ID}}')) and a_source_systemname is not 'Alert Group' and a_correlation_status not-in 'AGGREGATE' and a_en_node_id is not '{{NODE_ID}}'",
+                    "extra_filter": "a_source_systemname is not 'Alert Group' and a_correlation_status not-in 'AGGREGATE' and a_en_node_id is not '{{NODE_ID}}'",
                     "query": "*",
                     "duration_hours": 2160,
                     "columns": {
@@ -183,7 +183,7 @@
             ]
         }
     ],
-    "saved_time": "2025-07-09T05:26:25.653067",
+    "saved_time": "2026-02-04T07:00:26.244747",
     "attachments": [
         {
             "name": "node_details_label",
