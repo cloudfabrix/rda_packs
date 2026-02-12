@@ -1,5 +1,5 @@
 ## Overview section
-This pack deploys the Base AI Project andf its accociated artifacts.
+This pack deploys the Base AI Project and its accociated artifacts.
 
 ## Pre-Requisite Steps
 - 'AI Projects Administration App' pack should be in Activated State before proceeding with the activation of this pack.
