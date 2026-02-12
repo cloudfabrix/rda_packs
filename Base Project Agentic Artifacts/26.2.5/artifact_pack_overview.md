@@ -1,5 +1,5 @@
 ## Overview section
-This pack can be used to restore the artifacts in another environment.
+This pack deploys the Base AI Project andf its accociated artifacts.
 
 ## Pre-Requisite Steps
 - 'AI Projects Administration App' pack should be in Activated State before proceeding with the activation of this pack.
