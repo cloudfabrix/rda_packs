@@ -1,0 +1,8 @@
+%% stream = no and limit = 0
+
+@c:new-block
+    --> @exec:get-input
+    --> @dm:save name="temp-input-data"
+
+--> @c:data-loop dataset="temp-input-data" and columns='workflow_name,ai_project_name'
+    --> @workflow:execute-workflow workflow_name = "$workflow_name" & is_template="no" and ai_project_name = "$ai_project_name"

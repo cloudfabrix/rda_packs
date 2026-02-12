@@ -1,0 +1,51 @@
+{
+    "name": "my_ai_projects",
+    "label": "AI Projects",
+    "description": "AI Projects",
+    "enabled": true,
+    "dashboard_type": "template",
+    "dashboard_folder": "AI",
+    "live_edit": true,
+    "dashboard_style": "auto",
+    "dashboard_filters": {
+        "time_filter": false
+    },
+    "template_variables": {
+        "USER_ID": {
+            "contextId": "USER_ID"
+        }
+    },
+    "dashboard_sections": [
+        {
+            "title": "Projects",
+            "show_filter": true,
+            "widgets": [
+                {
+                    "title": "My Projects",
+                    "widget_type": "portal_card",
+                    "html_template": "attachment://card_template",
+                    "reportId": "users.aiprojects.list.tabular",
+                    "height": 10,
+                    "min_wdith": 12,
+                    "exportSupported": false,
+                    "widget_id": "bb1dd6c0"
+                },
+                {
+                    "title": "My Projects",
+                    "widget_type0": "portal_tabular",
+                    "reportId": "users.aiprojects.list.tabular",
+                    "height": 10,
+                    "min_wdith": 12,
+                    "widget_id": "1abcb398"
+                }
+            ]
+        }
+    ],
+    "saved_time": "2025-11-04T16:23:04.960419",
+    "attachments": [
+        {
+            "name": "card_template",
+            "value": "<div>\r\n  {% raw %}\r\n  <div style=\"font-weight:bold; font-size:1.2em; margin-bottom:6px;\">\r\n    <cfx-linked-action-field :rowData=\"data\" actionId=\"saas-service-action:ai_project-launch\" columnId=\"name\" />\r\n  </div>\r\n\r\n  <div style=\"margin-bottom:10px; font-size:0.95em;\">\r\n    {{ data.description }}\r\n  </div>\r\n\r\n  <div style=\"margin-bottom:10px; font-size:0.9em;\">\r\n    <b>Type:</b> <span>{{ data.type }}</span>\r\n  </div>\r\n\r\n  <div style=\"display:flex; align-items:center; font-size:0.95em; margin-bottom:12px;\">\r\n    <span \r\n      :style=\"{ \r\n        display:'inline-block', \r\n        width:'12px', \r\n        height:'12px', \r\n        marginRight:'8px', \r\n        borderRadius:'50%', \r\n        backgroundColor: data.enabled == 'Yes' ? 'green' : 'grey' \r\n      }\">\r\n    </span>\r\n    <span><b>Enabled:</b> {{ data.enabled }}</span>\r\n  </div>\r\n\r\n  {% endraw %}\r\n</div>\r\n"
+        }
+    ]
+}

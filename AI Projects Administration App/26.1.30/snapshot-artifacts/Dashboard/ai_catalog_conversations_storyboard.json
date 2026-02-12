@@ -1,0 +1,721 @@
+{
+    "name": "ai_catalog_conversations_storyboard",
+    "label": "AI Catalog Conversations Storyboard",
+    "description": "AI Catalog Conversations Storyboard",
+    "dashboard_folder": "AI",
+    "version": "1.0.3",
+    "enabled": true,
+    "stream": "rda_chat_sessions",
+    "dashboard_type": "template",
+    "template_variables": {
+        "PERSONA": {
+            "default": null,
+            "contextId": "persona"
+        },
+        "AI_PROJECT_NAME": {
+            "contextId": "ai_project_name"
+        }
+    },
+    "live_edit": true,
+    "stream_query_mapping": {
+        "ai_observability": {
+            "persona": "ai_persona",
+            "llm": "llm_name",
+            "USER_ID": "user_id"
+        }
+    },
+    "dashboard_filters": {
+        "time_filter": true,
+        "extra_filter": "persona is '{{PERSONA}}'",
+        "default_time_filter_labels": [
+            "All Time"
+        ],
+        "columns_filter": [
+            {
+                "id": "timestamp",
+                "label": "Timestamp",
+                "type": "DATETIME"
+            },
+            {
+                "id": "USER_ID",
+                "label": "User Id",
+                "type": "TEXT"
+            },
+            {
+                "id": "context_USER_ID",
+                "label": "Context User Id",
+                "type": "TEXT"
+            },
+            {
+                "id": "context_USER_ROLE",
+                "label": "Context User Role",
+                "type": "TEXT"
+            },
+            {
+                "id": "context_approver_userid",
+                "label": "Context Approver Userid",
+                "type": "TEXT"
+            },
+            {
+                "id": "context_incidentid",
+                "label": "Context Incidentid",
+                "type": "TEXT"
+            },
+            {
+                "id": "conversationId",
+                "label": "Conversationid",
+                "type": "TEXT"
+            },
+            {
+                "id": "conversationLabel",
+                "label": "Conversationlabel",
+                "type": "TEXT"
+            },
+            {
+                "id": "isToolCall",
+                "label": "Istoolcall",
+                "type": "TEXT"
+            },
+            {
+                "id": "llm",
+                "label": "Llm",
+                "type": "TEXT"
+            },
+            {
+                "id": "llm_name",
+                "label": "Llm Name",
+                "type": "TEXT"
+            },
+            {
+                "id": "message",
+                "label": "Message",
+                "type": "TEXT"
+            },
+            {
+                "id": "persona",
+                "label": "Persona",
+                "type": "TEXT"
+            },
+            {
+                "id": "prompt_id",
+                "label": "Prompt Id",
+                "type": "TEXT"
+            },
+            {
+                "id": "request_status",
+                "label": "Request Status",
+                "type": "TEXT"
+            },
+            {
+                "id": "request_subtype",
+                "label": "Request Subtype",
+                "type": "TEXT"
+            },
+            {
+                "id": "request_type",
+                "label": "Request Type",
+                "type": "TEXT"
+            },
+            {
+                "id": "severity",
+                "label": "Severity",
+                "type": "TEXT"
+            },
+            {
+                "id": "tool_content",
+                "label": "Tool Content",
+                "type": "TEXT"
+            },
+            {
+                "id": "tool_domain",
+                "label": "Tool Domain",
+                "type": "TEXT"
+            },
+            {
+                "id": "tool_name",
+                "label": "Tool Name",
+                "type": "TEXT"
+            },
+            {
+                "id": "tool_status",
+                "label": "Tool Status",
+                "type": "TEXT"
+            },
+            {
+                "id": "type",
+                "label": "Type",
+                "type": "TEXT"
+            },
+            {
+                "id": "token_usage_cache_tokens",
+                "label": "Token Usage Cache Tokens",
+                "type": "DOUBLE"
+            },
+            {
+                "id": "token_usage_input_tokens",
+                "label": "Token Usage Input Tokens",
+                "type": "DOUBLE"
+            },
+            {
+                "id": "token_usage_output_tokens",
+                "label": "Token Usage Output Tokens",
+                "type": "DOUBLE"
+            },
+            {
+                "id": "token_usage_reasoning_tokens",
+                "label": "Token Usage Reasoning Tokens",
+                "type": "DOUBLE"
+            },
+            {
+                "id": "token_usage_total_tokens",
+                "label": "Token Usage Total Tokens",
+                "type": "DOUBLE"
+            }
+        ],
+        "group_filters": [
+            {
+                "stream": "rda_chat_sessions",
+                "title": "LLM",
+                "duration_hours": 1080,
+                "limit": 200,
+                "extra_filter": "type == 'client'",
+                "group_by": [
+                    "llm"
+                ],
+                "ts_column": "timestamp",
+                "agg": "sum",
+                "column": "count_",
+                "type": "int"
+            },
+            {
+                "stream": "rda_chat_sessions",
+                "title": "User",
+                "duration_hours": 1080,
+                "limit": 200,
+                "extra_filter": "type == 'client'",
+                "group_by": [
+                    "USER_ID"
+                ],
+                "ts_column": "timestamp",
+                "agg": "sum",
+                "column": "count_",
+                "type": "int"
+            },
+            {
+                "stream": "rda_chat_sessions",
+                "title": "Persona",
+                "duration_hours": 1080,
+                "limit": 200,
+                "extra_filter": "type == 'client'",
+                "group_by": [
+                    "persona"
+                ],
+                "ts_column": "timestamp",
+                "agg": "sum",
+                "column": "count_",
+                "type": "int"
+            }
+        ]
+    },
+    "dashboard_sections": [
+        {
+            "title": "AI Conversations",
+            "show_filter": true,
+            "widgets": [
+                {
+                    "widget_type": "label",
+                    "title": "Prompt Templates Tabular",
+                    "min_width": 12,
+                    "height": 10,
+                    "max_width": 12,
+                    "stream": "rda_chat_sessions",
+                    "label": "attachment://promptTemplates",
+                    "segments": [
+                        {
+                            "stream": "rda_chat_sessions",
+                            "variable": "results",
+                            "columns": [
+                                "codeBlocks"
+                            ],
+                            "type": "tabular",
+                            "extra_filter": "tool_name contains 'common-get_prompt_template' and ai_project_name is '{{AI_PROJECT_NAME}}'",
+                            "duration_hours": 100000
+                        }
+                    ],
+                    "widget_id": "e12886fc"
+                },
+                {
+                    "title": "Total Cost",
+                    "widget_type": "custom_counter",
+                    "formatter0": "DescriptiveCountFormatter",
+                    "formatter1": "CountFormatter",
+                    "stream": "ai_observability",
+                    "duration_hours": 100000,
+                    "formatter": {
+                        "notation1": "compact",
+                        "style": "currency",
+                        "currency": "USD"
+                    },
+                    "ts_column": "timestamp",
+                    "extra_filter": "metric_name is 'token_cost' and ai_project_name is '{{AI_PROJECT_NAME}}'",
+                    "column": "metric_value",
+                    "agg": "sum",
+                    "type": "int",
+                    "widget_id": "02be1e2p"
+                },
+                {
+                    "title": "Total $ Cost",
+                    "widget_type": "label",
+                    "advanced": true,
+                    "label": "attachment://usd",
+                    "fixed_variables": {
+                        "count_label": "Total Cost",
+                        "NUMBER_STYLE": ""
+                    },
+                    "segments": [
+                        {
+                            "variable": "node_count",
+                            "stream": "ai_observability",
+                            "extra_filter": "metric_name is 'token_cost' and ai_project_name is '{{AI_PROJECT_NAME}}'",
+                            "ts_column": "timestamp",
+                            "duration_hours": 10800,
+                            "column": "metric_value",
+                            "agg": "sum"
+                        }
+                    ],
+                    "min_width": 4,
+                    "height": 2.6,
+                    "max_width": 4,
+                    "widget_id": "totalCost"
+                },
+                {
+                    "title": "Input Tokens",
+                    "widget_type": "label",
+                    "advanced": true,
+                    "label": "attachment://assets",
+                    "fixed_variables": {
+                        "count_label": "Input Tokens",
+                        "NUMBER_STYLE": ""
+                    },
+                    "segments": [
+                        {
+                            "variable": "node_count",
+                            "stream": "rda_chat_sessions",
+                            "extra_filter": "ai_project_name is '{{AI_PROJECT_NAME}}'",
+                            "ts_column": "timestamp",
+                            "duration_hours": 10800,
+                            "column": "token_usage_input_tokens",
+                            "agg": "sum"
+                        }
+                    ],
+                    "min_width": 4,
+                    "height": 2.6,
+                    "max_width": 4,
+                    "widget_id": "inputTokensTotal"
+                },
+                {
+                    "title": "Cache Tokens",
+                    "widget_type": "label",
+                    "advanced": true,
+                    "label": "attachment://assets",
+                    "fixed_variables": {
+                        "count_label": "Cache Tokens",
+                        "NUMBER_STYLE": ""
+                    },
+                    "segments": [
+                        {
+                            "variable": "node_count",
+                            "stream": "rda_chat_sessions",
+                            "extra_filter": "ai_project_name is '{{AI_PROJECT_NAME}}'",
+                            "ts_column": "timestamp",
+                            "duration_hours": 10800,
+                            "column": "token_usage_cache_tokens",
+                            "agg": "sum"
+                        }
+                    ],
+                    "min_width": 4,
+                    "height": 2.6,
+                    "max_width": 4,
+                    "widget_id": "cachTokensTotal"
+                },
+                {
+                    "title": "Total Tool Calls",
+                    "widget_type": "label",
+                    "advanced": true,
+                    "label": "attachment://assets",
+                    "fixed_variables": {
+                        "count_label": "Total Tool Calls",
+                        "NUMBER_STYLE": ""
+                    },
+                    "segments": [
+                        {
+                            "variable": "node_count",
+                            "stream": "rda_chat_sessions",
+                            "extra_filter": "tool_name is not null and ai_project_name is '{{AI_PROJECT_NAME}}'",
+                            "ts_column": "timestamp",
+                            "duration_hours": 10800,
+                            "column": "count_",
+                            "agg": "sum"
+                        }
+                    ],
+                    "min_width": 4,
+                    "height": 2.6,
+                    "max_width": 4,
+                    "widget_id": "toolCallCount"
+                },
+                {
+                    "title": "Total Requests",
+                    "widget_type": "label",
+                    "advanced": true,
+                    "label": "attachment://assets",
+                    "fixed_variables": {
+                        "count_label": "Total Requests",
+                        "NUMBER_STYLE": ""
+                    },
+                    "segments": [
+                        {
+                            "variable": "node_count",
+                            "stream": "rda_chat_sessions",
+                            "extra_filter": "type == 'client' and ai_project_name is '{{AI_PROJECT_NAME}}'",
+                            "ts_column": "timestamp",
+                            "duration_hours": 10800,
+                            "column": "count_",
+                            "agg": "sum"
+                        }
+                    ],
+                    "min_width": 4,
+                    "height": 2.6,
+                    "max_width": 4,
+                    "widget_id": "requestCount"
+                },
+                {
+                    "title": "Total User Requests",
+                    "widget_type": "label",
+                    "advanced": true,
+                    "label": "attachment://assets",
+                    "fixed_variables": {
+                        "count_label": "User Requests",
+                        "NUMBER_STYLE": ""
+                    },
+                    "segments": [
+                        {
+                            "variable": "node_count",
+                            "stream": "rda_chat_sessions",
+                            "extra_filter": "type == 'client' and USER_ID contains '@' and  ai_project_name is '{{AI_PROJECT_NAME}}'",
+                            "ts_column": "timestamp",
+                            "duration_hours": 10800,
+                            "column": "count_",
+                            "agg": "sum"
+                        }
+                    ],
+                    "min_width": 4,
+                    "height": 2.6,
+                    "max_width": 4,
+                    "widget_id": "userRequestCount"
+                },
+                {
+                    "title": "Total Agent Requests",
+                    "widget_type": "label",
+                    "advanced": true,
+                    "label": "attachment://assets",
+                    "fixed_variables": {
+                        "count_label": "Agent Requests",
+                        "NUMBER_STYLE": ""
+                    },
+                    "segments": [
+                        {
+                            "variable": "node_count",
+                            "stream": "rda_chat_sessions",
+                            "extra_filter": "type == 'client' and USER_ID not contains '@'and ai_project_name is '{{AI_PROJECT_NAME}}'",
+                            "ts_column": "timestamp",
+                            "duration_hours": 10800,
+                            "column": "count_",
+                            "agg": "sum"
+                        }
+                    ],
+                    "min_width": 4,
+                    "height": 2.6,
+                    "max_width": 4,
+                    "widget_id": "agentRequestCount"
+                },
+                {
+                    "title": "Output Tokens",
+                    "widget_type": "label",
+                    "advanced": true,
+                    "label": "attachment://assets",
+                    "fixed_variables": {
+                        "count_label": "Output Tokens",
+                        "NUMBER_STYLE": ""
+                    },
+                    "segments": [
+                        {
+                            "variable": "node_count",
+                            "stream": "rda_chat_sessions",
+                            "ts_column": "timestamp",
+                            "duration_hours": 10800,
+                            "extra_filter": "ai_project_name is '{{AI_PROJECT_NAME}}'",
+                            "column": "token_usage_output_tokens",
+                            "agg": "sum"
+                        }
+                    ],
+                    "min_width": 4,
+                    "height": 2.6,
+                    "max_width": 4,
+                    "widget_id": "outputTokensTotal"
+                },
+                {
+                    "widget_type": "bar_chart",
+                    "stream": "rda_chat_sessions",
+                    "title": "Top Users",
+                    "duration_hours": 1080,
+                    "limit": 10,
+                    "extra_filter": "type == 'client' and USER_ID contains '@' and  ai_project_name is '{{AI_PROJECT_NAME}}'",
+                    "chartProperties": {
+                        "legendLocation": "none",
+                        "yAxisLabel": "Top Users",
+                        "orientation": "horizontal"
+                    },
+                    "group_by": [
+                        "USER_ID"
+                    ],
+                    "ts_column": "timestamp",
+                    "agg": "sum",
+                    "column": "count_",
+                    "type": "int",
+                    "widget_id": "a5af22ac2"
+                },
+                {
+                    "widget_type": "bar_chart",
+                    "stream": "rda_chat_sessions",
+                    "title": "Top Agents",
+                    "duration_hours": 1080,
+                    "limit": 10,
+                    "extra_filter": "type == 'client' and USER_ID not contains '@' and ai_project_name is '{{AI_PROJECT_NAME}}'",
+                    "chartProperties": {
+                        "legendLocation": "none",
+                        "yAxisLabel": "Top Agents",
+                        "orientation": "horizontal"
+                    },
+                    "group_by": [
+                        "USER_ID"
+                    ],
+                    "ts_column": "timestamp",
+                    "agg": "sum",
+                    "column": "count_",
+                    "type": "int",
+                    "widget_id": "topAgentsBar"
+                },
+                {
+                    "widget_type": "bar_chart",
+                    "stream": "rda_chat_sessions",
+                    "title": "AI Persona",
+                    "duration_hours": 1080,
+                    "limit": 200,
+                    "extra_filter": "type == 'client' and  ai_project_name is '{{AI_PROJECT_NAME}}'",
+                    "chartProperties": {
+                        "legendLocation": "none",
+                        "orientation": "horizontal"
+                    },
+                    "group_by": [
+                        "persona"
+                    ],
+                    "ts_column": "timestamp",
+                    "agg": "sum",
+                    "column": "count_",
+                    "type": "int",
+                    "widget_id": "a5af22ac3"
+                },
+                {
+                    "widget_type": "bar_chart",
+                    "stream": "rda_chat_sessions",
+                    "title": "LLMs",
+                    "duration_hours": 1080,
+                    "limit": 200,
+                    "extra_filter": "type == 'client' and ai_project_name is '{{AI_PROJECT_NAME}}'",
+                    "chartProperties": {
+                        "legendLocation": "none",
+                        "orientation": "horizontal"
+                    },
+                    "group_by": [
+                        "llm"
+                    ],
+                    "ts_column": "timestamp",
+                    "agg": "sum",
+                    "column": "count_",
+                    "type": "int",
+                    "widget_id": "a5af22ac4"
+                },
+                {
+                    "widget_type": "pie_chart",
+                    "stream": "rda_chat_sessions",
+                    "title": "Client Type",
+                    "duration_hours": 1080,
+                    "limit": 200,
+                    "extra_filter": "type == 'client' and  ai_project_name is '{{AI_PROJECT_NAME}}'",
+                    "chartProperties": {
+                        "legendLocation": "right"
+                    },
+                    "group_by": [
+                        "request_type"
+                    ],
+                    "ts_column": "timestamp",
+                    "agg": "sum",
+                    "column": "count_",
+                    "type": "int",
+                    "widget_id": "76297ed6"
+                },
+                {
+                    "widget_type": "bar_chart",
+                    "stream": "rda_chat_sessions",
+                    "title": "Tool Calls by Domain",
+                    "duration_hours": 1080,
+                    "limit": 200,
+                    "extra_filter": "tool_domain is not null  and ai_project_name is '{{AI_PROJECT_NAME}}'",
+                    "chartProperties": {
+                        "legendLocation": "none",
+                        "orientation": "horizontal"
+                    },
+                    "group_by": [
+                        "tool_domain"
+                    ],
+                    "ts_column": "timestamp",
+                    "agg": "sum",
+                    "column": "count_",
+                    "type": "int",
+                    "widget_id": "a5af22ac7"
+                },
+                {
+                    "widget_type": "bar_chart",
+                    "stream": "rda_chat_sessions",
+                    "title": "Tool Calls by Tool",
+                    "duration_hours": 1080,
+                    "limit": 200,
+                    "extra_filter": "tool_name is not null and ai_project_name is '{{AI_PROJECT_NAME}}'",
+                    "chartProperties": {
+                        "legendLocation": "none",
+                        "orientation": "horizontal"
+                    },
+                    "group_by": [
+                        "tool_name"
+                    ],
+                    "ts_column": "timestamp",
+                    "agg": "sum",
+                    "column": "count_",
+                    "type": "int",
+                    "widget_id": "toolNames"
+                },
+                {
+                    "title": "Conversations",
+                    "widget_type": "tabular",
+                    "duration_hours": 1080,
+                    "widget_group": "G0",
+                    "max_width": 12,
+                    "height": 8,
+                    "min_width": 12,
+                    "preview_dashboard": "ai_conversation_details",
+                    "preview_width": 900,
+                    "preview_height": 700,
+                    "stream": "rda_chat_sessions",
+                    "ts_column": "timestamp",
+                    "extra_filter": "type == 'client' and   ai_project_name is '{{AI_PROJECT_NAME}}'",
+                    "virtual_scrolling": false,
+                    "showRowSummary": false,
+                    "columns": {
+                        "timestamp": {
+                            "title": "Timestamp",
+                            "type": "DATETIME",
+                            "hidden": false
+                        },
+                        "conversationLabel": {
+                            "title": "Conversationlabel",
+                            "type": "TEXT",
+                            "hidden": false,
+                            "key": true
+                        },
+                        "USER_ID": {
+                            "title": "User Id",
+                            "type": "TEXT",
+                            "hidden": false
+                        },
+                        "request_type": {
+                            "title": "Request Type",
+                            "type": "TEXT",
+                            "hidden": true
+                        },
+                        "persona": {
+                            "title": "Persona",
+                            "type": "TEXT",
+                            "hidden": false
+                        },
+                        "llm": {
+                            "title": "LLM",
+                            "type": "TEXT",
+                            "hidden": false
+                        },
+                        "conversationId": {
+                            "title": "Conversationid",
+                            "type": "TEXT",
+                            "hidden": true,
+                            "key": true
+                        },
+                        "conversation_id": {
+                            "title": "Conversationid",
+                            "type": "COMPUTED",
+                            "expr": "conversationId",
+                            "hidden": true,
+                            "key": true
+                        }
+                    },
+                    "actions": [
+                        {
+                            "appName": "user-dashboard/ai_conversation_details_app",
+                            "permission": "agenticai:conversation:view",
+                            "drillDownLinkField": "conversationLabel",
+                            "identifier": "conversationLabel",
+                            "selectionType": "SINGLE",
+                            "stateName": "app.featureapp",
+                            "title": "View Details",
+                            "type": "GO_TO_APP_STATE"
+                        }
+                    ],
+                    "widget_id": "f141b075"
+                }
+            ]
+        }
+    ],
+    "saved_time": "2025-11-13T08:15:21.417946",
+    "default_storyboard": "AI Storyboard",
+    "use_storyboard": true,
+    "attachments": [
+        {
+            "name": "assets",
+            "value": "{% raw %}\n{%\n  set unit = \"\"\n%}\n\n{%\n   if node_count > 1000000\n%}\n\n    {%\n        set node_count = (node_count /1000000) | round (1)\n    %}\n\n    {%\n      set unit = \"M\"\n    %}\n\n\n{%\n  elif node_count > 10000\n%}\n\n    {%\n        set node_count = (node_count /1000) | round (1)\n    %}\n    {%\n      set unit = \"K\"\n    %}\n\n\n\n{%\n    else\n%}\n\n    {%\n        set node_count = node_count | int\n    %}\n\n{%\n    endif\n%}\n\n\n<div style='width:100%;height:100%;'>\n\n  <div style=\"color: white; width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center\">\n    <h3 {{NUMBER_STYLE}}> {{ \"{:,}\".format(node_count)}}{{unit}} </h3> \n    <div style='text-align: center'>{{count_label}}</div>\n\n  </div>\n</div>\n{% endraw %}"
+        },
+        {
+            "name": "usd",
+            "value": "{% raw %}\n{%\n  set unit = \"\"\n%}\n\n{%\n   if node_count > 1000000\n%}\n\n    {%\n        set node_count = (node_count /1000000) | round (1)\n    %}\n\n    {%\n      set unit = \"M\"\n    %}\n\n\n{%\n  elif node_count > 10000\n%}\n\n    {%\n        set node_count = (node_count /1000) | round (1)\n    %}\n    {%\n      set unit = \"K\"\n    %}\n\n\n\n{%\n    else\n%}\n\n    {%\n        set node_count = node_count | round (1)\n    %}\n\n{%\n    endif\n%}\n\n\n<div style='width:100%;height:100%;'>\n\n  <div style=\"color: white; width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center\">\n    <h3 {{NUMBER_STYLE}}> ${{ \"{:,}\".format(node_count)}}{{unit}} </h3> \n    <div style='text-align: center'>{{count_label}}</div>\n\n  </div>\n</div>\n{% endraw %}"
+        },
+        {
+            "name": "promptTemplates",
+            "value": "{% raw %}\r\n{%- set names = {} -%}\r\n{%- for row in results -%}\r\n  {%- set cb = row.codeBlocks.strip('{}').split(\":\", 1)[1] \r\n        | trim \r\n        | trim('\"') \r\n        | replace('\\\\n', '\\n') \r\n        | replace('\\\\\"', '\"') \r\n  -%}\r\n  {%- set tc = cb.splitlines() -%}\r\n  {%- for line in tc -%}\r\n      {%- set line = line.strip() -%}\r\n        {%- if \"prompt_template_name\" in line -%}\r\n          {%- set name = line.split()[1].replace('\"', '').replace(',','').replace('}','').strip() -%}\r\n          {%- if name not in names -%}\r\n            {%- set _ = names.update({name: 1}) -%}\r\n          {%- else -%}\r\n            {%- set _ = names.update({name: names[name] + 1 }) -%}\r\n          {%- endif -%}\r\n        {%- endif -%}\r\n  {%- endfor -%}\r\n{%- endfor -%}\r\n\r\n{%- set data = [] -%}\r\n{%- for n in names -%}\r\n    {%- set _ = data.append({\"name\": n, \"count\": names[n]}) -%}\r\n{%- endfor -%}\r\n\r\n<div style='overflow: flex; width: 100%; height: 100%;'>\r\n<table style='border-collapse: collapse; width: 100%; height: 100%;'>\r\n{%- for n in data | sort(attribute='count', reverse=True)  -%}\r\n  <tr style='border-bottom: 1px solid #ccc;'><td><b>{{n[\"name\"]}}<\/b><\/td><td>{{n[\"count\"]}}<\/td><\/tr>\r\n{%- endfor -%}\r\n<\/table>\r\n<\/div>\r\n{% endraw %}\r\n"
+        },
+        {
+            "name": "promptTemplates_old1",
+            "value": "{% raw %}\r\n{%- set names = {} -%}\r\n{%- for row in results -%}\r\n  {%- set tc = row[\"codeBlocks\"].splitlines() -%}\r\n  {%- for line in tc -%}\r\n      {%- set line = line.strip() -%}\r\n        {%- if \"prompt_template\" in line -%}\r\n          {%- set name = line.split()[1].replace('\"', '').replace(',','').strip() -%}\r\n          {%- if name not in names -%}\r\n            {%- set _ = names.update({name: 1}) -%}\r\n          {%- else -%}\r\n            {%- set _ = names.update({name: names[name] + 1 }) -%}\r\n          {%- endif -%}\r\n        {%- endif -%}\r\n\r\n  {%- endfor -%}\r\n\r\n{%- endfor -%}\r\n\r\n{%- set data = [] -%}\r\n{%- for n in names -%}\r\n    {%- set _ = data.append({\"name\": n, \"count\": names[n]}) -%}\r\n{%- endfor -%}\r\n\r\n<div style='overflow: flex; width: 100%; height: 100%;'>\r\n<table style='border-collapse: collapse; width: 100%; height: 100%;'>\r\n{%- for n in data | sort(attribute='count', reverse=True)  -%}\r\n  <tr style='border-bottom: 1px solid #ccc;'><td><b>{{n[\"name\"]}}</b></td><td>{{n[\"count\"]}}</td></tr>\r\n{%- endfor -%}\r\n</table>\r\n</div>\r\n{% endraw %}"
+        },
+        {
+            "name": "promptTemplates_old",
+            "value": "{% raw %}\r\n{# ---------- DEBUG: show raw codeBlocks ---------- #}\r\n<h3>Debug Output:</h3>\r\n<pre>\r\n{%- for row in results -%}\r\nRow {{ loop.index }}:\r\n  {{ row.codeBlocks }}\r\n{%- endfor -%}\r\n</pre>\r\n<hr>\r\n\r\n{# ---------- Count prompt_template_name occurrences ---------- #}\r\n{%- set names = {} -%}\r\n{%- for row in results -%}\r\n    {%- set cb_dict = row.get(\"codeBlocks\", {}) -%}\r\n    {%- for cb_val in cb_dict.values() -%}\r\n        {# If cb_val is already a dict, no need to parse JSON #}\r\n        {%- if cb_val is mapping and cb_val.get(\"prompt_template_name\") -%}\r\n            {%- set name = cb_val[\"prompt_template_name\"] -%}\r\n            {%- set _ = names.update({name: (names.get(name, 0) + 1)}) -%}\r\n        {%- endif -%}\r\n    {%- endfor -%}\r\n{%- endfor -%}\r\n\r\n{# ---------- Output results ---------- #}\r\n{%- if names -%}\r\n<div style='overflow: auto; width: 100%; height: 100%;'>\r\n<table style='border-collapse: collapse; width: 100%; height: 100%;'>\r\n<tr style='border-bottom: 2px solid #000;'>\r\n  <th>Prompt Template Name</th>\r\n  <th>Count</th>\r\n</tr>\r\n{%- for name, count in names | dictsort(by='value', reverse=True) -%}\r\n  <tr style='border-bottom: 1px solid #ccc;'>\r\n    <td><b>{{ name }}</b></td>\r\n    <td>{{ count }}</td>\r\n  </tr>\r\n{%- endfor -%}\r\n</table>\r\n</div>\r\n{%- else -%}\r\n<p>No <code>prompt_template_name</code> found in any codeBlocks.</p>\r\n{%- endif -%}\r\n{% endraw %}"
+        },
+        {
+            "name": "promptTemplates_123",
+            "value": "{% raw %}\r\n{%- set names = {} -%}\r\n\r\n{%- for row in results -%}\r\n--- NEW ROW ---\r\n{%- if row[\"codeBlocks\"] -%}\r\n    RAW codeBlocks: {{ row[\"codeBlocks\"] }}\r\n\r\n    {# Step 1: Extract the C0 content from the JSON string #}\r\n    {%- if '\"C0\"' in row[\"codeBlocks\"] -%}\r\n        {%- set c0_content = row[\"codeBlocks\"]\r\n            .split('\"C0\"', 1)[1]\r\n            .split(\":\", 1)[1]\r\n            .lstrip()\r\n            .lstrip('\"')\r\n            .rstrip('\"}')\r\n            .replace('\\\\\\\\n', '\\n')\r\n            .replace('\\\\\"', '\"')\r\n        -%}\r\n\r\n        CODEBLOCK C0 CONTENT:\r\n        {{ c0_content }}\r\n\r\n        {# Step 2: Extract prompt_template_name from C0 content #}\r\n        {%- if '\"prompt_template_name\"' in c0_content -%}\r\n            {%- set extracted = c0_content\r\n                .split('\"prompt_template_name\"', 1)[1]\r\n                .split(\":\", 1)[1]\r\n                .strip()\r\n                .strip('{}')\r\n                .replace('\"', '')\r\n                .replace(',', '')\r\n                .strip()\r\n            -%}\r\n            Found prompt_template_name: {{ extracted }}\r\n\r\n            {%- if extracted not in names -%}\r\n                {%- set _ = names.update({extracted: 1}) -%}\r\n            {%- else -%}\r\n                {%- set _ = names.update({extracted: names[extracted] + 1 }) -%}\r\n            {%- endif -%}\r\n        {%- else -%}\r\n            No prompt_template_name found in C0.\r\n        {%- endif -%}\r\n\r\n    {%- else -%}\r\n        No C0 field found in codeBlocks.\r\n    {%- endif -%}\r\n\r\n{%- else -%}\r\n    No codeBlocks found.\r\n{%- endif -%}\r\n{%- endfor -%}\r\n\r\n{# Build table #}\r\n{%- set data = [] -%}\r\n{%- for n in names -%}\r\n    {%- set _ = data.append({\"name\": n, \"count\": names[n]}) -%}\r\n{%- endfor -%}\r\n\r\n<div style='overflow: auto; width: 100%; height: 100%;'>\r\n<table style='border-collapse: collapse; width: 100%; height: 100%;'>\r\n<tr><th>Prompt Template Name</th><th>Count</th></tr>\r\n{%- for n in data | sort(attribute='count', reverse=True) -%}\r\n<tr style='border-bottom: 1px solid #ccc;'>\r\n    <td><b>{{ n[\"name\"] }}</b></td>\r\n    <td>{{ n[\"count\"] }}</td>\r\n</tr>\r\n{%- endfor -%}\r\n</table>\r\n</div>\r\n{% endraw %}"
+        }
+    ],
+    "storyboards": [
+        {
+            "name": "AI Storyboard",
+            "value": "{\n    \"stage\": {\n        \"size\": {\n            \"width\": 1920,\n            \"height\": 1500\n        },\n        \"background\": {\n            \"fill\": null,\n            \"src\": null,\n            \"gradient\": {\n                \"color1\": \"#222222\",\n                \"color2\": \"#2C2C2C\",\n                \"type\": \"linear\",\n                \"rotation\": 90\n            }\n        },\n        \"theme\": \"dark\",\n        \"autoFitByDefault\": true,\n        \"autoFitMinWidth\": 480\n    },\n    \"widgets\": [\n        {\n            \"widget_id\": \"inputTokensTotal\",\n            \"layoutConfig\": {\n                \"rotation\": 0,\n                \"width\": 122,\n                \"height\": 57.21,\n                \"scaleX\": 1,\n                \"scaleY\": 1,\n                \"fill\": \"#282f3900\",\n                \"opacity\": 1,\n                \"name\": \"widget-64\",\n                \"draggable\": false,\n                \"x\": 1100.533425338188,\n                \"y\": 329.25270607423164,\n                \"id\": \"cfx-dcff95f3-8bc1-4b5e-d447-f8f2d649e859\"\n            }\n        },\n        {\n            \"widget_id\": \"cachTokensTotal\",\n            \"layoutConfig\": {\n                \"rotation\": 0,\n                \"width\": 116.67,\n                \"height\": 59.88,\n                \"scaleX\": 1,\n                \"scaleY\": 1,\n                \"fill\": \"#282f3900\",\n                \"opacity\": 1,\n                \"name\": \"widget-65\",\n                \"draggable\": false,\n                \"x\": 1614.2033348026982,\n                \"y\": 222.07,\n                \"id\": \"cfx-1cc98f44-d702-457d-d390-ce4273cba742\"\n            }\n        },\n        {\n            \"widget_id\": \"outputTokensTotal\",\n            \"layoutConfig\": {\n                \"rotation\": 0,\n                \"width\": 135.34,\n                \"height\": 61.22,\n                \"scaleX\": 1,\n                \"scaleY\": 1,\n                \"fill\": \"#282f3900\",\n                \"opacity\": 1,\n                \"name\": \"widget-66\",\n                \"draggable\": false,\n                \"x\": 1105.196652651185,\n                \"y\": 157.99096631896464,\n                \"id\": \"cfx-1672a748-5b4f-4ae7-b68c-9b5f59ecaea3\"\n            }\n        },\n        {\n            \"widget_id\": \"a5af22ac2\",\n            \"layoutConfig\": {\n                \"rotation\": 0,\n                \"width\": 467.84,\n                \"height\": 209.32,\n                \"scaleX\": 1,\n                \"scaleY\": 1,\n                \"fill\": \"#282f3900\",\n                \"opacity\": 1,\n                \"name\": \"widget-67\",\n                \"draggable\": false,\n                \"x\": 76.24,\n                \"y\": 346.5,\n                \"id\": \"cfx-06909c17-547b-4e8c-93e3-67b1dcc101e2\"\n            }\n        },\n        {\n            \"widget_id\": \"a5af22ac3\",\n            \"layoutConfig\": {\n                \"rotation\": 0,\n                \"width\": 413.59,\n                \"height\": 180,\n                \"scaleX\": 1,\n                \"scaleY\": 1,\n                \"fill\": \"#282f3900\",\n                \"opacity\": 1,\n                \"name\": \"widget-68\",\n                \"draggable\": false,\n                \"x\": 516.5492310235439,\n                \"y\": 364.04153981787545,\n                \"id\": \"cfx-c5e8231d-f94d-47f3-fc67-1c3c7e677392\"\n            }\n        },\n        {\n            \"widget_id\": \"a5af22ac4\",\n            \"layoutConfig\": {\n                \"rotation\": 0,\n                \"width\": 303.28,\n                \"height\": 298.09,\n                \"scaleX\": 1,\n                \"scaleY\": 1,\n                \"fill\": \"#282f3900\",\n                \"opacity\": 1,\n                \"name\": \"widget-69\",\n                \"draggable\": false,\n                \"x\": 1283.03,\n                \"y\": 125.42,\n                \"id\": \"cfx-b999dde9-6451-4695-f004-f1fad7515ef0\"\n            }\n        },\n        {\n            \"widget_id\": \"a5af22ac7\",\n            \"layoutConfig\": {\n                \"rotation\": 0,\n                \"width\": 298.53,\n                \"height\": 301.17,\n                \"scaleX\": 1,\n                \"scaleY\": 1,\n                \"fill\": \"#282f3900\",\n                \"opacity\": 1,\n                \"name\": \"widget-70\",\n                \"draggable\": false,\n                \"x\": 111.53000019073485,\n                \"y\": 675.7299975133823,\n                \"id\": \"cfx-800c5948-53e9-472d-bf15-ca79abc23ea7\"\n            }\n        },\n        {\n            \"widget_id\": \"toolCallCount\",\n            \"layoutConfig\": {\n                \"rotation\": 0,\n                \"width\": 156.39,\n                \"height\": 67.76,\n                \"scaleX\": 1,\n                \"scaleY\": 1,\n                \"fill\": \"transparent\",\n                \"opacity\": 1,\n                \"name\": \"widget-71\",\n                \"draggable\": false,\n                \"x\": 756.0000096003222,\n                \"y\": 602.0099747947382,\n                \"id\": \"cfx-ba63b6e3-8f04-4951-c40c-151f3eec71f7\"\n            }\n        },\n        {\n            \"widget_id\": \"toolNames\",\n            \"layoutConfig\": {\n                \"rotation\": 0,\n                \"width\": 499,\n                \"height\": 285,\n                \"scaleX\": 1,\n                \"scaleY\": 1,\n                \"fill\": \"#fafafa00\",\n                \"opacity\": 1,\n                \"name\": \"widget-72\",\n                \"draggable\": false,\n                \"x\": 424,\n                \"y\": 689.01,\n                \"id\": \"cfx-dce528c1-1a9b-43f2-ccdb-40d68a85f6cc\"\n            }\n        },\n        {\n            \"widget_id\": \"f141b075\",\n            \"layoutConfig\": {\n                \"rotation\": 0,\n                \"width\": 712,\n                \"height\": 795,\n                \"scaleX\": 1,\n                \"scaleY\": 1,\n                \"fill\": \"#fafafa33\",\n                \"opacity\": 1,\n                \"name\": \"widget-73\",\n                \"draggable\": false,\n                \"x\": 1102,\n                \"y\": 640.01,\n                \"id\": \"cfx-b1fb5435-6bcb-4a43-bddf-0e2ef485bf17\"\n            }\n        },\n        {\n            \"widget_id\": \"requestCount\",\n            \"layoutConfig\": {\n                \"rotation\": 0,\n                \"width\": 105.55,\n                \"height\": 62.47,\n                \"scaleX\": 1,\n                \"scaleY\": 1,\n                \"fill\": \"#fafafa00\",\n                \"opacity\": 1,\n                \"name\": \"widget-74\",\n                \"draggable\": false,\n                \"x\": 801.0000254948951,\n                \"y\": 53.01000180844928,\n                \"id\": \"cfx-7e973131-4b32-4347-daca-a18363065540\"\n            }\n        },\n        {\n            \"widget_id\": \"totalCost\",\n            \"layoutConfig\": {\n                \"rotation\": 0,\n                \"width\": 101.98,\n                \"height\": 54.41,\n                \"scaleX\": 1,\n                \"scaleY\": 1,\n                \"fill\": \"#fafafa00\",\n                \"opacity\": 1,\n                \"name\": \"widget-75\",\n                \"draggable\": false,\n                \"x\": 1622.000016784669,\n                \"y\": 53.009971629951906,\n                \"id\": \"cfx-1c164fc8-7c73-4f33-ae2e-2e8eb45bb2e3\"\n            }\n        },\n        {\n            \"widget_id\": \"userRequestCount\",\n            \"layoutConfig\": {\n                \"rotation\": 0,\n                \"width\": 118.14,\n                \"height\": 50.26,\n                \"scaleX\": 1,\n                \"scaleY\": 1,\n                \"fill\": \"#fafafa00\",\n                \"opacity\": 1,\n                \"name\": \"widget-76\",\n                \"draggable\": false,\n                \"x\": 791.3077017808578,\n                \"y\": 230.5484764581681,\n                \"id\": \"cfx-6fc95f02-0c2f-4c23-ab8a-9f41ee2087d8\"\n            }\n        },\n        {\n            \"widget_id\": \"agentRequestCount\",\n            \"layoutConfig\": {\n                \"rotation\": 0,\n                \"width\": 106.62,\n                \"height\": 49.39,\n                \"scaleX\": 1,\n                \"scaleY\": 1,\n                \"fill\": \"#fafafa00\",\n                \"opacity\": 1,\n                \"name\": \"widget-77\",\n                \"draggable\": false,\n                \"x\": 797.5384586138601,\n                \"y\": 143.36809150369922,\n                \"id\": \"cfx-7b310f82-9152-4458-ae3b-473ffbcdce47\"\n            }\n        },\n        {\n            \"widget_id\": \"topAgentsBar\",\n            \"layoutConfig\": {\n                \"rotation\": 0,\n                \"width\": 647.77,\n                \"height\": 227.31,\n                \"scaleX\": 1,\n                \"scaleY\": 1,\n                \"fill\": \"#fafafa00\",\n                \"opacity\": 1,\n                \"name\": \"widget-78\",\n                \"draggable\": false,\n                \"x\": 123,\n                \"y\": 112.01,\n                \"id\": \"cfx-0d88ade6-5786-493d-ef14-eff13a0489ac\"\n            }\n        },\n        {\n            \"widget_id\": \"e12886fc\",\n            \"layoutConfig\": {\n                \"rotation\": 0,\n                \"width\": 772.5,\n                \"height\": 322.5,\n                \"scaleX\": 1,\n                \"scaleY\": 1,\n                \"fill\": \"#FFFFFF00\",\n                \"opacity\": 1,\n                \"name\": \"widget-79\",\n                \"draggable\": true,\n                \"x\": 125,\n                \"y\": 1127.5,\n                \"id\": \"cfx-40f79431-f77f-472c-80c6-e3f6f75927af\",\n                \"offsetX\": 0,\n                \"offsetY\": 0,\n                \"skewX\": 0,\n                \"skewY\": 0,\n                \"fillPriority\": \"color\"\n            }\n        }\n    ],\n    \"shapes\": [\n        {\n            \"compType\": \"vRect\",\n            \"rotation\": 0,\n            \"width\": 852.61,\n            \"height\": 525.51,\n            \"scaleX\": 1,\n            \"scaleY\": 1,\n            \"fill\": \"transparent\",\n            \"name\": \"shape-40\",\n            \"cornerRadius\": 20,\n            \"draggable\": false,\n            \"x\": 84.12,\n            \"y\": 46.82,\n            \"id\": \"cfx-eda54a7c-e474-4194-ba34-c0dc0c8197d4\",\n            \"offsetX\": 0,\n            \"offsetY\": 0,\n            \"skewX\": 0,\n            \"skewY\": 0,\n            \"stroke\": \"#0C29E2\",\n            \"fillPriority\": \"color\",\n            \"strokeWidth\": 4\n        },\n        {\n            \"compType\": \"vRect\",\n            \"rotation\": 0,\n            \"width\": 637.6,\n            \"height\": 436.28,\n            \"scaleX\": 1,\n            \"scaleY\": 1,\n            \"fill\": \"transparent\",\n            \"name\": \"shape-41\",\n            \"cornerRadius\": 20,\n            \"draggable\": false,\n            \"x\": 1098.79,\n            \"y\": 46.82,\n            \"id\": \"cfx-eda54a7c-e474-4194-ba34-c0dc0c8197d4\",\n            \"offsetX\": 0,\n            \"offsetY\": 0,\n            \"skewX\": 0,\n            \"skewY\": 0,\n            \"stroke\": \"#E20FA5\",\n            \"fillPriority\": \"color\",\n            \"strokeWidth\": 4\n        },\n        {\n            \"compType\": \"vArrow\",\n            \"rotation\": 0,\n            \"x\": 932.7844215210317,\n            \"y\": 185.023204864869,\n            \"points\": [\n                18.333334611963437,\n                0,\n                158.66666316279623,\n                1.0880508551993557\n            ],\n            \"width\": 100,\n            \"height\": 100,\n            \"scaleX\": 1,\n            \"scaleY\": 1,\n            \"strokeWidth\": 10,\n            \"stroke\": \"#C3D41A\",\n            \"name\": \"shape-42\",\n            \"draggable\": false,\n            \"pointerAtBeginning\": true,\n            \"pointerAtEnding\": false,\n            \"id\": \"cfx-c9511248-a80a-4661-e78d-7c022923b4f4\",\n            \"dashEnabled\": true,\n            \"offsetX\": 0,\n            \"offsetY\": 0,\n            \"skewX\": 0,\n            \"skewY\": 0\n        },\n        {\n            \"compType\": \"vArrow\",\n            \"rotation\": 0,\n            \"x\": 792.4510735152412,\n            \"y\": 339.5804137490664,\n            \"points\": [\n                296.6666919425709,\n                0,\n                151.66666271774818,\n                1.0880508551993557\n            ],\n            \"width\": 100,\n            \"height\": 100,\n            \"scaleX\": 1,\n            \"scaleY\": 1,\n            \"strokeWidth\": 10,\n            \"stroke\": \"#C3D41A\",\n            \"name\": \"shape-43\",\n            \"draggable\": false,\n            \"pointerAtBeginning\": true,\n            \"pointerAtEnding\": false,\n            \"id\": \"cfx-c9511248-a80a-4661-e78d-7c022923b4f4\",\n            \"dashEnabled\": true,\n            \"offsetX\": 0,\n            \"offsetY\": 0,\n            \"skewX\": 0,\n            \"skewY\": 0\n        },\n        {\n            \"compType\": \"vRect\",\n            \"rotation\": 0,\n            \"width\": 852.61,\n            \"height\": 413.59,\n            \"scaleX\": 1,\n            \"scaleY\": 1,\n            \"fill\": \"transparent\",\n            \"name\": \"shape-44\",\n            \"cornerRadius\": 20,\n            \"draggable\": false,\n            \"x\": 84.12,\n            \"y\": 594.64,\n            \"id\": \"cfx-eda54a7c-e474-4194-ba34-c0dc0c8197d4\",\n            \"offsetX\": 0,\n            \"offsetY\": 0,\n            \"skewX\": 0,\n            \"skewY\": 0,\n            \"stroke\": \"#00AA00\",\n            \"fillPriority\": \"color\",\n            \"strokeWidth\": 4\n        },\n        {\n            \"compType\": \"vCircle\",\n            \"radius\": 21.225,\n            \"fill\": \"#D41BA7\",\n            \"stroke\": \"#D619BF\",\n            \"strokeWidth\": 4,\n            \"name\": \"shape-45\",\n            \"draggable\": false,\n            \"x\": 1840.0099983045786,\n            \"y\": 252.2148976223087,\n            \"id\": \"cfx-8d54394a-dcc9-4cd7-8e4d-7e4e11c8f8da\",\n            \"rotation\": 0,\n            \"scaleX\": 1,\n            \"scaleY\": 1,\n            \"skewX\": 0,\n            \"skewY\": 0,\n            \"offsetX\": 0,\n            \"offsetY\": 0,\n            \"fillPriority\": \"color\"\n        },\n        {\n            \"compType\": \"vArrow\",\n            \"rotation\": 0,\n            \"x\": 1506.1177983701746,\n            \"y\": 249.02814343825426,\n            \"points\": [\n                302.6666923240401,\n                4.004938573385289,\n                232.0000027126739,\n                5.092989428584616\n            ],\n            \"width\": 100,\n            \"height\": 100,\n            \"scaleX\": 1,\n            \"scaleY\": 1,\n            \"strokeWidth\": 5,\n            \"stroke\": \"#D61AD0\",\n            \"name\": \"shape-46\",\n            \"draggable\": false,\n            \"pointerAtBeginning\": true,\n            \"pointerAtEnding\": true,\n            \"id\": \"cfx-c9511248-a80a-4661-e78d-7c022923b4f4\",\n            \"dashEnabled\": true,\n            \"offsetX\": 0,\n            \"offsetY\": 0,\n            \"skewX\": 0,\n            \"skewY\": 0\n        },\n        {\n            \"fill\": \"white\",\n            \"compType\": \"vText\",\n            \"name\": \"shape-47\",\n            \"text\": \"LLM Cache\",\n            \"align\": \"center\",\n            \"fontSize\": 19,\n            \"fontFamily\": \"Roboto\",\n            \"fontStyle\": \"normal\",\n            \"textDecoration\": [],\n            \"draggable\": false,\n            \"x\": 1794.1178278705029,\n            \"y\": 194.21990433454383,\n            \"id\": \"cfx-1a0da783-fadf-4c9b-891e-95bdf19dc58e\",\n            \"rotation\": 0,\n            \"scaleX\": 1,\n            \"scaleY\": 1,\n            \"offsetX\": 0,\n            \"offsetY\": 0,\n            \"skewX\": 0,\n            \"skewY\": 0,\n            \"opacity\": 1\n        },\n        {\n            \"fill\": \"#FFFFE0\",\n            \"compType\": \"vText\",\n            \"name\": \"shape-48\",\n            \"text\": \"LLMs\",\n            \"align\": \"left\",\n            \"fontSize\": 24,\n            \"fontFamily\": \"Roboto\",\n            \"fontStyle\": \"normal\",\n            \"textDecoration\": [],\n            \"draggable\": false,\n            \"x\": 1162.1177766263988,\n            \"y\": 64.35240268929462,\n            \"id\": \"cfx-1a0da783-fadf-4c9b-891e-95bdf19dc58e\",\n            \"rotation\": 0,\n            \"scaleX\": 1,\n            \"scaleY\": 1,\n            \"offsetX\": 0,\n            \"offsetY\": 0,\n            \"skewX\": 0,\n            \"skewY\": 0,\n            \"opacity\": 1\n        },\n        {\n            \"fill\": \"#FFFFE0\",\n            \"compType\": \"vText\",\n            \"name\": \"shape-49\",\n            \"text\": \"Clients\",\n            \"align\": \"left\",\n            \"fontSize\": 24,\n            \"fontFamily\": \"Roboto\",\n            \"fontStyle\": \"normal\",\n            \"textDecoration\": [],\n            \"draggable\": false,\n            \"x\": 144.78,\n            \"y\": 66.31,\n            \"id\": \"cfx-1a0da783-fadf-4c9b-891e-95bdf19dc58e\",\n            \"rotation\": 0,\n            \"scaleX\": 1,\n            \"scaleY\": 1,\n            \"offsetX\": 0,\n            \"offsetY\": 0,\n            \"skewX\": 0,\n            \"skewY\": 0,\n            \"opacity\": 1,\n            \"width\": 101.2,\n            \"height\": 31\n        },\n        {\n            \"fill\": \"#FFFFE0\",\n            \"compType\": \"vText\",\n            \"name\": \"shape-50\",\n            \"text\": \"Persona\",\n            \"align\": \"center\",\n            \"fontSize\": 14,\n            \"fontFamily\": \"Roboto\",\n            \"fontStyle\": \"normal\",\n            \"textDecoration\": [],\n            \"draggable\": false,\n            \"x\": 711.6305493636637,\n            \"y\": 535.8145362987163,\n            \"id\": \"cfx-1a0da783-fadf-4c9b-891e-95bdf19dc58e\",\n            \"rotation\": 0,\n            \"scaleX\": 1,\n            \"scaleY\": 1,\n            \"offsetX\": 0,\n            \"offsetY\": 0,\n            \"skewX\": 0,\n            \"skewY\": 0,\n            \"opacity\": 1\n        },\n        {\n            \"fill\": \"white\",\n            \"compType\": \"vText\",\n            \"name\": \"shape-51\",\n            \"text\": \"Tool Calls by Domain\",\n            \"align\": \"center\",\n            \"fontSize\": 14,\n            \"fontFamily\": \"Roboto\",\n            \"fontStyle\": \"normal\",\n            \"textDecoration\": [],\n            \"draggable\": false,\n            \"x\": 176.11768736247564,\n            \"y\": 981.3244998878148,\n            \"id\": \"cfx-1a0da783-fadf-4c9b-891e-95bdf19dc58e\",\n            \"rotation\": 0,\n            \"scaleX\": 1,\n            \"scaleY\": 1,\n            \"offsetX\": 0,\n            \"offsetY\": 0,\n            \"skewX\": 0,\n            \"skewY\": 0,\n            \"opacity\": 1\n        },\n        {\n            \"compType\": \"vLine\",\n            \"rotation\": 0,\n            \"x\": 1270.1177834504686,\n            \"y\": 793.6257108178694,\n            \"points\": [\n                -330.66669469762974,\n                23.359672617444062,\n                -252.00003840128954,\n                23.359672617444062\n            ],\n            \"width\": 100,\n            \"height\": 100,\n            \"scaleX\": 1,\n            \"scaleY\": 1,\n            \"strokeWidth\": 10,\n            \"stroke\": \"#C3D41A\",\n            \"name\": \"shape-52\",\n            \"draggable\": false,\n            \"id\": \"cfx-76ceb0db-6649-4657-b593-a575ade91046\",\n            \"dash\": [\n                \"5\",\n                \"5\"\n            ],\n            \"lineJoin\": \"butt\",\n            \"lineCap\": \"butt\"\n        },\n        {\n            \"compType\": \"vLine\",\n            \"rotation\": 0,\n            \"x\": 1298.7844500041072,\n            \"y\": 820.955751768946,\n            \"points\": [\n                -283.66669077696804,\n                460.6650581048451,\n                -284.66670779475874,\n                -416.7654784226012\n            ],\n            \"width\": 100,\n            \"height\": 100,\n            \"scaleX\": 1,\n            \"scaleY\": 1,\n            \"strokeWidth\": 10,\n            \"stroke\": \"#CBD61B\",\n            \"name\": \"shape-53\",\n            \"draggable\": false,\n            \"id\": \"cfx-76ceb0db-6649-4657-b593-a575ade91046\",\n            \"offsetX\": 0,\n            \"offsetY\": 0,\n            \"skewX\": 0,\n            \"skewY\": 0,\n            \"dash\": [\n                \"5\",\n                \"5\"\n            ],\n            \"lineJoin\": \"butt\",\n            \"lineCap\": \"butt\"\n        },\n        {\n            \"compType\": \"vLine\",\n            \"rotation\": 0,\n            \"x\": 1094.0001000722314,\n            \"y\": 558.0110951754077,\n            \"points\": [\n                -84.00000534057642,\n                -151.00001706724004,\n                0.9999873479198413,\n                -151.00003967285602\n            ],\n            \"width\": 100,\n            \"height\": 100,\n            \"scaleX\": 1,\n            \"scaleY\": 1,\n            \"strokeWidth\": 10,\n            \"stroke\": \"#CEC618\",\n            \"name\": \"shape-54\",\n            \"draggable\": false,\n            \"id\": \"cfx-cfdf89f1-83d5-4843-8aa0-947fbbb0c985\",\n            \"offsetX\": 0,\n            \"offsetY\": 0,\n            \"skewX\": 0,\n            \"skewY\": 0,\n            \"dash\": [\n                \"5\",\n                \"5\"\n            ],\n            \"lineJoin\": \"butt\",\n            \"lineCap\": \"butt\"\n        },\n        {\n            \"fill\": \"white\",\n            \"compType\": \"vText\",\n            \"name\": \"shape-55\",\n            \"text\": \"MCP Based Tool Calling \\n& Instructions\",\n            \"align\": \"left\",\n            \"fontSize\": 16,\n            \"fontFamily\": \"Roboto\",\n            \"fontStyle\": \"normal\",\n            \"textDecoration\": [],\n            \"draggable\": false,\n            \"x\": 1026.1177394966749,\n            \"y\": 533.3244458603926,\n            \"id\": \"cfx-1a0da783-fadf-4c9b-891e-95bdf19dc58e\",\n            \"rotation\": 0,\n            \"scaleX\": 1,\n            \"scaleY\": 1,\n            \"offsetX\": 0,\n            \"offsetY\": 0,\n            \"skewX\": 0,\n            \"skewY\": 0,\n            \"opacity\": 1\n        },\n        {\n            \"width\": 30.61,\n            \"height\": 33.74,\n            \"draggable\": false,\n            \"compType\": \"vImage\",\n            \"name\": \"image-56\",\n            \"x\": 107.99999828338612,\n            \"y\": 63.009998417606894,\n            \"src\": \"/assets/img/icons/featureApp/svgIcons/customer.svg\",\n            \"rotation\": 0,\n            \"scaleX\": 1,\n            \"scaleY\": 1,\n            \"skewX\": 0,\n            \"skewY\": 0,\n            \"offsetX\": 0,\n            \"offsetY\": 0,\n            \"image\": {}\n        },\n        {\n            \"width\": 37.86,\n            \"height\": 41.04,\n            \"draggable\": false,\n            \"compType\": \"vImage\",\n            \"name\": \"image-57\",\n            \"x\": 97.99999618530249,\n            \"y\": 609.010062165444,\n            \"src\": \"/assets/img/icons/featureApp/svgIcons/remedial.svg\",\n            \"rotation\": 0,\n            \"scaleX\": 1,\n            \"scaleY\": 1,\n            \"skewX\": 0,\n            \"skewY\": 0,\n            \"offsetX\": 0,\n            \"offsetY\": 0,\n            \"image\": {}\n        },\n        {\n            \"width\": 29.88,\n            \"height\": 32.4,\n            \"draggable\": false,\n            \"compType\": \"vImage\",\n            \"name\": \"image-58\",\n            \"x\": 1117,\n            \"y\": 58.010000452112315,\n            \"src\": \"/assets/img/icons/featureApp/svgIcons/nlp.svg\",\n            \"rotation\": 0,\n            \"scaleX\": 1,\n            \"scaleY\": 1,\n            \"skewX\": 0,\n            \"skewY\": 0,\n            \"offsetX\": 0,\n            \"offsetY\": 0,\n            \"image\": {}\n        },\n        {\n            \"fill\": \"#FFFFE0\",\n            \"compType\": \"vText\",\n            \"name\": \"shape-59\",\n            \"text\": \"Tools\",\n            \"align\": \"left\",\n            \"fontSize\": 24,\n            \"fontFamily\": \"Roboto\",\n            \"fontStyle\": \"normal\",\n            \"textDecoration\": [],\n            \"draggable\": false,\n            \"x\": 145.78000101725266,\n            \"y\": 614.31,\n            \"id\": \"cfx-1a0da783-fadf-4c9b-891e-95bdf19dc58e\",\n            \"rotation\": 0,\n            \"scaleX\": 1,\n            \"scaleY\": 1,\n            \"offsetX\": 0,\n            \"offsetY\": 0,\n            \"skewX\": 0,\n            \"skewY\": 0,\n            \"opacity\": 1,\n            \"width\": 89.2,\n            \"height\": 31\n        },\n        {\n            \"compType\": \"vRect\",\n            \"rotation\": 0,\n            \"width\": 852.61,\n            \"height\": 413.59,\n            \"scaleX\": 1,\n            \"scaleY\": 1,\n            \"fill\": \"transparent\",\n            \"name\": \"shape-60\",\n            \"cornerRadius\": 20,\n            \"draggable\": false,\n            \"x\": 85.11999815622954,\n            \"y\": 1055.6400350748727,\n            \"id\": \"cfx-eda54a7c-e474-4194-ba34-c0dc0c8197d4\",\n            \"offsetX\": 0,\n            \"offsetY\": 0,\n            \"skewX\": 0,\n            \"skewY\": 0,\n            \"stroke\": \"#00AA00\",\n            \"fillPriority\": \"color\",\n            \"strokeWidth\": 4\n        },\n        {\n            \"compType\": \"vLine\",\n            \"rotation\": 0,\n            \"x\": 1276.1177819245895,\n            \"y\": 1253.6257458113619,\n            \"points\": [\n                -330.66669469762974,\n                23.359672617444062,\n                -252.00003840128954,\n                22.447723246587316\n            ],\n            \"width\": 100,\n            \"height\": 100,\n            \"scaleX\": 1,\n            \"scaleY\": 1,\n            \"strokeWidth\": 10,\n            \"stroke\": \"#C3D41A\",\n            \"name\": \"shape-61\",\n            \"draggable\": false,\n            \"id\": \"cfx-76ceb0db-6649-4657-b593-a575ade91046\",\n            \"dash\": [\n                \"5\",\n                \"5\"\n            ],\n            \"lineJoin\": \"butt\",\n            \"lineCap\": \"butt\",\n            \"offsetX\": 0,\n            \"offsetY\": 0,\n            \"skewX\": 0,\n            \"skewY\": 0\n        },\n        {\n            \"width\": 29.52,\n            \"height\": 35.21,\n            \"draggable\": false,\n            \"compType\": \"vImage\",\n            \"name\": \"image-62\",\n            \"x\": 104,\n            \"y\": 1079.31,\n            \"src\": \"/assets/img/icons/featureApp/svgIcons/contract.svg\",\n            \"rotation\": 0,\n            \"scaleX\": 1,\n            \"scaleY\": 1,\n            \"skewX\": 0,\n            \"skewY\": 0,\n            \"offsetX\": 0,\n            \"offsetY\": 0,\n            \"image\": {}\n        },\n        {\n            \"fill\": \"#FFFFE0\",\n            \"compType\": \"vText\",\n            \"name\": \"shape-63\",\n            \"text\": \"Prompt Templates (Instructions)\",\n            \"align\": \"left\",\n            \"fontSize\": 24,\n            \"fontFamily\": \"Roboto\",\n            \"fontStyle\": \"normal\",\n            \"textDecoration\": [],\n            \"draggable\": false,\n            \"x\": 150.78,\n            \"y\": 1084.31,\n            \"id\": \"cfx-1a0da783-fadf-4c9b-891e-95bdf19dc58e\",\n            \"rotation\": 0,\n            \"scaleX\": 1,\n            \"scaleY\": 1,\n            \"offsetX\": 0,\n            \"offsetY\": 0,\n            \"skewX\": 0,\n            \"skewY\": 0,\n            \"opacity\": 1,\n            \"width\": 365.2,\n            \"height\": 31\n        }\n    ],\n    \"lines\": [],\n    \"sbBookmarkList\": []\n}"
+        }
+    ]
+}

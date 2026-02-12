@@ -1,0 +1,217 @@
+enabled: true
+domain: common
+description: >-
+  Common domain tools and resources that are used to demonstrate how create new resources & tools dynamically
+textResources:
+- name: domainDetails
+  description: Describes the different domains provided by this server
+  text: |
+    This is an multi-domain MCP Server. Each tool name is prefixed with a domain name.
+    Some of the domains are
+        common: These tools that are used in conjunction with other domains.
+        topology: This domain provides tools associated network and application topologies.
+        aiops: AIOPs related tools. Typically contains alerts and Incident related tools
+        mobility: This domain provides tools for Performance management related to 4G/5G Packet Core, Mobility
+        networkAutomation: This domain provides tools related network automation
+- name: queryLanguage
+  description: Describes proprietary query language used by some of the tools
+  text: |
+    This platform uses proprietary query language that is similar to SQL WHERE Clause syntax.
+    Each expression in the query must follow following rules * Left side must be a variable / column in the database table. column names must be escaped with a back quote. * Right side must be a constant (String or Int or Double). All dates / timestamps must be represented as a ISO formatted text on the right hand side. If right side is a an array it must be a comma separated values inside square brackets []
+    Support operands are: =, !=, >, <. contains, does not contain, matches, does not match, IN, NOT IN, IS NULL, NOT NULL.
+    Examples for IN operator are
+        `state` IN [ 'Up', 'Unknown' ]
+    Logical operators are OR, AND.
+    his query language does not support GROUPY, JOINs, LIMITS to any other. Does not have SELECT or UPDATE any of these non WHERE clause  related. Use parenthesis () when combining multiple expressions with OR / AND.
+    It also supports following time based operations. Right hand value for each expression must be a ISO formatted date & time OR relative time in days, hours, minutes, seconds.
+        timestamp is after '2025:01:01T22:00:00' 
+        timestamp is after -30 days
+        timestamp is after -10 hours
+        timestamp is after -15 minutes
+        timestamp is before '2025:01:01T22:00:00' 
+        timestamp is during '2025:01:01T00:00:00' to '2025:01:15T00:00:00'   (this queries data between Jan 1 to Jan 15)
+tools:
+- name: get_current_time
+  description: Get current time in ISO format
+  type: template
+  templateType: jinja
+  template: |
+    {{ time_now_as_isoformat() }}
+- name: get_persona_details
+  description: Get Persona details.
+  type: template
+  templateType: jinja
+  template: |
+    {%- set persona_details = engine.get_persona(persona_name=persona, ai_project_name =ai_project_name) -%}
+    {{ persona_details | tojson }}
+  parameters:
+  - name: persona
+    description: Name of the persona to retrieve information about (e.g. Admin,Automation,QA)
+    type: string
+  - name: ai_project_name
+    description: Name of the project to retrieve information about (e.g. Project_A, Project_B)
+    type: string
+  required: true
+
+- name: list_prompt_templates_by_persona
+  description: List the prompt templates based on persona. Persona details can be fetched using the get_persona_details tool.
+  type: listPromptTemplatesByPersona
+  parameters:
+  - name: persona
+    description: Name of the persona to retrieve information about (e.g.Admin,Automation,QA)
+    type: string
+  - name: ai_project_name
+    description: Name of the project to retrieve information about (e.g. Project_A,Project_B)
+    type: string
+    required: true
+- name: get_conversation_history
+  type: conversationHistory
+  description: >-
+      Update Conversation history. This history is used to generate the context for the AI assistant.
+  history_optimization:
+    llm: gpt-4.1
+    timeout: 120
+    text_summarization_threshold_in_kb: 20
+    prompt: >-
+            You are a context compactor. Your job is to preserve essential
+            information from this conversation in the most concise form possible
+            while maintaining all critical details for problem-solving.  Your
+            summary must have two parts:
+
+            1. A relatively faithful account of the messages (user, tool and assistant)
+            leading up to this summary.
+
+            2. A highly contextual summary of the entire conversation history
+            that picks out items most relevant to the current goal.
+
+            Always preserve:
+            - The most recently completed turn: both the user's question AND
+            the outcome/results (regardless of current relevance). If the most recent outcome includes specific actions to take, include them in full.
+            - User's current objective and intent
+            - The names of context-cache documents that may be relevant to the
+            current objective.
+            - Key technical findings, data points, and error messages from the
+            conversation history.
+            - Important tool results (reference cache documents by name)
+            - Critical context needed to understand the conversation flow
+
+            When summarizing assistant tool calls, describe them in plain English rather than preserving raw XML/tag formatting.Do not include raw XML tags like <tool_name>, <parameters>, etc. in your summary.
+
+            Focus content on:
+            - Information most relevant to the current user request
+            - Context that enables effective problem-solving
+            - Details that maintain conversation continuity and include important details (verbatim if doing so will improve outcomes)
+
+            Remove:
+            - Redundant confirmations and verbose tool outputs
+            - Tangential discussions unrelated to core objectives
+            - Repetitive explanations of the same concepts
+
+            Output: A condensed conversation history suitable for LLM context.
+            Prioritize current relevance while ensuring the complete most recent
+            question-answer pair is preserved AS-IS.
+  save_to_cache: true
+  parameters:
+    - name: number_of_prompts
+      description: |
+            Last N number of prompts to return in conversation history
+            (Each prompt includes user prompt, tool calls, and final response).
+            Default is 5.
+            type: integer
+            default: 5
+
+- name: add_learning
+  type: runPipeline
+  description: 'Add a new learning for the AI'
+  data_format: csv
+  save_to_cache: auto
+
+  custom_config:
+    template_type: jinja
+    pipeline_content: |
+      @dm:empty
+        --> @dm:addrow persona='{{persona}}'
+            and user_id='{{user_id}}'
+            and learning_summary=`{{learning_summary}}`
+        
+        --> @rn:write-stream name="ai_learnings"
+
+  parameters:
+  - name: persona
+    description: AI Persona
+    type: string
+    required: true
+  - name: user_id
+    description: Current User ID
+    type: string
+    required: true
+  - name: learning_summary
+    description: Learning Summary for the AI to learn from in the future
+    type: string
+    required: true
+
+- name: get_learnings
+  description: Get Learnings for a Persona
+  type: streamQuery
+  stream: ai_learnings
+  parameters:
+  - name: persona
+    description: Name of the persona to retrieve information about (e.g. Admin,Automation,QA)
+    operator: '='
+- name: get_stream_histogram
+  type: streamHistogram
+  description: Get Histogram of a stream.
+  stream: rda_chat_sessions
+  ts_column: timestamp
+  interval: 1h
+  duration_hours: 12
+- name: query_stream
+  description: Query a stream.
+  type: streamQuery
+  stream:
+    template_type: jinja
+    template: '{{ stream_name }}'
+  extra_filter:
+    template_type: jinja
+    template: '{{ filter }}'
+  parameters:
+  - name: stream_name
+    description: Name of the stream to query data
+    use_in_cfxql: false
+  - name: filter
+    description: >-
+      Filter to apply while querying the data. Some example filter operators are device == '10.10.10.1', port >= 80, device contains '10.10', device matches '^10.*', device starts with '10.'
+    use_in_cfxql: false
+    default: '*'
+- name: get_prompt_template
+  description: Get Prompt template by name. Name can be fetched using the list_prompt_templates tool.**IMPORTANT Always call this get_prompt_template tool
+  type: streamQuery
+  stream: ai_mcp_prompt_templates
+  data_format: json
+  result_columns:
+    prompt_template: 
+  parameters:
+  - name: prompt_template_name
+    description: Name of the prompt template.
+- name: generate_diff
+  type: CompareDiff
+  description: Generate a diff between two documents or configurations.
+  parameters:
+  - name: doc_1
+    description: First document or configuration to compare
+    type: string
+  - name: doc_2
+    description: Second document or configuration to compare
+    type: string
+  - name: doc_1_label
+    description: Label for the first document (e.g., 'Current Config', 'Golden Config')
+    type: string
+  - name: doc_2_label
+    description: Label for the second document (e.g., 'Current Config', 'Golden Config')
+    type: string
+- name: get_stream_metadata
+  description: Get Stream metadata details.
+  type: streamMetadata
+  parameters:
+  - name: stream
+    description: Name of the stream to retrieve metadata information about

@@ -1,0 +1,70 @@
+{
+  "name": "workflow_run_details_generic_app",
+  "label": "Workflow: {{FLOW_NAME}}",
+  "description": "Workflow Job Run Details App",
+  "version": "25.8.11",
+  "enabled": true,
+  "status_poller": {},
+  "dashboard_type": "app",
+  "dashboard_folder": "Workflow",
+  "is_template": true,
+  "template_variables": {
+    "JOB_ID": {
+      "contextId": "jobId"
+    },
+    "FLOW_NAME": {
+      "contextId": "flow_name"
+    },
+    "STATUS": {
+      "contextId": "status"
+    },
+    "STATUS_COLOR": {
+      "contextId": "status_color"
+    }
+  },
+  "hidePageMenu": false,
+  "hidePageContent": false,
+  "dashboard_sections": [
+    {
+      "title": "header section",
+      "widgets": [
+        {
+          "title": "Run Job Summary",
+          "min_width": 12,
+          "height": 2,
+          "widget_type": "header_section",
+          "htmlTemplate": "attachment://header",
+          "widget_id": "6e64b2f1"
+        }
+      ]
+    }
+  ],
+  "dashboard_pages": [
+    {
+      "name": "workflow_run_details_generic_steps",
+      "label": "Step Runs",
+      "icon": "metrics.svg"
+    },
+    {
+      "name": "workflow_run_details_generic_jobs",
+      "label": "Job Logs",
+      "icon": "diagnostic.svg"
+    },
+    {
+      "name": "workflow_run_details_generic_attachment",
+      "label": "Attachment",
+      "icon": "attachments.svg"
+    },
+    {
+      "name": "workflow_run_details_generic_output",
+      "label": "Output",
+      "icon": "outcome.svg"
+    }
+  ],
+  "attachments": [
+    {
+      "name": "header",
+      "value": "<div class=\"pa-4\">\n    <table>\n        <tbody>\n            <tr>\n                <td style=\"min-width: 100px\">Workflow:</td><td>{{ FLOW_NAME }}</td>\n            </tr>\n            <tr>\n                <td>Job ID:</td><td>{{ JOB_ID }}</td>\n            </tr>\n            <tr>\n                <td><span class='badge' style='background-color: {{ STATUS_COLOR }};' > {{ STATUS }} </span></td>\n            </tr>\n        </tbody>\n    </table>\n</div>"
+    }
+  ]
+}

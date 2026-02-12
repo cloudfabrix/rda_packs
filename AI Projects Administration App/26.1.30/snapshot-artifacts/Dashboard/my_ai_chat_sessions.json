@@ -1,0 +1,384 @@
+{
+    "name": "my_ai_chat_sessions",
+    "label": "Monitor Conversations",
+    "description": "rda_chat_sessions: Insights",
+    "dashboard_folder": "AI",
+    "version": "1.0.1",
+    "enabled": false,
+    "stream": "rda_chat_sessions",
+    "dashboard_type": "template",
+    "live_edit": true,
+    "template_variables": {
+        "USER_ID": {
+            "contextId": "USER_ID"
+        },
+        "ai_project_name": {
+            "contextId": "ai_project_name"
+        }
+    },
+    "dashboard_filters": {
+        "time_filter": true,
+        "default_time_filter_labels": [
+            "All Time"
+        ],
+        "columns_filter": [
+            {
+                "id": "timestamp",
+                "label": "Timestamp",
+                "type": "DATETIME"
+            },
+            {
+                "id": "USER_ID",
+                "label": "User Id",
+                "type": "TEXT"
+            },
+            {
+                "id": "ai_project_name",
+                "label": "ai_project_name",
+                "type": "TEXT"
+            },
+            {
+                "id": "context_USER_ID",
+                "label": "Context User Id",
+                "type": "TEXT"
+            },
+            {
+                "id": "context_USER_ROLE",
+                "label": "Context User Role",
+                "type": "TEXT"
+            },
+            {
+                "id": "context_approver_userid",
+                "label": "Context Approver Userid",
+                "type": "TEXT"
+            },
+            {
+                "id": "context_incidentid",
+                "label": "Context Incidentid",
+                "type": "TEXT"
+            },
+            {
+                "id": "conversationId",
+                "label": "Conversationid",
+                "type": "TEXT"
+            },
+            {
+                "id": "conversationLabel",
+                "label": "Conversationlabel",
+                "type": "TEXT"
+            },
+            {
+                "id": "isToolCall",
+                "label": "Istoolcall",
+                "type": "TEXT"
+            },
+            {
+                "id": "llm",
+                "label": "Llm",
+                "type": "TEXT"
+            },
+            {
+                "id": "llm_name",
+                "label": "Llm Name",
+                "type": "TEXT"
+            },
+            {
+                "id": "message",
+                "label": "Message",
+                "type": "TEXT"
+            },
+            {
+                "id": "persona",
+                "label": "Persona",
+                "type": "TEXT"
+            },
+            {
+                "id": "prompt_id",
+                "label": "Prompt Id",
+                "type": "TEXT"
+            },
+            {
+                "id": "request_status",
+                "label": "Request Status",
+                "type": "TEXT"
+            },
+            {
+                "id": "request_subtype",
+                "label": "Request Subtype",
+                "type": "TEXT"
+            },
+            {
+                "id": "request_type",
+                "label": "Request Type",
+                "type": "TEXT"
+            },
+            {
+                "id": "severity",
+                "label": "Severity",
+                "type": "TEXT"
+            },
+            {
+                "id": "tool_content",
+                "label": "Tool Content",
+                "type": "TEXT"
+            },
+            {
+                "id": "tool_domain",
+                "label": "Tool Domain",
+                "type": "TEXT"
+            },
+            {
+                "id": "tool_name",
+                "label": "Tool Name",
+                "type": "TEXT"
+            },
+            {
+                "id": "tool_status",
+                "label": "Tool Status",
+                "type": "TEXT"
+            },
+            {
+                "id": "type",
+                "label": "Type",
+                "type": "TEXT"
+            },
+            {
+                "id": "token_usage_cache_tokens",
+                "label": "Token Usage Cache Tokens",
+                "type": "DOUBLE"
+            },
+            {
+                "id": "token_usage_input_tokens",
+                "label": "Token Usage Input Tokens",
+                "type": "DOUBLE"
+            },
+            {
+                "id": "token_usage_output_tokens",
+                "label": "Token Usage Output Tokens",
+                "type": "DOUBLE"
+            },
+            {
+                "id": "token_usage_reasoning_tokens",
+                "label": "Token Usage Reasoning Tokens",
+                "type": "DOUBLE"
+            },
+            {
+                "id": "token_usage_total_tokens",
+                "label": "Token Usage Total Tokens",
+                "type": "DOUBLE"
+            }
+        ],
+        "group_filters": [
+            {
+                "stream": "rda_chat_sessions",
+                "title": "LLM",
+                "duration_hours": 1080,
+                "limit": 200,
+                "extra_filter": "type == 'client'",
+                "group_by": [
+                    "llm"
+                ],
+                "ts_column": "timestamp",
+                "agg": "sum",
+                "column": "count_",
+                "type": "int"
+            },
+            {
+                "stream": "rda_chat_sessions",
+                "title": "Persona",
+                "duration_hours": 1080,
+                "limit": 200,
+                "extra_filter": "type == 'client'",
+                "group_by": [
+                    "persona"
+                ],
+                "ts_column": "timestamp",
+                "agg": "sum",
+                "column": "count_",
+                "type": "int"
+            }
+        ]
+    },
+    "dashboard_sections": [
+        {
+            "title": "Monitor Conversations",
+            "show_filter": true,
+            "widgets": [
+                {
+                    "title": "Conversations",
+                    "widget_type": "tabular",
+                    "duration_hours": 1080,
+                    "widget_group": "G0",
+                    "max_width": 12,
+                    "height": 8,
+                    "min_width": 12,
+                    "preview_dashboard": "ai_conversation_details",
+                    "preview_width": 900,
+                    "preview_height": 700,
+                    "stream": "rda_chat_sessions",
+                    "ts_column": "timestamp",
+                    "extra_filter": "type == 'client' and USER_ID is '{{USER_ID}}'",
+                    "virtual_scrolling": false,
+                    "showRowSummary": false,
+                    "columns": {
+                        "timestamp": {
+                            "title": "Timestamp",
+                            "type": "DATETIME",
+                            "hidden": false
+                        },
+                        "USER_ID": {
+                            "title": "User Id",
+                            "type": "TEXT",
+                            "hidden": true
+                        },
+                        "ai_project_name": {
+                            "title": "ai_project_name",
+                            "type": "TEXT",
+                            "hidden": true
+                        },
+                        "conversationLabel": {
+                            "title": "Conversationlabel",
+                            "type": "TEXT",
+                            "hidden": false,
+                            "key": true
+                        },
+                        "request_type": {
+                            "title": "Request Type",
+                            "type": "TEXT",
+                            "hidden": false
+                        },
+                        "persona": {
+                            "title": "Persona",
+                            "type": "TEXT",
+                            "hidden": false
+                        },
+                        "llm": {
+                            "title": "LLM",
+                            "type": "TEXT",
+                            "hidden": false
+                        },
+                        "message": {
+                            "title": "Message",
+                            "type": "TEXT",
+                            "hidden": false,
+                            "formatter": "truncate"
+                        },
+                        "conversationId": {
+                            "title": "Conversationid",
+                            "type": "TEXT",
+                            "hidden": true,
+                            "key": true
+                        },
+                        "conversation_id": {
+                            "title": "Conversationid",
+                            "type": "COMPUTED",
+                            "expr": "conversationId",
+                            "hidden": true,
+                            "key": true
+                        }
+                    },
+                    "actions": [
+                        {
+                            "appName": "user-dashboard/ai_conversation_details_app",
+                            "permission": "agenticai:conversation:view",
+                            "drillDownLinkField": "conversationLabel",
+                            "identifier": "conversationLabel",
+                            "selectionType": "SINGLE",
+                            "stateName": "app.featureapp",
+                            "title": "View Details",
+                            "type": "GO_TO_APP_STATE"
+                        }
+                    ],
+                    "widget_id": "1df1b6dc"
+                },
+                {
+                    "title": "Token Counts",
+                    "widget_type": "tabular",
+                    "duration_hours": 1080,
+                    "widget_group": "G0",
+                    "max_width": 12,
+                    "height": 8,
+                    "min_width": 12,
+                    "stream": "rda_chat_sessions",
+                    "ts_column": "timestamp",
+                    "extra_filter0": "llm is not empty and persona is not empty",
+                    "extra_filter": "USER_ID is '{{USER_ID}}' ",
+                    "columns": {
+                        "conversationId": {
+                            "title": "Conversation ID",
+                            "type": "TEXT",
+                            "hidden": true,
+                            "key": true
+                        },
+                        "ai_project_name": {
+                            "title": "ai_project_name",
+                            "type": "TEXT",
+                            "hidden": true
+                        },
+                        "conversationLabel": {
+                            "title": "Conversation Label",
+                            "type": "TEXT",
+                            "hidden": false,
+                            "key": true
+                        },
+                        "llm": {
+                            "title": "LLM",
+                            "type": "TEXT",
+                            "hidden": false
+                        },
+                        "persona": {
+                            "title": "Persona",
+                            "type": "TEXT",
+                            "hidden": false
+                        }
+                    },
+                    "pivot": {
+                        "pivot_type": "advanced",
+                        "group_by": [
+                            "USER_ID",
+                            "ai_project_name",
+                            "conversationId",
+                            "conversationLabel",
+                            "llm",
+                            "persona"
+                        ],
+                        "series": [
+                            {
+                                "column": "token_usage_input_tokens",
+                                "agg": "sum",
+                                "type": "int",
+                                "label": "Input Tokens"
+                            },
+                            {
+                                "column": "token_usage_output_tokens",
+                                "agg": "sum",
+                                "type": "int",
+                                "label": "Output Tokens"
+                            },
+                            {
+                                "column": "token_usage_cache_tokens",
+                                "agg": "sum",
+                                "type": "int",
+                                "label": "Cache Tokens"
+                            }
+                        ]
+                    },
+                    "actions": [
+                        {
+                            "appName": "user-dashboard/ai_conversation_details_app",
+                            "permission": "agenticai:conversation:view",
+                            "drillDownLinkField": "conversationLabel",
+                            "identifier": "conversationLabel",
+                            "selectionType": "SINGLE",
+                            "stateName": "app.featureapp",
+                            "title": "View Details",
+                            "type": "GO_TO_APP_STATE"
+                        }
+                    ],
+                    "widget_id": "3c025874"
+                }
+            ]
+        }
+    ],
+    "saved_time": "2025-11-05T19:17:10.555392"
+	}

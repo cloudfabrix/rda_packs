@@ -1,0 +1,84 @@
+{
+  "name": "workflow_run_details_generic_output",
+  "label": "{{FLOW_NAME}} Job Details",
+  "is_template": false,
+  "description": "Workflow Job Details",
+  "live_edit": false,
+  "version": "25.6.6.2",
+  "enabled": true,
+  "dashboard_folder": "Workflows",
+  "dashboard_type": "template",
+  "use_storyboard": false,
+  "default_storyboard": null,
+  "template_variables": {
+    "JOB_ID": {
+      "contextId": "jobId"
+    },
+    "FLOW_NAME": {
+      "contextId": "flow_name"
+    }
+  },
+  "computedContext": {},
+  "dashboard_filters": {},
+  "dashboard_sections": [
+    {
+      "title": "Output",
+      "widgets": [
+        {
+          "title": "Run Output",
+          "widget_type": "label",
+          "label": "attachment://agentOutput.html",
+          "advanced": true,
+          "uses_reporting_engine": true,
+          "fixed_variables": {
+            "agent_name": "{{FLOW_NAME}}",
+            "job_id": "{{JOB_ID}}"
+          },
+          "widget_id": "accfc497",
+          "min_width": 12,
+          "max_width": 12,
+          "height": 8
+        },
+        {
+          "title": "Run Log",
+          "widget_type_commented": "html_report",
+          "html_template": "data-flow/workflow-details",
+          "report_id": "rda.saas.workflow.view",
+          "widget_id": "389256d0",
+          "min_width": 5,
+          "max_width": 5,
+          "height": 10
+        },
+        {
+          "title": "Workflow Attachments",
+          "widget_type_commented": "custom_widget",
+          "advanced": true,
+          "uses_reporting_engine": true,
+          "widget_implementation": "workflow_job_status_generic/workflow_attachments_viewer",
+          "min_width": 7,
+          "max_width": 7,
+          "height": 12,
+          "widget_id": "d961e620"
+        },
+        {
+          "title": "{{FLOW_NAME}} Job Steps",
+          "widget_type_commented": "custom_widget",
+          "widget_implementation": "workflow_job_status_generic/workflow_viewer",
+          "advanced": true,
+          "uses_reporting_engine": true,
+          "widget_id": "cb9b6803",
+          "min_width": 12,
+          "max_width": 12,
+          "height": 8
+        }
+      ]
+    }
+  ],
+  "custom_widgets": {},
+  "attachments": [
+    {
+      "name": "agentOutput.html",
+      "value": "{%raw%}\n\n<div style=\"overflow: auto;\">\n{%- \n    set query = \"workflow_name = '\" + agent_name + \"' & jobId = '\" + job_id + \"'\"\n-%}\n\n{%\n    set ns = namespace(eval_output=\"No Evaluation Status\", agent_output=\"No Output Yet\", last_updated=\"\")\n%}\n\n{%- \n    set data = engine.query_stream_data(\"agent_output_stream\", cfxql_query=query, sorting=[{\"timestamp\": \"desc\" }]) \n-%}\n\n{%- if len(data) > 0 -%}\n    {%- set ns.last_updated = data[0][\"timestamp\"] -%}\n{%- endif -%}\n\n{%- for row in data -%}\n    {%- set raw_eval = row.get(\"evaluation_output_0\", \"\").strip(\"```\").lstrip(\"json\").strip() -%}\n    {%- if raw_eval and raw_eval.startswith(\"{\") -%}\n        {%- set parsed = json_loads(raw_eval) -%}\n        {%- set ns.eval_output = parsed.get(\"agent_run\", \"\") -%}\n    {%- endif -%}\n\n    {%- if row.get(\"agent_output_0\", \"\") -%}\n        {%- set ns.agent_output = row.get(\"agent_output_0\").strip(\"```\").lstrip(\"html\")  -%}\n    {%- endif -%}\n{%- endfor -%}\n\n{% if ns.eval_output in [\"Success\", \"OK\"] %}\n    {%- set ns.eval_output = \"<font style='color: #22dd22;'>\"+ns.eval_output + \"</font>\"-%}\n{%- elif ns.eval_output == \"Failure\" -%}\n    {%- set ns.eval_output = \"<font style='color: #ff2511;'>\"+ns.eval_output + \"</font>\"-%}\n{%- endif -%}\n\n<h3>{{agent_name}}</h3>\n<h3>Last Updated: {{ns.last_updated}}</h3>\n<h3>Status: {{ns.eval_output}}</h3>\n<h3>Output:</h3>\n<hr/>\n{{ns.agent_output}}\n\n</div>\n\n{%endraw%}"
+    }
+  ]
+}

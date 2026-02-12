@@ -1,0 +1,545 @@
+{
+    "name": "model_cost_comparison_sb_per_project",
+    "description": "AI Cost Analysis",
+    "label": "AI Cost Analysis",
+    "enabled": true,
+    "dashboard_folder": "Default",
+    "dashboard_style": "auto",
+    "dashboard_type": "template",
+    "default_storyboard": "Storyboard 1",
+    "use_storyboard": true,
+    "live_edit": true,
+    "template_variables": {
+        "ai_project_name": {
+            "contextId": "ai_project_name"
+        }
+    },
+    "dashboard_filters": {
+        "time_filter": true,
+        "default_time_filter_labels": [
+            "All Time"
+        ]
+    },
+    "custom_widgets": {
+        "llm_accuracy": {
+            "artifacts": {
+                "main": {
+                    "attachment": "Dynamic Persona",
+                    "content_type": "text/html",
+                    "is_template": true
+                }
+            }
+        },
+        "llm_persona_accuracy": {
+            "artifacts": {
+                "main": {
+                    "attachment": "Dynamic Persona LLM",
+                    "content_type": "text/html",
+                    "is_template": true
+                }
+            }
+        },
+        "cost_per_user": {
+            "artifacts": {
+                "main": {
+                    "attachment": "Cost Breakdown Per User",
+                    "content_type": "text/html",
+                    "is_template": true
+                }
+            }
+        }
+    },
+    "dashboard_sections": [
+        {
+            "title": "Agentic AI",
+            "show_filter": true,
+            "widgets": [
+                {
+                    "widget_type": "label",
+                    "label": "<div style='text-align:center;width:100%;'><h1><a style='text-decoration:none;' target='_blank'> AI Project : {{ai_project_name}} </a></h1></div>",
+                    "widget_id": "06ab3244"
+                },
+                {
+                    "title": "Cost Breakdown per Model",
+                    "widget_type": "label",
+                    "label": "attachment://Dynamic Persona",
+                    "uses_reporting_engine": true,
+                    "min_width": 12,
+                    "max_width": 12,
+                    "height": 6,
+                    "advanced": true,
+                    "widget_id": "a20a7370"
+                },
+                {
+                    "title": "Cost Breakdown Per User",
+                    "widget_type": "label",
+                    "label": "attachment://Cost Breakdown Per User",
+                    "uses_reporting_engine": true,
+                    "min_width": 12,
+                    "max_width": 12,
+                    "height": 6,
+                    "advanced": true,
+                    "widget_id": "7bab71e0"
+                },
+                {
+                    "title": "Cost Breakdown per LLM",
+                    "widget_type": "label",
+                    "label": "attachment://Dynamic Persona LLM",
+                    "uses_reporting_engine": true,
+                    "min_width": 12,
+                    "max_width": 12,
+                    "height": 6,
+                    "advanced": true,
+                    "widget_id": "a20a737m"
+                },
+                {
+                    "title": "Request Volume Overtime",
+                    "widget_type": "timeseries",
+                    "stream": "ai_observability",
+                    "ts_column": "timestamp",
+                    "duration_hours": 10800000,
+                    "max_width": 12,
+                    "height": 4,
+                    "extra_filter": "metric_name is 'request_count' and ai_project_name is '{{ai_project_name}}'",
+                    "min_width": 12,
+                    "chartProperties": {
+                        "yAxisLabel": null,
+                        "xAxisLabel": null,
+                        "legendLocation": "none"
+                    },
+                    "interval": "30m",
+                    "series_spec": [
+                        {
+                            "column": "metric_value",
+                            "agg": "sum",
+                            "type": "int"
+                        }
+                    ],
+                    "group_by": [
+                        "metric_name"
+                    ],
+                    "widget_id": "32de83bs"
+                },
+                {
+                    "title": "Overall Cost Overtime",
+                    "widget_type": "timeseries",
+                    "stream": "ai_observability",
+                    "ts_column": "timestamp",
+                    "duration_hours": 10800000,
+                    "max_width": 12,
+                    "height": 4,
+                    "extra_filter": "metric_name is 'token_cost' and ai_project_name is '{{ai_project_name}}'",
+                    "min_width": 12,
+                    "chartProperties": {
+                        "yAxisLabel": null,
+                        "xAxisLabel": null,
+                        "legendLocation": "none"
+                    },
+                    "interval": "30m",
+                    "series_spec": [
+                        {
+                            "column": "metric_value",
+                            "agg": "sum",
+                            "type": "int"
+                        }
+                    ],
+                    "group_by": [
+                        "metric_name"
+                    ],
+                    "widget_id": "32de83bk"
+                },
+                {
+                    "title": "Total Requests",
+                    "widget_type": "custom_counter",
+                    "formatter0": "DescriptiveCountFormatter",
+                    "stream": "ai_observability",
+                    "ts_column": "timestamp",
+                    "extra_filter": "metric_name is 'request_count' and ai_project_name is '{{ai_project_name}}'",
+                    "column": "metric_value",
+                    "agg": "sum",
+                    "value": "int",
+                    "widget_id": "02be1e20"
+                },
+                {
+                    "title": "Total Tokens",
+                    "widget_type": "custom_counter",
+                    "formatter": "CountFormatter",
+                    "stream": "ai_observability",
+                    "ts_column": "timestamp",
+                    "extra_filter": "metric_name is 'token_count' and ai_project_name is '{{ai_project_name}}'",
+                    "column": "metric_value",
+                    "agg": "sum",
+                    "type": "int",
+                    "widget_id": "02be1e2r"
+                },
+                {
+                    "title": "Input Tokens",
+                    "widget_type": "custom_counter",
+                    "formatter": "CountFormatter",
+                    "stream": "ai_observability",
+                    "ts_column": "timestamp",
+                    "extra_filter": "metric_name is 'token_count' and direction is 'input' and ai_project_name is '{{ai_project_name}}'",
+                    "column": "metric_value",
+                    "agg": "sum",
+                    "type": "int",
+                    "widget_id": "02be1e2a"
+                },
+                {
+                    "title": "Output Tokens",
+                    "widget_type": "custom_counter",
+                    "formatter": "CountFormatter",
+                    "stream": "ai_observability",
+                    "ts_column": "timestamp",
+                    "extra_filter": "metric_name is 'token_count' and direction is 'output' and ai_project_name is '{{ai_project_name}}'",
+                    "column": "metric_value",
+                    "agg": "sum",
+                    "type": "int",
+                    "widget_id": "02be1e2b"
+                },
+                {
+                    "title": "Total Cost",
+                    "widget_type": "custom_counter",
+                    "formatter0": "DescriptiveCountFormatter",
+                    "formatter1": "CountFormatter",
+                    "stream": "ai_observability",
+                    "duration_hours": 100000,
+                    "formatter": {
+                        "notation1": "compact",
+                        "style": "currency",
+                        "currency": "USD"
+                    },
+                    "ts_column": "timestamp",
+                    "extra_filter": "metric_name is 'token_cost' and ai_project_name is '{{ai_project_name}}'",
+                    "column": "metric_value",
+                    "agg": "sum",
+                    "type": "int",
+                    "widget_id": "02be1e2p"
+                },
+                {
+                    "title": "Total Tools Called",
+                    "widget_type": "custom_counter",
+                    "formatter": "CountFormatter",
+                    "stream": "ai_observability",
+                    "ts_column": "timestamp",
+                    "extra_filter": "metric_name is 'tools_called' and ai_project_name is '{{ai_project_name}}'",
+                    "column": "count_",
+                    "agg": "sum",
+                    "type": "int",
+                    "widget_id": "02be1e2d"
+                },
+                {
+                    "title": "Request Volume",
+                    "widget_type": "timeseries",
+                    "stream": "ai_observability",
+                    "ts_column": "timestamp",
+                    "max_width": 12,
+                    "height": 4,
+                    "extra_filter": "metric_name is 'request_count' and ai_project_name is '{{ai_project_name}}'",
+                    "duration_hours": 24,
+                    "min_width": 12,
+                    "chartProperties": {
+                        "yAxisLabel": null,
+                        "xAxisLabel": null,
+                        "legendLocation": "bottom"
+                    },
+                    "interval": "auto",
+                    "series_spec": [
+                        {
+                            "column": "metric_value",
+                            "agg": "value_count",
+                            "type": "int"
+                        }
+                    ],
+                    "group_by": [
+                        "llm_name"
+                    ],
+                    "widget_id": "32de83b1"
+                },
+                {
+                    "title": "Hourly Cost Trend",
+                    "widget_type": "timeseries",
+                    "stream": "ai_observability",
+                    "ts_column": "timestamp",
+                    "extra_filter": " metric_name is 'token_cost' and direction is not 'none' and ai_project_name is '{{ai_project_name}}'",
+                    "duration_hours": 24,
+                    "max_width": 12,
+                    "height": 4,
+                    "min_width": 12,
+                    "chartProperties": {
+                        "yAxisLabel": null,
+                        "xAxisLabel": null,
+                        "legendLocation": "bottom"
+                    },
+                    "interval": "auto",
+                    "series_spec": [
+                        {
+                            "column": "metric_value",
+                            "agg": "sum",
+                            "type": "int"
+                        }
+                    ],
+                    "group_by": [
+                        "llm_name"
+                    ],
+                    "widget_id": "32de83b2"
+                },
+                {
+                    "widget_type": "pie_chart",
+                    "title": "Request Type Distribution",
+                    "stream": "ai_observability",
+                    "ts_column": "timestamp",
+                    "column": "request_type",
+                    "extra_filter": "metric_name is 'request_count' and  direction is not 'none' and ai_project_name is '{{ai_project_name}}'",
+                    "agg": "value_count",
+                    "group_by": [
+                        "request_type"
+                    ],
+                    "type": "str",
+                    "min_width": 4,
+                    "height": 4,
+                    "max_width": 6,
+                    "widget_id": "c8c56aac"
+                },
+                {
+                    "title": "LLM Provider Usage on basis of Request Count",
+                    "widget_type": "bar_chart",
+                    "stream": "ai_observability",
+                    "ts_column": "timestamp",
+                    "extra_filter": "ai_project_name is '{{ai_project_name}}'",
+                    "chartProperties": {
+                        "yAxisLabel": null,
+                        "xAxisLabel": null,
+                        "stacked": false,
+                        "legendLocation": "none",
+                        "orientation": "vertical"
+                    },
+                    "group_by": [
+                        "llm_provider"
+                    ],
+                    "column": "llm_provider",
+                    "agg": "value_count",
+                    "type": "int",
+                    "widget_id": "f4786acb"
+                },
+                {
+                    "title": "Token Usage Breakdown",
+                    "widget_type": "multi_bar_chart",
+                    "stream": "ai_observability",
+                    "extra_filter": "metric_name is 'token_count' and ai_project_name is '{{ai_project_name}}'",
+                    "ts_column": "timestamp",
+                    "chartProperties": {
+                        "yAxisLabel": null,
+                        "xAxisLabel": null,
+                        "stacked": true,
+                        "legendLocation": "bottom",
+                        "orientation": "vertical"
+                    },
+                    "duration_hours": 24,
+                    "group_by": [
+                        "direction",
+                        "llm_name"
+                    ],
+                    "column": "metric_value",
+                    "agg": "sum",
+                    "type": "int",
+                    "widget_id": "f4786ac1"
+                },
+                {
+                    "widget_type": "bar_chart",
+                    "title": "Top Domains by Request Volume",
+                    "stream": "ai_observability",
+                    "chartProperties": {
+                        "orientation": "horizontal",
+                        "legendLocation": "none"
+                    },
+                    "ts_column": "timestamp",
+                    "column": "tool_domain",
+                    "extra_filter": "metric_name is 'request_count' and ai_project_name is '{{ai_project_name}}'",
+                    "agg": "value_count",
+                    "group_by": [
+                        "tool_domain"
+                    ],
+                    "type": "str",
+                    "widget_id": "0db7119b"
+                },
+                {
+                    "widget_type": "pie_chart",
+                    "title": "Request per Domain ",
+                    "stream": "ai_observability",
+                    "ts_column": "timestamp",
+                    "column": "request_type",
+                    "extra_filter": "metric_name is 'request_count' and tool_domain is not empty and ai_project_name is '{{ai_project_name}}'",
+                    "agg": "value_count",
+                    "group_by": [
+                        "tool_domain"
+                    ],
+                    "type": "str",
+                    "min_width": 4,
+                    "height": 4,
+                    "max_width": 6,
+                    "widget_id": "c8c56aa2"
+                },
+                {
+                    "widget_type": "pie_chart",
+                    "title": "Tools Usage Pattern",
+                    "stream": "ai_observability",
+                    "ts_column": "timestamp",
+                    "column": "tool_domain",
+                    "extra_filter": "tool_domain is not 'none' and ai_project_name is '{{ai_project_name}}'",
+                    "agg": "value_count",
+                    "group_by": [
+                        "tool_domain"
+                    ],
+                    "type": "str",
+                    "min_width": 4,
+                    "height": 4,
+                    "max_width": 6,
+                    "widget_id": "c8c56aav"
+                },
+                {
+                    "widget_type": "pie_chart",
+                    "title": "Success Rate",
+                    "stream": "ai_observability",
+                    "ts_column": "timestamp",
+                    "column": "request_status",
+                    "extra_filter": "metric_name is 'request_count' and ai_project_name is '{{ai_project_name}}'",
+                    "agg": "value_count",
+                    "group_by": [
+                        "request_status"
+                    ],
+                    "type": "str",
+                    "min_width": 4,
+                    "height": 4,
+                    "max_width": 6,
+                    "widget_id": "c8c56aaq"
+                },
+                {
+                    "title": "Tabular with Pstream Query Example",
+                    "widget_type": "tabular",
+                    "stream": "ai_observability",
+                    "query": "ai_project_name is '{{ai_project_name}}'",
+                    "min_width": 6,
+                    "height": 8,
+                    "max_width": 6,
+                    "paginated": true,
+                    "remote_searchable": true,
+                    "max_rows": 50,
+                    "sorting": [
+                        {
+                            "timestamp": "desc"
+                        }
+                    ],
+                    "columns": {
+                        "ai_persona": "Persona",
+                        "LLM": "llm_name",
+                        "metric_name": "Metric Name",
+                        "metric_value": "Metric Value",
+                        "direction": "Direction"
+                    },
+                    "widget_id": "94a3fc11"
+                },
+                {
+                    "title": "Request per Persona",
+                    "widget_type": "bar_chart",
+                    "stream": "ai_observability",
+                    "extra_filter": "metric_name is 'request_count' and ai_project_name is '{{ai_project_name}}'",
+                    "ts_column": "timestamp",
+                    "chartProperties": {
+                        "yAxisLabel": null,
+                        "xAxisLabel": null,
+                        "stacked": false,
+                        "legendLocation": "none",
+                        "orientation": "vertical"
+                    },
+                    "duration_hours": 24,
+                    "group_by": [
+                        "llm_name"
+                    ],
+                    "column": "metric_value",
+                    "agg": "sum",
+                    "type": "int",
+                    "widget_id": "32de83bm"
+                },
+                {
+                    "title": "Cost per Persona",
+                    "widget_type": "bar_chart",
+                    "stream": "ai_observability",
+                    "extra_filter": "metric_name is 'token_cost' and  direction is not 'none' and ai_project_name is '{{ai_project_name}}'",
+                    "ts_column": "timestamp",
+                    "chartProperties": {
+                        "yAxisLabel": null,
+                        "xAxisLabel": null,
+                        "stacked": false,
+                        "legendLocation": "none",
+                        "orientation": "vertical"
+                    },
+                    "duration_hours": 24,
+                    "group_by": [
+                        "llm_name"
+                    ],
+                    "column": "metric_value",
+                    "agg": "sum",
+                    "type": "int",
+                    "widget_id": "fc125f5d"
+                }
+            ]
+        }
+    ],
+    "saved_time": "2025-10-17T06:48:12.038218",
+    "attachments": [
+        {
+            "name": "logo",
+            "value": "<style>\r\n.agentic_ai__agent-logo {\r\n    width: 40px;\r\n    animation: agentic_ai_up_and_down 3s ease-in-out infinite;\r\n    margin-top: 20px;\r\n}\r\n\r\n@keyframes agentic_ai_up_and_down {\r\n    0% {\r\n        transform: translateY(0);\r\n    }\r\n\r\n    50% {\r\n        transform: translateY(-5px);\r\n    }\r\n\r\n    100% {\r\n        transform: translateY(0);\r\n    }\r\n}\r\n</style>\r\n<img class=\"agentic_ai__agent-logo\" src=\"https://raw.githubusercontent.com/cfxMusaib/storyboard_assets/refs/heads/main/agent.png\" />\r\n"
+        },
+        {
+            "name": "alert",
+            "value": "<!DOCTYPE html>\r\n<html lang=\"en\">\r\n<head>\r\n  <meta charset=\"UTF-8\">\r\n  <title>Alert Animation</title>\r\n  <style>\r\n    body {\r\n      margin: 0;\r\n      background: transparent;\r\n      overflow: hidden;\r\n    }\r\n\r\n    .alert-container {\r\n      position: absolute;\r\n      top: 50%;\r\n      left: 50%;\r\n      width: 100px;\r\n      height: 100px;\r\n      transform: translate(-50%, -50%);\r\n      display: flex;\r\n      justify-content: center;\r\n      align-items: center;\r\n    }\r\n\r\n    .alert-core {\r\n      width: 30px;\r\n      height: 30px;\r\n      background: red;\r\n      border-radius: 50%;\r\n      box-shadow: 0 0 20px red, 0 0 40px red;\r\n      animation: corePulse 1s infinite ease-in-out;\r\n      position: absolute;\r\n      z-index: 2;\r\n    }\r\n\r\n    .alert-ring {\r\n      position: absolute;\r\n      width: 30px;\r\n      height: 30px;\r\n      border: 2px solid red;\r\n      border-radius: 50%;\r\n      opacity: 0.7;\r\n      animation: ringExpand 1s infinite ease-out;\r\n      z-index: 1;\r\n    }\r\n\r\n    .alert-icon {\r\n      color: white;\r\n      font-size: 24px;\r\n      font-weight: bold;\r\n      animation: flashIcon 1s infinite ease-in-out;\r\n      z-index: 3;\r\n    }\r\n\r\n    @keyframes corePulse {\r\n      0%, 100% {\r\n        box-shadow: 0 0 10px red, 0 0 20px red;\r\n      }\r\n      50% {\r\n        box-shadow: 0 0 30px red, 0 0 60px red;\r\n      }\r\n    }\r\n\r\n    @keyframes ringExpand {\r\n      0% {\r\n        transform: scale(1);\r\n        opacity: 0.7;\r\n      }\r\n      100% {\r\n        transform: scale(2.5);\r\n        opacity: 0;\r\n      }\r\n    }\r\n\r\n    @keyframes flashIcon {\r\n      0%, 100% { opacity: 0; }\r\n      50% { opacity: 1; }\r\n    }\r\n  </style>\r\n</head>\r\n<body>\r\n  <div class=\"alert-container\">\r\n    <div class=\"alert-ring\"></div>\r\n    <div class=\"alert-core\"></div>\r\n    <div class=\"alert-icon\">!</div>\r\n  </div>\r\n</body>\r\n</html>\r\n"
+        },
+        {
+            "name": "moving dot",
+            "value": "<!DOCTYPE html>\r\n<html lang=\"en\">\r\n<head>\r\n  <meta charset=\"UTF-8\" />\r\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\" />\r\n  <title>Moving Neon Dot</title>\r\n  <style>\r\n    body {\r\n      background-color: transparent;\r\n      margin: 0;\r\n      overflow: hidden;\r\n    }\r\n\r\n    .line {\r\n      position: absolute;\r\n      top: 50%;\r\n      left: 0;\r\n      width: 100%;\r\n      height: 2px;\r\n      background-color: white;\r\n    }\r\n\r\n    .dot {\r\n      position: absolute;\r\n      top: calc(50% - 6px); /* center the dot on the line */\r\n      left: 0;\r\n      width: 12px;\r\n      height: 12px;\r\n      background-color: red;\r\n      border-radius: 50%;\r\n      box-shadow: 0 0 10px red, 0 0 20px red, 0 0 30px red;\r\n      animation: moveDot 4s linear infinite;\r\n    }\r\n\r\n    @keyframes moveDot {\r\n      0% {\r\n        left: -12px;\r\n      }\r\n      100% {\r\n        left: 100%;\r\n      }\r\n    }\r\n  </style>\r\n</head>\r\n<body>\r\n  <div class=\"line\"></div>\r\n  <div class=\"dot\"></div>\r\n</body>\r\n</html>\r\n"
+        },
+        {
+            "name": "data collection",
+            "value": "<!DOCTYPE html>\r\n<html lang=\"en\">\r\n<head>\r\n  <meta charset=\"UTF-8\" />\r\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"/>\r\n  <title>Data Collection Animation</title>\r\n  <style>\r\n    body {\r\n      margin: 0;\r\n      background: transparent;\r\n      overflow: hidden;\r\n    }\r\n\r\n    .data-collector {\r\n      position: absolute;\r\n      top: 50%;\r\n      left: 50%;\r\n      width: 80px;\r\n      height: 80px;\r\n      transform: translate(-50%, -50%);\r\n      border: 2px dashed white;\r\n      border-radius: 50%;\r\n      animation: pulse 2s infinite ease-in-out;\r\n      box-shadow: 0 0 15px white;\r\n    }\r\n\r\n    .data-dot {\r\n      position: absolute;\r\n      width: 10px;\r\n      height: 10px;\r\n      background: cyan;\r\n      border-radius: 50%;\r\n      box-shadow: 0 0 10px cyan, 0 0 20px cyan;\r\n    }\r\n\r\n    /* Dot directions */\r\n    .from-top {\r\n      left: 50%;\r\n      top: -20px;\r\n      animation: moveDown 3s infinite ease-in-out;\r\n    }\r\n\r\n    .from-bottom {\r\n      left: 50%;\r\n      bottom: -20px;\r\n      animation: moveUp 3s infinite ease-in-out;\r\n    }\r\n\r\n    .from-left {\r\n      top: 50%;\r\n      left: -20px;\r\n      animation: moveRight 3s infinite ease-in-out;\r\n    }\r\n\r\n    .from-right {\r\n      top: 50%;\r\n      right: -20px;\r\n      animation: moveLeft 3s infinite ease-in-out;\r\n    }\r\n\r\n    .from-diagonal {\r\n      top: -20px;\r\n      left: -20px;\r\n      animation: moveDiagonal 3s infinite ease-in-out;\r\n    }\r\n\r\n    /* Animations */\r\n    @keyframes pulse {\r\n      0%, 100% {\r\n        box-shadow: 0 0 8px white, 0 0 16px white;\r\n      }\r\n      50% {\r\n        box-shadow: 0 0 20px white, 0 0 40px white;\r\n      }\r\n    }\r\n\r\n    @keyframes moveDown {\r\n      0% { top: -20px; opacity: 0; }\r\n      50% { opacity: 1; }\r\n      100% { top: 50%; opacity: 0; }\r\n    }\r\n\r\n    @keyframes moveUp {\r\n      0% { bottom: -20px; opacity: 0; }\r\n      50% { opacity: 1; }\r\n      100% { bottom: 50%; opacity: 0; }\r\n    }\r\n\r\n    @keyframes moveRight {\r\n      0% { left: -20px; opacity: 0; }\r\n      50% { opacity: 1; }\r\n      100% { left: 50%; opacity: 0; }\r\n    }\r\n\r\n    @keyframes moveLeft {\r\n      0% { right: -20px; opacity: 0; }\r\n      50% { opacity: 1; }\r\n      100% { right: 50%; opacity: 0; }\r\n    }\r\n\r\n    @keyframes moveDiagonal {\r\n      0% { top: -20px; left: -20px; opacity: 0; }\r\n      50% { opacity: 1; }\r\n      100% { top: 50%; left: 50%; opacity: 0; }\r\n    }\r\n  </style>\r\n</head>\r\n<body>\r\n  <div class=\"data-collector\"></div>\r\n  <div class=\"data-dot from-top\"></div>\r\n  <div class=\"data-dot from-bottom\"></div>\r\n  <div class=\"data-dot from-left\"></div>\r\n  <div class=\"data-dot from-right\"></div>\r\n  <div class=\"data-dot from-diagonal\"></div>\r\n</body>\r\n</html>\r\n"
+        },
+        {
+            "name": "analysis",
+            "value": "<!DOCTYPE html>\r\n<html lang=\"en\">\r\n<head>\r\n  <meta charset=\"UTF-8\">\r\n  <title>Analyzing Tool Icon</title>\r\n  <style>\r\n    .analyzing-loader {\r\n      display: flex;\r\n      justify-content: center;\r\n      align-items: flex-end;\r\n      height: 60px;\r\n      width: 100px;\r\n      margin: 50px auto;\r\n      gap: 6px;\r\n    }\r\n\r\n    .bar {\r\n      width: 8px;\r\n      height: 20px;\r\n      background-color: #3498db;\r\n      animation: bounce 1s infinite ease-in-out;\r\n    }\r\n\r\n    .bar:nth-child(2) {\r\n      animation-delay: 0.2s;\r\n    }\r\n\r\n    .bar:nth-child(3) {\r\n      animation-delay: 0.4s;\r\n    }\r\n\r\n    @keyframes bounce {\r\n      0%, 100% {\r\n        height: 20px;\r\n      }\r\n      50% {\r\n        height: 40px;\r\n      }\r\n    }\r\n  </style>\r\n</head>\r\n<body>\r\n\r\n  <div class=\"analyzing-loader\">\r\n    <div class=\"bar\"></div>\r\n    <div class=\"bar\"></div>\r\n    <div class=\"bar\"></div>\r\n  </div>\r\n\r\n</body>\r\n</html>\r\n"
+        },
+        {
+            "name": "Agent Details",
+            "value": "<!DOCTYPE html>\r\n<html lang=\"en\" data-theme=\"dark\">\r\n\r\n<head>\r\n    <meta charset=\"UTF-8\">\r\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\r\n    <style>\r\n        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400..900&display=swap');\r\n\r\n        * {\r\n            margin: 0;\r\n            padding: 0;\r\n        }\r\n\r\n        body {\r\n            background-color: #040404;\r\n            color: white;\r\n            overflow: hidden;\r\n            height: 100vh;\r\n        }\r\n\r\n        html {\r\n            font-family: Orbitron, Avenir, sans-serif;\r\n            letter-spacing: 1.5px;\r\n            line-height: 1.5;\r\n            box-sizing: border-box;\r\n        }\r\n\r\n        .outer-container {\r\n            height: 100%;\r\n            width: 100%;\r\n            display: flex;\r\n            justify-content: center;\r\n            /* align-items: center; */\r\n        }\r\n\r\n        .container {\r\n            display: flex;\r\n            flex-direction: column;\r\n            align-items: center;\r\n            text-align: center;\r\n            width: 90%;\r\n            height: 80%;\r\n            padding-top: 50px;\r\n            overflow-y: auto;\r\n        }\r\n\r\n        .agent-logo {\r\n            width: 100px;\r\n            animation: up_and_down 3s ease-in-out infinite;\r\n            margin-bottom: 20px;\r\n        }\r\n\r\n        @keyframes up_and_down {\r\n            0% {\r\n                transform: translateY(0);\r\n            }\r\n\r\n            50% {\r\n                transform: translateY(-20px);\r\n            }\r\n\r\n            100% {\r\n                transform: translateY(0);\r\n            }\r\n        }\r\n\r\n        .typing-container {\r\n            font-size: 12px;\r\n            border-right: 2px solid black;\r\n            padding: 0 10px;\r\n            display: none;\r\n            max-height: 200px;\r\n            overflow-y: auto;\r\n        }\r\n    </style>\r\n</head>\r\n\r\n<body>\r\n    <div class=\"outer-container\">\r\n        <div class=\"container\"> \r\n            <div class=\"typing-container\" id=\"typing-text\">Hi. I'm {{agent_name}}. My task is to {{description}}</div>\r\n        </div>\r\n    </div>\r\n    <script>\r\n        const typingElement = document.getElementById(\"typing-text\");\r\n        const text = typingElement.innerText.trim(); // Get the existing text from the div\r\n        typingElement.innerHtml = \"\";\r\n        typingElement.style.display = \"inline-block\";\r\n        const words = text.split(\" \"); // Split text into words\r\n\r\n        typingElement.innerText = \"\"; // Clear the text to start animation\r\n\r\n        let index = 0;\r\n\r\n        function typeWord() {\r\n            if (index < words.length) {\r\n                typingElement.innerHTML += words[index] + \" \";\r\n                index++;\r\n                setTimeout(typeWord, 100); // Adjust speed (milliseconds per word)\r\n            } else {\r\n                typingElement.style.borderRight = \"none\"; // Remove cursor at the end\r\n            }\r\n        }\r\n\r\n        typeWord(); // Start the typing effect\r\n    </script>\r\n</body>\r\n\r\n</html>"
+        },
+        {
+            "name": "dashboardPreview",
+            "value": "{%raw%}\r\n<div style='width: 100%; height: 100%;'>\r\n    <div style='display: flex; justify-content: center;width:100%;height:100%;'  v-cfx-action='{ type: \"GO_TO_APP_STATE\", label: \"cfx action\", appName: \"user-dashboard/{{appName}}\", pageName: \"{{pageName}}\", contexts: {\"sourceNames\": \"\\\"i_source_name\\\"\"}}'>\r\n    \r\n    </div>\r\n</div>\r\n{%endraw%}"
+        },
+        {
+            "name": "LLM Accuracy",
+            "value": "{% raw %}\r\n{% set cfxql_pass_query = \"test_result is 'Pass' and agent_id is '\" ~ context.agent_id ~ \"'\" %}\r\n{% set all_llm_passed = engine.query_stream_aggs(stream=\"rda_agentic_ai_agent_test_executions\", cfxql_query=cfxql_pass_query, aggs=[{\"field\":\"count_\", \"label\": \"Passed\",\"func\":\"sum\"}],groupby=[\"llm\"], duration_hours=1800000, ts_column=\"timestamp\") %}\r\n\r\n{% set cfxql_total_query = \"agent_id is '\" ~ context.agent_id ~ \"'\" %}\r\n{% set all_llm_total = engine.query_stream_aggs(stream=\"rda_agentic_ai_agent_test_executions\", cfxql_query=cfxql_total_query, aggs=[{\"field\":\"count_\", \"label\": \"Total\",\"func\":\"sum\"}],groupby=[\"llm\"], duration_hours=1800000, ts_column=\"timestamp\", sorting=[{\"llm\": \"desc\"}]) %}\r\n\r\n<div style=\"width: 100%; height: 100%; background: transparent; display: flex; gap: 10px; align-items: center; overflow-x: auto\">\r\n    {% for llm_data in all_llm_total %}\r\n        {% set llm_name = llm_data.llm %}\r\n        {% set total = llm_data.Total %}\r\n        {% set passed_data = all_llm_passed | selectattr(\"llm\", \"equalto\", llm_name) | list %}\r\n        {% set passed = passed_data[0].Passed if passed_data else 0 %}\r\n        {% set accuracy = (passed / total * 100) if total > 0 else 0 %}\r\n        \r\n        {% set color = \"red\" %}\r\n        {% if accuracy >= 75 %}\r\n            {% set color = \"green\" %}\r\n        {% elif accuracy >= 50 %}\r\n            {% set color = \"orange\" %}\r\n        {% endif %}\r\n        \r\n        <div style=\"min-width: 120px; width: 120px; max-width: 120px; height: 80px; background: #1c1e22; padding: 8px; border-radius: 6px; text-align: center; overflow: hidden\">\r\n            <p style=\"font-size: 10px; color: #cccccc; margin: 0; height: 30px\">{{ llm_name }}</p>\r\n            <p style=\"font-size: 16px; font-weight: bold; color: {{ color }}; margin: 4px 0;\">{{ accuracy | round(1) }} <span style=\"font-size: 12px; font-weight: normal; color: white;\">%</span></p>\r\n        </div>\r\n    {% endfor %}\r\n</div>\r\n{% endraw %}\r\n"
+        },
+        {
+            "name": "dash-preview",
+            "value": "{%raw%}\r\n<div style='width: 100%; height: 100%;'>\r\n    <div style='display: flex; justify-content: center;width:100%;height:100%;'  v-cfx-action='{ type: \"GO_TO_APP_STATE\", label: \"cfx action\", appName: \"user-dashboard/{{appName}}\",contexts: {i_source:\"event_agent_2_webhook\"}}'>\r\n    \r\n    </div>\r\n</div>\r\n{%endraw%}"
+        },
+        {
+            "name": "Dynamic Persona",
+            "value": "{% raw %}\r\n{% set cfxql_pass_query = \"metric_name is 'token_cost' and ai_project_name is '\" ~ context.ai_project_name ~ \"' \" %}\r\n{% set all_llm_passed = engine.query_stream_aggs(stream=\"ai_observability\", cfxql_query=cfxql_pass_query, aggs=[{\"field\":\"metric_value\",\"func\":\"sum\"}],groupby=[\"llm_name\"], duration_hours=1800000, ts_column=\"timestamp\")%}\r\n\r\n<div style=\"width: 100%; height: 100%; background: transparent; display: flex; gap: 10px; align-items: center; overflow-x: auto\">\r\n    {% for llm_data in all_llm_passed %}\r\n        {% set llm_name = llm_data.llm_name %}\r\n        {% set total = llm_data.metric_value_sum %}\r\n        <div style=\"min-width: 120px; width: 100px; max-width: 120px; height: 80px; background: #1c1e22; padding: 4px; border-radius: 6px; text-align: center; overflow: hidden\">\r\n            <p style=\"font-size: 10px; color: #cccccc; margin: 0; height: 30px\">{{ llm_name }}</p>\r\n            <p style=\"font-size: 16px; font-weight: bold; color: green; margin: 4px 0;\">${{ total | round(3) }} <span style=\"font-size: 12px; font-weight: normal; color: white;\"></span></p>\r\n        </div>\r\n    {% endfor %}\r\n</div>\r\n{% endraw %}\r\n"
+        },
+        {
+            "name": "Dynamic Persona LLM",
+            "value": "{% raw %}\r\n{% set cfxql_pass_query = \"metric_name is 'token_cost' and ai_project_name is '\" ~ context.ai_project_name ~ \"'\" %}\r\n{% set all_llm_passed = engine.query_stream_aggs(stream=\"ai_observability\", cfxql_query=cfxql_pass_query, aggs=[{\"field\":\"metric_value\",\"func\":\"sum\"}],groupby=[\"ai_persona\"], duration_hours=1800000, ts_column=\"timestamp\")%}\r\n\r\n<div style=\"width: 100%; height: 100%; background: transparent; display: flex; gap: 10px; align-items: center; overflow-x: auto\">\r\n    {% for llm_data in all_llm_passed %}\r\n        {% set persona_name = llm_data.ai_persona %}\r\n        {% set total = llm_data.metric_value_sum %}\r\n        <div style=\"min-width: 100px; width: 100px; max-width: 120px; height: 80px; background: #1c1e22; padding: 4px; border-radius: 6px; text-align: center; overflow: hidden\">\r\n            <p style=\"font-size: 10px; color: #cccccc; margin: 0; height: 30px\">{{ persona_name }}</p>\r\n            <p style=\"font-size: 16px; font-weight: bold; color: green; margin: 4px 0;\">${{ total | round(3) }} <span style=\"font-size: 12px; font-weight: normal; color: white;\"></span></p>\r\n        </div>\r\n    {% endfor %}\r\n</div>\r\n{% endraw %}\r\n"
+        },
+        {
+            "name": "Cost Breakdown Per User",
+            "value": "{% raw %}\r\n{% set cost_by_user_query = \"metric_name is 'token_cost' and ai_project_name is '\" ~ context.ai_project_name ~ \"'\" %}\r\n{% set cost_by_user = engine.query_stream_aggs(\r\n    stream=\"ai_observability\",\r\n    cfxql_query=cost_by_user_query,\r\n    aggs=[{\"field\":\"metric_value\",\"func\":\"sum\"}],\r\n    groupby=[\"user_id\"],\r\n    duration_hours=1800000,\r\n    ts_column=\"timestamp\"\r\n) %}\r\n<div style=\"width: 100%; height: 100%; background: transparent; display: flex; gap: 10px; align-items: center; overflow-x: auto\">\r\n    {% for user_data in cost_by_user %}\r\n        {% set user_id = user_data.user_id %}\r\n        {% set total = user_data.metric_value_sum %}\r\n        <div style=\"min-width: 120px; width: 1700px; max-width: 120px; height: 80px; background: #1C1E22; padding: 10px; border-radius: 6px; text-align: center; overflow: hidden\">\r\n            <p style=\"font-size: 10px; color: #cccccc; margin: 0; height: 30px\">{{ user_id }}</p>\r\n            <p style=\"font-size: 16px; font-weight: bold; color: orange; margin: 4px 0;\">${{ total | round(3) }}</p>\r\n        </div>\r\n    {% endfor %}\r\n</div>\r\n{% endraw %}\r\n\r\n"
+        }
+    ],
+    "storyboards": [
+        {
+            "name": "Storyboard 1",
+            "value": "{\n    \"stage\": {\n        \"size\": {\n            \"width\": 1050,\n            \"height\": 1800\n        },\n        \"background\": {\n            \"fill\": \"#000000\",\n            \"src\": null,\n            \"gradient\": null\n        },\n        \"theme\": \"dark\",\n        \"autoFitByDefault\": true,\n        \"autoFitMinWidth\": 480\n    },\n    \"widgets\": [\n        {\n            \"widget_id\": \"02be1e20\",\n            \"layoutConfig\": {\n                \"rotation\": 0,\n                \"width\": 164.73,\n                \"height\": 141.23,\n                \"scaleX\": 1,\n                \"scaleY\": 1,\n                \"fill\": \"#FFFFFF00\",\n                \"opacity\": 1,\n                \"name\": \"widget-26\",\n                \"draggable\": true,\n                \"x\": 187.60706289048946,\n                \"y\": 84.29794871794911,\n                \"id\": \"cfx-fdad6b4c-40ab-4068-af87-41f76e4dccef\"\n            }\n        },\n        {\n            \"widget_id\": \"02be1e2r\",\n            \"layoutConfig\": {\n                \"rotation\": 0,\n                \"width\": 198.16,\n                \"height\": 121.01,\n                \"scaleX\": 1,\n                \"scaleY\": 1,\n                \"fill\": \"#FFFFFF00\",\n                \"opacity\": 1,\n                \"name\": \"widget-27\",\n                \"draggable\": true,\n                \"x\": 502.1310161167505,\n                \"y\": 90.87333333333353,\n                \"id\": \"cfx-5f7bf632-d8db-4161-f54a-467e445d0eb8\"\n            }\n        },\n        {\n            \"widget_id\": \"02be1e2p\",\n            \"layoutConfig\": {\n                \"rotation\": 0,\n                \"width\": 181.94,\n                \"height\": 121.03,\n                \"scaleX\": 1,\n                \"scaleY\": 1,\n                \"fill\": \"#FFFFFF00\",\n                \"opacity\": 1,\n                \"name\": \"widget-28\",\n                \"draggable\": true,\n                \"x\": 22.043042039545924,\n                \"y\": 94.39487179487212,\n                \"id\": \"cfx-1caa2ca0-9424-4817-b5fa-4d1085568ae9\"\n            }\n        },\n        {\n            \"widget_id\": \"02be1e2d\",\n            \"layoutConfig\": {\n                \"rotation\": 0,\n                \"width\": 137.24,\n                \"height\": 117.63,\n                \"scaleX\": 1,\n                \"scaleY\": 1,\n                \"fill\": \"#FFFFFF00\",\n                \"opacity\": 1,\n                \"name\": \"widget-29\",\n                \"draggable\": true,\n                \"x\": 361.83674167324517,\n                \"y\": 96.40179487179505,\n                \"id\": \"cfx-ee5644b8-20af-4cd4-c58f-3b3ae72d4bf7\"\n            }\n        },\n        {\n            \"widget_id\": \"32de83b1\",\n            \"layoutConfig\": {\n                \"rotation\": 0,\n                \"width\": 474.58,\n                \"height\": 215.12,\n                \"scaleX\": 1,\n                \"scaleY\": 1,\n                \"fill\": \"#FFFFFF00\",\n                \"opacity\": 1,\n                \"name\": \"widget-30\",\n                \"draggable\": true,\n                \"x\": 29.219999999999878,\n                \"y\": 706.4166666666666,\n                \"id\": \"cfx-8056b782-99b7-4fec-83b6-c8ecb5fef134\"\n            }\n        },\n        {\n            \"widget_id\": \"32de83b2\",\n            \"layoutConfig\": {\n                \"rotation\": 0,\n                \"width\": 488.97,\n                \"height\": 210.08,\n                \"scaleX\": 1,\n                \"scaleY\": 1,\n                \"fill\": \"#FFFFFF00\",\n                \"opacity\": 1,\n                \"name\": \"widget-31\",\n                \"draggable\": true,\n                \"x\": 538.0199999999998,\n                \"y\": 700.8866666666667,\n                \"id\": \"cfx-7f53a7e0-dfe3-4f83-f080-f41ed2eae4dd\"\n            }\n        },\n        {\n            \"widget_id\": \"c8c56aac\",\n            \"layoutConfig\": {\n                \"rotation\": 0,\n                \"width\": 225.38,\n                \"height\": 196.98,\n                \"scaleX\": 1,\n                \"scaleY\": 1,\n                \"fill\": \"#FFFFFF00\",\n                \"opacity\": 1,\n                \"name\": \"widget-32\",\n                \"draggable\": true,\n                \"x\": 84.89516203184421,\n                \"y\": 1009.5706915306907,\n                \"id\": \"cfx-fe2b7bd0-578b-434c-8b0a-9e3c86ca009a\"\n            }\n        },\n        {\n            \"widget_id\": \"f4786acb\",\n            \"layoutConfig\": {\n                \"rotation\": 0,\n                \"width\": 645.29,\n                \"height\": 197.94,\n                \"scaleX\": 1,\n                \"scaleY\": 1,\n                \"fill\": \"#FFFFFF00\",\n                \"opacity\": 1,\n                \"name\": \"widget-33\",\n                \"draggable\": true,\n                \"x\": 389.55,\n                \"y\": 1015.7433333333336,\n                \"id\": \"cfx-3fcd3cb2-2611-4e89-fc80-6f87122b9624\"\n            }\n        },\n        {\n            \"widget_id\": \"f4786ac1\",\n            \"layoutConfig\": {\n                \"rotation\": 0,\n                \"width\": 982.27,\n                \"height\": 215.35,\n                \"scaleX\": 1,\n                \"scaleY\": 1,\n                \"fill\": \"#FFFFFF00\",\n                \"opacity\": 1,\n                \"name\": \"widget-34\",\n                \"draggable\": true,\n                \"x\": 37.48,\n                \"y\": 1279.73,\n                \"id\": \"cfx-4d97fa02-f853-4069-adb4-504f38c0657d\",\n                \"skewX\": 0,\n                \"skewY\": 0\n            }\n        },\n        {\n            \"widget_id\": \"02be1e2a\",\n            \"layoutConfig\": {\n                \"rotation\": 0,\n                \"width\": 204.94,\n                \"height\": 135.38,\n                \"scaleX\": 1,\n                \"scaleY\": 1,\n                \"fill\": \"#FFFFFF00\",\n                \"opacity\": 1,\n                \"name\": \"widget-35\",\n                \"draggable\": true,\n                \"x\": 664.0199999999999,\n                \"y\": 85.71333333333352,\n                \"id\": \"cfx-4f2f4c98-c772-43ea-ee81-895119d59fb8\"\n            }\n        },\n        {\n            \"widget_id\": \"02be1e2b\",\n            \"layoutConfig\": {\n                \"rotation\": 0,\n                \"width\": 187.49,\n                \"height\": 160.7,\n                \"scaleX\": 1,\n                \"scaleY\": 1,\n                \"fill\": \"#FFFFFF00\",\n                \"opacity\": 1,\n                \"name\": \"widget-36\",\n                \"draggable\": true,\n                \"x\": 825.9280772607348,\n                \"y\": 73.17948717948732,\n                \"id\": \"cfx-790c1772-8e2d-4fa8-e3f4-f9df54f04103\"\n            }\n        },\n        {\n            \"widget_id\": \"c8c56aaq\",\n            \"layoutConfig\": {\n                \"rotation\": 0,\n                \"width\": 268.7,\n                \"height\": 230.32,\n                \"scaleX\": 1,\n                \"scaleY\": 1,\n                \"fill\": \"#FFFFFF00\",\n                \"opacity\": 1,\n                \"name\": \"widget-37\",\n                \"draggable\": true,\n                \"x\": 34.89168779938012,\n                \"y\": 1545.4359440559438,\n                \"id\": \"cfx-0113373b-e280-4dc5-d492-5d213c7944e1\"\n            }\n        },\n        {\n            \"widget_id\": \"32de83bm\",\n            \"layoutConfig\": {\n                \"rotation\": 0,\n                \"width\": 332,\n                \"height\": 237.42,\n                \"scaleX\": 1,\n                \"scaleY\": 1,\n                \"fill\": \"#FFFFFF00\",\n                \"opacity\": 1,\n                \"name\": \"widget-38\",\n                \"draggable\": true,\n                \"x\": 326.8916877993799,\n                \"y\": 1552.255944055944,\n                \"id\": \"cfx-cbde8042-52f2-4ff4-e675-5b6049332314\"\n            }\n        },\n        {\n            \"widget_id\": \"fc125f5d\",\n            \"layoutConfig\": {\n                \"rotation\": 0,\n                \"width\": 345.92,\n                \"height\": 236.65,\n                \"scaleX\": 1,\n                \"scaleY\": 1,\n                \"fill\": \"#FFFFFF00\",\n                \"opacity\": 1,\n                \"name\": \"widget-39\",\n                \"draggable\": true,\n                \"x\": 684.4916877993802,\n                \"y\": 1554.4059440559442,\n                \"id\": \"cfx-6cda655c-464a-4c89-eafb-71d55e5b80f1\"\n            }\n        },\n        {\n            \"widget_id\": \"a20a7370\",\n            \"layoutConfig\": {\n                \"rotation\": 0,\n                \"width\": 476,\n                \"height\": 97,\n                \"scaleX\": 1,\n                \"scaleY\": 1,\n                \"fill\": \"#FFFFFF00\",\n                \"opacity\": 1,\n                \"name\": \"widget-40\",\n                \"draggable\": true,\n                \"x\": 38.57142857142843,\n                \"y\": 394.3809523809527,\n                \"id\": \"cfx-8b1d26fc-8b3f-400a-b991-48efc285542e\"\n            }\n        },\n        {\n            \"widget_id\": \"a20a737m\",\n            \"layoutConfig\": {\n                \"rotation\": 0,\n                \"width\": 487,\n                \"height\": 99,\n                \"scaleX\": 1,\n                \"scaleY\": 1,\n                \"fill\": \"#FFFFFF00\",\n                \"opacity\": 1,\n                \"name\": \"widget-41\",\n                \"draggable\": true,\n                \"x\": 536.9714285714282,\n                \"y\": 393.5238095238094,\n                \"id\": \"cfx-7e9f76c3-b6d0-43c5-f9b9-b812e757ab0b\"\n            }\n        },\n        {\n            \"widget_id\": \"32de83bs\",\n            \"layoutConfig\": {\n                \"rotation\": 0,\n                \"width\": 459,\n                \"height\": 83,\n                \"scaleX\": 1,\n                \"scaleY\": 1,\n                \"fill\": \"#FFFFFF00\",\n                \"opacity\": 1,\n                \"name\": \"widget-42\",\n                \"draggable\": true,\n                \"x\": 39.99999999999991,\n                \"y\": 557.6666666666666,\n                \"id\": \"cfx-5bc382af-239d-4b4b-d5a7-27b799fe3cb7\"\n            }\n        },\n        {\n            \"widget_id\": \"32de83bk\",\n            \"layoutConfig\": {\n                \"rotation\": 0,\n                \"width\": 478,\n                \"height\": 93,\n                \"scaleX\": 1,\n                \"scaleY\": 1,\n                \"fill\": \"#FFFFFF00\",\n                \"opacity\": 1,\n                \"name\": \"widget-43\",\n                \"draggable\": true,\n                \"x\": 538.3999999999997,\n                \"y\": 547.6666666666667,\n                \"id\": \"cfx-019b36f6-9c5a-417b-ce37-8bd9c093775b\"\n            }\n        },\n        {\n            \"widget_id\": \"7bab71e0\",\n            \"layoutConfig\": {\n                \"rotation\": 0,\n                \"width\": 973.85,\n                \"height\": 91.13,\n                \"scaleX\": 1,\n                \"scaleY\": 1,\n                \"fill\": \"#FFFFFF00\",\n                \"opacity\": 1,\n                \"name\": \"widget-44\",\n                \"draggable\": true,\n                \"x\": 45.150000000000055,\n                \"y\": 251.05333333333346,\n                \"id\": \"cfx-d4eb10d0-b2b8-475c-e563-5fef88cc787c\"\n            }\n        },\n        {\n            \"widget_id\": \"06ab3244\",\n            \"layoutConfig\": {\n                \"rotation\": 0,\n                \"width\": 625.58,\n                \"height\": 36.67,\n                \"scaleX\": 1,\n                \"scaleY\": 1,\n                \"fill\": \"#FFFFFF00\",\n                \"opacity\": 1,\n                \"name\": \"widget-45\",\n                \"draggable\": true,\n                \"x\": 205.6566131304592,\n                \"y\": 18.556923076923077,\n                \"id\": \"cfx-537e159e-34a9-4247-8778-5c0dabf2d232\"\n            }\n        }\n    ],\n    \"shapes\": [\n        {\n            \"compType\": \"vRect\",\n            \"rotation\": 0,\n            \"width\": 998.11,\n            \"height\": 127.87,\n            \"scaleX\": 1,\n            \"scaleY\": 1,\n            \"fill\": \"#92929149\",\n            \"name\": \"shape-0\",\n            \"cornerRadius\": 10,\n            \"draggable\": true,\n            \"x\": 31.68000000000006,\n            \"y\": 222.2933333333335,\n            \"id\": \"cfx-875d06fc-43b1-4131-ae14-62ae106834f8\",\n            \"stroke\": \"#0000AA\",\n            \"fillPriority\": \"color\",\n            \"offsetX\": 0,\n            \"offsetY\": 0,\n            \"skewX\": 0,\n            \"skewY\": 0\n        },\n        {\n            \"compType\": \"vRect\",\n            \"rotation\": 0,\n            \"width\": 497.56,\n            \"height\": 423.34,\n            \"scaleX\": 1,\n            \"scaleY\": 1,\n            \"fill\": \"#92929149\",\n            \"name\": \"shape-1\",\n            \"cornerRadius\": 10,\n            \"draggable\": true,\n            \"x\": 532.9199999999997,\n            \"y\": 512.3166666666664,\n            \"id\": \"cfx-875d06fc-43b1-4131-ae14-62ae106834f8\",\n            \"stroke\": \"#0000AA\",\n            \"fillPriority\": \"color\",\n            \"offsetX\": 0,\n            \"offsetY\": 0,\n            \"skewX\": 0,\n            \"skewY\": 0\n        },\n        {\n            \"compType\": \"vRect\",\n            \"rotation\": 0,\n            \"width\": 489.56,\n            \"height\": 424.34,\n            \"scaleX\": 1,\n            \"scaleY\": 1,\n            \"fill\": \"#92929149\",\n            \"name\": \"shape-2\",\n            \"cornerRadius\": 10,\n            \"draggable\": true,\n            \"x\": 27.919999999999924,\n            \"y\": 511.31666666666644,\n            \"id\": \"cfx-875d06fc-43b1-4131-ae14-62ae106834f8\",\n            \"stroke\": \"#0000AA\",\n            \"fillPriority\": \"color\",\n            \"offsetX\": 0,\n            \"offsetY\": 0,\n            \"skewX\": 0,\n            \"skewY\": 0\n        },\n        {\n            \"compType\": \"vRect\",\n            \"rotation\": 0,\n            \"width\": 1000.9,\n            \"height\": 120.87,\n            \"scaleX\": 1,\n            \"scaleY\": 1,\n            \"fill\": \"#92929149\",\n            \"name\": \"shape-3\",\n            \"cornerRadius\": 10,\n            \"draggable\": true,\n            \"x\": 30.769999999999982,\n            \"y\": 82.19333333333358,\n            \"id\": \"cfx-875d06fc-43b1-4131-ae14-62ae106834f8\",\n            \"stroke\": \"#0000AA\",\n            \"fillPriority\": \"color\",\n            \"offsetX\": 0,\n            \"offsetY\": 0,\n            \"skewX\": 0,\n            \"skewY\": 0\n        },\n        {\n            \"compType\": \"vRect\",\n            \"rotation\": 0,\n            \"width\": 335.12,\n            \"height\": 230.71,\n            \"scaleX\": 1,\n            \"scaleY\": 1,\n            \"fill\": \"#92929149\",\n            \"name\": \"shape-4\",\n            \"cornerRadius\": 10,\n            \"draggable\": true,\n            \"x\": 27.27999999999999,\n            \"y\": 985.9933333333332,\n            \"id\": \"cfx-875d06fc-43b1-4131-ae14-62ae106834f8\",\n            \"stroke\": \"#0000AA\",\n            \"fillPriority\": \"color\",\n            \"offsetX\": 0,\n            \"offsetY\": 0,\n            \"skewX\": 0,\n            \"skewY\": 0\n        },\n        {\n            \"compType\": \"vRect\",\n            \"rotation\": 0,\n            \"width\": 658.23,\n            \"height\": 228.42,\n            \"scaleX\": 1,\n            \"scaleY\": 1,\n            \"fill\": \"#92929149\",\n            \"name\": \"shape-5\",\n            \"cornerRadius\": 10,\n            \"draggable\": true,\n            \"x\": 380.63,\n            \"y\": 983.3833333333336,\n            \"id\": \"cfx-875d06fc-43b1-4131-ae14-62ae106834f8\",\n            \"stroke\": \"#0000AA\",\n            \"fillPriority\": \"color\",\n            \"offsetX\": 0,\n            \"offsetY\": 0,\n            \"skewX\": 0,\n            \"skewY\": 0\n        },\n        {\n            \"compType\": \"vRect\",\n            \"rotation\": 0,\n            \"width\": 1013.27,\n            \"height\": 267.8,\n            \"scaleX\": 1,\n            \"scaleY\": 1,\n            \"fill\": \"#92929149\",\n            \"name\": \"shape-6\",\n            \"cornerRadius\": 10,\n            \"draggable\": true,\n            \"x\": 24.52,\n            \"y\": 1237.36,\n            \"id\": \"cfx-875d06fc-43b1-4131-ae14-62ae106834f8\",\n            \"stroke\": \"#0000AA\",\n            \"fillPriority\": \"color\",\n            \"offsetX\": 0,\n            \"offsetY\": 0,\n            \"skewX\": 0,\n            \"skewY\": 0\n        },\n        {\n            \"fill\": \"#FFFFFF\",\n            \"compType\": \"vText\",\n            \"name\": \"shape-7\",\n            \"text\": \"Key Performance Indicators\",\n            \"align\": \"center\",\n            \"fontSize\": 16,\n            \"fontFamily\": \"Roboto\",\n            \"fontStyle\": \"normal\",\n            \"textDecoration\": [],\n            \"draggable\": true,\n            \"x\": 10.509561755117526,\n            \"y\": 88.64202020202052,\n            \"id\": \"cfx-7eb8c058-4709-4685-ad31-6e3bb5fdaf75\",\n            \"rotation\": 0,\n            \"scaleX\": 1,\n            \"scaleY\": 1,\n            \"offsetX\": 0,\n            \"offsetY\": 0,\n            \"skewX\": 0,\n            \"skewY\": 0,\n            \"width\": 250.56,\n            \"height\": 20.35\n        },\n        {\n            \"fill\": \"#FFFFFF\",\n            \"compType\": \"vText\",\n            \"name\": \"shape-8\",\n            \"text\": \"Request Volume by LLM\",\n            \"align\": \"left\",\n            \"fontSize\": 16,\n            \"fontFamily\": \"Roboto\",\n            \"fontStyle\": \"normal\",\n            \"textDecoration\": [],\n            \"draggable\": true,\n            \"x\": 34.029999999999916,\n            \"y\": 666.7966666666666,\n            \"id\": \"cfx-7eb8c058-4709-4685-ad31-6e3bb5fdaf75\",\n            \"rotation\": 0,\n            \"scaleX\": 1,\n            \"scaleY\": 1,\n            \"offsetX\": 0,\n            \"offsetY\": 0,\n            \"skewX\": 0,\n            \"skewY\": 0,\n            \"width\": 290.86,\n            \"height\": 20.35\n        },\n        {\n            \"fill\": \"#FFFFFF\",\n            \"compType\": \"vText\",\n            \"name\": \"shape-9\",\n            \"text\": \"Cost By LLM\",\n            \"align\": \"left\",\n            \"fontSize\": 16,\n            \"fontFamily\": \"Roboto\",\n            \"fontStyle\": \"normal\",\n            \"textDecoration\": [],\n            \"draggable\": true,\n            \"x\": 529.8699999999997,\n            \"y\": 666.7666666666668,\n            \"id\": \"cfx-7eb8c058-4709-4685-ad31-6e3bb5fdaf75\",\n            \"rotation\": 0,\n            \"scaleX\": 1,\n            \"scaleY\": 1,\n            \"offsetX\": 0,\n            \"offsetY\": 0,\n            \"skewX\": 0,\n            \"skewY\": 0,\n            \"width\": 223.27,\n            \"height\": 24.77\n        },\n        {\n            \"fill\": \"#FFFFFF\",\n            \"compType\": \"vText\",\n            \"name\": \"shape-10\",\n            \"text\": \"Request Type Distribution\",\n            \"align\": \"center\",\n            \"fontSize\": 16,\n            \"fontFamily\": \"Roboto\",\n            \"fontStyle\": \"normal\",\n            \"textDecoration\": [],\n            \"draggable\": true,\n            \"x\": 7.191617106885246,\n            \"y\": 988.9276612276612,\n            \"id\": \"cfx-7eb8c058-4709-4685-ad31-6e3bb5fdaf75\",\n            \"rotation\": 0,\n            \"scaleX\": 1,\n            \"scaleY\": 1,\n            \"offsetX\": 0,\n            \"offsetY\": 0,\n            \"skewX\": 0,\n            \"skewY\": 0,\n            \"width\": 246.37,\n            \"height\": 21.67\n        },\n        {\n            \"fill\": \"#FFFFFF\",\n            \"compType\": \"vText\",\n            \"name\": \"shape-11\",\n            \"text\": \"LLM Provider Usage on basis of Request Count\",\n            \"align\": \"center\",\n            \"fontSize\": 16,\n            \"fontFamily\": \"Roboto\",\n            \"fontStyle\": \"normal\",\n            \"textDecoration\": [],\n            \"draggable\": true,\n            \"x\": 551.8915343915343,\n            \"y\": 996.0369696969694,\n            \"id\": \"cfx-7eb8c058-4709-4685-ad31-6e3bb5fdaf75\",\n            \"rotation\": 0,\n            \"scaleX\": 1,\n            \"scaleY\": 1,\n            \"offsetX\": 0,\n            \"offsetY\": 0,\n            \"skewX\": 0,\n            \"skewY\": 0,\n            \"width\": 317.77,\n            \"height\": 18.05\n        },\n        {\n            \"fill\": \"#FFFFFF\",\n            \"compType\": \"vText\",\n            \"name\": \"shape-12\",\n            \"text\": \"Token Usage Breakdown\",\n            \"align\": \"center\",\n            \"fontSize\": 16,\n            \"fontFamily\": \"Roboto\",\n            \"fontStyle\": \"normal\",\n            \"textDecoration\": [],\n            \"draggable\": true,\n            \"x\": -17.994874893444972,\n            \"y\": 1246.7395804195796,\n            \"id\": \"cfx-7eb8c058-4709-4685-ad31-6e3bb5fdaf75\",\n            \"rotation\": 0,\n            \"scaleX\": 1,\n            \"scaleY\": 1,\n            \"offsetX\": 0,\n            \"offsetY\": 0,\n            \"skewX\": 0,\n            \"skewY\": 0,\n            \"width\": 299.38,\n            \"height\": 27.38\n        },\n        {\n            \"compType\": \"vRect\",\n            \"rotation\": 0,\n            \"width\": 293.55,\n            \"height\": 265.43,\n            \"scaleX\": 1,\n            \"scaleY\": 1,\n            \"fill\": \"#92929149\",\n            \"name\": \"shape-13\",\n            \"cornerRadius\": 10,\n            \"draggable\": true,\n            \"x\": 24.051687799380183,\n            \"y\": 1526.0059440559444,\n            \"id\": \"cfx-875d06fc-43b1-4131-ae14-62ae106834f8\",\n            \"stroke\": \"#0000AA\",\n            \"fillPriority\": \"color\",\n            \"offsetX\": 0,\n            \"offsetY\": 0,\n            \"skewX\": 0,\n            \"skewY\": 0\n        },\n        {\n            \"compType\": \"vRect\",\n            \"rotation\": 0,\n            \"width\": 332.55,\n            \"height\": 265.43,\n            \"scaleX\": 1,\n            \"scaleY\": 1,\n            \"fill\": \"#92929149\",\n            \"name\": \"shape-14\",\n            \"cornerRadius\": 10,\n            \"draggable\": true,\n            \"x\": 332.05168779938015,\n            \"y\": 1526.0059440559444,\n            \"id\": \"cfx-875d06fc-43b1-4131-ae14-62ae106834f8\",\n            \"stroke\": \"#0000AA\",\n            \"fillPriority\": \"color\",\n            \"offsetX\": 0,\n            \"offsetY\": 0,\n            \"skewX\": 0,\n            \"skewY\": 0\n        },\n        {\n            \"compType\": \"vRect\",\n            \"rotation\": 0,\n            \"width\": 359.55,\n            \"height\": 265.43,\n            \"scaleX\": 1,\n            \"scaleY\": 1,\n            \"fill\": \"#92929149\",\n            \"name\": \"shape-15\",\n            \"cornerRadius\": 10,\n            \"draggable\": true,\n            \"x\": 677.0516877993799,\n            \"y\": 1525.0059440559437,\n            \"id\": \"cfx-875d06fc-43b1-4131-ae14-62ae106834f8\",\n            \"stroke\": \"#0000AA\",\n            \"fillPriority\": \"color\",\n            \"offsetX\": 0,\n            \"offsetY\": 0,\n            \"skewX\": 0,\n            \"skewY\": 0\n        },\n        {\n            \"fill\": \"#FFFFFF\",\n            \"compType\": \"vText\",\n            \"name\": \"shape-16\",\n            \"text\": \"Request per LLM in Last 24 Hours\",\n            \"align\": \"center\",\n            \"fontSize\": 16,\n            \"fontFamily\": \"Roboto\",\n            \"fontStyle\": \"normal\",\n            \"textDecoration\": [],\n            \"draggable\": true,\n            \"x\": 327.2404655237136,\n            \"y\": 1534.5577622377614,\n            \"id\": \"cfx-7eb8c058-4709-4685-ad31-6e3bb5fdaf75\",\n            \"rotation\": 0,\n            \"scaleX\": 1,\n            \"scaleY\": 1,\n            \"offsetX\": 0,\n            \"offsetY\": 0,\n            \"skewX\": 0,\n            \"skewY\": 0,\n            \"width\": 299.38,\n            \"height\": 27.38\n        },\n        {\n            \"fill\": \"#FFFFFF\",\n            \"compType\": \"vText\",\n            \"name\": \"shape-17\",\n            \"text\": \"Cost per LLM in Last 24 Hours\",\n            \"align\": \"center\",\n            \"fontSize\": 16,\n            \"fontFamily\": \"Roboto\",\n            \"fontStyle\": \"normal\",\n            \"textDecoration\": [],\n            \"draggable\": true,\n            \"x\": 667.2404655237135,\n            \"y\": 1532.5577622377618,\n            \"id\": \"cfx-7eb8c058-4709-4685-ad31-6e3bb5fdaf75\",\n            \"rotation\": 0,\n            \"scaleX\": 1,\n            \"scaleY\": 1,\n            \"offsetX\": 0,\n            \"offsetY\": 0,\n            \"skewX\": 0,\n            \"skewY\": 0,\n            \"width\": 299.38,\n            \"height\": 27.38\n        },\n        {\n            \"fill\": \"#FFFFFF\",\n            \"compType\": \"vText\",\n            \"name\": \"shape-18\",\n            \"text\": \"Success Rate\",\n            \"align\": \"center\",\n            \"fontSize\": 16,\n            \"fontFamily\": \"Roboto\",\n            \"fontStyle\": \"normal\",\n            \"textDecoration\": [],\n            \"draggable\": true,\n            \"x\": -0.758312200619855,\n            \"y\": 1535.5559440559443,\n            \"id\": \"cfx-7eb8c058-4709-4685-ad31-6e3bb5fdaf75\",\n            \"rotation\": 0,\n            \"scaleX\": 1,\n            \"scaleY\": 1,\n            \"offsetX\": 0,\n            \"offsetY\": 0,\n            \"skewX\": 0,\n            \"skewY\": 0,\n            \"width\": 174.38,\n            \"height\": 27.38\n        },\n        {\n            \"compType\": \"vRect\",\n            \"rotation\": 0,\n            \"width\": 484.9,\n            \"height\": 127.87,\n            \"scaleX\": 1,\n            \"scaleY\": 1,\n            \"fill\": \"#92929149\",\n            \"name\": \"shape-19\",\n            \"cornerRadius\": 10,\n            \"draggable\": true,\n            \"x\": 30.76999999999989,\n            \"y\": 365.52666666666676,\n            \"id\": \"cfx-875d06fc-43b1-4131-ae14-62ae106834f8\",\n            \"stroke\": \"#0000AA\",\n            \"fillPriority\": \"color\",\n            \"offsetX\": 0,\n            \"offsetY\": 0,\n            \"skewX\": 0,\n            \"skewY\": 0\n        },\n        {\n            \"fill\": \"#FFFFFF\",\n            \"compType\": \"vText\",\n            \"name\": \"shape-20\",\n            \"text\": \"Cost Breakdown per User\",\n            \"align\": \"left\",\n            \"fontSize\": 16,\n            \"fontFamily\": \"Roboto\",\n            \"fontStyle\": \"normal\",\n            \"textDecoration\": [],\n            \"draggable\": true,\n            \"x\": 41.480000000000054,\n            \"y\": 229.50333333333356,\n            \"id\": \"cfx-7eb8c058-4709-4685-ad31-6e3bb5fdaf75\",\n            \"rotation\": 0,\n            \"scaleX\": 1,\n            \"scaleY\": 1,\n            \"offsetX\": 0,\n            \"offsetY\": 0,\n            \"skewX\": 0,\n            \"skewY\": 0,\n            \"width\": 210.38,\n            \"height\": 23.29\n        },\n        {\n            \"compType\": \"vRect\",\n            \"rotation\": 0,\n            \"width\": 499.9,\n            \"height\": 127.87,\n            \"scaleX\": 1,\n            \"scaleY\": 1,\n            \"fill\": \"#92929149\",\n            \"name\": \"shape-21\",\n            \"cornerRadius\": 10,\n            \"draggable\": true,\n            \"x\": 530.7700000000001,\n            \"y\": 365.52666666666676,\n            \"id\": \"cfx-875d06fc-43b1-4131-ae14-62ae106834f8\",\n            \"stroke\": \"#0000AA\",\n            \"fillPriority\": \"color\",\n            \"offsetX\": 0,\n            \"offsetY\": 0,\n            \"skewX\": 0,\n            \"skewY\": 0\n        },\n        {\n            \"fill\": \"#FFFFFF\",\n            \"compType\": \"vText\",\n            \"name\": \"shape-22\",\n            \"text\": \"Cost Breakdown per Persona\",\n            \"align\": \"left\",\n            \"fontSize\": 16,\n            \"fontFamily\": \"Roboto\",\n            \"fontStyle\": \"normal\",\n            \"textDecoration\": [],\n            \"draggable\": true,\n            \"x\": 541.0433333333334,\n            \"y\": 371.2142857142859,\n            \"id\": \"cfx-7eb8c058-4709-4685-ad31-6e3bb5fdaf75\",\n            \"rotation\": 0,\n            \"scaleX\": 1,\n            \"scaleY\": 1,\n            \"offsetX\": 0,\n            \"offsetY\": 0,\n            \"skewX\": 0,\n            \"skewY\": 0,\n            \"width\": 213.38,\n            \"height\": 27.38\n        },\n        {\n            \"fill\": \"#FFFFFF\",\n            \"compType\": \"vText\",\n            \"name\": \"shape-23\",\n            \"text\": \"Request Volume Overtime\",\n            \"align\": \"center\",\n            \"fontSize\": 16,\n            \"fontFamily\": \"Roboto\",\n            \"fontStyle\": \"normal\",\n            \"textDecoration\": [],\n            \"draggable\": true,\n            \"x\": 1.0799999999998513,\n            \"y\": 526.9766666666667,\n            \"id\": \"cfx-7eb8c058-4709-4685-ad31-6e3bb5fdaf75\",\n            \"rotation\": 0,\n            \"scaleX\": 1,\n            \"scaleY\": 1,\n            \"offsetX\": 0,\n            \"offsetY\": 0,\n            \"skewX\": 0,\n            \"skewY\": 0,\n            \"width\": 284.86,\n            \"height\": 20.35\n        },\n        {\n            \"fill\": \"#FFFFFF\",\n            \"compType\": \"vText\",\n            \"name\": \"shape-24\",\n            \"text\": \"Total LLM Cost Overtime\",\n            \"align\": \"center\",\n            \"fontSize\": 16,\n            \"fontFamily\": \"Roboto\",\n            \"fontStyle\": \"normal\",\n            \"textDecoration\": [],\n            \"draggable\": true,\n            \"x\": 505.43999999999994,\n            \"y\": 523.9766666666668,\n            \"id\": \"cfx-7eb8c058-4709-4685-ad31-6e3bb5fdaf75\",\n            \"rotation\": 0,\n            \"scaleX\": 1,\n            \"scaleY\": 1,\n            \"offsetX\": 0,\n            \"offsetY\": 0,\n            \"skewX\": 0,\n            \"skewY\": 0,\n            \"width\": 269.5,\n            \"height\": 15.84\n        },\n        {\n            \"fill\": \"#FFFFFF\",\n            \"compType\": \"vText\",\n            \"name\": \"shape-25\",\n            \"text\": \"Cost Breakdown per LLM\",\n            \"align\": \"left\",\n            \"fontSize\": 16,\n            \"fontFamily\": \"Roboto\",\n            \"fontStyle\": \"normal\",\n            \"textDecoration\": [],\n            \"draggable\": true,\n            \"x\": 35.05000000000005,\n            \"y\": 372.0733333333336,\n            \"id\": \"cfx-7eb8c058-4709-4685-ad31-6e3bb5fdaf75\",\n            \"rotation\": 0,\n            \"scaleX\": 1,\n            \"scaleY\": 1,\n            \"offsetX\": 0,\n            \"offsetY\": 0,\n            \"skewX\": 0,\n            \"skewY\": 0,\n            \"width\": 207.38,\n            \"height\": 23.29\n        }\n    ],\n    \"lines\": [],\n    \"sbBookmarkList\": []\n}"
+        }
+    ]
+}

@@ -1,0 +1,133 @@
+{
+    "name": "evaluation_details",
+    "description": "Evaulation of and Recommendation",
+    "label": "Summary and Recommendation",
+    "enabled": true,
+    "dashboard_folder": "Default",
+    "dashboard_style": "auto",
+    "dashboard_type": "template",
+    "live_edit": true,
+    "template_variables": {
+        "conversation_id": {
+            "contextId": "conversationId"
+        }
+    },
+    "custom_context": {
+        "alert-context": true
+    },
+    "dashboard_sections": [
+        {
+            "title": "Summary and Recommendation",
+            "show_filter": false,
+            "widgets": [
+                {
+                    "title": "Incident Summary",
+                    "min_width": 12,
+                    "height": 2,
+                    "widget_type0": "portal_html",
+                    "widget_template": "cfx-oia/incident-summary",
+                    "widget_id": "784726f6"
+                },
+                {
+                    "title": "Evaluation Results",
+                    "widget_type": "tabular",
+                    "stream": "rda_conversation_evaluations",
+                    "extra_filter": "conversationId is '{{conversation_id}}' and conversationLabel is not empty",
+                    "min_width": 6,
+                    "height": 8,
+                    "max_width": 6,
+                    "paginated": true,
+                    "remote_searchable": true,
+                    "widget_id": "94a3fc11",
+                    "columns": {
+                        "conversationId": {
+                            "title": "conversationId",
+                            "type": "DATETIME",
+                            "hidden": true
+                        },
+                        "conversationLabel": {
+                            "title": "Conversation Label",
+                            "type": "TEXT",
+                            "hidden": false
+                        },
+                        "evalution_prompt": {
+                            "title": "Evalution Prompt",
+                            "type": "TEXT",
+                            "hidden": true,
+                            "key": true
+                        },
+                        "timestamp": {
+                            "title": "Evalution Timestamp",
+                            "type": "TEXT",
+                            "hidden": false
+                        },
+                        "evalution_type": {
+                            "title": "evalution_type",
+                            "type": "TEXT",
+                            "hidden": true
+                        }
+                    },
+                    "actions": [
+                        {
+                            "appName": "user-dashboard/evaluation_report",
+                            "permission": "agenticai:conversation:view",
+                            "drillDownLinkField": "conversationLabel",
+                            "identifier": "conversationLabel",
+                            "selectionType": "SINGLE",
+                            "stateName": "app.featureapp",
+                            "title": "View Details",
+                            "type": "GO_TO_APP_STATE"
+                        }
+                    ]
+                },
+                {
+                    "widget_type0": "label",
+                    "min_width": 12,
+                    "height": 12,
+                    "max_width": 12,
+                    "stream": "rda_conversation_evaluations",
+                    "label": "attachment://evaluation_data",
+                    "objectName0": "recommendations",
+                    "segments": [
+                        {
+                            "stream": "rda_conversation_evaluations",
+                            "variable": "output",
+                            "sorting": [
+                                {
+                                    "timestamp": "desc"
+                                }
+                            ],
+                            "type": "tabular",
+                            "extra_filter": "conversationId is '{{conversation_id}}'and conversationLabel is not empty",
+                            "duration_hours": 10000000
+                        }
+                    ],
+                    "actions": [
+                        {
+                            "appName": "user-dashboard/evaluation_report",
+                            "permission": "agenticai:conversation:view",
+                            "drillDownLinkField": "conversationLabel",
+                            "identifier": "conversationLabel",
+                            "selectionType": "SINGLE",
+                            "stateName": "app.featureapp",
+                            "title": "View Details",
+                            "type": "GO_TO_APP_STATE"
+                        }
+                    ],
+                    "widget_id": "03430956"
+                }
+            ]
+        }
+    ],
+    "saved_time": "2025-10-30T14:43:52.916027",
+    "attachments": [
+        {
+            "name": "evaluation_data_1",
+            "value": "{%raw%}\r\n{%- set content = \"\" -%}\r\n\r\n{%- if output | length > 0 -%}\r\n    {%- set content = output[0].get('message') -%}\r\n{%- else -%}\r\n    {%- set content = \"Evaluation Report has not been generated for this Conversation. \" -%}\r\n\r\n{%- endif -%}\r\n\r\n\r\n<div style='overflow:auto;width:100%;height:100%;'> {{ content }} </div>\r\n\r\n{%endraw%}"
+        },
+        {
+            "name": "evaluation_data",
+            "value": "{%raw%}\r\n{%- set content = \"\" -%}\r\n{%- if output | length > 0 -%}\r\n    {%- set raw_content = output[0].get('message') -%}\r\n    {%- if raw_content -%}\r\n        {# Check if \"html\" text is present in the content #}\r\n        {%- if \"html\" in raw_content -%}\r\n            {# Find the position after \"html\" and extract content from there #}\r\n            {%- set html_pos = raw_content.find('html') -%}\r\n            {%- set content_start = html_pos + 4 -%}\r\n            {%- set content = raw_content[content_start:] | trim -%}\r\n        {%- else -%}\r\n            {# If no \"html\" text found, use the content as is #}\r\n            {%- set content = raw_content -%}\r\n        {%- endif -%}\r\n    {%- else -%}\r\n        {%- set content = \"Evaluation Report has not been generated for this Conversation.\" -%}\r\n    {%- endif -%}\r\n{%- else -%}\r\n    {%- set content = \"Evaluation Report has not been generated for this Conversation.\" -%}\r\n{%- endif -%}\r\n<div style='overflow:auto;width:100%;height:100%;'> {{ content }} </div>\r\n{%endraw%}\r\n"
+        }
+    ]
+}

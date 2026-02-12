@@ -1,0 +1,64 @@
+{
+    "name": "ai_conversation_details_tools_only",
+    "description": "AI Conversation Details",
+    "label": "AI Conversation Detailss",
+    "enabled": true,
+    "dashboard_folder": "AI",
+    "dashboard_style": "auto",
+    "dashboard_type": "template",
+    "template_variables": {
+        "CONVERSATION_ID": {
+            "contextId": "conversationId",
+            "default": "2cf24a24-f406-452f-be9f-998697f490ba",
+            "default1": "a647971b-62a8-4072-ed69-505f9c0a9e14"
+        },
+        "TOOL_NAME": {
+            "contextId": "tool_name",
+            "default": ""
+        },
+        "TOOL_DOMAIN": {
+            "contextId": "domain",
+            "default": ""
+        }
+    },
+    "live_edit": true,
+    "dashboard_sections": [
+        {
+            "title": "AI Conversation Details",
+            "show_filter": false,
+            "widgets": [
+                {
+                    "widget_type": "label",
+                    "label": "attachment://ai_costs",
+                    "widget_id": "eac56026",
+                    "fixed_variables": {
+                        "conversation_id": "{{CONVERSATION_ID}}",
+                        "tool_name": "{{TOOL_NAME}}",
+                        "domain": "{{TOOL_DOMAIN}}"
+                    },
+                    "uses_reporting_engine": true,
+                    "advanced": false
+                }
+            ]
+        }
+    ],
+    "saved_time": "2025-12-09T10:12:21.770051",
+    "attachments": [
+        {
+            "name": "ai_costs_old",
+            "value": "{%raw%}\n<div style=\"overflow: auto; width: 100%; height: 100%; background-color: #000000; color: #ffffff; padding: 10px 10px 0px 20px;\">\n\n{%-\n  set cfxql_query2 = \"conversationId = '\"+ conversation_id + \"' and tool_name is not null  GET USER_ID,persona,message,conversationLabel,timestamp,type,llm,tool_name,token_usage_input_tokens,token_usage_cache_tokens,token_usage_output_tokens,tool_content\"\n-%}\n\n\n{%-\n    set convs = engine.query_stream_data(\"rda_chat_sessions\", cfxql_query=cfxql_query2, sorting=[{\"timestamp\": \"asc\"}], limit=1000, max_rows=1000)\n-%}\n<pre>\n{%- for row in convs -%}\n\n\n    \n<p>Tool Call: <b>{{row[\"tool_name\"].strip()}}</b>\n\n{{str(row[\"tool_content\"]).split(\"Result:\", 1)[0].strip().replace('>','&gt;').replace('<','&lt;') }}\n\n\n{%- endfor -%}\n</pre>\n</div>\n\n\n\n{%endraw%}\n"
+        },
+        {
+            "name": "ai_costs_1",
+            "value": "{%raw%}\r\n<div style=\"overflow: auto; width: 100%; height: 100%; background-color: #000000; color: #ffffff; padding: 10px 10px 0px 20px;\">\r\n\r\n{%-\r\n  set cfxql_query2 = \"conversationId = '\"+ conversation_id + \"' and tool_name is not null  GET USER_ID,persona,message,conversationLabel,timestamp,type,llm,tool_name,token_usage_input_tokens,token_usage_cache_tokens,token_usage_output_tokens,tool_content,codeBlocks\"\r\n-%}\r\n\r\n\r\n{%-\r\n    set convs = engine.query_stream_data(\"rda_chat_sessions\", cfxql_query=cfxql_query2, sorting=[{\"timestamp\": \"asc\"}], limit=1000, max_rows=1000)\r\n-%}\r\n<ol>\r\n{%- for row in convs -%}\r\n\r\n<li><p>Tool Call: <b>{{row[\"tool_name\"].strip()}}</b>\r\n\r\n <pre>{{ row[\"codeBlocks\"].strip('{}').split(\":\", 1)[1] | trim | trim('\"') | replace('\\\\n', '\\n') | replace('\\\\\"', '\"') }}</pre>\r\n <br/>\r\n\r\n{%- endfor -%}\r\n</ol>\r\n</div>\r\n\r\n\r\n\r\n{%endraw%}\r\n"
+        },
+        {
+            "name": "ai_costs",
+            "value": "{%raw%}<div style=\"overflow: auto; width: 100%; height: 100%; background-color: #000000; color: #ffffff; padding: 10px 10px 0px 20px;\">\r\n\r\n{%- set cfxql_query2 = \"conversationId = '\" + conversation_id + \"' and tool_name is not null  GET USER_ID,persona,message,conversationLabel,timestamp,type,llm,tool_name,token_usage_input_tokens,token_usage_cache_tokens,token_usage_output_tokens,tool_content,codeBlocks\" -%}\r\n\r\n{%- set convs = engine.query_stream_data(\r\n      \"rda_chat_sessions\",\r\n      cfxql_query=cfxql_query2,\r\n      sorting=[{\"timestamp\": \"asc\"}],\r\n      limit=1000,\r\n      max_rows=1000\r\n  )\r\n-%}\r\n\r\n<ol>\r\n{%- for row in convs -%}\r\n  <li>\r\n    <p>Tool Call:\r\n      <b>{{ row[\"tool_name\"] | default(\"\") | trim }}</b>\r\n    </p>\r\n\r\n    {# ---- Safe handling for codeBlocks ---- #}\r\n    {%- set cb = row[\"codeBlocks\"] | default(\"\") | trim -%}\r\n\r\n    {%- if cb and cb != \"{}\" -%}\r\n        {%- if \":\" in cb -%}\r\n            {# If codeBlocks looks like {\"something\": \"code...\"} #}\r\n            {%- set cb_value = cb.strip('{}').split(\":\", 1)[1]\r\n                               | trim\r\n                               | trim('\"')\r\n                               | replace('\\\\n', '\\n')\r\n                               | replace('\\\\\"', '\"')\r\n            -%}\r\n        {%- else -%}\r\n            {# Fallback: just use raw cb if it has no \":\" #}\r\n            {%- set cb_value = cb -%}\r\n        {%- endif -%}\r\n    {%- else -%}\r\n        {# Empty, null or \"{}\" #}\r\n        {%- set cb_value = \"No code blocks\" -%}\r\n    {%- endif -%}\r\n\r\n    <pre>{{ cb_value }}</pre>\r\n    <br/>\r\n  </li>\r\n{%- endfor -%}\r\n</ol>\r\n\r\n</div>\r\n{%endraw%}",
+            "additionalFields": {
+                "valueType": "",
+                "description": ""
+            }
+        }
+    ]
+  }

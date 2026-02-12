@@ -1,0 +1,1013 @@
+{
+    "name": "ai_search_per_project",
+    "label": "Search AI Artifacts",
+    "description": "AI Artifact Search",
+    "title": "Search: {{SEARCH_TEXT}}",
+    "showTitle": true,
+    "is_template": true,
+    "enabled": true,
+    "dashboard_type": "template",
+    "dashboard_folder": "AI",
+    "live_edit": true,
+    "dashboard_style": "auto",
+    "stream": "rda_secret_meta",
+    "dashboard_filters": {
+        "time_filter": false
+    },
+    "dashboard_generator": {
+        "attachment": "generator"
+    },
+    "computedContext": {
+        "show_personas": {
+            "expr": "'yes' if str(show_personas)  in [ 'yes', 'True'] else 'no'",
+            "defaultValue": "yes"
+        },
+        "show_domains": {
+            "expr": "'yes' if str(show_domains ) in [ 'yes', 'True'] else 'no'",
+            "defaultValue": "yes"
+        },
+        "show_prompt_templates": {
+            "expr": "'yes' if str(show_prompt_templates)  in [ 'yes', 'True'] else 'no'",
+            "defaultValue": "no"
+        },
+        "show_conversations": {
+            "expr": "'yes' if str(show_conversations) in [ 'yes', 'True'] else 'no'",
+            "defaultValue": "no"
+        },
+        "show_tool_usage": {
+            "expr": "'yes' if str(show_tool_usage) in [ 'yes', 'True'] else 'no'",
+            "defaultValue": "no"
+        },
+        "show_agents": {
+            "expr": "'yes' if str(show_agents) in [ 'yes', 'True'] else 'no'",
+            "defaultValue": "no"
+        }
+    },
+    "template_variables": {
+        "SEARCH_TEXT": {
+            "contextId": "search_text",
+            "default": ""
+        },
+        "ai_project_name": {
+            "contextId": "ai_project_name",
+            "default": ""
+        }
+    },
+    "dashboard_sections": [
+        {
+            "title": "Personas",
+            "show_filter": true,
+            "widgets": [
+                {
+                    "context_filter": "show_personas = 'yes'",
+                    "title": "Personas",
+                    "widget_type": "tabular",
+                    "stream": "ai_personas",
+                    "extra_filter": "(name contains '{{SEARCH_TEXT}}' or description contains '{{SEARCH_TEXT}}'  or llms contains '{{SEARCH_TEXT}}') and ai_project_name is '{{ai_project_name}}'",
+                    "duration_hours": 87600,
+                    "remote_searchable": true,
+                    "remote_searchable_cols": [
+                        "name",
+                        "description",
+                        "llms"
+                    ],
+                    "ts_column": "saved_time",
+                    "paginated": true,
+                    "height": 5,
+                    "min_width": 12,
+                    "max_width": 12,
+                    "columns": {
+                        "name": {
+                            "title": "Persona Name",
+                            "key": true
+                        },
+                        "ai_project_name": {
+                            "title": "Project Name",
+                            "key": true
+                        },
+                        "description": {
+                            "title": "Description",
+                            "key": false
+                        },
+                        "llms": {
+                            "title": "LLMs",
+                            "htmlTemplateForRow": "{%raw%}<span class='badge' style='background-color: {{ row.static_color }}' > {{ row.llms }} </span>{%endraw%}"
+                        },
+                        "guardrails": {
+                            "title": "Guardrails",
+                            "htmlTemplateForRow": "{%raw%}<span class='badge' style='background-color: {{ row.static_color }}' > {{ row.guardrails }} </span>{%endraw%}"
+                        },
+                        "color": {
+                            "title": "Color",
+                            "key": true,
+                            "type": "DYNAMIC_HTML",
+                            "htmlTemplate": "{%raw%}<div class='d-flex'><div style='width:18px;height:18px;margin-right:8px;' :style='{backgroundColor:rowData.color}'></div></div>{%endraw%}"
+                        }
+                    },
+                    "custom_columns": [
+                        {
+                            "id": "static_color",
+                            "expr": "['#3F51B5']",
+                            "visible": false,
+                            "hidden": true,
+                            "label": "Static Color"
+                        }
+                    ],
+                    "actions": [
+                        {
+                            "permission": "agenticai:persona:add",
+                            "title": "Add",
+                            "icon": "mdi mdi-plus",
+                            "type": "POPUP_FORM",
+                            "selectionType": "NONE",
+                            "identifier": "saas-service-action:personas-add",
+                            "api-endpoint": {
+                                "service-name": "saas-reports",
+                                "methodName": "getForm",
+                                "stringified-params": true,
+                                "parse-output": false,
+                                "params": [
+                                    {
+                                        "formId": "rda.saas.aipersona.add"
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "permission": "agenticai:persona:edit",
+                            "title": "Edit",
+                            "type": "POPUP_FORM",
+                            "selectionType": "SINGLE",
+                            "identifier": "saas-service-action:personas-edit",
+                            "api-endpoint": {
+                                "service-name": "saas-reports",
+                                "methodName": "getForm",
+                                "stringified-params": true,
+                                "parse-output": false,
+                                "params": [
+                                    {
+                                        "formId": "rda.saas.aipersona.edit"
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "permission": "agenticai:persona:view",
+                            "title": "View",
+                            "type": "POPUP_FORM",
+                            "selectionType": "SINGLE",
+                            "identifier": "saas-service-action:vault-persona-view",
+                            "api-endpoint": {
+                                "service-name": "saas-reports",
+                                "methodName": "getForm",
+                                "stringified-params": true,
+                                "parse-output": false,
+                                "params": [
+                                    {
+                                        "formId": "rda.saas.aipersona.view.json"
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "permission": "agenticai:persona:delete",
+                            "title": "Delete",
+                            "type": "POPUP_FORM",
+                            "selectionType": "SINGLE",
+                            "identifier": "saas-service-action:vault-delete",
+                            "api-endpoint": {
+                                "service-name": "saas-reports",
+                                "methodName": "getForm",
+                                "stringified-params": true,
+                                "parse-output": false,
+                                "params": [
+                                    {
+                                        "formId": "rda.saas.aipersona.delete"
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "widget_id": "c9d555e3"
+                },
+                {
+                    "context_filter": "show_domains = 'yes'",
+                    "title": "Toolsets",
+                    "widget_type": "tabular",
+                    "min_width": 12,
+                    "height": 6,
+                    "max_width": 12,
+                    "timebased": false,
+                    "timestamp": "timestamp",
+                    "extra_filter": "(domain contains '{{SEARCH_TEXT}}' or description contains '{{SEARCH_TEXT}}'  or contents contains '{{SEARCH_TEXT}}') and ai_project_name is '{{ai_project_name}}'",
+                    "stream": "ai_mcp_toolsets",
+                    "columns": {
+                        "domain": {
+                            "title": "Toolset Name",
+                            "key": true
+                        },
+                        "ai_project_name": {
+                            "title": "Project Name",
+                            "key": true
+                        },
+                        "description": {
+                            "title": "Description",
+                            "key": false
+                        },
+                        "enabled_color": {
+                            "type": "COLOR-MAP",
+                            "source-column": "enabled",
+                            "color-map": {
+                                "yes": "#4CAF50",
+                                "no": "#B71C1C"
+                            }
+                        },
+                        "enabled": {
+                            "title": "Enabled",
+                            "htmlTemplateForRow": "<span class='badge' style='background-color: {{'{{ row.enabled_color }}'}}' > {{'{{ row.enabled }}'}} </span>",
+                            "key": false
+                        },
+                        "tools": {
+                            "title": "Tools",
+                            "key": false
+                        },
+                        "textResources": {
+                            "title": "Resources",
+                            "key": false
+                        },
+                        "contents": {
+                            "title": "YAML",
+                            "defaultWidth": 500,
+                            "visible": false,
+                            "key": true
+                        }
+                    },
+                    "widget_id": "2630645a",
+                    "actions": [
+                        {
+                            "permission": "agenticai:toolset:add",
+                            "title": "Add",
+                            "type": "POPUP_FORM",
+                            "selectionType": "NONE",
+                            "identifier": "saas-service-action:aiadministration-add-mcpserver",
+                            "api-endpoint": {
+                                "service-name": "saas-reports",
+                                "methodName": "getForm",
+                                "stringified-params": true,
+                                "parse-output": false,
+                                "params": [
+                                    {
+                                        "formId": "rda.saas.mcpserver.local.add"
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "permission": "agenticai:toolset:edit",
+                            "title": "Edit",
+                            "type": "POPUP_FORM",
+                            "selectionType": "SINGLE",
+                            "identifier": "saas-service-action:aiadministration-edit-mcpserver",
+                            "api-endpoint": {
+                                "service-name": "saas-reports",
+                                "methodName": "getForm",
+                                "stringified-params": true,
+                                "parse-output": false,
+                                "params": [
+                                    {
+                                        "formId": "rda.saas.mcpserver.local.edit"
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "permission": "agenticai:toolset:delete",
+                            "title": "Delete",
+                            "type": "POPUP_FORM",
+                            "selectionType": "SINGLE",
+                            "identifier": "saas-service-action:aiadministration-delete-mcpserver",
+                            "api-endpoint": {
+                                "service-name": "saas-reports",
+                                "methodName": "getForm",
+                                "stringified-params": true,
+                                "parse-output": false,
+                                "params": [
+                                    {
+                                        "formId": "rda.saas.mcpserver.local.delete"
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "appName": "user-dashboard/ai_tool_usage",
+                            "permission": "agenticai:page:view",
+                            "drillDownLinkField": "domain",
+                            "identifier": "domain",
+                            "selectionType": "SINGLE",
+                            "stateName": "app.featureapp",
+                            "title": "View Details",
+                            "type": "GO_TO_APP_STATE"
+                        }
+                    ]
+                },
+                {
+                    "context_filter": "show_conversations = 'yes'",
+                    "extra_filter": "(type = 'client' and (USER_ID contains '{{SEARCH_TEXT}}' or conversationLabel contains '{{SEARCH_TEXT}}'  or llm contains '{{SEARCH_TEXT}}' or persona contains '{{SEARCH_TEXT}}' or message contains '{{SEARCH_TEXT}}')) and ai_project_name is '{{ai_project_name}}'",
+                    "title": "Conversations",
+                    "widget_type": "tabular",
+                    "duration_hours": 1080,
+                    "max_width": 12,
+                    "height": 5,
+                    "min_width": 12,
+                    "stream": "rda_chat_sessions",
+                    "ts_column": "timestamp",
+                    "virtual_scrolling": true,
+                    "showRowSummary": false,
+                    "columns": {
+                        "timestamp": {
+                            "title": "Timestamp",
+                            "type": "DATETIME",
+                            "hidden": false
+                        },
+                        "USER_ID": {
+                            "title": "User Id",
+                            "type": "TEXT",
+                            "hidden": false
+                        },
+                        "conversationLabel": {
+                            "title": "Conversationlabel",
+                            "type": "TEXT",
+                            "hidden": false,
+                            "key": true
+                        },
+                        "request_type": {
+                            "title": "Request Type",
+                            "type": "TEXT",
+                            "hidden": false
+                        },
+                        "persona": {
+                            "title": "Persona",
+                            "type": "TEXT",
+                            "hidden": false
+                        },
+                        "llm": {
+                            "title": "LLM",
+                            "type": "TEXT",
+                            "hidden": false
+                        },
+                        "message": {
+                            "title": "Message",
+                            "type": "TEXT",
+                            "hidden": false,
+                            "formatter": "truncate"
+                        },
+                        "conversationId": {
+                            "title": "Conversationid",
+                            "type": "TEXT",
+                            "hidden": true,
+                            "key": true
+                        },
+                        "conversation_id": {
+                            "title": "Conversationid",
+                            "type": "COMPUTED",
+                            "expr": "conversationId",
+                            "hidden": true,
+                            "key": true
+                        }
+                    },
+                    "actions": [
+                        {
+                            "appName": "user-dashboard/ai_conversation_details_app",
+                            "permission": "agenticai:conversation:view",
+                            "drillDownLinkField": "conversationLabel",
+                            "identifier": "conversationLabel",
+                            "selectionType": "SINGLE",
+                            "stateName": "app.featureapp",
+                            "title": "View Details",
+                            "type": "GO_TO_APP_STATE"
+                        }
+                    ],
+                    "widget_id": "1df1b6dc"
+                },
+                {
+                    "title": "Prompt Templates",
+                    "context_filter": "show_prompt_templates = 'yes'",
+                    "extra_filter": "(prompt_template_name contains '{{SEARCH_TEXT}}' or template_description contains '{{SEARCH_TEXT}}' ) and ai_project_name is '{{ai_project_name}}'",
+                    "widget_type": "tabular",
+                    "min_width": 12,
+                    "height": 5,
+                    "max_width": 12,
+                    "timebased": false,
+                    "timestamp": "timestamp",
+                    "stream": "ai_mcp_prompt_templates",
+                    "columns": {
+                        "prompt_template_name": {
+                            "title": "Prompt Template Name",
+                            "key": true
+                        },
+                        "ai_project_name": {
+                            "title": "Project Name",
+                            "key": true
+                        },
+                        "template_description": {
+                            "title": "Description",
+                            "key": true
+                        },
+                        "prompt_template": {
+                            "title": "Template",
+                            "defaultWidth": 500,
+                            "visible": false,
+                            "key": true
+                        },
+                        "token_count": {
+                            "title": "Token Count",
+                            "key": true
+                        }
+                    },
+                    "widget_id": "7e789b1b",
+                    "actions": [
+                        {
+                            "permission": "agenticai:prompt_template:add",
+                            "title": "Add",
+                            "type": "POPUP_FORM",
+                            "selectionType": "NONE",
+                            "identifier": "saas-service-action:aiadministration-add-prompt-template",
+                            "api-endpoint": {
+                                "service-name": "saas-reports",
+                                "methodName": "getForm",
+                                "stringified-params": true,
+                                "parse-output": false,
+                                "params": [
+                                    {
+                                        "formId": "rda.saas.dynamic.form",
+                                        "formDefinition": {
+                                            "id": "rda.saas.dynamic.form",
+                                            "refreshRequired": true,
+                                            "formFieldList": [
+                                                {
+                                                    "fieldId": "prompt_template_name",
+                                                    "label": "Template Name",
+                                                    "description": "Prompt Template Name",
+                                                    "required": true,
+                                                    "isSecret": false,
+                                                    "dataType": "string",
+                                                    "hidden": false,
+                                                    "editable": true,
+                                                    "controlType": "TEXT"
+                                                },
+                                                {
+                                                    "fieldId": "template_description",
+                                                    "label": "Description",
+                                                    "description": "Prompt Template Description",
+                                                    "required": true,
+                                                    "isSecret": false,
+                                                    "dataType": "string",
+                                                    "hidden": false,
+                                                    "editable": true,
+                                                    "controlType": "TEXT"
+                                                },
+                                                {
+                                                    "fieldId": "prompt_template",
+                                                    "label": "Prompt Template",
+                                                    "description": "Prompt Template",
+                                                    "required": true,
+                                                    "isSecret": false,
+                                                    "dataType": "string",
+                                                    "hidden": false,
+                                                    "editable": true,
+                                                    "controlType": "TEXT_FIELD"
+                                                }
+                                            ]
+                                        },
+                                        "actions": [
+                                            {
+                                                "type": "API_ENDPOINT",
+                                                "service-name": "chat-helper",
+                                                "namespace": "io.cfx.dimensions.app",
+                                                "methodName": "get-prompt-template",
+                                                "stringified-params": true,
+                                                "parse-output": false,
+                                                "useReportContext": true,
+                                                "params": [
+                                                    {
+                                                        "form_id": "chatHelper.add.prompt.template",
+                                                        "context": {}
+                                                    }
+                                                ]
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "permission": "agenticai:prompt_template:view",
+                            "title": "View Template",
+                            "type": "POPUP_FORM",
+                            "selectionType": "SINGLE",
+                            "drillDownLinkField": "prompt_template_name",
+                            "identifier": "saas-service-action:aiadministration-view-prompt-template",
+                            "api-endpoint": {
+                                "service-name": "saas-reports",
+                                "methodName": "getForm",
+                                "stringified-params": true,
+                                "parse-output": false,
+                                "params": [
+                                    {
+                                        "formId": "rda.saas.dynamic.form",
+                                        "formDefinition": {
+                                            "id": "rda.saas.dynamic.form",
+                                            "refreshRequired": true,
+                                            "submitRequired": false,
+                                            "formFieldList": [
+                                                {
+                                                    "fieldId": "prompt_template_name",
+                                                    "label": "Template Name",
+                                                    "description": "Prompt Template Name",
+                                                    "required": true,
+                                                    "isSecret": false,
+                                                    "dataType": "string",
+                                                    "hidden": false,
+                                                    "editable": false,
+                                                    "controlType": "TEXT"
+                                                },
+                                                {
+                                                    "fieldId": "template_description",
+                                                    "label": "Description",
+                                                    "description": "Prompt Template Description",
+                                                    "required": true,
+                                                    "isSecret": false,
+                                                    "dataType": "string",
+                                                    "hidden": false,
+                                                    "editable": true,
+                                                    "controlType": "TEXT"
+                                                },
+                                                {
+                                                    "fieldId": "prompt_template",
+                                                    "label": "Prompt Template",
+                                                    "description": "Prompt Template",
+                                                    "required": true,
+                                                    "isSecret": false,
+                                                    "dataType": "string",
+                                                    "hidden": false,
+                                                    "editable": false,
+                                                    "controlType": "TEXT_AREA"
+                                                }
+                                            ]
+                                        }
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "permission": "agenticai:prompt_template:edit",
+                            "title": "Edit Template",
+                            "type": "POPUP_FORM",
+                            "selectionType": "SINGLE",
+                            "identifier": "saas-service-action:aiadministration-edit-prompt-template",
+                            "api-endpoint": {
+                                "service-name": "saas-reports",
+                                "methodName": "getForm",
+                                "stringified-params": true,
+                                "parse-output": false,
+                                "params": [
+                                    {
+                                        "formId": "rda.saas.dynamic.form",
+                                        "formDefinition": {
+                                            "id": "rda.saas.dynamic.form",
+                                            "refreshRequired": true,
+                                            "formFieldList": [
+                                                {
+                                                    "fieldId": "prompt_template_name",
+                                                    "label": "Template Name",
+                                                    "description": "Prompt Template Name",
+                                                    "required": true,
+                                                    "isSecret": false,
+                                                    "dataType": "string",
+                                                    "hidden": false,
+                                                    "editable": false,
+                                                    "controlType": "TEXT"
+                                                },
+                                                {
+                                                    "fieldId": "template_description",
+                                                    "label": "Description",
+                                                    "description": "Prompt Template Description",
+                                                    "required": true,
+                                                    "isSecret": false,
+                                                    "dataType": "string",
+                                                    "hidden": false,
+                                                    "editable": true,
+                                                    "controlType": "TEXT"
+                                                },
+                                                {
+                                                    "fieldId": "prompt_template",
+                                                    "label": "Prompt Template",
+                                                    "description": "Prompt Template",
+                                                    "required": true,
+                                                    "isSecret": false,
+                                                    "dataType": "string",
+                                                    "hidden": false,
+                                                    "editable": true,
+                                                    "controlType": "TEXT_AREA"
+                                                }
+                                            ]
+                                        },
+                                        "actions": [
+                                            {
+                                                "type": "API_ENDPOINT",
+                                                "service-name": "chat-helper",
+                                                "namespace": "io.cfx.dimensions.app",
+                                                "methodName": "get-prompt-template",
+                                                "stringified-params": true,
+                                                "parse-output": false,
+                                                "useReportContext": true,
+                                                "params": [
+                                                    {
+                                                        "form_id": "chatHelper.edit.prompt.template",
+                                                        "context": {}
+                                                    }
+                                                ]
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "permission": "agenticai:prompt_template:delete",
+                            "title": "Delete Template",
+                            "type": "POPUP_FORM",
+                            "selectionType": "SINGLE",
+                            "identifier": "saas-service-action:aiadministration-delete-prompt-template",
+                            "api-endpoint": {
+                                "service-name": "saas-reports",
+                                "methodName": "getForm",
+                                "stringified-params": true,
+                                "parse-output": false,
+                                "params": [
+                                    {
+                                        "formId": "rda.saas.dynamic.form",
+                                        "formDefinition": {
+                                            "id": "rda.saas.dynamic.form",
+                                            "refreshRequired": true,
+                                            "formFieldList": [
+                                                {
+                                                    "help": "Do you want to delete the prompt template?",
+                                                    "dataType": "string",
+                                                    "controlType": "LABEL",
+                                                    "required": false,
+                                                    "editable": false,
+                                                    "label": "Do you want to delete the prompt template?",
+                                                    "hidden": false,
+                                                    "fieldId": "name"
+                                                }
+                                            ]
+                                        },
+                                        "actions": [
+                                            {
+                                                "type": "UPDATE_PSTREAM",
+                                                "pstreamName": "mcp_prompt_templates",
+                                                "operation": "DELETE",
+                                                "cfxql_query": "prompt_template_name is '{{prompt_template_name}}'"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        }
+                    ]
+                },
+                {
+                    "title": "Tool Usage",
+                    "widget_type": "tabular",
+                    "duration_hours": 1080,
+                    "max_width": 12,
+                    "height": 5,
+                    "min_width": 12,
+                    "stream": "rda_chat_sessions",
+                    "ts_column": "timestamp",
+                    "context_filter": "show_tool_usage = 'yes'",
+                    "extra_filter": "(tool_domain contains '{{SEARCH_TEXT}}' or tool_name contains '{{SEARCH_TEXT}}' or USER_ID contains '{{SEARCH_TEXT}}' or conversationLabel contains '{{SEARCH_TEXT}}'  or llm contains '{{SEARCH_TEXT}}' or persona contains '{{SEARCH_TEXT}}') and ai_project_name is '{{ai_project_name}}'",
+                    "virtual_scrolling": false,
+                    "showRowSummary": false,
+                    "columns": {
+                        "timestamp": {
+                            "title": "Timestamp",
+                            "type": "DATETIME",
+                            "hidden": false
+                        },
+                        "USER_ID": {
+                            "title": "User Id",
+                            "type": "TEXT",
+                            "hidden": false
+                        },
+                        "conversationLabel": {
+                            "title": "Conversation Label",
+                            "type": "TEXT",
+                            "hidden": false,
+                            "key": true
+                        },
+                        "persona": {
+                            "title": "Persona",
+                            "type": "TEXT",
+                            "hidden": false
+                        },
+                        "llm": {
+                            "title": "LLM",
+                            "type": "TEXT",
+                            "hidden": false
+                        },
+                        "tool_name": {
+                            "title": "Tool Name",
+                            "type": "TEXT",
+                            "hidden": false,
+                            "key": true,
+                            "htmlTemplateForRow": "{%raw%}<details><summary>{{row.tool_name}}</summary><div style='overflow: auto; height: 150px;'><pre>{{ row.tool_content }}</pre></div></details>{%endraw%}"
+                        },
+                        "tool_content": {
+                            "title": "Tool Content",
+                            "type": "TEXT",
+                            "hidden": true,
+                            "key": false
+                        },
+                        "conversationId": {
+                            "title": "Conversationid",
+                            "type": "TEXT",
+                            "hidden": true,
+                            "key": true
+                        }
+                    },
+                    "actions": [
+                        {
+                            "appName": "user-dashboard/ai_conversation_details",
+                            "permission": "agenticai:conversation:view",
+                            "drillDownLinkField": "conversationLabel",
+                            "identifier": "conversationLabel",
+                            "selectionType": "SINGLE",
+                            "stateName": "app.featureapp",
+                            "title": "View Details",
+                            "type": "GO_TO_APP_STATE"
+                        }
+                    ],
+                    "widget_id": "8f11fe3e"
+                },
+                {
+                    "title": "AI Agents",
+                    "context_filter": "show_agents = 'yes'",
+                    "widget_type": "tabular",
+                    "stream": "rda_orchestrator_flow_meta",
+                    "timebased": true,
+                    "remote_searchable": true,
+                    "ts_column": "timestamp",
+                    "paginated": true,
+                    "height": 5,
+                    "min_width": 12,
+                    "max_width": 12,
+                    "extra_filter": "(orchestration_type is 'workflow' and name contains 'Agent') and (name contains '{{SEARCH_TEXT}}') and ai_project_name is '{{ai_project_name}}'",
+                    "custom_columns": [
+                        {
+                            "id": "flow_name",
+                            "label": "Name",
+                            "expr": "str(name)",
+                            "key": true,
+                            "visible": false
+                        }
+                    ],
+                    "columns": {
+                        "name": {
+                            "title": "Agent",
+                            "key": true,
+                            "visible": true
+                        },
+                        "ai_project_name": {
+                            "title": "Project Name",
+                            "key": true
+                        },
+                        "description": {
+                            "title": "Description",
+                            "key": false,
+                            "visible": false
+                        },
+                        "timestamp": {
+                            "title": "Created",
+                            "type": "DATETIME",
+                            "key": false,
+                            "visible": false
+                        },
+                        "saved_time": {
+                            "title": "Last Updated",
+                            "type": "DATETIME",
+                            "key": false,
+                            "visible": true
+                        },
+                        "orchestration_type": {
+                            "title": "orchestration_type",
+                            "key": true,
+                            "visible": false
+                        }
+                    },
+                    "actions": [
+                        {
+                            "permission": "agenticai:workflow:add",
+                            "title": "Add Agent",
+                            "type": "GO_TO_APP_STATE",
+                            "selectionType": "NONE",
+                            "appName": "new-app/workflow-editor",
+                            "identifier": "orchestrator-action:workflow-add",
+                            "addTimeToContext": true
+                        },
+                        {
+                            "permission": "agenticai:workflow:import",
+                            "title": "Import",
+                            "type": "POPUP_FORM",
+                            "selectionType": "NONE",
+                            "identifier": "orchestrator-action:workflow-import",
+                            "api-endpoint": {
+                                "service-name": "saas-reports",
+                                "methodName": "getForm",
+                                "stringified-params": true,
+                                "parse-output": false,
+                                "params": [
+                                    {
+                                        "formId": "rda.saas.orchestrator.workflow.import"
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "permission": "agenticai:page:view",
+                            "title": "View Details",
+                            "type": "GO_TO_APP_STATE",
+                            "selectionType": "SINGLE",
+                            "appName": "user-dashboard/workflow_details",
+                            "identifier": "orchestrator-action:workflow-details"
+                        },
+                        {
+                            "permission": "agenticai:workflow:edit",
+                            "title": "Edit",
+                            "type": "GO_TO_APP_STATE",
+                            "selectionType": "SINGLE",
+                            "appName": "new-app/workflow-editor",
+                            "identifier": "orchestrator-action:workflow-edit"
+                        },
+                        {
+                            "permission": "agenticai:workflow:clone",
+                            "title": "Clone",
+                            "type": "POPUP_FORM",
+                            "selectionType": "SINGLE",
+                            "identifier": "orchestrator-action:workflow-clone",
+                            "api-endpoint": {
+                                "service-name": "saas-reports",
+                                "methodName": "getForm",
+                                "stringified-params": true,
+                                "parse-output": false,
+                                "params": [
+                                    {
+                                        "formId": "rda.saas.orchestrator.workflow.clone"
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "permission": "agenticai:workflow:run",
+                            "title": "Run",
+                            "type": "POPUP_FORM",
+                            "selectionType": "SINGLE",
+                            "identifier": "saas-service-action:run-pipeline",
+                            "api-endpoint": {
+                                "service-name": "saas-reports",
+                                "methodName": "getForm",
+                                "stringified-params": true,
+                                "parse-output": false,
+                                "params": [
+                                    {
+                                        "formId": "rda.saas.orchestrator.workflow.run"
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "permission": "agenticai:workflow:delete",
+                            "title": "Delete",
+                            "type": "POPUP_FORM",
+                            "selectionType": "SINGLE",
+                            "identifier": "saas-service-action:delete-orchestrator-flow",
+                            "api-endpoint": {
+                                "methodName": "getForm",
+                                "params": [
+                                    {
+                                        "formId": "rda.saas.orchestrator.flow.delete"
+                                    }
+                                ],
+                                "parse-output": false,
+                                "service-name": "saas-reports",
+                                "stringified-params": true
+                            }
+                        },
+                        {
+                            "permission": "agenticai:workflow:export",
+                            "title": "Export",
+                            "type": "POPUP_FORM",
+                            "selectionType": "SINGLE",
+                            "identifier": "orchestrator-action:workflow-export",
+                            "api-endpoint": {
+                                "service-name": "saas-reports",
+                                "methodName": "getForm",
+                                "stringified-params": true,
+                                "parse-output": false,
+                                "params": [
+                                    {
+                                        "formId": "rda.saas.orchestrator.workflow.export"
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "widget_id": "08bda3b5"
+                }
+            ]
+        }
+    ],
+    "dynamic_form": {
+        "formData": {},
+        "controlPanelFormDefinition": {
+            "title": "Search Options",
+            "buttonLabel": "Search",
+            "id": "ai.search.everything",
+            "refreshRequired": true,
+            "openByDefault": true,
+            "formFieldList": [
+                {
+                    "fieldId": "search_text",
+                    "label": "Search Text",
+                    "hidden": false,
+                    "editable": true,
+                    "required": true,
+                    "controlType": "TEXT_FIELD",
+                    "defaultValue": ""
+                },
+                {
+                    "fieldId": "show_personas",
+                    "label": "AI Personas",
+                    "hidden": false,
+                    "editable": true,
+                    "required": false,
+                    "controlType": "BOOLEAN_FIELD",
+                    "defaultValue": true
+                },
+                {
+                    "fieldId": "show_domains",
+                    "label": "Toolsets",
+                    "hidden": false,
+                    "editable": true,
+                    "required": false,
+                    "controlType": "BOOLEAN_FIELD",
+                    "defaultValue": true
+                },
+                {
+                    "fieldId": "show_prompt_templates",
+                    "label": "Prompt Templates",
+                    "hidden": false,
+                    "editable": true,
+                    "required": false,
+                    "controlType": "BOOLEAN_FIELD",
+                    "defaultValue": false
+                },
+                {
+                    "fieldId": "show_conversations",
+                    "label": "Conversations",
+                    "hidden": false,
+                    "editable": true,
+                    "required": false,
+                    "controlType": "BOOLEAN_FIELD",
+                    "defaultValue": false
+                },
+                {
+                    "fieldId": "show_tool_usage",
+                    "label": "Tool Usage",
+                    "hidden": false,
+                    "editable": true,
+                    "required": false,
+                    "controlType": "BOOLEAN_FIELD",
+                    "defaultValue": false
+                },
+                {
+                    "fieldId": "show_agents",
+                    "label": "Agents",
+                    "hidden": false,
+                    "editable": true,
+                    "required": false,
+                    "controlType": "BOOLEAN_FIELD",
+                    "defaultValue": false
+                }
+            ]
+        }
+    },
+    "attachments": [
+        {
+            "name": "generator",
+            "value": "{% if search_text is defined %}\n{{ dashboard.update({\"label\": \"Search AI Artifacts for \"+str(search_text) }) }}\n{% endif %}"
+        }
+    ],
+    "saved_time": "2025-10-15T10:11:01.734683"
+}

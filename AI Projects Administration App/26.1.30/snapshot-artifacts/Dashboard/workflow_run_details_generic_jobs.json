@@ -1,0 +1,89 @@
+{
+  "name": "workflow_run_details_generic_jobs",
+  "label": "{{FLOW_NAME}} Job Details",
+  "is_template": false,
+  "description": "Workflow Job Details",
+  "live_edit": false,
+  "version": "25.6.6.2",
+  "enabled": true,
+  "dashboard_folder": "Workflows",
+  "dashboard_type": "template",
+  "use_storyboard": false,
+  "default_storyboard": null,
+  "template_variables": {
+    "JOB_ID": {
+      "contextId": "jobId"
+    },
+    "FLOW_NAME": {
+      "contextId": "flow_name"
+    }
+  },
+  "computedContext": {},
+  "dashboard_filters": {},
+  "dashboard_sections": [
+    {
+      "title": "All Logs",
+      "widgets": [
+        {
+          "title": "{{FLOW_NAME}} Job Logs",
+          "widget_type": "tabular",
+          "stream": "rda_workflow_logs",
+          "timebased": false,
+          "remote_searchable": true,
+          "ts_column": "timestamp",
+          "sorting": [],
+          "paginated": true,
+          "columns": {
+            "timestamp": {
+              "title": "Timestamp",
+              "type": "DATETIME",
+              "key": false,
+              "hidden": false
+            },
+            "description": {
+              "title": "Description",
+              "key": false,
+              "visible": false
+            },
+            "jobId": {
+              "title": "Job ID",
+              "key": false,
+              "hidden": true
+            },
+            "step_index": {
+              "title": "Step Index",
+              "key": false
+            },
+            "taskType": {
+              "title": "Task Type",
+              "key": false
+            },
+            "severity_color": {
+              "title": "Color",
+              "type": "COLOR-MAP",
+              "source-column": "severity",
+              "color-map": {
+                "CRITICAL": "#E53935",
+                "ERROR": "#F57C00",
+                "WARNING": "#FFD54F",
+                "INFO": "#03A9F4"
+              }
+            },
+            "severity": {
+              "title": "Severity",
+              "key": false,
+              "htmlTemplateForRow": "<span class='badge' style='background-color: {{'{{ row.severity_color }}'}}' > {{'{{ row.severity }}'}} </span>"
+            },
+            "message": {
+              "title": "Message",
+              "key": false
+            }
+          },
+          "extra_filter": "jobId is '{{JOB_ID}}' and messageType != 'attachment' ",
+          "widget_id": "9a0a1ae8"
+        }
+      ]
+    }
+  ],
+  "custom_widgets": {}
+}

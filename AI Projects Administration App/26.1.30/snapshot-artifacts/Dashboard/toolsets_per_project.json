@@ -1,0 +1,209 @@
+{
+    "name": "toolsets_per_project",
+    "label": "Placeholder",
+    "description": "Placeholder",
+    "enabled": true,
+    "dashboard_type": "template",
+    "dashboard_folder": "AI",
+    "dashboard_filters": {
+        "time_filter": false
+    },
+    "template_variables": {
+        "PROJECT_NAME": {
+            "contextId": "ai_project_name"
+        }
+    },
+    "dashboard_sections": [
+        {
+            "title": "Local",
+            "show_filter": false,
+            "widgets": [
+                {
+                    "widget_type": "label",
+                    "label": "<div style='text-align:center;width:100%;'><h1><a style='text-decoration:none;' target='_blank'> Project : {{PROJECT_NAME}} </a></h1></div>",
+                    "min_width": 12,
+                    "widget_id": "4b1867d9"
+                },
+                {
+                    "title": "Toolsets",
+                    "widget_type": "tabular",
+                    "min_width": 12,
+                    "height": 8,
+                    "max_width": 12,
+                    "timebased": false,
+                    "timestamp": "timestamp",
+                    "stream": "ai_mcp_toolsets",
+                    "extra_filter": "ai_project_name is '{{PROJECT_NAME}}' or ai_project_name is None",
+                    "remote_searchable_cols": [
+                        "domain",
+                        "description"
+                    ],
+                    "preview_dashboard": "code_snippet_preview",
+                    "preview_width": 900,
+                    "preview_height": 700,
+                    "columns": {
+                        "domain": {
+                            "title": "Name",
+                            "key": true,
+                            "hidden": true
+                        },
+                        "toolset_name": {
+                            "title": "Name",
+                            "key": true
+                        },
+                        "description": {
+                            "title": "Description",
+                            "key": false
+                        },
+                        "enabled": {
+                            "title": "Enabled",
+                            "type": "TEXT",
+                            "visible": false,
+                            "key": true,
+                            "defaultValue": "yes",
+                            "uiProperties": {
+                                "valueMap": {
+                                    "editType": "switch",
+                                    "trueValue": "true",
+                                    "falseValue": "false",
+                                    "defaultValue": "true",
+                                    "editable": true,
+                                    "showLabel": false
+                                },
+                                "editEndpoint": {
+                                    "service-name": "chat-helper",
+                                    "namespace": "io.cfx.dimensions.app",
+                                    "methodName": "enable-disable-ai-artifacts",
+                                    "stringified-params": true,
+                                    "useReportContext": true,
+                                    "parse-output": false,
+                                    "params": [
+                                        {
+                                            "artifact": "toolsets"
+                                        }
+                                    ]
+                                }
+                            }
+                        },
+                        "tools": {
+                            "title": "Tools",
+                            "key": false
+                        },
+                        "textResources": {
+                            "title": "Resources",
+                            "key": false
+                        },
+                        "contents": {
+                            "title": "YAML",
+                            "defaultWidth": 500,
+                            "visible": false,
+                            "key": true
+                        }
+                    },
+                    "widget_id": "2630645a",
+                    "actions": [
+                        {
+                            "permission": "agenticai:toolset:add",
+                            "title": "Add",
+                            "type": "POPUP_FORM",
+                            "selectionType": "NONE",
+                            "identifier": "saas-service-action:aiadministration-add-mcpserver",
+                            "api-endpoint": {
+                                "service-name": "saas-reports",
+                                "methodName": "getForm",
+                                "stringified-params": true,
+                                "parse-output": false,
+                                "params": [
+                                    {
+                                        "formId": "rda.saas.mcpserver.local.add"
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "permission": "agenticai:toolset:edit",
+                            "title": "Edit",
+                            "type": "POPUP_FORM",
+                            "selectionType": "SINGLE",
+                            "identifier": "saas-service-action:aiadministration-edit-mcpserver",
+                            "api-endpoint": {
+                                "service-name": "saas-reports",
+                                "methodName": "getForm",
+                                "stringified-params": true,
+                                "parse-output": false,
+                                "params": [
+                                    {
+                                        "formId": "rda.saas.mcpserver.local.edit"
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "permission": "agenticai:toolset:view",
+                            "title": "View",
+                            "type": "POPUP_FORM",
+                            "selectionType": "SINGLE",
+                            "drillDownLinkField": "toolset_name",
+                            "identifier": "saas-service-action:aiadministration-view-mcpserver",
+                            "api-endpoint": {
+                                "service-name": "saas-reports",
+                                "methodName": "getForm",
+                                "stringified-params": true,
+                                "parse-output": false,
+                                "params": [
+                                    {
+                                        "formId": "rda.saas.mcpserver.local.view"
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "permission": "agenticai:toolset:delete",
+                            "title": "Delete",
+                            "type": "POPUP_FORM",
+                            "selectionType": "SINGLE",
+                            "identifier": "saas-service-action:aiadministration-delete-mcpserver",
+                            "api-endpoint": {
+                                "service-name": "saas-reports",
+                                "methodName": "getForm",
+                                "stringified-params": true,
+                                "parse-output": false,
+                                "params": [
+                                    {
+                                        "formId": "rda.saas.mcpserver.local.delete"
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "appName": "user-dashboard/ai_tool_usage",
+                            "permission": "agenticai:page:view",
+                            "drillDownLinkField": "domain",
+                            "identifier": "domain",
+                            "selectionType": "SINGLE",
+                            "stateName": "app.featureapp",
+                            "title": "View Details",
+                            "type": "GO_TO_APP_STATE"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "title": "Imported",
+            "show_filter": false,
+            "widgets": [
+                {
+                    "title": "Imported Toolsets",
+                    "widget_type": "portal_tabular",
+                    "reportId": "rda.saas.aiproject.mcptools.list.tabular",
+                    "only_imported": true,
+                    "height": 10,
+                    "min_wdith": 12,
+                    "widget_id": "ea3a3778"
+                }
+            ]
+        }
+    ],
+    "saved_time": "2025-11-04T09:49:44.508788"
+}

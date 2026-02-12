@@ -1,0 +1,314 @@
+{
+    "name": "workflow_job_status",
+    "label": "Workflow Job Status",
+    "is_template": false,
+    "description": "Workflow Job Job Status",
+    "live_edit": true,
+    "version": "25.1.4.2",
+    "enabled": true,
+    "dashboard_type": "template",
+    "dashboard_folder": "Workflow",
+    "dashboard_style": "auto",
+    "use_storyboard": false,
+    "default_storyboard": null,
+    "template_variables": {
+        "JOB_ID": {
+            "contextId": "jobId"
+        },
+        "WORKFLOW_NAME": {
+            "contextId": "workflow_name"
+        },
+        "ai_project_name": {
+            "contextId": "ai_project_name"
+        }
+    },
+    "dashboard_filters": {},
+    "dashboard_sections": [
+        {
+            "title": "Output",
+            "widgets": [
+                {
+                    "title": "Workflow View",
+                    "widget_type": "label",
+                    "label": "attachment://agentOutput",
+                    "advanced": false,
+                    "uses_reporting_engine": true,
+                    "fixed_variables": {
+                        "agent_name": "{{FLOW_NAME}}",
+                        "job_id": "{{JOB_ID}}"
+                    },
+                    "widget_id": "accfc497",
+                    "min_width": 12,
+                    "max_width": 12,
+                    "height": 8
+                }
+            ]
+        },
+        {
+            "title": "Workflow Steps",
+            "widgets": [
+                {
+                    "title": "Workflow View",
+                    "widget_type": "custom_widget",
+                    "widget_implementation": "workflow_job_status/workflow_viewer",
+                    "advanced": true,
+                    "uses_reporting_engine": true,
+                    "widget_id": "42a4e9fa",
+                    "min_width": 5,
+                    "max_width": 5,
+                    "height": 18
+                }
+            ]
+        },
+        {
+            "title": "Attachments",
+            "widgets": [
+                {
+                    "title": "Workflow Attachments",
+                    "widget_type": "custom_widget",
+                    "advanced": true,
+                    "uses_reporting_engine": true,
+                    "widget_implementation": "workflow_job_status/workflow_attachments_viewer",
+                    "fixed_variables": {
+                        "test_variable": "Test"
+                    },
+                    "min_width": 7,
+                    "max_width": 7,
+                    "height": 12,
+                    "widget_id": "118e2757"
+                }
+            ]
+        },
+        {
+            "title": "Logs",
+            "widgets": [
+                {
+                    "title": "Workflow Job Status",
+                    "widget_type": "tabular",
+                    "stream": "rda_workflow_logs",
+                    "extra_filter0": "jobId is '{{JOB_ID}}'",
+                    "timebased": false,
+                    "remote_searchable": true,
+                    "ts_column": "timestamp",
+                    "sorting": [],
+                    "paginated": true,
+                    "height": 18,
+                    "min_width": 7,
+                    "max_width": 7,
+                    "columns": {
+                        "timestamp": {
+                            "title": "Timestamp",
+                            "key": false,
+                            "type": "DATETIME",
+                            "hidden": true
+                        },
+                        "description": {
+                            "title": "Description",
+                            "key": false,
+                            "hidden": true
+                        },
+                        "customerName": {
+                            "title": "Customer Name",
+                            "key": false,
+                            "visible": false
+                        },
+                        "customerTag": {
+                            "title": "Customer Tag",
+                            "key": false,
+                            "visible": false
+                        },
+                        "jobId": {
+                            "title": "Job ID",
+                            "key": false,
+                            "hidden": true
+                        },
+                        "step_index": {
+                            "title": "Step Index",
+                            "key": false
+                        },
+                        "taskType": {
+                            "title": "Task Type",
+                            "key": false
+                        },
+                        "severity_color": {
+                            "title": "Color",
+                            "type": "COLOR-MAP",
+                            "source-column": "severity",
+                            "color-map": {
+                                "CRITICAL": "#E53935",
+                                "ERROR": "#F57C00",
+                                "WARNING": "#FFD54F",
+                                "INFO": "#03A9F4"
+                            }
+                        },
+                        "severity": {
+                            "title": "Severity",
+                            "key": false,
+                            "htmlTemplateForRow": "<span class='badge' style='background-color: {{'{{ row.severity_color }}'}}' > {{'{{ row.severity }}'}} </span>"
+                        },
+                        "message": {
+                            "title": "Message",
+                            "key": false
+                        }
+                    },
+                    "extra_filter": "jobId is '{{JOB_ID}}' and messageType != 'attachment' ",
+                    "widget_id": "9a0a1ae8"
+                }
+            ]
+        },
+        {
+            "title": "Conversation Details",
+            "widgets": [
+                {
+                    "title": "Conversations",
+                    "widget_type": "tabular",
+                    "duration_hours": 1080,
+                    "max_width": 12,
+                    "height": 8,
+                    "min_width": 12,
+                    "preview_dashboard": "ai_conversation_details",
+                    "preview_width": 900,
+                    "preview_height": 700,
+                    "stream": "rda_chat_sessions",
+                    "ts_column": "timestamp",
+                    "extra_filter": "type == 'client' and USER_ID is '{{WORKFLOW_NAME}}' and conversationId is '{{JOB_ID}}'",
+                    "virtual_scrolling": false,
+                    "showRowSummary": false,
+                    "columns": {
+                        "timestamp": {
+                            "title": "Timestamp",
+                            "type": "DATETIME",
+                            "hidden": false
+                        },
+                        "USER_ID": {
+                            "title": "User Id",
+                            "type": "TEXT",
+                            "hidden": false
+                        },
+                        "conversationLabel": {
+                            "title": "Conversationlabel",
+                            "type": "TEXT",
+                            "hidden": false,
+                            "key": true
+                        },
+                        "request_type": {
+                            "title": "Request Type",
+                            "type": "TEXT",
+                            "hidden": false,
+                            "key": true
+                        },
+                        "persona": {
+                            "title": "Persona",
+                            "type": "TEXT",
+                            "hidden": false
+                        },
+                        "llm": {
+                            "title": "LLM",
+                            "type": "TEXT",
+                            "hidden": false
+                        },
+                        "message": {
+                            "title": "Message",
+                            "type": "TEXT",
+                            "hidden": false,
+                            "formatter": "truncate"
+                        },
+                        "conversationId": {
+                            "title": "Conversationid",
+                            "type": "TEXT",
+                            "hidden": true,
+                            "key": true
+                        },
+                        "conversation_id": {
+                            "title": "Conversationid",
+                            "type": "COMPUTED",
+                            "expr": "conversationId",
+                            "hidden": true,
+                            "key": true
+                        }
+                    },
+                    "actions": [
+                        {
+                            "appName": "user-dashboard/ai_conversation_details_app",
+                            "permission": "agenticai:conversation:view",
+                            "drillDownLinkField": "conversationLabel",
+                            "identifier": "conversationLabel",
+                            "selectionType": "SINGLE",
+                            "stateName": "app.featureapp",
+                            "title": "View Details",
+                            "type": "GO_TO_APP_STATE"
+                        }
+                    ],
+                    "widget_id": "1df1b6dc"
+                }
+            ]
+        }
+    ],
+    "saved_time": "2025-10-30T10:54:44.928385",
+    "custom_widgets": {
+        "workflow_viewer": {
+            "artifacts": {
+                "main": {
+                    "attachment": "workflowView",
+                    "content_type": "text/html",
+                    "is_template": true
+                },
+                "data.json": {
+                    "attachment": "data.json",
+                    "content_type": "text/html",
+                    "is_template": true
+                }
+            }
+        },
+        "workflow_attachments_viewer": {
+            "artifacts": {
+                "main": {
+                    "attachment": "workflowAttachmentsView",
+                    "content_type": "text/html",
+                    "is_template": true
+                },
+                "wf-attachments.json": {
+                    "attachment": "wf-attachments.json",
+                    "content_type": "text/html",
+                    "is_template": true
+                }
+            }
+        }
+    },
+    "attachments": [
+        {
+            "name": "data.json",
+            "value": "{% set rt = engine.get_orchestrator_flow(ai_project_name,workflow_name) %}\r\n{% set statusMap = {} %}\r\n{% set statusMap2 = {} %}\r\n{% set logs = {} %}\r\n{% set log_data = {} %}\r\n\r\n{% set rows = engine.query_stream_data(\r\n    \"rda_workflow_logs\",\r\n    cfxql_query=\"jobId = '\"+jobId+\"' and messageType != 'attachment' \",\r\n    sorting=[{\"timestamp\": \"asc\"}]\r\n) %}\r\n\r\n{%- for row in rows -%}\r\n    {%- set step_index = row.get(\"step_index\", -1) -%}\r\n\r\n    {%- if row.get(\"message\").startswith('Completed task') -%}\r\n        {%- set _ = statusMap.update({ step_index: \"success\" }) -%}\r\n    {%- elif row.get(\"message\").startswith('Task failed') -%}\r\n        {%- set _ = statusMap.update({ step_index: \"failed\" }) -%}\r\n    {%- elif row.get(\"message\").startswith('Task skipped') -%}\r\n        {%- set _ = statusMap2.update({ step_index: \"skipped\" }) -%}\r\n    {%- elif row.get(\"message\").startswith('Starting task') -%}\r\n        {%- set _ = statusMap2.update({ step_index: \"in_progress\" }) -%}\r\n    {%- endif -%}\r\n\r\n    {%- if step_index not in logs -%}\r\n        {%- set _ = logs.update({ step_index: [] }) -%}\r\n    {%- endif -%}\r\n\r\n    {%- if step_index not in log_data -%}\r\n        {%- set _ = log_data.update({ step_index: [] }) -%}\r\n    {%- endif -%}\r\n\r\n    {% set _ = logs[step_index].append(row[\"severity\"] ~ \": \" ~ row[\"message\"].replace(\"\\n\",\"\\\\n\")) %}\r\n    {% set _ = log_data[step_index].append(row) %}\r\n{%- endfor -%}\r\n\r\n{% set wf = rt.get(\"workflow\") %}\r\n{% set tasks = wf.get(\"tasks\", []) %}\r\n\r\n[\r\n    {% for task in tasks %}\r\n        {% set index = loop.index0 %}\r\n        {% set log_index = index - 1 if index > 0 else None %}\r\n        {\r\n            \"index\": {{ index }},\r\n            \"name1\": \"{{ task.get('description', task.get('type')) }}\",\r\n            \"name\": \"{{ task.get('label', task.get('type')) }}\",\r\n            \"logs\": [\r\n                {% if log_index is not none %}\r\n                    {% for log_line in logs.get(log_index, []) %}\r\n                        \"{{ log_line | replace('\\n', ' ') | e }}\"{{ \", \" if not loop.last else \"\" }}\r\n                    {% endfor %}\r\n                {% endif %}\r\n            ],\r\n            \"status\": \"{{ statusMap.get(index, statusMap2.get(index, 'not_executed')) }}\",\r\n            \"data\": [\r\n                {% if log_index is not none %}\r\n                    {% for row in log_data.get(log_index, []) %}\r\n                        {\r\n                            \"timestamp\": \"{{ row.timestamp }}\",\r\n                            \"description\": \"{{ row.description }}\",\r\n                            \"task_type\": \"{{ row.taskType }}\",\r\n                            \"severity\": \"{{ row.severity }}\",\r\n                            \"message\": \"{{ row.message.replace('\\n','\\\\n') }}\"\r\n                        }{{ \", \" if not loop.last else \"\" }}\r\n                    {% endfor %}\r\n                {% endif %}\r\n            ]\r\n        }{{ \", \" if not loop.last else \"\" }}\r\n    {% endfor %}\r\n]\r\n"
+        },
+        {
+            "name": "workflowViewMsb",
+            "value": "<!DOCTYPE html>\n<html lang=\"en\">\n\n<head>\n    <meta charset=\"UTF-8\">\n    <title>Task Viewer</title>\n    <link href=\"https://cdn.jsdelivr.net/npm/vuetify@3.8.8/dist/vuetify.min.css\" rel=\"stylesheet\">\n    <link href=\"https://cdn.jsdelivr.net/npm/@mdi/font@7.2.96/css/materialdesignicons.min.css\" rel=\"stylesheet\">\n    <script src=\"https://unpkg.com/vue@3/dist/vue.global.js\"></script>\n    <script src=\"https://cdn.jsdelivr.net/npm/vuetify@3.8.8/dist/vuetify.min.js\"></script>\n    <script src=\"https://cdn.jsdelivr.net/npm/monaco-editor@0.47.0/min/vs/loader.min.js\"></script>\n\n    <style>\n        #app {\n            font-family: Avenir, Helvetica, Arial, sans-serif;\n        }\n\n        html {\n            overflow-y: auto;\n        }\n\n        .card {\n            border-radius: 4px;\n            overflow: hidden;\n        }\n\n        .min-100 {\n            min-height: 100vh;\n        }\n\n        .v-card-title, .v-list-item-title {\n            font-size: 14px;\n        }\n\n        * {\n            font-size: 12px;\n        }\n    </style>\n</head>\n\n<body>\n    <div id=\"app\">\n        <v-app>\n            <v-container class=\"d-flex h-100 pa-0\" fluid style=\"background-color: rgb(var(--v-theme-cfxcard))\">\n                <v-card style=\"min-width: 250px;max-width: 250px; width: 250px;\">\n                    <v-list class=\"py-0\" color=\"primary\">\n                        <v-list-item v-for=\"(item, i) in tasks\" :key=\"i\" @click=\"selected = item\"\n                            :active=\"selected === item\" style=\"cursor: pointer\" :title=\"item.name\">\n                        </v-list-item>\n                    </v-list>\n                </v-card>\n                <div v-if=\"selected\" class=\"d-flex flex-column flex-grow-1 ml-2\">\n                    <v-card class=\"mb-2\" style=\"border-radius: 4px; overflow: hidden;\" color=\"primary\"\n                        density=\"compact\">\n                        <v-card-title class=\"px-4 py-2\">\n                            Logs\n                        </v-card-title>\n                        <div style=\"height: 250px\">\n                            <div id=\"monaco-container\" style=\"width: 100%; height: 100%;\"></div>\n                        </div>\n                    </v-card>\n                    <v-card class=\"flex-grow-1\" style=\"border-radius: 4px; overflow: hidden;\" color=\"primary\"\n                        density=\"compact\">\n                        <v-card-title class=\"px-4 py-2\">\n                            Details\n                        </v-card-title>\n                        <v-data-table :items=\"selected.data\" hide-default-footer density=\"compact\"\n                            class=\"h-100\"></v-data-table>\n                    </v-card>\n                </div>\n            </v-container>\n        </v-app>\n    </div>\n\n    <script>\n        const { createApp, ref, onMounted, watch } = Vue;\n        const { createVuetify, useTheme } = Vuetify;\n        const endpoint = \"data.json?jobId={{jobId}}&workflow_name={{workflow_name}}\"\n        console.log(\"MSB ENDPOINT \", endpoint)\n\n        const app = createApp({\n            setup() {\n                const tasks = ref([]);\n                const selected = ref(null);\n                const tab = ref(\"logs\")\n                let monacoInstance = null;\n                const theme = useTheme();\n\n                onMounted(async () => {\n                    try {\n                        const res = await fetch(endpoint);\n                        const data = await res.json();\n                        console.log(\"MSB CHECK DATA \", data)\n                        if (true) {\n                            const colorScheme = window?.parent\n                                .getComputedStyle(window.parent.document.documentElement)\n                                .getPropertyValue('color-scheme');\n                            if (colorScheme === \"dark\") {\n                                theme.name.value = \"dark\"\n                            } else {\n                                // temp for testing\n                                // theme.name.value = \"dark\"\n                            }\n                        }\n                        tasks.value = data;\n                        selected.value = tasks.value[0]; // auto-select first item\n                    } catch (error) {\n                        cnsole.log(\"Error getting task data\", error)\n                    }\n\n                    initMonaco(selected.value?.logs || '');\n                });\n\n                // Watch selected change\n                watch(selected, (newVal) => {\n                    if (monacoInstance && newVal) {\n                        monacoInstance.setValue(newVal.logs || '');\n                    }\n                });\n\n                // Initialize Monaco Editor\n                function initMonaco(logText) {\n                    require.config({ paths: { vs: 'https://cdn.jsdelivr.net/npm/monaco-editor@0.47.0/min/vs' } });\n                    require(['vs/editor/editor.main'], () => {\n                        monacoInstance = monaco.editor.create(document.getElementById('monaco-container'), {\n                            value: logText,\n                            language: 'plaintext',\n                            readOnly: true,\n                            automaticLayout: true,\n                            theme: 'vs-dark',\n                            fontSize: 13,\n                            minimap: { enabled: false }\n                        });\n                    });\n                }\n\n                return { tasks, selected, tab };\n            }\n        });\n\n        const vuetify = createVuetify({\n            theme: {\n                defaultTheme: \"light\",\n                themes: {\n                    light: {\n                        colors: {\n                            primary: \"#1976D2\",\n                            secondary: \"#e8e8e8\",\n                            cfxcard: \"#FFFFFF\",\n                            cfxcardheader: \"#0d48a1\"\n                        }\n                    },\n                    dark: {\n                        colors: {\n                            primary: \"#1976D2\",\n                            secondary: \"#424242\",\n                            cfxcard: \"#282F3A\",\n                            cfxcardheader: \"#0d48a1\"\n                        }\n                    },\n                }\n            }\n        });\n        app.use(vuetify);\n        app.mount('#app');\n    </script>\n\n</body>\n\n</html>"
+        },
+        {
+            "name": "wf-attachments.json",
+            "value": "{%- set query = \"jobId = '\"+jobId+\"' and messageType is 'attachment'\" -%}\n{%- set pstream = \"rda_workflow_logs\" -%}\n\n{%-\n    set attachments = engine.query_stream_data(pstream, cfxql_query=query)\n-%}\n\n{{attachments | tojson}}"
+        },
+        {
+            "name": "workflowAttachmentsViewMsb",
+            "value": "<!DOCTYPE html>\n<html lang=\"en\">\n\n<head>\n    <meta charset=\"UTF-8\">\n    <title>Task Viewer</title>\n    <link href=\"https://cdn.jsdelivr.net/npm/vuetify@3.8.8/dist/vuetify.min.css\" rel=\"stylesheet\">\n    <link href=\"https://cdn.jsdelivr.net/npm/@mdi/font@7.2.96/css/materialdesignicons.min.css\" rel=\"stylesheet\">\n    <script src=\"https://unpkg.com/vue@3/dist/vue.global.js\"></script>\n    <script src=\"https://cdn.jsdelivr.net/npm/vuetify@3.8.8/dist/vuetify.min.js\"></script>\n    <script src=\"https://cdn.jsdelivr.net/npm/monaco-editor@0.47.0/min/vs/loader.min.js\"></script>\n\n    <style>\n        #app {\n            font-family: Avenir, Helvetica, Arial, sans-serif;\n        }\n\n        html {\n            overflow-y: auto;\n        }\n\n        .card {\n            border-radius: 4px;\n            overflow: hidden;\n        }\n\n        .min-100 {\n            min-height: 100vh;\n        }\n\n        .v-card-title, .v-list-item-title {\n            font-size: 14px;\n        }\n\n        * {\n            font-size: 12px;\n        }\n\n        .v-application__wrap {\n            max-height: 100dvh;;\n        }\n    </style>\n</head>\n\n<body>\n    <div id=\"app\">\n        <v-app>\n            <v-container class=\"d-flex h-100 pa-0\" fluid style=\"background-color: rgb(var(--v-theme-cfxcard))\">\n                <v-card style=\"min-width: 250px;max-width: 250px; width: 250px;\">\n                    <v-list class=\"py-0\" color=\"primary\">\n                        <v-list-item v-for=\"(item, i) in tasks\" :key=\"i\" @click=\"selected = item\"\n                            :active=\"selected === item\" style=\"cursor: pointer\" :title=\"item.attachment_name\">\n                        </v-list-item>\n                    </v-list>\n                </v-card>\n                <div v-if=\"selected\" class=\"h-100 w-100 ml-2\">\n                    <v-card class=\"mb-2 h-100\" style=\"border-radius: 4px; overflow: hidden;\" color=\"primary\"\n                        density=\"compact\">\n                        <v-card-title class=\"px-4 py-2\">\n                            Logs\n                        </v-card-title>\n                        <div class=\"h-100\">\n                            <div id=\"monaco-container\" style=\"width: 100%; height: 100%;\"></div>\n                        </div>\n                    </v-card>\n                </div>\n            </v-container>\n        </v-app>\n    </div>\n\n    <script>\n        const { createApp, ref, onMounted, watch } = Vue;\n        const { createVuetify, useTheme } = Vuetify;\n        const endpoint = \"wf-attachments.json\";\n        console.log(\"MSB ENDPOINT \", endpoint);\n\n        {%- set query = \"jobId = '\"+jobId+\"' and messageType is 'attachment'\" -%}\n        {%- set pstream = \"rda_workflow_logs\" -%}\n\n        {%-\n           set attachments = engine.query_stream_data(pstream, cfxql_query=query)\n        -%}\n\n        const app = createApp({\n            setup() {\n                const tasks = ref([]);\n                const selected = ref(null);\n                const tab = ref(\"logs\")\n                let monacoInstance = null;\n                const theme = useTheme();\n\n                const formatJSON = (str) => {\n                    return JSON.stringify(JSON.parse(str), null, 2)\n                }\n\n                onMounted(async () => {\n                    try {\n//                        const res = await fetch(endpoint);\n//                        const data = await res.json();\n//                        console.log(\"MSB CHECK DATA \", data)\n\n                        const colorScheme = window?.parent\n                            .getComputedStyle(window.parent.document.documentElement)\n                            .getPropertyValue('color-scheme');\n                        if (colorScheme === \"dark\") {\n                            theme.name.value = \"dark\"\n                        } else {\n                            // temp for testing\n                            // theme.name.value = \"dark\"\n                        }\n                        tasks.value = {{attachments | tojson}};\n                        //tasks.value = data;\n\n                        selected.value = tasks.value[0]; // auto-select first item\n                    } catch (error) {\n                        console.log(\"Error getting task data\", error)\n                    }\n\n                    if(selected?.value.attachment_data && selected.value?.attachment_format === 'json'){\n                        initMonaco(formatJSON(selected.value?.attachment_data), 'json');\n                    }else{\n                        initMonaco(selected.value?.attachment_data || '', selected.value?.attachment_format || 'plaintext');\n                    }\n                });\n\n                // Watch selected change\n                watch(selected, (newVal) => {\n                    if (monacoInstance && newVal) {\n                        if(newVal.attachment_data && newVal.attachment_format==='json'){\n                            monacoInstance.setValue(formatJSON(newVal.attachment_data));\n                        }else{\n                            monacoInstance.setValue(newVal.attachment_data || '');\n                        }\n                        if(newVal.attachment_format){\n                            monaco.editor.setModelLanguage(monacoInstance.getModel(), newVal.attachment_format)\n                        }else{\n                            monaco.editor.setModelLanguage(monacoInstance.getModel(), 'plaintext')\n                        }\n                    }\n                });\n\n                // Initialize Monaco Editor\n                function initMonaco(logText, language) {\n                    require.config({ paths: { vs: 'https://cdn.jsdelivr.net/npm/monaco-editor@0.47.0/min/vs' } });\n                    require(['vs/editor/editor.main'], () => {\n                        monacoInstance = monaco.editor.create(document.getElementById('monaco-container'), {\n                            value: logText,\n                            language: language,\n                            readOnly: true,\n                            automaticLayout: true,\n                            theme: 'vs-dark',\n                            autoIndent: true,\n                            formatOnPaste: true,\n                            formatOnType: true,\n                            fontSize: 13,\n                            minimap: { enabled: false }\n                        });\n                    });\n                }\n\n                return { tasks, selected, tab };\n            }\n        });\n\n        const vuetify = createVuetify({\n            theme: {\n                defaultTheme: \"light\",\n                themes: {\n                    light: {\n                        colors: {\n                            primary: \"#1976D2\",\n                            secondary: \"#e8e8e8\",\n                            cfxcard: \"#FFFFFF\",\n                            cfxcardheader: \"#0d48a1\"\n                        }\n                    },\n                    dark: {\n                        colors: {\n                            primary: \"#1976D2\",\n                            secondary: \"#424242\",\n                            cfxcard: \"#282F3A\",\n                            cfxcardheader: \"#0d48a1\"\n                        }\n                    },\n                }\n            }\n        });\n        app.use(vuetify);\n        app.mount('#app');\n    </script>\n\n</body>\n\n</html>"
+        },
+        {
+            "name": "workflowView",
+            "value": "<!DOCTYPE html>\n<html lang=\"en\">\n\n<head>\n    <meta charset=\"UTF-8\">\n    <title>Task Viewer</title>\n    <link href=\"https://cdn.jsdelivr.net/npm/vuetify@3.8.8/dist/vuetify.min.css\" rel=\"stylesheet\">\n    <link href=\"https://cdn.jsdelivr.net/npm/@mdi/font@7.2.96/css/materialdesignicons.min.css\" rel=\"stylesheet\">\n    <script src=\"https://unpkg.com/vue@3/dist/vue.global.js\"></script>\n    <script src=\"https://cdn.jsdelivr.net/npm/vuetify@3.8.8/dist/vuetify.min.js\"></script>\n    <script src=\"https://cdn.jsdelivr.net/npm/monaco-editor@0.47.0/min/vs/loader.min.js\"></script>\n\n    <style>\n        #app {\n            font-family: Avenir, Helvetica, Arial, sans-serif;\n        }\n\n        html {\n            overflow-y: auto;\n        }\n\n        .card {\n            border-radius: 4px;\n            overflow: hidden;\n        }\n\n        .min-100 {\n            min-height: 100vh;\n        }\n\n        .v-card-title, .v-list-item-title {\n            font-size: 14px;\n        }\n\n        * {\n            font-size: 12px;\n        }\n    </style>\n</head>\n\n<body>\n    <div id=\"app\">\n        <v-app>\n            <v-container class=\"d-flex h-100 pa-0\" fluid style=\"background-color: rgb(var(--v-theme-cfxcard))\">\n                <v-card style=\"min-width: 250px;max-width: 250px; width: 250px;\">\n                    <v-list class=\"py-0\" color=\"primary\">\n                        <v-list-item v-for=\"(item, i) in tasks\" :key=\"i\" @click=\"selected = item\"\n                            :active=\"selected === item\" style=\"cursor: pointer\" :title=\"item.name\">\n                        </v-list-item>\n                    </v-list>\n                </v-card>\n                <div v-if=\"selected\" class=\"d-flex flex-column flex-grow-1 ml-2\">\n                    <v-card class=\"mb-2\" style=\"border-radius: 4px; overflow: hidden;\" color=\"primary\"\n                        density=\"compact\">\n                        <v-card-title class=\"px-4 py-2\">\n                            Logs\n                        </v-card-title>\n                        <div style=\"height: 250px\">\n                            <div id=\"monaco-container\" style=\"width: 100%; height: 100%;\"></div>\n                        </div>\n                    </v-card>\n                    <v-card class=\"flex-grow-1\" style=\"border-radius: 4px; overflow: hidden;\" color=\"primary\"\n                        density=\"compact\">\n                        <v-card-title class=\"px-4 py-2\">\n                            Details\n                        </v-card-title>\n                        <v-data-table :items=\"selected.data\" hide-default-footer density=\"compact\"\n                            class=\"h-100\"></v-data-table>\n                    </v-card>\n                </div>\n            </v-container>\n        </v-app>\n    </div>\n\n    <script>\n        const { createApp, ref, onMounted, watch } = Vue;\n        const { createVuetify, useTheme } = Vuetify;\n        const endpoint = \"data.json?jobId={{jobId}}&workflow_name={{workflow_name}}&ai_project_name={{ai_project_name}}\"\n        console.log(\"MSB ENDPOINT \", endpoint)\n\n        const app = createApp({\n            setup() {\n                const tasks = ref([]);\n                const selected = ref(null);\n                const tab = ref(\"logs\")\n                let monacoInstance = null;\n                const theme = useTheme();\n\n                onMounted(async () => {\n                    try {\n                        const res = await fetch(endpoint);\n                        const data = await res.json();\n                        console.log(\"MSB CHECK DATA \", data)\n                        if (true) {\n                            const colorScheme = window?.parent\n                                .getComputedStyle(window.parent.document.documentElement)\n                                .getPropertyValue('color-scheme');\n                            if (colorScheme === \"dark\") {\n                                theme.name.value = \"dark\"\n                            } else {\n                                // temp for testing\n                                // theme.name.value = \"dark\"\n                            }\n                        }\n                        tasks.value = data;\n                        selected.value = tasks.value[0]; // auto-select first item\n                    } catch (error) {\n                        console.log(\"Error getting task data\", error)\n                    }\n\n                    initMonaco(selected.value?.logs?.join('\\n') || '');\n                });\n\n                // Watch selected change\n                watch(selected, (newVal) => {\n                    if (monacoInstance && newVal) {\n                        monacoInstance.setValue(newVal.logs?.join('\\n') || '');\n                    }\n                });\n\n                // Initialize Monaco Editor\n                function initMonaco(logText) {\n                    require.config({ paths: { vs: 'https://cdn.jsdelivr.net/npm/monaco-editor@0.47.0/min/vs' } });\n                    require(['vs/editor/editor.main'], () => {\n                        monacoInstance = monaco.editor.create(document.getElementById('monaco-container'), {\n                            value: logText,\n                            language: 'plaintext',\n                            readOnly: true,\n                            automaticLayout: true,\n                            theme: 'vs-dark',\n                            fontSize: 13,\n                            minimap: { enabled: false }\n                        });\n                    });\n                }\n\n                return { tasks, selected, tab };\n            }\n        });\n\n        const vuetify = createVuetify({\n            theme: {\n                defaultTheme: \"light\",\n                themes: {\n                    light: {\n                        colors: {\n                            primary: \"#1976D2\",\n                            secondary: \"#e8e8e8\",\n                            cfxcard: \"#FFFFFF\",\n                            cfxcardheader: \"#0d48a1\"\n                        }\n                    },\n                    dark: {\n                        colors: {\n                            primary: \"#1976D2\",\n                            secondary: \"#424242\",\n                            cfxcard: \"#282F3A\",\n                            cfxcardheader: \"#0d48a1\"\n                        }\n                    },\n                }\n            }\n        });\n        app.use(vuetify);\n        app.mount('#app');\n    </script>\n\n</body>\n\n</html>"
+        },
+        {
+            "name": "workflowAttachmentsView",
+            "value": "<!DOCTYPE html>\n<html lang=\"en\">\n\n<head>\n    <meta charset=\"UTF-8\">\n    <title>Task Viewer</title>\n    <link href=\"https://cdn.jsdelivr.net/npm/vuetify@3.8.8/dist/vuetify.min.css\" rel=\"stylesheet\">\n    <link href=\"https://cdn.jsdelivr.net/npm/@mdi/font@7.2.96/css/materialdesignicons.min.css\" rel=\"stylesheet\">\n    <script src=\"https://unpkg.com/vue@3/dist/vue.global.js\"></script>\n    <script src=\"https://cdn.jsdelivr.net/npm/vuetify@3.8.8/dist/vuetify.min.js\"></script>\n    <script src=\"https://cdn.jsdelivr.net/npm/monaco-editor@0.47.0/min/vs/loader.min.js\"></script>\n\n    <style>\n        #app {\n            font-family: Avenir, Helvetica, Arial, sans-serif;\n        }\n\n        html {\n            overflow-y: auto;\n        }\n\n        .card {\n            border-radius: 4px;\n            overflow: hidden;\n        }\n\n        .min-100 {\n            min-height: 100vh;\n        }\n\n        .v-card-title, .v-list-item-title {\n            font-size: 14px;\n        }\n\n        * {\n            font-size: 12px;\n        }\n\n        .v-application__wrap {\n            max-height: 100dvh;;\n        }\n    </style>\n</head>\n\n<body>\n    <div id=\"app\">\n        <v-app>\n            <v-container class=\"d-flex h-100 pa-0\" fluid style=\"background-color: rgb(var(--v-theme-cfxcard))\">\n                <v-card style=\"min-width: 250px;max-width: 250px; width: 250px;\">\n                    <v-list class=\"py-0\" color=\"primary\">\n                        <v-list-item v-for=\"(item, i) in tasks\" :key=\"i\" @click=\"selected = item\"\n                            :active=\"selected === item\" style=\"cursor: pointer\" :title=\"item.attachment_name\">\n                        </v-list-item>\n                    </v-list>\n                </v-card>\n                <div v-if=\"selected\" class=\"h-100 w-100 ml-2\">\n                    <v-card class=\"mb-2 h-100\" style=\"border-radius: 4px; overflow: hidden;\" color=\"primary\"\n                        density=\"compact\">\n                        <v-card-title class=\"px-4 py-2\">\n                            Logs\n                        </v-card-title>\n                        <div class=\"h-100\">\n                            <div id=\"monaco-container\" style=\"width: 100%; height: 100%;\"></div>\n                        </div>\n                    </v-card>\n                </div>\n            </v-container>\n        </v-app>\n    </div>\n\n    <script>\n        const { createApp, ref, onMounted, watch } = Vue;\n        const { createVuetify, useTheme } = Vuetify;\n        const endpoint = \"wf-attachments.json\";\n        console.log(\"MSB ENDPOINT \", endpoint);\n\n        {%- set query = \"jobId = '\"+jobId+\"' and messageType is 'attachment'\" -%}\n        {%- set pstream = \"rda_workflow_logs\" -%}\n\n        {%-\n           set attachments = engine.query_stream_data(pstream, cfxql_query=query)\n        -%}\n\n        const app = createApp({\n            setup() {\n                const tasks = ref([]);\n                const selected = ref(null);\n                const tab = ref(\"logs\")\n                let monacoInstance = null;\n                const theme = useTheme();\n\n                const formatJSON = (str) => {\n                    return JSON.stringify(JSON.parse(str), null, 2)\n                }\n\n                onMounted(async () => {\n                    try {\n//                        const res = await fetch(endpoint);\n//                        const data = await res.json();\n//                        console.log(\"MSB CHECK DATA \", data)\n\n                        const colorScheme = window?.parent\n                            .getComputedStyle(window.parent.document.documentElement)\n                            .getPropertyValue('color-scheme');\n                        if (colorScheme === \"dark\") {\n                            theme.name.value = \"dark\"\n                        } else {\n                            // temp for testing\n                            // theme.name.value = \"dark\"\n                        }\n                        tasks.value = {{attachments | tojson}};\n                        //tasks.value = data;\n\n                        selected.value = tasks.value[0]; // auto-select first item\n                    } catch (error) {\n                        console.log(\"Error getting task data\", error)\n                    }\n\n                    if(selected?.value.attachment_data && selected.value?.attachment_format === 'json'){\n                        initMonaco(formatJSON(selected.value?.attachment_data), 'json');\n                    }else{\n                        initMonaco(selected.value?.attachment_data || '', selected.value?.attachment_format || 'plaintext');\n                    }\n                });\n\n                // Watch selected change\n                watch(selected, (newVal) => {\n                    if (monacoInstance && newVal) {\n                        if(newVal.attachment_data && newVal.attachment_format==='json'){\n                            monacoInstance.setValue(formatJSON(newVal.attachment_data));\n                        }else{\n                            monacoInstance.setValue(newVal.attachment_data || '');\n                        }\n                        if(newVal.attachment_format){\n                            monaco.editor.setModelLanguage(monacoInstance.getModel(), newVal.attachment_format)\n                        }else{\n                            monaco.editor.setModelLanguage(monacoInstance.getModel(), 'plaintext')\n                        }\n                    }\n                });\n\n                // Initialize Monaco Editor\n                function initMonaco(logText, language) {\n                    require.config({ paths: { vs: 'https://cdn.jsdelivr.net/npm/monaco-editor@0.47.0/min/vs' } });\n                    require(['vs/editor/editor.main'], () => {\n                        monacoInstance = monaco.editor.create(document.getElementById('monaco-container'), {\n                            value: logText,\n                            language: language,\n                            readOnly: true,\n                            automaticLayout: true,\n                            theme: 'vs-dark',\n                            autoIndent: true,\n                            formatOnPaste: true,\n                            formatOnType: true,\n                            fontSize: 13,\n                            minimap: { enabled: false }\n                        });\n                    });\n                }\n\n                return { tasks, selected, tab };\n            }\n        });\n\n        const vuetify = createVuetify({\n            theme: {\n                defaultTheme: \"light\",\n                themes: {\n                    light: {\n                        colors: {\n                            primary: \"#1976D2\",\n                            secondary: \"#e8e8e8\",\n                            cfxcard: \"#FFFFFF\",\n                            cfxcardheader: \"#0d48a1\"\n                        }\n                    },\n                    dark: {\n                        colors: {\n                            primary: \"#1976D2\",\n                            secondary: \"#424242\",\n                            cfxcard: \"#282F3A\",\n                            cfxcardheader: \"#0d48a1\"\n                        }\n                    },\n                }\n            }\n        });\n        app.use(vuetify);\n        app.mount('#app');\n    </script>\n\n</body>\n\n</html>"
+        },
+        {
+            "name": "agentOutput",
+            "value": "{% raw %}\r\n{%- set ns = namespace(\r\n    eval_output=\"No Evaluation Status\", \r\n    agent_output=\"No Output Yet\", \r\n    last_updated=\"\", \r\n    num_parts=1, \r\n    combined_output=\"\"\r\n) -%}\r\n\r\n{# --- Query agent output stream --- #}\r\n{%- set query = \"jobId = '\" ~ job_id ~ \"'\" -%}\r\n{%- set data = engine.query_stream_data(\r\n    \"agent_output_stream\", \r\n    cfxql_query=query, \r\n    sorting=[{\"timestamp\": \"asc\"}], \r\n    limit=50\r\n) -%}\r\n\r\n{# --- Query license message --- #}\r\n{%- set cfxql_query_agent_license = \"conversationId = '\" ~ job_id ~ \"' and final_response = 'true' GET message\" -%}\r\n{%- set license_rows = engine.query_stream_data(\r\n    \"rda_chat_sessions\", \r\n    cfxql_query=cfxql_query_agent_license, \r\n    limit=2, \r\n    max_rows=2, \r\n    sorting=[{\"timestamp\": \"asc\"}]\r\n) -%}\r\n\r\n{%- set message = \"\" -%}\r\n{%- if license_rows and license_rows[0] is mapping -%}\r\n    {%- set message = license_rows[0].get(\"message\", \"\") -%}\r\n{%- endif -%}\r\n\r\n{# --- Set last updated timestamp --- #}\r\n{%- if data and data | length > 0 -%}\r\n    {%- set ns.last_updated = data[-1][\"timestamp\"] -%}\r\n{%- endif -%}\r\n\r\n{# --- Find latest num_parts safely --- #}\r\n{%- for row in data | reverse -%}\r\n    {%- if row.get(\"agent_output_num_parts\") -%}\r\n        {%- set ns.num_parts = row.get(\"agent_output_num_parts\") | int -%}\r\n    {%- endif -%}\r\n{%- endfor -%}\r\n\r\n{# --- Concatenate all parts across rows as-is --- #}\r\n{%- for row in data -%}\r\n    {%- for i in range(ns.num_parts) -%}\r\n        {%- set part_key = \"agent_output_\" ~ i -%}\r\n        {%- if row.get(part_key) -%}\r\n            {%- set ns.combined_output = ns.combined_output + row.get(part_key) -%}\r\n        {%- endif -%}\r\n    {%- endfor -%}\r\n{%- endfor -%}\r\n\r\n{# --- Set final agent output --- #}\r\n{%- if ns.combined_output.strip()|length > 0 -%}\r\n    {%- set ns.agent_output = ns.combined_output -%}\r\n{%- else -%}\r\n    {%- for row in data -%}\r\n        {%- if row.get(\"agent_output_0\") and ns.agent_output == \"No Output Yet\" -%}\r\n            {%- set ns.agent_output = row.get(\"agent_output_0\").strip(\"`\").lstrip(\"html\") -%}\r\n        {%- endif -%}\r\n    {%- endfor -%}\r\n{%- endif -%}\r\n\r\n{# --- Override with license message if expired --- #}\r\n{%- if message | trim | lower == \"ai agentic features are not available due to license expiry. please contact support to renew your license.\" -%}\r\n    {%- set ns.agent_output = message -%}\r\n{%- endif -%}\r\n\r\n{# --- Final scrollable output container using flex layout --- #}\r\n<div style=\"\r\n    display:flex;\r\n    flex-direction:column;\r\n    background-color:#111;\r\n    color:#fff;\r\n    padding:10px;\r\n    border-radius:8px;\r\n    height:100%;\r\n\">\r\n    <div style=\"flex-shrink:0;\">\r\n        <h3>{{ agent_name }}</h3>\r\n        <h3>Last Updated: {{ ns.last_updated }}</h3>\r\n        <hr/>\r\n    </div>\r\n    <div style=\"\r\n        flex:1;\r\n        overflow-y:auto;\r\n        overflow-x:hidden;\r\n    \">\r\n        <strong>Final Output:</strong><br/>\r\n        {{ ns.agent_output | safe }}\r\n    </div>\r\n</div>\r\n{% endraw %}\r\n"
+        }
+    ],
+    "storyboards": [
+        {
+            "name": "JobStatus",
+            "value": "{\n    \"stage\": {\n        \"size\": {\n            \"width\": 1920,\n            \"height\": 1080\n        },\n        \"background\": {\n            \"fill\": \"#161B21\",\n            \"src\": null,\n            \"gradient\": null\n        },\n        \"theme\": null\n    },\n    \"widgets\": [\n        {\n            \"widget_id\": \"6b0bd66e\",\n            \"layoutConfig\": {\n                \"rotation\": 0,\n                \"width\": 1104.39,\n                \"height\": 1035.47,\n                \"scaleX\": 1,\n                \"scaleY\": 1,\n                \"fill\": \"#fafafa\",\n                \"opacity\": 0.2,\n                \"name\": \"widget-0\",\n                \"draggable\": true,\n                \"x\": 5,\n                \"y\": 10.5,\n                \"id\": \"cfx-eef9e08f-2433-4a8d-edfa-9b5c79f0ac6d\",\n                \"skewX\": 0,\n                \"skewY\": 0,\n                \"offsetX\": 0,\n                \"offsetY\": 0\n            }\n        },\n        {\n            \"widget_id\": \"118e2757\",\n            \"layoutConfig\": {\n                \"rotation\": 0,\n                \"width\": 781,\n                \"height\": 1028,\n                \"scaleX\": 1,\n                \"scaleY\": 1,\n                \"fill\": \"#fafafa00\",\n                \"opacity\": 0.2,\n                \"name\": \"widget-1\",\n                \"draggable\": true,\n                \"x\": 1126,\n                \"y\": 17.5,\n                \"id\": \"cfx-04abd230-dd50-4dfc-d9cd-f25dcc44e4b7\",\n                \"offsetX\": 0,\n                \"offsetY\": 0,\n                \"skewX\": 0,\n                \"skewY\": 0,\n                \"fillPriority\": \"color\"\n            }\n        }\n    ],\n    \"shapes\": [],\n    \"lines\": [],\n    \"sbBookmarkList\": []\n}"
+        }
+    ]
+}

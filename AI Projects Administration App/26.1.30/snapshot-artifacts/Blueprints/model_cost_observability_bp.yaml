@@ -1,0 +1,20 @@
+name: model_cost_observability_bp
+id: model_cost_observability_bp_2025_05_22_01
+version: '2025_05_22_01'
+category: Model Cost Observability
+comment: null
+enabled: true
+type: Service
+provider: CloudFabrix Software Inc.
+service_pipelines:
+    -   name: ai_cost_bookmark_pipeline
+        label: Model cost Data
+        version: '*'
+        site: .*
+        site_type: regex
+        instances: 1
+        scaling_policy:
+            min_instances: 0
+            max_instances: 1
+saved_time: '2025-10-06T06:38:26.497446'
+dashboard_type: dashboard

@@ -1,0 +1,42 @@
+enabled: true
+domain: inventory
+description: Inventory related tools.
+tools:
+    -   name: get_inventory_meta_data
+        type: streamMetadata
+        stream: network_device_inventory
+        description: 'Retrieves the complete schema of inventory fields available
+            in the system.
+
+            '
+    -   name: get_inventory
+        save_to_cache: auto
+        type: streamQuery
+        stream: network_device_inventory
+        description: 'Get Inventory data based on the IP address and location. it
+            retrieves the inventory data from the network_device_inventory stream.
+            which includes the following fields: Description, Model, Serial Number,
+            IP Address, Firmware Type, Vendor, Location, Hostname.
+
+            '
+        data_format: csv
+        response_prefix: Here are inventory in CSV format
+        no_data_message: No inventory found for the specified parameters
+        result_columns:
+            device_eq_description: Description
+            device_model: Model
+            device_serial_number: Serial Number
+            device_ip: IP Address
+            device_fw_type: Firmware Type
+            device_vendor: Vendor
+            device_location: Location
+            device_hostname: Hostname
+        parameters:
+            -   name: IP
+                description: IP Address of the device (e.g. 10.95.140.21 or 10.95.140.23)
+                operator: '='
+                queryMapping: device_ip = '{{IP}}'
+            -   name: location
+                description: location of the device (e.g. CML-Lab or CFX-Pleasanton-HQ)
+                operator: '='
+                queryMapping: device_location = '{{location}}'

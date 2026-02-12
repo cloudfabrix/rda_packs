@@ -1,0 +1,103 @@
+enabled: true
+domain: syslogs
+description: Syslogs related tools.Typically contains syslog related tools
+tools:
+    -   name: get_syslog_meta_data
+        type: streamMetadata
+        stream: syslog_udp_event_stream
+        save_to_cache: auto
+        description: 'Retrieves the complete schema of syslog fields available in
+            the system.
+
+            '
+    -   name: get_syslog_data
+        type: streamQuery
+        stream: syslog_udp_event_stream
+        save_to_cache: auto
+        description: 'Get syslog data based on the severity. it retrieves the syslog
+            data from the syslog_udp_event_stream stream. which includes the following
+            fields: Priority, Severity, Severity Number, Timestamp, RDA Gateway Client
+            IP, Hostname, Message.
+
+            '
+        data_format: csv
+        response_prefix: Here are syslog data in CSV format
+        no_data_message: No syslog data found for the specified parameters
+        result_columns:
+            syslog_priority: Priority
+            syslog_severity: Severity
+            syslog_severity_num: Severity Number
+            timestamp: Timestamp
+            rda_gw_client_ip: RDA Gateway Client IP
+            device_hostname: Device hostname
+            Message: Message
+        parameters:
+            -   name: severity
+                description: Severity of the syslog (e.g. NOTICE, INFORMATIONAL)
+                operator: '='
+                queryMapping: syslog_severity = '{{severity}}'
+            -   name: ip
+                description: IP of the device (e.g. 10.95.140.21, 10.95.140.22)
+                operator: '='
+                queryMapping: rda_gw_client_ip = '{{ip}}'
+            -   name: Device_Hostname
+                description: Hostname of the device (e.g. RDAF-P1.fabrix.ai or RDAF-P1.fabrix.ai)
+                operator: '='
+                queryMapping: device_hostname = '{{Device_Hostname}}'
+            -   name: from_time
+                type: string
+                description: Query data using a From time, Date and time in ISO format
+                default: null
+                queryMapping: timestamp after '{{from_time}}'
+            -   name: to_time
+                type: string
+                description: Query data using a To time, Date and time in ISO format
+                default: null
+                queryMapping: timestamp before '{{to_time}}'
+            -   name: keyword
+                type: string
+                operator: contains
+                description: Keyword to be searched in description
+                default: null
+                queryMapping: Message contains '{{keyword}}'
+    -   name: get_syslog_count
+        type: streamQueryAggs
+        stream: syslog_udp_event_stream
+        save_to_cache: auto
+        description: Get syslog Counts. This tool aggregates the syslog data based
+            on the specified parameters. The exact syslog fields to be aggregated
+            can be found by calling the get_syslog_meta_data tool first
+        data_format: csv
+        parameters:
+            -   name: groupby
+                description: syslog fields to group by. Use comma separated values
+                    for multiple fields. Fields can be found by calling the get_syslog_meta_data
+                    tool first.
+                use_in_cfxql: false
+            -   name: syslog_severity
+                description: Severity of the syslog (e.g. NOTICE, INFORMATIONAL)
+                operator: '='
+                queryMapping: syslog_severity = '{{syslog_severity}}'
+            -   name: ip
+                description: IP of the device (e.g. 10.95.140.21, 10.95.140.22)
+                operator: '='
+                queryMapping: rda_gw_client_ip = '{{ip}}'
+            -   name: Device_Hostname
+                description: Hostname of the device (e.g. RDAF-P1.fabrix.ai or RDAF-P1.fabrix.ai)
+                operator: '='
+                queryMapping: device_hostname = '{{Device_Hostname}}'
+            -   name: from_time
+                type: string
+                description: Query data using a From time, Date and time in ISO format
+                default: null
+                queryMapping: timestamp after '{{from_time}}'
+            -   name: to_time
+                type: string
+                description: Query data using a To time, Date and time in ISO format
+                default: null
+                queryMapping: timestamp before '{{to_time}}'
+            -   name: keyword
+                type: string
+                description: Keyword to be searched in description
+                default: null
+                queryMapping: Message contains '{{keyword}}'
