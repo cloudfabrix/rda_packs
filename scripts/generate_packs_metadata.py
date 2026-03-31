@@ -20,10 +20,9 @@ for pack_name in os.listdir(REPO_ROOT):
             continue
 
         manifest_path = os.path.join(version_path, "manifest.yaml")
-        description_path = os.path.join(version_path, "description.md")
         tar_file = next((f for f in os.listdir(version_path) if f.endswith(".tar.gz")), None)
 
-        if not os.path.exists(manifest_path) or not os.path.exists(description_path) or not tar_file:
+        if not os.path.exists(manifest_path) or not tar_file:
             continue
 
         with open(manifest_path) as mf:
@@ -49,24 +48,17 @@ for pack_name in os.listdir(REPO_ROOT):
             required_base_packs = "None"
 
         description_text = manifest.get("name", "")  # fallback default
-        # Initialize description path and fallback
+        # Resolve description markdown from manifest when present
         desc_file_path = None
         desc_cfg = manifest.get("description", {})
 
         if isinstance(desc_cfg, dict):
             md_path = desc_cfg.get("md")
             if md_path:
-                if md_path.startswith("./"):
-                    desc_file_path = os.path.join(version_path, md_path[2:])
-                else:
-                    desc_file_path = os.path.abspath(os.path.join(REPO_ROOT, md_path))
+                desc_file_path = os.path.normpath(os.path.join(version_path, md_path))
             elif "value" in desc_cfg:
                 # If no md but value is provided
                 description_text = str(desc_cfg["value"])
-
-        # Fallback to default description.md only if text wasn't set from value
-        if not desc_file_path and description_text == manifest.get("name", ""):
-            desc_file_path = os.path.join(version_path, "description.md")
 
         if desc_file_path and os.path.exists(desc_file_path):
             with open(desc_file_path) as df:
@@ -173,3 +165,4 @@ for pack in latest_packs_list:
 latest_packs_md_path = os.path.join(METADATA_DIR, "latest_packs.md")
 with open(latest_packs_md_path, "w") as md_file:
     md_file.write("\n".join(md_lines))
+
