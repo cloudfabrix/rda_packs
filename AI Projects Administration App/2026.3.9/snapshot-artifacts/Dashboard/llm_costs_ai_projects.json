@@ -1,0 +1,502 @@
+{
+  "name": "llm_costs_ai_projects",
+  "label": "AI Model Costs",
+  "description": "llm_model_costs: Insights",
+  "dashboard_folder": "AI",
+  "version": "1.0.0",
+  "enabled": false,
+  "stream": "llm_model_costs",
+  "dashboard_type": "dashboard",
+  "live_edit": true,
+  "dashboard_filters": {
+      "time_filter": true,
+      "default_time_filter_labels": [
+          "All Time"
+      ],
+      "columns_filter": [
+          {
+              "id": "timestamp",
+              "label": "Timestamp",
+              "type": "DATETIME"
+          },
+          {
+              "id": "context_wondow",
+              "label": "Context Wondow",
+              "type": "TEXT"
+          },
+          {
+              "id": "currency",
+              "label": "Currency",
+              "type": "TEXT"
+          },
+          {
+              "id": "hosted_by",
+              "label": "Hosted By",
+              "type": "TEXT"
+          },
+          {
+              "id": "llm_name",
+              "label": "LLM Name",
+              "type": "TEXT"
+          },
+          {
+              "id": "max_output_tokens",
+              "label": "Max Output Tokens",
+              "type": "TEXT"
+          },
+          {
+              "id": "provider",
+              "label": "Provider",
+              "type": "TEXT"
+          },
+          {
+              "id": "input_token_cost_per1M",
+              "label": "Input Token Cost Per1M",
+              "type": "DOUBLE"
+          },
+          {
+              "id": "output_token_cost_per1M",
+              "label": "Output Token Cost Per1M",
+              "type": "DOUBLE"
+          }
+      ],
+      "group_filters": [
+          {
+              "stream": "llm_model_costs",
+              "title": "Hosted By",
+              "duration_hours": 1080,
+              "limit": 200,
+              "extra_filter": null,
+              "group_by": [
+                  "hosted_by"
+              ],
+              "ts_column": "timestamp",
+              "agg": "sum",
+              "column": "count_",
+              "type": "int"
+          },
+          {
+              "stream": "llm_model_costs",
+              "title": "Provider",
+              "duration_hours": 1080,
+              "limit": 200,
+              "extra_filter": null,
+              "group_by": [
+                  "provider"
+              ],
+              "ts_column": "timestamp",
+              "agg": "sum",
+              "column": "count_",
+              "type": "int"
+          }
+      ]
+  },
+  "dashboard_sections": [
+      {
+          "title": "AI Model Costs",
+          "show_filter": true,
+          "widgets": [
+              {
+                  "widget_type": "pie_chart",
+                  "title": "Hosted By",
+                  "duration_hours": 1080,
+                  "stream": "llm_model_costs",
+                  "ts_column": "timestamp",
+                  "column": "count_",
+                  "agg": "sum",
+                  "group_by": [
+                      "hosted_by"
+                  ],
+                  "type": "int",
+                  "min_width": 3,
+                  "height": 3,
+                  "max_width": 6,
+                  "widget_id": "00ce0951"
+              },
+              {
+                  "widget_type": "pie_chart",
+                  "title": "Provider",
+                  "duration_hours": 1080,
+                  "stream": "llm_model_costs",
+                  "ts_column": "timestamp",
+                  "column": "count_",
+                  "agg": "sum",
+                  "group_by": [
+                      "provider"
+                  ],
+                  "type": "int",
+                  "min_width": 3,
+                  "height": 3,
+                  "max_width": 6,
+                  "widget_id": "5b90d57f"
+              },
+              {
+                  "title": "Models",
+                  "widget_type": "tabular",
+                  "duration_hours": 1080,
+                  "max_width": 12,
+                  "height": 8,
+                  "min_width": 12,
+                  "stream": "llm_model_costs",
+                  "ts_column": "timestamp",
+                  "columns": {
+                      "llm_name": {
+                          "title": "Name",
+                          "type": "TEXT",
+                          "hidden": false,
+                          "key": true
+                      },
+                      "hosted_by": {
+                          "title": "Hosted By",
+                          "type": "TEXT",
+                          "hidden": false,
+                          "key": true
+                      },
+                      "provider": {
+                          "title": "Provider",
+                          "type": "TEXT",
+                          "hidden": false,
+                          "key": true
+                      },
+                      "input_token_cost_per1M": {
+                          "title": "Input Token Cost Per1M",
+                          "type": "DOUBLE",
+                          "hidden": false,
+                          "key": true
+                      },
+                      "output_token_cost_per1M": {
+                          "title": "Output Token Cost Per1M",
+                          "type": "DOUBLE",
+                          "hidden": false,
+                          "key": true
+                      },
+                      "currency": {
+                          "title": "Currency",
+                          "type": "TEXT",
+                          "hidden": false,
+                          "key": true
+                      },
+                      "max_output_tokens": {
+                          "title": "Max Output Tokens",
+                          "type": "DOUBLE",
+                          "hidden": false,
+                          "key": true
+                      },
+                      "context_wondow": {
+                          "title": "Context Window",
+                          "type": "DOUBLE",
+                          "hidden": false,
+                          "key": true
+                      }
+                  },
+                  "actions": [
+                      {
+                          "permission": "agenticai:llm_cost:add",
+                          "title": "Add",
+                          "type": "POPUP_FORM",
+                          "selectionType": "NONE",
+                          "identifier": "saas-service-action:userdashboard-add-yaml",
+                          "api-endpoint": {
+                              "service-name": "saas-reports",
+                              "methodName": "getForm",
+                              "stringified-params": true,
+                              "parse-output": false,
+                              "params": [
+                                  {
+                                      "formId": "rda.saas.dynamic.form",
+                                      "formDefinition": {
+                                          "id": "rda.saas.dynamic.form",
+                                          "refreshRequired": true,
+                                          "formFieldList": [
+                                              {
+                                                  "fieldId": "llm_name",
+                                                  "label": "Model Name",
+                                                  "description": "Model Name",
+                                                  "required": true,
+                                                  "isSecret": false,
+                                                  "dataType": "string",
+                                                  "hidden": false,
+                                                  "editable": true,
+                                                  "controlType": "TEXT_FIELD"
+                                              },
+                                              {
+                                                  "fieldId": "hosted_by",
+                                                  "label": "Hosted By",
+                                                  "description": "Hosted By",
+                                                  "required": true,
+                                                  "isSecret": false,
+                                                  "dataType": "string",
+                                                  "hidden": false,
+                                                  "editable": true,
+                                                  "controlType": "TEXT_FIELD"
+                                              },
+                                              {
+                                                  "fieldId": "provider",
+                                                  "label": "Provider",
+                                                  "description": "Provider",
+                                                  "required": true,
+                                                  "isSecret": false,
+                                                  "dataType": "string",
+                                                  "hidden": false,
+                                                  "editable": true,
+                                                  "controlType": "TEXT_FIELD"
+                                              },
+                                              {
+                                                  "fieldId": "input_token_cost_per1M",
+                                                  "label": "Input Token Cost Per1M",
+                                                  "description": "Input Token Cost Per1M",
+                                                  "required": true,
+                                                  "isSecret": false,
+                                                  "dataType": "string",
+                                                  "hidden": false,
+                                                  "editable": true,
+                                                  "controlType": "TEXT_FIELD"
+                                              },
+                                              {
+                                                  "fieldId": "output_token_cost_per1M",
+                                                  "label": "Output Token Cost Per1M",
+                                                  "description": "Output Token Cost Per1M",
+                                                  "required": true,
+                                                  "isSecret": false,
+                                                  "dataType": "string",
+                                                  "hidden": false,
+                                                  "editable": true,
+                                                  "controlType": "TEXT_FIELD"
+                                              },
+                                              {
+                                                  "fieldId": "currency",
+                                                  "label": "Currency",
+                                                  "description": "Currency",
+                                                  "required": true,
+                                                  "isSecret": false,
+                                                  "dataType": "string",
+                                                  "hidden": false,
+                                                  "editable": true,
+                                                  "controlType": "TEXT_FIELD",
+                                                  "defaultValue": "USD"
+                                              },
+                                              {
+                                                  "fieldId": "max_output_tokens",
+                                                  "label": "Maximum Output Tokens",
+                                                  "description": "Maximum Output Tokens",
+                                                  "required": true,
+                                                  "isSecret": false,
+                                                  "dataType": "string",
+                                                  "hidden": false,
+                                                  "editable": true,
+                                                  "controlType": "TEXT_FIELD"
+                                              },
+                                              {
+                                                  "fieldId": "context_wondow",
+                                                  "label": "Context Window",
+                                                  "description": "Context Window",
+                                                  "required": true,
+                                                  "isSecret": false,
+                                                  "dataType": "string",
+                                                  "hidden": false,
+                                                  "editable": true,
+                                                  "controlType": "TEXT_FIELD"
+                                              }
+                                          ]
+                                      },
+                                      "actions": [
+                                          {
+                                              "type": "RUN_PIPELINE",
+                                              "pipelineName": "llm_cost_add",
+                                              "isSync": true
+                                          }
+                                      ]
+                                  }
+                              ]
+                          }
+                      },
+                      {
+                          "permission": "agenticai:llm_cost:edit",
+                          "title": "Edit",
+                          "type": "POPUP_FORM",
+                          "selectionType": "SINGLE",
+                          "identifier": "saas-service-action:userdashboard-add-yaml",
+                          "api-endpoint": {
+                              "service-name": "saas-reports",
+                              "methodName": "getForm",
+                              "stringified-params": true,
+                              "parse-output": false,
+                              "params": [
+                                  {
+                                      "formId": "rda.saas.dynamic.form",
+                                      "formActionList": {
+                                          "formActions": [
+                                              {
+                                                  "actionLabel": "Update",
+                                                  "identifier": "Submit"
+                                              },
+                                              {
+                                                  "actionLabel": "Cancel",
+                                                  "identifier": "Cancel"
+                                              }
+                                          ]
+                                      },
+                                      "formDefinition": {
+                                          "id": "rda.saas.dynamic.form",
+                                          "refreshRequired": true,
+                                          "formFieldList": [
+                                              {
+                                                  "fieldId": "llm_name",
+                                                  "label": "Model Name",
+                                                  "description": "Model Name",
+                                                  "required": true,
+                                                  "isSecret": false,
+                                                  "dataType": "string",
+                                                  "hidden": false,
+                                                  "editable": false,
+                                                  "controlType": "TEXT_FIELD"
+                                              },
+                                              {
+                                                  "fieldId": "hosted_by",
+                                                  "label": "Hosted By",
+                                                  "description": "Hosted By",
+                                                  "required": true,
+                                                  "isSecret": false,
+                                                  "dataType": "string",
+                                                  "hidden": false,
+                                                  "editable": false,
+                                                  "controlType": "TEXT_FIELD"
+                                              },
+                                              {
+                                                  "fieldId": "provider",
+                                                  "label": "Provider",
+                                                  "description": "Provider",
+                                                  "required": true,
+                                                  "isSecret": false,
+                                                  "dataType": "string",
+                                                  "hidden": false,
+                                                  "editable": false,
+                                                  "controlType": "TEXT_FIELD"
+                                              },
+                                              {
+                                                  "fieldId": "input_token_cost_per1M",
+                                                  "label": "Input Token Cost Per1M",
+                                                  "description": "Input Token Cost Per1M",
+                                                  "required": true,
+                                                  "isSecret": false,
+                                                  "dataType": "string",
+                                                  "hidden": false,
+                                                  "editable": true,
+                                                  "controlType": "TEXT_FIELD"
+                                              },
+                                              {
+                                                  "fieldId": "output_token_cost_per1M",
+                                                  "label": "Output Token Cost Per1M",
+                                                  "description": "Output Token Cost Per1M",
+                                                  "required": true,
+                                                  "isSecret": false,
+                                                  "dataType": "string",
+                                                  "hidden": false,
+                                                  "editable": true,
+                                                  "controlType": "TEXT_FIELD"
+                                              },
+                                              {
+                                                  "fieldId": "currency",
+                                                  "label": "Currency",
+                                                  "description": "Currency",
+                                                  "required": true,
+                                                  "isSecret": false,
+                                                  "dataType": "string",
+                                                  "hidden": false,
+                                                  "editable": false,
+                                                  "controlType": "TEXT_FIELD"
+                                              },
+                                              {
+                                                  "fieldId": "max_output_tokens",
+                                                  "label": "Maximum Output Tokens",
+                                                  "description": "Maximum Output Tokens",
+                                                  "required": true,
+                                                  "isSecret": false,
+                                                  "dataType": "string",
+                                                  "hidden": false,
+                                                  "editable": true,
+                                                  "controlType": "TEXT_FIELD"
+                                              },
+                                              {
+                                                  "fieldId": "context_wondow",
+                                                  "label": "Context Window",
+                                                  "description": "Context Window",
+                                                  "required": true,
+                                                  "isSecret": false,
+                                                  "dataType": "string",
+                                                  "hidden": false,
+                                                  "editable": true,
+                                                  "controlType": "TEXT_FIELD"
+                                              }
+                                          ]
+                                      },
+                                      "actions": [
+                                          {
+                                              "type": "UPDATE_PSTREAM",
+                                              "pstreamName": "llm_model_costs",
+                                              "operation": "UPDATE",
+                                              "cfxql_query": "llm_name is '{{llm_name}}'"
+                                          }
+                                      ]
+                                  }
+                              ]
+                          }
+                      },
+                      {
+                          "permission": "agenticai:llm_cost:delete",
+                          "title": "Delete",
+                          "type": "POPUP_FORM",
+                          "selectionType": "SINGLE",
+                          "identifier": "saas-service-action:userdashboard-add-yaml",
+                          "api-endpoint": {
+                              "service-name": "saas-reports",
+                              "methodName": "getForm",
+                              "stringified-params": true,
+                              "parse-output": false,
+                              "params": [
+                                  {
+                                      "formId": "rda.saas.dynamic.form",
+                                      "formActionList": {
+                                          "formActions": [
+                                              {
+                                                  "identifier": "Submit",
+                                                  "actionLabel": "Delete"
+                                              }
+                                          ]
+                                      },
+                                      "formDefinition": {
+                                          "id": "rda.saas.dynamic.form",
+                                          "refreshRequired": true,
+                                          "formFieldList": [
+                                              {
+                                                  "help": "Name of Model to be deleted",
+                                                  "dataType": "string",
+                                                  "controlType": "TEXT_FIELD",
+                                                  "required": false,
+                                                  "editable": false,
+                                                  "label": "Name",
+                                                  "hidden": false,
+                                                  "fieldId": "llm_name"
+                                              }
+                                          ]
+                                      },
+                                      "actions": [
+                                          {
+                                              "type": "UPDATE_PSTREAM",
+                                              "pstreamName": "llm_model_costs",
+                                              "operation": "DELETE",
+                                              "cfxql_query": "llm_name is '{{llm_name}}'"
+                                          }
+                                      ]
+                                  }
+                              ]
+                          }
+                      }
+                  ],
+                  "widget_id": "4e823765"
+              }
+          ]
+      }
+  ],
+  "saved_time": "2025-12-02T17:17:44.655896"
+}

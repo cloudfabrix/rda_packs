@@ -1,0 +1,148 @@
+enabled: true
+domain: aiAsTool
+description: AI as Tool - Use AI for summarization, analysis, and other AI-powered tasks
+tools:
+- name: summarize
+  type: aiAsTool
+  save_to_cache: no
+  llm: gpt-4.1
+  description: |
+    Summarize text content using AI. This tool can summarize long documents, 
+    articles, or any text content to provide concise summaries.
+  parameters:
+  - name: prompt
+    description: The text content to be summarized
+    type: string
+    required: true
+
+- name: summarize_conversation
+  type: aiAsTool
+  save_to_cache: false
+  llm: gpt-oss:120b
+  timeout: 300
+  write_to_stream: false
+  timeout_msg: Request has been timed out. Please increase the timeout parameter
+  description: |
+    Summarize text content using AI. This tool can summarize long documents, 
+    articles, or any text content to provide concise summaries.
+  prompt:
+    template: |
+      You are given the following:
+
+      - Original User Query: {{original_query}}
+      - Conversation Transcript: (this includes all user messages, assistant responses, and tool calls){{conversation_data}} 
+
+      Your task is to produce a comprehensive, structured summary and response to the original query, based on the full conversation.
+
+      Instructions:
+      1. 
+      - Provide a clear, thorough, and well-structured response to the original user query, synthesizing all relevant information from the conversation and tool outputs.
+      - Avoid being vague or overly brief—ensure the answer is complete and actionable.
+      - Do not make or suggest any further tool calls.
+      - **Strictly avoid including the word "html" (in any form or capitalization) in the response.**
+
+      2. Conversation Analysis
+      - Summarize the key points, context, and outcomes from the conversation (including relevant tool results).
+      - Highlight important findings, clarifications, or resolutions that emerged during the discussion.
+
+      3. Insights & Learnings
+      - Point out notable patterns, important details, or takeaways discovered in the conversation.
+
+      HTML Response Guidelines (wherever applicable):\n
+      - The entire content/message must be wrapped inside a single `<div>`.\n
+      - The HTML content should be enclosed within a code block ```\n
+      - Use proper HTML semantics:\n
+          - Paragraphs: `<p>`\n
+          - Bulleted lists: `<ul><li>...</li></ul>`\n
+          - Tables: `<table><tr><th>...</th><td>...</td></tr></table>`\n
+      - Use accessible and neutral color schemes from the following palette:\n
+          Red #F44336, Pink #E91E63, Deep Orange #FF5722, Orange #FF9800, Amber #FFC107,\n
+          Light Green #8BC34A, Green #4CAF50, Teal #009688, Cyan #00BCD4,\n
+          Light Blue #03A9F4, Blue #1E88E5, Indigo #3F51B5, Purple #9C27B0,\n
+          Brown #795548, Blue Gray #607D8B\n
+      - Ensure readability in both light and dark modes. Use inline styles only when necessary.
+      - Color Theme for Output HTML  (use CSS function light-dark)
+          - Regular Text foreground: color:light-dark(#000000, #FFFFFF)
+          - Regular  background-color:  light-dark(#FFFFFF, #000000)
+      - [VERY IMPORTANT] Note= **Strictly avoid including the word "html" (in any form or capitalization) in the response.**
+
+  parameters:
+  - name: original_query
+    description: The original user question/query
+    type: string
+    required: true
+  - name: conversation_data
+    description: The conversation data to be analyzed
+    type: string
+    required: true
+
+- name: format_html_content
+  type: aiAsTool
+  save_to_cache: false
+  llm: gpt-4o
+  timeout: 300
+  write_to_stream: false
+  timeout_msg: Request has been timed out. Please increase the timeout parameter
+  description: |
+    Format text content into proper HTML with consistent styling and structure. 
+    This tool ensures content is properly formatted with HTML tags, colors, and styling.
+  prompt:
+    template: |
+      You are given the following content to format:
+
+      - Content to Format: {{content_to_format}}
+
+      Your task is to format this content into proper, well-structured HTML while preserving all the original information and meaning.
+
+      Instructions:
+      1. **Content Preservation**
+      - Keep ALL original content exactly as provided
+      - Do not add, remove, or modify any factual information
+      - Maintain the same structure and organization
+      - Preserve all data, numbers, and specific details
+
+      2. **HTML Formatting Rules**
+      - Wrap the entire content in a single `<div>` container
+      - Use proper HTML semantic tags:
+          - Headers: `<h1>`, `<h2>`, `<h3>`, `<h4>`, `<h5>`, `<h6>`
+          - Paragraphs: `<p>`
+          - Lists: `<ul><li>...</li></ul>` or `<ol><li>...</li></ol>`
+          - Tables: `<table><thead><tr><th>...</th></tr></thead><tbody><tr><td>...</td></tr></tbody></table>`
+          - Emphasis: `<strong>`, `<em>`, `<mark>`
+          - Code: `<code>`, `<pre>`
+      - Apply consistent styling and colors
+
+      3. **Styling Guidelines**
+      - Use the provided color palette for visual elements:
+          Red #F44336, Pink #E91E63, Deep Orange #FF5722, Orange #FF9800, Amber #FFC107,
+          Light Green #8BC34A, Green #4CAF50, Teal #009688, Cyan #00BCD4,
+          Light Blue #03A9F4, Blue #1E88E5, Indigo #3F51B5, Purple #9C27B0,
+          Brown #795548, Blue Gray #607D8B
+      - Use CSS light-dark function for theme compatibility:
+          - Text: `color: light-dark(#000000, #FFFFFF)`
+          - Background: `background-color: light-dark(#FFFFFF, #000000)`
+      - Apply appropriate colors for headers, tables, alerts, and emphasis
+      - Use inline styles for consistent rendering
+
+      4. **Quality Checks**
+      - If the content is already well-formatted HTML, make minimal changes
+      - If the content is plain text, convert it to proper HTML structure
+      - Ensure all HTML tags are properly closed
+      - Make tables responsive and accessible
+      - Use appropriate heading hierarchy
+
+      5. **Output Requirements**
+      - Return ONLY the formatted HTML content
+      - Do not include any explanations or additional text
+      - Do not wrap in code blocks or markdown
+      - Ensure the output is clean, valid HTML
+
+      **Important**: Preserve the exact content while improving only the HTML formatting and styling.
+      **Mandatory requirement**: Use CSS light-dark function for theme compatibility:
+          - Text: `color: light-dark(#000000, #FFFFFF)`
+          - Background: `background-color: light-dark(#FFFFFF, #000000)`
+  parameters:
+  - name: content_to_format
+    description: The content that needs to be formatted into proper HTML
+    type: string
+    required: true

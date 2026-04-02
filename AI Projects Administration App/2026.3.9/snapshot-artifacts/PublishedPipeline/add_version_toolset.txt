@@ -1,0 +1,37 @@
+%% stream = no and limit = 0
+@c:new-block
+    --> @dm:empty
+    --> @dm:addrow name="ai_mcp_toolsets" and limit=0
+    --> #dm:query-persistent-stream *
+    --> @dm:add-missing-columns columns = 'version,last_enabled,enabled,checksum,updated_at'
+    --> @dm:save name="temp-toolsets"
+--> @c:new-block
+    --> @dm:recall name="temp-toolsets"
+    --> @dm:sort columns="timestamp" and order="ascending"
+    --> @dm:pandas-eval expr="df.assign(date_part=df['timestamp'].astype(str).str.split('T').str[0])"
+    --> @dm:pandas-eval expr="df.assign(date_part=df['date_part'].str.replace('-', '.'))"
+    --> @dm:pandas-eval expr="df.assign(date_part=df['date_part'].str.replace('.0','.',regex=False))"
+    --> @dm:pandas-eval expr="df.assign(seq_num=df.groupby(['ai_project_name','toolset_name','date_part']).cumcount()+1)"
+    --> @dm:pandas-eval expr="df.assign(_generated_version=df['date_part'] + '.' + df['seq_num'].astype(str))"
+    --> @dm:pandas-eval expr="df.assign(_normalized_version=df['version'].astype(str).str.replace('_','.',regex=False))"
+    --> @dm:pandas-eval expr="df.assign(_normalized_version=df['_normalized_version'].str.replace('.0','.',regex=False))"
+    --> @dm:pandas-eval expr="df.assign(version=df['_normalized_version'].where((df['version'].notna()) & (df['version'].astype(str).str.strip()!=''), df['_generated_version']))"
+    --> @dm:pandas-eval expr="df.drop(columns=['date_part','seq_num','_generated_version','_normalized_version'])"
+    --> @dm:save name="temp-toolsets"
+--> @c:new-block
+    --> @dm:recall name="temp-toolsets"
+    --> @dm:sort columns="timestamp" and order="descending"
+    --> @dm:pandas-eval expr="df.assign(updated_at=df['timestamp'].astype(str))"
+    --> @dm:pandas-eval expr="df.assign(_is_enabled=df['enabled'].astype(str).str.lower().eq('true'))"
+    --> @dm:pandas-eval expr="df.assign(_n_enabled=df.groupby(['ai_project_name','toolset_name'])['_is_enabled'].transform('sum'))"
+    --> @dm:pandas-eval expr="df.assign(_first=~df.duplicated(subset=['ai_project_name','toolset_name'], keep='first'))"
+    --> @dm:pandas-eval expr="df.assign(_winner=((df['_n_enabled']==1) & df['_is_enabled']) | ((df['_n_enabled']!=1) & df['_first']))"
+    --> @dm:pandas-eval expr="df.assign(enabled=df['_winner'].astype(bool), last_enabled=df['_winner'].astype(bool)).drop(columns=['_is_enabled','_n_enabled','_first','_winner'])"
+    --> @dm:save name="temp-toolsets"
+--> @c:new-block
+    --> @dm:recall name="temp-toolsets"
+    --> @dm:eval content_for_checksum="str(coalesce(contents, ''))"
+    --> @dm:eval checksum_new="md5(content_for_checksum)[:8]"
+    --> @dm:pandas-eval expr="df.assign(checksum=df['checksum'].where((df['checksum'].notna()) & (df['checksum'].astype(str).str.strip()!=''), df['checksum_new']))"
+    --> @dm:selectcolumns exclude="content_for_checksum|checksum_new"
+    --> @dm:save name="ai_mcp_toolset"

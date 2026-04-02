@@ -1,0 +1,961 @@
+{
+    "name": "agent-catalog-table-dash",
+    "label": "Agent dash",
+    "description": "Agents data",
+    "dashboard_folder": "default",
+    "version": "25.06.02",
+    "enabled": true,
+    "stream": "agent_catalogue_data",
+    "dashboard_type": "template",
+    "live_edit": true,
+    "dashboard_filters": {
+        "time_filter": true,
+        "default_time_filter_labels": []
+    },
+    "dashboard_sections": [
+        {
+            "title": "Agent Catalog",
+            "show_filter": true,
+            "widgets": [
+                {
+                    "title": "Agent Catalog",
+                    "widget_type": "tabular",
+                    "duration_hours": 999999,
+                    "max_width": 12,
+                    "height": 8,
+                    "min_width": 12,
+                    "stream": "agent_catalogue_data",
+                    "extra_filter1": "state is Enabled",
+                    "ts_column": "timestamp",
+                    "preview_width": 900,
+                    "preview_height": 400,
+                    "columns": {
+                        "_RDA_Id": {
+                            "title": "RDA ID",
+                            "key": true,
+                            "visible": false
+                        },
+                        "agent_name": {
+                            "title": "Name",
+                            "key": true
+                        },
+                        "agent_id": {
+                            "title": "ID",
+                            "key": true
+                        },
+                        "version": {
+                            "title": "Version",
+                            "key": true
+                        },
+                        "ai_project_name": {
+                            "title": "Project Name",
+                            "visible": true,
+                            "key": true
+                        },
+                        "category": {
+                            "title": "Category",
+                            "key": true
+                        },
+                        "description": {
+                            "title": "Description",
+                            "formatter": "truncate",
+                            "key": true
+                        },
+                        "publisher": {
+                            "title": "Publisher",
+                            "key": true,
+                            "visible": false
+                        },
+                        "state": {
+                            "title": "State",
+                            "key": true
+                        },
+                        "timestamp": {
+                            "title": "Timestamp",
+                            "type": "DATETIME"
+                        },
+                        "status_color": {
+                            "title": "Color",
+                            "type": "COLOR-MAP",
+                            "source-column": "status",
+                            "color-map": {
+                                "Failed": "#E53935",
+                                "Deployed": "#4caf50",
+                                "Creating": "#03A9F4"
+                            }
+                        },
+                        "status": {
+                            "title": "Status",
+                            "key": true,
+                            "htmlTemplateForRow": "<span class='badge' style='background-color: {{'{{ row.status_color }}'}};' > {{'{{ row.status }}'}} </span>"
+                        },
+                        "tags": {
+                            "title": "Tags",
+                            "visible": false,
+                            "key": true
+                        },
+                        "persona": {
+                            "title": "Persona",
+                            "visible": false,
+                            "key": true
+                        },
+                        "ai_workflow_name": {
+                            "title": "AI Workflow Name",
+                            "visible": false,
+                            "key": true
+                        }
+                    },
+                    "actions": [
+                        {
+                            "permission": "agenticai:agent:upload",
+                            "title": "Upload",
+                            "type": "POPUP_FORM",
+                            "selectionType": "NONE",
+                            "identifier": "saas-service-action:userdashboard-add-yaml",
+                            "api-endpoint": {
+                                "service-name": "saas-reports",
+                                "methodName": "getForm",
+                                "stringified-params": true,
+                                "parse-output": false,
+                                "params": [
+                                    {
+                                        "formId": "rda.saas.dynamic.form",
+                                        "formDefinition": {
+                                            "refreshRequired": true,
+                                            "formFieldList": [
+                                                {
+                                                    "help": "Select the AI project where the agent will be imported",
+                                                    "dataType": "string",
+                                                    "controlType": "COMBO_BOX",
+                                                    "required": true,
+                                                    "editable": true,
+                                                    "label": "AI Project Name",
+                                                    "hidden": false,
+                                                    "fieldId": "ai_project_name",
+                                                    "lovSourceType": "pstream",
+                                                    "lovSourceParams": {
+                                                        "name": "ai_projects",
+                                                        "valueColumn": "ai_project_name",
+                                                        "labelColumn": "ai_project_name",
+                                                        "query": "ai_project_name is not empty"
+                                                    }
+                                                },
+                                                {
+                                                    "help": "Choose the agent ZIP file to import",
+                                                    "dataType": "string",
+                                                    "controlType": "FILE_UPLOAD",
+                                                    "required": true,
+                                                    "editable": true,
+                                                    "label": "Agent ZIP File",
+                                                    "hidden": false,
+                                                    "fieldId": "fileUpload"
+                                                }
+                                            ]
+                                        },
+                                        "formActionList": {
+                                            "formActions": [
+                                                {
+                                                    "actionLabel": "upload Agent",
+                                                    "type": "SUBMIT",
+                                                    "identifier": "Submit",
+                                                    "api-endpoint": {
+                                                        "service-name": "chat-helper",
+                                                        "namespace": "io.cfx.dimensions.app",
+                                                        "methodName": "validate-agent-upload",
+                                                        "stringified-params": true,
+                                                        "parse-output": false,
+                                                        "params": [
+                                                            {}
+                                                        ]
+                                                    }
+                                                },
+                                                {
+                                                    "actionLabel": "Cancel",
+                                                    "type": "CANCEL",
+                                                    "identifier": "Cancel"
+                                                }
+                                            ]
+                                        },
+                                        "submitRequired": true
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "permission": "agenticai:agent:edit",
+                            "title": "Edit",
+                            "type": "POPUP_FORM",
+                            "selectionType": "SINGLE",
+                            "identifier": "saas-service-action:edit-agent",
+                            "api-endpoint": {
+                                "service-name": "chat-helper",
+                                "namespace": "io.cfx.dimensions.app",
+                                "methodName": "get-edit-agent-form",
+                                "stringified-params": true,
+                                "parse-output": false,
+                                "useReportContext": true,
+                                "refreshRequired": true,
+                                "params": [
+                                    {
+                                        "agent_id": "${context.agent_id}"
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "permission": "agenticai:agent:download",
+                            "title": "Download",
+                            "type": "POPUP_FORM",
+                            "selectionType": "SINGLE",
+                            "identifier": "saas-service-action:userdashboard-add-yaml",
+                            "api-endpoint": {
+                                "service-name": "saas-reports",
+                                "methodName": "getForm",
+                                "stringified-params": true,
+                                "parse-output": false,
+                                "useReportContext": true,
+                                "params": [
+                                    {
+                                        "formId": "rda.saas.dynamic.form",
+                                        "formDefinition": {
+                                            "formFieldList": [
+                                                {
+                                                    "dataType": "string",
+                                                    "controlType": "LABEL",
+                                                    "required": false,
+                                                    "editable": false,
+                                                    "label": "Do you want to download this agent?",
+                                                    "hidden": false,
+                                                    "fieldId": "confirmation_message"
+                                                }
+                                            ]
+                                        },
+                                        "formActionList": {
+                                            "formActions": [
+                                                {
+                                                    "actionLabel": "Download",
+                                                    "type": "SUBMIT",
+                                                    "identifier": "Submit",
+                                                    "api-endpoint": {
+                                                        "service-name": "chat-helper",
+                                                        "namespace": "io.cfx.dimensions.app",
+                                                        "methodName": "export-agent",
+                                                        "stringified-params": true,
+                                                        "parse-output": false,
+                                                        "useReportContext": true,
+                                                        "params": [
+                                                            {
+                                                                "id": "${context.id}",
+                                                                "name": "${context.name}"
+                                                            }
+                                                        ]
+                                                    }
+                                                },
+                                                {
+                                                    "actionLabel": "Cancel",
+                                                    "type": "CANCEL",
+                                                    "identifier": "Cancel"
+                                                }
+                                            ]
+                                        },
+                                        "submitRequired": true,
+                                        "contextKeys": [
+                                            "id",
+                                            "name"
+                                        ]
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "permission": "agenticai:agent:viewconflicts",
+                            "title": "View Conflicts",
+                            "type": "GO_TO_APP_STATE",
+                            "selectionType": "SINGLE",
+                            "identifier": "artifact-action:view-difference",
+                            "appName": "user-dashboard/artifact_approval_dashboard",
+                            "contextKeys": [
+                                "agent_id",
+                                "agent_name",
+                                "status"
+                            ],
+                            "actionConditions": {
+                                "actionControl": "SHOW_IF",
+                                "actionCondition": [
+                                    {
+                                        "conditionalField": [
+                                            {
+                                                "fieldId": "status",
+                                                "conditionType": "IS",
+                                                "conditionValue": "Deployed"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "permission": "agenticai:agent:deploy",
+                            "title": "Deploy Agent",
+                            "type": "POPUP_FORM",
+                            "selectionType": "SINGLE",
+                            "identifier": "saas-service-action:userdashboard-add-yaml",
+                            "api-endpoint": {
+                                "service-name": "saas-reports",
+                                "methodName": "getForm",
+                                "stringified-params": true,
+                                "parse-output": false,
+                                "useReportContext": true,
+                                "params": [
+                                    {
+                                        "formId": "rda.saas.dynamic.form",
+                                        "formDefinition": {
+                                            "refreshRequired": true,
+                                            "formFieldList": [
+                                                {
+                                                    "dataType": "string",
+                                                    "controlType": "LABEL",
+                                                    "required": false,
+                                                    "editable": false,
+                                                    "label": "Do you want to deploy this agent?",
+                                                    "hidden": false,
+                                                    "fieldId": "confirmation_message"
+                                                }
+                                            ]
+                                        },
+                                        "formActionList": {
+                                            "formActions": [
+                                                {
+                                                    "actionLabel": "Deploy",
+                                                    "type": "SUBMIT",
+                                                    "identifier": "Submit",
+                                                    "api-endpoint": {
+                                                        "service-name": "chat-helper",
+                                                        "namespace": "io.cfx.dimensions.app",
+                                                        "methodName": "upload-agent",
+                                                        "stringified-params": true,
+                                                        "parse-output": false,
+                                                        "useReportContext": true,
+                                                        "params": [
+                                                            {}
+                                                        ]
+                                                    }
+                                                },
+                                                {
+                                                    "actionLabel": "Cancel",
+                                                    "type": "CANCEL",
+                                                    "identifier": "Cancel"
+                                                }
+                                            ]
+                                        },
+                                        "submitRequired": true
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "permission": "agenticai:agent:enable",
+                            "title": "Enable",
+                            "type": "POPUP_FORM",
+                            "selectionType": "SINGLE",
+                            "identifier": "saas-service-action:userdashboard-add-yaml",
+                            "actionCondition": {
+                                "actionControl": "SHOW_IF",
+                                "conditionalField": [
+                                    {
+                                        "fieldId": "state",
+                                        "conditionType": "EQUAL_IGNORE_CASE",
+                                        "conditionValue": "Disabled"
+                                    }
+                                ]
+                            },
+                            "api-endpoint": {
+                                "service-name": "saas-reports",
+                                "methodName": "getForm",
+                                "stringified-params": true,
+                                "parse-output": false,
+                                "useReportContext": true,
+                                "params": [
+                                    {
+                                        "formId": "rda.saas.dynamic.form",
+                                        "formData": {
+                                            "agent_id": "${context.agent_id}",
+                                            "agent_name": "${context.agent_name}"
+                                        },
+                                        "formDefinition": {
+                                            "refreshRequired": true,
+                                            "formFieldList": [
+                                                {
+                                                    "fieldId": "confirmation_message",
+                                                    "label": "Do you want to Enable this Agent?",
+                                                    "dataType": "string",
+                                                    "controlType": "LABEL",
+                                                    "hidden": false,
+                                                    "editable": false,
+                                                    "required": false,
+                                                    "defaultValue": "Do you want to enable the agent '${context.agent_name}'?"
+                                                }
+                                            ]
+                                        },
+                                        "actions": [
+                                            {
+                                                "type": "RUN_PIPELINE",
+                                                "pipelineName": "agent_enable",
+                                                "isSync": false,
+                                                "show_submission_prompt": true,
+                                                "submit_success_title": "Agent Enabled",
+                                                "submit_success_message": "The agent has been enabled successfully."
+                                            }
+                                        ],
+                                        "formActionList": {
+                                            "formActions": [
+                                                {
+                                                    "actionLabel": "Enable",
+                                                    "identifier": "Submit"
+                                                },
+                                                {
+                                                    "actionLabel": "Cancel",
+                                                    "type": "CANCEL",
+                                                    "identifier": "Cancel"
+                                                }
+                                            ]
+                                        },
+                                        "contextKeys": [
+                                            "agent_id",
+                                            "agent_name"
+                                        ]
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "permission": "agenticai:agent:disable",
+                            "title": "Disable",
+                            "type": "POPUP_FORM",
+                            "selectionType": "SINGLE",
+                            "identifier": "saas-service-action:userdashboard-add-yaml",
+                            "actionCondition": {
+                                "actionControl": "SHOW_IF",
+                                "conditionalField": [
+                                    {
+                                        "fieldId": "state",
+                                        "conditionType": "EQUAL_IGNORE_CASE",
+                                        "conditionValue": "Enabled"
+                                    }
+                                ]
+                            },
+                            "api-endpoint": {
+                                "service-name": "saas-reports",
+                                "methodName": "getForm",
+                                "stringified-params": true,
+                                "parse-output": false,
+                                "useReportContext": true,
+                                "params": [
+                                    {
+                                        "formId": "rda.saas.dynamic.form",
+                                        "formData": {
+                                            "agent_id": "${context.agent_id}",
+                                            "agent_name": "${context.agent_name}"
+                                        },
+                                        "formDefinition": {
+                                            "refreshRequired": true,
+                                            "formFieldList": [
+                                                {
+                                                    "fieldId": "confirmation_message",
+                                                    "label": "Do you want to Disable this Agent?",
+                                                    "dataType": "string",
+                                                    "controlType": "LABEL",
+                                                    "hidden": false,
+                                                    "editable": false,
+                                                    "required": false,
+                                                    "defaultValue": "Do you want to disable the agent '${context.agent_name}'?"
+                                                }
+                                            ]
+                                        },
+                                        "actions": [
+                                            {
+                                                "type": "RUN_PIPELINE",
+                                                "pipelineName": "agent_disable",
+                                                "isSync": false,
+                                                "show_submission_prompt": true,
+                                                "submit_success_title": "Agent Disabled",
+                                                "submit_success_message": "The agent has been disabled successfully."
+                                            }
+                                        ],
+                                        "formActionList": {
+                                            "formActions": [
+                                                {
+                                                    "actionLabel": "Disable",
+                                                    "identifier": "Submit"
+                                                },
+                                                {
+                                                    "actionLabel": "Cancel",
+                                                    "type": "CANCEL",
+                                                    "identifier": "Cancel"
+                                                }
+                                            ]
+                                        },
+                                        "contextKeys": [
+                                            "agent_id",
+                                            "agent_name"
+                                        ]
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "permission": "agenticai:agent:delete",
+                            "title": "Delete Agent",
+                            "type": "POPUP_FORM",
+                            "selectionType": "SINGLE",
+                            "identifier": "saas-service-action:delete-agent",
+                            "api-endpoint": {
+                                "service-name": "saas-reports",
+                                "methodName": "getForm",
+                                "stringified-params": true,
+                                "parse-output": false,
+                                "useReportContext": true,
+                                "params": [
+                                    {
+                                        "formId": "rda.saas.dynamic.form",
+                                        "formDefinition": {
+                                            "refreshRequired": true,
+                                            "formFieldList": [
+                                                {
+                                                    "dataType": "string",
+                                                    "controlType": "LABEL",
+                                                    "required": false,
+                                                    "editable": false,
+                                                    "label": "Do you want to delete this agent? This action cannot be undone. Deleting this agent will also remove all associated toolsets, prompt templates, personas, and workflows.",
+                                                    "hidden": false,
+                                                    "fieldId": "confirmation_message"
+                                                }
+                                            ]
+                                        },
+                                        "formActionList": {
+                                            "formActions": [
+                                                {
+                                                    "actionLabel": "Delete",
+                                                    "type": "SUBMIT",
+                                                    "identifier": "Submit",
+                                                    "api-endpoint": {
+                                                        "service-name": "chat-helper",
+                                                        "namespace": "io.cfx.dimensions.app",
+                                                        "methodName": "delete-agent",
+                                                        "stringified-params": true,
+                                                        "parse-output": false,
+                                                        "useReportContext": true,
+                                                        "params": [
+                                                            {}
+                                                        ]
+                                                    }
+                                                },
+                                                {
+                                                    "actionLabel": "Cancel",
+                                                    "type": "CANCEL",
+                                                    "identifier": "Cancel"
+                                                }
+                                            ]
+                                        },
+                                        "submitRequired": true
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "permission": "agenticai:agent:createzip",
+                            "title": "Create",
+                            "type": "POPUP_FORM",
+                            "selectionType": "NONE",
+                            "identifier": "saas-service-action:create-agent-zip",
+                            "api-endpoint": {
+                                "service-name": "saas-reports",
+                                "methodName": "getForm",
+                                "stringified-params": true,
+                                "parse-output": false,
+                                "params": [
+                                    {
+                                        "formId": "rda.saas.dynamic.form",
+                                        "formDefinition": {
+                                            "refreshRequired": true,
+                                            "formFieldList": [
+                                                {
+                                                    "help": "Enter the agent name",
+                                                    "dataType": "string",
+                                                    "controlType": "TEXT_FIELD",
+                                                    "required": true,
+                                                    "editable": true,
+                                                    "label": "Agent Name",
+                                                    "hidden": false,
+                                                    "fieldId": "agent_name"
+                                                },
+                                                {
+                                                    "help": "Enter the agent description",
+                                                    "dataType": "string",
+                                                    "controlType": "TEXT_FIELD",
+                                                    "required": true,
+                                                    "editable": true,
+                                                    "label": "Agent Description",
+                                                    "hidden": false,
+                                                    "fieldId": "description"
+                                                },
+                                                {
+                                                    "help": "Enter the agent version",
+                                                    "dataType": "string",
+                                                    "controlType": "TEXT_FIELD",
+                                                    "required": true,
+                                                    "editable": true,
+                                                    "label": "Agent Version",
+                                                    "hidden": false,
+                                                    "fieldId": "version"
+                                                },
+                                                {
+                                                    "help": "Enter the category",
+                                                    "dataType": "string",
+                                                    "controlType": "TEXT_FIELD",
+                                                    "required": true,
+                                                    "editable": true,
+                                                    "label": "Agent Category",
+                                                    "hidden": false,
+                                                    "fieldId": "category"
+                                                },
+                                                {
+                                                    "help": "Enter tags for the agent",
+                                                    "dataType": "string",
+                                                    "controlType": "PYTHON_EDITOR",
+                                                    "required": false,
+                                                    "editable": true,
+                                                    "label": "Tags",
+                                                    "hidden": false,
+                                                    "fieldId": "tags",
+                                                    "defaultValue": "[]",
+                                                    "controlPropertyList": [
+                                                        {
+                                                            "attribute": "lang",
+                                                            "value": "text/json"
+                                                        }
+                                                    ]
+                                                },
+                                                {
+                                                    "help": "Select the AI project name",
+                                                    "dataType": "string",
+                                                    "controlType": "COMBO_BOX",
+                                                    "required": true,
+                                                    "editable": true,
+                                                    "label": "AI Project Name",
+                                                    "hidden": false,
+                                                    "fieldId": "ai_project_name",
+                                                    "lovSourceType": "pstream",
+                                                    "lovSourceParams": {
+                                                        "name": "ai_projects",
+                                                        "valueColumn": "ai_project_name",
+                                                        "labelColumn": "ai_project_name",
+                                                        "query": "ai_project_name is not empty"
+                                                    }
+                                                },
+                                                {
+                                                    "help": "Select the persona",
+                                                    "dataType": "string",
+                                                    "controlType": "SELECTOR_TABLE",
+                                                    "required": true,
+                                                    "editable": true,
+                                                    "label": "Persona",
+                                                    "hidden": false,
+                                                    "fieldId": "persona",
+                                                    "controlPropertyList": [
+                                                        {
+                                                            "attribute": "column-key",
+                                                            "value": "name"
+                                                        },
+                                                        {
+                                                            "attribute": "selection",
+                                                            "value": "MULTIPLE"
+                                                        },
+                                                        {
+                                                            "attribute": "disable-all-actions",
+                                                            "value": true
+                                                        },
+                                                        {
+                                                            "attribute": "hide-search",
+                                                            "value": true
+                                                        },
+                                                        {
+                                                            "attribute": "hide-filter",
+                                                            "value": true
+                                                        },
+                                                        {
+                                                            "attribute": "hide-select-all",
+                                                            "value": true
+                                                        }
+                                                    ],
+                                                    "widget": {
+                                                        "title": "Personas",
+                                                        "timebased": false,
+                                                        "max_width": 12,
+                                                        "height": 8,
+                                                        "min_width": 12,
+                                                        "stream": "ai_personas",
+                                                        "extra_filter": "ai_project_name is not empty",
+                                                        "show_search": false,
+                                                        "show_filter": false,
+                                                        "enable_search": false,
+                                                        "enable_filter": false,
+                                                        "show_select_all": false,
+                                                        "sorting": [],
+                                                        "columns": {
+                                                            "name": {
+                                                                "title": "Name",
+                                                                "key": true
+                                                            },
+                                                            "ai_project_name": {
+                                                                "title": "AI Project Name",
+                                                                "key": true
+                                                            },
+                                                            "description": {
+                                                                "title": "Description"
+                                                            }
+                                                        }
+                                                    }
+                                                },
+                                                {
+                                                    "isSecret": false,
+                                                    "help": "Select the AI workflow name",
+                                                    "dataType": "string",
+                                                    "controlType": "SELECTOR_TABLE",
+                                                    "required": false,
+                                                    "editable": true,
+                                                    "label": "AI Workflow Name",
+                                                    "hidden": false,
+                                                    "fieldId": "ai_workflow_name",
+                                                    "controlPropertyList": [
+                                                        {
+                                                            "attribute": "column-key",
+                                                            "value": "name"
+                                                        },
+                                                        {
+                                                            "attribute": "selection",
+                                                            "value": "MULTIPLE"
+                                                        },
+                                                        {
+                                                            "attribute": "hide-select-all",
+                                                            "value": true
+                                                        }
+                                                    ],
+                                                    "widget": {
+                                                        "title": "Workflows",
+                                                        "timebased": false,
+                                                        "show_filter": false,
+                                                        "max_width": 12,
+                                                        "height": 8,
+                                                        "min_width": 12,
+                                                        "stream": "rda_orchestrator_flow_meta",
+                                                        "extra_filter": "ai_project_name is not empty",
+                                                        "show_select_all": false,
+                                                        "sorting": [],
+                                                        "columns": {
+                                                            "name": {
+                                                                "title": "Workflow Name",
+                                                                "key": true
+                                                            },
+                                                            "description": {
+                                                                "title": "Description"
+                                                            },
+                                                            "ai_project_name": {
+                                                                "title": "AI Project Name",
+                                                                "key": true
+                                                            }
+                                                        }
+                                                    }
+                                                },
+                                                {
+                                                    "help": "Upload image files (jpeg, png, ico, etc.)",
+                                                    "dataType": "string",
+                                                    "controlType": "FILE_UPLOAD",
+                                                    "required": false,
+                                                    "editable": true,
+                                                    "label": "Images",
+                                                    "hidden": false,
+                                                    "fieldId": "images"
+                                                },
+                                                {
+                                                    "help": "Upload video files as ZIP",
+                                                    "dataType": "string",
+                                                    "controlType": "FILE_UPLOAD",
+                                                    "required": false,
+                                                    "editable": true,
+                                                    "label": "Videos (ZIP)",
+                                                    "hidden": false,
+                                                    "fieldId": "videos"
+                                                },
+                                                {
+                                                    "help": "Upload document files as ZIP",
+                                                    "dataType": "string",
+                                                    "controlType": "FILE_UPLOAD",
+                                                    "required": false,
+                                                    "editable": true,
+                                                    "label": "Docs (ZIP)",
+                                                    "hidden": false,
+                                                    "fieldId": "docs"
+                                                },
+                                                {
+                                                    "help": "Upload icon image file",
+                                                    "dataType": "string",
+                                                    "controlType": "FILE_UPLOAD",
+                                                    "required": false,
+                                                    "editable": true,
+                                                    "label": "Icon",
+                                                    "hidden": false,
+                                                    "fieldId": "icon"
+                                                }
+                                            ]
+                                        },
+                                        "formActionList": {
+                                            "formActions": [
+                                                {
+                                                    "actionLabel": "Submit",
+                                                    "type": "SUBMIT",
+                                                    "identifier": "Submit",
+                                                    "api-endpoint": {
+                                                        "service-name": "chat-helper",
+                                                        "namespace": "io.cfx.dimensions.app",
+                                                        "methodName": "create-agent-zip",
+                                                        "stringified-params": true,
+                                                        "parse-output": false,
+                                                        "params": [
+                                                            {}
+                                                        ]
+                                                    }
+                                                },
+                                                {
+                                                    "actionLabel": "Cancel",
+                                                    "type": "CANCEL",
+                                                    "identifier": "Cancel"
+                                                }
+                                            ]
+                                        },
+                                        "submitRequired": true
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "permission": "agenticai:agent:downloadall",
+                            "title": "Download All",
+                            "type": "POPUP_FORM",
+                            "selectionType": "NONE",
+                            "identifier": "saas-service-action:download-agents-zip",
+                            "api-endpoint": {
+                                "service-name": "saas-reports",
+                                "methodName": "getForm",
+                                "stringified-params": true,
+                                "parse-output": false,
+                                "params": [
+                                    {
+                                        "formId": "rda.saas.dynamic.form",
+                                        "formDefinition": {
+                                            "formFieldList": [
+                                                {
+                                                    "help": "Select agents to download. Use 'Select All' to select all enabled agents, or select individual agents.",
+                                                    "dataType": "string",
+                                                    "controlType": "SELECTOR_TABLE",
+                                                    "required": false,
+                                                    "editable": true,
+                                                    "label": "Select Agents",
+                                                    "hidden": false,
+                                                    "fieldId": "selected_agents",
+                                                    "controlPropertyList": [
+                                                        {
+                                                            "attribute": "column-key",
+                                                            "value": "agent_id"
+                                                        },
+                                                        {
+                                                            "attribute": "selection",
+                                                            "value": "MULTIPLE"
+                                                        },
+                                                        {
+                                                            "attribute": "hide-search",
+                                                            "value": true
+                                                        },
+                                                        {
+                                                            "attribute": "hide-filter",
+                                                            "value": true
+                                                        }
+                                                    ],
+                                                    "widget": {
+                                                        "title": "Enabled Agents",
+                                                        "timebased": false,
+                                                        "max_width": 12,
+                                                        "height": 8,
+                                                        "min_width": 12,
+                                                        "stream": "agent_catalogue_data",
+                                                        "ts_column": "timestamp",
+                                                        "extra_filter": "state is 'Enabled'",
+                                                        "show_search": false,
+                                                        "show_filter": false,
+                                                        "enable_search": false,
+                                                        "enable_filter": false,
+                                                        "sorting": [],
+                                                        "columns": {
+                                                            "agent_name": {
+                                                                "title": "Name",
+                                                                "key": true
+                                                            },
+                                                            "agent_id": {
+                                                                "title": "ID",
+                                                                "key": true
+                                                            },
+                                                            "version": {
+                                                                "title": "Version"
+                                                            },
+                                                            "category": {
+                                                                "title": "Category"
+                                                            },
+                                                            "description": {
+                                                                "title": "Description",
+                                                                "formatter": "truncate"
+                                                            },
+                                                            "publisher": {
+                                                                "title": "Publisher"
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            ]
+                                        },
+                                        "formActionList": {
+                                            "formActions": [
+                                                {
+                                                    "actionLabel": "Download All",
+                                                    "type": "SUBMIT",
+                                                    "identifier": "Submit",
+                                                    "api-endpoint": {
+                                                        "service-name": "chat-helper",
+                                                        "namespace": "io.cfx.dimensions.app",
+                                                        "methodName": "export-agents-zip",
+                                                        "stringified-params": true,
+                                                        "parse-output": false,
+                                                        "params": [
+                                                            {}
+                                                        ]
+                                                    }
+                                                },
+                                                {
+                                                    "actionLabel": "Cancel",
+                                                    "type": "CANCEL",
+                                                    "identifier": "Cancel"
+                                                }
+                                            ]
+                                        },
+                                        "submitRequired": true
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "widget_id": "13503d73"
+                }
+            ]
+        }
+    ],
+    "saved_time": "2026-03-04T09:48:39.618026"
+}

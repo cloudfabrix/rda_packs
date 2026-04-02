@@ -1,0 +1,936 @@
+{
+  "flowName": "Network Config Compliance Agent",
+  "flowDesc": "",
+  "flowData": {
+    "nodes": [
+      {
+        "id": "start",
+        "type": "start",
+        "initialized": false,
+        "position": {
+          "x": 135,
+          "y": -60
+        },
+        "data": {
+          "name": "start",
+          "label": "Start",
+          "input_ports": [],
+          "output_ports": [
+            {
+              "id": "start",
+              "label": "",
+              "min_connections": 1,
+              "max_connections": 1,
+              "config_schema": {
+                "model": {},
+                "uiSchema": {}
+              },
+              "connection_restrictions": [],
+              "connected_to": [
+                "cfx-da2f761f-15ee-44f6-fa11-dccfc68c8677"
+              ]
+            }
+          ]
+        },
+        "deletable": false,
+        "label": "Start"
+      },
+      {
+        "id": "cfx-da2f761f-15ee-44f6-fa11-dccfc68c8677",
+        "type": "wtask",
+        "initialized": false,
+        "position": {
+          "x": 195,
+          "y": 15
+        },
+        "data": {
+          "name": "agent_with_mcp",
+          "label": "AI Evaluate Config Compliance",
+          "main": "agentic_AI_nodes.agent_tasks.ProcessMCPPrompt",
+          "icon": "/assets/img/icons/blue_outline/pipeline.png",
+          "input_document_count": 0,
+          "parameter_model": {
+            "type": "object",
+            "properties": {
+              "llm_credential": {
+                "type": "string"
+              },
+              "persona": {
+                "type": "string",
+                "enum": [
+                  "Admin",
+                  "Service Desk",
+                  "Service Delivery",
+                  "Technology Providers",
+                  "Service Integration & Management",
+                  "Support Operations",
+                  "Security Ops"
+                ]
+              },
+              "prompt": {
+                "type": "string"
+              },
+              "output_attribute_name": {
+                "type": "string"
+              },
+              "server_token": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "llm_credential",
+              "persona",
+              "prompt"
+            ]
+          },
+          "ui_schema": {
+            "elements": [
+              {
+                "type": "Control",
+                "scope": "#/properties/llm_credential"
+              },
+              {
+                "type": "Control",
+                "scope": "#/properties/persona"
+              },
+              {
+                "type": "Control",
+                "scope": "#/properties/prompt",
+                "options": {
+                  "multi": true
+                }
+              },
+              {
+                "type": "Control",
+                "scope": "#/properties/output_attribute_name"
+              },
+              {
+                "type": "Control",
+                "scope": "#/properties/server_token"
+              }
+            ]
+          },
+          "category": "Agentic AI Nodes",
+          "input_ports": [
+            {
+              "label": "",
+              "min_connections": 1,
+              "max_connections": 1,
+              "id": "input_1"
+            }
+          ],
+          "output_ports": [
+            {
+              "label": "",
+              "min_connections": 1,
+              "max_connections": 1,
+              "id": "output_1",
+              "connected_to": [
+                "cfx-a2c28829-93a9-4c6c-d94a-7190d7b124a8"
+              ],
+              "isGlobalVariableMapped": true,
+              "globalVariableName": "agent_output"
+            }
+          ],
+          "formData": {
+            "persona": "Service Delivery",
+            "output_attribute_name": "agent",
+            "globalVarMap": {
+              "output_attribute_name": "agent_output",
+              "server_token": "Server_Token"
+            },
+            "prompt": "Evaluate the configuration compliance for network device {{device_ip}}.\n\nYou are a network compliance expert.\n\nYour task is to:\n1. Go through each row in the compliance table.\n2. For each configuration check, return its name and status.\n3. If the status is \"Fail\" or \"Unknown\", include the reason (from the Details column) and a concise remediation action or command.\n4. If the status is \"Pass\", return the check and status, but leave the reason and remediation columns empty.\n\nReturn the final output as an HTML table with the following columns: Check, Status, Reason, and Remediation.",
+            "llm_credential": "prod-claude-sonnet-4"
+          }
+        },
+        "label": "AI Evaluate Config Compliance",
+        "sourcePosition": "right",
+        "targetPosition": "left"
+      },
+      {
+        "id": "cfx-a2c28829-93a9-4c6c-d94a-7190d7b124a8",
+        "type": "wtask",
+        "initialized": false,
+        "position": {
+          "x": 270,
+          "y": 135
+        },
+        "data": {
+          "name": "agent_with_mcp",
+          "label": "AI Config Compliance Validator",
+          "main": "agentic_AI_nodes.agent_tasks.ProcessMCPPrompt",
+          "icon": "/assets/img/icons/blue_outline/pipeline.png",
+          "input_document_count": 0,
+          "parameter_model": {
+            "type": "object",
+            "properties": {
+              "llm_credential": {
+                "type": "string"
+              },
+              "persona": {
+                "type": "string",
+                "enum": [
+                  "Admin",
+                  "Service Desk",
+                  "Service Delivery",
+                  "Technology Providers",
+                  "Service Integration & Management",
+                  "Support Operations",
+                  "Security Ops"
+                ]
+              },
+              "prompt": {
+                "type": "string"
+              },
+              "output_attribute_name": {
+                "type": "string"
+              },
+              "server_token": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "llm_credential",
+              "persona",
+              "prompt"
+            ]
+          },
+          "ui_schema": {
+            "elements": [
+              {
+                "type": "Control",
+                "scope": "#/properties/llm_credential"
+              },
+              {
+                "type": "Control",
+                "scope": "#/properties/persona"
+              },
+              {
+                "type": "Control",
+                "scope": "#/properties/prompt",
+                "options": {
+                  "multi": true
+                }
+              },
+              {
+                "type": "Control",
+                "scope": "#/properties/output_attribute_name"
+              },
+              {
+                "type": "Control",
+                "scope": "#/properties/server_token"
+              }
+            ]
+          },
+          "category": "Agentic AI Nodes",
+          "input_ports": [
+            {
+              "label": "",
+              "min_connections": 1,
+              "max_connections": 1,
+              "id": "input_1"
+            }
+          ],
+          "output_ports": [
+            {
+              "label": "",
+              "min_connections": 1,
+              "max_connections": 1,
+              "id": "output_1",
+              "connected_to": [
+                "cfx-63cf28f7-9d88-4465-9b2b-e9a3b8752cdd"
+              ],
+              "isGlobalVariableMapped": true,
+              "globalVariableName": "evaluation_output"
+            }
+          ],
+          "formData": {
+            "prompt": "You are an evaluation agent. Given the output from an configuration compliance analysis agent in the variable {{agent_output}}, determine whether the configuration compliance analysis process was successfully executed. Do not analyze or interpret the configuration compliance analysis results. Only check for evidence that the configuration compliance analysis process ran to completion without errors.\n\nRespond in a single JSON line with this format:\n\n{\"agent_run\": \"Success\"} \n\nor\n\n{\"agent_run\": \"Failure\"}\n\nUse \"Failure\" if the output is empty, incomplete, or contains signs of execution errors or failures.",
+            "globalVarMap": {
+              "output_attribute_name": "evaluation_output",
+              "server_token": "Server_Token"
+            },
+            "persona": "Service Delivery",
+            "llm_credential": "prod-claude-sonnet-4"
+          }
+        },
+        "label": "AI Config Compliance Validator",
+        "sourcePosition": "right",
+        "targetPosition": "left"
+      },
+      {
+        "id": "cfx-319c504f-eca3-4b2f-b539-94f726f1dfdb",
+        "type": "wtask",
+        "initialized": false,
+        "position": {
+          "x": 480,
+          "y": 630
+        },
+        "data": {
+          "name": "write_data_to_pstream",
+          "label": "Write Validation Data to PStream",
+          "main": "common_tasks.data_readwrite_tasks.WriteDataToPStream",
+          "input_document_count": 0,
+          "icon": "/assets/img/icons/blue_outline/query_pstream.png",
+          "parameter_model": {
+            "type": "object",
+            "properties": {
+              "pstream_name": {
+                "type": "string"
+              },
+              "data": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "inputs": {
+                      "type": "string",
+                      "description": "Input column for pstream"
+                    }
+                  }
+                }
+              },
+              "validate_data_model": {
+                "type": "boolean",
+                "default": false
+              }
+            },
+            "required": [
+              "pstream_name"
+            ]
+          },
+          "ui_schema": {
+            "type": "VerticalLayout",
+            "elements": [
+              {
+                "type": "Control",
+                "scope": "#/properties/pstream_name"
+              },
+              {
+                "type": "Control",
+                "scope": "#/properties/data"
+              },
+              {
+                "type": "Control",
+                "scope": "#/properties/validate_data_model"
+              }
+            ]
+          },
+          "category": "Common Tasks",
+          "input_ports": [
+            {
+              "label": "",
+              "min_connections": 1,
+              "max_connections": 1,
+              "id": "input_1"
+            }
+          ],
+          "output_ports": [
+            {
+              "label": "",
+              "min_connections": 1,
+              "max_connections": 1,
+              "id": "output_1",
+              "connected_to": [
+                "cfx-1694b0df-431c-4b4c-a574-a40dfb369bb5"
+              ]
+            }
+          ],
+          "formData": {
+            "validate_data_model": false,
+            "pstream_name": "agent_output_stream",
+            "globalVarMap": {
+              "data": "evaluation_output"
+            }
+          }
+        },
+        "label": "Write Validation Data to PStream",
+        "sourcePosition": "right",
+        "targetPosition": "left"
+      },
+      {
+        "id": "cfx-1694b0df-431c-4b4c-a574-a40dfb369bb5",
+        "type": "wtask",
+        "initialized": false,
+        "position": {
+          "x": 540,
+          "y": 750
+        },
+        "data": {
+          "name": "write_data_to_pstream",
+          "label": "Write Agent Output to PStream",
+          "main": "common_tasks.data_readwrite_tasks.WriteDataToPStream",
+          "input_document_count": 0,
+          "icon": "/assets/img/icons/blue_outline/query_pstream.png",
+          "parameter_model": {
+            "type": "object",
+            "properties": {
+              "pstream_name": {
+                "type": "string"
+              },
+              "data": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "inputs": {
+                      "type": "string",
+                      "description": "Input column for pstream"
+                    }
+                  }
+                }
+              },
+              "validate_data_model": {
+                "type": "boolean",
+                "default": false
+              }
+            },
+            "required": [
+              "pstream_name"
+            ]
+          },
+          "ui_schema": {
+            "type": "VerticalLayout",
+            "elements": [
+              {
+                "type": "Control",
+                "scope": "#/properties/pstream_name"
+              },
+              {
+                "type": "Control",
+                "scope": "#/properties/data"
+              },
+              {
+                "type": "Control",
+                "scope": "#/properties/validate_data_model"
+              }
+            ]
+          },
+          "category": "Common Tasks",
+          "input_ports": [
+            {
+              "label": "",
+              "min_connections": 1,
+              "max_connections": 1,
+              "id": "input_1"
+            }
+          ],
+          "output_ports": [
+            {
+              "label": "",
+              "min_connections": 1,
+              "max_connections": 1,
+              "id": "output_1",
+              "connected_to": []
+            }
+          ],
+          "formData": {
+            "validate_data_model": false,
+            "pstream_name": "agent_output_stream",
+            "globalVarMap": {
+              "data": "agent_output"
+            }
+          }
+        },
+        "label": "Write Agent Output to PStream",
+        "sourcePosition": "right",
+        "targetPosition": "left"
+      },
+      {
+        "id": "cfx-63cf28f7-9d88-4465-9b2b-e9a3b8752cdd",
+        "type": "wtask",
+        "initialized": false,
+        "position": {
+          "x": 330,
+          "y": 255
+        },
+        "data": {
+          "name": "agent_with_mcp",
+          "label": "AI Analyze the Compliance Failures",
+          "main": "agentic_AI_nodes.agent_tasks.ProcessMCPPrompt",
+          "icon": "/assets/img/icons/blue_outline/pipeline.png",
+          "input_document_count": 0,
+          "parameter_model": {
+            "type": "object",
+            "properties": {
+              "llm_credential": {
+                "type": "string"
+              },
+              "persona": {
+                "type": "string",
+                "enum": [
+                  "Admin",
+                  "Service Desk",
+                  "Service Delivery",
+                  "Technology Providers",
+                  "Service Integration & Management",
+                  "Support Operations",
+                  "Security Ops"
+                ]
+              },
+              "prompt": {
+                "type": "string"
+              },
+              "output_attribute_name": {
+                "type": "string"
+              },
+              "server_token": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "llm_credential",
+              "persona",
+              "prompt"
+            ]
+          },
+          "ui_schema": {
+            "elements": [
+              {
+                "type": "Control",
+                "scope": "#/properties/llm_credential"
+              },
+              {
+                "type": "Control",
+                "scope": "#/properties/persona"
+              },
+              {
+                "type": "Control",
+                "scope": "#/properties/prompt",
+                "options": {
+                  "multi": true
+                }
+              },
+              {
+                "type": "Control",
+                "scope": "#/properties/output_attribute_name"
+              },
+              {
+                "type": "Control",
+                "scope": "#/properties/server_token"
+              }
+            ]
+          },
+          "category": "Agentic AI Nodes",
+          "input_ports": [
+            {
+              "label": "",
+              "min_connections": 1,
+              "max_connections": 1,
+              "id": "input_1"
+            }
+          ],
+          "output_ports": [
+            {
+              "label": "",
+              "min_connections": 1,
+              "max_connections": 1,
+              "id": "output_1",
+              "isGlobalVariableMapped": true,
+              "globalVariableName": "message",
+              "connected_to": [
+                "cfx-51883efc-9af8-4c45-ba82-044abf3d4cca"
+              ]
+            }
+          ],
+          "formData": {
+            "persona": "Service Desk",
+            "output_attribute_name": "message",
+            "globalVarMap": {
+              "output_attribute_name": "message",
+              "server_token": "Server_Token"
+            },
+            "prompt": "You are given configuration compliance check data for a network device. Your task is to analyse the reason for the failed checks and create a message with relevant information to raise an alert in the system indicating the issue with compliance check on a device. For each such check, generate the relevant alert message which can then be used to create an incident. Respond in a paragraph for each failed check. Ignore passed checks.\nOnly use the reason and remediation column to generate alert message. Keep it short and to the point without any detailed explanations and give only necessary information like device details. give remediation suggestions in the message along with the commands to be executed.Give the messages as a list of objects.Give the messages in following format always enclosed in ```json ```\nFor example:\n```json\n[\n  {\n    \"message\": \"...\"\n  }\n}```\n\nUse this data: {{agent_output}}",
+            "llm_credential": "prod-claude-sonnet-4"
+          }
+        },
+        "label": "AI Analyze the Compliance Failures",
+        "sourcePosition": "right",
+        "targetPosition": "left"
+      },
+      {
+        "id": "cfx-d998f32b-aec4-44dd-bdd5-61591de67e27",
+        "type": "wtask",
+        "initialized": false,
+        "position": {
+          "x": 450,
+          "y": 510
+        },
+        "data": {
+          "name": "write_data_to_pstream",
+          "label": "Write Message to PStream",
+          "main": "common_tasks.data_readwrite_tasks.WriteDataToPStream",
+          "input_document_count": 0,
+          "icon": "/assets/img/icons/blue_outline/query_pstream.png",
+          "parameter_model": {
+            "type": "object",
+            "properties": {
+              "pstream_name": {
+                "type": "string"
+              },
+              "data": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "inputs": {
+                      "type": "string",
+                      "description": "Input column for pstream"
+                    }
+                  }
+                }
+              },
+              "validate_data_model": {
+                "type": "boolean",
+                "default": false
+              }
+            },
+            "required": [
+              "pstream_name"
+            ]
+          },
+          "ui_schema": {
+            "type": "VerticalLayout",
+            "elements": [
+              {
+                "type": "Control",
+                "scope": "#/properties/pstream_name"
+              },
+              {
+                "type": "Control",
+                "scope": "#/properties/data"
+              },
+              {
+                "type": "Control",
+                "scope": "#/properties/validate_data_model"
+              }
+            ]
+          },
+          "category": "Common Tasks",
+          "input_ports": [
+            {
+              "label": "",
+              "min_connections": 1,
+              "max_connections": 1,
+              "id": "input_1"
+            }
+          ],
+          "output_ports": [
+            {
+              "label": "",
+              "min_connections": 1,
+              "max_connections": 1,
+              "id": "output_1",
+              "connected_to": [
+                "cfx-319c504f-eca3-4b2f-b539-94f726f1dfdb"
+              ]
+            }
+          ],
+          "formData": {
+            "validate_data_model": false,
+            "pstream_name": "agent_output_stream",
+            "globalVarMap": {
+              "data": "message"
+            },
+            "data": []
+          }
+        },
+        "label": "Write Message to PStream",
+        "sourcePosition": "right",
+        "targetPosition": "left"
+      },
+      {
+        "id": "cfx-51883efc-9af8-4c45-ba82-044abf3d4cca",
+        "type": "wtask",
+        "initialized": false,
+        "position": {
+          "x": 390,
+          "y": 390
+        },
+        "data": {
+          "name": "agent_without_mcp",
+          "label": "Agent without MCP 1",
+          "main": "agentic_ai_nodes.agent_tasks.ProcessMCPPromptWithoutMCP",
+          "input_document_count": 0,
+          "parameter_model": {
+            "type": "object",
+            "properties": {
+              "llm_credential": {
+                "type": "string"
+              },
+              "persona": {
+                "type": "string"
+              },
+              "prompt": {
+                "type": "string"
+              },
+              "prompt_template": {
+                "type": "string"
+              },
+              "output_attribute_name": {
+                "type": "string"
+              },
+              "server_token": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "llm_credential",
+              "persona",
+              "prompt"
+            ]
+          },
+          "ui_schema": {
+            "elements": [
+              {
+                "type": "Control",
+                "scope": "#/properties/llm_credential"
+              },
+              {
+                "type": "Control",
+                "scope": "#/properties/persona"
+              },
+              {
+                "type": "Control",
+                "scope": "#/properties/prompt",
+                "options": {
+                  "multi": true
+                }
+              },
+              {
+                "type": "Control",
+                "scope": "#/properties/prompt_template"
+              },
+              {
+                "type": "Control",
+                "scope": "#/properties/output_attribute_name"
+              },
+              {
+                "type": "Control",
+                "scope": "#/properties/server_token"
+              }
+            ]
+          },
+          "category": "Agentic AI Nodes",
+          "icon": "/assets/img/icons/logoRda.png",
+          "input_ports": [
+            {
+              "label": "",
+              "min_connections": 1,
+              "max_connections": 1,
+              "id": "input_1"
+            }
+          ],
+          "output_ports": [
+            {
+              "label": "",
+              "min_connections": 1,
+              "max_connections": 1,
+              "id": "output_1",
+              "isGlobalVariableMapped": true,
+              "globalVariableName": "agent_output",
+              "connected_to": [
+                "cfx-d998f32b-aec4-44dd-bdd5-61591de67e27"
+              ]
+            }
+          ],
+          "formData": {
+            "prompt": "this is the Network compliance HTML table: {{agent_output}}\n\nYou are an Impact assessment agent, You are given a Network compliance HTML table. Your job is to provide an impact assessment of each of the compliance rules, such as what wiil be the impact of the changes in each compliance. \nStrictly return the HTML table as is, and add the assessment after the table. Provide the Impact assessment in the HTML report as well\n\nDo not do any tool calls. just provide the output as specified\n\n",
+            "persona": "Service Delivery",
+            "llm_credential": "prod-claude-sonnet-4",
+            "globalVarMap": {
+              "output_attribute_name": "agent_output",
+              "server_token": "Server_Token"
+            }
+          }
+        },
+        "label": "Agent without MCP 1",
+        "sourcePosition": "right",
+        "targetPosition": "left"
+      }
+    ],
+    "edges": [
+      {
+        "id": "vueflow__edge-startstart-cfx-da2f761f-15ee-44f6-fa11-dccfc68c8677input_1",
+        "type": "default",
+        "source": "start",
+        "target": "cfx-da2f761f-15ee-44f6-fa11-dccfc68c8677",
+        "sourceHandle": "start",
+        "targetHandle": "input_1",
+        "data": {
+          "sourceLabel": "Start",
+          "targetLabel": "Agent with MCP"
+        },
+        "label": "",
+        "sourceX": 202.5000178425114,
+        "sourceY": -27.399977604891916,
+        "targetX": 263.0000806625516,
+        "targetY": 12.00000979875627
+      },
+      {
+        "id": "vueflow__edge-cfx-da2f761f-15ee-44f6-fa11-dccfc68c8677output_1-cfx-a2c28829-93a9-4c6c-d94a-7190d7b124a8input_1",
+        "type": "default",
+        "source": "cfx-da2f761f-15ee-44f6-fa11-dccfc68c8677",
+        "target": "cfx-a2c28829-93a9-4c6c-d94a-7190d7b124a8",
+        "sourceHandle": "output_1",
+        "targetHandle": "input_1",
+        "data": {
+          "sourceLabel": "Agent with MCP",
+          "targetLabel": "Agent with MCP 3"
+        },
+        "label": "",
+        "sourceX": 263.0000806625516,
+        "sourceY": 94.00005746222428,
+        "targetX": 338.0000103500066,
+        "targetY": 132.00002737689252
+      },
+      {
+        "id": "vueflow__edge-cfx-319c504f-eca3-4b2f-b539-94f726f1dfdboutput_1-cfx-1694b0df-431c-4b4c-a574-a40dfb369bb5input_1",
+        "type": "default",
+        "source": "cfx-319c504f-eca3-4b2f-b539-94f726f1dfdb",
+        "target": "cfx-1694b0df-431c-4b4c-a574-a40dfb369bb5",
+        "sourceHandle": "output_1",
+        "targetHandle": "input_1",
+        "data": {
+          "sourceLabel": "Write Data to PStream",
+          "targetLabel": "Write Data to PStream 1"
+        },
+        "label": "",
+        "sourceX": 548.0000103500066,
+        "sourceY": 709.0001014075649,
+        "targetX": 608.0000806625517,
+        "targetY": 746.9999746424837
+      },
+      {
+        "id": "vueflow__edge-cfx-a2c28829-93a9-4c6c-d94a-7190d7b124a8output_1-cfx-63cf28f7-9d88-4465-9b2b-e9a3b8752cddinput_1",
+        "type": "default",
+        "source": "cfx-a2c28829-93a9-4c6c-d94a-7190d7b124a8",
+        "target": "cfx-63cf28f7-9d88-4465-9b2b-e9a3b8752cdd",
+        "sourceHandle": "output_1",
+        "targetHandle": "input_1",
+        "data": {
+          "sourceLabel": "Agent with MCP 3",
+          "targetLabel": "Agent with MCP 4"
+        },
+        "label": "",
+        "sourceX": 338.0000103500066,
+        "sourceY": 214.0000662512924,
+        "targetX": 398.0000806625516,
+        "targetY": 251.99997464248378
+      },
+      {
+        "id": "vueflow__edge-cfx-d998f32b-aec4-44dd-bdd5-61591de67e27output_1-cfx-319c504f-eca3-4b2f-b539-94f726f1dfdbinput_1",
+        "type": "default",
+        "source": "cfx-d998f32b-aec4-44dd-bdd5-61591de67e27",
+        "target": "cfx-319c504f-eca3-4b2f-b539-94f726f1dfdb",
+        "sourceHandle": "output_1",
+        "targetHandle": "input_1",
+        "data": {
+          "sourceLabel": "Write Data to PStream 2",
+          "targetLabel": "Write Data to PStream"
+        },
+        "label": "",
+        "sourceX": 518.0000806625517,
+        "sourceY": 589.00003109502,
+        "targetX": 548.0000103500066,
+        "targetY": 627.0000449550288
+      },
+      {
+        "id": "vueflow__edge-cfx-63cf28f7-9d88-4465-9b2b-e9a3b8752cddoutput_1-cfx-51883efc-9af8-4c45-ba82-044abf3d4ccainput_1",
+        "type": "default",
+        "source": "cfx-63cf28f7-9d88-4465-9b2b-e9a3b8752cdd",
+        "target": "cfx-51883efc-9af8-4c45-ba82-044abf3d4cca",
+        "sourceHandle": "output_1",
+        "targetHandle": "input_1",
+        "data": {
+          "sourceLabel": "AI Analyze the Compliance Failures",
+          "targetLabel": "Agent without MCP 1"
+        },
+        "label": "",
+        "sourceX": 398.0000806625516,
+        "sourceY": 334.0000662512924,
+        "targetX": 458.0000103500066,
+        "targetY": 386.99993948621125
+      },
+      {
+        "id": "vueflow__edge-cfx-51883efc-9af8-4c45-ba82-044abf3d4ccaoutput_1-cfx-d998f32b-aec4-44dd-bdd5-61591de67e27input_1",
+        "type": "default",
+        "source": "cfx-51883efc-9af8-4c45-ba82-044abf3d4cca",
+        "target": "cfx-d998f32b-aec4-44dd-bdd5-61591de67e27",
+        "sourceHandle": "output_1",
+        "targetHandle": "input_1",
+        "data": {
+          "sourceLabel": "Agent without MCP 1",
+          "targetLabel": "Write Message to PStream"
+        },
+        "label": "",
+        "sourceX": 458.0000103500066,
+        "sourceY": 469.0000310950199,
+        "targetX": 518.0000806625517,
+        "targetY": 506.9999746424838
+      }
+    ],
+    "position": [
+      -21.002777777777737,
+      -564.7197109764622
+    ],
+    "zoom": 1.7361111111111114,
+    "viewport": {
+      "x": -21.002777777777737,
+      "y": -564.7197109764622,
+      "zoom": 1.7361111111111114
+    },
+    "globalVariables": {
+      "variables": [
+        {
+          "runtime_input": true,
+          "name": "device_ip",
+          "value_type": "string"
+        },
+        {
+          "name": "agent_output",
+          "runtime_input": false,
+          "value_type": "string"
+        },
+        {
+          "name": "evaluation_output",
+          "runtime_input": false,
+          "value_type": "string"
+        },
+        {
+          "name": "Server_Token",
+          "runtime_input": false,
+          "value_type": "string",
+          "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyLWlkIjoidGVqb0BmYWJyaXguYWkiLCJ3b3Jrc3BhY2VpZCI6ImZjYjY0YWIwLTY3MTYtNDgxYi1iZTUxLWRiNjY4NThhY2M0NyIsInJkYWNfYXBpX2VuZHBvaW50IjoiaHR0cDovLzEwLjk1LjEwNy4yMDo4ODA4In0.6uLov92frNR48pCVGIkJ6aW2cr7eqE11pfgxecFHuic"
+        },
+        {
+          "name": "non_complaint_output",
+          "runtime_input": false,
+          "value_type": "string"
+        },
+        {
+          "name": "pipeline_output",
+          "runtime_input": false,
+          "value_type": "string"
+        },
+        {
+          "name": "message",
+          "runtime_input": false,
+          "value_type": "string"
+        },
+        {
+          "name": "alert_message",
+          "runtime_input": false,
+          "value_type": "string"
+        },
+        {
+          "name": "impact_output",
+          "runtime_input": false,
+          "value_type": "string"
+        }
+      ]
+    }
+  },
+  "flow_type": "agent",
+  "ai_project_name": "Base"
+}

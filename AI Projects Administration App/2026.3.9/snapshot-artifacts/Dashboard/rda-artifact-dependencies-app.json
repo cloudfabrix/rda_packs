@@ -1,0 +1,150 @@
+{
+  "name": "rda-artifact-dependencies-app",
+  "label": "Artifact: {{ARTIFACT_NAME}}",
+  "is_template": true,
+  "description": "Artifact Dependencies",
+  "version": "23.10.26.1",
+  "enabled": true,
+  "template_variables": {
+    "ARTIFACT_NAME": {
+      "contextId": "artifact_name"
+    },
+    "ARTIFACT_TYPE": {
+      "contextId": "artifact_type"
+    }
+  },
+  "dashboard_filters": {
+    "time_filter": false,
+    "columns_filter": []
+  },
+  "dashboard_type": "template",
+  "dashboard_folder": "System",
+  "dashboard_sections": [
+    {
+      "title": "Using this artifact",
+      "widgets": [
+        {
+          "title": "Using this artifact",
+          "widget_type": "tabular",
+          "stream": "rda_artifact_dependencies",
+          "timebased": false,
+          "remote_searchable": true,
+          "remote_searchable_cols": [
+            "from_artifact_type",
+            "from_artifact_name"
+          ],
+          "ts_column": "timestamp",
+          "paginated": true,
+          "height": 10,
+          "min_wdith": 12,
+          "columns": {
+            "from_artifact_type": {
+              "title": "Artifact Type"
+            },
+            "from_artifact_name": {
+              "title": "Artifact Name"
+            }
+          },
+          "custom_columns": [
+            {
+              "id": "artifact_name",
+              "label": "Artifact Name",
+              "expr": "from_artifact_name",
+              "key": true,
+              "visible": false,
+              "hidden": true,
+              "sortable": false
+            },
+            {
+              "id": "artifact_type",
+              "label": "Artifact Type",
+              "expr": "from_artifact_type",
+              "key": true,
+              "visible": false,
+              "hidden": true,
+              "sortable": false
+            }
+          ],
+          "actions": [
+            {
+              "permission": "rda:pipeline:view",
+              "appName": "user-dashboard/rda-artifact-dependencies-app",
+              "displayLabelColumnId": "name",
+              "drillDownLinkField": "name",
+              "identifier": "launch.url.dashboard",
+              "selectionType": "SINGLE",
+              "stateName": "app.featureapp",
+              "title": "View Dependencies",
+              "type": "GO_TO_APP_STATE"
+            }
+          ],
+          "widget_id": "01dc3a55",
+          "extra_filter": "to_artifact_type is '{{ARTIFACT_TYPE}}' and to_artifact_name is '{{ARTIFACT_NAME}}'"
+        }
+      ]
+    },
+    {
+      "title": "Used by this artifact",
+      "widgets": [
+        {
+          "title": "Used by this artifact",
+          "widget_type": "tabular",
+          "stream": "rda_artifact_dependencies",
+          "timebased": false,
+          "remote_searchable": true,
+          "remote_searchable_cols": [
+            "to_artifact_type",
+            "to_artifact_name"
+          ],
+          "ts_column": "timestamp",
+          "paginated": true,
+          "height": 10,
+          "min_wdith": 12,
+          "columns": {
+            "to_artifact_type": {
+              "title": "Artifact Type"
+            },
+            "to_artifact_name": {
+              "title": "Artifact Name"
+            }
+          },
+          "custom_columns": [
+            {
+              "id": "artifact_name",
+              "label": "Artifact Name",
+              "expr": "to_artifact_name",
+              "key": true,
+              "visible": false,
+              "hidden": true,
+              "sortable": false
+            },
+            {
+              "id": "artifact_type",
+              "label": "Artifact Type",
+              "expr": "to_artifact_type",
+              "key": true,
+              "visible": false,
+              "hidden": true,
+              "sortable": false
+            }
+          ],
+          "actions": [
+            {
+              "permission": "rda:pipeline:view",
+              "appName": "user-dashboard/rda-artifact-dependencies-app",
+              "displayLabelColumnId": "name",
+              "drillDownLinkField": "name",
+              "identifier": "launch.url.dashboard",
+              "selectionType": "SINGLE",
+              "stateName": "app.featureapp",
+              "title": "View Dependencies",
+              "type": "GO_TO_APP_STATE"
+            }
+          ],
+          "widget_id": "7ab0a8b7",
+          "extra_filter": "from_artifact_type is '{{ARTIFACT_TYPE}}' and from_artifact_name is '{{ARTIFACT_NAME}}'"
+        }
+      ]
+    }
+  ]
+}

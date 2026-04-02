@@ -1,0 +1,62 @@
+{
+    "name": "toolset_version_diff_widget",
+    "label": "View Version Difference",
+    "live_edit": true,
+    "version": "25.2.25.1",
+    "description": "View differences between two versions of a toolset",
+    "context_label_id": "toolset_name",
+    "dashboard_type": "dashboard",
+    "enabled": true,
+    "dashboard_sections": [
+        {
+            "title": "Version Comparison",
+            "widgets": [
+                {
+                    "title": "Toolset Version Difference",
+                    "widget_type": "custom_widget",
+                    "widget_implementation": "toolset_version_diff_widget/dashboard_version_diff_widget",
+                    "min_width": 12,
+                    "min_height": 12,
+                    "widget_id": "toolset-diff-widget",
+                    "fixed_variables": {
+                        "stream_name": "ai_mcp_toolsets",
+                        "entity_name_field": "toolset_name",
+                        "content_field": "contents",
+                        "entity_label": "Toolset",
+                        "version_field": "version"
+                    }
+                }
+            ]
+        }
+    ],
+    "custom_widgets": {
+        "dashboard_version_diff_widget": {
+            "artifacts": {
+                "main": {
+                    "attachment": "toolset_diff_template",
+                    "content_type": "text/html",
+                    "is_template": true
+                }
+            }
+        }
+    },
+    "saved_time": "2026-03-03T10:31:00.624818",
+    "attachments": [
+        {
+            "name": "toolset_diff_template",
+            "value": "{%- set data = engine.query_stream_data(stream=\"ai_mcp_toolsets\") -%}\r\n{%- set toolset_name = toolset_name -%}\r\n{%- set version = version | default(current_version) -%}\r\n\r\n{%- set config_data_for_toolset =\r\n    data | selectattr(\"toolset_name\", \"equalto\", toolset_name) | list\r\n-%}\r\n\r\n{%- if ai_project_name -%}\r\n  {%- set config_data_for_toolset =\r\n      config_data_for_toolset\r\n      | selectattr(\"ai_project_name\", \"equalto\", ai_project_name)\r\n      | list\r\n  -%}\r\n{%- endif -%}\r\n\r\n{# Grab raw contents (may be string OR dict/list) #}\r\n{%- set lhs_raw =\r\n    config_data_for_toolset\r\n    | selectattr(\"version\", \"equalto\", version)\r\n    | map(attribute=\"contents\")\r\n    | list\r\n    | first\r\n-%}\r\n\r\n{%- set rhs_raw =\r\n    config_data_for_toolset\r\n    | selectattr(\"version\", \"equalto\", compare_version)\r\n    | map(attribute=\"contents\")\r\n    | list\r\n    | first\r\n-%}\r\n\r\n<!DOCTYPE html>\r\n<html lang=\"en\">\r\n<head>\r\n  <meta charset=\"UTF-8\" />\r\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"/>\r\n  <title>Toolset Diff Viewer</title>\r\n\r\n  <style>\r\n    html, body {\r\n      margin: 0;\r\n      padding: 0;\r\n      height: 100%;\r\n      width: 100%;\r\n      background: #1e1e2f;\r\n      color: #ffffff;\r\n      font-family: \"Segoe UI\", Roboto, sans-serif;\r\n    }\r\n\r\n    #header {\r\n      background: #2b2b3d;\r\n      border-bottom: 1px solid #3a3a4d;\r\n      padding: 10px 0;\r\n      text-align: center;\r\n    }\r\n\r\n    #header .title {\r\n      font-size: 18px;\r\n      font-weight: 600;\r\n    }\r\n\r\n    #header .project {\r\n      color: #7dcfff;\r\n      font-size: 15px;\r\n      margin-top: 3px;\r\n    }\r\n\r\n    #version-row {\r\n      display: grid;\r\n      grid-template-columns: 1fr 1fr;\r\n      background: #24243a;\r\n      border-bottom: 1px solid #3a3a4d;\r\n      padding: 6px 20px;\r\n      font-size: 14px;\r\n      color: #c8c8dc;\r\n      font-weight: 500;\r\n      gap: 10px;\r\n    }\r\n\r\n    .version-label span {\r\n      color: #7dcfff;\r\n      font-weight: 600;\r\n    }\r\n\r\n    #diff-container {\r\n      height: calc(100% - 110px);\r\n      width: 100%;\r\n    }\r\n  </style>\r\n\r\n  <script src=\"https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js\"></script>\r\n</head>\r\n\r\n<body>\r\n  <div id=\"header\">\r\n    <div class=\"title\">\r\n      Toolset Difference for: <span>{{ toolset_name }}</span>\r\n    </div>\r\n    {% if ai_project_name %}\r\n      <div class=\"project\">Project: {{ ai_project_name }}</div>\r\n    {% endif %}\r\n  </div>\r\n\r\n  <div id=\"version-row\">\r\n    <div class=\"version-label\">\r\n      Current Version: <span>{{ version }}</span>\r\n    </div>\r\n    <div class=\"version-label\">\r\n      Comparison Version: <span>{{ compare_version }}</span>\r\n    </div>\r\n  </div>\r\n\r\n  <div id=\"diff-container\"></div>\r\n\r\n  <script>\r\n    // NOTE:\r\n    // lhs_raw / rhs_raw can be:\r\n    // - a string (already YAML/JSON text)\r\n    // - an object/array (structured toolset contents)\r\n    //\r\n    // We inject them as JS values using tojson, then normalize to strings.\r\n    const lhs_raw = {{ lhs_raw | default(none) | tojson }};\r\n    const rhs_raw = {{ rhs_raw | default(none) | tojson }};\r\n\r\n    function normalizeToText(v) {\r\n      if (v === null || v === undefined) return \"\";\r\n      if (typeof v === \"string\") return v;\r\n      try {\r\n        return JSON.stringify(v, null, 2);\r\n      } catch (e) {\r\n        // Last resort\r\n        return String(v);\r\n      }\r\n    }\r\n\r\n    const lhs = normalizeToText(lhs_raw);\r\n    const rhs = normalizeToText(rhs_raw);\r\n\r\n    window.require.config({\r\n      paths: {\r\n        vs: \"https://cdn.jsdelivr.net/npm/monaco-editor@0.45.0/min/vs\"\r\n      }\r\n    });\r\n\r\n    window.require([\"vs/editor/editor.main\"], function () {\r\n      const container = document.getElementById(\"diff-container\");\r\n\r\n      if (!lhs || !rhs) {\r\n        container.innerText =\r\n          \"Missing toolset data. Please ensure both versions exist and contain contents.\";\r\n        return;\r\n      }\r\n\r\n      // Choose language: YAML if it looks like YAML, else JSON.\r\n      // (Monaco will still work fine even if this guess is imperfect.)\r\n      const looksYaml = (s) =>\r\n        /^[\\s-]*[A-Za-z0-9_.-]+\\s*:\\s*/m.test(s) && !/^\\s*[\\[{]/.test(s.trim());\r\n      const lang = (looksYaml(lhs) || looksYaml(rhs)) ? \"yaml\" : \"json\";\r\n\r\n      const originalModel = monaco.editor.createModel(lhs, lang);\r\n      const modifiedModel = monaco.editor.createModel(rhs, lang);\r\n\r\n      const diffEditor = monaco.editor.createDiffEditor(container, {\r\n        theme: \"vs-dark\",\r\n        readOnly: true,\r\n        automaticLayout: true,\r\n        enableSplitViewResizing: true\r\n      });\r\n\r\n      diffEditor.setModel({\r\n        original: originalModel,\r\n        modified: modifiedModel\r\n      });\r\n    });\r\n  </script>\r\n</body>\r\n</html>\r\n",
+            "additionalFields": {
+                "valueType": "",
+                "description": ""
+            }
+        },
+        {
+            "name": "test",
+            "value": "<h1>Test</h1>",
+            "additionalFields": {
+                "valueType": "",
+                "description": ""
+            }
+        }
+    ]
+}

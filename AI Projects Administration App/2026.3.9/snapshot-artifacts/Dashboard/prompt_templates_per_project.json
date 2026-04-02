@@ -1,0 +1,375 @@
+{
+    "name": "prompt_templates_per_project",
+    "label": "Prompt Templates",
+    "description": "Dashboard to manage MCP Prompt Templates",
+    "enabled": true,
+    "dashboard_folder": "AI",
+    "live_edit": true,
+    "dashboard_filters": {
+        "time_filter": true
+    },
+    "dashboard_type": "template",
+    "template_variables": {
+        "PROJECT_NAME": {
+            "contextId": "ai_project_name"
+        }
+    },
+    "dashboard_sections": [
+        {
+            "title": "Local",
+            "show_filter": true,
+            "widgets": [
+                {
+                    "widget_type": "label",
+                    "label": "<div style='text-align:center;width:100%;'><h1><a style='text-decoration:none;' target='_blank'> Project : {{PROJECT_NAME}} </a></h1></div>",
+                    "min_width": 12,
+                    "widget_id": "4b1867d9"
+                },
+                {
+                    "title": "Prompt Templates",
+                    "widget_type": "tabular",
+                    "min_width": 12,
+                    "height": 10,
+                    "max_width": 12,
+                    "timebased": false,
+                    "timestamp": "updated_at",
+                    "sorting": [
+                        {
+                            "updated_at": "desc"
+                        }
+                    ],
+                    "stream": "ai_mcp_prompt_templates",
+                    "extra_filter": "ai_project_name is '{{PROJECT_NAME}}' and last_enabled is true",
+                    "custom_columns": [
+                        {
+                            "id": "version_display",
+                            "label": "Version",
+                            "expr": "version if (enabled == True or enabled == 'true') else '-'",
+                            "key": true,
+                            "visible": false
+                        }
+                    ],
+                    "columns": {
+                        "prompt_template_name": {
+                            "title": "Name",
+                            "key": true,
+                            "type": "TEXT"
+                        },
+                        "template_description": {
+                            "title": "Description",
+                            "key": true
+                        },
+                        "prompt_template": {
+                            "title": "Template",
+                            "defaultWidth": 500,
+                            "visible": false,
+                            "key": true
+                        },
+                        "token_count": {
+                            "title": "Token Count",
+                            "key": true
+                        },
+                        "version_display": {
+                            "title": "Version",
+                            "type": "TEXT",
+                            "visible": true,
+                            "filterable": false
+                        },
+                        "version": {
+                            "title": "Version",
+                            "key": true,
+                            "type": "TEXT",
+                            "visible": false,
+                            "filterable": false
+                        },
+                        "enabled": {
+                            "title": "IsEnabled",
+                            "key": true,
+                            "type": "BOOLEAN"
+                        },
+                        "updated_at": {
+                            "title": "Updated At",
+                            "key": false,
+                            "type": "DATETIME"
+                        },
+                        "updated_by": {
+                            "title": "Updated By",
+                            "key": true,
+                            "type": "TEXT"
+                        }
+                    },
+                    "widget_id": "2630645a",
+                    "actions": [
+                        {
+                            "permission": "agenticai:prompt_template:add",
+                            "title": "Add",
+                            "type": "POPUP_FORM",
+                            "selectionType": "NONE",
+                            "identifier": "saas-service-action:aiadministration-add-prompt",
+                            "api-endpoint": {
+                                "service-name": "saas-reports",
+                                "methodName": "getForm",
+                                "stringified-params": true,
+                                "parse-output": false,
+                                "params": [
+                                    {
+                                        "formId": "rda.saas.aiprompt.template.add",
+                                        "llm": "claude-sonnet-4"
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "permission": "agenticai:prompt_template:edit",
+                            "title": "Edit",
+                            "type": "POPUP_FORM",
+                            "selectionType": "SINGLE",
+                            "identifier": "saas-service-action:aiadministration-edit-prompt",
+                            "api-endpoint": {
+                                "service-name": "saas-reports",
+                                "methodName": "getForm",
+                                "stringified-params": true,
+                                "parse-output": false,
+                                "params": [
+                                    {
+                                        "formId": "rda.saas.aiprompt.template.edit"
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "permission": "agenticai:prompt_template:view",
+                            "title": "View",
+                            "type": "POPUP_FORM",
+                            "selectionType": "SINGLE",
+                            "drillDownLinkField": "prompt_template_name",
+                            "identifier": "saas-service-action:aiadministration-view-prompt",
+                            "api-endpoint": {
+                                "service-name": "saas-reports",
+                                "methodName": "getForm",
+                                "stringified-params": true,
+                                "parse-output": false,
+                                "params": [
+                                    {
+                                        "formId": "rda.saas.aiprompt.template.view"
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "permission": "agenticai:prompt_template:delete",
+                            "title": "Delete All Versions",
+                            "type": "POPUP_FORM",
+                            "selectionType": "SINGLE",
+                            "identifier": "saas-service-action:delete-all-versions-prompt-template",
+                            "contextParamList": {
+                                "contextParams": [
+                                    {
+                                        "paramKey": "version",
+                                        "paramId": "version"
+                                    },
+                                    {
+                                        "paramKey": "prompt_template_name",
+                                        "paramId": "prompt_template_name"
+                                    }
+                                ]
+                            },
+                            "api-endpoint": {
+                                "service-name": "saas-reports",
+                                "methodName": "getForm",
+                                "stringified-params": true,
+                                "parse-output": false,
+                                "params": [
+                                    {
+                                        "formId": "rda.saas.dynamic.form",
+                                        "formDefinition": {
+                                            "formFieldList": [
+                                                {
+                                                    "fieldId": "prompt_template_name",
+                                                    "label": "Prompt Template Name",
+                                                    "help": "Prompt Template Name",
+                                                    "dataType": "string",
+                                                    "controlType": "TEXT_FIELD",
+                                                    "hidden": false,
+                                                    "editable": false,
+                                                    "required": true
+                                                },
+                                                {
+                                                    "help": "Are you sure you want to delete all versions of this prompt template? This action cannot be undone.",
+                                                    "dataType": "string",
+                                                    "controlType": "LABEL",
+                                                    "required": false,
+                                                    "editable": false,
+                                                    "label": "Are you sure you want to delete all versions of this prompt template?",
+                                                    "hidden": false,
+                                                    "fieldId": "confirmation"
+                                                }
+                                            ]
+                                        },
+                                        "formActionList": {
+                                            "formActions": [
+                                                {
+                                                    "actionLabel": "Delete All Versions",
+                                                    "identifier": "Submit"
+                                                }
+                                            ]
+                                        },
+                                        "actions": [
+                                            {
+                                                "type": "UPDATE_PSTREAM",
+                                                "pstreamName": "ai_mcp_prompt_templates",
+                                                "operation": "DELETE",
+                                                "cfxql_query": "prompt_template_name is '$prompt_template_name' and ai_project_name is '$ai_project_name'"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "permission": "agenticai:prompt_template:view",
+                            "title": "Version History",
+                            "type": "POPUP_REPORT",
+                            "icon": "mdi mdi-history",
+                            "selectionType": "SINGLE",
+                            "identifier": "saas-service-action:ai_prompt_template-version-history",
+                            "contextParamList": {
+                                "contextParams": [
+                                    {
+                                        "paramKey": "prompt_template_name",
+                                        "paramId": "prompt_template_name"
+                                    },
+                                    {
+                                        "paramKey": "ai_project_name",
+                                        "paramId": "ai_project_name"
+                                    }
+                                ]
+                            },
+                            "api-endpoint": {
+                                "service-name": "saas-reports",
+                                "methodName": "getReport",
+                                "parse-output": true,
+                                "params": [
+                                    {
+                                        "reportId": "rda.saas.aiprompt.template.version.history.tabular",
+                                        "params": {
+                                            "prompt_template_name": "{{prompt_template_name}}",
+                                            "ai_project_name": "{{ai_project_name}}"
+                                        }
+                                    }
+                                ],
+                                "stringified-params": false
+                            }
+                        },
+                        {
+                            "permission": "agenticai:prompt_template:view",
+                            "title": "View Difference",
+                            "type": "POPUP_FORM",
+                            "contextParamList": {
+                                "contextParams": [
+                                    {
+                                        "paramKey": "version",
+                                        "paramId": "version"
+                                    },
+                                    {
+                                        "paramKey": "prompt_template_name",
+                                        "paramId": "prompt_template_name"
+                                    }
+                                ]
+                            },
+                            "selectionType": "SINGLE",
+                            "identifier": "saas-service-action:userdashboard-add-yaml",
+                            "api-endpoint": {
+                                "service-name": "saas-reports",
+                                "methodName": "getForm",
+                                "stringified-params": true,
+                                "parse-output": false,
+                                "params": [
+                                    {
+                                        "formId": "rda.saas.dynamic.form",
+                                        "formActionList": {
+                                            "formActions": [
+                                                {
+                                                    "identifier": "Submit",
+                                                    "actionLabel": "View"
+                                                }
+                                            ]
+                                        },
+                                        "formDefinition": {
+                                            "id": "rda.saas.dynamic.form",
+                                            "refreshRequired": true,
+                                            "formFieldList": [
+                                                {
+                                                    "fieldId": "prompt_template_name",
+                                                    "label": "Verify Prompt Template Name",
+                                                    "help": "Verify Prompt Template Name",
+                                                    "dataType": "string",
+                                                    "controlType": "TEXT_FIELD",
+                                                    "hidden": false,
+                                                    "server-validation": true,
+                                                    "editable": false,
+                                                    "required": true
+                                                },
+                                                {
+                                                    "fieldId": "version",
+                                                    "label": "Current Version",
+                                                    "help": "Current Version",
+                                                    "dataType": "string",
+                                                    "controlType": "TEXT_FIELD",
+                                                    "hidden": false,
+                                                    "server-validation": true,
+                                                    "editable": false,
+                                                    "required": true
+                                                },
+                                                {
+                                                    "help": "Version to compare",
+                                                    "dataType": "string",
+                                                    "controlType": "COMBO_BOX",
+                                                    "required": false,
+                                                    "editable": true,
+                                                    "label": "Version to compare",
+                                                    "hidden": false,
+                                                    "fieldId": "compare_version",
+                                                    "lovSourceType": "pstream",
+                                                    "lovSourceParams": {
+                                                        "name": "ai_mcp_prompt_templates",
+                                                        "valueColumn": "version",
+                                                        "labelColumn": "version",
+                                                        "query": "version is not '$version' and prompt_template_name is '$prompt_template_name' and ai_project_name is '$ai_project_name'"
+                                                    }
+                                                }
+                                            ]
+                                        },
+                                        "actions": [
+                                            {
+                                                "appName": "user-dashboard/prompt_template_version_diff_widget",
+                                                "messageType": "without_message",
+                                                "type": "GO_TO_APP_STATE"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "title": "Imported",
+            "show_filter": false,
+            "widgets": [
+                {
+                    "title": "Imported Prompt Templates",
+                    "widget_type": "portal_tabular",
+                    "reportId": "rda.saas.aiproject.prompttemplates.list.tabular",
+                    "only_imported": true,
+                    "height": 10,
+                    "min_wdith": 12,
+                    "widget_id": "ea3a3778"
+                }
+            ]
+        }
+    ],
+    "saved_time": "2026-03-03T16:04:15.733488"
+}

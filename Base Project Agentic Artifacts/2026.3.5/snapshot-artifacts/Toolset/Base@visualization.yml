@@ -1,0 +1,1445 @@
+enabled: true
+domain: visualization
+description: >-
+  Visualization for user. Uses Widgets and Dashboard to show visualizations to user.Check if the layoutConfig is provided , if not then you need to add it accordingly.You need to always have the layoutConfig associated with each widget.
+tools:
+- name: list-widget-schemas
+  type: dashboardManagement
+  subType: list-widget-schemas
+  save_to_cache: false
+  description: |
+    List supported widget types. From this get name (schema name) so that schema can be retrieved 
+    using get-widget-schema       
+  parameters: []
+- name: get-widget-schema
+  type: dashboardManagement
+  subType: get-widget-schema
+  save_to_cache: false
+  description: |
+    List supported widget types. From this get name (schema name) so that schema can be retrieved 
+    using get-widget-schema       
+  parameters:
+  - name: name
+    required: true
+    description: Name of the widget schema (from list-widget-schemas)
+    type: string
+- name: list-widgets-in-dashboard
+  type: dashboardManagement
+  subType: list-widgets-in-dashboard
+  save_to_cache: false
+  description: |
+    Get the list of widgets currently used in the canvas dashboard. 
+- name: delete-widget-from-dashboard
+  type: dashboardManagement
+  subType: delete-static-data-widget
+  save_to_cache: false
+  description: >
+    Delete one or more existing widgets from the canavs
+  parameters:
+  - name: widget_ids
+    required: true
+    description: >-
+      Comma separated list of widget_id of the widget to be deleted (typically from list-widgets-in-dashboard)
+    type: string
+- name: move-widget-in-dashboard
+  type: dashboardManagement
+  subType: move-static-data-widget
+  save_to_cache: false
+  description: >
+    Move an existing widget to a position in the canvas
+  parameters:
+  - name: widget_id
+    required: true
+    description: widget_id of the widget to be moved (typically from list-widgets-in-dashboard)
+    type: string
+  - name: layoutConfig
+    required: true
+    description: |
+      Mandatory layout information on where to place the widget  on the canvas. Canvas size is 1920 pixels wide, 1080 pixels  tall. Foreach widget compute the x,y and width / height to.  make it visble in a canvas and make sure widgets don''t overlap.  Use space efficiently.    
+          { "type": "object" ,      "properties" : 
+              {    "x": {  "description" :  "X coordinatre of the widget (num pixels from left)",  " type": "number"  },  "y": {  "description": "Y coordinatre  of the widget (num pixels from top)",   "type": "number"   },  "width": { "description": "Width os the widget in  pixels" ,   "type": "number"  },  "height": {  "description" : " Height os the widget in pixels",   "type": "number"   }, "fill": { "description": "Fill color for the background  of the widget, Default is ''transparent''",  " type": " string" } }, "required" : [ "x", "y", "width", "height"  ] } 
+    type: object
+- name: add-static-data-widget
+  type: dashboardManagement
+  subType: add-static-data-widget
+  save_to_cache: false
+  description: |
+    Add a widget to the dashboard. If there is a no
+    incident associated, use 'Other' for incident_id. 
+    First get the sceham for the widget, and then generate data (dict) based on user instructions and pass the necessary parameters.
+  parameters:
+  - name: data
+    required: true
+    description: |
+      Static Data generated using the schema for the widget_type (obtained using get-widget-schema). This is mandatory.
+    type: object
+  - name: layoutConfig
+    required: true
+    description: |
+      Mandatory layout information on where to place the widget on the canvas. Canvas size is 1920 pixels wide, 1080 pixels tall.
+      For each widget compute the x,y and width / height to. make it visble in a canvas and make sure widgets don't overlap. Use space efficiently.
+          {
+              "type": "object",                                    
+              "properties": {   
+                  "x": {
+                      "description": "X coordinatre of the widget (num pixels from left)", 
+                      "type": "number" 
+                  },
+                   "y": {
+                      "description": "Y coordinatre of the widget (num pixels from top)", 
+                      "type": "number" 
+                  },
+                   "width": {
+                      "description": "Width os the widget in pixels", 
+                      "type": "number" 
+                  },
+                   "height": {
+                      "description": "Height os the widget in pixels", 
+                      "type": "number" 
+                  },
+                  "fill": {
+                      "description": "Fill color for the background of the widget, Default is 'transparent'",
+                      "type": "string"
+                  }
+              },
+              "required": [ "x", "y", "width", "height" ] 
+          } 
+    type: object
+  - name: incident_id
+    description: Incident ID if any. If no incident ID, use Other
+    type: string
+  - name: replace
+    description: If true, Replace current widget
+    type: boolean
+  - name: widget_type
+    required: true
+    description: Type of widget (such as pie_chart, bar_chart, label)
+    type: string
+  - name: title
+    required: true
+    description: Title for the widget
+    type: string
+  - name: widget_id
+    description: >
+      Unique ID for the widget. Must specify if replace is true. If not specified
+
+      during addition, this tool will generate a uuid like unique ID
+    type: string
+- name: add-dynamic-data-widget
+  type: dashboardManagement
+  subType: add-dynamic-data-widget
+  save_to_cache: auto
+  description: |
+    Add a widget to the dashboard. 
+    First get the schema for the widget, and then generate widget_definition (dict) based on user instructions and pass the necessary parameters.
+  parameters:
+  - name: widget_definition
+    required: true
+    description: >-
+      Dynamic widget definition generated using the schema for the widget_type (obtained using get-widget-schema). This is mandatory.
+    type: object
+  - name: layoutConfig
+    required: true
+    description: |
+      Mandatory layout information on where to place the widget on the canvas. Canvas size is 1920 pixels wide, 1080 pixels tall.
+      For each widget compute the x,y and width / height to. make it visble in a canvas and make sure widgets don't overlap. Use space efficiently.
+          {
+              "type": "object",                                    
+              "properties": {   
+                  "x": {
+                      "description": "X coordinatre of the widget (num pixels from left)", 
+                      "type": "number" 
+                  },
+                   "y": {
+                      "description": "Y coordinatre of the widget (num pixels from top)", 
+                      "type": "number" 
+                  },
+                   "width": {
+                      "description": "Width os the widget in pixels", 
+                      "type": "number" 
+                  },
+                   "height": {
+                      "description": "Height os the widget in pixels", 
+                      "type": "number" 
+                  },
+                  "fill": {
+                      "description": "Fill color for the background of the widget, Default is 'transparent'",
+                      "type": "string"
+                  }
+              },
+              "required": [ "x", "y", "width", "height" ] 
+          } 
+    type: object
+  - name: replace
+    description: If true, Replace current widget
+    type: boolean
+  - name: widget_type
+    required: true
+    description: Type of widget (such as pie_chart, bar_chart, label)
+    type: string
+  - name: title
+    required: true
+    description: Title for the widget
+    type: string
+  - name: widget_id
+    description: >-
+      Unique ID for the widget. Must specify if replace is true. If not specified during addition, this tool will generate a uuid like unique ID
+    type: string
+- name: get_stack_data
+  type: dashboardManagement
+  subType: get_stack_data
+  save_to_cache: auto
+  description: "Get stack data for topology widget"
+  parameters:
+  - name: stack_name
+    required: true
+    description: Name of the stack to retrieve topology data
+    type: string
+config:
+  test_dashboard: ai_generated_dashboard_playground
+  widget_types:
+  - name: topology_chart_static_data
+    type: topology
+    data_source: static
+    description: |
+      Topology Widget 
+    schema: |-
+      {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "properties": {
+          "dataFlowGraph": {
+            "type": "object",
+            "properties": {
+              "components": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "alert_count": {"type": "number"},
+                    "counter": {
+                      "type": "object",
+                      "properties": {
+                        "color" : {"type": "string"},
+                        "concept" : {"type": "string"},
+                        "value": {"type": "number"}
+                      }
+                    },
+                    "node_type": { "type": "string" },
+                    "iconURL": { "type": "string" },
+                    "node_label": { "type": "string" },
+                    "node_id": { "type": "string" },
+                    "neighborCount": { "type": "number" },
+                    "id": { "type": "string" },
+                    "label": { "type": "string" },
+                    "type": { "type": "string" },
+                    "hasMoreData": { "type": "boolean" },
+                    "displayAttributes": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "key": { "type": "string" },
+                          "value": {},
+                          "label": { "type": "string" }
+                        },
+                        "required": ["key", "value", "label"]
+                      }
+                    },
+                    "elementStyles" : {
+                      "type" : "object",
+                      "properties": {
+                        "bgColor": {"type" : "string"},
+                        "borderRing" : {
+                          "type": "object",
+                          "properties": {
+                            "color": {"type" : "string"},
+                            "style": {"type": "string"},
+                            "thickness" : {"type" : "string"}
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "required": [
+                     "node_type","iconURL", "node_label", "node_id", "neighborCount", "id",
+                    "label", "type", "hasMoreData", "displayAttributes"
+                  ]
+                }
+              },
+              "relationships": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "left_label": { "type": "string" },
+                    "left_id": { "type": "string" },
+                    "left_node_type": { "type": "string" },
+                    "relation_type": { "type": "string" },
+                    "right_id": { "type": "string" },
+                    "right_label": { "type": "string" },
+                    "right_node_type": { "type": "string" },
+                    "edge_id": { "type": "string" },
+                    "destinationComponentId": { "type": "string" },
+                    "sourceComponentId": { "type": "string" },
+                    "mouseover": { "type": "string" },
+                    "id": { "type": "number" },
+                    "graphID": { "type": "string" },
+                    "is_directionless": { "type": "boolean" },
+                    "displayAttributes": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "key": { "type": "string" },
+                          "value": {},
+                          "label": { "type": "string" }
+                        },
+                        "required": ["key", "value", "label"]
+                      }
+                    }
+                  },
+                  "required": [
+                    "left_label", "left_id",
+                    "left_node_type", "relation_type", "right_id", "right_label",
+                    "right_node_type", "edge_id", "destinationComponentId",
+                    "sourceComponentId", "mouseover", "id", "graphID",
+                    "is_directionless", "displayAttributes"
+                  ]
+                }
+              }
+            },
+            "required": ["components", "relationships"]
+          }
+        },
+        "required": ["dataFlowGraph"]
+      }
+  - name: topology_chart_dynamic_data
+    type: topology
+    data_source: dynamic
+    description: |
+      Topology Widget 
+    schema: |-
+      {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "properties": {
+          "dataFlowGraph": {
+            "type": "object",
+            "properties": {
+              "components": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "node_type": { "type": "string" },
+                    "iconURL": { "type": "string" },
+                    "node_label": { "type": "string" },
+                    "node_id": { "type": "string" },
+                    "neighborCount": { "type": "number" },
+                    "id": { "type": "string" },
+                    "label": { "type": "string" },
+                    "type": { "type": "string" },
+                    "hasMoreData": { "type": "boolean" },
+                    "displayAttributes": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "key": { "type": "string" },
+                          "value": {},
+                          "label": { "type": "string" }
+                        },
+                        "required": ["key", "value", "label"]
+                      }
+                    }
+                  },
+                  "required": [
+                     "node_type","iconURL", "node_label", "node_id", "neighborCount", "id",
+                    "label", "type", "hasMoreData", "displayAttributes"
+                  ]
+                }
+              },
+              "relationships": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "left_label": { "type": "string" },
+                    "left_id": { "type": "string" },
+                    "left_node_type": { "type": "string" },
+                    "relation_type": { "type": "string" },
+                    "right_id": { "type": "string" },
+                    "right_label": { "type": "string" },
+                    "right_node_type": { "type": "string" },
+                    "edge_id": { "type": "string" },
+                    "destinationComponentId": { "type": "string" },
+                    "sourceComponentId": { "type": "string" },
+                    "mouseover": { "type": "string" },
+                    "id": { "type": "number" },
+                    "graphID": { "type": "string" },
+                    "is_directionless": { "type": "boolean" },
+                    "displayAttributes": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "key": { "type": "string" },
+                          "value": {},
+                          "label": { "type": "string" }
+                        },
+                        "required": ["key", "value", "label"]
+                      }
+                    }
+                  },
+                  "required": [
+                    "left_label", "left_id",
+                    "left_node_type", "relation_type", "right_id", "right_label",
+                    "right_node_type", "edge_id", "destinationComponentId",
+                    "sourceComponentId", "mouseover", "id", "graphID",
+                    "is_directionless", "displayAttributes"
+                  ]
+                }
+              }
+            },
+            "required": ["components", "relationships"]
+          }
+        },
+        "required": ["dataFlowGraph"]
+      }
+  - name: label_chart_static_data
+    type: label
+    data_source: static
+    description: >
+      HTML content widget
+    schema: |
+      {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "required": ["htmlLabel"],
+          "properties": {
+              "htmlLabel": {
+                  "type": "string",
+                  "description": "Any HTML content that will be displayed inside the widget"
+              }
+          }
+      } 
+
+  - name: bar_chart_static_data
+    type: bar_chart
+    data_source: static
+    description: |
+      Bar chart widget 
+    schema: |
+      {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "required": ["title", "chartProperties", "formatting", "segments"],
+          "properties": {
+              "title": {
+                  "type": "string",
+                  "description": "Title of the bar chart"
+              },
+              "description": {
+                  "type": ["string", "null"],
+                  "description": "Optional description of the chart"
+              },
+              "chartProperties": {
+                  "type": "object",
+                  "required": ["xAxisLabel", "yAxisLabel", "stacked", "legendLocation", "orientation"],
+                  "properties": {
+                      "xAxisLabel": {
+                          "type": "string",
+                          "description": "Label for the X-axis"
+                      },
+                      "yAxisLabel": {
+                          "type": "string",
+                          "description": "Label for the Y-axis"
+                      },
+                      "stacked": {
+                          "type": "boolean",
+                          "description": "Whether the bars should be stacked"
+                      },
+                      "legendLocation": {
+                          "type": "string",
+                          "enum": ["right", "left", "top", "bottom", "none"],
+                          "description": "Location of the chart legend"
+                      },
+                      "orientation": {
+                          "type": "string",
+                          "enum": ["vertical", "horizontal"],
+                          "description": "Orientation of the bars"
+                      }
+                  }
+              },
+              "formatting": {
+                  "type": "object",
+                  "required": ["style", "minimumIntegerDigits", "maximumFractionDigits", "minimumFractionDigits"],
+                  "properties": {
+                      "locale": {
+                          "type": ["string", "null"],
+                          "description": "Locale for number formatting"
+                      },
+                      "style": {
+                          "type": "string",
+                          "enum": ["decimal", "currency", "percent"],
+                          "description": "Number formatting style"
+                      },
+                      "currency": {
+                          "type": ["string", "null"],
+                          "description": "Currency code for currency formatting"
+                      },
+                      "minimumIntegerDigits": {
+                          "type": "integer",
+                          "minimum": 1,
+                          "description": "Minimum number of integer digits"
+                      },
+                      "maximumFractionDigits": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "description": "Maximum number of fraction digits"
+                      },
+                      "minimumFractionDigits": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "description": "Minimum number of fraction digits"
+                      }
+                  }
+              },
+              "totalcount": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "description": "Total number of segments in the chart"
+              },
+              "segments": {
+                  "type": "array",
+                  "items": {
+                      "type": "object",
+                      "required": [ "label", "value" ],
+                      "properties": {
+                          "label": {
+                              "type": "string",
+                              "description": "Label for the segment"
+                          },
+                          "value": {
+                              "type": "number",
+                              "description": "Value for the segment"
+                          }
+                      }
+                  }
+              }
+          }
+      } 
+  - name: timeseries_static_data
+    type: timeseries
+    data_source: static
+    description: Create a time series widget with predefined static data
+    schema: |
+      {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "title": "Static Time Series Widget Schema",
+        "type": "object",
+        "required": [
+          "title",
+          "widget_type",
+          "unit",
+          "series"
+        ],
+        "properties": {
+          "title": {
+            "type": "string",
+            "description": "Specify the label for the Line Graph chart."
+          },
+          "widget_type": {
+            "type": "string",
+            "enum": ["timeseries"],
+            "description": "Must be 'timeseries'."
+          },
+          "max_width": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 12,
+            "description": "Chart's maximum width size (0–12)."
+          },
+          "min_width": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 12,
+            "description": "Chart's minimum width size (0–12)."
+          },
+          "height": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Chart/widget height (0–n)."
+          },
+          "chartProperties": {
+            "type": "object",
+            "description": "Defines Y axis, X axis, legend, orientation, stacking, zooming, colors, etc.",
+            "properties": {
+              "yAxisLabel": { "type": ["string","null"] },
+              "xAxisLabel": { "type": ["string","null"] },
+              "legendLocation": { "type": "string", "enum": ["top","bottom","left","right"], "default": "top" },
+              "orientation": { "type": "string", "enum": ["horizontal","vertical"], "default": "horizontal" },
+              "stacked": { "type": "boolean", "default": true }
+            },
+            "additionalProperties": true
+          },
+          "series": {
+            "type": "array",
+            "minItems": 1,
+            "description": "Defines one or more static series with timestamp-value pairs.",
+            "items": {
+              "type": "object",
+              "required": ["label", "data"],
+              "properties": {
+                "label": { "type": "string", "description": "Legend label for this series." },
+                "data": {
+                  "type": "array",
+                  "minItems": 1,
+                  "description": "Array of time-value points.",
+                  "items": {
+                    "type": "object",
+                    "required": ["timestamp", "value"],
+                    "properties": {
+                      "timestamp": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "ISO8601 timestamp for the data point."
+                      },
+                      "value": {
+                        "type": "number",
+                        "description": "Value at the given timestamp."
+                      }
+                    }
+                  }
+                }
+              },
+              "additionalProperties": false
+            }
+          },
+          "unit": {
+            "type": "string",
+            "description": "Converts values to specified unit (e.g., bytes, bits, KB)."
+          },
+          "addn": {
+            "type": "string",
+            "description": "Adds suffix like 'ps' (per second) or 'PH' (per hour)."
+          }
+        },
+        "additionalProperties": false
+      }
+  - name: pie_chart_static_data
+    type: pie_chart
+    data_source: static
+    description: |
+      Pie chart widget 
+    schema: |
+      {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "required": ["title", "chartProperties", "formatting", "segments"],
+          "properties": {
+              "title": {
+                  "type": "string",
+                  "description": "Title of the bar chart"
+              },
+              "description": {
+                  "type": ["string", "null"],
+                  "description": "Optional description of the chart"
+              },
+              "chartProperties": {
+                  "type": "object",
+                  "required": [ "legendLocation" ],
+                  "properties": {
+                      "legendLocation": {
+                          "type": "string",
+                          "enum": ["right", "left", "top", "bottom", "none"],
+                          "description": "Location of the chart legend"
+                      }
+                  }
+              },
+              "formatting": {
+                  "type": "object",
+                  "required": ["style", "minimumIntegerDigits", "maximumFractionDigits", "minimumFractionDigits"],
+                  "properties": {
+                      "locale": {
+                          "type": ["string", "null"],
+                          "description": "Locale for number formatting"
+                      },
+                      "style": {
+                          "type": "string",
+                          "enum": ["decimal", "currency", "percent"],
+                          "description": "Number formatting style"
+                      },
+                      "currency": {
+                          "type": ["string", "null"],
+                          "description": "Currency code for currency formatting"
+                      },
+                      "minimumIntegerDigits": {
+                          "type": "integer",
+                          "minimum": 1,
+                          "description": "Minimum number of integer digits"
+                      },
+                      "maximumFractionDigits": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "description": "Maximum number of fraction digits"
+                      },
+                      "minimumFractionDigits": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "description": "Minimum number of fraction digits"
+                      }
+                  }
+              },
+              "totalcount": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "description": "Total number of segments in the chart"
+              },
+              "segments": {
+                  "type": "array",
+                  "items": {
+                      "type": "object",
+                      "required": [ "label", "value" ],
+                      "properties": {
+                          "label": {
+                              "type": "string",
+                              "description": "Label for the segment"
+                          },
+                          "value": {
+                              "type": "number",
+                              "description": "Value for the segment"
+                          }
+                      }
+                  }
+              }
+          }
+      } 
+  - name: pie_chart_dynamic_data
+    type: pie_chart
+    data_source: dynamic
+    description: |
+      Pie chart widget with dynamic data 
+    schema: |
+      {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "title": "Pie Chart Widget Schema",
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "widget_type",
+          "title",
+          "stream",
+          "ts_column",
+          "column",
+          "agg",
+          "group_by",
+          "type"
+        ],
+        "properties": {
+          "widget_type": {
+            "type": "string",
+            "enum": ["pie_chart"],
+            "description": "Type of widget."
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Human-readable title for the widget."
+          },
+          "stream": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Source stream or index to query."
+          },
+          "extra_filter": {
+            "type": "string",
+            "description": "Optional filter expression applied before aggregation."
+          },
+          "ts_column": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Name of the timestamp column."
+          },
+          "column": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Field used by the aggregation."
+          },
+          "agg": {
+            "type": "string",
+            "enum": ["value_count", "max", "min", "avg"],
+            "description": "Aggregation function to apply."
+          },
+          "duration_hours": {
+            "type": "integer",
+            "minimum": 1,
+            "default": 10000,
+            "description": "Optional duration in hours to look back from current time."
+          },
+          "group_by": {
+            "type": "array",
+            "minItems": 1,
+            "uniqueItems": true,
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "description": "Fields to group results by."
+          },
+          "type": {
+            "type": "string",
+            "enum": ["str", "int", "float"],
+            "description": "Data type of the aggregated field."
+          }
+        }
+      }
+  - name: bar_chart_dynamic_data
+    type: bar_chart
+    data_source: dynamic
+    description: |
+      Bar chart widget with dynamic data 
+    schema: |
+      {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "title": "Bar Chart Widget Schema",
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "stream",
+          "ts_column",
+          "chartProperties",
+          "group_by",
+          "column",
+          "agg",
+          "type"
+        ],
+        "properties": {
+          "stream": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Name of the data stream or index."
+          },
+          "extra_filter": {
+            "type": "string",
+            "description": "Optional filter expression for refining the data."
+          },
+          "ts_column": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Timestamp field used for time filtering."
+          },
+          "chartProperties": {
+            "type": "object",
+            "required": [
+              "stacked",
+              "legendLocation",
+              "orientation"
+            ],
+            "properties": {
+              "xAxisLabel": {
+                "type": ["string", "null"],
+                "description": "Optional label for the X-axis."
+              },
+              "yAxisLabel": {
+                "type": ["string", "null"],
+                "description": "Optional label for the Y-axis."
+              },
+              "stacked": {
+                "type": "boolean",
+                "default": true,
+                "description": "Whether bars should be stacked."
+              },
+              "legendLocation": {
+                "type": "string",
+                "enum": ["top", "bottom", "left", "right", "none"],
+                "default": "top",
+                "description": "Location of the legend."
+              },
+              "orientation": {
+                "type": "string",
+                "enum": ["vertical", "horizontal"],
+                "default": "horizontal",
+                "description": "Orientation of the bars."
+              }
+            },
+            "additionalProperties": false
+          },
+          "duration_hours": {
+            "type": "integer",
+            "minimum": 1,
+            "default": 10000,
+            "description": "Optional duration in hours to look back from current time."
+          },
+          "group_by": {
+            "type": "array",
+            "minItems": 1,
+            "uniqueItems": true,
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "description": "List of fields to group the data by."
+          },
+          "column": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Field used for aggregation."
+          },
+          "agg": {
+            "type": "string",
+            "enum": ["value_count", "max", "min", "avg"],
+            "description": "Aggregation function to apply."
+          },
+          "type": {
+            "type": "string",
+            "enum": ["str", "int", "float"],
+            "description": "Data type of the aggregated field."
+          }
+        }
+      }
+  - name: tabular_dynamic_data
+    type: tabular
+    data_source: dynamic
+    description: |
+      Tabular widget with dynamic data 
+    schema: |
+      {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "title": "Tabular Widget Schema",
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "title",
+          "widget_type",
+          "stream",
+          "query",
+          "min_width",
+          "height",
+          "max_width",
+          "paginated",
+          "remote_searchable",
+          "remote_searchable_cols",
+          "max_rows",
+          "duration_hours",
+          "sorting",
+          "columns",
+          "widget_id"
+        ],
+        "properties": {
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Title of the widget."
+          },
+          "widget_type": {
+            "type": "string",
+            "enum": ["tabular"],
+            "description": "Type of the widget, fixed to 'tabular'."
+          },
+          "stream": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Name of the data stream or index."
+          },
+          "query": {
+            "type": "string",
+            "description": "Query expression to fetch data from the stream."
+          },
+          "min_width": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "Minimum width of the widget in grid units."
+          },
+          "height": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "Height of the widget in grid units."
+          },
+          "max_width": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "Maximum width of the widget in grid units."
+          },
+          "paginated": {
+            "type": "boolean",
+            "description": "Whether pagination is enabled for the table.",
+            "default": true
+          },
+          "remote_searchable": {
+            "type": "boolean",
+            "description": "Enables server-side remote searching."
+          },
+          "remote_searchable_cols": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "description": "List of column fields that are searchable remotely."
+          },
+          "max_rows": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "Maximum number of rows displayed in the widget."
+          },
+          "duration_hours": {
+            "type": "integer",
+            "minimum": 1,
+            "default": 10000,
+            "description": "Optional duration in hours to look back from current time."
+          },
+          "sorting": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "object",
+              "minProperties": 1,
+              "additionalProperties": {
+                "type": "string",
+                "enum": ["asc", "desc"]
+              }
+            },
+            "description": "Sorting rules for the table columns."
+          },
+          "columns": {
+            "type": "object",
+            "minProperties": 1,
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": "Mapping of stream fields to display labels."
+          },
+          "widget_id": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Unique identifier of the widget."
+          }
+        }
+      }
+  - name: label_dynamic_data
+    type: label
+    data_source: dynamic
+    description: Label widget to show static or dynamic HTML content
+    schema: |
+      {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "title": "Dynamic Label Widget Schema",
+       "description": "Label widget to display dynamically generated HTML content. When connected to a data stream through dynamic segments, this widget automatically fetches and aggregates live data. To use it effectively, you must select a valid column that supports the chosen aggregation method (e.g., count, max, min, average). The system intelligently analyzes the incoming data and applies the aggregation, ensuring that the result is meaningful and successfully rendered. The AI-powered logic enhances reliability by validating column-aggregation compatibility and returning actionable values for display.",
+        "type": "object",
+        "required": [
+          "widget_type",
+          "label",
+          "segments",
+          "min_width",
+          "max_width",
+          "height"
+        ],
+        "properties": {
+          "advanced": {
+            "type": "boolean",
+            "default": false,
+            "description": "Whether advanced settings are enabled for this widget."
+          },
+          "height": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "Height of the widget in grid units."
+          },
+          "label": {
+            "type": "string",
+            "description": "The HTML/text label content to display. Supports templating logic."
+          },
+          "max_width": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "Maximum number of grid columns the widget can span."
+          },
+          "min_width": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "Minimum number of grid columns the widget can span."
+          },
+          "segments": {
+            "type": "array",
+            "minItems": 1,
+            "description": "List of data segments used to populate the label dynamically.",
+            "items": {
+              "type": "object",
+              "required": ["stream", "variable", "ts_column", "agg", "column","duration_hours",extra_filter],
+              "properties": {
+                "agg": {
+                  "type": "string",
+                  "enum": ["value_count", "sum", "avg", "min", "max"],
+                  "description": "The aggregation function applied to the selected column."
+                },
+                "column": {
+                  "type": "string",
+                  "description": "The column name in the stream to which the aggregation is applied."
+                },
+                "duration_hours": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "description": "Number of hours in the past to consider for data aggregation."
+                },
+                "extra_filter": {
+                  "type": "string",
+                  "description": "Optional SQL-style expression to filter data before aggregation. Example: \"extra_filter\": \"a_severity = 'CRITICAL'\""
+                },
+                "group_by": {
+                  "type": "string",
+                  "description": "Column to group data by. Optional."
+                },
+                "stream": {
+                  "type": "string",
+                  "description": "The name of the data stream from which data is extracted."
+                },
+                "ts_column": {
+                  "type": "string",
+                  "description": "The timestamp column used to filter or aggregate data."
+                },
+                "variable": {
+                  "type": "string",
+                  "description": "The variable name or alias for data usage in templating."
+                }
+              },
+              "additionalProperties": false
+            }
+          },
+          "sorting": {
+            "type": "array",
+            "description": "Optional sorting to apply on the segment data before rendering.",
+            "items": {
+              "type": "object",
+              "minProperties": 1,
+              "additionalProperties": {
+                "type": "string",
+                "enum": ["asc", "desc"]
+              }
+            }
+          },
+          "widget_type": {
+            "type": "string",
+            "enum": ["label"],
+            "description": "Type of widget. Must be 'label'."
+          }
+        },
+        "additionalProperties": false
+      }
+  - name: timeseries_dynamic_data
+    type: timeseries
+    data_source: dynamic
+    description: Create a time series widget dynamically from stream or dataset data
+    schema: |
+      {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "title": "Dynamic Time Series Widget Schema",
+        "type": "object",
+        "required": [
+          "title",
+          "widget_type",
+          "interval",
+          "series_spec",
+          "unit",
+          "duration_hours"
+        ],
+        "properties": {
+          "title": {
+            "type": "string",
+            "description": "Specify the label for the Line Graph chart."
+          },
+          "widget_type": {
+            "type": "string",
+            "enum": ["timeseries"],
+            "description": "Specify the chart / widget type. Must be 'timeseries'."
+          },
+          "stream": {
+            "type": "string",
+            "description": "Specify the persistent stream. Either 'stream' or 'dataset' is required."
+          },
+          "dataset": {
+            "type": "string",
+            "description": "Specify the dataset name. Either 'stream' or 'dataset' is required."
+          },
+          "duration_hours": {
+            "type": "integer",
+            "minimum": 1,
+            "default": 10000,
+            "description": "Time range (in hours) to pull data for"
+          },
+          "ts_column": {
+            "type": "string",
+            "description": "Timestamp column name within the selected persistent stream or dataset."
+          },
+          "max_width": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 12,
+            "description": "Chart's maximum width size (0–12)."
+          },
+          "min_width": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 12,
+            "description": "Chart's minimum width size (0–12)."
+          },
+          "height": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Chart/widget height (0–n)."
+          },
+          "chartProperties": {
+            "type": "object",
+            "description": "Defines Y axis, X axis, legend, orientation, stacking, zooming, colors, etc.",
+            "properties": {
+              "yAxisLabel": { "type": ["string","null"] },
+              "xAxisLabel": { "type": ["string","null"] },
+              "legendLocation": { "type": "string", "enum": ["top","bottom","left","right"], "default": "top" },
+              "orientation": { "type": "string", "enum": ["horizontal","vertical"], "default": "horizontal" },
+              "stacked": { "type": "boolean", "default": true }
+            },
+            "additionalProperties": true
+          },
+          "interval": {
+            "type": "string",
+            "description": "Time frame for report grouping. Supported units: auto, ms, s, m, h, d. Example: '5m'."
+          },
+          "interval_type": {
+            "type": "string",
+            "enum": ["calendar"],
+            "description": "Optional. When set to 'calendar', interval is aligned to calendar units (minute, hour, day, week, month, quarter, year)."
+          },
+          "gap_interval": {
+            "type": "string",
+            "enum": ["join", "keep", "skip"],
+            "default": "keep",
+            "description": "Handling strategy for missing intervals. 'keep' drops value to 0, 'join' connects across gaps, 'skip' leaves gaps."
+          },
+          "group_by": {
+            "type": "string",
+            "description": "Defines categorical grouping for identical reports."
+          },
+          "series_spec": {
+            "type": "array",
+            "minItems": 1,
+            "description": "Defines series to show and their data points.",
+            "items": {
+              "type": "object",
+              "required": ["column", "agg", "type"],
+              "properties": {
+                "column": { "type": "string", "description": "Name of the column containing values." },
+                "agg": { 
+                  "type": "string", 
+                  "enum": ["value_count", "cardinality", "sum", "avg", "min", "max"],
+                  "description": "Aggregation function to apply."
+                },
+                "type": {
+                  "type": "string",
+                  "enum": ["int", "str"],
+                  "description": "Data type for aggregation."
+                },
+                "label1": { "type": "string", "description": "Optional custom legend label." },
+                "extra_filter": { "type": "string", "description": "Optional filter for this series." }
+              },
+              "additionalProperties": false
+            }
+          },
+          "widget_id": {
+            "type": "string",
+            "description": "Unique widget ID (autogenerated if not provided)."
+          },
+          "fixTimeWindow": {
+            "type": "boolean",
+            "description": "If true, X-axis time window always shows selected duration even if data covers only a subset."
+          },
+          "customIntervalMap": {
+            "type": "object",
+            "description": "Defines 'from' and 'to' ranges (in hours) with custom intervals. If absent, backend defaults are used.",
+            "additionalProperties": true
+          },
+          "style": {
+            "type": "object",
+            "description": "Allows specifying colors or formatting for grouped values.",
+            "additionalProperties": true
+          },
+          "alert_markers": {
+            "type": "array",
+            "description": "Markers to highlight alerts in the Time Series Graph.",
+            "items": { "type": "string" }
+          },
+          "group_selection": {
+            "type": "object",
+            "description": "Controls sorting output by column, aggregation, limit, and order.",
+            "properties": {
+              "column": { "type": "string" },
+              "agg": { "type": "string" },
+              "limit": { "type": "integer", "default": 20 },
+              "orderby": { "type": "string", "enum": ["asc","desc"], "default": "desc" }
+            }
+          },
+          "unit": {
+            "type": "string",
+            "description": "Converts values to specified unit (e.g., bytes, bits, KB)."
+          },
+          "addn": {
+            "type": "string",
+            "description": "Adds suffix like 'ps' (per second) or 'PH' (per hour)."
+          }
+        },
+        "additionalProperties": false
+      }
+  - name: graph_dynamic_data
+    type: topology
+    data_source: dynamic
+    description: Dynamic topology visualization widget with GraphDB streams
+    schema: |
+      {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "title": "Dynamic Topology Widget Schema",
+        "type": "object",
+        "required": [
+          "title",
+          "widget_type",
+          "stack_type",
+          "stack_definition"
+        ],
+        "properties": {
+          "title": {
+            "type": "string",
+            "description": "Title of the topology widget"
+          },
+          "widget_type": {
+            "type": "string",
+            "enum": ["topology"],
+            "description": "Must be 'topology'"
+          },
+          "stack_type": {
+            "type": "string",
+            "enum": ["dynamic", "static"],
+            "description": "Topology stack type"
+          },
+          "legendHtml": {
+            "type": "string",
+            "description": "Optional legend HTML (can be a URI reference like 'attachment://...')"
+          },
+          "empty_stack_start": {
+            "type": "boolean",
+            "default": false,
+            "description": "If true, starts with empty stack"
+          },
+          "limit_to_node_types": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Restrict nodes to specific types"
+          },
+          "stack_definition": {
+            "type": "object",
+            "required": ["name", "is_dynamic", "dynamic_nodes", "dynamic_relationships"],
+            "properties": {
+              "name": { "type": "string" },
+              "description": { "type": "string" },
+              "is_dynamic": { "type": "boolean" },
+              "hierarchical": { "type": "boolean" },
+              "dynamic_nodes": {
+                "type": "object",
+                "required": ["stream"],
+                "properties": {
+                  "stream": { "type": "string" },
+                  "query": { "type": "string" }
+                }
+              },
+              "dynamic_relationships": {
+                "type": "object",
+                "required": ["stream","relation_map"],
+                "properties": {
+                  "stream": { "type": "string" },
+                  "relation_map": { "type": "string" },
+                  "query": { "type": "string" }
+                }
+              },
+              "views": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "required": ["viewId", "label"],
+                  "properties": {
+                    "viewId": { "type": "string" },
+                    "label": { "type": "string" },
+                    "fillna_rules": {
+                      "type": "array",
+                      "items": { "type": "string" }
+                    },
+                    "grouping_rules": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "query": { "type": "string" },
+                          "node_action": { "type": "string", "enum": ["include", "exclude"] }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "nodes_report": {
+            "type": "object",
+            "properties": {
+              "reportMetaData": {
+                "type": "object",
+                "properties": {
+                  "title": { "type": "string" },
+                  "sorting": { "type": "boolean" },
+                  "filtering": { "type": "boolean" },
+                  "remote_searchable": { "type": "boolean" },
+                  "remote_searchable_cols": {
+                    "type": "array",
+                    "items": { "type": "string" }
+                  },
+                  "reportColumnDefinitionList": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "identifier": { "type": "string" },
+                        "title": { "type": "string" }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "edges_report": {
+            "type": "object",
+            "properties": {
+              "reportMetaData": {
+                "type": "object",
+                "properties": {
+                  "title": { "type": "string" },
+                  "sorting": { "type": "boolean" },
+                  "filtering": { "type": "boolean" },
+                  "reportColumnDefinitionList": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "identifier": { "type": "string" },
+                        "title": { "type": "string" }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "height": { "type": "integer", "minimum": 1 },
+          "min_width": { "type": "integer", "minimum": 1, "maximum": 12 },
+          "widget_id": { "type": "string" }
+        },
+        "additionalProperties": false
+      }

@@ -1,0 +1,371 @@
+{
+    "name": "toolsets_per_project",
+    "label": "Placeholder",
+    "description": "Placeholder",
+    "enabled": true,
+    "dashboard_type": "template",
+    "dashboard_folder": "AI",
+    "dashboard_filters": {
+        "time_filter": true
+    },
+    "template_variables": {
+        "PROJECT_NAME": {
+            "contextId": "ai_project_name"
+        }
+    },
+    "dashboard_sections": [
+        {
+            "title": "Local",
+            "show_filter": true,
+            "widgets": [
+                {
+                    "widget_type": "label",
+                    "label": "<div style='text-align:center;width:100%;'><h1><a style='text-decoration:none;' target='_blank'> Project : {{PROJECT_NAME}} </a></h1></div>",
+                    "min_width": 12,
+                    "widget_id": "4b1867d9"
+                },
+                {
+                    "title": "Toolsets",
+                    "widget_type": "tabular",
+                    "min_width": 12,
+                    "height": 6,
+                    "max_width": 12,
+                    "timebased": false,
+                    "timestamp": "updated_at",
+                    "sorting": [
+                        {
+                            "updated_at": "desc"
+                        }
+                    ],
+                    "stream": "ai_mcp_toolsets",
+                    "extra_filter": "ai_project_name is '{{PROJECT_NAME}}' and last_enabled is true",
+                    "remote_searchable_cols": [
+                        "domain",
+                        "description"
+                    ],
+                    "preview_dashboard": "code_snippet_preview",
+                    "preview_width": 900,
+                    "preview_height": 700,
+                    "custom_columns": [
+                        {
+                            "id": "version_display",
+                            "label": "version",
+                            "expr": "version if enabled else '-'",
+                            "key": true,
+                            "visible": false
+                        }
+                    ],
+                    "columns": {
+                        "domain": {
+                            "title": "Name",
+                            "key": true,
+                            "hidden": true
+                        },
+                        "toolset_name": {
+                            "title": "Name",
+                            "key": true
+                        },
+                        "description": {
+                            "title": "Description",
+                            "key": false
+                        },
+                        "enabled": {
+                            "title": "IsEnabled",
+                            "key": true
+                        },
+                        "version_display": {
+                            "title": "Version",
+                            "type": "TEXT",
+                            "visible": true
+                        },
+                        "version": {
+                            "title": "Version",
+                            "key": true,
+                            "type": "TEXT",
+                            "visible": false
+                        },
+                        "enableddd": {
+                            "title": "Enabled",
+                            "type": "TEXT",
+                            "visible": false,
+                            "key": true,
+                            "defaultValue": "yes",
+                            "uiProperties": {
+                                "valueMap": {
+                                    "editType": "switch",
+                                    "trueValue": "true",
+                                    "falseValue": "false",
+                                    "defaultValue": "true",
+                                    "editable": true,
+                                    "showLabel": false
+                                },
+                                "editEndpoint": {
+                                    "service-name": "chat-helper",
+                                    "namespace": "io.cfx.dimensions.app",
+                                    "methodName": "enable-disable-ai-artifacts",
+                                    "stringified-params": true,
+                                    "useReportContext": true,
+                                    "parse-output": false,
+                                    "params": [
+                                        {
+                                            "artifact": "toolsets"
+                                        }
+                                    ]
+                                }
+                            }
+                        },
+                        "tools": {
+                            "title": "Tools",
+                            "key": false
+                        },
+                        "textResources": {
+                            "title": "Resources",
+                            "key": false
+                        },
+                        "contents": {
+                            "title": "YAML",
+                            "defaultWidth": 500,
+                            "visible": false,
+                            "key": true
+                        },
+                        "updated_at": {
+                            "title": "Updated At",
+                            "key": false,
+                            "type": "DATETIME"
+                        },
+                        "updated_by": {
+                            "title": "Updated By",
+                            "key": true,
+                            "type": "TEXT"
+                        }
+                    },
+                    "widget_id": "2630645a",
+                    "actions": [
+                        {
+                            "permission": "agenticai:toolset:add",
+                            "title": "Add",
+                            "type": "POPUP_FORM",
+                            "selectionType": "NONE",
+                            "identifier": "saas-service-action:aiadministration-add-mcpserver",
+                            "api-endpoint": {
+                                "service-name": "saas-reports",
+                                "methodName": "getForm",
+                                "stringified-params": true,
+                                "parse-output": false,
+                                "params": [
+                                    {
+                                        "formId": "rda.saas.mcpserver.local.add"
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "permission": "agenticai:toolset:edit",
+                            "title": "Edit",
+                            "type": "POPUP_FORM",
+                            "selectionType": "SINGLE",
+                            "identifier": "saas-service-action:aiadministration-edit-mcpserver",
+                            "contextParamList": [
+                                "domain",
+                                "ai_project_name",
+                                "version"
+                            ],
+                            "api-endpoint": {
+                                "service-name": "saas-reports",
+                                "methodName": "getForm",
+                                "stringified-params": true,
+                                "parse-output": false,
+                                "params": [
+                                    {
+                                        "formId": "rda.saas.mcpserver.local.edit"
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "permission": "agenticai:toolset:view",
+                            "title": "View",
+                            "type": "POPUP_FORM",
+                            "selectionType": "SINGLE",
+                            "drillDownLinkField": "toolset_name",
+                            "identifier": "saas-service-action:aiadministration-view-mcpserver",
+                            "contextParamList": [
+                                "domain",
+                                "ai_project_name",
+                                "version"
+                            ],
+                            "api-endpoint": {
+                                "service-name": "saas-reports",
+                                "methodName": "getForm",
+                                "stringified-params": true,
+                                "parse-output": false,
+                                "params": [
+                                    {
+                                        "formId": "rda.saas.mcpserver.local.view"
+                                    }
+                                ]
+                            }
+                        },               
+                        {
+                            "permission": "agenticai:toolset:delete",
+                            "title": "Delete All Versions",
+                            "type": "POPUP_FORM",
+                            "selectionType": "SINGLE",
+                            "identifier": "saas-service-action:mcp_toolset-delete-all",
+                            "contextParamList": [
+                                "domain",
+                                "ai_project_name"
+                            ],
+                            "api-endpoint": {
+                                "service-name": "saas-reports",
+                                "methodName": "getForm",
+                                "stringified-params": true,
+                                "parse-output": false,
+                                "params": [
+                                    {
+                                        "formId": "rda.saas.mcpserver.local.delete.all"
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "permission": "agenticai:toolset:view",
+                            "title": "Version History",
+                            "type": "POPUP_REPORT",
+                            "icon": "mdi mdi-history",
+                            "selectionType": "SINGLE",
+                            "identifier": "saas-service-action:mcp-tool-version-history",
+                            "contextParamList": [
+                                "toolset_name",
+                                "ai_project_name",
+                                "domain"
+                            ],
+                            "api-endpoint": {
+                                "service-name": "saas-reports",
+                                "methodName": "getReport",
+                                "parse-output": true,
+                                "stringified-params": false,
+                                "params": [
+                                    {
+                                        "reportId": "rda.saas.mcptoolset.version.history.tabular",
+                                        "params": {
+                                            "toolset_name": "{{toolset_name}}",
+                                            "ai_project_name": "{{ai_project_name}}",
+                                            "domain": "{{domain}}"
+                                        }
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "permission": "agenticai:toolset:view",
+                            "title": "View Difference",
+                            "type": "POPUP_FORM",
+                            "contextParamList": {
+                                "contextParams": [
+                                    {
+                                        "paramKey": "version",
+                                        "paramId": "version"
+                                    },
+                                    {
+                                        "paramKey": "toolset_name",
+                                        "paramId": "toolset_name"
+                                    }
+                                ]
+                            },
+                            "selectionType": "SINGLE",
+                            "identifier": "saas-service-action:userdashboard-add-yaml",
+                            "api-endpoint": {
+                                "service-name": "saas-reports",
+                                "methodName": "getForm",
+                                "stringified-params": true,
+                                "parse-output": false,
+                                "params": [
+                                    {
+                                        "formId": "rda.saas.dynamic.form",
+                                        "formActionList": {
+                                            "formActions": [
+                                                {
+                                                    "identifier": "Submit",
+                                                    "actionLabel": "View"
+                                                }
+                                            ]
+                                        },
+                                        "formDefinition": {
+                                            "id": "rda.saas.dynamic.form",
+                                            "refreshRequired": true,
+                                            "formFieldList": [
+                                                {
+                                                    "fieldId": "toolset_name",
+                                                    "label": "Verify Toolset Name",
+                                                    "help": "Verify Toolset Name",
+                                                    "dataType": "string",
+                                                    "controlType": "TEXT_FIELD",
+                                                    "hidden": false,
+                                                    "server-validation": true,
+                                                    "editable": false,
+                                                    "required": true
+                                                },
+                                                {
+                                                    "fieldId": "version",
+                                                    "label": "Current Version",
+                                                    "help": "Current Version",
+                                                    "dataType": "string",
+                                                    "controlType": "TEXT_FIELD",
+                                                    "hidden": false,
+                                                    "server-validation": true,
+                                                    "editable": false,
+                                                    "required": true
+                                                },
+                                                {
+                                                    "help": "Version to compare",
+                                                    "dataType": "string",
+                                                    "controlType": "COMBO_BOX",
+                                                    "required": false,
+                                                    "editable": true,
+                                                    "label": "Version to compare",
+                                                    "hidden": false,
+                                                    "fieldId": "compare_version",
+                                                    "lovSourceType": "pstream",
+                                                    "lovSourceParams": {
+                                                        "name": "ai_mcp_toolsets",
+                                                        "valueColumn": "version",
+                                                        "labelColumn": "version",
+                                                        "query": "version is not '$version' and toolset_name is '$toolset_name' and ai_project_name is '$ai_project_name'"
+                                                    }
+                                                }
+                                            ]
+                                        },
+                                        "actions": [
+                                            {
+                                                "appName": "user-dashboard/toolset_version_diff_widget",
+                                                "messageType": "without_message",
+                                                "type": "GO_TO_APP_STATE"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "title": "Imported",
+            "show_filter": false,
+            "widgets": [
+                {
+                    "title": "Imported Toolsets",
+                    "widget_type": "portal_tabular",
+                    "reportId": "rda.saas.aiproject.mcptools.list.tabular",
+                    "only_imported": true,
+                    "height": 10,
+                    "min_wdith": 12,
+                    "widget_id": "ea3a3778"
+                }
+            ]
+        }
+    ],
+    "saved_time": "2026-03-03T16:11:06.627096"
+}

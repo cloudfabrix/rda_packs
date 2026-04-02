@@ -1,0 +1,49 @@
+{
+    "name": "ai_project_users",
+    "description": "Users",
+    "label": "Users",
+    "enabled": false,
+    "dashboard_type": "template",
+    "dashboard_folder": "AI",
+    "version": "23.2.7.1",
+    "dashboard_filters": {
+        "time_filter": false,
+        "show_filter": false
+    },
+    "template_variables": {
+        "PROJECT_NAME": {
+            "contextId": "ai_project_name"
+        }
+    },
+    "dashboard_sections": [
+        {
+            "title": "Users",
+            "widgets": [
+                {
+                    "widget_type": "label",
+                    "label": "<div style='text-align:center;width:100%;'><h1><a style='text-decoration:none;' target='_blank'> Project : {{PROJECT_NAME}} </a></h1></div>",
+                    "min_width": 12,
+                    "widget_id": "4b1867d9"
+                },
+                {
+                    "title": "User Groups",
+                    "widget_type": "portal_tabular",
+                    "reportId": "rda.saas.aiproject.usergroups.list.tabular",
+                    "height": 10,
+                    "min_width": 12,
+                    "paginated": true,
+                    "widget_id": "f7d8b5be"
+                },
+                {
+                    "title": "Members",
+                    "widget_type": "portal_tabular",
+                    "reportId": "rda.saas.aiproject.users.list.tabular",
+                    "height": 10,
+                    "min_wdith": 12,
+                    "widget_id": "ea3a3778"
+                }
+            ]
+        }
+    ],
+    "saved_time": "2025-10-16T13:45:20.682670"
+}

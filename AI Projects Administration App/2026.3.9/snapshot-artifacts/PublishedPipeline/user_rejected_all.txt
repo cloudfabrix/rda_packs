@@ -1,0 +1,20 @@
+%% stream = no and limit = 0
+
+@dm:empty
+    --> @dm:addrow name is "user_approval_stream"
+    --> #dm:query-persistent-stream user_approval="pending"
+    --> @dm:save name="test-reject-all-data"
+    --> *exec:if-shape num_rows = 0
+       --> @dm:addrow message="There are no pending requests"
+       --> @dm:save name="temp-out"
+       --> @dm:save name='test-reject-all'
+    --> @exec:end-if
+    --> *exec:if-shape num_rows > 0
+       --> @dm:eval updated_time="now()"
+       --> @dm:change-time-format columns='updated_time' and from_format='ms' and to_format='%Y-%m-%dT%H:%M:%S'
+       --> @dm:eval action_comments="' action performed successfully '" and user_approval="'Rejected'"
+       --> @rn:write-stream name is "user_approval_stream"
+       --> @dm:eval message="'Request is successfully rejected'"
+       --> @dm:save name="temp-out"
+       --> @dm:save name='test-reject-all'
+    --> @exec:end-if

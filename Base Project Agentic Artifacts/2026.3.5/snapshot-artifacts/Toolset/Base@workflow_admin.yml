@@ -1,0 +1,44 @@
+enabled: true
+domain: workflow_admin
+description: Workflow Administration Tools
+tools:
+- name: list-workflows
+  type: workflowAdmin
+  subType: list-workflows
+  description: >
+    List non agentic Workflows. A non agentic workflow is a workflow with flow_type as 'workflow'. Output includes 3 cxolumns: name, description, and link with HTML tag A HREF.
+  parameters:
+  - name: search_text
+    description: Search for the text in name and description of the agentic workflows.
+    required: false
+    type: string
+
+- name: create-workflow
+  type: workflowAdmin
+  subType: add-workflows
+  
+  description: >
+    Add a new non agentic Workflow. A non agentic workflow is a workflow with flow_type as 'workflow'. Output includes 3 cxolumns: name, description, and link with HTML tag A HREF.
+  parameters:
+  - name: input_wf_name
+    description: Name of the workflow as it is saved in context cache
+    required: true
+    type: string
+  - name: mode
+    description: Mode for this method call - add/update
+    required: true
+    type: string
+
+
+- name: get-existing-workflow
+  type: workflowAdmin
+  subType: get-existing-workflow
+  
+  description: >
+    This tool gets workflow if it exists
+  parameters:
+  - name: input_wf_name
+    description: Name of the workflow to retrieve
+    required: true
+    type: string
+

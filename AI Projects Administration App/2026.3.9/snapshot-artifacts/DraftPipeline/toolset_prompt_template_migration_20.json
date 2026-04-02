@@ -1,0 +1,88 @@
+{
+  "folder": "Default",
+  "name": "toolset_prompt_template_migration_20",
+  "description": "test pipeline",
+  "usecase": "",
+  "category": "",
+  "version": "2025_10_16_1",
+  "sources": {
+    "rn": {
+      "name": "rn",
+      "type": "rn"
+    }
+  },
+  "data": {
+    "name": "toolset_prompt_template_migration_20",
+    "sequence": [
+      {
+        "tag": "@c:new-block",
+        "stream": false,
+        "limit": 0
+      },
+      {
+        "tag": "@dm:empty"
+      },
+      {
+        "tag": "@dm:addrow",
+        "query": "name=\"mcp_domains_10720\" and limit=0"
+      },
+      {
+        "tag": "#dm:query-persistent-stream",
+        "query": "*"
+      },
+      {
+        "tag": "@dm:add-missing-columns",
+        "query": "columns = 'ai_project_name' & value = 'dev_common'"
+      },
+      {
+        "tag": "@dm:eval",
+        "query": "toolset_name = \"domain\""
+      },
+      {
+        "tag": "@rn:write-stream",
+        "query": "name=\"ai_mcp_toolsets\""
+      },
+      {
+        "tag": "@c:new-block",
+        "comment": "updating ai_project_name in ai_mcp_prompt_templates Pstream"
+      },
+      {
+        "tag": "@dm:empty"
+      },
+      {
+        "tag": "@dm:addrow",
+        "query": "name=\"mcp_prompt_templates_10720\" and limit=0"
+      },
+      {
+        "tag": "#dm:query-persistent-stream",
+        "query": "*"
+      },
+      {
+        "tag": "@dm:add-missing-columns",
+        "query": "columns = 'ai_project_name' & value = 'dev_common'"
+      },
+      {
+        "tag": "@rn:write-stream",
+        "query": "name=\"ai_mcp_prompt_templates\""
+      }
+    ]
+  },
+  "artifacts": [
+    {
+      "artifact_type": "rda-network-stream",
+      "artifact_name": "ai_mcp_toolsets",
+      "access": "write"
+    },
+    {
+      "artifact_type": "rda-network-stream",
+      "artifact_name": "ai_mcp_prompt_templates",
+      "access": "write"
+    }
+  ],
+  "directives": {
+    "stream": false,
+    "limit": 0
+  },
+  "html_data": "\n        <style>\n\n        .tooltip {\n            position: relative;\n            display: inline-block;\n            border-bottom: 1px dotted black; /* If you want dots under the hoverable text */\n            }\n\n        /* Tooltip text */\n        .tooltip .tooltiptext {\n            visibility: hidden;\n            width: 120px;\n            background-color: black;\n            color: #fff;\n            text-align: center;\n            padding: 5px 0;\n            border-radius: 6px;\n            \n            /* Position the tooltip text - see examples below! */\n            position: absolute;\n            z-index: 1;\n        }\n\n         /* Show the tooltip text when you mouse over the tooltip container */\n        .tooltip:hover .tooltiptext {\n            visibility: visible;\n            }\n\n        .bot .tooltiptext {\n            visibility: hidden;\n            width: 550px;\n            background-color: black;\n            color: #fff;\n            text-align: center;\n            padding: 5px 0;\n            border-radius: 6px;\n            \n            /* Position the tooltip text - see examples below! */\n            position: absolute;\n            z-index: 1;\n        }\n\n         /* Show the tooltip text when you mouse over the tooltip container */\n        .bot:hover .tooltiptext {\n            visibility: visible;\n        }\n\n        .bot_error .tooltiptext {\n            visibility: hidden;\n            width: 450px;\n            background-color: #800;\n            color: #fff;\n            text-align: center;\n            padding: 5px 0;\n            border-radius: 6px;\n            \n            /* Position the tooltip text - see examples below! */\n            position: absolute;\n            z-index: 1;\n        }\n\n         /* Show the tooltip text when you mouse over the tooltip container */\n        .bot_error:hover .tooltiptext {\n            visibility: visible;\n        }\n\n        .bot_templ .tooltiptext {\n            visibility: hidden;\n            width: 425px;\n            background-color: #777;\n            color: #fff;\n            text-align: center;\n            padding: 5px 0;\n            border-radius: 6px;\n            \n            /* Position the tooltip text - see examples below! */\n            position: absolute;\n            z-index: 1;\n        }\n\n         /* Show the tooltip text when you mouse over the tooltip container */\n        .bot_templ:hover .tooltiptext {\n            visibility: visible;\n        }\n\n        .bot {\n            position: relative;\n            display: inline-block;\n            color: #080;\n            font-weight: bold;\n        }\n\n        .bot_error {\n            position: relative;\n            display: inline-block;\n            color: #800;\n            font-weight: bold;\n        }\n\n        .bot_templ {\n            position: relative;\n            display: inline-block;\n            color: #088;\n            font-weight: bold;\n        }\n        \n        .link {\n            color: #FFA500;\n        }\n    \n        .comment {\n            color: #888;\n        }\n        \n        .directive {\n            color: #08dddd;\n        }\n        \n        .directive_error {\n            color: #888;\n        }\n        \n        code {\n          color: 0033FF;\n          background-color: #fff;\n        }\n\n        .code {\n          color: 0033FF;\n          background-color: #fff;\n        }\n\n        </style>\n        <div class='directive'>%% stream = no and limit = 0\n</div><div style='padding: 10px;'></div><div><span class='bot'>@c:new-block<span class='tooltiptext'>Start a new block within the pipeline</span></span> &nbsp; <code style='color: #0033FF; background-color: #fff;'>  </code>\n\n</div><div style='padding-left: 20px;'>    <span class='link'>-->&nbsp; </span><span class='bot'>@dm:empty<span class='tooltiptext'>Create an empty dataframe with optional columns</span></span> &nbsp;</span> &nbsp; <code style='color: #0033FF; background-color: #fff;'></code>\n\n</div><div style='padding-left: 20px;'>    <span class='link'>-->&nbsp; </span><span class='bot'>@dm:addrow<span class='tooltiptext'>Append a row to input dataframe, with specified column = value parameters</span></span> &nbsp;</span> &nbsp; <code style='color: #0033FF; background-color: #fff;'>name=&quot;mcp_domains_10720&quot; and limit=0</code>\n\n</div><div style='padding-left: 20px;'>    <span class='link'>-->&nbsp; </span><span class='bot'>#dm:query-persistent-stream<span class='tooltiptext'>Query the data in a persistent stream via CFXQL.</span></span> &nbsp;</span> &nbsp; <code style='color: #0033FF; background-color: #fff;'>*</code>\n\n</div><div style='padding-left: 20px;'>    <span class='link'>-->&nbsp; </span><span class='bot'>@dm:add-missing-columns<span class='tooltiptext'>Add columns if not found in the input</span></span> &nbsp;</span> &nbsp; <code style='color: #0033FF; background-color: #fff;'>columns = &#x27;ai_project_name&#x27; &amp; value = &#x27;dev_common&#x27;</code>\n\n</div><div style='padding-left: 20px;'>    <span class='link'>-->&nbsp; </span><span class='bot'>@dm:eval<span class='tooltiptext'>Map values using evaluate function. Speciy one of more column = &#x27;expression&#x27; pairs</span></span> &nbsp;</span> &nbsp; <code style='color: #0033FF; background-color: #fff;'>toolset_name = &quot;domain&quot;</code>\n\n</div><div style='padding-left: 20px;'>    <span class='link'>-->&nbsp; </span><span class='bot'>@rn:write-stream<span class='tooltiptext'>Write input dataframe as messages to a specified stream. Each row is encoded as a JSON object. No acknowledgement is expected.</span></span> &nbsp;</span> &nbsp; <code style='color: #0033FF; background-color: #fff;'>name=&quot;ai_mcp_toolsets&quot;</code>\n\n</div><div style='padding: 10px;'></div><div><div class='comment'>&nbsp;&nbsp;&nbsp;&nbsp;## updating ai_project_name in ai_mcp_prompt_templates Pstream</div><span class='link'>-->&nbsp; </span><span class='bot'>@c:new-block<span class='tooltiptext'>Start a new block within the pipeline</span></span> &nbsp;</span> &nbsp; <code style='color: #0033FF; background-color: #fff;'></code>\n\n</div><div style='padding-left: 20px;'>    <span class='link'>-->&nbsp; </span><span class='bot'>@dm:empty<span class='tooltiptext'>Create an empty dataframe with optional columns</span></span> &nbsp;</span> &nbsp; <code style='color: #0033FF; background-color: #fff;'></code>\n\n</div><div style='padding-left: 20px;'>    <span class='link'>-->&nbsp; </span><span class='bot'>@dm:addrow<span class='tooltiptext'>Append a row to input dataframe, with specified column = value parameters</span></span> &nbsp;</span> &nbsp; <code style='color: #0033FF; background-color: #fff;'>name=&quot;mcp_prompt_templates_10720&quot; and limit=0</code>\n\n</div><div style='padding-left: 20px;'>    <span class='link'>-->&nbsp; </span><span class='bot'>#dm:query-persistent-stream<span class='tooltiptext'>Query the data in a persistent stream via CFXQL.</span></span> &nbsp;</span> &nbsp; <code style='color: #0033FF; background-color: #fff;'>*</code>\n\n</div><div style='padding-left: 20px;'>    <span class='link'>-->&nbsp; </span><span class='bot'>@dm:add-missing-columns<span class='tooltiptext'>Add columns if not found in the input</span></span> &nbsp;</span> &nbsp; <code style='color: #0033FF; background-color: #fff;'>columns = &#x27;ai_project_name&#x27; &amp; value = &#x27;dev_common&#x27;</code>\n\n</div><div style='padding-left: 20px;'>    <span class='link'>-->&nbsp; </span><span class='bot'>@rn:write-stream<span class='tooltiptext'>Write input dataframe as messages to a specified stream. Each row is encoded as a JSON object. No acknowledgement is expected.</span></span> &nbsp;</span> &nbsp; <code style='color: #0033FF; background-color: #fff;'>name=&quot;ai_mcp_prompt_templates&quot;</code>\n\n</div>\n",
+  "template_type": null
+}

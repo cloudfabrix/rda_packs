@@ -1,0 +1,327 @@
+{
+  "name": "ai_review_storyboard_ai_projects",
+  "label": "Review Storyboard",
+  "description": "AI Reviews Storyboard",
+  "dashboard_folder": "AI",
+  "version": "1.0.2",
+  "enabled": false,
+  "stream": "ai_observability",
+  "dashboard_type": "template",
+  "live_edit": true,
+  "stream_query_mapping": {
+    "ai_observability": {
+      "llm": "llm_name",
+      "USER_ID": "user_id"
+    }
+  },
+  "template_variables": {
+    "ai_project_name": {
+      "contextId": "ai_project_name"
+    }
+  },
+  "dashboard_filters": {
+    "time_filter": true,
+    "default_time_filter_labels": [
+      "All Time"
+    ],
+    "columns_filter": [
+      {
+        "id": "timestamp",
+        "label": "Timestamp",
+        "type": "DATETIME"
+      },
+      {
+        "id": "USER_ID",
+        "label": "User Id",
+        "type": "TEXT"
+      }
+    ],
+    "group_filters": [
+      {
+        "stream": "ai_projects",
+        "title": "AI Project",
+        "duration_hours": 1080,
+        "limit": 200,
+        "extra_filter": "ai_project_name is not empty",
+        "group_by": [
+          "ai_project_name"
+        ],
+        "ts_column": "timestamp",
+        "agg": "sum",
+        "column": "count_",
+        "type": "int"
+      }
+    ]
+  },
+  "dashboard_sections": [
+    {
+      "title": "My Reviews",
+      "show_filter": true,
+      "widgets": [
+        {
+          "title": "",
+          "widget_type": "custom_counter",
+          "formatter0": "DescriptiveCountFormatter",
+          "stream": "ai_observability",
+          "ts_column": "timestamp",
+          "extra_filter": "metric_name is 'review_rating'",
+          "column": "count_",
+          "agg": "sum",
+          "type": "float",
+          "widget_id": "28f5f991"
+        },
+        {
+          "title": "",
+          "widget_type": "expression_counter",
+          "expression": "0.0 if total_review == 0 else round(total / total_review, 1)",
+          "segments": [
+            {
+              "variable": "total",
+              "stream": "ai_observability",
+              "extra_filter": "metric_name is 'review_rating'",
+              "ts_column": "timestamp",
+              "column": "metric_value",
+              "agg": "sum",
+              "type": "int"
+            },
+            {
+              "variable": "total_review",
+              "stream": "ai_observability",
+              "ts_column": "timestamp",
+              "extra_filter": "metric_name is 'review_rating'",
+              "column": "config_id",
+              "agg": "value_count",
+              "type": "int"
+            }
+          ],
+          "widget_id": "33b828d6"
+        },
+        {
+          "title": "",
+          "widget_type": "custom_counter",
+          "formatter0": "DescriptiveCountFormatter",
+          "stream": "ai_observability",
+          "ts_column": "timestamp",
+          "extra_filter": "metric_name is 'review_rating'",
+          "column": "metric_value",
+          "agg": "max",
+          "type": "float",
+          "widget_id": "a7b7d764"
+        },
+        {
+          "title": "",
+          "widget_type": "custom_counter",
+          "formatter0": "DescriptiveCountFormatter",
+          "stream": "ai_observability",
+          "ts_column": "timestamp",
+          "extra_filter": "metric_name is 'review_rating'",
+          "column": "metric_value",
+          "agg": "min",
+          "type": "float",
+          "widget_id": "e9044ed7"
+        },
+        {
+          "title": "",
+          "widget_type": "custom_counter",
+          "formatter0": "DescriptiveCountFormatter",
+          "stream": "ai_observability",
+          "ts_column": "timestamp",
+          "extra_filter": "metric_name is 'review_rating' and metric_value is '5'",
+          "column": "metric_value",
+          "agg": "value_count",
+          "type": "int",
+          "widget_id": "ecda4284"
+        },
+        {
+          "title": "",
+          "widget_type": "custom_counter",
+          "formatter0": "DescriptiveCountFormatter",
+          "stream": "ai_observability",
+          "ts_column": "timestamp",
+          "extra_filter": "metric_name is 'review_rating' and metric_value is '4'",
+          "column": "metric_value",
+          "agg": "value_count",
+          "type": "float",
+          "widget_id": "86b9ac66"
+        },
+        {
+          "title": "",
+          "widget_type": "custom_counter",
+          "formatter0": "DescriptiveCountFormatter",
+          "stream": "ai_observability",
+          "ts_column": "timestamp",
+          "extra_filter": "metric_name is 'review_rating' and metric_value is '3'",
+          "column": "metric_value",
+          "agg": "value_count",
+          "type": "float",
+          "widget_id": "b61823a3"
+        },
+        {
+          "title": "",
+          "widget_type": "custom_counter",
+          "formatter0": "DescriptiveCountFormatter",
+          "stream": "ai_observability",
+          "ts_column": "timestamp",
+          "extra_filter": "metric_name is 'review_rating' and metric_value is '2'",
+          "column": "metric_value",
+          "agg": "value_count",
+          "type": "float",
+          "widget_id": "794c5ada"
+        },
+        {
+          "title": "",
+          "widget_type": "custom_counter",
+          "formatter0": "DescriptiveCountFormatter",
+          "stream": "ai_observability",
+          "ts_column": "timestamp",
+          "extra_filter": "metric_name is 'review_rating' and metric_value is '1'",
+          "column": "metric_value",
+          "agg": "value_count",
+          "type": "float",
+          "widget_id": "91e296d9"
+        },
+        {
+          "widget_type": "bar_chart",
+          "stream": "ai_observability",
+          "title": "Reviews Chart by Project",
+          "duration_hours": 1080,
+          "limit": 200,
+          "extra_filter": "metric_name is 'review_rating'",
+          "chartProperties": {
+            "legendLocation": "none",
+            "orientation": "horizontal"
+          },
+          "group_by": [
+            "ai_project_name"
+          ],
+          "ts_column": "timestamp",
+          "agg": "sum",
+          "column": "count_",
+          "type": "int",
+          "widget_id": "a5af22ac3"
+        },
+        {
+          "widget_type": "bar_chart",
+          "stream": "ai_observability",
+          "title": "Reviews Chart",
+          "duration_hours": 1080,
+          "limit": 200,
+          "extra_filter": "metric_name is 'review_rating'",
+          "chartProperties": {
+            "legendLocation": "none",
+            "orientation": "horizontal"
+          },
+          "group_by": [
+            "reviewer"
+          ],
+          "ts_column": "timestamp",
+          "agg": "sum",
+          "column": "count_",
+          "type": "int",
+          "widget_id": "b4e9357e"
+        },
+        {
+          "title": "Reviews",
+          "widget_type": "tabular",
+          "duration_hours": 1080,
+          "widget_group": "G0",
+          "max_width": 12,
+          "height": 8,
+          "min_width": 12,
+          "preview_dashboard": "ai_conversation_details",
+          "preview_width": 900,
+          "preview_height": 700,
+          "stream": "ai_observability",
+          "ts_column": "timestamp",
+          "extra_filter": "metric_name is 'review_rating'",
+          "virtual_scrolling": false,
+          "showRowSummary": false,
+          "columns": {
+            "timestamp": {
+              "title": "Timestamp",
+              "type": "DATETIME",
+              "hidden": false
+            },
+            "conversationLabel": {
+              "title": "Conversation Label",
+              "type": "TEXT",
+              "hidden": false,
+              "key": true
+            },
+            "ai_project_name": {
+              "title": "Project Name",
+              "type": "TEXT",
+              "hidden": false,
+              "key": true
+            },
+            "conversationId": {
+              "title": "Conversationid",
+              "type": "TEXT",
+              "hidden": true,
+              "key": true
+            },
+            "conversation_id": {
+              "title": "Conversationid",
+              "type": "COMPUTED",
+              "expr": "conversationId",
+              "hidden": true,
+              "key": true
+            },
+            "metric_value": {
+              "title": "Rating",
+              "type": "TEXT",
+              "hidden": false
+            },
+            "review_positive": {
+              "title": "Positive Review",
+              "type": "TEXT",
+              "hidden": false
+            },
+            "review_negative": {
+              "title": "Negative Review",
+              "type": "TEXT",
+              "hidden": false
+            },
+            "reviewer": {
+              "title": "Reviewer",
+              "type": "TEXT",
+              "hidden": false,
+              "key": true
+            }
+          },
+          "actions": [
+            {
+              "appName": "user-dashboard/ai_conversation_details_app",
+              "permission": "agenticai:conversation:view",
+              "drillDownLinkField": "conversationLabel",
+              "identifier": "conversationLabel",
+              "selectionType": "SINGLE",
+              "stateName": "app.featureapp",
+              "title": "View Details",
+              "type": "GO_TO_APP_STATE"
+            }
+          ],
+          "widget_id": "f141b075"
+        }
+      ]
+    }
+  ],
+  "default_storyboard": "My Reviews",
+  "use_storyboard": true,
+  "attachments": [
+    {
+      "name": "promptTemplates",
+      "value": "{%- raw -%}\n{%- set names = {} -%}\n{%- for row in results -%}\n  {%- set tc = row[\"tool_content\"].splitlines() -%}\n  {%- for line in tc -%}\n      {%- set line = line.strip() -%}\n        {%- if \"prompt_template_name\" in line -%}\n          {%- set name = line.split()[1].replace('\"', '').replace(',','').strip() -%}\n          {%- if name not in names -%}\n            {%- set _ = names.update({name: 1}) -%}\n          {%- else -%}\n            {%- set _ = names.update({name: names[name] + 1 }) -%}\n          {%- endif -%}\n        {%- endif -%}\n\n  {%- endfor -%}\n\n{%- endfor -%}\n\n{%- set data = [] -%}\n{%- for n in names -%}\n    {%- set _ = data.append({\"name\": n, \"count\": names[n]}) -%}\n{%- endfor -%}\n\n<div style='overflow: flex; width: 100%; height: 100%;'>\n<table style='border-collapse: collapse; width: 100%; height: 100%;'>\n{%- for n in data | sort(attribute='count', reverse=True)  -%}\n  <tr style='border-bottom: 1px solid #ccc;'><td><b>{{n[\"name\"]}}</b></td><td>{{n[\"count\"]}}</td></tr>\n{%- endfor -%}\n</table>\n</div>\n{%- endraw -%}"
+    },
+    {
+      "name": "reviews",
+      "value": "{%- raw -%}\r\n{%\r\n  set unit = \"\"\r\n%}\r\n{%\r\n  set review_count = float(review_count)\r\n%}\r\n{%\r\n   if review_count > 1000000\r\n%}\r\n\r\n    {%\r\n        set review_count = (review_count /1000000) | round (1)\r\n    %}\r\n\r\n    {%\r\n      set unit = \"M\"\r\n    %}\r\n\r\n\r\n{%\r\n  elif review_count > 10000\r\n%}\r\n\r\n    {%\r\n        set review_count = (review_count /1000) | round (1)\r\n    %}\r\n    {%\r\n      set unit = \"K\"\r\n    %}\r\n\r\n\r\n\r\n{%\r\n    else\r\n%}\r\n\r\n    {%\r\n        set review_count = review_count | int\r\n    %}\r\n\r\n{%\r\n    endif\r\n%}\r\n\r\n\r\n<div style='width:100%;height:100%;'>\r\n\r\n  <div style=\"color: white; width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center\">\r\n    <h3 {{NUMBER_STYLE}}> {{ \"{:,}\".format(review_count)}}{{unit}} </h3> \r\n    <div style='text-align: center'>Total Reviews</div>\r\n\r\n  </div>\r\n</div>\r\n{%- endraw -%}"
+    }
+  ],
+  "storyboards": [
+    {
+      "name": "My Reviews",
+      "value": "{\n    \"stage\": {\n        \"size\": {\n            \"width\": 1024,\n            \"height\": 950\n        },\n        \"background\": {\n            \"fill\": \"#000000\",\n            \"src\": null,\n            \"gradient\": null\n        },\n        \"theme\": null,\n        \"autoFitByDefault\": true,\n        \"autoFitMinWidth\": 480\n    },\n    \"widgets\": [\n        {\n            \"widget_id\": \"f141b075\",\n            \"layoutConfig\": {\n                \"rotation\": 0,\n                \"width\": 559.99,\n                \"height\": 346.25,\n                \"scaleX\": 1,\n                \"scaleY\": 1,\n                \"fill\": \"#fafafa33\",\n                \"opacity\": 1,\n                \"name\": \"widget-20\",\n                \"draggable\": true,\n                \"x\": 33.70693004989028,\n                \"y\": 584.2311118031766,\n                \"id\": \"cfx-7c1944b8-7c0e-499d-c895-dc073f9a7c56\",\n                \"offsetX\": 0,\n                \"offsetY\": 0,\n                \"skewX\": 0,\n                \"skewY\": 0\n            }\n        },\n        {\n            \"widget_id\": \"a7b7d764\",\n            \"layoutConfig\": {\n                \"rotation\": 0,\n                \"width\": 122.96,\n                \"height\": 105.41,\n                \"scaleX\": 1,\n                \"scaleY\": 1,\n                \"fill\": \"#FFFFFF00\",\n                \"opacity\": 1,\n                \"name\": \"widget-21\",\n                \"draggable\": true,\n                \"x\": 658.6569300498903,\n                \"y\": 358.6911118031765,\n                \"id\": \"cfx-f5034df6-1fe2-40fd-e07b-20d59937dfd9\",\n                \"offsetX\": 0,\n                \"offsetY\": 0,\n                \"skewX\": 0,\n                \"skewY\": 0\n            }\n        },\n        {\n            \"widget_id\": \"e9044ed7\",\n            \"layoutConfig\": {\n                \"rotation\": 0,\n                \"width\": 96.19,\n                \"height\": 82.43,\n                \"scaleX\": 1,\n                \"scaleY\": 1,\n                \"fill\": \"#FFFFFF00\",\n                \"opacity\": 1,\n                \"name\": \"widget-22\",\n                \"draggable\": true,\n                \"x\": 862.6369300498901,\n                \"y\": 361.8911118031766,\n                \"id\": \"cfx-4b5a21cc-aba5-4a7c-fba5-be01a9defc71\",\n                \"offsetX\": 0,\n                \"offsetY\": 0,\n                \"skewX\": 0,\n                \"skewY\": 0\n            }\n        },\n        {\n            \"widget_id\": \"ecda4284\",\n            \"layoutConfig\": {\n                \"rotation\": 0,\n                \"width\": 94.93,\n                \"height\": 81.36,\n                \"scaleX\": 1,\n                \"scaleY\": 1,\n                \"fill\": \"#FFFFFF00\",\n                \"opacity\": 1,\n                \"name\": \"widget-23\",\n                \"draggable\": true,\n                \"x\": 767.1869300498903,\n                \"y\": 635.8411118031765,\n                \"id\": \"cfx-298c9fbf-826e-4409-de09-8677f3446824\",\n                \"offsetX\": 0,\n                \"offsetY\": 0,\n                \"skewX\": 0,\n                \"skewY\": 0\n            }\n        },\n        {\n            \"widget_id\": \"86b9ac66\",\n            \"layoutConfig\": {\n                \"rotation\": 0,\n                \"width\": 99.51,\n                \"height\": 85.3,\n                \"scaleX\": 1,\n                \"scaleY\": 1,\n                \"fill\": \"#FFFFFF00\",\n                \"opacity\": 1,\n                \"name\": \"widget-24\",\n                \"draggable\": true,\n                \"x\": 767.4669300498903,\n                \"y\": 689.0711118031764,\n                \"id\": \"cfx-92ac39ed-4082-42d4-c764-0376ef381208\",\n                \"offsetX\": 0,\n                \"offsetY\": 0,\n                \"skewX\": 0,\n                \"skewY\": 0\n            }\n        },\n        {\n            \"widget_id\": \"b61823a3\",\n            \"layoutConfig\": {\n                \"rotation\": 0,\n                \"width\": 101.24,\n                \"height\": 86.77,\n                \"scaleX\": 1,\n                \"scaleY\": 1,\n                \"fill\": \"#FFFFFF00\",\n                \"opacity\": 1,\n                \"name\": \"widget-25\",\n                \"draggable\": true,\n                \"x\": 769.3769300498903,\n                \"y\": 740.0011118031766,\n                \"id\": \"cfx-2279bd8d-271d-4b8d-fd56-c7ae28764cdf\",\n                \"offsetX\": 0,\n                \"offsetY\": 0,\n                \"skewX\": 0,\n                \"skewY\": 0\n            }\n        },\n        {\n            \"widget_id\": \"794c5ada\",\n            \"layoutConfig\": {\n                \"rotation\": 0,\n                \"width\": 95.89,\n                \"height\": 82.19,\n                \"scaleX\": 1,\n                \"scaleY\": 1,\n                \"fill\": \"#FFFFFF00\",\n                \"opacity\": 1,\n                \"name\": \"widget-26\",\n                \"draggable\": true,\n                \"x\": 772.6869300498905,\n                \"y\": 792.2711118031765,\n                \"id\": \"cfx-7884e99a-fe3c-442e-ce2f-b6fbd64f0635\",\n                \"offsetX\": 0,\n                \"offsetY\": 0,\n                \"skewX\": 0,\n                \"skewY\": 0\n            }\n        },\n        {\n            \"widget_id\": \"91e296d9\",\n            \"layoutConfig\": {\n                \"rotation\": 0,\n                \"width\": 98.56,\n                \"height\": 55.48,\n                \"scaleX\": 1,\n                \"scaleY\": 1,\n                \"fill\": \"#FFFFFF00\",\n                \"opacity\": 1,\n                \"name\": \"widget-27\",\n                \"draggable\": true,\n                \"x\": 771.1369300498902,\n                \"y\": 853.6511118031766,\n                \"id\": \"cfx-f40ddaf3-661f-412c-fb98-49221926d0f4\",\n                \"offsetX\": 0,\n                \"offsetY\": 0,\n                \"skewX\": 0,\n                \"skewY\": 0\n            }\n        },\n        {\n            \"widget_id\": \"28f5f991\",\n            \"layoutConfig\": {\n                \"rotation\": 0,\n                \"width\": 138.64,\n                \"height\": 118.84,\n                \"scaleX\": 1,\n                \"scaleY\": 1,\n                \"fill\": \"#FFFFFF00\",\n                \"opacity\": 1,\n                \"name\": \"widget-29\",\n                \"draggable\": true,\n                \"x\": 81.2104275553795,\n                \"y\": 84.30419184054804,\n                \"id\": \"cfx-985e76bc-1893-4076-8fd6-5030e9c779eb\",\n                \"offsetX\": 0,\n                \"offsetY\": 0,\n                \"skewX\": 0,\n                \"skewY\": 0\n            }\n        },\n        {\n            \"widget_id\": \"33b828d6\",\n            \"layoutConfig\": {\n                \"rotation\": 0,\n                \"width\": 117.83,\n                \"height\": 100.96,\n                \"scaleX\": 1,\n                \"scaleY\": 1,\n                \"fill\": \"#FFFFFF00\",\n                \"opacity\": 1,\n                \"name\": \"widget-30\",\n                \"draggable\": true,\n                \"x\": 781.1469300498903,\n                \"y\": 456.9211118031766,\n                \"id\": \"cfx-313473ed-a6d9-43a4-f90c-0f35164e7011\",\n                \"offsetX\": 0,\n                \"offsetY\": 0,\n                \"skewX\": 0,\n                \"skewY\": 0\n            }\n        },\n        {\n            \"widget_id\": \"a5af22ac3\",\n            \"layoutConfig\": {\n                \"rotation\": 0,\n                \"width\": 476.23,\n                \"height\": 215.32,\n                \"scaleX\": 1,\n                \"scaleY\": 1,\n                \"fill\": \"#FFFFFF00\",\n                \"opacity\": 1,\n                \"name\": \"widget-32\",\n                \"draggable\": true,\n                \"x\": 60.65,\n                \"y\": 336.49,\n                \"id\": \"cfx-a5ace4a8-a06e-4cda-e9da-9d6afb05fe2f\",\n                \"offsetX\": 0,\n                \"offsetY\": 0,\n                \"skewX\": 0,\n                \"skewY\": 0,\n                \"fillPriority\": \"color\"\n            }\n        },\n        {\n            \"widget_id\": \"b4e9357e\",\n            \"layoutConfig\": {\n                \"rotation\": 0,\n                \"width\": 537.81,\n                \"height\": 207.62,\n                \"scaleX\": 1,\n                \"scaleY\": 1,\n                \"fill\": \"#FFFFFF00\",\n                \"opacity\": 1,\n                \"name\": \"widget-34\",\n                \"draggable\": true,\n                \"x\": 314.65,\n                \"y\": 33.18,\n                \"id\": \"cfx-82fadd2e-481a-4db1-cbf2-a8d2862508d9\",\n                \"offsetX\": 0,\n                \"offsetY\": 0,\n                \"skewX\": 0,\n                \"skewY\": 0,\n                \"fillPriority\": \"color\"\n            }\n        }\n    ],\n    \"shapes\": [\n        {\n            \"compType\": \"vRect\",\n            \"rotation\": 0,\n            \"width\": 555.88,\n            \"height\": 287.39,\n            \"scaleX\": 1,\n            \"scaleY\": 1,\n            \"fill\": \"#FFFFFF00\",\n            \"name\": \"shape-0\",\n            \"cornerRadius\": 10,\n            \"draggable\": true,\n            \"x\": 34.69693004989031,\n            \"y\": 279.3811118031765,\n            \"id\": \"cfx-72f31063-10f3-45b3-8300-08f41292b778\",\n            \"stroke\": \"#0000FF\",\n            \"fillPriority\": \"color\",\n            \"offsetX\": 0,\n            \"offsetY\": 0,\n            \"skewX\": 0,\n            \"skewY\": 0\n        },\n        {\n            \"compType\": \"vRect\",\n            \"rotation\": 0,\n            \"width\": 386.39,\n            \"height\": 287.39,\n            \"scaleX\": 1,\n            \"scaleY\": 1,\n            \"fill\": \"#FFFFFF00\",\n            \"name\": \"shape-1\",\n            \"cornerRadius\": 10,\n            \"draggable\": true,\n            \"x\": 609.9469300498903,\n            \"y\": 275.88111180317657,\n            \"id\": \"cfx-72f31063-10f3-45b3-8300-08f41292b778\",\n            \"stroke\": \"#0000FF\",\n            \"fillPriority\": \"color\",\n            \"offsetX\": 0,\n            \"offsetY\": 0,\n            \"skewX\": 0,\n            \"skewY\": 0\n        },\n        {\n            \"compType\": \"vRect\",\n            \"rotation\": 0,\n            \"width\": 387.39,\n            \"height\": 349.39,\n            \"scaleX\": 1,\n            \"scaleY\": 1,\n            \"fill\": \"#FFFFFF00\",\n            \"name\": \"shape-2\",\n            \"cornerRadius\": 10,\n            \"draggable\": true,\n            \"x\": 611.2012027715344,\n            \"y\": 582.1311118031765,\n            \"id\": \"cfx-72f31063-10f3-45b3-8300-08f41292b778\",\n            \"stroke\": \"#0000FF\",\n            \"fillPriority\": \"color\",\n            \"offsetX\": 0,\n            \"offsetY\": 0,\n            \"skewX\": 0,\n            \"skewY\": 0\n        },\n        {\n            \"fill\": \"#FFFFFF\",\n            \"compType\": \"vText\",\n            \"name\": \"shape-3\",\n            \"text\": \"Average Ratings\",\n            \"align\": \"center\",\n            \"fontSize\": 20,\n            \"fontFamily\": \"Roboto\",\n            \"fontStyle\": \"normal\",\n            \"textDecoration\": [],\n            \"draggable\": true,\n            \"x\": 743.8569300498905,\n            \"y\": 468.5911118031767,\n            \"id\": \"cfx-e3178187-66b1-4bd6-f6d4-a450f5d567c3\",\n            \"rotation\": 0,\n            \"scaleX\": 1,\n            \"scaleY\": 1,\n            \"offsetX\": 0,\n            \"offsetY\": 0,\n            \"skewX\": 0,\n            \"skewY\": 0,\n            \"width\": 157.42,\n            \"height\": 39.96\n        },\n        {\n            \"fill\": \"#FFFFFF\",\n            \"compType\": \"vText\",\n            \"name\": \"shape-4\",\n            \"text\": \"Highest\\nRated\",\n            \"align\": \"center\",\n            \"fontSize\": 20,\n            \"fontFamily\": \"Roboto\",\n            \"fontStyle\": \"normal\",\n            \"textDecoration\": [],\n            \"draggable\": true,\n            \"x\": 654.7969300498903,\n            \"y\": 353.8011118031765,\n            \"id\": \"cfx-e3178187-66b1-4bd6-f6d4-a450f5d567c3\",\n            \"rotation\": 0,\n            \"scaleX\": 1,\n            \"scaleY\": 1,\n            \"offsetX\": 0,\n            \"offsetY\": 0,\n            \"skewX\": 0,\n            \"skewY\": 0,\n            \"width\": 113.14,\n            \"height\": 42.51\n        },\n        {\n            \"fill\": \"#FFFFFF\",\n            \"compType\": \"vText\",\n            \"name\": \"shape-5\",\n            \"text\": \"Least\\nRated\",\n            \"align\": \"center\",\n            \"fontSize\": 20,\n            \"fontFamily\": \"Roboto\",\n            \"fontStyle\": \"normal\",\n            \"textDecoration\": [],\n            \"draggable\": true,\n            \"x\": 843.0869300498902,\n            \"y\": 350.6311118031766,\n            \"id\": \"cfx-e3178187-66b1-4bd6-f6d4-a450f5d567c3\",\n            \"rotation\": 0,\n            \"scaleX\": 1,\n            \"scaleY\": 1,\n            \"offsetX\": 0,\n            \"offsetY\": 0,\n            \"skewX\": 0,\n            \"skewY\": 0,\n            \"width\": 113.14,\n            \"height\": 41.2\n        },\n        {\n            \"fill\": \"#FFFFFF\",\n            \"compType\": \"vText\",\n            \"name\": \"shape-6\",\n            \"text\": \"Ratings Breakdown\",\n            \"align\": \"center\",\n            \"fontSize\": 20,\n            \"fontFamily\": \"Roboto\",\n            \"fontStyle\": \"normal\",\n            \"textDecoration\": [],\n            \"draggable\": true,\n            \"x\": 626.6869300498903,\n            \"y\": 604.8811118031765,\n            \"id\": \"cfx-e3178187-66b1-4bd6-f6d4-a450f5d567c3\",\n            \"rotation\": 0,\n            \"scaleX\": 1,\n            \"scaleY\": 1,\n            \"offsetX\": 0,\n            \"offsetY\": 0,\n            \"skewX\": 0,\n            \"skewY\": 0,\n            \"width\": 199.17,\n            \"height\": 20\n        },\n        {\n            \"fill\": \"#FFFFFF\",\n            \"compType\": \"vText\",\n            \"name\": \"shape-7\",\n            \"text\": \"\u2b50\",\n            \"align\": \"center\",\n            \"fontSize\": 20,\n            \"fontFamily\": \"Roboto\",\n            \"fontStyle\": \"normal\",\n            \"textDecoration\": [],\n            \"draggable\": true,\n            \"x\": 676.5169300498906,\n            \"y\": 409.47111180317654,\n            \"id\": \"cfx-25296279-4a68-4ac8-ebde-490e1455012d\",\n            \"rotation\": 0,\n            \"scaleX\": 1,\n            \"scaleY\": 1,\n            \"offsetX\": 0,\n            \"offsetY\": 0,\n            \"skewX\": 0,\n            \"skewY\": 0,\n            \"width\": 27.82,\n            \"height\": 0\n        },\n        {\n            \"fill\": \"#FFFFFF\",\n            \"compType\": \"vText\",\n            \"name\": \"shape-8\",\n            \"text\": \"\u2b50\",\n            \"align\": \"center\",\n            \"fontSize\": 20,\n            \"fontFamily\": \"Roboto\",\n            \"fontStyle\": \"normal\",\n            \"textDecoration\": [],\n            \"draggable\": true,\n            \"x\": 870.19693004989,\n            \"y\": 401.58111180317655,\n            \"id\": \"cfx-25296279-4a68-4ac8-ebde-490e1455012d\",\n            \"rotation\": 0,\n            \"scaleX\": 1,\n            \"scaleY\": 1,\n            \"offsetX\": 0,\n            \"offsetY\": 0,\n            \"skewX\": 0,\n            \"skewY\": 0,\n            \"width\": 27.82,\n            \"height\": 0\n        },\n        {\n            \"fill\": \"#FFFFFF\",\n            \"compType\": \"vText\",\n            \"name\": \"shape-9\",\n            \"text\": \"\u2b50\",\n            \"align\": \"center\",\n            \"fontSize\": 20,\n            \"fontFamily\": \"Roboto\",\n            \"fontStyle\": \"normal\",\n            \"textDecoration\": [],\n            \"draggable\": true,\n            \"x\": 780.7569300498902,\n            \"y\": 505.9711118031766,\n            \"id\": \"cfx-25296279-4a68-4ac8-ebde-490e1455012d\",\n            \"rotation\": 0,\n            \"scaleX\": 1,\n            \"scaleY\": 1,\n            \"offsetX\": 0,\n            \"offsetY\": 0,\n            \"skewX\": 0,\n            \"skewY\": 0,\n            \"width\": 27.82,\n            \"height\": 0\n        },\n        {\n            \"fill\": \"#FFFFFF\",\n            \"compType\": \"vText\",\n            \"name\": \"shape-10\",\n            \"text\": \"\u2b50\u2b50\u2b50\u2b50\u2b50\",\n            \"align\": \"center\",\n            \"fontSize\": 20,\n            \"fontFamily\": \"Roboto\",\n            \"fontStyle\": \"normal\",\n            \"textDecoration\": [],\n            \"draggable\": true,\n            \"x\": 634.9334175746757,\n            \"y\": 670.131115617874,\n            \"id\": \"cfx-b08e52af-0ff5-43f1-d5da-11f5320dce34\",\n            \"rotation\": 0,\n            \"scaleX\": 1,\n            \"scaleY\": 1,\n            \"offsetX\": 0,\n            \"offsetY\": 0,\n            \"skewX\": 0,\n            \"skewY\": 0\n        },\n        {\n            \"fill\": \"#FFFFFF\",\n            \"compType\": \"vText\",\n            \"name\": \"shape-11\",\n            \"text\": \"\u2b50\u2b50\u2b50\u2b50\",\n            \"align\": \"center\",\n            \"fontSize\": 20,\n            \"fontFamily\": \"Roboto\",\n            \"fontStyle\": \"normal\",\n            \"textDecoration\": [],\n            \"draggable\": true,\n            \"x\": 637.1318397205426,\n            \"y\": 726.3811156178738,\n            \"id\": \"cfx-ef70fb9a-4172-4b09-e720-9f281549c765\",\n            \"rotation\": 0,\n            \"scaleX\": 1,\n            \"scaleY\": 1,\n            \"offsetX\": 0,\n            \"offsetY\": 0,\n            \"skewX\": 0,\n            \"skewY\": 0\n        },\n        {\n            \"fill\": \"#FFFFFF\",\n            \"compType\": \"vText\",\n            \"name\": \"shape-12\",\n            \"text\": \"\u2b50\u2b50\u2b50\",\n            \"align\": \"center\",\n            \"fontSize\": 20,\n            \"fontFamily\": \"Roboto\",\n            \"fontStyle\": \"normal\",\n            \"textDecoration\": [],\n            \"draggable\": true,\n            \"x\": 640.1770084922093,\n            \"y\": 780.8811156178738,\n            \"id\": \"cfx-803c6a82-d505-48d7-c365-67324227ef6e\",\n            \"rotation\": 0,\n            \"scaleX\": 1,\n            \"scaleY\": 1,\n            \"offsetX\": 0,\n            \"offsetY\": 0,\n            \"skewX\": 0,\n            \"skewY\": 0\n        },\n        {\n            \"fill\": \"#FFFFFF\",\n            \"compType\": \"vText\",\n            \"name\": \"shape-13\",\n            \"text\": \"\u2b50\u2b50\",\n            \"align\": \"center\",\n            \"fontSize\": 20,\n            \"fontFamily\": \"Roboto\",\n            \"fontStyle\": \"normal\",\n            \"textDecoration\": [],\n            \"draggable\": true,\n            \"x\": 641.6239046660608,\n            \"y\": 828.3811156178738,\n            \"id\": \"cfx-71010615-12b9-46d4-9478-60fe8c147b31\",\n            \"rotation\": 0,\n            \"scaleX\": 1,\n            \"scaleY\": 1,\n            \"offsetX\": 0,\n            \"offsetY\": 0,\n            \"skewX\": 0,\n            \"skewY\": 0\n        },\n        {\n            \"fill\": \"#FFFFFF\",\n            \"compType\": \"vText\",\n            \"name\": \"shape-14\",\n            \"text\": \"\u2b50\",\n            \"align\": \"center\",\n            \"fontSize\": 20,\n            \"fontFamily\": \"Roboto\",\n            \"fontStyle\": \"normal\",\n            \"textDecoration\": [],\n            \"draggable\": true,\n            \"x\": 642.9236513537747,\n            \"y\": 883.631115617874,\n            \"id\": \"cfx-252c7ca7-80db-49ac-f5a5-9d842bd02c88\",\n            \"rotation\": 0,\n            \"scaleX\": 1,\n            \"scaleY\": 1,\n            \"offsetX\": 0,\n            \"offsetY\": 0,\n            \"skewX\": 0,\n            \"skewY\": 0\n        },\n        {\n            \"fill\": \"#FFFFFF\",\n            \"compType\": \"vText\",\n            \"name\": \"shape-15\",\n            \"text\": \"Ratings\",\n            \"align\": \"center\",\n            \"fontSize\": 20,\n            \"fontFamily\": \"Roboto\",\n            \"fontStyle\": \"normal\",\n            \"textDecoration\": [],\n            \"draggable\": true,\n            \"x\": 81.9287720199561,\n            \"y\": 36.048829025225785,\n            \"id\": \"cfx-e3178187-66b1-4bd6-f6d4-a450f5d567c3\",\n            \"rotation\": 0,\n            \"scaleX\": 1,\n            \"scaleY\": 1,\n            \"offsetX\": 0,\n            \"offsetY\": 0,\n            \"skewX\": 0,\n            \"skewY\": 0,\n            \"width\": 72.17,\n            \"height\": 21.54\n        },\n        {\n            \"fill\": \"#FFFFFF\",\n            \"compType\": \"vText\",\n            \"name\": \"shape-16\",\n            \"text\": \"Total Ratings\",\n            \"align\": \"center\",\n            \"fontSize\": 16,\n            \"fontFamily\": \"Roboto\",\n            \"fontStyle\": \"normal\",\n            \"textDecoration\": [],\n            \"draggable\": true,\n            \"x\": 85.30104154540155,\n            \"y\": 103.03682653379006,\n            \"id\": \"cfx-e3178187-66b1-4bd6-f6d4-a450f5d567c3\",\n            \"rotation\": 0,\n            \"scaleX\": 1,\n            \"scaleY\": 1,\n            \"offsetX\": 0,\n            \"offsetY\": 0,\n            \"skewX\": 0,\n            \"skewY\": 0,\n            \"width\": 128.17,\n            \"height\": 33\n        },\n        {\n            \"width\": 39.65,\n            \"height\": 42.79,\n            \"draggable\": true,\n            \"compType\": \"vImage\",\n            \"name\": \"image-17\",\n            \"x\": 47.2138600997805,\n            \"y\": 23.371463718467687,\n            \"src\": \"/assets/img/icons/featureApp/svgIcons/license.svg\",\n            \"rotation\": 0,\n            \"scaleX\": 1,\n            \"scaleY\": 1,\n            \"skewX\": 0,\n            \"skewY\": 0,\n            \"offsetX\": 0,\n            \"offsetY\": 0,\n            \"image\": {}\n        },\n        {\n            \"fill\": \"#FFFFFF\",\n            \"compType\": \"vText\",\n            \"name\": \"shape-18\",\n            \"text\": \"User Ratings\",\n            \"align\": \"center\",\n            \"fontSize\": 20,\n            \"fontFamily\": \"Roboto\",\n            \"fontStyle\": \"normal\",\n            \"textDecoration\": [],\n            \"draggable\": true,\n            \"x\": 649.6869300498903,\n            \"y\": 294.88111180317657,\n            \"id\": \"cfx-e3178187-66b1-4bd6-f6d4-a450f5d567c3\",\n            \"rotation\": 0,\n            \"scaleX\": 1,\n            \"scaleY\": 1,\n            \"offsetX\": 0,\n            \"offsetY\": 0,\n            \"skewX\": 0,\n            \"skewY\": 0,\n            \"width\": 124.17,\n            \"height\": 21\n        },\n        {\n            \"width\": 29.14,\n            \"height\": 32.13,\n            \"draggable\": true,\n            \"compType\": \"vImage\",\n            \"name\": \"image-19\",\n            \"x\": 617.69693004989,\n            \"y\": 289.1311118031765,\n            \"src\": \"/assets/img/icons/featureApp/svgIcons/customer.svg\",\n            \"rotation\": 0,\n            \"scaleX\": 1,\n            \"scaleY\": 1,\n            \"skewX\": 0,\n            \"skewY\": 0,\n            \"offsetX\": 0,\n            \"offsetY\": 0,\n            \"image\": {}\n        },\n        {\n            \"compType\": \"vRect\",\n            \"rotation\": 0,\n            \"width\": 960.58,\n            \"height\": 250.44,\n            \"scaleX\": 1,\n            \"scaleY\": 1,\n            \"fill\": \"#FFFFFF00\",\n            \"name\": \"shape-31\",\n            \"cornerRadius\": 10,\n            \"draggable\": true,\n            \"x\": 31.891841970065816,\n            \"y\": 5.640878231080671,\n            \"id\": \"cfx-72f31063-10f3-45b3-8300-08f41292b778\",\n            \"stroke\": \"#0000FF\",\n            \"fillPriority\": \"color\",\n            \"offsetX\": 0,\n            \"offsetY\": 0,\n            \"skewX\": 0,\n            \"skewY\": 0\n        },\n        {\n            \"fill\": \"#FFFFFF\",\n            \"compType\": \"vText\",\n            \"name\": \"shape-33\",\n            \"text\": \"Ratings Breakdown by Project\",\n            \"align\": \"center\",\n            \"fontSize\": 20,\n            \"fontFamily\": \"Roboto\",\n            \"fontStyle\": \"normal\",\n            \"textDecoration\": [],\n            \"draggable\": true,\n            \"x\": 34.68903369068069,\n            \"y\": 297.16146371846776,\n            \"id\": \"cfx-e3178187-66b1-4bd6-f6d4-a450f5d567c3\",\n            \"rotation\": 0,\n            \"scaleX\": 1,\n            \"scaleY\": 1,\n            \"offsetX\": 0,\n            \"offsetY\": 0,\n            \"skewX\": 0,\n            \"skewY\": 0,\n            \"width\": 325.82,\n            \"height\": 21\n        }\n    ],\n    \"lines\": [],\n    \"sbBookmarkList\": []\n}"
+    }
+  ]
+}
