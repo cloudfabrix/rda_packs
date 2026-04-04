@@ -1,0 +1,105 @@
+%% stream = no and limit = 0
+
+## LLDP Topology Calculation Pipeline
+## Receives customer_tag via input dataset from parent pipeline (via @exec:run-pipeline)
+## This pipeline processes LLDP (Link Layer Discovery Protocol) data to build network topology
+@c:new-block
+    --> @exec:get-input
+    --> @dm:save name="temp-input-context"
+
+--> @c:new-block
+    --> @dm:recall name="temp-input-context" and return_empty="yes"
+    --> @dm:head n=1
+    --> @dm:skip-block-if-shape row_count="0"
+    --> *exec:if-condition topo_customer_tag is not empty and topo_customer_tag is not "None" and topo_customer_tag is not "none"
+       --> @dm:eval dataset_name = "topo_customer_tag + '_topology_nodes'"
+       --> @dm:save name="temp-dataset-config"
+    --> @exec:end-if
+    --> *exec:if-condition topo_customer_tag is empty or topo_customer_tag is "None" or topo_customer_tag is "none"
+       --> @dm:recall name="topology_nodes" and return_empty="yes"
+       --> *dm:safe-filter lldp is 'yes'
+       --> @dm:save name="temp-nodes"
+       --> @dm:empty
+       --> @dm:save name="temp-dataset-config"
+    --> @exec:end-if
+
+--> @c:new-block
+    --> @dm:recall name="temp-dataset-config" and return_empty="yes"
+    --> @dm:skip-block-if-shape row_count="0"
+
+--> @c:data-loop dataset="temp-dataset-config" & columns="dataset_name"
+    --> @dm:recall name="$dataset_name" and return_empty="yes"
+    --> *dm:safe-filter lldp is 'yes'
+    --> @dm:save name="temp-nodes"
+
+## LLDP Edge Processing
+--> @c:new-block
+
+--> @c:data-loop columns="topo_customer_tag" and dataset="temp-input-context" and return_empty="yes"
+    --> @dm:recall name="temp-input-context" and return_empty="yes"
+    --> @dm:head n=1
+    --> @dm:skip-block-if-shape row_count="0"
+    --> *exec:if-condition topo_customer_tag is not empty and topo_customer_tag is not "None" and topo_customer_tag is not "none"
+       --> #dm:query-persistent-stream device_object is 'LLDP' and remote_device_id is not "Not Available" and customer_tag = '$topo_customer_tag' with-input name = "network_devices_cdp" & limit = "0"
+       --> @dm:selectcolumns exclude="row_index|_RDA_Id|asset_ip|collection_timestamp|count_|data|path"
+       --> @dm:enrich dict="temp-nodes" and src_key_cols="device_ip" and dict_key_cols="device_ip" and enrich_cols="node_id,node_label,node_type,org_id"  and enrich_cols_as = "left_id,left_label,left_node_type,org_id"
+       --> @dm:eval remote_hostname_short = "remote_device_id.split('.')[0]"
+       --> @dm:enrich dict="temp-nodes" and src_key_cols="remote_hostname_short" and dict_key_cols="device_hostname_short" and enrich_cols="node_id,node_label,node_type,latitude,longitude" and enrich_cols_as = "right_id,right_label,right_node_type,latitude,longitude" & return_empty_dict = "yes" & return_empty_cols = "yes"
+       --> *dm:filter right_id is not empty
+       --> *dm:filter left_id is not empty
+       ## Hack to overcome a bug in our current LLDP discovery. LLDP discovery does not provide local interface.
+       ## do a self enrichment to find the remote device's remote interface and make it a local interface.
+       ## This works only if there is only one LLDP link between the same devices.
+       --> @dm:save name="temp-lldp-edges"
+       --> @dm:rename-columns remote_device_id_orig="remote_device_id" and device_hostname_orig="device_hostname"
+       --> @dm:enrich dict="temp-lldp-edges" and src_key_cols="device_hostname_orig,remote_device_id_orig" and dict_key_cols="remote_device_id,device_hostname" and enrich_cols="remote_device_int_name" and enrich_cols_as="local_interface"
+       --> @dm:rename-columns remote_device_id="remote_device_id_orig" and device_hostname="device_hostname_orig"
+       ## End Hack
+       ## LLDP-specific interface handling
+       --> @dm:eval link_type="'LLDP'" and
+               direction = "'NO_DIRECTION'" and
+               relation_type = "'connected-to'" and
+               neighbor_interface="remote_device_int_name or 'Unknown'" and
+               local_interface="local_interface or 'Unknown'" and
+               left_ip="device_ip" and
+               right_ip="remote_device_id" and
+               sorted_arr="[f'{left_id}_{local_interface}',f'{right_id}_{neighbor_interface}']" and
+               unique_id="':'.join(sorted(sorted_arr)) + str(link_type)"
+       --> @dm:dedup columns="unique_id"
+       --> @dm:selectcolumns include="customer_id|customer_tag|org_id|relation_type|left_id|left_label|left_node_type|left_ip|right_id|right_label|right_node_type|right_ip|timestamp|link_type|right_interface|neighbor_interface|unique_id|latitude|longitude"
+       --> @rn:write-stream name="cfx_rdaf_topology_edges"
+       --> @graph:insert-edges dbname = 'cfx_rdaf_topology' & nodes_collection = 'cfx_rdaf_topology_nodes' & edges_collection = 'cfx_rdaf_topology_edges' & left_id = 'left_id' & right_id = 'right_id' & edge_key_attrs="unique_id" & sort_on_key = true
+    --> @exec:end-if
+    --> *exec:if-condition topo_customer_tag is empty or topo_customer_tag is "None" or topo_customer_tag is "none"
+       --> #dm:query-persistent-stream device_object is 'LLDP' and remote_device_id is not "Not Available" and (customer_tag is empty or customer_tag is 'None' or customer_tag is 'none') with-input name = "network_devices_cdp" & limit = "0"
+       --> @dm:selectcolumns exclude="row_index|_RDA_Id|count_|data|path"
+       --> @dm:enrich dict="temp-nodes" and src_key_cols="device_ip" and dict_key_cols="device_ip" and enrich_cols="node_id,node_label,node_type,org_id,latitude,longitude"  and enrich_cols_as = "left_id,left_label,left_node_type,org_id,latitude,longitude" & return_empty_dict = "yes" & return_empty_cols = "yes"
+       --> @dm:eval remote_hostname_short = "remote_device_id.split('.')[0]"
+       --> @dm:enrich dict="temp-nodes" and src_key_cols="remote_hostname_short" and dict_key_cols="device_hostname_short" and enrich_cols="node_id,node_label,node_type" and enrich_cols_as = "right_id,right_label,right_node_type"
+       --> *dm:filter right_id is not empty
+       --> *dm:filter left_id is not empty
+       ## Hack to overcome a bug in our current LLDP discovery. LLDP discovery does not provide local interface.
+       ## do a self enrichment to find the remote device's remote interface and make it a local interface.
+       ## This works only if there is only one LLDP link between the same devices.
+       --> @dm:save name="temp-lldp-edges"
+       --> @dm:rename-columns remote_device_id_orig="remote_device_id" and device_hostname_orig="device_hostname"
+       --> @dm:enrich dict="temp-lldp-edges" and src_key_cols="device_hostname_orig,remote_device_id_orig" and dict_key_cols="remote_device_id,device_hostname" and enrich_cols="remote_device_int_name" and enrich_cols_as="local_interface"
+       --> @dm:rename-columns remote_device_id="remote_device_id_orig" and device_hostname="device_hostname_orig"
+       ## End Hack
+       ## LLDP-specific interface handling
+       --> @dm:eval link_type="'LLDP'" and
+               relation_type = "'connected-to'" and
+               neighbor_interface="remote_device_int_name or 'Unknown'" and
+               local_interface="local_interface or 'Unknown'" and
+               left_ip="device_ip" and
+               right_ip="remote_device_id" and
+               direction = "'NO_DIRECTION'" and
+               sorted_arr="[f'{left_id}_{local_interface}',f'{right_id}_{neighbor_interface}']" and
+               unique_id="':'.join(sorted(sorted_arr)) + str(link_type)"
+       --> @dm:dedup columns="unique_id"
+       --> @dm:selectcolumns include="customer_id|customer_tag|org_id|relation_type|left_id|left_label|left_node_type|left_ip|right_id|right_label|right_node_type|right_ip|timestamp|link_type|neighbor_interface|local_interface|unique_id|direction|latitude|longitude"
+       --> *dm:filter left_id is not empty
+       --> @rn:write-stream name="cfx_rdaf_topology_edges"
+       --> @graph:insert-edges dbname = 'cfx_rdaf_topology' & nodes_collection = 'cfx_rdaf_topology_nodes' & edges_collection = 'cfx_rdaf_topology_edges' & left_id = 'left_id' & right_id = 'right_id' & edge_key_attrs="unique_id" & sort_on_key = true
+    --> @exec:end-if
+

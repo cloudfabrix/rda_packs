@@ -1,0 +1,54 @@
+{
+    "type": "metric",
+    "name": "out_discards_snmp_metric",
+    "enabled": true,
+    "schedule": {
+        "minutes": 15
+    },
+    "data": {
+        "stream": "rdaf_telegraf_metrics",
+        "groupby": [
+            "i_agent_host",
+            "name",
+            "i_description",
+            "i_projectid"
+        ],
+        "query": "(name == 'interface') and i_input == 'SNMP'"
+    },
+    "actions": [
+        {
+            "state": "OPEN",
+            "threshold": "700000",
+            "agg_column": "m_out_discards",
+            "agg_func": "avg",
+            "repeat_count": 1,
+            "attributes": {
+                "severity": "CRITICAL",
+                "metric_name": "out_discards",
+                "metric_value_field": "m_out_discards_avg"
+            },
+            "notification": [
+                {
+                    "channel": "telegraf_snmp_metrics"
+                }
+            ]
+        },
+        {
+            "state": "CLEAR",
+            "agg_column": "m_out_discards",
+            "agg_func": "avg",
+            "threshold": "600000",
+            "attributes": {
+                "severity": "INFO",
+                "metric_name": "out_discards",
+                "metric_value_field": "m_out_discards_avg"
+            },
+            "notification": [
+                {
+                    "channel": "telegraf_snmp_metrics"
+                }
+            ]
+        }
+    ],
+    "saved_time": "2025-08-19T06:32:27.314966"
+}

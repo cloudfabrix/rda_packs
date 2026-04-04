@@ -1,0 +1,368 @@
+{
+    "name": "customer_access_status_icmp",
+    "label": "Network Collection status",
+    "description": "Network collection and access verification status",
+    "dashboard_folder": "NetworkDevicePack",
+    "version": "1.0.5",
+    "enabled": false,
+    "live_edit": true,
+    "dashboard_type": "template",
+    "template_variables": {
+        "CUST_ID": {
+            "contextId": "customerId"
+        },
+        "PROJ_ID": {
+            "contextId": "projectId"
+        },
+        "CUST_TAG": {
+            "contextId": "customerTag"
+        }
+    },
+    "dashboard_filters": {
+        "time_filter": true,
+        "default_time_filter_labels": [
+            "Last 1 month"
+        ],
+        "extra_filter": "(customer_tag is '{{CUST_TAG}}' or customer_tag is empty or customer_tag is '' or customer_tag is 'None')",
+        "columns_filter": [
+            {
+                "id": "icmp_status",
+                "label": "ICMP Status",
+                "type": "TEXT"
+            }
+        ],
+        "group_filters": [
+            {
+                "stream": "network_access_verification_final",
+                "title": "ICMP Status",
+                "duration_hours": 1080000,
+                "group_by": [
+                    "icmp_status"
+                ],
+                "ts_column": "timestamp",
+                "agg": "value_count",
+                "column": "_id",
+                "limit": 100,
+                "type": "int"
+            },
+            {
+                "stream": "network_access_verification_final",
+                "title": "SNMP Status",
+                "duration_hours": 1080000,
+                "group_by": [
+                    "snmp_status"
+                ],
+                "ts_column": "timestamp",
+                "agg": "value_count",
+                "column": "_id",
+                "limit": 100,
+                "type": "int"
+            },
+            {
+                "stream": "network_access_verification_final",
+                "title": "SSH Status",
+                "duration_hours": 1080000,
+                "group_by": [
+                    "ssh_status"
+                ],
+                "ts_column": "timestamp",
+                "agg": "value_count",
+                "column": "_id",
+                "limit": 100,
+                "type": "int"
+            }
+        ]
+    },
+    "dashboard_sections": [
+        {
+            "title": "Access Verification Status",
+            "show_filter": true,
+            "widgets": [
+                {
+                    "widget_type": "pie_chart",
+                    "title": "ICMP Status",
+                    "duration_hours": 1080,
+                    "stream": "network_access_verification_final",
+                    "ts_column": "timestamp",
+                    "extra_filter0": "protocol is 'ICMP'",
+                    "column": "count_",
+                    "agg": "sum",
+                    "group_by": [
+                        "icmp_status"
+                    ],
+                    "type": "int",
+                    "style": {
+                        "color-map": {
+                            "Success": [
+                                "#64b5f6",
+                                "#ffffff"
+                            ],
+                            "Failed": [
+                                "#ffb74d",
+                                "#ffffff"
+                            ],
+                            "success": [
+                                "#64b5f6",
+                                "#ffffff"
+                            ],
+                            "failed": [
+                                "#ffb74d",
+                                "#ffffff"
+                            ]
+                        }
+                    },
+                    "min_width": 4,
+                    "height": 4,
+                    "max_width": 6,
+                    "widget_id": "879317d9"
+                },
+                {
+                    "widget_type": "pie_chart",
+                    "title": "SNMP Status",
+                    "duration_hours": 1080,
+                    "stream": "network_access_verification_final",
+                    "ts_column": "timestamp",
+                    "extra_filter0": "protocol is 'SNMP'",
+                    "column": "count_",
+                    "agg": "sum",
+                    "group_by": [
+                        "snmp_status"
+                    ],
+                    "type": "int",
+                    "style": {
+                        "color-map": {
+                            "Success": [
+                                "#64b5f6",
+                                "#ffffff"
+                            ],
+                            "Failed": [
+                                "#ffb74d",
+                                "#ffffff"
+                            ],
+                            "success": [
+                                "#64b5f6",
+                                "#ffffff"
+                            ],
+                            "failed": [
+                                "#ffb74d",
+                                "#ffffff"
+                            ]
+                        }
+                    },
+                    "min_width": 4,
+                    "height": 4,
+                    "max_width": 6,
+                    "widget_id": "89b5242b"
+                },
+                {
+                    "widget_type": "pie_chart",
+                    "title": "SSH Status",
+                    "duration_hours": 1080,
+                    "stream": "network_access_verification_final",
+                    "ts_column": "timestamp",
+                    "extra_filter0": "protocol is 'SSH'",
+                    "column": "count_",
+                    "agg": "sum",
+                    "group_by": [
+                        "ssh_status"
+                    ],
+                    "type": "int",
+                    "style": {
+                        "color-map": {
+                            "Success": [
+                                "#64b5f6",
+                                "#ffffff"
+                            ],
+                            "Failed": [
+                                "#ffb74d",
+                                "#ffffff"
+                            ],
+                            "success": [
+                                "#64b5f6",
+                                "#ffffff"
+                            ],
+                            "failed": [
+                                "#ffb74d",
+                                "#ffffff"
+                            ]
+                        }
+                    },
+                    "min_width": 4,
+                    "height": 4,
+                    "max_width": 6,
+                    "widget_id": "8e5cae77"
+                },
+                {
+                    "title": "ICMP",
+                    "widget_type": "tabular",
+                    "stream": "network_access_verification_final",
+                    "min_width": 4,
+                    "height": 4,
+                    "max_width": 4,
+                    "columns": {
+                        "icmp_failure_reason": "ICMP Status"
+                    },
+                    "pivot": {
+                        "pivot_type": "advanced",
+                        "group_by": [
+                            "icmp_failure_reason"
+                        ],
+                        "series": [
+                            {
+                                "column": "count_",
+                                "agg": "value_count",
+                                "type": "int",
+                                "label": "Count"
+                            }
+                        ]
+                    },
+                    "widget_id": "66b6d1ba"
+                },
+                {
+                    "title": "SNMP",
+                    "widget_type": "tabular",
+                    "stream": "network_access_verification_final",
+                    "min_width": 4,
+                    "height": 4,
+                    "max_width": 4,
+                    "columns": {
+                        "snmp_failure_reason": "SNMP Status"
+                    },
+                    "pivot": {
+                        "pivot_type": "advanced",
+                        "group_by": [
+                            "snmp_failure_reason"
+                        ],
+                        "series": [
+                            {
+                                "column": "count_",
+                                "agg": "value_count",
+                                "type": "int",
+                                "label": "Count"
+                            }
+                        ]
+                    },
+                    "widget_id": "c605d988"
+                },
+                {
+                    "title": "SSH",
+                    "widget_type": "tabular",
+                    "stream": "network_access_verification_final",
+                    "min_width": 4,
+                    "height": 4,
+                    "max_width": 4,
+                    "columns": {
+                        "ssh_failure_reason": "SSH Status"
+                    },
+                    "pivot": {
+                        "pivot_type": "advanced",
+                        "group_by": [
+                            "ssh_failure_reason"
+                        ],
+                        "series": [
+                            {
+                                "column": "count_",
+                                "agg": "value_count",
+                                "type": "int",
+                                "label": "Count"
+                            }
+                        ]
+                    },
+                    "widget_id": "659e2af5"
+                },
+                {
+                    "title": "Access Status",
+                    "widget_type": "tabular",
+                    "extra_filter0": "customer_tag is '{{CUST_TAG}}' or customer_tag is empty",
+                    "stream": "network_access_verification_final",
+                    "duration_hours": 1080,
+                    "showRowSummary": true,
+                    "min_width": 12,
+                    "height": 6,
+                    "max_width": 12,
+                    "paginated": true,
+                    "remote_searchable": true,
+                    "remote_searchable_cols": [
+                        "ip_address"
+                    ],
+                    "max_rows": 50,
+                    "columns": {
+                        "ip_address": {
+                            "title": "IP Address",
+                            "defaultWidth": 150,
+                            "key": true
+                        },
+                        "icmp_status": {
+                            "title": "ICMP  Status",
+                            "defaultWidth": 150,
+                            "htmlTemplateForRow": "{%raw%}<span class='badge' style='background-color: {{ row.icmp_status_color }}'>{{ row.icmp_status }}</span>{%endraw%}"
+                        },
+                        "snmp_status": {
+                            "title": "SNMP Status",
+                            "defaultWidth": 150,
+                            "htmlTemplateForRow": "{%raw%}<span class='badge' style='background-color: {{ row.snmp_status_color }}'>{{ row.snmp_status }}</span>{%endraw%}"
+                        },
+                        "ssh_status": {
+                            "title": "SSH  Status",
+                            "defaultWidth": 150,
+                            "htmlTemplateForRow": "{%raw%}<span class='badge' style='background-color: {{ row.ssh_status_color }}'>{{ row.ssh_status }}</span>{%endraw%}"
+                        },
+                        "snmp_cred": {
+                            "title": "SNMP creds",
+                            "defaultWidth": 150
+                        },
+                        "ssh_cred": {
+                            "title": "SSH creds",
+                            "defaultWidth": 150
+                        },
+                        "icmp_reason_orig": {
+                            "title": "ICMP failure reason",
+                            "defaultWidth": 150
+                        },
+                        "snmp_reason_orig": {
+                            "title": "SNMP failure reason",
+                            "defaultWidth": 150
+                        },
+                        "ssh_reason_orig": {
+                            "title": "SSH failure reason",
+                            "defaultWidth": 150
+                        },
+                        "timestamp": {
+                            "title": "Verification Time",
+                            "type": "DATETIME",
+                            "visible": true
+                        }
+                    },
+                    "custom_columns": [
+                        {
+                            "id": "icmp_status_color",
+                            "label": "ICMP Status Color",
+                            "expr": "'#008000' if icmp_status in ['Success', 'success'] else '#FF0000' if icmp_status in ['Failed', 'failed'] else 'transparent'",
+                            "hidden": true,
+                            "visible": false,
+                            "sortable": false
+                        },
+                        {
+                            "id": "snmp_status_color",
+                            "label": "SNMP Status Color",
+                            "expr": "'#008000' if snmp_status in ['Success', 'success'] else '#FF0000' if snmp_status in ['Failed', 'failed'] else 'transparent'",
+                            "hidden": true,
+                            "visible": false,
+                            "sortable": false
+                        },
+                        {
+                            "id": "ssh_status_color",
+                            "label": "SSH Status Color",
+                            "expr": "'#008000' if ssh_status in ['Success', 'success'] else '#FF0000' if ssh_status in ['Failed', 'failed'] else 'transparent'",
+                            "hidden": true,
+                            "visible": false,
+                            "sortable": false
+                        }
+                    ],
+                    "widget_id": "4c2cfdd7"
+                }
+            ]
+        }
+    ],
+    "saved_time": "2025-12-23T05:50:39.997839"
+}

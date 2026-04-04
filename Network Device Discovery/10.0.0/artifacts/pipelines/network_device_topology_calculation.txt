@@ -1,0 +1,565 @@
+%% stream = no and limit = 0
+%%template_type="jinja"
+%% import_src_type = "network_device"
+
+%%start_inline_object name="context_dynamic_form" and type="data" and format="json"
+
+{
+    "formFieldList": [
+        {
+            "fieldId": "customer_tag",
+            "label": "Tag of the customer",
+            "required": false,
+            "dataType": "string"
+        }
+    ]
+}
+%%end_inline_object
+-->@c:new-block
+-->@dm:empty
+    --> @dm:save name = "temp-customer-context"
+
+
+   {% if customer_tag %} 
+      {% set customer_id = customer_id %}
+      {% set customer_tag = customer_tag %}
+      {% set customerTag = customer_tag %}
+   {% elif customerTag %} 
+      {% set customer_id = customer_id %}
+      {% set customer_tag = customerTag %}
+   {% else %}
+      {% set customer_id = '' %}
+      {% set customer_tag = '' %}
+   {% endif %}  
+
+   {% set dict_geo_location = (customer_tag ~ '_geo_location') if customer_tag else 'geo_location' %}
+
+## Get optional network bot name input (aligns with Crosswork/Intersight style)
+--> @dm:empty
+    --> @dm:save name = 'temp-network-bot-name'
+    --> @dm:save name = 'temp-network-bot-name-interim'
+    --> @dm:save name = 'temp-network-sources'
+
+    
+--> @c:new-block
+    --> @dm:recall name = 'temp-network-bot-name'
+    --> *exec:if-shape num_rows = 0
+       --> @dm:empty
+      {% if customer_tag %}
+         --> #dm:query-persistent-stream type in ['network_device'] and customerTag contains '{{customer_tag}}'  with-input name = 'rda_secrets_meta' and limit= 0
+      {% else %}
+         --> #dm:query-persistent-stream type in ['network_device'] and customerTag is empty with-input name = 'rda_secrets_meta' and limit= 0
+      {% endif %}   
+       --> @dm:save name = 'temp-network-sources'
+       --> @dm:recall name = 'temp-network-sources'
+       --> *exec:if-shape num_rows = 0    
+         --> @dm:empty
+         --> @dm:addrow network_bot_name = "network_device"
+         --> @dm:save name = 'temp-network-bot-name'
+      --> @exec:end-if
+       --> *exec:if-shape num_rows > 0
+         --> @dm:dedup columns = 'name'
+         --> @dm:rename-columns network_bot_name = 'name'
+         --> @dm:save name = 'temp-network-bot-name'
+      --> @exec:end-if
+    --> @exec:end-if
+
+--> @c:new-block
+    --> @dm:recall name = 'temp-network-bot-name'
+    --> @dm:eval customer_id =  "'{{ customer_id }}'"
+    --> @dm:eval customer_tag =  "'{{ customer_tag }}'"
+    --> @dm:eval key="'key'"
+   --> @dm:save name = 'temp-network-bot-name'
+
+## Get devices for which discovery_scope is "yes" 
+--> @c:new-block
+    --> @dm:empty
+    {% if customer_tag %}
+        --> #dm:query-persistent-stream device_ip is not empty and discovery_scope is 'yes'  and (customer_tag is '{{customer_tag}}')  with-input name = "discovery" & limit = "0"
+    {% else %}
+        --> #dm:query-persistent-stream device_ip is not empty and discovery_scope is 'yes'  and (customer_tag is empty or customer_tag is 'None')  with-input name = "discovery" & limit = "0"
+    {% endif %}
+    -->@dm:add-missing-columns columns="cdp,lldp,ospf,bgp,isis" and value="no"
+    --> @dm:selectcolumns include="device_ip|discovery_scope|cdp|lldp|ospf|bgp|isis|customer_tag|customer_id"
+    --> @dm:save name="temp-discovery"
+
+## Delete existing chassis nodes before topology creation
+## Clean up stale CHASSIS nodes with NETWORK layer for the current customer
+--> @c:new-block
+    --> @dm:empty
+    {% if customer_tag %}
+    --> @graph:delete-by-query dbname = 'cfx_rdaf_topology' & collection = 'cfx_rdaf_topology_nodes' & delete_query = 'node_type in ["CHASSIS","Chassis","chassis"] and layer in ["NETWORK","Network","network"] and customer_tag = "{{customer_tag}}"'
+    --> @graph:delete-by-query dbname = 'cfx_rdaf_topology' & collection = 'cfx_rdaf_topology_edges' & delete_query = 'link_type in ["CDP","LLDP","ISIS","OSPF","BGP"] and customer_tag = "{{customer_tag}}"'
+    {% else %}
+    --> @graph:delete-by-query dbname = 'cfx_rdaf_topology' & collection = 'cfx_rdaf_topology_nodes' & delete_query = 'node_type in ["CHASSIS","Chassis","chassis"] and layer in ["NETWORK","Network","network"] and (customer_tag is "" or customer_tag is "None"  or customer_tag is "none")'
+    --> @graph:delete-by-query dbname = 'cfx_rdaf_topology' & collection = 'cfx_rdaf_topology_edges' & delete_query = 'link_type in ["CDP","LLDP","ISIS","OSPF","BGP"] and (customer_tag is "" or customer_tag is "None"  or customer_tag is "none")'
+    {% endif %}
+
+
+--> @c:new-block
+--> @dm:empty
+    {% if customer_tag %}
+    --> #dm:query-persistent-stream device_equip_type in ["CHASSIS","Chassis","chassis"] and (customer_tag is '{{customer_tag}}') with-input name = "network_device_inventory" & limit = "0"
+    
+    {% else %}
+    --> #dm:query-persistent-stream device_equip_type in ["CHASSIS","Chassis","chassis"] and (customer_tag is empty or customer_tag is 'None' or customer_tag is 'none') with-input name = "network_device_inventory" & limit = "0"
+            
+    {% endif %}
+    --> @dm:selectcolumns exclude="_RDA_Id|count_"
+    --> @dm:dedup columns ="parent_sn"
+    --> @dm:eval-multi-proc node_type="'CHASSIS'" and
+            device_status="'MANAGED'" and
+            source="'CHASSIS'" and
+            device_hostname_short = "device_hostname.split('.')[0]"
+    --> @dm:copy-columns from ="device_hostname_short" and to="node_label"
+    --> @dm:copy-columns from ="device_ip" and to="node_id"
+    --> @dm:eval layer = "'Network'"
+    --> @dm:eval node_id = "device_ip+'_CHASSIS'"
+    --> @dm:eval deviceFamily = "device_model"
+    ## --> @dm:eval serialNumber = "device_serial_number"
+    --> @dm:eval iconURL="'Router'"
+    --> @dm:save name="temp-chassis-nodes"
+
+--> @c:new-block
+    --> @dm:recall name="temp-chassis-nodes" and return_empty = "yes"
+    --> @dm:selectcolumns exclude = "target_x|target_y"
+     --> @dm:enrich dict="temp-discovery" and src_key_cols="device_ip" and dict_key_cols="device_ip" and enrich_cols="cdp,lldp,ospf,bgp,isis"
+    -->@dm:fixnull columns='cdp,lldp,ospf,bgp,isis' and value= 'yes'
+    
+    -->@dm:fixnull columns='cdp,lldp,ospf,bgp,isis' and value= 'yes'
+    --> @dm:save name="temp-rdaf_topology_nodes"
+    --> @dm:recall name="temp-rdaf_topology_nodes"
+    --> @dm:enrich dict= '{{ dict_geo_location }}' and src_key_cols="device_hostname" and dict_key_cols="device_hostname" and enrich_cols="latitude,longitude" &  return_empty_dict = "yes" & return_empty_cols = "yes" 
+        --> @dm:save name="temp-rdaf_topology_nodes"
+
+    --> @rn:write-stream name='cfx_rdaf_topology_nodes'
+    --> @graph:insert-nodes dbname = 'cfx_rdaf_topology' & collection = 'cfx_rdaf_topology_nodes' & key_column = 'node_id'
+
+
+## Create the profile_data that is common for all topology types
+-->@c:new-block
+    --> @dm:empty
+    --> @dm:addrow profile_name = 'show_ip_interface_brief' and
+            command = 'show ip interface brief' and
+            textfsm_content = 'objectstore/cisco_ios_show_ip_interface_brief.textfsm' and device_type="cisco_ios" and 
+            condition = `{% raw %} {{ '{{device_fw_type == "Cisco IOS"}}' }}{% endraw %}`
+    --> @dm:addrow profile_name = 'show_ip_interface_brief_xr' and
+            command = 'show ip interface brief' and
+            textfsm_content = 'objectstore/cisco_xr_show_ip_interface_brief.textfsm' and device_type="cisco_xr" and 
+            condition = `{% raw %} {{ '{{device_fw_type == "Cisco IOS XR"}}' }}{% endraw %}`
+    -->@dm:save name="temp-common_profile_dataset"
+    ##-->@dm:save name="common_profile_dataset"
+
+## Create the profile_data for ospf
+--> @c:new-block
+    --> @dm:empty
+    --> @dm:addrow profile_name = 'show_ip_ospf_neighbor_detail' and
+            command = 'show ip ospf neighbor detail' and
+            textfsm_content = 'objectstore/cisco_ios_show_ip_ospf_neighbor_detail.textfsm' and
+            condition =  `{% raw %} {{ '{{device_fw_type == "Cisco IOS"}}' }}{% endraw %}`
+    --> @dm:addrow profile_name = 'show_ip_ospf_neighbor_detail_xr' and
+            command = 'show ip ospf neighbor detail' and
+            textfsm_content = 'objectstore/cisco_xr_show_ip_ospf_neighbor_detail.textfsm' and
+            condition =  `{% raw %} {{ '{{device_fw_type == "Cisco IOS XR"}}' }}{% endraw %}`
+    --> @dm:addrow profile_name = 'show_ip_ospf_include_id' and
+            command = 'show ip ospf | include ID' and
+            textfsm_content = 'objectstore/cisco_ios_show_ip_ospf_include_id.textfsm' and
+            condition =  `{% raw %} {{ '{{device_fw_type == "Cisco IOS"}}' }}{% endraw %}`
+    --> @dm:addrow profile_name = 'show_ip_ospf_include_id_xr' and
+            command = 'show ip ospf | include ID' and
+            textfsm_content = 'objectstore/cisco_xr_show_ip_ospf_include_id.textfsm' and
+            condition =  `{% raw %} {{ '{{device_fw_type == "Cisco IOS XR"}}' }}{% endraw %}`
+    --> @dm:addrow profile_name = 'show_ip_ospf_interface_brief' and
+            command = 'show ip ospf interface brief'  and
+            textfsm_content = 'objectstore/cisco_ios_show_ip_ospf_interface_brief.textfsm' and
+            condition =  `{% raw %} {{ '{{device_fw_type == "Cisco IOS"}}' }}{% endraw %}`
+    --> @dm:addrow profile_name = 'show_ip_ospf_interface_brief_xr' and
+            command = 'show ip ospf interface brief' and
+            textfsm_content = 'objectstore/cisco_xr_show_ip_ospf_interface_brief.textfsm' and
+            condition =  `{% raw %} {{ '{{device_fw_type == "Cisco IOS XR"}}' }}{% endraw %}`
+    -->@dm:save name="temp-ospf_profile_dataset"
+    ##-->@dm:save name="ospf_profile_dataset"
+    
+## Create the profile_data for bgp
+--> @c:new-block
+    --> @dm:empty
+    --> @dm:addrow profile_name = 'show_ip_bgp_neighbor' and
+            command = 'show ip bgp neighbors' and
+            textfsm_content = 'objectstore/cisco_ios_show_ip_bgp_neighbors_1.textfsm' and
+            condition =  `{% raw %} {{ '{{device_fw_type == "Cisco IOS"}}' }}{% endraw %}`
+    --> @dm:addrow profile_name = 'show_ip_bgp_neighbor_xr' and
+            command = 'show ip bgp neighbors' and
+            textfsm_content = 'objectstore/cisco_xr_show_ip_bgp_neighbors_1.textfsm' and
+            condition =  `{% raw %} {{ '{{device_fw_type == "Cisco IOS XR"}}' }}{% endraw %}`
+    
+    ## --> @dm:addrow profile_name = 'nxos_show_ip_ospf_neighbor_nxos' and
+    ## command = 'show ip ospf neighbor detail' and
+    ## textfsm_content = 'objectstore/cisco_nxos_show_ip_ospf_neighbor_detail.textfsm' and
+    ## condition = '{% raw %}{{device_fw_type == "Cisco NX-OS"}}{% endraw %}'
+    -->@dm:save name="temp-bgp_profile_dataset"
+    ##-->@dm:save name="bgp_profile_dataset"
+
+## Create the profile_data for isis
+--> @c:new-block
+    --> @dm:empty
+    --> @dm:addrow profile_name = 'show_isis_neighbors_detail' and
+            command = 'show isis neighbors detail' and
+            textfsm_content = 'objectstore/cisco_ios_show_isis_neighbors_detail.textfsm' and
+            condition =  `{% raw %} {{ '{{device_fw_type == "Cisco IOS"}}' }}{% endraw %}`
+    --> @dm:addrow profile_name = 'show_isis_neighbors_detail_xr' and
+            command = 'show isis neighbors detail' and
+            textfsm_content = 'objectstore/cisco_xr_show_isis_neighbors_detail.textfsm' and
+            condition =  `{% raw %} {{ '{{device_fw_type == "Cisco IOS XR"}}' }}{% endraw %}`
+    -->@dm:save name="temp-isis_profile_dataset"
+
+
+    ## Get collected inventory for discovered devices
+--> @c:new-block
+    --> @dm:empty
+    {% if customer_tag %}
+        --> #dm:query-persistent-stream device_ip is not empty and (customer_tag is '{{customer_tag}}')  with-input name = "network_device_inventory" & limit = "0"
+    {% else %}
+        --> #dm:query-persistent-stream device_ip is not empty and (customer_tag is empty or customer_tag is 'None') with-input name = "network_device_inventory" & limit = "0"
+    {% endif %}
+    --> @dm:save name="temp-network-inventory"
+
+## enriching common profile_name for all the devices for which commands needs to be run
+--> @c:new-block
+    --> @dm:recall name="temp-common_profile_dataset"
+    --> @dm:eval key="'key'"
+    --> @dm:implode key_columns="key" and merge_columns = "profile_name"
+    --> @dm:save name="temp-common_profile_names"
+
+    --> @dm:recall name="temp-discovery"
+    --> @dm:eval key="'key'"
+    --> @dm:enrich dict='temp-network-bot-name' and dict_key_cols='key' and src_key_cols='key' and enrich_cols="network_bot_name" and replace_values="yes"
+    --> @dm:eval key="'key'"
+    --> @dm:enrich dict='temp-common_profile_names' and dict_key_cols='key' and src_key_cols='key' and enrich_cols="profile_name" and enrich_cols_as = "profiles"
+    --> @dm:eval credentials_regex="network_bot_name + '.*'"
+    --> @dm:save name="temp-common-discovery"
+    ##--> @dm:save name="common-discovery"
+
+## enriching ospf profile_name for all the devices for which ospf is yes
+--> @c:new-block
+    --> @dm:recall name="temp-discovery"
+    -->*dm:safe-filter ospf is 'yes' 
+    --> @dm:skip-block-if-shape row_count = 0
+    --> @dm:recall name="temp-ospf_profile_dataset"
+    --> @dm:eval key="'key'"
+    --> @dm:implode key_columns="key" and merge_columns = "profile_name"
+    --> @dm:save name="temp-ospf_profile_names"
+    --> @dm:recall name="temp-discovery"
+    --> @dm:eval key="'key'"
+    --> @dm:enrich dict='temp-network-bot-name' and dict_key_cols='key' and src_key_cols='key' and enrich_cols="network_bot_name" and replace_values="yes"
+    --> @dm:eval key="'key'"
+    --> @dm:enrich dict='temp-ospf_profile_names' and dict_key_cols='key' and src_key_cols='key' and enrich_cols="profile_name" and enrich_cols_as = "profiles"
+    --> @dm:eval credentials_regex="network_bot_name + '.*'"
+    --> @dm:save name="temp-ospf-discovery"
+    ##--> @dm:save name="ospf-discovery"
+
+## enriching bgp profile_name for all the devices for which bgp is yes
+--> @c:new-block
+    --> @dm:recall name="temp-discovery"
+    -->*dm:safe-filter bgp is 'yes' 
+    --> @dm:skip-block-if-shape row_count = 0
+    --> @dm:recall name="temp-bgp_profile_dataset"
+    --> @dm:eval key="'key'"
+    --> @dm:implode key_columns="key" and merge_columns = "profile_name"
+    --> @dm:save name="temp-bgp_profile_names"
+    --> @dm:recall name="temp-discovery"
+    --> @dm:eval key="'key'"
+    --> @dm:enrich dict='temp-network-bot-name' and dict_key_cols='key' and src_key_cols='key' and enrich_cols="network_bot_name" and replace_values="yes"
+    --> @dm:eval key="'key'"
+    --> @dm:enrich dict='temp-bgp_profile_names' and dict_key_cols='key' and src_key_cols='key' and enrich_cols="profile_name" and enrich_cols_as = "profiles"
+    --> @dm:eval credentials_regex="network_bot_name + '.*'"
+    --> @dm:save name="temp-bgp-discovery"
+    ##--> @dm:save name="bgp-discovery"
+
+## enriching isis profile_name for all the devices for which isis is yes
+--> @c:new-block
+    --> @dm:recall name="temp-discovery"
+    -->*dm:safe-filter isis is 'yes' 
+    --> @dm:skip-block-if-shape row_count = 0
+    --> @dm:recall name="temp-isis_profile_dataset"
+    --> @dm:eval key="'key'"
+    --> @dm:implode key_columns="key" and merge_columns = "profile_name"
+    --> @dm:save name="temp-isis_profile_names"
+    --> @dm:recall name="temp-discovery"
+    --> @dm:eval key="'key'"
+    --> @dm:enrich dict='temp-network-bot-name' and dict_key_cols='key' and src_key_cols='key' and enrich_cols="network_bot_name" and replace_values="yes"
+    --> @dm:eval key="'key'"
+    --> @dm:enrich dict='temp-isis_profile_names' and dict_key_cols='key' and src_key_cols='key' and enrich_cols="profile_name" and enrich_cols_as = "profiles"
+    --> @dm:eval credentials_regex="network_bot_name + '.*'"
+    --> @dm:save name="temp-isis-discovery"
+    ##--> @dm:save name="isis-discovery"
+
+
+## Collect show ip interface brief data 
+--> @c:new-block
+    --> @dm:empty
+    --> @c:data-loop name = "network-bot-loop" & dataset = "temp-network-bot-name" & columns = "network_bot_name"
+        --> @dm:recall name="temp-common-discovery" and return_empty= "yes"
+    --> @dm:skip-block-if-shape row_count = 0
+        --> @$network_bot_name:run-commands ip_column_name = 'device_ip' and
+                profile_dataset_name = 'temp-common_profile_dataset' and
+                profile_column_name = 'profiles' and
+                credentials_regex_column = 'credentials_regex' and
+                devices_details_dataset = 'temp-network-inventory' and
+                return_type = "dataset" and
+                condition_column_name = "condition" and 
+                return_raw="yes"
+    --> @dm:enrich dict="temp-network-inventory" and dict_key_cols="device_ip" and src_key_cols="source_ip" and enrich_cols="customer_id,customer_tag" and replace_values="yes"
+    --> @rn:write-stream name='routing_protocol_data'
+
+
+## Collect show ip ospf database network data
+--> @c:new-block
+    --> @dm:empty
+    --> @c:data-loop name = "network-bot-loop" & dataset = "temp-network-bot-name" & columns = "network_bot_name"
+        --> @dm:recall name="temp-ospf-discovery" and return_empty= "yes"
+    --> @dm:skip-block-if-shape row_count = 0
+        --> @$network_bot_name:run-commands ip_column_name = 'device_ip' and
+                profile_dataset_name = 'temp-ospf_profile_dataset' and
+                profile_column_name = 'profiles' and
+                credentials_regex_column = 'credentials_regex' and
+                devices_details_dataset = 'temp-network-inventory' and
+                return_type = "dataset" and
+                condition_column_name = "condition" and
+                return_raw="yes"
+    --> @dm:enrich dict="temp-network-inventory" and dict_key_cols="device_ip" and src_key_cols="source_ip" and enrich_cols="customer_id,customer_tag" and replace_values="yes"
+    --> @rn:write-stream name='routing_protocol_data'
+
+## Collect bgp data
+--> @c:new-block
+    --> @dm:empty
+    --> @dm:recall name="temp-bgp-discovery" and return_empty= "yes"
+    --> @dm:skip-block-if-shape row_count = 0
+    --> @c:data-loop name = "network-bot-loop" & dataset = "temp-network-bot-name" & columns = "network_bot_name"
+        --> @dm:recall name="temp-bgp-discovery" and return_empty= "yes"
+    --> @dm:skip-block-if-shape row_count = 0
+        --> @$network_bot_name:run-commands ip_column_name = 'device_ip' and
+                profile_dataset_name = 'temp-bgp_profile_dataset' and
+                profile_column_name = 'profiles' and
+                credentials_regex_column = 'credentials_regex' and
+                devices_details_dataset = 'temp-network-inventory' and
+                return_type = "dataset" and
+                condition_column_name = "condition" and
+                return_raw="yes"
+    --> @dm:enrich dict="temp-network-inventory" and dict_key_cols="device_ip" and src_key_cols="source_ip" and enrich_cols="customer_id,customer_tag" and replace_values="yes"
+    --> @rn:write-stream name='routing_protocol_data'
+
+## Collect isis data
+--> @c:new-block
+    --> @dm:empty
+    --> @c:data-loop name = "network-bot-loop" & dataset = "temp-network-bot-name" & columns = "network_bot_name"
+            --> @dm:recall name="temp-isis-discovery" and return_empty= "yes"
+    --> @dm:skip-block-if-shape row_count = 0
+        --> @$network_bot_name:run-commands ip_column_name = 'device_ip' and
+                profile_dataset_name = 'temp-isis_profile_dataset' and
+                profile_column_name = 'profiles' and
+                credentials_regex_column = 'credentials_regex' and
+                devices_details_dataset = 'temp-network-inventory' and
+                return_type = "dataset" and
+                condition_column_name = "condition" and
+                return_raw="yes"
+    --> @dm:enrich dict="temp-network-inventory" and dict_key_cols="device_ip" and src_key_cols="source_ip" and enrich_cols="customer_id,customer_tag" and replace_values="yes"
+    --> @rn:write-stream name='routing_protocol_data'
+
+--> @c:new-block
+    --> @dm:empty
+    {% if customer_tag %}
+    --> #dm:query-persistent-stream collection_status is 'Success' and profile contains 'show_ip_interface_brief' and parsed_json is not '[]' and customer_tag = '{{customer_tag}}' with-input name = "routing_protocol_data" & limit = "0"
+    {% else %}
+    --> #dm:query-persistent-stream collection_status is 'Success' and profile contains 'show_ip_interface_brief' and parsed_json is not '[]' and (customer_tag is empty or customer_tag is 'None' or customer_tag is 'none') with-input name = "routing_protocol_data" & limit = "0"
+    {% endif %}
+    --> @dm:selectcolumns exclude = "raw_output"
+    --> @dm:explode-json column="parsed_json"
+    --> @dm:save name="temp-show_ip_interface_brief_data"
+    ##--> @dm:save name="show_ip_interface_brief_data"
+
+--> @c:new-block
+    --> @dm:empty
+    {% if customer_tag %}
+    --> #dm:query-persistent-stream collection_status is 'Success' and profile contains 'show_ip_ospf_neighbor_detail' and parsed_json is not '[]' and customer_tag = '{{customer_tag}}' with-input name = "routing_protocol_data" & limit = "0"
+    {% else %}
+    --> #dm:query-persistent-stream collection_status is 'Success' and profile contains 'show_ip_ospf_neighbor_detail' and parsed_json is not '[]' and (customer_tag is empty or customer_tag is 'None' or customer_tag is 'none') with-input name = "routing_protocol_data" & limit = "0"
+    {% endif %}
+    --> @dm:selectcolumns exclude = "raw_output"
+    --> @dm:explode-json column="parsed_json"
+    --> @dm:save name="temp-show_ip_ospf_neighbor_detail_data"
+    ##--> @dm:save name="show_ip_ospf_neighbor_detail_data"
+
+
+--> @c:new-block
+    --> @dm:empty
+    {% if customer_tag %}
+    --> #dm:query-persistent-stream collection_status is 'Success' and profile contains 'show_ip_bgp_neighbor' and parsed_json is not '[]' and customer_tag = '{{customer_tag}}' with-input name = "routing_protocol_data" & limit = "0"
+    {% else %}
+    --> #dm:query-persistent-stream collection_status is 'Success' and profile contains 'show_ip_bgp_neighbor' and parsed_json is not '[]' and (customer_tag is empty or customer_tag is 'None' or customer_tag is 'none') with-input name = "routing_protocol_data" & limit = "0"
+    {% endif %}
+    --> @dm:selectcolumns exclude = "raw_output"
+    --> @dm:explode-json column="parsed_json"
+    --> @dm:save name="temp-show_ip_bgp_neighbor_data"
+    ##--> @dm:save name="show_ip_bgp_neighbor_data"
+
+
+--> @c:new-block
+    --> @dm:empty
+    {% if customer_tag %}
+    --> #dm:query-persistent-stream collection_status is 'Success' and profile contains 'show_ip_ospf_include_id' and parsed_json is not '[]' and customer_tag = '{{customer_tag}}' with-input name = "routing_protocol_data" & limit = "0"
+    {% else %}
+    --> #dm:query-persistent-stream collection_status is 'Success' and profile contains 'show_ip_ospf_include_id' and parsed_json is not '[]' and (customer_tag is empty or customer_tag is 'None' or customer_tag is 'none') with-input name = "routing_protocol_data" & limit = "0"
+    {% endif %}
+    --> @dm:selectcolumns exclude = "raw_output"
+    --> @dm:explode-json column="parsed_json"
+    --> @dm:save name="temp-show_ip_ospf_include_id_data"
+    ##--> @dm:save name="show_ip_ospf_include_id_data"
+
+--> @c:new-block
+    --> @dm:empty
+    {% if customer_tag %}
+    --> #dm:query-persistent-stream collection_status is 'Success' and profile contains 'show_ip_ospf_interface_brief' and parsed_json is not '[]' and customer_tag = '{{customer_tag}}' with-input name = "routing_protocol_data" & limit = "0"
+    {% else %}
+    --> #dm:query-persistent-stream collection_status is 'Success' and profile contains 'show_ip_ospf_interface_brief' and parsed_json is not '[]' and (customer_tag is empty or customer_tag is 'None' or customer_tag is 'none') with-input name = "routing_protocol_data" & limit = "0"
+    {% endif %}
+    --> @dm:selectcolumns exclude = "raw_output"
+    --> @dm:explode-json column="parsed_json"
+    --> @dm:save name="temp-show_ip_ospf_interface_brief_data"
+    ##--> @dm:save name="show_ip_ospf_interface_brief_data"
+
+
+
+##enrich show_ip_interface_brief_data"
+--> @c:new-block
+    --> @dm:recall name = "temp-show_ip_interface_brief_data"
+    ## enrich device hostname, model and serial number
+    --> @dm:enrich dict = "temp-network-inventory" and 
+                dict_key_cols="device_ip" and 
+                src_key_cols="source_ip" and 
+                enrich_cols ="device_hostname,device_model,device_serial_number,device_vendor,parent_sn,org_id,customer_tag,customer_id"
+    --> @dm:eval device_hostname="'device_hostname' if device_hostname else 'source_ip'" and
+                 device_hostname_short = "device_hostname.split('.')[0] if device_hostname != source_ip else device_ip"
+    --> @dm:save name ="temp-show_ip_interface_brief_enriched"
+     ## enrich router ID if ospf data is collected
+     --> @dm:recall name = "temp-show_ip_ospf_include_id_data" and cache="no" and return_empty="yes"
+    --> @dm:skip-block-if-shape row_count = 0
+    --> @dm:recall name ="temp-show_ip_interface_brief_enriched"
+    --> @dm:enrich dict = "temp-show_ip_ospf_include_id_data" and dict_key_cols="source_ip" and src_key_cols="source_ip" and enrich_cols ="router_id" and replace_values="yes"
+    --> @dm:eval key="'key'"
+    --> @dm:save name ="temp-show_ip_interface_brief_enriched"
+
+## Prepare customer context for sub-pipelines from main pipeline's template context
+--> @c:new-block
+    --> @dm:empty
+    {% if customer_tag %}
+        --> @dm:addrow topo_customer_tag="{{customer_tag}}"
+    {% else %}
+        --> @dm:addrow topo_customer_tag=""
+    {% endif %}
+    --> @dm:save name="temp-sub-pipeline-context"
+
+
+    
+## Save topology nodes dataset for sub-pipelines to access
+--> @c:new-block
+    {% if customer_tag %}
+    --> @dm:recall name="temp-rdaf_topology_nodes" and return_empty="yes"
+    --> @dm:save name="{{customer_tag}}_topology_nodes"
+    {% else %}
+    --> @dm:recall name="temp-rdaf_topology_nodes" and return_empty="yes"
+    --> @dm:save name="topology_nodes"
+    {% endif %}
+
+## Save temp datasets without temp- prefix for sub-pipelines to access
+--> @c:new-block
+    {% if customer_tag %}
+    --> @dm:recall name="temp-show_ip_interface_brief_enriched" and return_empty="yes"
+    --> @dm:save name="{{customer_tag}}_show_ip_interface_brief_enriched"
+    {% else %}
+    --> @dm:recall name="temp-show_ip_interface_brief_enriched" and return_empty="yes"
+    --> @dm:save name="show_ip_interface_brief_enriched"
+    {% endif %}
+
+--> @c:new-block
+    {% if customer_tag %}
+    --> @dm:recall name="temp-show_ip_ospf_neighbor_detail_data" and return_empty="yes"
+    --> @dm:save name="{{customer_tag}}_show_ip_ospf_neighbor_detail_data"
+    {% else %}
+    --> @dm:recall name="temp-show_ip_ospf_neighbor_detail_data" and return_empty="yes"
+    --> @dm:save name="show_ip_ospf_neighbor_detail_data"
+    {% endif %}
+
+--> @c:new-block
+    {% if customer_tag %}
+    --> @dm:recall name="temp-show_ip_ospf_interface_brief_data" and return_empty="yes"
+    --> @dm:save name="{{customer_tag}}_show_ip_ospf_interface_brief_data"
+    {% else %}
+    --> @dm:recall name="temp-show_ip_ospf_interface_brief_data" and return_empty="yes"
+    --> @dm:save name="show_ip_ospf_interface_brief_data"
+    {% endif %}
+
+--> @c:new-block
+    {% if customer_tag %}
+    --> @dm:recall name="temp-show_ip_bgp_neighbor_data" and return_empty="yes"
+    --> @dm:save name="{{customer_tag}}_show_ip_bgp_neighbor_data"
+    {% else %}
+    --> @dm:recall name="temp-show_ip_bgp_neighbor_data" and return_empty="yes"
+    --> @dm:save name="show_ip_bgp_neighbor_data"
+    {% endif %}
+
+## Call topology-specific child pipelines based on discovery scope
+## OSPF Topology Calculation - called only if ospf is 'yes' in discovery scope
+--> @c:new-block
+    --> @dm:recall name="temp-discovery"
+    --> *dm:safe-filter ospf is 'yes'
+    --> @dm:skip-block-if-shape row_count = 0
+    --> @dm:recall name="temp-sub-pipeline-context"
+    --> @exec:run-pipeline name = "ospf_topology_calculation"
+
+## BGP Topology Calculation - called only if bgp is 'yes' in discovery scope
+--> @c:new-block
+    --> @dm:recall name="temp-discovery"
+    --> *dm:safe-filter bgp is 'yes'
+    --> @dm:skip-block-if-shape row_count = 0
+    --> @dm:recall name="temp-sub-pipeline-context"
+    --> @exec:run-pipeline name = "bgp_topology_calculation"
+
+## ISIS Topology Calculation - called only if isis is 'yes' in discovery scope
+--> @c:new-block
+    --> @dm:recall name="temp-discovery"
+    --> *dm:safe-filter isis is 'yes'
+    --> @dm:skip-block-if-shape row_count = 0
+    --> @dm:recall name="temp-sub-pipeline-context"
+    --> @exec:run-pipeline name = "isis_topology_calculation"
+
+## Run CDP topology calculation - called only if cdp is 'yes' in discovery scope
+--> @c:new-block
+    --> @dm:recall name="temp-discovery"
+    --> *dm:safe-filter cdp is 'yes'
+    --> @dm:skip-block-if-shape row_count = 0
+    --> @dm:recall name="temp-sub-pipeline-context"
+    --> @exec:run-pipeline name = "cdp_topology_calculation"
+
+## Run LLDP topology calculation - called only if cdp is 'yes' in discovery scope (LLDP uses same scope as CDP)
+--> @c:new-block
+    --> @dm:recall name="temp-discovery"
+    --> *dm:safe-filter lldp is 'yes'
+    --> @dm:skip-block-if-shape row_count = 0
+    --> @dm:recall name="temp-sub-pipeline-context"
+    --> @exec:run-pipeline name = "lldp_topology_calculation"
+
+--> @c:new-block
+    --> @dm:empty
+    {% if customer_tag %}
+    --> #dm:query-persistent-stream device_object is "Chassis" and device_equip_type is "CHASSIS" and (customer_tag is '{{customer_tag}}') with-input name = "network_device_inventory" & limit = "0"
+   --> @dm:eval-multi-proc device_hostname_short = "device_hostname.split('.')[0]" and device_status = "'MANAGED'"
+   --> @dm:copy-columns from = "node_id" and to = "node_id" and func = "upper"
+    --> @dm:save name = "{{customer_tag}}_chassis_inventory"
+    {% else %}  
+   --> #dm:query-persistent-stream device_object is "Chassis" and device_equip_type is "CHASSIS" and (customer_tag is empty or customer_tag is 'None') with-input name = "network_device_inventory" & limit = "0"          
+   
+    --> @dm:eval-multi-proc device_hostname_short = "device_hostname.split('.')[0]" and device_status = "'MANAGED'"
+    --> @dm:copy-columns from = "node_id" and to = "node_id" and func = "upper"
+
+    --> @dm:save name = "chassis_inventory"
+     {% endif %}

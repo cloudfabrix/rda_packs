@@ -1,0 +1,38 @@
+action,alarm_class,raise_code,reason,rule,rule_id,severity,state
+DROP,Interface,linkStatus,LINK Up Alert,snmp_trap_name is 'linkUp' and device_int_name is 'GigabitEthernet0/0' and device_model contains 'C3650',A098,Info,Open
+DROP,Interface,linkStatus,LINK Down Alert,snmp_trap_name is 'linkDown' and device_int_name is 'GigabitEthernet0/0' and device_model contains 'C3650',A099,Info,Open
+KEEP,Interface,linkStatus,LINK Down Alert,snmp_trap_name is 'linkDown' and (message contains 'ifIndex') and (message does not contains 'Serial') and ifAdminStatus != 'down',A100,Info,Open
+KEEP,Interface,linkStatus,LINK Up Alert,snmp_trap_name is 'linkUp' and (message contains 'ifIndex') and (message does not contains 'Serial'),A101,Info,Clear
+DROP,ConfigEvent,,Configuration change event,snmp_trap_name is 'ciscoConfigManEvent',A102,Info,Open
+KEEP,Interface,linkStatus,LINK Down Alert,snmp_trap_name is 'linkDown' and (message contains 'ifIndex') and (message does not contains 'Serial') and ifAdminStatus is 'down',A103,Info,Clear
+KEEP,EquipmentFanInoperable,,,snmp_trap_name is 'cucsFaultActiveNotif' and cucsFaultCode is 'fltEquipmentFanInoperable',A104,Info,Open
+KEEP,EquipmentFanInoperable,,,snmp_trap_name is 'cucsFaultClearNotif' and cucsFaultCode is 'fltEquipmentFanInoperable',A105,Info,Clear
+KEEP,EquipmentPsuInoperable,,,snmp_trap_name is 'cucsFaultActiveNotif' and cucsFaultCode is 'fltEquipmentPsuInoperable',A106,Info,Open
+KEEP,EquipmentPsuInoperable,,,snmp_trap_name is 'cucsFaultClearNotif' and cucsFaultCode is 'fltEquipmentPsuInoperable',A107,Info,Clear
+KEEP,EquipmentChassisThermalThresholdCritical,,,snmp_trap_name is 'cucsFaultActiveNotif' and cucsFaultCode is 'fltEquipmentChassisThermalThresholdCritical',A108,Info,Open
+KEEP,EquipmentChassisThermalThresholdCritical,,,snmp_trap_name is 'cucsFaultClearNotif' and cucsFaultCode is 'fltEquipmentChassisThermalThresholdCritical',A109,Info,Clear
+KEEP,AdaptorExtIfLinkDown,,,snmp_trap_name is 'cucsFaultActiveNotif' and cucsFaultCode is 'fltAdaptorExtIfLinkDown',A110,Major,Open
+KEEP,AdaptorExtIfLinkDown,,,snmp_trap_name is 'cucsFaultClearNotif' and cucsFaultCode is 'fltAdaptorExtIfLinkDown',A111,Major,Clear
+KEEP,AdaptorHostIfLinkDown,,,snmp_trap_name is 'cucsFaultActiveNotif' and cucsFaultCode is 'fltAdaptorHostIfLinkDown',A112,Major,Open
+KEEP,AdaptorHostIfLinkDown,,,snmp_trap_name is 'cucsFaultClearNotif' and cucsFaultCode is 'fltAdaptorHostIfLinkDown',A113,Major,Clear
+KEEP,EquipmentChassisInoperable,,,snmp_trap_name is 'cucsFaultActiveNotif' and cucsFaultCode is 'fltEquipmentChassisInoperable',A114,Major,Open
+KEEP,EquipmentChassisInoperable,,,snmp_trap_name is 'cucsFaultClearNotif' and cucsFaultCode is 'fltEquipmentChassisInoperable',A115,Major,Clear
+KEEP,StorageItemCapacityWarning,,,snmp_trap_name is 'cucsFaultActiveNotif' and cucsFaultCode is 'fltStorageItemCapacityWarning',A116,Minor,Open
+KEEP,StorageItemCapacityWarning,,,snmp_trap_name is 'cucsFaultClearNotif' and cucsFaultCode is 'fltStorageItemCapacityWarning',A117,Minor,Clear
+KEEP,MemoryArrayVoltageThresholdCritical,,,snmp_trap_name is 'cucsFaultActiveNotif' and cucsFaultCode is 'fltMemoryArrayVoltageThresholdCritical',A118,Info,Open
+KEEP,MemoryArrayVoltageThresholdCritical,,,snmp_trap_name is 'cucsFaultClearNotif' and cucsFaultCode is 'fltMemoryArrayVoltageThresholdCritical',A119,Info,Clear
+KEEP,MemoryUnitDegraded,,,snmp_trap_name is 'cucsFaultActiveNotif' and cucsFaultCode is 'fltMemoryUnitDegraded',A120,Minor,Open
+KEEP,MemoryUnitDegraded,,,snmp_trap_name is 'cucsFaultClearNotif' and cucsFaultCode is 'fltMemoryUnitDegraded',A121,Minor,Clear
+KEEP,MemoryUnitInoperable,,,snmp_trap_name is 'cucsFaultActiveNotif' and cucsFaultCode is 'fltMemoryUnitInoperable',A122,Major,Open
+KEEP,MemoryUnitInoperable,,,snmp_trap_name is 'cucsFaultClearNotif' and cucsFaultCode is 'fltMemoryUnitInoperable',A123,Major,Clear
+KEEP,ProcessorUnitVoltageThresholdCritical,,,snmp_trap_name is 'cucsFaultActiveNotif' and cucsFaultCode is 'fltProcessorUnitVoltageThresholdCritical',A124,Info,Open
+KEEP,ProcessorUnitVoltageThresholdCritical,,,snmp_trap_name is 'cucsFaultClearNotif' and cucsFaultCode is 'fltProcessorUnitVoltageThresholdCritical',A125,Info,Clear
+KEEP,ProcessorUnitInoperable,,,snmp_trap_name is 'cucsFaultActiveNotif' and cucsFaultCode is 'fltProcessorUnitInoperable',A126,Major,Open
+KEEP,ProcessorUnitInoperable,,,snmp_trap_name is 'cucsFaultClearNotif' and cucsFaultCode is 'fltProcessorUnitInoperable',A127,Major,Clear
+KEEP,ComputePhysicalInoperable,,,snmp_trap_name is 'cucsFaultActiveNotif' and cucsFaultCode is 'fltComputePhysicalInoperable',A128,Major,Open
+KEEP,ComputePhysicalInoperable,,,snmp_trap_name is 'cucsFaultClearNotif' and cucsFaultCode is 'fltComputePhysicalInoperable',A129,Major,Clear
+KEEP,StorageLocalDiskInoperable,,,snmp_trap_name is 'cucsFaultActiveNotif' and cucsFaultCode is 'fltStorageLocalDiskInoperable',A130,Minor,Open
+KEEP,StorageLocalDiskInoperable,,,snmp_trap_name is 'cucsFaultClearNotif' and cucsFaultCode is 'fltStorageLocalDiskInoperable',A131,Minor,Clear
+KEEP,DcxVcDown,,,snmp_trap_name is 'cucsFaultActiveNotif' and cucsFaultCode is 'fltDcxVcDown',A132,Major,Open
+KEEP,DcxVcDown,,,snmp_trap_name is 'cucsFaultClearNotif' and cucsFaultCode is 'fltDcxVcDown',A133,Major,Clear
+DROP,,,,*,Z999,,
