@@ -1,7 +1,0 @@
-%% stream = no and limit = 0
-@exec:get-input
-    --> @dm:save name="test-enable-agent"
---> @c:data-loop dataset="test-enable-agent" and columns="agent_id,agent_name"
-    --> @dm:empty
-    --> @dm:addrow name is "agent_catalogue_data" and columns="state" and values="Enabled"
-    --> #dm:pstream-update-data-by-query agent_id is "$agent_id" & agent_name is "$agent_name"
