@@ -1,0 +1,59 @@
+{
+  "name": "node_details_app",
+  "label": "Node Details App",
+  "description": "Node Details App",
+  "dashboard_folder": "MSP",
+  "context_label_id": "a_asset_name",
+  "version": "2026.02.10.1",
+  "debug": true,
+  "enabled": true,
+  "custom_context": {
+    "rda-dashboard-live-edit": true
+  },
+  "context_enrichment": {
+    "stream": "cisco_devices_inventory",
+    "enrich_columns": [
+      "device_serial_number"
+    ],
+    "query_template": "(device_ip = '$ip_address' or edgeName is '$a_asset_name' or edge_ip is '$edge_ip')",
+    "defaultValues": {}
+  },
+  "dashboard_sections": [
+    {
+      "title": "Org Ops"
+    }
+  ],
+  "dashboard_type": "app",
+  "dashboard_groups": {
+    "from_to": {
+      "icon": "alert.svg",
+      "label": "Alerts"
+    },
+    "topo": {
+      "icon": "topology.svg",
+      "label": "Topology"
+    }
+  },
+  "dashboard_pages": [
+    {
+      "name": "device_inventory_from_alert",
+      "label": "Inventory",
+      "icon": "alert.svg"
+    },
+    {
+      "name": "device_alerts_from_alert",
+      "label": "Alerts",
+      "icon": "alert.svg"
+    },
+    {
+      "name": "device_syslog_from_alert",
+      "label": "Syslogs",
+      "icon": "trace.svg"
+    },
+    {
+      "name": "device_SNMP_Traps_from_alerts",
+      "label": "SNMP Traps",
+      "icon": "trace.svg"
+    }
+  ]
+}

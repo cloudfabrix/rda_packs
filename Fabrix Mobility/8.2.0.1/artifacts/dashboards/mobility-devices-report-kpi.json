@@ -1,0 +1,73 @@
+{
+    "name": "mobility-devices-report-kpi",
+    "label": "KPIs",
+    "description": "KPIs",
+    "enabled": true,
+    "version": "26.05.06.1",
+    "dashboard_type": "dashboard",
+    "dashboard_folder": "fabrix-mobility",
+    "dashboard_style": "auto",
+    "live_edit": true,
+    "dashboard_filters": {
+        "time_filter": true,
+        "default_time_filter_labels": [
+            "All Time"
+        ]
+    },
+    "dashboard_sections": [
+        {
+            "title": "KPI",
+            "show_filter": true,
+            "widgets": [
+                {
+                    "title": "KPI",
+                    "widget_type": "tabular",
+                    "stream": "mobility_new_kpi_list",
+                    "extra_filter": "validation is 'passed'",
+                    "paginated": true,
+                    "columns": {
+                        "schema": {
+                            "title": "Schema",
+                            "key": true
+                        }
+                    },
+                    "widget_id": "2ea74a7d",
+                    "pivot": {
+                        "pivot_type": "advanced",
+                        "group_by": [
+                            "schema"
+                        ],
+                        "series": [
+                            {
+                                "column": "schema",
+                                "label": "KPI Count",
+                                "agg": "value_count"
+                            }
+                        ]
+                    },
+                    "custom_columns": [
+                        {
+                            "id": "id",
+                            "expr": "'user-dashboard-auto-x-3-'+ schema + '-metrics-workbench'",
+                            "key": true,
+                            "visible": false
+                        }
+                    ],
+                    "actions": [
+                        {
+                            "permission": "rda:github:view",
+                            "title": "Device Details",
+                            "type": "GO_TO_APP_STATE",
+                            "identifier": "schema",
+                            "stateName": "app.featureapp",
+                            "drillDownContext": "id",
+                            "drillDownLinkField": "schema",
+                            "appName": "user-dashboard",
+                            "selectionType": "SINGLE"
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

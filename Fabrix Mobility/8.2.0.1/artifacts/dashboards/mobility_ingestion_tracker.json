@@ -1,0 +1,537 @@
+{
+  "name": "mobility_ingestion_tracker",
+  "label": "Ingestion Tracker",
+  "description": "mobility_file_system_tracker: Insights",
+  "dashboard_folder": "fabrix-mobility",
+  "version": "2026.04.15.1",
+  "live_edit": true,
+  "enabled": false,
+  "stream": "mobility_file_system_tracker",
+  "dashboard_type": "dashboard",
+  "dashboard_filters": {
+    "time_filter": true,
+    "default_time_filter_labels": [
+      "Last 24 hours"
+    ],
+    "columns_filter": [
+      {
+        "id": "timestamp",
+        "label": "Timestamp",
+        "type": "DATETIME"
+      },
+      {
+        "id": "city",
+        "label": "City",
+        "type": "TEXT"
+      },
+      {
+        "id": "clli_code",
+        "label": "CLLI Code",
+        "type": "TEXT"
+      },
+      {
+        "id": "comment",
+        "label": "Comment",
+        "type": "TEXT"
+      },
+      {
+        "id": "device",
+        "label": "Device",
+        "type": "TEXT"
+      },
+      {
+        "id": "filename",
+        "label": "Filename",
+        "type": "TEXT"
+      },
+      {
+        "id": "image",
+        "label": "Image",
+        "type": "TEXT"
+      },
+      {
+        "id": "ip_address",
+        "label": "Device IP",
+        "type": "TEXT"
+      },
+      {
+        "id": "kpi_status",
+        "label": "KPI Status",
+        "type": "TEXT"
+      },
+      {
+        "id": "network_code",
+        "label": "Network Code",
+        "type": "TEXT"
+      },
+      {
+        "id": "network_type",
+        "label": "Network Type",
+        "type": "TEXT"
+      },
+      {
+        "id": "object_folder",
+        "label": "Object Folder",
+        "type": "TEXT"
+      },
+      {
+        "id": "object_name",
+        "label": "Object Name",
+        "type": "TEXT"
+      },
+      {
+        "id": "region",
+        "label": "Region",
+        "type": "TEXT"
+      },
+      {
+        "id": "zone",
+        "label": "Zone",
+        "type": "TEXT"
+      },
+      {
+        "id": "kpi_count",
+        "label": "KPI Count",
+        "type": "DOUBLE"
+      }
+    ],
+    "group_filters": [
+      {
+        "stream": "mobility_file_system_tracker",
+        "title": "Network Type",
+        "group_by": [
+          "network_type"
+        ],
+        "ts_column": "timestamp",
+        "agg": "sum",
+        "column": "count_",
+        "type": "str",
+        "show_counts": false
+      },
+      {
+        "stream": "mobility_file_system_tracker",
+        "title": "City",
+        "duration_hours": 1080,
+        "limit": 200,
+        "extra_filter": null,
+        "group_by": [
+          "city"
+        ],
+        "ts_column": "timestamp",
+        "agg": "sum",
+        "column": "count_",
+        "type": "int"
+      },
+      {
+        "stream": "mobility_file_system_tracker",
+        "title": "CLLI Code",
+        "duration_hours": 1080,
+        "limit": 200,
+        "extra_filter": null,
+        "group_by": [
+          "clli_code"
+        ],
+        "ts_column": "timestamp",
+        "agg": "sum",
+        "column": "count_",
+        "type": "int"
+      },
+      {
+        "stream": "mobility_file_system_tracker",
+        "title": "Device",
+        "duration_hours": 1080,
+        "limit": 200,
+        "extra_filter": null,
+        "group_by": [
+          "device"
+        ],
+        "ts_column": "timestamp",
+        "agg": "sum",
+        "column": "count_",
+        "type": "int"
+      },
+      {
+        "stream": "mobility_file_system_tracker",
+        "title": "Image",
+        "duration_hours": 1080,
+        "limit": 200,
+        "extra_filter": null,
+        "group_by": [
+          "image"
+        ],
+        "ts_column": "timestamp",
+        "agg": "sum",
+        "column": "count_",
+        "type": "int"
+      },
+      {
+        "stream": "mobility_file_system_tracker",
+        "title": "IP Address",
+        "duration_hours": 1080,
+        "limit": 200,
+        "extra_filter": null,
+        "group_by": [
+          "ip_address"
+        ],
+        "ts_column": "timestamp",
+        "agg": "sum",
+        "column": "count_",
+        "type": "int"
+      },
+      {
+        "stream": "mobility_file_system_tracker",
+        "title": "KPI Status",
+        "duration_hours": 1080,
+        "limit": 200,
+        "extra_filter": null,
+        "group_by": [
+          "kpi_status"
+        ],
+        "ts_column": "timestamp",
+        "agg": "sum",
+        "column": "count_",
+        "type": "int"
+      },
+      {
+        "stream": "mobility_file_system_tracker",
+        "title": "Object Folder",
+        "duration_hours": 1080,
+        "limit": 200,
+        "extra_filter": null,
+        "group_by": [
+          "object_folder"
+        ],
+        "ts_column": "timestamp",
+        "agg": "sum",
+        "column": "count_",
+        "type": "int"
+      },
+      {
+        "stream": "mobility_file_system_tracker",
+        "title": "Region",
+        "duration_hours": 1080,
+        "limit": 200,
+        "extra_filter": null,
+        "group_by": [
+          "region"
+        ],
+        "ts_column": "timestamp",
+        "agg": "sum",
+        "column": "count_",
+        "type": "int"
+      }
+    ]
+  },
+  "dashboard_sections": [
+    {
+      "title": "Ingestion Tracker",
+      "show_filter": true,
+      "widgets": [
+        {
+          "widget_type": "pie_chart",
+          "title": "Ingestion by Device",
+          "duration_hours": 1080,
+          "stream": "mobility_file_system_tracker",
+          "ts_column": "timestamp",
+          "extra_filter": null,
+          "column": "count_",
+          "agg": "sum",
+          "group_by": [
+            "device"
+          ],
+          "type": "int",
+          "min_width": 3,
+          "height": 4,
+          "max_width": 6,
+          "widget_id": "48d9c52c"
+        },
+        {
+          "widget_type": "pie_chart",
+          "title": "Ingestion by IP Address",
+          "duration_hours": 1080,
+          "stream": "mobility_file_system_tracker",
+          "ts_column": "timestamp",
+          "extra_filter": null,
+          "column": "count_",
+          "agg": "sum",
+          "group_by": [
+            "ip_address"
+          ],
+          "type": "int",
+          "min_width": 3,
+          "height": 4,
+          "max_width": 6,
+          "widget_id": "519687de"
+        },
+        {
+          "widget_type": "pie_chart",
+          "title": "Ingestion by KPI Status",
+          "duration_hours": 1080,
+          "stream": "mobility_file_system_tracker",
+          "ts_column": "timestamp",
+          "extra_filter": null,
+          "column": "count_",
+          "agg": "sum",
+          "group_by": [
+            "kpi_status"
+          ],
+          "style": {
+            "color-map": {
+              "SUCCESS": [
+                "#00BB00",
+                "#ffffff"
+              ],
+              "SKIPPED": [
+                "#BB0000",
+                "#ffffff"
+              ],
+              "LAST_PROCESSED": [
+                "#FF5722",
+                "#ffffff"
+              ]
+            }
+          },
+          "type": "int",
+          "min_width": 3,
+          "height": 4,
+          "max_width": 6,
+          "widget_id": "5cb5e9f8"
+        },
+        {
+          "title": "Details",
+          "widget_type": "tabular",
+          "duration_hours": 1080,
+          "max_width": 12,
+          "height": 8,
+          "min_width": 12,
+          "stream": "mobility_file_system_tracker",
+          "ts_column": "timestamp",
+          "extra_filter": null,
+          "columns": {
+            "filename": {
+              "title": "Filename",
+              "type": "TEXT",
+              "key": true,
+              "visible": true,
+              "defaultWidth": 150
+            },
+            "file_type": {
+              "name": "file type",
+              "key": true,
+              "visible": false,
+              "hidden": true
+            },
+            "backup_filename": {
+              "title": "Backup Name",
+              "type": "TEXT",
+              "key": true,
+              "visible": true,
+              "defaultWidth": 150
+            },
+            "object_name": {
+              "title": "Object Name",
+              "type": "TEXT",
+              "key": true,
+              "visible": true,
+              "defaultWidth": 150
+            },
+            "comment": {
+              "title": "Comment",
+              "type": "TEXT",
+              "visible": true,
+              "defaultWidth": 150
+            },
+            "city": {
+              "title": "City",
+              "type": "TEXT",
+              "visible": true,
+              "defaultWidth": 150
+            },
+            "clli_code": {
+              "title": "CLLI Code",
+              "type": "TEXT",
+              "visible": true,
+              "defaultWidth": 150
+            },
+            "device": {
+              "title": "Device",
+              "type": "TEXT",
+              "visible": true,
+              "defaultWidth": 150
+            },
+            "ip_address": {
+              "title": "Device IP",
+              "type": "TEXT",
+              "visible": true,
+              "key": true,
+              "defaultWidth": 150
+            },
+            "kpi_status_color": {
+              "type": "COLOR-MAP",
+              "source-column": "kpi_status",
+              "color-map": {
+                "SUCCESS": "#00BB00",
+                "SKIPPED": "#BB0000",
+                "LAST_PROCESSED": "#FF5722"
+              }
+            },
+            "kpi_status": {
+              "title": "KPI Status",
+              "type": "TEXT",
+              "htmlTemplateForRow": "<span class='badge' style='background-color: {{ row.kpi_status_color }}' > {{ row.kpi_status }} </span>",
+              "visible": true,
+              "defaultWidth": 150
+            },
+            "object_folder": {
+              "title": "Object Folder",
+              "type": "TEXT",
+              "key": true,
+              "visible": true,
+              "defaultWidth": 150
+            },
+            "backup_folder": {
+              "title": "Backup Folder",
+              "type": "TEXT",
+              "key": true,
+              "visible": true,
+              "defaultWidth": 150
+            },
+            "region": {
+              "title": "Region",
+              "type": "TEXT",
+              "visible": true,
+              "defaultWidth": 150
+            },
+            "zone": {
+              "title": "Zone",
+              "type": "TEXT",
+              "visible": true,
+              "defaultWidth": 150
+            },
+            "image": {
+              "title": "Image",
+              "type": "TEXT",
+              "visible": true,
+              "defaultWidth": 150
+            },
+            "network_code": {
+              "title": "Network Code",
+              "type": "TEXT",
+              "visible": true,
+              "defaultWidth": 150
+            },
+            "network_type": {
+              "title": "Network Type",
+              "type": "TEXT",
+              "visible": true,
+              "defaultWidth": 150
+            },
+            "kpi_count": {
+              "title": "KPI Count",
+              "type": "DOUBLE",
+              "visible": true,
+              "defaultWidth": 150
+            },
+            "timestamp": {
+              "title": "Timestamp",
+              "type": "DATETIME",
+              "visible": true,
+              "defaultWidth": 150
+            }
+          },
+          "custom_columns": [
+            {
+              "id": "file_type",
+              "label": "File Type",
+              "expr": "'.'.join(backup_filename.split('.')[1:])"
+            },
+            {
+              "id": "config_minio_location",
+              "label": "Minio Location",
+              "expr": "'Bulkstats/file_upload/'+object_folder+'/'+object_name",
+              "key": true,
+              "hidden": true
+            },
+            {
+              "id": "file_path",
+              "label": "Minio Location",
+              "expr": "'Bulkstats/file_upload/'+backup_folder+'/'+backup_filename",
+              "key0": true,
+              "hidden": true
+            }
+          ],
+          "actions": [
+            {
+              "permission": "rda:user_dashboard:add",
+              "title": "Download",
+              "type": "POPUP_FORM",
+              "selectionType": "SINGLE",
+              "identifier": "saas-service-action:download-object",
+              "contextParamList": {
+                "contextParams": [
+                  {
+                    "paramKey": "backup_filename",
+                    "paramId": "name"
+                  },
+                  {
+                    "paramKey": "backup_folder",
+                    "paramId": "folder"
+                  },
+                  {
+                    "paramKey": "file_path",
+                    "paramId": "minio_location"
+                  }
+                ]
+              },
+              "api-endpoint": {
+                "service-name": "saas-reports",
+                "methodName": "getForm",
+                "stringified-params": true,
+                "parse-output": false,
+                "params": [
+                  {
+                    "formId": "rda.saas.object.download"
+                  }
+                ]
+              }
+            },
+            {
+              "permission": "rda:user_dashboard:view",
+              "title": "View JSON",
+              "selectionType": "SINGLE",
+              "drillDownLinkField": "object_folder",
+              "identifier": "object_folder",
+              "type": "POPUP_FORM",
+              "identifier0": "saas-service-action:userdashboard-view-json",
+              "contextParamList": {
+                "contextParams": [
+                  {
+                    "paramKey": "object_name",
+                    "paramId": "config_file_name"
+                  },
+                  {
+                    "paramKey": "object_folder",
+                    "paramId": "config_folder"
+                  }
+                ]
+              },
+              "api-endpoint": {
+                "service-name": "saas-reports",
+                "methodName": "getForm",
+                "stringified-params": true,
+                "parse-output": false,
+                "params": [
+                  {
+                    "formId": "rda.saas.userdashboard.config.view.json",
+                    "config_minio_location": "Bulkstats/file_upload"
+                  }
+                ]
+              }
+            }
+          ],
+          "widget_id": "d57c3ab6"
+        }
+      ]
+    }
+  ]
+}

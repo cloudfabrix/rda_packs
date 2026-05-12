@@ -1,0 +1,320 @@
+{
+    "name": "auto-x-3-per-{{schema}}",
+    "label": "{{schema}}",
+    "description": "mobility_kpi_metrics_data: Insights",
+    "dashboard_folder": "mobility-auto-x-3",
+    "version": "2026.02.10.1",
+    "enabled": false,
+    "live_edit": true,
+    "stream": "mobility_kpi_metrics_data",
+    "dashboard_type": "template",
+    "section_as_dashboard": true,
+    "template_variables": {
+        "DEVICE": {
+            "contextId": "device"
+        },
+        "FUNCTION": {
+            "contextId": "function",
+            "default": "max"
+        },
+        "INTERVAL": {
+            "contextId": "interval",
+            "default": "1H"
+        }
+    },
+    "dashboard_filters": {
+        "time_filter": true,
+        "default_time_filter_labels": [
+            "Last 24 hours"
+        ],
+        "columns_filter": [
+            {
+                "id": "timestamp",
+                "label": "Timestamp",
+                "type": "DATETIME"
+            },
+            {
+                "id": "instance_key",
+                "label": "Instance Key",
+                "type": "TEXT"
+            },
+            {
+                "id": "vpnname",
+                "label": "VPN Name",
+                "type": "TEXT"
+            },
+            {
+                "id": "vpnid",
+                "label": "VPN ID",
+                "type": "TEXT"
+            },
+            {
+                "id": "servname",
+                "label": "Serv Name",
+                "type": "TEXT"
+            },
+            {
+                "id": "servid",
+                "label": "Serv ID",
+                "type": "TEXT"
+            }
+        ],
+        "group_filters": [
+            {
+                "stream": "mobility_kpi_metrics_data",
+                "title": "Instance Key",
+                "group_by": [
+                    "instance_key"
+                ],
+                "extra_filter": "device = '{{DEVICE}}' and schema_key is '{{schema}}'",
+                "ts_column": "timestamp",
+                "agg": "sum",
+                "column": "count_",
+                "type": "int",
+                "show_counts": false
+            },
+            {
+                "stream": "mobility_kpi_metrics_data",
+                "title": "VPN Name",
+                "group_by": [
+                    "vpnname"
+                ],
+                "extra_filter": "device = '{{DEVICE}}' and schema_key is '{{schema}}'",
+                "ts_column": "timestamp",
+                "agg": "sum",
+                "column": "count_",
+                "type": "int",
+                "show_counts": false
+            },
+            {
+                "stream": "mobility_kpi_metrics_data",
+                "title": "VPN ID",
+                "group_by": [
+                    "vpnid"
+                ],
+                "extra_filter": "device = '{{DEVICE}}' and schema_key is '{{schema}}'",
+                "ts_column": "timestamp",
+                "agg": "sum",
+                "column": "count_",
+                "type": "int",
+                "show_counts": false
+            },
+            {
+                "stream": "mobility_kpi_metrics_data",
+                "title": "Region",
+                "group_by": [
+                    "region"
+                ],
+                "extra_filter": "device = '{{DEVICE}}' and schema_key is '{{schema}}'",
+                "ts_column": "timestamp",
+                "agg": "sum",
+                "column": "count_",
+                "type": "int",
+                "show_counts": false
+            },
+            {
+                "stream": "mobility_kpi_metrics_data",
+                "title": "Network Type",
+                "group_by": [
+                    "network_type"
+                ],
+                "extra_filter": "device = '{{DEVICE}}' and schema_key is '{{schema}}'",
+                "ts_column": "timestamp",
+                "agg": "sum",
+                "column": "count_",
+                "type": "int",
+                "show_counts": false
+            }
+        ]
+    },
+    "dashboard_sections": [
+        {
+            "title": "{{schema}}",
+            "show_filter": true,
+            "widgets": [
+                {
+                    "widget_type": "label",
+                    "label": "<div><center><h3>Device: {{DEVICE}}</h3></center></div>",
+                    "height": 0.5,
+                    "min_width": 12,
+                    "max_width": 12,
+                    "widget_id": "851010ec"
+                },
+                {
+                    "title": "IP_Pool_Utilization",
+                    "widget_type": "timeseries",
+                    "stream": "mobility_kpi_metrics_data",
+                    "description": "Formula: (100*(%used%)/(%used%+%free%+%hold%))\nDescription: IP Pool utilization",
+                    "ts_column": "timestamp",
+                    "extra_filter": "device = '{{DEVICE}}' and schema_key is '{{schema}}'",
+                    "max_width": 12,
+                    "height": 6,
+                    "min_width": 12,
+                    "chartProperties": {
+                        "yAxisLabel": "Utilization (%)",
+                        "xAxisLabel": null,
+                        "legendLocation": "right",
+                        "mode": "selection",
+                        "column-id": "timestamp"
+                    },
+                    "formatting": {
+                        "maximumFractionDigits": 5,
+                        "notation": "compact"
+                    },
+                    "interval": "{{INTERVAL}}",
+                    "group_by": [
+                        "instance_key"
+                    ],
+                    "series_spec": [
+                        {
+                            "column": "kpi_IP_Pool_Utilization",
+                            "agg": "{{FUNCTION}}",
+                            "type": "int"
+                        }
+                    ],
+                    "widget_id": "7428feec"
+                },
+                {
+                    "title": "KPI's Summary",
+                    "widget_type": "tabular",
+                    "stream": "mobility_kpi_metrics_data",
+                    "ts_column": "timestamp",
+                    "query": "*",
+                    "extra_filter": "device = '{{DEVICE}}' and schema_key is '{{schema}}'",
+                    "min_width": 6,
+                    "height": 12,
+                    "max_width": 12,
+                    "paginated": true,
+                    "resizableColumns": true,
+                    "virtual_scrolling": false,
+                    "showRowSummary": true,
+                    "max_rows": 50,
+                    "sorting": [
+                        {
+                            "timestamp": "desc"
+                        }
+                    ],
+                    "columns": {
+                        "timestamp": "Timestamp",
+                        "instance_key": "Instance_Key",
+                        "kpi_IP_Pool_Utilization": "IP_Pool_Utilization"
+                    },
+                    "widget_id": "94a3fc11"
+                }
+            ]
+        }
+    ],
+    "dynamic_form": {
+        "formData": {},
+        "controlPanelFormDefinition": {
+            "id": "kpi.benchmark.json",
+            "refreshRequired": true,
+            "formFieldList": [
+                {
+                    "fieldId": "function",
+                    "label": "Function",
+                    "help": "Function",
+                    "dataType": "string",
+                    "hidden": false,
+                    "editable": true,
+                    "required": true,
+                    "controlType": "COMBO_BOX",
+                    "defaultValue": "max",
+                    "lovValues": [
+                        {
+                            "identifier": "max",
+                            "displayName": "Maximum"
+                        },
+                        {
+                            "identifier": "min",
+                            "displayName": "Minimum"
+                        },
+                        {
+                            "identifier": "avg",
+                            "displayName": "Average"
+                        },
+                        {
+                            "identifier": "sum",
+                            "displayName": "Sum"
+                        }
+                    ]
+                },
+                {
+                    "fieldId": "interval",
+                    "label": "Interval",
+                    "help": "Interval",
+                    "dataType": "string",
+                    "hidden": false,
+                    "editable": true,
+                    "required": true,
+                    "controlType": "COMBO_BOX",
+                    "defaultValue": "auto",
+                    "lovValues": [
+                        {
+                            "identifier": "auto",
+                            "displayName": "Auto"
+                        },
+                        {
+                            "identifier": "5Min",
+                            "displayName": "5 Minutes"
+                        },
+                        {
+                            "identifier": "15Min",
+                            "displayName": "15 Minutes"
+                        },
+                        {
+                            "identifier": "1H",
+                            "displayName": "1 Hour"
+                        },
+                        {
+                            "identifier": "24H",
+                            "displayName": "1 Day"
+                        }
+                    ]
+                },
+                {
+                    "fieldId": "device",
+                    "label": "Device",
+                    "help": "Device",
+                    "hidden": false,
+                    "editable": true,
+                    "required": true,
+                    "controlType": "COMBO_BOX",
+                    "lovSourceType": "pstream",
+                    "lovSourceParams": {
+                        "name": "mobility_kpi_metrics_data",
+                        "valueColumn": "device",
+                        "labelColumn": "device"
+                    }
+                }
+            ],
+            "formActionList": {
+                "formActions": [
+                    {
+                        "api-endpoint": {
+                            "methodName": "submitForm",
+                            "parse-output": false,
+                            "params": [
+                                {
+                                    "formData": {},
+                                    "formId": "kpi.benchmark.json"
+                                }
+                            ],
+                            "service-name": "saas-reports",
+                            "stringified-params": true
+                        },
+                        "actionLabel": "Save",
+                        "type": "SUBMIT",
+                        "identifier": "Submit"
+                    },
+                    {
+                        "actionLabel": "Cancel",
+                        "type": "CANCEL",
+                        "identifier": "Cancel"
+                    }
+                ]
+            }
+        }
+    },
+    "saved_time": "2026-03-09T12:18:45.285864"
+}

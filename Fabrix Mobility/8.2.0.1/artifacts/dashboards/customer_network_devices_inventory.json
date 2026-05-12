@@ -1,0 +1,676 @@
+{
+    "name": "customer_network_devices_inventory",
+    "description": "Network Devices Inventory",
+    "label": "Network Devices Inventory - Analytics",
+    "enabled": false,
+    "dashboard_type": "template",
+    "dashboard_style": "auto",
+    "version": "26.04.15.1",
+    "dashboard_folder": "fabrix-mobility",
+    "custom_context": {
+        "rda-dashboard-live-edit": true
+    },
+    "template_variables": {
+        "CUST_ID": {
+            "contextId": "customerId"
+        },
+        "PROJ_ID": {
+            "contextId": "project_id"
+        },
+        "PROJ_ID_SINGLE": {
+            "contextId": "project_id"
+        },
+        "CUST_TAG": {
+            "contextId": "customerTag"
+        }
+    },
+    "dashboard_filters": {
+        "time_filter": true,
+        "extra_filter1": "(project_id is '{{PROJ_ID_SINGLE}}') and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+        "columns_filter": [
+            {
+                "id": "hostname",
+                "label": "Device",
+                "type": "TEXT"
+            },
+            {
+                "id": "ip_address",
+                "label": "Device IP",
+                "type": "TEXT"
+            },
+            {
+                "id": "vendor",
+                "label": "Vendor",
+                "type": "TEXT"
+            },
+            {
+                "id": "device_model",
+                "label": "Device Model",
+                "type": "TEXT"
+            }
+        ],
+        "default_time_filter_labels": [
+            "Last 24 hours"
+        ],
+        "group_filters": [
+            {
+                "stream": "network-devices-inventory",
+                "extra_filter": "asset_object in ['CHASSIS','Chassis']",
+                "title": "Device",
+                "group_by": [
+                    "hostname"
+                ],
+                "ts_column": "timestamp",
+                "agg": "value_count",
+                "column": "_id",
+                "limit": 100,
+                "type": "int"
+            },
+            {
+                "stream": "network-devices-inventory",
+                "extra_filter": "asset_object in ['CHASSIS','Chassis']",
+                "title": "Device IP",
+                "group_by": [
+                    "ip_address"
+                ],
+                "ts_column": "timestamp",
+                "agg": "cardinality",
+                "column": "device_model",
+                "limit": 200,
+                "type": "int"
+            }
+        ]
+    },
+    "dashboard_sections": [
+        {
+            "title": "Inventory",
+            "show_filter": true,
+            "widgets": [
+                {
+                    "title": "Total Devices",
+                    "widget_type": "custom_counter",
+                    "duration_hours": 1080,
+                    "stream": "network-devices-inventory",
+                    "extra_filter": "equipment_type in ['CHASSIS','Chassis'] and asset_object is 'Chassis' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "ts_column": "timestamp",
+                    "column": "count_",
+                    "agg": "value_count",
+                    "type": "int",
+                    "min_width": 3,
+                    "height": 4,
+                    "max_width": 3,
+                    "widget_id": "499554e0"
+                },
+                {
+                    "widget_type": "pie_chart",
+                    "title": "Devices by Model",
+                    "stream": "network-devices-inventory",
+                    "ts_column": "timestamp",
+                    "extra_filter": "equipment_type in ['CHASSIS','Chassis'] and asset_object is 'Chassis' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "column": "_id",
+                    "agg": "value_count",
+                    "group_by": [
+                        "device_model"
+                    ],
+                    "type": "str",
+                    "min_width": 3,
+                    "height": 4,
+                    "max_width": 3,
+                    "widget_id": "f29397d2"
+                },
+                {
+                    "title": "Devices by Vendor",
+                    "widget_type": "counter",
+                    "min_width": 6,
+                    "max_width": 6,
+                    "height": 3,
+                    "extra_filter": "equipment_type in ['CHASSIS','Chassis'] and asset_object is 'Chassis' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "stream": "network-devices-inventory",
+                    "ts_column": "timestamp",
+                    "limit": 5,
+                    "style": {
+                        "color-map": {
+                            "ACTIVATED": "#4CAF50",
+                            "REACTIVATION_PENDING": " #FF9800",
+                            "OFFLINE": " #F44336"
+                        }
+                    },
+                    "duration_hours": 2400,
+                    "group_by": [
+                        "vendor"
+                    ],
+                    "column": "_RDA_Id",
+                    "agg": "value_count",
+                    "type": "str",
+                    "widget_id": "dc9dc743"
+                },
+                {
+                    "widget_type": "pie_chart",
+                    "title": "Devices By SW Version",
+                    "stream": "network-devices-inventory",
+                    "ts_column": "timestamp",
+                    "extra_filter": "equipment_type in ['CHASSIS','Chassis'] and asset_object is 'Chassis' and  (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "column": "_id",
+                    "agg": "value_count",
+                    "group_by": [
+                        "sw_version"
+                    ],
+                    "type": "str",
+                    "min_width": 3,
+                    "height": 4,
+                    "max_width": 3,
+                    "widget_id": "d73d0d8d"
+                },
+                {
+                    "title": "Devices by Model and Version",
+                    "widget_type": "multi_bar_chart",
+                    "stream": "network-devices-inventory",
+                    "ts_column": "timestamp",
+                    "extra_filter": "equipment_type in ['CHASSIS','Chassis'] and asset_object is 'Chassis' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "duration_hours": 1080,
+                    "group_by": [
+                        "sw_version",
+                        "device_model"
+                    ],
+                    "chartProperties": {
+                        "yAxisLabel": "Count",
+                        "xAxisLabel": "Model",
+                        "stacked": true,
+                        "legendLocation": "right",
+                        "orientation": "vertical"
+                    },
+                    "min_width": 9,
+                    "height": 4,
+                    "max_width": 9,
+                    "column": "_id",
+                    "agg": "value_count",
+                    "widget_id": "b6ae721b"
+                },
+                {
+                    "title": "Devices Details",
+                    "widget_type": "tabular",
+                    "stream": "network-devices-inventory",
+                    "duration_hours": 1080,
+                    "extra_filter": "equipment_type in ['CHASSIS','Chassis'] and asset_object is 'Chassis' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "showRowSummary": true,
+                    "query": "*",
+                    "min_width": 12,
+                    "height": 8,
+                    "max_width": 12,
+                    "paginated": true,
+                    "remote_searchable": true,
+                    "remote_searchable_cols": [
+                        "hostname",
+                        "ip_address",
+                        "device_model",
+                        "device_location",
+                        "serial_number",
+                        "equipment_type",
+                        "vendor",
+                        "additional_ips",
+                        "sw_version",
+                        "sw_type",
+                        "management_ip",
+                        "product_family",
+                        "equipment_name",
+                        "sys_contact",
+                        "parent_serial_number"
+                    ],
+                    "max_rows": 50,
+                    "columns": {
+                        "hostname": {
+                            "title": "Device",
+                            "type": "TEXT",
+                            "key": true
+                        },
+                        "product_id": {
+                            "title": "Product ID",
+                            "type": "TEXT",
+                            "visible": false
+                        },
+                        "shippedc_city": {
+                            "title": "Shipped City",
+                            "type": "TEXT",
+                            "visible": false
+                        },
+                        "product_family": {
+                            "title": "Product Family",
+                            "type": "TEXT",
+                            "key": true,
+                            "visible": false
+                        },
+                        "ip_address": {
+                            "title": "IP Address",
+                            "type": "TEXT",
+                            "key": true
+                        },
+                        "org_id": {
+                            "title": "Organisation ID",
+                            "type": "TEXT",
+                            "key": true,
+                            "visible": false,
+                            "hidden": true
+                        },
+                        "device_model": "Model",
+                        "serial_number": {
+                            "title": "Serial Number",
+                            "type": "TEXT"
+                        },
+                        "parent_serial_number": {
+                            "title": "Parent SN",
+                            "type": "TEXT",
+                            "key": true
+                        },
+                        "vendor": "Vendor",
+                        "sw_version": "SW Version",
+                        "equipment_type": "Equipment Type",
+                        "device_location": {
+                            "title": "Location",
+                            "visible": false
+                        },
+                        "sw_type": "Type",
+                        "management_ip": "Management IP Address",
+                        "additional_ips": {
+                            "title": "Device Additional IPs",
+                            "defaultWidth": 270,
+                            "formatter": "truncate",
+                            "visible": false
+                        },
+                        "equipment_name": {
+                            "title": "Equipment Description",
+                            "type": "TEXT",
+                            "visible": false
+                        },
+                        "sys_descr": {
+                            "title": "SW Version Summary",
+                            "type": "TEXT",
+                            "visible": false
+                        },
+                        "sys_contact": {
+                            "title": "Contact",
+                            "type": "TEXT",
+                            "visible": false
+                        },
+                        "city": {
+                            "title": "City",
+                            "type": "TEXT",
+                            "visible": false
+                        },
+                        "state": {
+                            "title": "State",
+                            "type": "TEXT",
+                            "visible": false
+                        },
+                        "country": {
+                            "title": "Country",
+                            "type": "TEXT",
+                            "visible": false
+                        },
+                        "latitude": {
+                            "title": "Location Latitude",
+                            "type": "DOUBLE",
+                            "visible": false
+                        },
+                        "longitude": {
+                            "title": "Location Longitude",
+                            "type": "DOUBLE",
+                            "visible": false
+                        },
+                        "node_id": {
+                            "title": "Node ID",
+                            "type": "TEXT",
+                            "key": true,
+                            "visible": false
+                        },
+                        "last_seen": {
+                            "title": "Last Discovery Time",
+                            "type": "DATETIME",
+                            "visible": true
+                        }
+                    },
+                    "custom_columns": [
+                        {
+                            "id": "node_id",
+                            "label": "Node Id",
+                            "expr": "str(_row.node_id).upper()",
+                            "hidden": true,
+                            "key": true,
+                            "visible": false,
+                            "sortable": false
+                        }
+                    ],
+                    "actions": [
+                        {
+                            "permission": "rda:user_dashboard:view",
+                            "appName": "user-dashboard/node_details_app",
+                            "drillDownLinkField": "hostname",
+                            "identifier": "launch.dashboard.device_view_app",
+                            "selectionType": "SINGLE",
+                            "contextParamList": {
+                                "contextParams": [
+                                    {
+                                        "paramKey": "hostname",
+                                        "paramId": "a_asset_name"
+                                    },
+                                    {
+                                        "paramKey": "ip_address",
+                                        "paramId": "a_asset_ip_address"
+                                    }
+                                ]
+                            },
+                            "title": "Node Details",
+                            "type": "GO_TO_APP_STATE"
+                        }
+                    ],
+                    "widget_id": "8ececef3"
+                },
+                {
+                    "title": "Mobility Device Mapping",
+                    "widget_type": "tabular",
+                    "max_width": 12,
+                    "height": 10,
+                    "min_width": 12,
+                    "stream": "mobility_device_mappings",
+                    "ts_column": "timestamp",
+                    "virtual_scrolling": true,
+                    "remote_searchable0": true,
+                    "remote_searchable_cols0": [
+                        "device",
+                        "ip_address",
+                        "network_type"
+                    ],
+                    "resizableColumns0": [
+                        "device"
+                    ],
+                    "columns": {
+                        "device": {
+                            "title": "Device",
+                            "type": "TEXT",
+                            "key": true,
+                            "hidden": false
+                        },
+                        "ip_address": {
+                            "title": "IP Address",
+                            "type": "TEXT",
+                            "key": true,
+                            "hidden": false
+                        },
+                        "image": {
+                            "title": "Image",
+                            "type": "TEXT",
+                            "key": true,
+                            "hidden": false
+                        },
+                        "city": {
+                            "title": "City",
+                            "type": "TEXT",
+                            "key": true,
+                            "hidden": false
+                        },
+                        "clli_code": {
+                            "title": "CLLI Code",
+                            "type": "TEXT",
+                            "hidden": false,
+                            "key": true
+                        },
+                        "zone": {
+                            "title": "Zone",
+                            "type": "TEXT",
+                            "hidden": false,
+                            "key": true
+                        },
+                        "region": {
+                            "title": "Region",
+                            "type": "TEXT",
+                            "hidden": false,
+                            "key": true
+                        },
+                        "network_code": {
+                            "title": "Network Code",
+                            "type": "TEXT",
+                            "hidden": false,
+                            "key": true
+                        },
+                        "network_type": {
+                            "title": "Network Type",
+                            "type": "TEXT",
+                            "hidden": false,
+                            "key": true
+                        },
+                        "__uuid": {
+                            "title": "UUID ID",
+                            "key": true,
+                            "visible": false
+                        }
+                    },
+                    "widget_id": "b039e934"
+                },
+                {
+                    "title": "Ports Usage Summary",
+                    "widget_type": "tabular",
+                    "max_width": 6,
+                    "height": 6,
+                    "min_width": 6,
+                    "showRowSummary": true,
+                    "stream": "network-devices-inventory",
+                    "ts_column": "timestamp",
+                    "duration_hours": 1080,
+                    "extra_filter": "equipment_type in ['CHASSIS','Chassis'] and asset_object is 'Chassis' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "remote_searchable": true,
+                    "remote_searchable_cols": [
+                        "hostname",
+                        "ip_address",
+                        "total_up_ports",
+                        "total_down_ports",
+                        "parent_serial_number",
+                        "device_model",
+                        "device_location",
+                        "serial_number",
+                        "equipment_type",
+                        "vendor",
+                        "additional_ips",
+                        "sw_version",
+                        "sw_type",
+                        "management_ip",
+                        "product_family",
+                        "equipment_name",
+                        "sys_contact",
+                        "parent_serial_number"
+                    ],
+                    "columns": {
+                        "hostname": {
+                            "title": "Device",
+                            "type": "TEXT",
+                            "visible": true,
+                            "key": true
+                        },
+                        "ip_address": {
+                            "title": "Device IP",
+                            "type": "TEXT",
+                            "visible": true,
+                            "key": true
+                        },
+                        "parent_serial_number": {
+                            "title": "Parent SN",
+                            "type": "TEXT",
+                            "key": true,
+                            "visible": false
+                        },
+                        "node_id": {
+                            "title": "Node ID",
+                            "type": "TEXT",
+                            "key": true,
+                            "visible": false
+                        },
+                        "org_id": {
+                            "title": "Org ID",
+                            "type": "TEXT",
+                            "key": true,
+                            "visible": false,
+                            "hidden": true
+                        }
+                    },
+                    "custom_columns": [
+                        {
+                            "id": "node_id",
+                            "label": "Node Id",
+                            "expr": "str(_row.node_id).upper()",
+                            "hidden": true,
+                            "key": true,
+                            "visible": false,
+                            "sortable": false
+                        }
+                    ],
+                    "pivot": {
+                        "pivot_type": "advanced",
+                        "group_by": [
+                            "hostname",
+                            "parent_serial_number",
+                            "ip_address"
+                        ],
+                        "series": [
+                            {
+                                "column": "total_up_ports",
+                                "agg": "sum",
+                                "type": "int",
+                                "label": "Up Ethernet Ports"
+                            },
+                            {
+                                "column": "total_down_ports",
+                                "agg": "sum",
+                                "type": "int",
+                                "label": "Down Ethernet Ports"
+                            },
+                            {
+                                "column": "total_admin_down_ports",
+                                "agg": "sum",
+                                "type": "int",
+                                "label": "Admin Down Ethernet Ports"
+                            },
+                            {
+                                "column": "total_eth_ports",
+                                "agg": "sum",
+                                "type": "int",
+                                "label": "Total Ethernet Ports"
+                            }
+                        ]
+                    },
+                    "actions": [
+                        {
+                            "permission": "rda:user_dashboard:view",
+                            "appName": "user-dashboard/node_details_app",
+                            "drillDownLinkField": "hostname",
+                            "identifier": "launch.dashboard.device_view_app",
+                            "selectionType": "SINGLE",
+                            "contextParamList": {
+                                "contextParams": [
+                                    {
+                                        "paramKey": "hostname",
+                                        "paramId": "a_asset_name"
+                                    },
+                                    {
+                                        "paramKey": "ip_address",
+                                        "paramId": "a_asset_ip_address"
+                                    },
+                                    {
+                                        "paramKey": "ip_address",
+                                        "paramId": "ip_address"
+                                    },
+                                    {
+                                        "paramKey": "org_id",
+                                        "paramId": "org_id"
+                                    }
+                                ]
+                            },
+                            "title": "Node Details",
+                            "type": "GO_TO_APP_STATE"
+                        }
+                    ],
+                    "widget_id": "08972f3c"
+                },
+                {
+                    "title": "Interface Summary",
+                    "widget_type": "tabular",
+                    "max_width": 6,
+                    "height": 6,
+                    "min_width": 6,
+                    "showRowSummary": true,
+                    "stream": "network-devices-inventory",
+                    "extra_filter": "customer_tag contains '{{CUST_TAG}}' or customer_tag is empty",
+                    "ts_column": "timestamp",
+                    "duration_hours": 1080,
+                    "remote_searchable": true,
+                    "remote_searchable_cols": [
+                        "vendor",
+                        "interface_description"
+                    ],
+                    "columns": {
+                        "vendor": {
+                            "title": "Device Vendor",
+                            "type": "TEXT",
+                            "key": true
+                        },
+                        "interface_description": {
+                            "title": "Interface Label",
+                            "type": "TEXT",
+                            "key": true
+                        },
+                        "node_id": {
+                            "title": "Node ID",
+                            "type": "TEXT",
+                            "key": true,
+                            "visible": false
+                        }
+                    },
+                    "custom_columns": [
+                        {
+                            "id": "node_id",
+                            "label": "Node Id",
+                            "expr": "str(_row.node_id).upper()",
+                            "hidden": true,
+                            "key": true,
+                            "visible": false,
+                            "sortable": false
+                        }
+                    ],
+                    "pivot": {
+                        "pivot_type": "advanced",
+                        "group_by": [
+                            "vendor",
+                            "interface_description"
+                        ],
+                        "series": [
+                            {
+                                "column": "interface_description",
+                                "agg": "value_count",
+                                "type": "int",
+                                "label": "Interface Count"
+                            }
+                        ]
+                    },
+                    "actions": [
+                        {
+                            "permission": "rda:user_dashboard:view",
+                            "appName": "user-dashboard/node_details_app",
+                            "drillDownLinkField": "hostname",
+                            "identifier": "launch.dashboard.device_view_app",
+                            "selectionType": "SINGLE",
+                            "title": "Node Details",
+                            "actionCondition": {
+                                "actionControl": "SHOW_IF",
+                                "conditionalField": [
+                                    {
+                                        "conditionType": "IS_NOT_NULL",
+                                        "fieldId": "node_id"
+                                    }
+                                ]
+                            },
+                            "type": "GO_TO_APP_STATE"
+                        }
+                    ],
+                    "widget_id": "a2064860"
+                }
+            ]
+        }
+    ]
+}

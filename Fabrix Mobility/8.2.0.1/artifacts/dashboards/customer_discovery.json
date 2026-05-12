@@ -1,0 +1,887 @@
+{
+    "name": "customer_discovery",
+    "label": "On Demand Discovery",
+    "description": "onboarded_devices: Insights",
+    "dashboard_folder": "Default",
+    "version": "2026.02.10.1",
+    "enabled": false,
+    "live_edit": true,
+    "stream": "onboard_devices",
+    "dashboard_type": "template",
+    "dashboard_filters": {
+        "time_filter": true,
+        "default_time_filter_labels": [
+            "Last 24 hours"
+        ],
+        "group_filters": []
+    },
+    "dashboard_sections": [
+        {
+            "title": "Onboarded Devices",
+            "show_filter": true,
+            "widgets": [
+                {
+                    "title": "Discovery",
+                    "widget_type": "tabular",
+                    "max_width": 12,
+                    "height": 9,
+                    "min_width": 12,
+                    "stream": "onboard_devices",
+                    "ts_column": "timestamp",
+                    "columns": {
+                        "device": {
+                            "title": "Device",
+                            "type": "TEXT",
+                            "key": true,
+                            "hidden": false
+                        },
+                        "ip_address": {
+                            "title": "Device IP",
+                            "type": "TEXT",
+                            "key": true,
+                            "hidden": false
+                        },
+                        "org_id": {
+                            "title": "ORG ID",
+                            "key": true,
+                            "hidden": true
+                        },
+                        "zone": {
+                            "title": "Zone",
+                            "type": "TEXT",
+                            "key": true,
+                            "hidden": false
+                        },
+                        "network_type": {
+                            "title": "Network Type",
+                            "type": "TEXT",
+                            "key": true,
+                            "hidden": false
+                        },
+                        "CLLI_code": {
+                            "title": "CLLI Code",
+                            "type": "TEXT",
+                            "key": true,
+                            "hidden": false
+                        },
+                        "_RDA_Id": {
+                            "title": "RDA ID",
+                            "key": true,
+                            "visible": "false",
+                            "hidden": true
+                        }
+                    },
+                    "actions": [
+                        {
+                            "permission1": "rda:user_dashboard:view",
+                            "appName": "user-dashboard/node_details_app",
+                            "drillDownLinkField": "device",
+                            "selectionType": "SINGLE",
+                            "title": "Device details",
+                            "contextParamList": {
+                                "contextParams": [
+                                    {
+                                        "paramKey": "device",
+                                        "paramId": "a_asset_name"
+                                    },
+                                    {
+                                        "paramKey": "ip_address",
+                                        "paramId": "a_asset_ip_address"
+                                    }
+                                ]
+                            },
+                            "identifier": "launch.dashboard.node_details_app",
+                            "type": "GO_TO_APP_STATE"
+                        },
+                        {
+                            "permission": "rda:mobility:update",
+                            "title": "Import Devices",
+                            "type": "POPUP_FORM",
+                            "selectionType": "NONE",
+                            "identifier": "saas-service-action:userdashboard-add-yaml",
+                            "api-endpoint": {
+                                "service-name": "saas-reports",
+                                "methodName": "getForm",
+                                "stringified-params": true,
+                                "parse-output": false,
+                                "params": [
+                                    {
+                                        "formId": "rda.saas.dynamic.form",
+                                        "formDefinition": {
+                                            "id": "rda.saas.dynamic.form",
+                                            "refreshRequired": true,
+                                            "formFieldList": [
+                                                {
+                                                    "fieldId": "job_name",
+                                                    "label": "Job Name",
+                                                    "help": "Job Name",
+                                                    "dataType": "string",
+                                                    "controlType": "TEXT_FIELD",
+                                                    "hidden": false,
+                                                    "editable": true,
+                                                    "required": false
+                                                },
+                                                {
+                                                    "help": "Choose file to upload",
+                                                    "dataType": "string",
+                                                    "required": true,
+                                                    "editable": true,
+                                                    "label": "Choose file to upload",
+                                                    "controlType": "FILE_UPLOAD",
+                                                    "hidden": false,
+                                                    "fieldId": "fileUpload"
+                                                },
+                                                {
+                                                    "help": "Overwrite existing onboarded data",
+                                                    "required": false,
+                                                    "editable": true,
+                                                    "label": "Replace Data",
+                                                    "hidden": false,
+                                                    "fieldId": "replace",
+                                                    "dataType": "boolean",
+                                                    "controlType": "BOOLEAN_FIELD",
+                                                    "defaultValue": false,
+                                                    "controlPropertyList": [
+                                                        {
+                                                            "attribute": "layout-group-id",
+                                                            "value": "Features"
+                                                        },
+                                                        {
+                                                            "attribute": "layout-percent",
+                                                            "value": "25"
+                                                        }
+                                                    ]
+                                                },
+                                                {
+                                                    "help": "Enable this option to run discovery for newly added devices.",
+                                                    "required": false,
+                                                    "editable": true,
+                                                    "label": "Run Discovery",
+                                                    "hidden": true,
+                                                    "fieldId": "run_discovery",
+                                                    "dataType": "boolean",
+                                                    "controlType": "BOOLEAN_FIELD",
+                                                    "defaultValue": true,
+                                                    "controlPropertyList": [
+                                                        {
+                                                            "attribute": "layout-group-id",
+                                                            "value": "Features"
+                                                        },
+                                                        {
+                                                            "attribute": "layout-percent",
+                                                            "value": "25"
+                                                        }
+                                                    ],
+                                                    "fieldControlPropertyList0": [
+                                                        {
+                                                            "fieldId": "upload_to_workflow",
+                                                            "controlActions": [
+                                                                "ShowField"
+                                                            ],
+                                                            "condition": {
+                                                                "selectionValue": "true"
+                                                            }
+                                                        }
+                                                    ]
+                                                },
+                                                {
+                                                    "help": "Enable this option to upload newly discovered devices to BPA.",
+                                                    "required": false,
+                                                    "editable": true,
+                                                    "label": "Upload to Workflow",
+                                                    "hidden": true,
+                                                    "fieldId": "upload_to_workflow",
+                                                    "dataType": "boolean",
+                                                    "controlType": "BOOLEAN_FIELD",
+                                                    "defaultValue": true,
+                                                    "controlPropertyList": [
+                                                        {
+                                                            "attribute": "layout-group-id",
+                                                            "value": "Features"
+                                                        },
+                                                        {
+                                                            "attribute": "layout-percent",
+                                                            "value": "25"
+                                                        }
+                                                    ]
+                                                },
+                                                {
+                                                    "fieldId": "retryCount",
+                                                    "label": "Retry Count",
+                                                    "help": "Retry Count",
+                                                    "dataType": "string",
+                                                    "controlType": "TEXT_FIELD",
+                                                    "defaultValue": "30",
+                                                    "controlPropertyList": [
+                                                        {
+                                                            "attribute": "layout-group-id",
+                                                            "value": "usertype-retry"
+                                                        },
+                                                        {
+                                                            "attribute": "layout-percent",
+                                                            "value": "50"
+                                                        }
+                                                    ],
+                                                    "hidden": true,
+                                                    "editable": true,
+                                                    "required": false
+                                                },
+                                                {
+                                                    "fieldId": "retryInterval",
+                                                    "label": "Retry Interval",
+                                                    "help": "Retry Interval",
+                                                    "dataType": "string",
+                                                    "controlType": "TEXT_FIELD",
+                                                    "defaultValue": "30000",
+                                                    "controlPropertyList": [
+                                                        {
+                                                            "attribute": "layout-group-id",
+                                                            "value": "usertype-retry"
+                                                        },
+                                                        {
+                                                            "attribute": "layout-percent",
+                                                            "value": "50"
+                                                        }
+                                                    ],
+                                                    "hidden": true,
+                                                    "editable": true,
+                                                    "required": false
+                                                }
+                                            ]
+                                        },
+                                        "actions": [
+                                            {
+                                                "type": "RUN_PIPELINE",
+                                                "pipelineName": "import-customer-devices",
+                                                "isSync": false,
+                                                "workerGroup": "rda-site-01"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "permission1": "rda:mobility:update",
+                            "title": "Run Discovery",
+                            "type": "POPUP_FORM",
+                            "selectionType": "NONE",
+                            "identifier": "saas-service-action:userdashboard-add-yaml",
+                            "api-endpoint": {
+                                "service-name": "saas-reports",
+                                "methodName": "getForm",
+                                "stringified-params": true,
+                                "parse-output": false,
+                                "params": [
+                                    {
+                                        "formId": "rda.saas.dynamic.form",
+                                        "formActionList": {
+                                            "formActions": [
+                                                {
+                                                    "identifier": "Submit",
+                                                    "actionLabel": "Run"
+                                                }
+                                            ]
+                                        },
+                                        "formDefinition": {
+                                            "id": "rda.saas.dynamic.form",
+                                            "refreshRequired": true,
+                                            "formFieldList": [
+                                                {
+                                                    "help": "Make sure access Verification is run for the devices you want to run discovery on",
+                                                    "dataType": "string",
+                                                    "required": true,
+                                                    "editable": true,
+                                                    "label": "NOTE: Make sure that access verification is completed for  devices for which discovery needs to be run.",
+                                                    "controlType": "LABEL",
+                                                    "hidden": false,
+                                                    "fieldId": "note_field"
+                                                },
+                                                {
+                                                    "help": "Select network devices for which you want to run discovery",
+                                                    "dataType": "string",
+                                                    "required": true,
+                                                    "editable": true,
+                                                    "label": "Network Devices",
+                                                    "hidden": false,
+                                                    "fieldId": "Others",
+                                                    "controlType": "SELECTOR_TABLE",
+                                                    "controlPropertyList": [
+                                                        {
+                                                            "attribute": "column-key",
+                                                            "value": "ip_address"
+                                                        },
+                                                        {
+                                                            "attribute": "selection",
+                                                            "value": "MULTIPLE"
+                                                        }
+                                                    ],
+                                                    "widget": {
+                                                        "title": "Device Details",
+                                                        "timebased": false,
+                                                        "max_width": 12,
+                                                        "height": 8,
+                                                        "min_width": 12,
+                                                        "extra_filter0": "type contains 'windows'",
+                                                        "extra_filter": "customer_tag is '{{CUST_TAG}}' or customer_tag is empty",
+                                                        "stream": "onboard_devices",
+                                                        "ts_column": "timestamp",
+                                                        "sorting": [],
+                                                        "columns": {
+                                                            "ip_address": {
+                                                                "title": "IP Address",
+                                                                "key": true
+                                                            },
+                                                            "discovery_scope": {
+                                                                "title": "discovery Scope",
+                                                                "key": true,
+                                                                "visible": false
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            ]
+                                        },
+                                        "actions": [
+                                            {
+                                                "type": "RUN_PIPELINE",
+                                                "pipelineName": "ondemand_discovery_main",
+                                                "isSync": false,
+                                                "workerGroup": "rda-site-01"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "permission1": "rda:mobility:update",
+                            "title": "Upload to Workflow",
+                            "type": "POPUP_FORM",
+                            "selectionType": "NONE",
+                            "identifier": "saas-service-action:userdashboard-add-yaml",
+                            "api-endpoint": {
+                                "service-name": "saas-reports",
+                                "methodName": "getForm",
+                                "stringified-params": true,
+                                "parse-output": false,
+                                "params": [
+                                    {
+                                        "formId": "rda.saas.dynamic.form",
+                                        "formActionList": {
+                                            "formActions": [
+                                                {
+                                                    "identifier": "Submit",
+                                                    "actionLabel": "Upload"
+                                                }
+                                            ]
+                                        },
+                                        "formDefinition": {
+                                            "id": "rda.saas.dynamic.form",
+                                            "refreshRequired": true,
+                                            "formFieldList": [
+                                                {
+                                                    "help": "Do you want to Upload?",
+                                                    "dataType": "string",
+                                                    "controlType": "LABEL",
+                                                    "required": false,
+                                                    "editable": false,
+                                                    "label": "Do you want to Upload?",
+                                                    "hidden": false,
+                                                    "fieldId": "uploadToWorkflow"
+                                                },
+                                                {
+                                                    "fieldId": "retryCount",
+                                                    "label": "Retry Count",
+                                                    "help": "Retry Count",
+                                                    "dataType": "string",
+                                                    "controlType": "TEXT_FIELD",
+                                                    "defaultValue": "30",
+                                                    "controlPropertyList": [
+                                                        {
+                                                            "attribute": "layout-group-id",
+                                                            "value": "usertype-retry"
+                                                        },
+                                                        {
+                                                            "attribute": "layout-percent",
+                                                            "value": "50"
+                                                        }
+                                                    ],
+                                                    "hidden": true,
+                                                    "editable": true,
+                                                    "required": false
+                                                },
+                                                {
+                                                    "fieldId": "retryInterval",
+                                                    "label": "Retry Interval",
+                                                    "help": "Retry Interval",
+                                                    "dataType": "string",
+                                                    "controlType": "TEXT_FIELD",
+                                                    "defaultValue": "30000",
+                                                    "controlPropertyList": [
+                                                        {
+                                                            "attribute": "layout-group-id",
+                                                            "value": "usertype-retry"
+                                                        },
+                                                        {
+                                                            "attribute": "layout-percent",
+                                                            "value": "50"
+                                                        }
+                                                    ],
+                                                    "hidden": true,
+                                                    "editable": true,
+                                                    "required": false
+                                                }
+                                            ]
+                                        },
+                                        "actions": [
+                                            {
+                                                "type": "RUN_PIPELINE",
+                                                "pipelineName": "ondemand_upload_to_workflow",
+                                                "isSync": false,
+                                                "workerGroup": "rda-site-01"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "permission0": "rda:github:view",
+                            "title": "Execute:Show Version",
+                            "type": "POPUP_FORM",
+                            "selectionType": "SINGLE",
+                            "identifier": "saas-service-action:userdashboard-add-yaml",
+                            "api-endpoint": {
+                                "service-name": "saas-reports",
+                                "methodName": "getForm",
+                                "stringified-params": true,
+                                "parse-output": false,
+                                "params": [
+                                    {
+                                        "formId": "rda.saas.dynamic.form",
+                                        "formActionList": {
+                                            "formActions": [
+                                                {
+                                                    "identifier": "Submit",
+                                                    "actionLabel": "Show Version"
+                                                }
+                                            ]
+                                        },
+                                        "formDefinition": {
+                                            "id": "rda.saas.dynamic.form",
+                                            "refreshRequired": true,
+                                            "formFieldList": [
+                                                {
+                                                    "help": "Do you want to run - show Version?",
+                                                    "dataType": "string",
+                                                    "controlType": "LABEL",
+                                                    "required": false,
+                                                    "editable": false,
+                                                    "label": "Do you want to run - show Version?",
+                                                    "hidden": false
+                                                }
+                                            ]
+                                        },
+                                        "actions": [
+                                            {
+                                                "type": "RUN_PIPELINE",
+                                                "pipelineName": "execute_command",
+                                                "isSync": false,
+                                                "workerGroup": "rda-site-01"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "appName": "user-dashboard/customer_view_config",
+                            "permission": "aia:page:view",
+                            "selectionType": "SINGLE",
+                            "stateName": "app.featureapp",
+                            "title": "View Config Details",
+                            "type": "GO_TO_APP_STATE",
+                            "contextParamList": {
+                                "contextParams": [
+                                    {
+                                        "paramKey": "device",
+                                        "paramId": "filename"
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "widget_id": "e60dc7c6"
+                },
+                {
+                    "title": "Discovery Runs",
+                    "widget_type": "tabular",
+                    "max_width": 12,
+                    "height": 9,
+                    "min_width": 12,
+                    "stream": "discovery_logs",
+                    "extra_filter": "log_type is 'metadata'",
+                    "refreshOptions": {
+                        "refreshType": "Periodic",
+                        "refreshInterval": 60000
+                    },
+                    "ts_column": "timestamp",
+                    "columns": {
+                        "ingestion_id": {
+                            "title": "Job Id",
+                            "type": "TEXT",
+                            "key": true,
+                            "hidden": true
+                        },
+                        "user_input_job_name": {
+                            "title": "Job Name",
+                            "type": "TEXT",
+                            "key": true,
+                            "hidden": false
+                        },
+                        "operation_type": {
+                            "title": "Operation Type",
+                            "type": "TEXT",
+                            "key": true,
+                            "hidden": false
+                        },
+                        "executed_time": {
+                            "title": "Start Time",
+                            "type": "DATETIME",
+                            "key": true,
+                            "hidden": false
+                        },
+                        "job_status": {
+                            "title": "Job Status",
+                            "defaultWidth": 150,
+                            "htmlTemplateForRow": "{% raw %}<span class='badge' style='background-color: {{ row.job_status_color}}' > {{ row.job_status }} </span>{% endraw %}"
+                        },
+                        "job_status_color": {
+                            "type": "COLOR-MAP",
+                            "source-column": "job_status",
+                            "color-map": {
+                                "Completed": "#008000",
+                                "Failed": "#FF0000",
+                                "In Progress": "#FFA500",
+                                "Success": "#008000"
+                            }
+                        },
+                        "job_log": {
+                            "title": "Job Log",
+                            "type": "TEXT",
+                            "key": true,
+                            "hidden": false
+                        },
+                        "reason": {
+                            "title": "Reason",
+                            "type": "TEXT",
+                            "key": true,
+                            "hidden": false
+                        },
+                        "id": {
+                            "title": "ID",
+                            "value": "user-dashboard-discovery_logs",
+                            "key": true,
+                            "type": "FIXED_VALUE",
+                            "hidden": true,
+                            "visible": false
+                        },
+                        "newly_uploded_device_count": {
+                            "title": "Imported Device"
+                        },
+                        "access_verification_count": {
+                            "title": "Access Success"
+                        },
+                        "run_discovery_counts": {
+                            "title": "Discovered Device"
+                        },
+                        "timestamp": {
+                            "title": "End time",
+                            "type": "DATETIME"
+                        },
+                        "jobname": {
+                            "title": "Jobname",
+                            "type": "TEXT",
+                            "hidden": true
+                        },
+                        "jobid": {
+                            "title": "job id",
+                            "type": "TEXT",
+                            "hidden": true
+                        }
+                    },
+                    "custom_columns": [
+                        {
+                            "id": "response_colors",
+                            "label": "Enable Color",
+                            "expr": "['#b3b3b3'] if success == 0 else ['#4CAF50']",
+                            "hidden": true,
+                            "visible": false,
+                            "sortable": false
+                        },
+                        {
+                            "id": "response_colorf",
+                            "label": "Enable Color",
+                            "expr": "['#b3b3b3'] if failed == 0 else ['#BB0000']",
+                            "hidden": true,
+                            "visible": false,
+                            "sortable": false
+                        }
+                    ],
+                    "actions": [
+                        {
+                            "appName": "user-dashboard/discovery_logs",
+                            "permission": "aia:page:view",
+                            "drillDownContext": "id",
+                            "drillDownLinkField": "user_input_job_name",
+                            "identifier": "user_input_job_name",
+                            "selectionType": "SINGLE",
+                            "stateName": "app.featureapp",
+                            "title": "View Details",
+                            "actionCondition1": {
+                                "actionControl": "HIDE_IF",
+                                "conditionalField": [
+                                    {
+                                        "conditionType": "EQUAL",
+                                        "conditionValue": "metadata",
+                                        "fieldId": "log_type"
+                                    }
+                                ]
+                            },
+                            "type": "GO_TO_APP_STATE"
+                        },
+                        {
+                            "permission1": "rda:user_dashboard:view",
+                            "appName": "user-dashboard/workflow_logs",
+                            "identifier1": "launch.dashboard.device_view_app",
+                            "selectionType": "SINGLE",
+                            "title": "Upload to Workflow Results",
+                            "actionCondition": {
+                                "actionControl": "SHOW_IF",
+                                "conditionalField": [
+                                    {
+                                        "conditionType": "IN",
+                                        "conditionValue": [
+                                            "Import and Replace devices",
+                                            "Import Devices",
+                                            "Upload to Workflow"
+                                        ],
+                                        "fieldId": "operation_type"
+                                    }
+                                ]
+                            },
+                            "type": "GO_TO_APP_STATE"
+                        },
+                        {
+                            "permission": "rda:mobility:update",
+                            "title": "Run Discovery",
+                            "type": "POPUP_FORM",
+                            "selectionType": "NONE",
+                            "identifier": "saas-service-action:userdashboard-add-yaml",
+                            "api-endpoint": {
+                                "service-name": "saas-reports",
+                                "methodName": "getForm",
+                                "stringified-params": true,
+                                "parse-output": false,
+                                "params": [
+                                    {
+                                        "formId": "rda.saas.dynamic.form",
+                                        "formActionList": {
+                                            "formActions": [
+                                                {
+                                                    "identifier": "Submit",
+                                                    "actionLabel": "Run"
+                                                }
+                                            ]
+                                        },
+                                        "formDefinition": {
+                                            "id": "rda.saas.dynamic.form",
+                                            "refreshRequired": true,
+                                            "formFieldList": [
+                                                {
+                                                    "fieldId": "job_name",
+                                                    "label": "Job Name",
+                                                    "help": "Job Name",
+                                                    "dataType": "string",
+                                                    "controlType": "TEXT_FIELD",
+                                                    "hidden": false,
+                                                    "editable": true,
+                                                    "required": false
+                                                },
+                                                {
+                                                    "help": "Make sure access Verification is run for the devices you want to run discovery on",
+                                                    "dataType": "string",
+                                                    "required": true,
+                                                    "editable": true,
+                                                    "label": "NOTE: Make sure that access verification is completed for  devices for which discovery needs to be run.",
+                                                    "controlType": "LABEL",
+                                                    "hidden": false,
+                                                    "fieldId": "note_field"
+                                                },
+                                                {
+                                                    "help": "Select network devices for which you want to run discovery",
+                                                    "dataType": "string",
+                                                    "required": true,
+                                                    "editable": true,
+                                                    "label": "Network Devices",
+                                                    "hidden": false,
+                                                    "fieldId": "Others",
+                                                    "controlType": "SELECTOR_TABLE",
+                                                    "controlPropertyList": [
+                                                        {
+                                                            "attribute": "column-key",
+                                                            "value": "ip_address"
+                                                        },
+                                                        {
+                                                            "attribute": "selection",
+                                                            "value": "MULTIPLE"
+                                                        }
+                                                    ],
+                                                    "widget": {
+                                                        "title": "Device Details",
+                                                        "timebased": false,
+                                                        "max_width": 12,
+                                                        "height": 8,
+                                                        "min_width": 12,
+                                                        "extra_filter0": "type contains 'windows'",
+                                                        "extra_filter": "customer_tag is '{{CUST_TAG}}' or customer_tag is empty",
+                                                        "stream": "onboard_devices",
+                                                        "ts_column": "timestamp",
+                                                        "sorting": [],
+                                                        "columns": {
+                                                            "ip_address": {
+                                                                "title": "IP Address",
+                                                                "key": true
+                                                            },
+                                                            "discovery_scope": {
+                                                                "title": "discovery Scope",
+                                                                "key": true,
+                                                                "visible": false
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            ]
+                                        },
+                                        "actions": [
+                                            {
+                                                "type": "RUN_PIPELINE",
+                                                "pipelineName": "ondemand_discovery_main",
+                                                "isSync": false,
+                                                "workerGroup": "rda-site-01"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "permission1": "rda:mobility:update",
+                            "title": "Upload to Workflow",
+                            "type": "POPUP_FORM",
+                            "selectionType": "NONE",
+                            "identifier1": "saas-service-action:userdashboard-add-yaml",
+                            "api-endpoint": {
+                                "service-name": "saas-reports",
+                                "methodName": "getForm",
+                                "stringified-params": true,
+                                "parse-output": false,
+                                "params": [
+                                    {
+                                        "formId": "rda.saas.dynamic.form",
+                                        "formActionList": {
+                                            "formActions": [
+                                                {
+                                                    "identifier": "Submit",
+                                                    "actionLabel": "Upload"
+                                                }
+                                            ]
+                                        },
+                                        "formDefinition": {
+                                            "id": "rda.saas.dynamic.form",
+                                            "refreshRequired": true,
+                                            "formFieldList": [
+                                                {
+                                                    "help": "Do you want to Upload?",
+                                                    "dataType": "string",
+                                                    "controlType": "LABEL",
+                                                    "required": false,
+                                                    "editable": false,
+                                                    "label": "Do you want to Upload?",
+                                                    "hidden": false,
+                                                    "fieldId": "uploadToWorkflow"
+                                                },
+                                                {
+                                                    "fieldId": "job_name",
+                                                    "label": "Job Name",
+                                                    "help": "Job Name",
+                                                    "dataType": "string",
+                                                    "controlType": "TEXT_FIELD",
+                                                    "hidden": false,
+                                                    "editable": true,
+                                                    "required": false
+                                                },
+                                                {
+                                                    "fieldId": "retryCount",
+                                                    "label": "Retry Count",
+                                                    "help": "Retry Count",
+                                                    "dataType": "string",
+                                                    "controlType": "TEXT_FIELD",
+                                                    "defaultValue": "30",
+                                                    "controlPropertyList": [
+                                                        {
+                                                            "attribute": "layout-group-id",
+                                                            "value": "usertype-retry"
+                                                        },
+                                                        {
+                                                            "attribute": "layout-percent",
+                                                            "value": "50"
+                                                        }
+                                                    ],
+                                                    "hidden": true,
+                                                    "editable": true,
+                                                    "required": false
+                                                },
+                                                {
+                                                    "fieldId": "retryInterval",
+                                                    "label": "Retry Interval",
+                                                    "help": "Retry Interval",
+                                                    "dataType": "string",
+                                                    "controlType": "TEXT_FIELD",
+                                                    "defaultValue": "30000",
+                                                    "controlPropertyList": [
+                                                        {
+                                                            "attribute": "layout-group-id",
+                                                            "value": "usertype-retry"
+                                                        },
+                                                        {
+                                                            "attribute": "layout-percent",
+                                                            "value": "50"
+                                                        }
+                                                    ],
+                                                    "hidden": true,
+                                                    "editable": true,
+                                                    "required": false
+                                                }
+                                            ]
+                                        },
+                                        "actions": [
+                                            {
+                                                "type": "RUN_PIPELINE",
+                                                "pipelineName": "ondemand_upload_to_workflow",
+                                                "isSync": false,
+                                                "workerGroup": "rda-site-01"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "widget_id": "9159e5f0"
+                }
+            ]
+        }
+    ]
+}

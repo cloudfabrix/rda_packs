@@ -1,0 +1,363 @@
+{
+  "name": "StarOS_APN_Aggregate_PDP_Contexts_Request_Statistics",
+  "label": "StarOS APN Aggregate PDP Contexts Request Statistics",
+  "description": "Web report: StarOS APN Aggregate PDP Contexts Request Statistics",
+  "dashboard_folder": "mobility-webreport",
+  "enabled": true,
+  "stream": "mobility_kpi_metrics_data",
+  "dashboard_type": "template",
+  "template_variables": {
+    "DEVICE": {
+      "contextId": "device",
+      "default": "HSTNTXNZ62G"
+    },
+    "FUNCTION": {
+      "contextId": "function",
+      "default": "max"
+    },
+    "INTERVAL": {
+      "contextId": "interval",
+      "default": "auto"
+    },
+    "ROLLUP": {
+      "contextId": "rollup",
+      "default": "device"
+    },
+    "SCHEMA": {
+      "contextId": "schema",
+      "default": "apn"
+    }
+  },
+  "dashboard_filters": {
+    "time_filter": true,
+    "default_time_filter_labels": [
+      "Last 24 hours"
+    ]
+  },
+  "dynamic_form": {
+    "formData": {
+      "device": "HSTNTXNZ62G"
+    },
+    "controlPanelFormDefinition": {
+      "id": "kpi.benchmark.json",
+      "refreshRequired": true,
+      "formFieldList": [
+        {
+          "fieldId": "function",
+          "label": "Function",
+          "help": "Function",
+          "dataType": "string",
+          "hidden": false,
+          "editable": true,
+          "required": true,
+          "controlType": "COMBO_BOX",
+          "defaultValue": "max",
+          "lovValues": [
+            {
+              "identifier": "max",
+              "displayName": "Maximum"
+            },
+            {
+              "identifier": "min",
+              "displayName": "Minimum"
+            },
+            {
+              "identifier": "avg",
+              "displayName": "Average"
+            },
+            {
+              "identifier": "sum",
+              "displayName": "Sum"
+            }
+          ]
+        },
+        {
+          "fieldId": "interval",
+          "label": "Interval",
+          "help": "Interval",
+          "dataType": "string",
+          "hidden": false,
+          "editable": true,
+          "required": true,
+          "controlType": "COMBO_BOX",
+          "defaultValue": null,
+          "lovValues": [
+            {
+              "identifier": "auto",
+              "displayName": "Auto"
+            },
+            {
+              "identifier": "5Min",
+              "displayName": "5 Minutes"
+            },
+            {
+              "identifier": "15Min",
+              "displayName": "15 Minutes"
+            },
+            {
+              "identifier": "1H",
+              "displayName": "1 Hour"
+            },
+            {
+              "identifier": "24H",
+              "displayName": "1 Day"
+            }
+          ]
+        },
+        {
+          "fieldId": "device",
+          "label": "Device",
+          "help": "Device",
+          "dataType": "string",
+          "hidden": false,
+          "editable": true,
+          "required": true,
+          "controlType": "COMBO_BOX",
+          "lovSourceType": "pstream",
+          "lovSourceParams": {
+            "name": "mobility_kpi_metrics_data",
+            "valueColumn": "device",
+            "labelColumn": "device",
+            "query": "schema_key is 'apn'"
+          },
+          "defaultValue": "HSTNTXNZ62G"
+        }
+      ],
+      "formActionList": {
+        "formActions": [
+          {
+            "api-endpoint": {
+              "methodName": "submitForm",
+              "parse-output": false,
+              "params": [
+                {
+                  "formData": {},
+                  "formId": "kpi.benchmark.json"
+                }
+              ],
+              "service-name": "saas-reports",
+              "stringified-params": true
+            },
+            "actionLabel": "Save",
+            "type": "SUBMIT",
+            "identifier": "Submit"
+          },
+          {
+            "actionLabel": "Cancel",
+            "type": "CANCEL",
+            "identifier": "Cancel"
+          }
+        ]
+      }
+    }
+  },
+  "dashboard_sections": [
+    {
+      "title": "StarOS APN Aggregate PDP Contexts Request Statistics",
+      "show_filter": true,
+      "widgets": [
+        {
+          "title": "APN CPC Request",
+          "widget_type": "timeseries",
+          "stream": "mobility_kpi_metrics_data",
+          "description": "Formula: (%att-pdp-ctxt%) Description: APN CPC Request",
+          "ts_column": "timestamp",
+          "max_width": 12,
+          "height": 6,
+          "min_width": 12,
+          "chartProperties": {
+            "yAxisLabel": "",
+            "xAxisLabel": null,
+            "legendLocation": "right",
+            "mode": "selection",
+            "column-id": "timestamp"
+          },
+          "interval": "{{INTERVAL}}",
+          "series_spec": [
+            {
+              "column": "kpi_APN_CPC_Request",
+              "agg": "{{FUNCTION}}",
+              "type": "int"
+            }
+          ],
+          "extra_filter": "device = '{{DEVICE}}' and schema_key is 'apn'",
+          "group_by": [
+            "{{ROLLUP}}"
+          ],
+          "formatting": {
+            "maximumFractionDigits": 5,
+            "notation": "compact"
+          },
+          "widget_id": "194ffc65"
+        },
+        {
+          "title": "APN DPC Request Transmitted",
+          "widget_type": "timeseries",
+          "stream": "mobility_kpi_metrics_data",
+          "description": "Formula: (%att-deact-pdp-ggsn%) Description: APN DPC Request Transmitted",
+          "ts_column": "timestamp",
+          "max_width": 12,
+          "height": 6,
+          "min_width": 12,
+          "chartProperties": {
+            "yAxisLabel": "",
+            "xAxisLabel": null,
+            "legendLocation": "right",
+            "mode": "selection",
+            "column-id": "timestamp"
+          },
+          "interval": "{{INTERVAL}}",
+          "series_spec": [
+            {
+              "column": "kpi_APN_DPC_Request_Transmitted",
+              "agg": "{{FUNCTION}}",
+              "type": "int"
+            }
+          ],
+          "extra_filter": "device = '{{DEVICE}}' and schema_key is 'apn'",
+          "group_by": [
+            "{{ROLLUP}}"
+          ],
+          "formatting": {
+            "maximumFractionDigits": 5,
+            "notation": "compact"
+          },
+          "widget_id": "c260114b"
+        },
+        {
+          "title": "APN DPC Request Transmitted Accepted",
+          "widget_type": "timeseries",
+          "stream": "mobility_kpi_metrics_data",
+          "description": "Formula: (%succ-deact-pdp-ggsn%) Description: APN DPC Request Transmitted Accepted",
+          "ts_column": "timestamp",
+          "max_width": 12,
+          "height": 6,
+          "min_width": 12,
+          "chartProperties": {
+            "yAxisLabel": "",
+            "xAxisLabel": null,
+            "legendLocation": "right",
+            "mode": "selection",
+            "column-id": "timestamp"
+          },
+          "interval": "{{INTERVAL}}",
+          "series_spec": [
+            {
+              "column": "kpi_APN_DPC_Request_Transmitted_Accepted",
+              "agg": "{{FUNCTION}}",
+              "type": "int"
+            }
+          ],
+          "extra_filter": "device = '{{DEVICE}}' and schema_key is 'apn'",
+          "group_by": [
+            "{{ROLLUP}}"
+          ],
+          "formatting": {
+            "maximumFractionDigits": 5,
+            "notation": "compact"
+          },
+          "widget_id": "d7371150"
+        },
+        {
+          "title": "APN DPC Request Received",
+          "widget_type": "timeseries",
+          "stream": "mobility_kpi_metrics_data",
+          "description": "Formula: (%att-deact-pdp-ms%) Description: APN DPC Request Received",
+          "ts_column": "timestamp",
+          "max_width": 12,
+          "height": 6,
+          "min_width": 12,
+          "chartProperties": {
+            "yAxisLabel": "",
+            "xAxisLabel": null,
+            "legendLocation": "right",
+            "mode": "selection",
+            "column-id": "timestamp"
+          },
+          "interval": "{{INTERVAL}}",
+          "series_spec": [
+            {
+              "column": "kpi_APN_DPC_Request_Received",
+              "agg": "{{FUNCTION}}",
+              "type": "int"
+            }
+          ],
+          "extra_filter": "device = '{{DEVICE}}' and schema_key is 'apn'",
+          "group_by": [
+            "{{ROLLUP}}"
+          ],
+          "formatting": {
+            "maximumFractionDigits": 5,
+            "notation": "compact"
+          },
+          "widget_id": "c467c742"
+        },
+        {
+          "title": "APN DPC Request Successful From MS",
+          "widget_type": "timeseries",
+          "stream": "mobility_kpi_metrics_data",
+          "description": "Formula: (%succ-deact-pdp-ms%) Description: APN DPC Request Successful From MS",
+          "ts_column": "timestamp",
+          "max_width": 12,
+          "height": 6,
+          "min_width": 12,
+          "chartProperties": {
+            "yAxisLabel": "",
+            "xAxisLabel": null,
+            "legendLocation": "right",
+            "mode": "selection",
+            "column-id": "timestamp"
+          },
+          "interval": "{{INTERVAL}}",
+          "series_spec": [
+            {
+              "column": "kpi_APN_DPC_Request_Successful_From_MS",
+              "agg": "{{FUNCTION}}",
+              "type": "int"
+            }
+          ],
+          "extra_filter": "device = '{{DEVICE}}' and schema_key is 'apn'",
+          "group_by": [
+            "{{ROLLUP}}"
+          ],
+          "formatting": {
+            "maximumFractionDigits": 5,
+            "notation": "compact"
+          },
+          "widget_id": "47ea0759"
+        },
+        {
+          "title": "KPI's Summary",
+          "widget_type": "tabular",
+          "stream": "mobility_kpi_metrics_data",
+          "ts_column": "timestamp",
+          "query": "*",
+          "extra_filter": "device = '{{DEVICE}}' and schema_key is 'apn'",
+          "min_width": 6,
+          "height": 12,
+          "max_width": 12,
+          "paginated": true,
+          "resizableColumns": true,
+          "virtual_scrolling": false,
+          "showRowSummary": true,
+          "max_rows": 50,
+          "sorting": [
+            {
+              "timestamp": "desc"
+            }
+          ],
+          "columns": {
+            "timestamp": "Timestamp",
+            "instance_key": "Instance_Key",
+            "kpi_APN_CPC_Request": "APN CPC Request",
+            "kpi_APN_DPC_Request_Transmitted": "APN DPC Request Transmitted",
+            "kpi_APN_DPC_Request_Transmitted_Accepted": "APN DPC Request Transmitted Accepted",
+            "kpi_APN_DPC_Request_Received": "APN DPC Request Received",
+            "kpi_APN_DPC_Request_Successful_From_MS": "APN DPC Request Successful From MS"
+          },
+          "widget_id": "94a3fc11"
+        }
+      ]
+    }
+  ]
+}

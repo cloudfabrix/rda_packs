@@ -1,0 +1,21 @@
+name: notify_send_email_on_incident_create
+id: notify_send_email_on_incident_create
+version: 2024041201
+category: Email notifier
+comment: Email notifier
+enabled: true
+type: Service
+provider: CloudFabrix Software, Inc.
+attrs: {}
+service_pipelines:
+    -   name: notify_on_incident_create
+        label: notify_on_incident_create
+        restart_on_pipeline_update: true
+        site: rda.*
+        version: '*'
+        site_type: regex
+        instances: 1
+        scaling_policy:
+            min_instances: 1
+            max_instances: 1
+saved_time: '2025-07-04T11:04:20.016257'

@@ -1,0 +1,89 @@
+{
+  "name": "preview_{{prefix}}-{{schema}}_metrics",
+  "label": "Metrics Workbench",
+  "description": "Metrics Workbench",
+  "dashboard_folder": "Default",
+  "enabled": true,
+  "dashboard_type": "dashboard",
+  "dashboard_filters": {
+    "time_filter": true,
+    "default_time_filter_non_removable": true,
+    "show_default_time_filter": true
+  },
+  "dashboard_sections": [
+    {
+      "title": "Metrics Dashboard",
+      "show_filter": true,
+      "widgets": [
+        {
+          "title": "Time Series",
+          "widget_type": "timeseries",
+          "stream": "{{kpi_stream_name}}",
+          "ts_column": "timestamp",
+          "ignore_extra_filter": true,
+          "duration_hours": 72000,
+          "max_width": 6,
+          "height": 6,
+          "min_width": 12,
+          "metric_source": "telegraf",
+          "chartProperties": {
+            "yAxisLabel": "",
+            "xAxisLabel": null,
+            "legendLocation": "right",
+            "mode": "selection",
+            "column-id": "timestamp"
+          },
+          "formatting": {
+            "maximumFractionDigits": 5,
+            "notation": "compact"
+          },
+          "interval": "5Min",
+          "group_by": [
+            "device"
+          ],
+          "series_spec": [
+            {
+              "column": "value",
+              "agg": "max",
+              "type": "int"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "dynamic_form": {
+    "formData": {},
+    "formDefinition": {
+      "id": "kpi.benchmark.json",
+      "refreshRequired": true,
+      "formFieldList": "{{preview_field_list}}",
+      "formActionList": {
+        "formActions": [
+          {
+            "api-endpoint": {
+              "methodName": "submitForm",
+              "parse-output": false,
+              "params": [
+                {
+                  "formData": {},
+                  "formId": "kpi.benchmark.json"
+                }
+              ],
+              "service-name": "saas-reports",
+              "stringified-params": true
+            },
+            "actionLabel": "Save",
+            "type": "SUBMIT",
+            "identifier": "Submit"
+          },
+          {
+            "actionLabel": "Cancel",
+            "type": "CANCEL",
+            "identifier": "Cancel"
+          }
+        ]
+      }
+    }
+  }
+}

@@ -1,0 +1,25 @@
+%% stream = no and limit = 0
+
+@c:new-block
+    --> @dm:empty
+    --> @exec:get-input
+    --> @dm:add-missing-columns columns="KPI_Name"
+    --> @dm:manipulate-string from ="schema" and to ="schema" and func="lower"
+    --> @dm:eval lastupdated = "int(time_now_as_ms())"
+    --> @dm:save name="temp-add-device-input"
+
+--> @c:data-loop columns="schema,Formula,Description,KPI_Label" and dataset ="temp-add-device-input"
+    --> @dm:recall name="Autox_KPI_list_new" and return_empty  ="yes"
+    --> *dm:filter KPI_Label is "$KPI_Label"
+    --> @dm:skip-pipeline-if-shape row_count > 0
+
+--> @c:data-loop columns="schema,Formula,Description,KPI_Label" and dataset ="temp-add-device-input"
+    --> @dm:recall name="Autox_KPI_list_new" and return_empty  ="yes"
+    --> @dm:addrow KPI_Name ="$KPI_Label" and schema ="$schema" and Schema_Original ="$schema" and Formula = "$Formula" and Description ="$Description" and KPI_Label  = "$KPI_Label"
+    --> @dm:manipulate-string from ="Schema_Original" and to ="Schema_Original" and func="upper"
+    --> @dm:eval KPI_Name = "KPI_Name if KPI_Name and KPI_Name.lower().startswith('kpi_')  else 'kpi_' + KPI_Name"
+    --> @dm:eval KPI_Name = "KPI_Name.replace('-', '_').replace(' ', '_')"
+    --> @dm:add-missing-columns columns="lastupdated"
+    --> @dm:eval lastupdated="int(time_now_as_ms()) if  lastupdated is None else lastupdated"
+    --> @dm:dedup
+    --> @dm:save name="Autox_KPI_list_new"

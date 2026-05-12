@@ -1,0 +1,394 @@
+{
+  "name": "StarOS_PGW_NW_Modification_Failure_Session_Statistics",
+  "label": "StarOS PGW N/W Modification Failure Session Statistics",
+  "description": "Web report: StarOS PGW N/W Modification Failure Session Statistics",
+  "dashboard_folder": "mobility-webreport",
+  "enabled": true,
+  "stream": "mobility_kpi_metrics_data",
+  "dashboard_type": "template",
+  "template_variables": {
+    "DEVICE": {
+      "contextId": "device"
+    },
+    "FUNCTION": {
+      "contextId": "function",
+      "default": "max"
+    },
+    "INTERVAL": {
+      "contextId": "interval",
+      "default": "auto"
+    },
+    "ROLLUP": {
+      "contextId": "rollup",
+      "default": "device"
+    },
+    "SCHEMA": {
+      "contextId": "schema",
+      "default": "pgw"
+    }
+  },
+  "dashboard_filters": {
+    "time_filter": true,
+    "default_time_filter_labels": [
+      "Last 24 hours"
+    ]
+  },
+  "dynamic_form": {
+    "formData": {},
+    "controlPanelFormDefinition": {
+      "id": "kpi.benchmark.json",
+      "refreshRequired": true,
+      "formFieldList": [
+        {
+          "fieldId": "function",
+          "label": "Function",
+          "help": "Function",
+          "dataType": "string",
+          "hidden": false,
+          "editable": true,
+          "required": true,
+          "controlType": "COMBO_BOX",
+          "defaultValue": "max",
+          "lovValues": [
+            {
+              "identifier": "max",
+              "displayName": "Maximum"
+            },
+            {
+              "identifier": "min",
+              "displayName": "Minimum"
+            },
+            {
+              "identifier": "avg",
+              "displayName": "Average"
+            },
+            {
+              "identifier": "sum",
+              "displayName": "Sum"
+            }
+          ]
+        },
+        {
+          "fieldId": "interval",
+          "label": "Interval",
+          "help": "Interval",
+          "dataType": "string",
+          "hidden": false,
+          "editable": true,
+          "required": true,
+          "controlType": "COMBO_BOX",
+          "defaultValue": null,
+          "lovValues": [
+            {
+              "identifier": "auto",
+              "displayName": "Auto"
+            },
+            {
+              "identifier": "5Min",
+              "displayName": "5 Minutes"
+            },
+            {
+              "identifier": "15Min",
+              "displayName": "15 Minutes"
+            },
+            {
+              "identifier": "1H",
+              "displayName": "1 Hour"
+            },
+            {
+              "identifier": "24H",
+              "displayName": "1 Day"
+            }
+          ]
+        },
+        {
+          "fieldId": "device",
+          "label": "Device",
+          "help": "Device",
+          "dataType": "string",
+          "hidden": false,
+          "editable": true,
+          "required": true,
+          "controlType": "COMBO_BOX",
+          "lovSourceType": "pstream",
+          "lovSourceParams": {
+            "name": "mobility_kpi_metrics_data",
+            "valueColumn": "device",
+            "labelColumn": "device",
+            "query": "schema_key is 'pgw'"
+          }
+        }
+      ],
+      "formActionList": {
+        "formActions": [
+          {
+            "api-endpoint": {
+              "methodName": "submitForm",
+              "parse-output": false,
+              "params": [
+                {
+                  "formData": {},
+                  "formId": "kpi.benchmark.json"
+                }
+              ],
+              "service-name": "saas-reports",
+              "stringified-params": true
+            },
+            "actionLabel": "Save",
+            "type": "SUBMIT",
+            "identifier": "Submit"
+          },
+          {
+            "actionLabel": "Cancel",
+            "type": "CANCEL",
+            "identifier": "Cancel"
+          }
+        ]
+      }
+    }
+  },
+  "dashboard_sections": [
+    {
+      "title": "StarOS PGW N/W Modification Failure Session Statistics",
+      "show_filter": true,
+      "widgets": [
+        {
+          "title": "PGW Network Bearers Modification Failed",
+          "widget_type": "timeseries",
+          "stream": "mobility_kpi_metrics_data",
+          "description": "Formula: (%sessstat-bearmodfail-nwinit%) Description: PGW Network Bearers Modification Failed",
+          "ts_column": "timestamp",
+          "max_width": 12,
+          "height": 6,
+          "min_width": 12,
+          "chartProperties": {
+            "yAxisLabel": "",
+            "xAxisLabel": null,
+            "legendLocation": "right",
+            "mode": "selection",
+            "column-id": "timestamp"
+          },
+          "interval": "{{INTERVAL}}",
+          "series_spec": [
+            {
+              "column": "kpi_PGW_Network_Bearers_Modification_Failed",
+              "agg": "{{FUNCTION}}",
+              "type": "int"
+            }
+          ],
+          "extra_filter": "device = '{{DEVICE}}' and schema_key is 'pgw'",
+          "group_by": [
+            "{{ROLLUP}}"
+          ],
+          "formatting": {
+            "maximumFractionDigits": 5,
+            "notation": "compact"
+          },
+          "widget_id": "194ffc65"
+        },
+        {
+          "title": "PGW Network Bearers Modification Failure No Resource",
+          "widget_type": "timeseries",
+          "stream": "mobility_kpi_metrics_data",
+          "description": "Formula: (%sessstat-bearmodfail-nwnores%) Description: PGW Network Bearers Modification Failure No Resource",
+          "ts_column": "timestamp",
+          "max_width": 12,
+          "height": 6,
+          "min_width": 12,
+          "chartProperties": {
+            "yAxisLabel": "",
+            "xAxisLabel": null,
+            "legendLocation": "right",
+            "mode": "selection",
+            "column-id": "timestamp"
+          },
+          "interval": "{{INTERVAL}}",
+          "series_spec": [
+            {
+              "column": "kpi_PGW_Network_Bearers_Modification_Failure_No_Resource",
+              "agg": "{{FUNCTION}}",
+              "type": "int"
+            }
+          ],
+          "extra_filter": "device = '{{DEVICE}}' and schema_key is 'pgw'",
+          "group_by": [
+            "{{ROLLUP}}"
+          ],
+          "formatting": {
+            "maximumFractionDigits": 5,
+            "notation": "compact"
+          },
+          "widget_id": "57993354"
+        },
+        {
+          "title": "PGW Network Bearers Modification Failure No Memory",
+          "widget_type": "timeseries",
+          "stream": "mobility_kpi_metrics_data",
+          "description": "Formula: (%sessstat-bearmodfail-nwnomem%) Description: PGW Network Bearers Modification Failure No Memory",
+          "ts_column": "timestamp",
+          "max_width": 12,
+          "height": 6,
+          "min_width": 12,
+          "chartProperties": {
+            "yAxisLabel": "",
+            "xAxisLabel": null,
+            "legendLocation": "right",
+            "mode": "selection",
+            "column-id": "timestamp"
+          },
+          "interval": "{{INTERVAL}}",
+          "series_spec": [
+            {
+              "column": "kpi_PGW_Network_Bearers_Modification_Failure_No_Memory",
+              "agg": "{{FUNCTION}}",
+              "type": "int"
+            }
+          ],
+          "extra_filter": "device = '{{DEVICE}}' and schema_key is 'pgw'",
+          "group_by": [
+            "{{ROLLUP}}"
+          ],
+          "formatting": {
+            "maximumFractionDigits": 5,
+            "notation": "compact"
+          },
+          "widget_id": "f434f49b"
+        },
+        {
+          "title": "PGW Network Bearers Modification Failure System Failure",
+          "widget_type": "timeseries",
+          "stream": "mobility_kpi_metrics_data",
+          "description": "Formula: (%sessstat-bearmodfail-nwsysfail%) Description: PGW Network Bearers Modification Failure System Failure",
+          "ts_column": "timestamp",
+          "max_width": 12,
+          "height": 6,
+          "min_width": 12,
+          "chartProperties": {
+            "yAxisLabel": "",
+            "xAxisLabel": null,
+            "legendLocation": "right",
+            "mode": "selection",
+            "column-id": "timestamp"
+          },
+          "interval": "{{INTERVAL}}",
+          "series_spec": [
+            {
+              "column": "kpi_PGW_Network_Bearers_Modification_Failure_System_Failure",
+              "agg": "{{FUNCTION}}",
+              "type": "int"
+            }
+          ],
+          "extra_filter": "device = '{{DEVICE}}' and schema_key is 'pgw'",
+          "group_by": [
+            "{{ROLLUP}}"
+          ],
+          "formatting": {
+            "maximumFractionDigits": 5,
+            "notation": "compact"
+          },
+          "widget_id": "88997724"
+        },
+        {
+          "title": "PGW Network Bearers Modification Failure TFT Semantic Error",
+          "widget_type": "timeseries",
+          "stream": "mobility_kpi_metrics_data",
+          "description": "Formula: (%sessstat-bearmodfail-nwsemtft%) Description: PGW Network Bearers Modification Failure TFT Semantic Error",
+          "ts_column": "timestamp",
+          "max_width": 12,
+          "height": 6,
+          "min_width": 12,
+          "chartProperties": {
+            "yAxisLabel": "",
+            "xAxisLabel": null,
+            "legendLocation": "right",
+            "mode": "selection",
+            "column-id": "timestamp"
+          },
+          "interval": "{{INTERVAL}}",
+          "series_spec": [
+            {
+              "column": "kpi_PGW_Network_Bearers_Modification_Failure_TFT_Semantic_Error",
+              "agg": "{{FUNCTION}}",
+              "type": "int"
+            }
+          ],
+          "extra_filter": "device = '{{DEVICE}}' and schema_key is 'pgw'",
+          "group_by": [
+            "{{ROLLUP}}"
+          ],
+          "formatting": {
+            "maximumFractionDigits": 5,
+            "notation": "compact"
+          },
+          "widget_id": "36759808"
+        },
+        {
+          "title": "PGW Network Bearers Modification Failure TFT Syntax Error",
+          "widget_type": "timeseries",
+          "stream": "mobility_kpi_metrics_data",
+          "description": "Formula: (%sessstat-bearmodfail-nwsyntft%) Description: PGW Network Bearers Modification Failure TFT Syntax Error",
+          "ts_column": "timestamp",
+          "max_width": 12,
+          "height": 6,
+          "min_width": 12,
+          "chartProperties": {
+            "yAxisLabel": "",
+            "xAxisLabel": null,
+            "legendLocation": "right",
+            "mode": "selection",
+            "column-id": "timestamp"
+          },
+          "interval": "{{INTERVAL}}",
+          "series_spec": [
+            {
+              "column": "kpi_PGW_Network_Bearers_Modification_Failure_TFT_Syntax_Error",
+              "agg": "{{FUNCTION}}",
+              "type": "int"
+            }
+          ],
+          "extra_filter": "device = '{{DEVICE}}' and schema_key is 'pgw'",
+          "group_by": [
+            "{{ROLLUP}}"
+          ],
+          "formatting": {
+            "maximumFractionDigits": 5,
+            "notation": "compact"
+          },
+          "widget_id": "d740e460"
+        },
+        {
+          "title": "KPI's Summary",
+          "widget_type": "tabular",
+          "stream": "mobility_kpi_metrics_data",
+          "ts_column": "timestamp",
+          "query": "*",
+          "extra_filter": "device = '{{DEVICE}}' and schema_key is 'pgw'",
+          "min_width": 6,
+          "height": 12,
+          "max_width": 12,
+          "paginated": true,
+          "resizableColumns": true,
+          "virtual_scrolling": false,
+          "showRowSummary": true,
+          "max_rows": 50,
+          "sorting": [
+            {
+              "timestamp": "desc"
+            }
+          ],
+          "columns": {
+            "timestamp": "Timestamp",
+            "instance_key": "Instance_Key",
+            "kpi_PGW_Network_Bearers_Modification_Failed": "PGW Network Bearers Modification Failed",
+            "kpi_PGW_Network_Bearers_Modification_Failure_No_Resource": "PGW Network Bearers Modification Failure No Resource",
+            "kpi_PGW_Network_Bearers_Modification_Failure_No_Memory": "PGW Network Bearers Modification Failure No Memory",
+            "kpi_PGW_Network_Bearers_Modification_Failure_System_Failure": "PGW Network Bearers Modification Failure System Failure",
+            "kpi_PGW_Network_Bearers_Modification_Failure_TFT_Semantic_Error": "PGW Network Bearers Modification Failure TFT Semantic Error",
+            "kpi_PGW_Network_Bearers_Modification_Failure_TFT_Syntax_Error": "PGW Network Bearers Modification Failure TFT Syntax Error"
+          },
+          "widget_id": "94a3fc11"
+        }
+      ]
+    }
+  ]
+}

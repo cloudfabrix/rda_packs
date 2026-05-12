@@ -1,0 +1,131 @@
+%% stream = no and limit = 0
+
+## Merge Chassis data with Product-Type Dictionary
+@exec:get-input
+    --> @dm:save name="temp-chassis_inventory_collection"
+    --> *exec:if-shape num_rows > 0
+       --> @dm:recall name = "productType" and return_empty="yes"  and cache is yes  and cache_refresh_seconds is 86400
+       --> *exec:if-shape num_rows > 0
+          --> @dm:rename-columns end_of_sw_maint="eox_maintenance_date" &
+                  end_of_ext_announcement_date="eox_announcement_date" &
+                  end_of_routine_fail_date="eox_failure_analysis_date" &
+                  end_of_contract_renew_date="eox_service_contract_date" &
+                  end_of_svc_attach_date="eox_service_attach_date" &
+                  end_of_sec_sup_date="eox_security_update_date"
+          --> @dm:add-missing-columns columns="product_type_dict" and value="yes"
+          --> @dm:copy-columns from ="product_id" and to ="product_id" and func="upper"
+          --> @dm:save name="temp-product_type_dict"
+          --> @dm:recall name="temp-chassis_inventory_collection"  and return_empty="yes"
+          --> @dm:enrich dict="temp-product_type_dict" and
+                  replace_values="yes" and
+                  src_key_cols="product_id" and
+                  dict_key_cols="product_id" and
+                  enrich_cols="product_category,price,hw_ldos,product_description,equipment_class,product_family,product_name,product_type,end_of_sale,end_of_sw_maint,end_of_ext_announcement_date,end_of_routine_fail_date,end_of_contract_renew_date,end_of_svc_attach_date,end_of_sec_sup_date,product_type_dict" and  return_empty_dict = 'yes' &
+                  return_empty_cols = 'yes'
+          --> @dm:change-time-format columns="end_of_sw_maint,end_of_ext_announcement_date,end_of_routine_fail_date,end_of_contract_renew_date,end_of_svc_attach_date,end_of_sec_sup_date,end_of_sale" and from_format="datetimestr" and to_format="ms"
+          --> @dm:save name="temp-chassis_assets_enriched_with_product_type"
+          --> *dm:filter hw_ldos is not null
+          --> @dm:save name="temp-chassis_assets_enriched_with_product_type_not_null"
+       --> @exec:end-if
+       --> *exec:if-shape num_rows == 0
+          --> @dm:recall name="temp-chassis_inventory_collection" and return_empty="yes"
+          --> @dm:add-missing-columns columns="product_category,price,hw_ldos,product_description,equipment_class,product_family,product_name,product_type,end_of_sale,end_of_sw_maint,end_of_ext_announcement_date,end_of_routine_fail_date,end_of_contract_renew_date,end_of_svc_attach_date,end_of_sec_sup_date,product_type_dict"
+          --> @dm:save name="temp-chassis_assets_enriched_with_product_type"
+          --> *dm:filter hw_ldos is not null
+          --> @dm:save name="temp-chassis_assets_enriched_with_product_type_not_null"
+       --> @exec:end-if
+    --> @exec:end-if
+
+## Compute Major, Semi Critical and Very Critical dates based on the current time
+--> @c:new-block
+    --> @dm:empty
+    --> @dm:addrow key="dummy"
+    --> @dm:eval today='int(time_now_as_ms())'
+    --> @dm:copy-columns from="today,today,today" and to="t_date,t_month,t_year"
+    --> @dm:change-time-format columns = 't_date' & from_format = 'ms' & to_format = '%d'
+    --> @dm:change-time-format columns = 't_month' & from_format = 'ms' & to_format ='%m'
+    --> @dm:change-time-format columns = 't_year' & from_format = 'ms' & to_format ='%Y'
+    --> @dm:to-type columns="t_month,t_year" and type="int"
+    --> @dm:manipulate-string to="major_unit" and value="t_month -1 + 24" and func="eval"
+    --> @dm:manipulate-string to="major_unit_year" and value="t_year + major_unit//12" and func="eval"
+    --> @dm:manipulate-string to="major_unit_month" and value="major_unit % 12 + 1" and func="eval"
+    --> @dm:to-type columns="major_unit_month,t_date,major_unit_year" and type="str"
+    --> @dm:manipulate-string to="major_eol_date" and value="/" and func="concat_columns" and from="major_unit_month,t_date,major_unit_year"
+    --> @dm:manipulate-string to="semi_critical" and value="t_month - 1 + 12" and func="eval"
+    --> @dm:manipulate-string to="semi_critical_unit_year" and value="t_year + semi_critical//12" and func="eval"
+    --> @dm:manipulate-string to="semi_critical_month" and value="semi_critical % 12 + 1" and func="eval"
+    --> @dm:to-type columns="semi_critical_month,t_date,semi_critical_unit_year" and type="str"
+    --> @dm:manipulate-string to="semi_critical_date" and value="/" and func="concat_columns" and from="semi_critical_month,t_date,semi_critical_unit_year"
+    --> @dm:manipulate-string to="very_critical" and value="t_month - 1 + 3" and func="eval"
+    --> @dm:manipulate-string to="very_critical_unit_year" and value="t_year + very_critical//12" and func="eval"
+    --> @dm:manipulate-string to="very_critical_month" and value="very_critical % 12 + 1" and func="eval"
+    --> @dm:to-type columns="very_critical_month,t_date,very_critical_unit_year" and type="str"
+    --> @dm:manipulate-string to="very_critical_date" and value="/" and func="concat_columns" and from="very_critical_month,t_date,very_critical_unit_year"
+    --> @dm:change-time-format columns="major_eol_date,semi_critical_date,very_critical_date" & from_format="datetimestr" and to_format="ms"
+    --> @dm:to-type columns="major_eol_date,semi_critical_date,very_critical_date" and type="int"
+    --> @dm:gc
+    --> @dm:save name="temp-last_date_of_support_attrs"
+
+## Calculate hardware Status, Expiring QTR and Expiring Year from sw_ldos based on the current time
+--> @c:new-block
+    --> @dm:recall name="temp-product_type_dict" and return_empty="yes"
+    --> @dm:add-missing-columns columns="hw_ldos"
+    --> *exec:if-shape num_rows > 0
+       --> @dm:recall name="temp-chassis_assets_enriched_with_product_type_not_null"
+       --> @dm:dedup columns="hw_ldos"
+       --> @dm:manipulate-string to="key" and value="'dummy'" and func="eval"
+       --> @dm:selectcolumns include="hw_ldos|key"
+       --> @dm:enrich dict="temp-last_date_of_support_attrs" and src_key_cols="key" and dict_key_cols="key" and enrich_cols="today,very_critical_date,semi_critical_date,major_eol_date" and return_empty_dict = 'yes' & return_empty_cols = 'yes'
+       --> @dm:copy-columns from="hw_ldos,hw_ldos" and to="ldos,YEAR"
+       --> @dm:change-time-format columns='ldos' & from_format="datetimestr" and to_format="ms"
+       --> @dm:to-type columns="ldos,today" and type="int"
+       --> @cfxaia:conditional-statement condition_column="ldos" and operator=">"  and check_value="yes" and value="0" and return_if="ldos"
+       --> @dm:gc
+       --> @dm:selectcolumns exclude="^t_date$|^t_month$|^t_year$|^major_unit$|^major_unit_year$|^major_unit_month$|^semi_critical$|^semi_critical_unit_year$|^semi_critical_month$|^very_critical_unit_year$|^very_critical_month$|^very_critical$"
+       --> @dm:manipulate-string to="hw_status" and func="eval" and value="None"
+       --> @dm:to-type columns="ldos,today" and type="int"
+       --> @cfxaia:conditional-statement condition_column="ldos,today" and operator="<" and return_if="Expired" and return_else="hw_status" and to_column="hw_status"
+       --> @cfxaia:conditional-statement condition_column="ldos,today" and operator=">" and return_if="yes" and to_column="hw_status1" and return_else="no"
+       --> @cfxaia:conditional-statement condition_column="ldos,very_critical_date" and operator="<=" and return_if="yes" and to_column="hw_status2" and  return_else="no"
+       --> @cfxaia:conditional-statement condition_column="hw_status1,hw_status2" and operator="=" and check_value="yes" and value="yes,yes" and return_if="Expiring in a Quarter" and return_else="hw_status" and to_column="hw_status"
+       --> @cfxaia:conditional-statement condition_column="ldos,semi_critical_date" and operator="<=" and return_if="yes" and to_column="hw_status2" and  return_else="no"
+       --> @cfxaia:conditional-statement condition_column="hw_status1,hw_status2" and operator="=" and check_value="yes" and value="yes,yes" and return_if="Expiring in 4 Quarters" and return_else="hw_status" and to_column="hw_status" and replace_if_null=True
+       --> @cfxaia:conditional-statement condition_column="ldos,major_eol_date" and operator="<=" and return_if="yes" and to_column="hw_status2" and return_else="no"
+       --> @cfxaia:conditional-statement condition_column="hw_status1,hw_status2" and operator="=" and check_value="yes" and value="yes,yes" and return_if="Expiring in 8 Quarters" and return_else="hw_status" and to_column="hw_status" and replace_if_null=True
+       --> @cfxaia:conditional-statement condition_column="ldos,major_eol_date" and operator=">" and return_if="yes" and to_column="hw_status2" and  return_else="no"
+       --> @cfxaia:conditional-statement condition_column="hw_status1,hw_status2" and operator="=" and check_value="yes" and value="yes,yes" and return_if="Expiring after 8 Quarters" and return_else="hw_status" and to_column="hw_status" and replace_if_null=True
+       --> @dm:selectcolumns exclude="hw_status1|hw_status2"
+       --> @dm:fixnull columns="hw_status" and value="No EOL"
+       --> @dm:rename-columns ldos_month="ldos"
+       --> @dm:to-type columns="ldos_month" and type="int"
+       --> @dm:change-time-format columns = 'ldos_month' & from_format = 'ms' & to_format ='%m'
+       --> @dm:manipulate-string from="YEAR" and value="[0-9]{4,7}" and func="match" and to="YEAR"
+       --> @dm:eval ldos_month = 'ldos_month[1:] if ldos_month and ldos_month[0] == "0" else ldos_month'
+       --> @dm:fixnull columns="ldos_month" and value=0
+       --> @dm:to-type columns="ldos_month" and type="int"
+       --> @dm:manipulate-string to="qtr" and func="eval" and value="((ldos_month - 1) // 3 ) + 1"
+       --> @cfxaia:conditional-statement condition_column="ldos_month" and operator="<=" and check_value="yes" and value="0" and return_if="" and return_else="qtr" and to_column="qtr"
+       --> @dm:copy-columns from="qtr" and to="qtr" and prefix="Q" and func="append"
+       --> @dm:manipulate-string to="hw_expiring_qtr" and func="concat_columns" and from="YEAR,qtr" and value=" "
+       --> @dm:copy-columns from="YEAR" and to="hw_expiring_year"
+       --> @dm:gc
+       --> @dm:copy-columns from="hw_ldos" and to="hw_ldos_string"
+       --> @dm:change-time-format columns="hw_ldos_string" and from_format='datetimestr' and to_format ='%b %d %Y'
+       --> @dm:to-type columns="hw_ldos_string" and type="str"
+       --> @dm:save name="temp-hw_expiry_status"
+    --> @exec:end-if
+    ## Enrich Chassis assets with expiry status
+    --> @dm:recall name="temp-chassis_assets_enriched_with_product_type_not_null" and return_empty="yes"
+    --> @dm:add-missing-columns columns="hw_ldos"
+    --> @dm:enrich dict="temp-hw_expiry_status" and replace_values="yes" and src_key_cols="hw_ldos" and dict_key_cols="hw_ldos" and enrich_cols="hw_ldos_string,hw_expiring_year,hw_expiring_qtr,hw_status" and return_empty_dict = 'yes' & return_empty_cols = 'yes'
+    --> @dm:add-missing-columns columns="hw_expiring_year,hw_expiring_qtr,hw_status,product_category,price,hw_ldos,product_description,equipment_class,product_family,product_name,product_type,end_of_sale,end_of_sw_maint,end_of_ext_announcement_date,end_of_routine_fail_date,end_of_contract_renew_date,end_of_svc_attach_date,end_of_sec_sup_date"
+    --> @dm:change-time-format columns="hw_ldos" and from_format="datetimestr" and to_format="ms"
+    --> @dm:save name="temp-chassis_data_enriched"
+
+--> @c:new-block
+    --> @dm:recall name="temp-chassis_assets_enriched_with_product_type" and return_empty="yes"
+    --> *dm:filter hw_ldos is null
+    --> @dm:save name="temp-chassis_data_enriched" and append='yes'
+
+--> @c:new-block
+    --> @dm:recall name='temp-chassis_data_enriched'

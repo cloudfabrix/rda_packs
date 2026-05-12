@@ -1,0 +1,306 @@
+%% stream = no and limit = 0
+
+## create the persistent stream in case it doesn't exist.
+## Note that this seems to take a while, so the next steps in the Pipeline may fail on the first execution. They usually succeed on a retry.
+## @dm:create-persistent-stream name = "device_monitoring_stream" & unique_cols="device_ip,category"
+## First, delete any issues that are Clear and older than the "foreget interval" (6 hours)
+@c:new-block
+    --> @dm:empty
+    --> @dm:addrow name="device_monitoring_stream"
+    --> #dm:pstream-delete-data-by-query issue_status = 'Clear' and last_updated_time is before -360mins
+
+## Get latest from cisco_devices_inventory pstream and save it in cisco_devices_discovery_data dataset
+--> @c:new-block
+    --> @dm:empty
+    --> #dm:query-persistent-stream *
+            with-input name = "cisco_devices_inventory" & limit="0"
+    --> @dm:dedup columns = "device_ip"
+    --> @dm:selectcolumns include = "^device_ip$"
+    --> @dm:save name = "cisco_devices_discovery_data"
+
+## Make a temp copy of the list of "already detected" issues from device_monitoring_stream,
+## add empty last_updated_time and issue_status columns if the were missing (they will be populated later)
+## save in temp-device_monitoring_stream.
+## We will delete all data from the original device_monitoring_stream later.
+--> @c:new-block
+    --> @dm:empty
+    --> @dm:addrow name="device_monitoring_stream"
+    --> #dm:query-persistent-stream category = "SNMP"
+    --> @dm:add-missing-columns columns = "last_updated_time,issue_status"
+    --> @dm:save name = "temp-device_monitoring_stream_snmp"
+
+--> @c:new-block
+    --> @dm:empty
+    --> @dm:addrow name="device_monitoring_stream"
+    --> #dm:query-persistent-stream category = "SYSLOG"
+    --> @dm:add-missing-columns columns = "last_updated_time,issue_status"
+    --> @dm:save name = "temp-device_monitoring_stream_syslog"
+
+--> @c:new-block
+    --> @dm:empty
+    --> @dm:addrow name="device_monitoring_stream"
+    --> #dm:query-persistent-stream category = "BULKSTATS"
+    --> @dm:add-missing-columns columns = "last_updated_time,issue_status"
+    --> @dm:save name = "temp-device_monitoring_stream_metrics"
+
+## The algorithm is the same for each of SNMP Traps, SYSLOG events and BULKSTATS (metrics)
+## Note: inside the loop over all IP addresses, we have 2 blocks for each, depending on whether there are any existing issues
+## since the error handling is different if there are now rows at all (so no columns) vs. if there are now rows for this IP
+## # SNMP  #########################################################################
+## Look for previously detected issues and update them
+--> @c:data-loop dataset = "cisco_devices_discovery_data" & columns ="device_ip"
+    ## If there are no old issues at all, the enrich will fail differently then of there are none for this IP, and we need to run slightly different code
+    --> @dm:recall name = "temp-device_monitoring_stream_snmp"
+    --> *exec:if-shape num_rows > 0
+       --> @dm:empty
+       ## Get data within the debounce_interval (15 mins), we only need 1 record
+       --> #dm:query-persistent-stream device = "${device_ip}" & timestamp is after -15mins
+               with-input name = "snmp_trap_event_stream" & limit="1"
+       --> @dm:save name = "temp-snmp_data"
+       ## If no current data found
+       --> *exec:if-shape num_rows = 0
+          ## Start building a new issue Active record
+          --> @dm:empty
+          --> @dm:addrow category = "SNMP" & device_ip = "${device_ip}" & issue_status = "Active"
+          --> @dm:selectcolumns include = "^device_ip$|^category$|^issue_status$"
+          --> @dm:enrich dict="device_mappings_with_latlongv1" and
+                  src_key_cols="device_ip" and dict_key_cols="ip_address" and enrich_cols="device,network_type"
+          --> @dm:selectcolumns exclude = "^ip_address$"
+          ## Figure out the last_updated_time -- if there already was one, use it.
+          --> @dm:eval last_updated_time = "utcnow().isoformat()"
+          --> @dm:save name = "temp-snmp-$device_ip"
+          --> @dm:enrich dict = "temp-device_monitoring_stream_snmp" & src_key_cols="device_ip,category" and dict_key_cols="device_ip,category" and enrich_cols="last_updated_time"
+          --> @dm:eval last_updated_time = "last_updated_time_x if last_updated_time_y is None else last_updated_time_y"
+          --> @dm:selectcolumns exclude = "^last_updated_time_x$|^last_updated_time_y$"
+          --> @dm:save name = "temp-issues-snmp-$device_ip"
+       --> @exec:end-if
+       ## If data is current data, start creating a row with a the status of Clear.
+       --> *exec:if-shape num_rows > 0
+          ## Start building the Clear record
+          --> @dm:empty
+          --> @dm:addrow category = "SNMP" & device_ip = "${device_ip}"
+          --> @dm:selectcolumns include = "^device_ip$|^category$"
+          --> @dm:enrich dict="device_mappings_with_latlongv1" and
+                  src_key_cols="device_ip" and dict_key_cols="ip_address" and enrich_cols="device,network_type"
+          --> @dm:selectcolumns exclude = "^ip_address$"
+          ## retreive the old status of this issue (if there was one)
+          --> @dm:enrich dict = "temp-device_monitoring_stream_snmp" & src_key_cols="device_ip,category" and dict_key_cols="device_ip,category" and enrich_cols="issue_status"
+          ## If there was no old issue, do nothing (drop the row again)
+          --> *exec:if-condition issue_status is not null
+             --> @dm:eval last_updated_time = "utcnow().isoformat()"
+             --> @dm:save name = "temp-issues-snmp-$device_ip"
+             ## If it's not newly Cleared, keep the old last_upated_time
+             --> *exec:if-condition issue_status = 'Clear'
+                --> @dm:enrich dict = "temp-device_monitoring_stream_snmp" & src_key_cols="device_ip,category" and dict_key_cols="device_ip,category" and enrich_cols="last_updated_time"
+                --> @dm:eval last_updated_time = "last_updated_time_x if last_updated_time_y is None else last_updated_time_y"
+                --> @dm:selectcolumns exclude = "^last_updated_time_x$|^last_updated_time_y$"
+                --> @dm:save name = "temp-issues-snmp-$device_ip"
+             --> @exec:end-if
+             ## Force the status to Clear
+             --> @dm:recall name = "temp-issues-snmp-$device_ip"
+             --> @dm:selectcolumns exclude = "^issue_status$"
+             --> @dm:add-missing-columns columns = 'issue_status' & value = 'Clear'
+             --> @dm:save name = "temp-issues-snmp-$device_ip"
+          --> @exec:end-if
+       --> @exec:end-if
+    --> @exec:end-if
+    ## This handles the	case where there are no old issues
+    --> @dm:recall name = "temp-device_monitoring_stream_snmp"
+    --> *exec:if-shape num_rows = 0
+       --> @dm:empty
+       ## Get data within the debounce_interval (15 mins), we only need 1 record
+       --> #dm:query-persistent-stream device = "${device_ip}" & timestamp is after -15mins
+               with-input name = "snmp_trap_event_stream" & limit="1"
+       --> @dm:save name = "temp-snmp_data"
+       ## If none found
+       --> *exec:if-shape num_rows = 0
+          ## Start building a new issue record
+          --> @dm:empty
+          --> @dm:addrow category = "SNMP" & device_ip = "${device_ip}" & issue_status = "Active"
+          --> @dm:selectcolumns include = "^device_ip$|^category$|^issue_status$"
+          --> @dm:enrich dict="device_mappings_with_latlongv1" and
+                  src_key_cols="device_ip" and dict_key_cols="ip_address" and enrich_cols="device,network_type"
+          --> @dm:selectcolumns exclude = "^ip_address$"
+          ## There can't be an old last_updated_time, so just us "now".
+          --> @dm:eval last_updated_time = "utcnow().isoformat()"
+          --> @dm:save name = "temp-issues-snmp-$device_ip"
+       --> @exec:end-if
+    --> @exec:end-if
+
+## This is the end of looping through IP addresses for SNMP
+## # SYSLOG  #########################################################################
+## Look for previously detected issues and update them
+--> @c:data-loop dataset = "cisco_devices_discovery_data" & columns ="device_ip"
+    ## If there are no old issues at all, the enrich will fail differently then of there are none for this IP, and we need to run slightly different code
+    --> @dm:recall name = "temp-device_monitoring_stream_syslog"
+    --> *exec:if-shape num_rows > 0
+       --> @dm:empty
+       ## Get data within the debounce_interval (15 mins), we only need 1 record
+       --> #dm:query-persistent-stream rda_gw_client_ip = "${device_ip}" & timestamp is after -15mins
+               with-input name = "syslog_udp_event_stream" & limit="1"
+       --> @dm:save name = "temp-syslog_data"
+       ## If no current data found
+       --> *exec:if-shape num_rows = 0
+          ## Start building a new issue record
+          --> @dm:empty
+          --> @dm:addrow category = "SYSLOG" & device_ip = "${device_ip}" & issue_status = "Active"
+          --> @dm:selectcolumns include = "^device_ip$|^category$|^issue_status$"
+          --> @dm:enrich dict="device_mappings_with_latlongv1" and
+                  src_key_cols="device_ip" and dict_key_cols="ip_address" and enrich_cols="device,network_type"
+          --> @dm:selectcolumns exclude = "^ip_address$"
+          ## Figure out the last_updated_time -- if there already was one, use it.
+          --> @dm:eval last_updated_time = "utcnow().isoformat()"
+          --> @dm:save name = "temp-syslog-$device_ip"
+          --> @dm:enrich dict = "temp-device_monitoring_stream_syslog" & src_key_cols="device_ip,category" and dict_key_cols="device_ip,category" and enrich_cols="last_updated_time"
+          --> @dm:eval last_updated_time = "last_updated_time_x if last_updated_time_y is None else last_updated_time_y"
+          --> @dm:selectcolumns exclude = "^last_updated_time_x$|^last_updated_time_y$"
+          --> @dm:save name = "temp-issues-syslog-$device_ip"
+       --> @exec:end-if
+       ## If data is current data, start creating a row with a the status of Clear.
+       --> *exec:if-shape num_rows > 0
+          ## Start building the Clear record
+          --> @dm:empty
+          --> @dm:addrow category = "SYSLOG" & device_ip = "${device_ip}"
+          --> @dm:selectcolumns include = "^device_ip$|^category$"
+          --> @dm:enrich dict="device_mappings_with_latlongv1" and
+                  src_key_cols="device_ip" and dict_key_cols="ip_address" and enrich_cols="device,network_type"
+          --> @dm:selectcolumns exclude = "^ip_address$"
+          ## retreive the old status of this issue (if there was one)
+          --> @dm:enrich dict = "temp-device_monitoring_stream_syslog" & src_key_cols="device_ip,category" and dict_key_cols="device_ip,category" and enrich_cols="issue_status"
+          ## If there was no old issue, do nothing (drop the row again)
+          --> *exec:if-condition issue_status is not null
+             --> @dm:eval last_updated_time = "utcnow().isoformat()"
+             --> @dm:save name = "temp-issues-syslog-$device_ip"
+             ## If it's not newly Cleared, keep the old last_upated_time
+             --> *exec:if-condition issue_status = 'Clear'
+                --> @dm:enrich dict = "temp-device_monitoring_stream_syslog" & src_key_cols="device_ip,category" and dict_key_cols="device_ip,category" and enrich_cols="last_updated_time"
+                --> @dm:eval last_updated_time = "last_updated_time_x if last_updated_time_y is None else last_updated_time_y"
+                --> @dm:selectcolumns exclude = "^last_updated_time_x$|^last_updated_time_y$"
+                --> @dm:save name = "temp-issues-syslog-$device_ip"
+             --> @exec:end-if
+             ## Force the status to Clear
+             --> @dm:recall name = "temp-issues-syslog-$device_ip"
+             --> @dm:selectcolumns exclude = "^issue_status$"
+             --> @dm:add-missing-columns columns = 'issue_status' & value = 'Clear'
+             --> @dm:save name = "temp-issues-syslog-$device_ip"
+          --> @exec:end-if
+       --> @exec:end-if
+    --> @exec:end-if
+    ## This handles the	case where there are no old issues
+    --> @dm:recall name = "temp-device_monitoring_stream_syslog"
+    --> *exec:if-shape num_rows = 0
+       --> @dm:empty
+       ## Get data within the debounce_interval (15 mins), we only need 1 record
+       --> #dm:query-persistent-stream rda_gw_client_ip = "${device_ip}" & timestamp is after -15mins
+               with-input name = "syslog_udp_event_stream" & limit="1"
+       --> @dm:save name = "temp-syslog_data"
+       ## If none found
+       --> *exec:if-shape num_rows = 0
+          ## Start building a new issue record
+          --> @dm:empty
+          --> @dm:addrow category = "SYSLOG" & device_ip = "${device_ip}" & issue_status = "Active"
+          --> @dm:selectcolumns include = "^device_ip$|^category$|^issue_status$"
+          --> @dm:enrich dict="device_mappings_with_latlongv1" and
+                  src_key_cols="device_ip" and dict_key_cols="ip_address" and enrich_cols="device,network_type"
+          --> @dm:selectcolumns exclude = "^ip_address$"
+          ## There can't be an old last_updated_time, so just us "now".
+          --> @dm:eval last_updated_time = "utcnow().isoformat()"
+          --> @dm:save name = "temp-issues-syslog-$device_ip"
+       --> @exec:end-if
+    --> @exec:end-if
+
+## This is the end of looping through IP addresses for SYSLOG
+## Metrics / BULKSTATS  #########################################################################
+## Look for previously detected issues and update them
+--> @c:data-loop dataset = "cisco_devices_discovery_data" & columns ="device_ip"
+    ## If there are no old issues at all, the enrich will fail differently then of there are none for this IP, and we need to run slightly different code
+    --> @dm:recall name = "temp-device_monitoring_stream_metrics"
+    --> *exec:if-shape num_rows > 0
+       --> @dm:empty
+       ## Get data within the debounce_interval (15 mins), we only need 1 record
+       --> #dm:query-persistent-stream ip_address = "${device_ip}" & timestamp is after -15mins
+               with-input name = "mobility_kpi_metrics_data" & limit="1"
+       --> @dm:save name = "temp-metric_data"
+       ## If no current data found
+       --> *exec:if-shape num_rows = 0
+          ## Start building a new issue record
+          --> @dm:empty
+          --> @dm:addrow category = "BULKSTATS" & device_ip = "${device_ip}" & issue_status = "Active"
+          --> @dm:selectcolumns include = "^device_ip$|^category$|^issue_status$"
+          --> @dm:enrich dict="device_mappings_with_latlongv1" and
+                  src_key_cols="device_ip" and dict_key_cols="ip_address" and enrich_cols="device,network_type"
+          --> @dm:selectcolumns exclude = "^ip_address$"
+          ## Figure out the last_updated_time -- if there already was one, use it.
+          --> @dm:eval last_updated_time = "utcnow().isoformat()"
+          --> @dm:save name = "temp-metric-$device_ip"
+          --> @dm:enrich dict = "temp-device_monitoring_stream_metrics" & src_key_cols="device_ip,category" and dict_key_cols="device_ip,category" and enrich_cols="last_updated_time"
+          --> @dm:eval last_updated_time = "last_updated_time_x if last_updated_time_y is None else last_updated_time_y"
+          --> @dm:selectcolumns exclude = "^last_updated_time_x$|^last_updated_time_y$"
+          --> @dm:save name = "temp-issues-metric-$device_ip"
+       --> @exec:end-if
+       ## If data is current data, start creating a row with a the status of Clear.
+       --> *exec:if-shape num_rows > 0
+          ## Start building the Clear record
+          --> @dm:empty
+          --> @dm:addrow category = "BULKSTATS" & device_ip = "${device_ip}"
+          --> @dm:selectcolumns include = "^device_ip$|^category$"
+          --> @dm:enrich dict="device_mappings_with_latlongv1" and
+                  src_key_cols="device_ip" and dict_key_cols="ip_address" and enrich_cols="device,network_type"
+          --> @dm:selectcolumns exclude = "^ip_address$"
+          ## retreive the old status of this issue (if there was one)
+          --> @dm:enrich dict = "temp-device_monitoring_stream_metrics" & src_key_cols="device_ip,category" and dict_key_cols="device_ip,category" and enrich_cols="issue_status"
+          ## If there was no old issue, do nothing (drop the row again)
+          --> *exec:if-condition issue_status is not null
+             --> @dm:eval last_updated_time = "utcnow().isoformat()"
+             --> @dm:save name = "temp-issues-metric-$device_ip"
+             ## If it's not newly Cleared, keep the old last_upated_time
+             --> *exec:if-condition issue_status = 'Clear'
+                --> @dm:enrich dict = "temp-device_monitoring_stream_metrics" & src_key_cols="device_ip,category" and dict_key_cols="device_ip,category" and enrich_cols="last_updated_time"
+                --> @dm:eval last_updated_time = "last_updated_time_x if last_updated_time_y is None else last_updated_time_y"
+                --> @dm:selectcolumns exclude = "^last_updated_time_x$|^last_updated_time_y$"
+                --> @dm:save name = "temp-issues-metric-$device_ip"
+             --> @exec:end-if
+             ## Force the status to Clear
+             --> @dm:recall name = "temp-issues-metric-$device_ip"
+             --> @dm:selectcolumns exclude = "^issue_status$"
+             --> @dm:add-missing-columns columns = 'issue_status' & value = 'Clear'
+             --> @dm:save name = "temp-issues-metric-$device_ip"
+          --> @exec:end-if
+       --> @exec:end-if
+    --> @exec:end-if
+    ## This handles the	case where there are no old issues
+    --> @dm:recall name = "temp-device_monitoring_stream_metrics"
+    --> *exec:if-shape num_rows = 0
+       --> @dm:empty
+       ## Get data within the debounce_interval (15 mins), we only need 1 record
+       --> #dm:query-persistent-stream ip_address = "${device_ip}" & timestamp is after -15mins
+               with-input name = "mobility_kpi_metrics_data" & limit="1"
+       --> @dm:save name = "temp-metric_data"
+       ## If none found
+       --> *exec:if-shape num_rows = 0
+          ## Start building a new issue record
+          --> @dm:empty
+          --> @dm:addrow category = "BULKSTATS" & device_ip = "${device_ip}" & issue_status = "Active"
+          --> @dm:selectcolumns include = "^device_ip$|^category$|^issue_status$"
+          --> @dm:enrich dict="device_mappings_with_latlongv1" and
+                  src_key_cols="device_ip" and dict_key_cols="ip_address" and enrich_cols="device,network_type"
+          --> @dm:selectcolumns exclude = "^ip_address$"
+          ## There can't be an old last_updated_time, so just us "now".
+          --> @dm:eval last_updated_time = "utcnow().isoformat()"
+          --> @dm:save name = "temp-issues-metric-$device_ip"
+       --> @exec:end-if
+    --> @exec:end-if
+
+## This is the end of looping through IP addresses for metrics / BULKSTATS
+## Since we have built a new set of issues records, delete the original
+--> @c:new-block
+    --> @dm:empty
+    --> @dm:addrow name="device_monitoring_stream"
+    --> #dm:pstream-delete-data-by-query device_ip is not null
+
+## write all the updated rows from "temp-issues-.*" to device_monitoring_stream
+--> @c:new-block
+    --> @dm:concat names = "temp-issues-.*"
+    --> @dm:save name = "pstream_issues"
+    --> @rn:write-stream name = "device_monitoring_stream"
+

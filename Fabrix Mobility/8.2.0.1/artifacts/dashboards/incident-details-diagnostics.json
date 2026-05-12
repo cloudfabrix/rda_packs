@@ -1,0 +1,93 @@
+{
+  "name": "incident-details-diagnostics",
+  "label": "Incident Diagnostics Tools",
+  "description": "OIA Diagnostics Tools in Incident",
+  "version": "2026.02.10.1",
+  "enabled": true,
+  "dashboard_style": "auto",
+  "status_poller": {},
+  "dashboard_type": "template",
+  "template_variables": {
+    "PROJECT_ID": {
+      "default": null,
+      "contextId": "projectid"
+    },
+    "INCIDENT_ID": {
+      "default": null,
+      "contextId": "incidentid"
+    }
+  },
+  "dashboard_filters": {
+    "time_filter": false,
+    "columns_filter": []
+  },
+  "dashboard_sections": [
+    {
+      "title": "Diagnostics Tools",
+      "show_filter": false,
+      "projects": [],
+      "widgets": [
+        {
+          "title": "Incident Summary",
+          "min_width": 12,
+          "height": 2,
+          "widget_type": "portal_html",
+          "widget_template": "cfx-oia/incident-summary",
+          "widget_id": "6e64b2f1"
+        },
+        {
+          "title": "Diagnostic Tools",
+          "widget_type": "tabular",
+          "min_width": 6,
+          "height": 6,
+          "max_width": 6,
+          "paginated": true,
+          "refreshRequired": true,
+          "timebased": false,
+          "max_rows": 100,
+          "api-endpoint": {
+            "service-name": "cfxdimensions-app-irm_service",
+            "namespace": "io.cfx.dimensions.app",
+            "version": "*",
+            "methodName": "invokeAppApi:getApplicableToolsDetails",
+            "stringified-params": true,
+            "parse-output": true,
+            "params": [
+              {
+                "type": "diagnostics",
+                "projectId": "{{PROJECT_ID}}"
+              }
+            ]
+          },
+          "widget_id": "network_tools"
+        },
+        {
+          "title": "Tools Run History",
+          "widget_type": "tabular",
+          "min_width": 6,
+          "height": 6,
+          "max_width": 6,
+          "paginated": true,
+          "refreshRequired": true,
+          "timebased": false,
+          "max_rows": 100,
+          "api-endpoint": {
+            "service-name": "cfxdimensions-app-irm_service",
+            "namespace": "io.cfx.dimensions.app",
+            "version": "*",
+            "methodName": "invokeAppApi:getToolHistory",
+            "stringified-params": true,
+            "parse-output": true,
+            "params": [
+              {
+                "type": "diagnostics",
+                "projectId": "{{PROJECT_ID}}"
+              }
+            ]
+          },
+          "widget_id": "tools_history"
+        }
+      ]
+    }
+  ]
+}

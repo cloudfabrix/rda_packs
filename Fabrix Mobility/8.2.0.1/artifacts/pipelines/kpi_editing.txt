@@ -1,0 +1,13 @@
+%% stream = no and limit = 0
+@dm:empty
+    --> @exec:get-input
+    --> @dm:manipulate-string from ="schema" and to ="schema" and func="lower"
+    --> @dm:eval last_updated_time = "int(time_now_as_ms())"
+    --> @dm:save name="temp-dataset"
+--> @c:new-block
+    --> @dm:recall name="Autox_KPI_list_new"
+    --> @dm:enrich dict="temp-dataset" and src_key_cols="KPI_Name" and dict_key_cols="KPI_Name" and enrich_cols="schema,Schema_Original,Formula,Description,last_updated_time" and replace_values='yes'
+    --> @dm:eval lastupdated ="last_updated_time if last_updated_time else lastupdated"
+    --> @dm:selectcolumns exclude ="last_updated_time"
+    --> @dm:manipulate-string from ="Schema_Original" and to ="Schema_Original" and func="upper"
+    --> @dm:save name="Autox_KPI_list_new"

@@ -1,0 +1,538 @@
+{
+  "name": "StarOS_APN_Dedicated_Bearers_Statistics",
+  "label": "StarOS APN Dedicated Bearers Statistics",
+  "description": "Web report: StarOS APN Dedicated Bearers Statistics",
+  "dashboard_folder": "mobility-webreport",
+  "enabled": true,
+  "stream": "mobility_kpi_metrics_data",
+  "dashboard_type": "template",
+  "template_variables": {
+    "DEVICE": {
+      "contextId": "device",
+      "default": "HSTNTXNZ62G"
+    },
+    "FUNCTION": {
+      "contextId": "function",
+      "default": "max"
+    },
+    "INTERVAL": {
+      "contextId": "interval",
+      "default": "auto"
+    },
+    "ROLLUP": {
+      "contextId": "rollup",
+      "default": "device"
+    },
+    "SCHEMA": {
+      "contextId": "schema",
+      "default": "apn"
+    }
+  },
+  "dashboard_filters": {
+    "time_filter": true,
+    "default_time_filter_labels": [
+      "Last 24 hours"
+    ]
+  },
+  "dynamic_form": {
+    "formData": {
+      "device": "HSTNTXNZ62G"
+    },
+    "controlPanelFormDefinition": {
+      "id": "kpi.benchmark.json",
+      "refreshRequired": true,
+      "formFieldList": [
+        {
+          "fieldId": "function",
+          "label": "Function",
+          "help": "Function",
+          "dataType": "string",
+          "hidden": false,
+          "editable": true,
+          "required": true,
+          "controlType": "COMBO_BOX",
+          "defaultValue": "max",
+          "lovValues": [
+            {
+              "identifier": "max",
+              "displayName": "Maximum"
+            },
+            {
+              "identifier": "min",
+              "displayName": "Minimum"
+            },
+            {
+              "identifier": "avg",
+              "displayName": "Average"
+            },
+            {
+              "identifier": "sum",
+              "displayName": "Sum"
+            }
+          ]
+        },
+        {
+          "fieldId": "interval",
+          "label": "Interval",
+          "help": "Interval",
+          "dataType": "string",
+          "hidden": false,
+          "editable": true,
+          "required": true,
+          "controlType": "COMBO_BOX",
+          "defaultValue": null,
+          "lovValues": [
+            {
+              "identifier": "auto",
+              "displayName": "Auto"
+            },
+            {
+              "identifier": "5Min",
+              "displayName": "5 Minutes"
+            },
+            {
+              "identifier": "15Min",
+              "displayName": "15 Minutes"
+            },
+            {
+              "identifier": "1H",
+              "displayName": "1 Hour"
+            },
+            {
+              "identifier": "24H",
+              "displayName": "1 Day"
+            }
+          ]
+        },
+        {
+          "fieldId": "device",
+          "label": "Device",
+          "help": "Device",
+          "dataType": "string",
+          "hidden": false,
+          "editable": true,
+          "required": true,
+          "controlType": "COMBO_BOX",
+          "lovSourceType": "pstream",
+          "lovSourceParams": {
+            "name": "mobility_kpi_metrics_data",
+            "valueColumn": "device",
+            "labelColumn": "device",
+            "query": "schema_key is 'apn'"
+          },
+          "defaultValue": "HSTNTXNZ62G"
+        }
+      ],
+      "formActionList": {
+        "formActions": [
+          {
+            "api-endpoint": {
+              "methodName": "submitForm",
+              "parse-output": false,
+              "params": [
+                {
+                  "formData": {},
+                  "formId": "kpi.benchmark.json"
+                }
+              ],
+              "service-name": "saas-reports",
+              "stringified-params": true
+            },
+            "actionLabel": "Save",
+            "type": "SUBMIT",
+            "identifier": "Submit"
+          },
+          {
+            "actionLabel": "Cancel",
+            "type": "CANCEL",
+            "identifier": "Cancel"
+          }
+        ]
+      }
+    }
+  },
+  "dashboard_sections": [
+    {
+      "title": "StarOS APN Dedicated Bearers Statistics",
+      "show_filter": true,
+      "widgets": [
+        {
+          "title": "APN Dedicated Bearers Admin Clear",
+          "widget_type": "timeseries",
+          "stream": "mobility_kpi_metrics_data",
+          "description": "Formula: (%sessstat-bearrel-ded-admin-clear%) Description: APN Dedicated Bearers Admin Clear",
+          "ts_column": "timestamp",
+          "max_width": 12,
+          "height": 6,
+          "min_width": 12,
+          "chartProperties": {
+            "yAxisLabel": "",
+            "xAxisLabel": null,
+            "legendLocation": "right",
+            "mode": "selection",
+            "column-id": "timestamp"
+          },
+          "interval": "{{INTERVAL}}",
+          "series_spec": [
+            {
+              "column": "kpi_APN_Dedicated_Bearers_Admin_Clear",
+              "agg": "{{FUNCTION}}",
+              "type": "int"
+            }
+          ],
+          "extra_filter": "device = '{{DEVICE}}' and schema_key is 'apn'",
+          "group_by": [
+            "{{ROLLUP}}"
+          ],
+          "formatting": {
+            "maximumFractionDigits": 5,
+            "notation": "compact"
+          },
+          "widget_id": "194ffc65"
+        },
+        {
+          "title": "APN Dedicated Bearers Admin Clear QCI1",
+          "widget_type": "timeseries",
+          "stream": "mobility_kpi_metrics_data",
+          "description": "Formula: (%sessstat-bearrel-ded-admin-clear-qci1%) Description: APN Dedicated Bearers Admin Clear QCI1",
+          "ts_column": "timestamp",
+          "max_width": 12,
+          "height": 6,
+          "min_width": 12,
+          "chartProperties": {
+            "yAxisLabel": "",
+            "xAxisLabel": null,
+            "legendLocation": "right",
+            "mode": "selection",
+            "column-id": "timestamp"
+          },
+          "interval": "{{INTERVAL}}",
+          "series_spec": [
+            {
+              "column": "kpi_APN_Dedicated_Bearers_Admin_Clear_QCI1",
+              "agg": "{{FUNCTION}}",
+              "type": "int"
+            }
+          ],
+          "extra_filter": "device = '{{DEVICE}}' and schema_key is 'apn'",
+          "group_by": [
+            "{{ROLLUP}}"
+          ],
+          "formatting": {
+            "maximumFractionDigits": 5,
+            "notation": "compact"
+          },
+          "widget_id": "b564399b"
+        },
+        {
+          "title": "APN Dedicated Bearers Admin Clear QCI2",
+          "widget_type": "timeseries",
+          "stream": "mobility_kpi_metrics_data",
+          "description": "Formula: (%sessstat-bearrel-ded-admin-clear-qci2%) Description: APN Dedicated Bearers Admin Clear QCI2",
+          "ts_column": "timestamp",
+          "max_width": 12,
+          "height": 6,
+          "min_width": 12,
+          "chartProperties": {
+            "yAxisLabel": "",
+            "xAxisLabel": null,
+            "legendLocation": "right",
+            "mode": "selection",
+            "column-id": "timestamp"
+          },
+          "interval": "{{INTERVAL}}",
+          "series_spec": [
+            {
+              "column": "kpi_APN_Dedicated_Bearers_Admin_Clear_QCI2",
+              "agg": "{{FUNCTION}}",
+              "type": "int"
+            }
+          ],
+          "extra_filter": "device = '{{DEVICE}}' and schema_key is 'apn'",
+          "group_by": [
+            "{{ROLLUP}}"
+          ],
+          "formatting": {
+            "maximumFractionDigits": 5,
+            "notation": "compact"
+          },
+          "widget_id": "6b33917b"
+        },
+        {
+          "title": "APN Dedicated Bearers Admin Clear QCI3",
+          "widget_type": "timeseries",
+          "stream": "mobility_kpi_metrics_data",
+          "description": "Formula: (%sessstat-bearrel-ded-admin-clear-qci3%) Description: APN Dedicated Bearers Admin Clear QCI3",
+          "ts_column": "timestamp",
+          "max_width": 12,
+          "height": 6,
+          "min_width": 12,
+          "chartProperties": {
+            "yAxisLabel": "",
+            "xAxisLabel": null,
+            "legendLocation": "right",
+            "mode": "selection",
+            "column-id": "timestamp"
+          },
+          "interval": "{{INTERVAL}}",
+          "series_spec": [
+            {
+              "column": "kpi_APN_Dedicated_Bearers_Admin_Clear_QCI3",
+              "agg": "{{FUNCTION}}",
+              "type": "int"
+            }
+          ],
+          "extra_filter": "device = '{{DEVICE}}' and schema_key is 'apn'",
+          "group_by": [
+            "{{ROLLUP}}"
+          ],
+          "formatting": {
+            "maximumFractionDigits": 5,
+            "notation": "compact"
+          },
+          "widget_id": "4769a65c"
+        },
+        {
+          "title": "APN Dedicated Bearers Admin Clear QCI4",
+          "widget_type": "timeseries",
+          "stream": "mobility_kpi_metrics_data",
+          "description": "Formula: (%sessstat-bearrel-ded-admin-clear-qci4%) Description: APN Dedicated Bearers Admin Clear QCI4",
+          "ts_column": "timestamp",
+          "max_width": 12,
+          "height": 6,
+          "min_width": 12,
+          "chartProperties": {
+            "yAxisLabel": "",
+            "xAxisLabel": null,
+            "legendLocation": "right",
+            "mode": "selection",
+            "column-id": "timestamp"
+          },
+          "interval": "{{INTERVAL}}",
+          "series_spec": [
+            {
+              "column": "kpi_APN_Dedicated_Bearers_Admin_Clear_QCI4",
+              "agg": "{{FUNCTION}}",
+              "type": "int"
+            }
+          ],
+          "extra_filter": "device = '{{DEVICE}}' and schema_key is 'apn'",
+          "group_by": [
+            "{{ROLLUP}}"
+          ],
+          "formatting": {
+            "maximumFractionDigits": 5,
+            "notation": "compact"
+          },
+          "widget_id": "72e2e8e8"
+        },
+        {
+          "title": "APN Dedicated Bearers Admin Clear QCI5",
+          "widget_type": "timeseries",
+          "stream": "mobility_kpi_metrics_data",
+          "description": "Formula: (%sessstat-bearrel-ded-admin-clear-qci5%) Description: APN Dedicated Bearers Admin Clear QCI5",
+          "ts_column": "timestamp",
+          "max_width": 12,
+          "height": 6,
+          "min_width": 12,
+          "chartProperties": {
+            "yAxisLabel": "",
+            "xAxisLabel": null,
+            "legendLocation": "right",
+            "mode": "selection",
+            "column-id": "timestamp"
+          },
+          "interval": "{{INTERVAL}}",
+          "series_spec": [
+            {
+              "column": "kpi_APN_Dedicated_Bearers_Admin_Clear_QCI5",
+              "agg": "{{FUNCTION}}",
+              "type": "int"
+            }
+          ],
+          "extra_filter": "device = '{{DEVICE}}' and schema_key is 'apn'",
+          "group_by": [
+            "{{ROLLUP}}"
+          ],
+          "formatting": {
+            "maximumFractionDigits": 5,
+            "notation": "compact"
+          },
+          "widget_id": "60e5b4a6"
+        },
+        {
+          "title": "APN Dedicated Bearers Admin Clear QCI6",
+          "widget_type": "timeseries",
+          "stream": "mobility_kpi_metrics_data",
+          "description": "Formula: (%sessstat-bearrel-ded-admin-clear-qci6%) Description: APN Dedicated Bearers Admin Clear QCI6",
+          "ts_column": "timestamp",
+          "max_width": 12,
+          "height": 6,
+          "min_width": 12,
+          "chartProperties": {
+            "yAxisLabel": "",
+            "xAxisLabel": null,
+            "legendLocation": "right",
+            "mode": "selection",
+            "column-id": "timestamp"
+          },
+          "interval": "{{INTERVAL}}",
+          "series_spec": [
+            {
+              "column": "kpi_APN_Dedicated_Bearers_Admin_Clear_QCI6",
+              "agg": "{{FUNCTION}}",
+              "type": "int"
+            }
+          ],
+          "extra_filter": "device = '{{DEVICE}}' and schema_key is 'apn'",
+          "group_by": [
+            "{{ROLLUP}}"
+          ],
+          "formatting": {
+            "maximumFractionDigits": 5,
+            "notation": "compact"
+          },
+          "widget_id": "ac33e68d"
+        },
+        {
+          "title": "APN Dedicated Bearers Admin Clear QCI7",
+          "widget_type": "timeseries",
+          "stream": "mobility_kpi_metrics_data",
+          "description": "Formula: (%sessstat-bearrel-ded-admin-clear-qci7%) Description: APN Dedicated Bearers Admin Clear QCI7",
+          "ts_column": "timestamp",
+          "max_width": 12,
+          "height": 6,
+          "min_width": 12,
+          "chartProperties": {
+            "yAxisLabel": "",
+            "xAxisLabel": null,
+            "legendLocation": "right",
+            "mode": "selection",
+            "column-id": "timestamp"
+          },
+          "interval": "{{INTERVAL}}",
+          "series_spec": [
+            {
+              "column": "kpi_APN_Dedicated_Bearers_Admin_Clear_QCI7",
+              "agg": "{{FUNCTION}}",
+              "type": "int"
+            }
+          ],
+          "extra_filter": "device = '{{DEVICE}}' and schema_key is 'apn'",
+          "group_by": [
+            "{{ROLLUP}}"
+          ],
+          "formatting": {
+            "maximumFractionDigits": 5,
+            "notation": "compact"
+          },
+          "widget_id": "3cd9cff5"
+        },
+        {
+          "title": "APN Dedicated Bearers Admin Clear QCI8",
+          "widget_type": "timeseries",
+          "stream": "mobility_kpi_metrics_data",
+          "description": "Formula: (%sessstat-bearrel-ded-admin-clear-qci8%) Description: APN Dedicated Bearers Admin Clear QCI8",
+          "ts_column": "timestamp",
+          "max_width": 12,
+          "height": 6,
+          "min_width": 12,
+          "chartProperties": {
+            "yAxisLabel": "",
+            "xAxisLabel": null,
+            "legendLocation": "right",
+            "mode": "selection",
+            "column-id": "timestamp"
+          },
+          "interval": "{{INTERVAL}}",
+          "series_spec": [
+            {
+              "column": "kpi_APN_Dedicated_Bearers_Admin_Clear_QCI8",
+              "agg": "{{FUNCTION}}",
+              "type": "int"
+            }
+          ],
+          "extra_filter": "device = '{{DEVICE}}' and schema_key is 'apn'",
+          "group_by": [
+            "{{ROLLUP}}"
+          ],
+          "formatting": {
+            "maximumFractionDigits": 5,
+            "notation": "compact"
+          },
+          "widget_id": "42f31102"
+        },
+        {
+          "title": "APN Dedicated Bearers Admin Clear QCI9",
+          "widget_type": "timeseries",
+          "stream": "mobility_kpi_metrics_data",
+          "description": "Formula: (%sessstat-bearrel-ded-admin-clear-qci9%) Description: APN Dedicated Bearers Admin Clear QCI9",
+          "ts_column": "timestamp",
+          "max_width": 12,
+          "height": 6,
+          "min_width": 12,
+          "chartProperties": {
+            "yAxisLabel": "",
+            "xAxisLabel": null,
+            "legendLocation": "right",
+            "mode": "selection",
+            "column-id": "timestamp"
+          },
+          "interval": "{{INTERVAL}}",
+          "series_spec": [
+            {
+              "column": "kpi_APN_Dedicated_Bearers_Admin_Clear_QCI9",
+              "agg": "{{FUNCTION}}",
+              "type": "int"
+            }
+          ],
+          "extra_filter": "device = '{{DEVICE}}' and schema_key is 'apn'",
+          "group_by": [
+            "{{ROLLUP}}"
+          ],
+          "formatting": {
+            "maximumFractionDigits": 5,
+            "notation": "compact"
+          },
+          "widget_id": "c5695bf0"
+        },
+        {
+          "title": "KPI's Summary",
+          "widget_type": "tabular",
+          "stream": "mobility_kpi_metrics_data",
+          "ts_column": "timestamp",
+          "query": "*",
+          "extra_filter": "device = '{{DEVICE}}' and schema_key is 'apn'",
+          "min_width": 6,
+          "height": 12,
+          "max_width": 12,
+          "paginated": true,
+          "resizableColumns": true,
+          "virtual_scrolling": false,
+          "showRowSummary": true,
+          "max_rows": 50,
+          "sorting": [
+            {
+              "timestamp": "desc"
+            }
+          ],
+          "columns": {
+            "timestamp": "Timestamp",
+            "instance_key": "Instance_Key",
+            "kpi_APN_Dedicated_Bearers_Admin_Clear": "APN Dedicated Bearers Admin Clear",
+            "kpi_APN_Dedicated_Bearers_Admin_Clear_QCI1": "APN Dedicated Bearers Admin Clear QCI1",
+            "kpi_APN_Dedicated_Bearers_Admin_Clear_QCI2": "APN Dedicated Bearers Admin Clear QCI2",
+            "kpi_APN_Dedicated_Bearers_Admin_Clear_QCI3": "APN Dedicated Bearers Admin Clear QCI3",
+            "kpi_APN_Dedicated_Bearers_Admin_Clear_QCI4": "APN Dedicated Bearers Admin Clear QCI4",
+            "kpi_APN_Dedicated_Bearers_Admin_Clear_QCI5": "APN Dedicated Bearers Admin Clear QCI5",
+            "kpi_APN_Dedicated_Bearers_Admin_Clear_QCI6": "APN Dedicated Bearers Admin Clear QCI6",
+            "kpi_APN_Dedicated_Bearers_Admin_Clear_QCI7": "APN Dedicated Bearers Admin Clear QCI7",
+            "kpi_APN_Dedicated_Bearers_Admin_Clear_QCI8": "APN Dedicated Bearers Admin Clear QCI8",
+            "kpi_APN_Dedicated_Bearers_Admin_Clear_QCI9": "APN Dedicated Bearers Admin Clear QCI9"
+          },
+          "widget_id": "94a3fc11"
+        }
+      ]
+    }
+  ]
+}

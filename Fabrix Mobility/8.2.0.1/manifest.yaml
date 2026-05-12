@@ -1,0 +1,926 @@
+name: Fabrix Mobility
+version: 8.2.0.1
+folder: /collection/network/mobility
+published_date: 2026-05-12
+publisher: Fabrix.ai
+label: Fabrix Mobility
+scope: system
+description:
+  value: ""
+  md: "./description.md"
+
+type: collection
+requires:
+
+  - name: Fabrix AIOps Fault Management Base
+    version: ">=10.0.0"
+    auto_install_requires: true
+  - name: Fabrix AIOPs syslogs
+    version: ">=10.0.2"
+    auto_install_requires: true
+  - name: Fabrix AIOPs snmp
+    version: ">=10.0.1"
+    auto_install_requires: true
+launch_dashboard: auto-x-3-app
+
+artifacts:
+  credentials:
+    - name: apscheduler
+      type: apscheduler
+    - name: restclient
+      type: restclient
+    - name: agent
+      type: rda_agents
+    - name: snmptrap
+      type: snmptrap
+    - name: cfxml
+      type: cfxai_regression
+    - name: cfxaia
+      type: cfxaia
+    - name: asset-discovery
+      type: asset-discovery
+    - name: graph
+      type: graphdb
+    - name: diagnostictools
+      type: diagnostictools
+
+
+  formatting_templates:
+    - name: raise_alerts_from_anomalies
+      file: ./artifacts/formatting_templates/raise_alerts_from_anomalies.txt
+      folder: MobilityPack
+      creation_policy: overwrite
+    - name: epm_trap_template
+      file: ./artifacts/formatting_templates/epm_trap_template.txt
+      folder: MobilityPack
+      creation_policy: overwrite
+    - name: notify-email-body
+      file: ./artifacts/formatting_templates/notify-email-body.html
+      folder: MobilityPack
+      creation_policy: overwrite
+    - name: notify-email-subject
+      file: ./artifacts/formatting_templates/notify-email-subject.html
+      folder: MobilityPack
+      creation_policy: overwrite
+    - name: blk_by_device_dashboard_template
+      file: ./artifacts/formatting_templates/blk_by_device_dashboard_template.json
+      folder: MobilityPack
+      creation_policy: overwrite
+    - name: blk_by_schema_dashboard_template
+      file: ./artifacts/formatting_templates/blk_by_schema_dashboard_template.json
+      folder: MobilityPack
+      creation_policy: overwrite
+    - name: blk_by_workbench_dashboard_template
+      file: ./artifacts/formatting_templates/blk_by_workbench_dashboard_template.json
+      folder: MobilityPack
+      creation_policy: overwrite
+    - name: blk_preview_dashboard_template
+      file: ./artifacts/formatting_templates/blk_preview_dashboard_template.json
+      folder: MobilityPack
+      creation_policy: overwrite
+
+
+  pstreams:
+
+    - name: snmp_traps_not_onboarded
+      attributes:
+        retention_days: 7
+      creation_policy: overwrite
+      remove_on_deactivation: false
+    - name: syslog_udp_event_stream
+      attributes:
+        retention_days: 7
+        search_case_insensitive: false
+        default_values:
+          device_status: UNMANAGED
+        enrich:
+          dict: mobility_device_mappings
+          dict_source: dataset
+          src_key_cols: rda_gw_client_ip
+          dict_key_cols: ip_address
+          enrich_cols: device_status,device_hostname,device_vendor,device_fw_type,device_model,device_fw_version,parent_sn,device_serial_number,zone,network_type,clli_code,city,region,network_code,image,device,latitude,longitude
+          enrich_cols_as: device_status,device_hostname,device_vendor,device_fw_type,device_model,device_fw_version,parent_sn,device_serial_number,zone,network_type,CLLI_code,city,region,network_code,image,device,latitude,longitude
+          replace_values: 'no'
+          dict_update_check_seconds: 60
+      creation_policy: overwrite
+      remove_on_deactivation: false
+    - name: snmp_trap_event_stream
+      attributes:
+        retention_days: 90
+        search_case_insensitive: false
+        default_values:
+          device_status: UNMANAGED
+        enrich:
+          dict: mobility_device_mappings
+          dict_source: dataset
+          src_key_cols: rda_gw_client_ip
+          dict_key_cols: ip_address
+          enrich_cols: device_status,device_hostname,device_vendor,device_fw_type,device_model,device_fw_version,parent_sn,device_serial_number,zone,network_type,clli_code,city,region,network_code,image,device,latitude,longitude
+          enrich_cols_as: device_status,device_hostname,device_vendor,device_fw_type,device_model,device_fw_version,parent_sn,device_serial_number,zone,network_type,CLLI_code,city,region,network_code,image,device,latitude,longitude
+          replace_values: 'no'
+          dict_update_check_seconds: 60
+      creation_policy: overwrite
+      remove_on_deactivation: false
+    - name: discovery
+      attributes:
+          unique_keys: [ "unique_id"]
+          retention_days: 60
+          search_case_insensitive: true
+          _settings:
+            number_of_shards: 1
+            number_of_replicas: 1
+      creation_policy: overwrite
+      remove_on_deactivation: false
+    - name: network-devices-inventory
+      attributes:
+        unique_keys: ["unique_id"]
+        search_case_insensitive: true
+        _settings:
+          number_of_shards: 3
+          number_of_replicas: 1
+          refresh_interval: 30s
+      creation_policy: overwrite
+      remove_on_deactivation: false
+    - name: network_access_verification
+      attributes:
+        unique_keys: ["unique_id"]
+        retention_days: 7
+      creation_policy: overwrite
+      remove_on_deactivation: false
+    - name: mobility_reports_metadata
+      attributes:
+        source_dataset: "mobility_reports_metadata"
+        unique_keys: [ "schema","report_name_key" ]
+        os_external: false
+      creation_policy: overwrite
+      remove_on_deactivation: false
+    - name: Autox_KPI_list_new
+      attributes:
+        source_dataset: "Autox_KPI_list_new"
+        os_external: false
+      creation_policy: overwrite
+      remove_on_deactivation: false
+    - name: mobility_validated_kpi_list
+      attributes:
+        unique_keys: [ "KPI_Name"]
+        retention_days: 365
+        os_external: false
+      creation_policy: overwrite
+      remove_on_deactivation: false
+    - name: bulkstats_variables
+      attributes:
+        unique_keys: [ "schema","variable" ]
+        source_dataset: "bulkstats_variables"
+        os_external: false
+      creation_policy: overwrite
+      remove_on_deactivation: false
+
+
+
+
+  pipelines:
+    - name: access_verification_main_pipeline
+      folder: MobilityPack
+      version: 2026.02.10.1
+      file: ./artifacts/pipelines/access_verification_main_pipeline.txt
+      skip_validation: true
+      creation_policy: overwrite
+    - name: add_kpi
+      folder: MobilityPack
+      version: 2026.05.05.01
+      file: ./artifacts/pipelines/add_kpi.txt
+      skip_validation: true
+      creation_policy: overwrite
+    - name: cisco_discovery_main_pipeline
+      folder: MobilityPack
+      version: 2026.02.10.1
+      file: ./artifacts/pipelines/cisco_discovery_main_pipeline.txt
+      skip_validation: true
+      creation_policy: overwrite
+    - name: delete_device
+      folder: MobilityPack
+      version: 2026.02.10.1
+      file: ./artifacts/pipelines/delete_device.txt
+      skip_validation: true
+      creation_policy: overwrite
+    - name: delete_kpi
+      folder: MobilityPack
+      version: 2026.05.05.01
+      file: ./artifacts/pipelines/delete_kpi.txt
+      skip_validation: true
+      creation_policy: overwrite
+    - name: device_editing
+      folder: MobilityPack
+      version: 2026.02.10.1
+      file: ./artifacts/pipelines/device_editing.txt
+      skip_validation: true
+      creation_policy: overwrite
+    - name: discovery_main_pipeline
+      folder: MobilityPack
+      version: 2026.05.11.1
+      file: ./artifacts/pipelines/discovery_main_pipeline.txt
+      skip_validation: true
+      creation_policy: overwrite
+    - name: import-customer-devices
+      folder: MobilityPack
+      version: 2026.03.03.1
+      file: ./artifacts/pipelines/import-customer-devices.txt
+      skip_validation: true
+      creation_policy: overwrite
+    - name: incident_create_notifier
+      folder: MobilityPack
+      version: 2026.02.10.1
+      file: ./artifacts/pipelines/incident_create_notifier.txt
+      skip_validation: true
+      creation_policy: overwrite
+    - name: kpi_editing
+      folder: MobilityPack
+      version: 2026.05.05.01
+      file: ./artifacts/pipelines/kpi_editing.txt
+      skip_validation: true
+      creation_policy: overwrite
+    - name: epm_trap_notification_sender
+      folder: MobilityPack
+      version: 2026.09.03.1
+      file: ./artifacts/pipelines/epm_trap_notification_sender.txt
+      skip_validation: true
+      creation_policy: overwrite
+    - name: notify_on_incident_create_email
+      folder: MobilityPack
+      version: 2026.02.10.1
+      file: ./artifacts/pipelines/notify_on_incident_create_email.txt
+      skip_validation: true
+      creation_policy: overwrite
+    - name: notify_on_incident_create
+      folder: MobilityPack
+      version: 2026.02.10.1
+      file: ./artifacts/pipelines/notify_on_incident_create.txt
+      skip_validation: true
+      creation_policy: overwrite
+    - name: ondemand_discovery_main
+      folder: MobilityPack
+      version: 2026.02.10.1
+      file: ./artifacts/pipelines/ondemand_discovery_main.txt
+      skip_validation: true
+      creation_policy: overwrite
+    - name: pstream_monitoring
+      folder: MobilityPack
+      version: 2026.02.10.1
+      file: ./artifacts/pipelines/pstream_monitoring.txt
+      skip_validation: true
+      creation_policy: overwrite
+    - name: send_email_on_incident_create
+      folder: MobilityPack
+      version: 2026.02.10.1
+      file: ./artifacts/pipelines/send_email_on_incident_create.txt
+      skip_validation: true
+      creation_policy: overwrite
+    - name: upload_kpi
+      folder: MobilityPack
+      version: 2026.05.05.01
+      file: ./artifacts/pipelines/upload_kpi.txt
+      skip_validation: true
+      creation_policy: overwrite
+    - name: import_and_replace_pipeline
+      folder: MobilityPack
+      version: 2026.02.10.1
+      file: ./artifacts/pipelines/import_and_replace_pipeline.txt
+      skip_validation: true
+      creation_policy: overwrite
+    - name: ondemand_access_verification
+      folder: MobilityPack
+      version: 2026.02.10.1
+      file: ./artifacts/pipelines/ondemand_access_verification.txt
+      skip_validation: true
+      creation_policy: overwrite
+    - name: network_access_verification_pipeline
+      folder: MobilityPack
+      version: 2026.02.10.1
+      file: ./artifacts/pipelines/network_access_verification_pipeline.txt
+      skip_validation: true
+      creation_policy: overwrite
+    - name: asset_discovery_main
+      folder: MobilityPack
+      version: 2026.02.10.1
+      file: ./artifacts/pipelines/asset_discovery_main.txt
+      skip_validation: true
+      creation_policy: overwrite
+    - name: network_inventory_collection
+      folder: MobilityPack
+      version: 2026.02.25.1
+      file: ./artifacts/pipelines/network_inventory_collection.txt
+      skip_validation: true
+      creation_policy: overwrite
+    - name: network_inventory_collection_status
+      folder: MobilityPack
+      version: 2026.02.10.1
+      file: ./artifacts/pipelines/network_inventory_collection_status.txt
+      skip_validation: true
+      creation_policy: overwrite
+    - name: network_inventory_parser
+      folder: MobilityPack
+      version: 2026.02.10.1
+      file: ./artifacts/pipelines/network_inventory_parser.txt
+      skip_validation: true
+      creation_policy: overwrite
+    - name: cisco_network_devices_inventory_processing_pipeline
+      folder: MobilityPack
+      version: 2026.02.10.1
+      file: ./artifacts/pipelines/cisco_network_devices_inventory_processing_pipeline.txt
+      skip_validation: true
+      creation_policy: overwrite
+    - name: viptela_network_devices_inventory_processing_pipeline
+      folder: MobilityPack
+      version: 2026.02.10.1
+      file: ./artifacts/pipelines/viptela_network_devices_inventory_processing_pipeline.txt
+      skip_validation: true
+      creation_policy: overwrite
+    - name: other_vendor_network_device_inventory_processing_pipeline
+      folder: MobilityPack
+      version: 2026.02.10.1
+      file: ./artifacts/pipelines/other_vendor_network_device_inventory_processing_pipeline.txt
+      skip_validation: true
+      creation_policy: overwrite
+    - name: product_type_enrichment_pipeline
+      folder: MobilityPack
+      version: 2026.02.10.1
+      file: ./artifacts/pipelines/product_type_enrichment_pipeline.txt
+      skip_validation: true
+      creation_policy: overwrite
+    - name: asset_discovery_refresh_datasets
+      folder: MobilityPack
+      version: 2026.02.10.1
+      file: ./artifacts/pipelines/asset_discovery_refresh_datasets.txt
+      skip_validation: true
+      creation_policy: overwrite
+    - name: aia_utility_functions
+      folder: MobilityPack
+      version: 2026.02.10.1
+      file: ./artifacts/pipelines/aia_utility_functions.txt
+      skip_validation: true
+      creation_policy: overwrite
+    - name: juniper_network_devices_inventory_processing_pipeline
+      folder: MobilityPack
+      version: 2026.02.25.1
+      file: ./artifacts/pipelines/juniper_network_devices_inventory_processing_pipeline.txt
+      skip_validation: true
+      creation_policy: overwrite
+    - name: add_devices
+      folder: MobilityPack
+      version: 2026.03.03.1
+      file: ./artifacts/pipelines/add_devices.txt
+      skip_validation: true
+      creation_policy: overwrite
+    - name: delete_devices
+      folder: MobilityPack
+      version: 2026.03.03.1
+      file: ./artifacts/pipelines/delete_devices.txt
+      skip_validation: true
+      creation_policy: overwrite
+
+
+
+  dashboards:
+    - name: alert_device_app
+      file: ./artifacts/dashboards/alert_device_app.json
+      creation_policy: overwrite
+    - name: auto-x-3-app
+      file: ./artifacts/dashboards/auto-x-3-app.json
+      creation_policy: overwrite
+    - name: mobility_consolidated_results_clone
+      file: ./artifacts/dashboards/mobility_consolidated_results_clone.json
+      creation_policy: overwrite
+    - name: bulkstats_schemas
+      file: ./artifacts/dashboards/bulkstats_schemas.json
+      creation_policy: overwrite
+    - name: bulkstats_variables
+      file: ./artifacts/dashboards/bulkstats_variables.json
+      creation_policy: overwrite
+    - name: customer_access_status
+      file: ./artifacts/dashboards/customer_access_status.json
+      creation_policy: overwrite
+    - name: customer_discovery
+      file: ./artifacts/dashboards/customer_discovery.json
+      creation_policy: overwrite
+    - name: customer_network_devices_inventory
+      file: ./artifacts/dashboards/customer_network_devices_inventory.json
+      creation_policy: overwrite
+    #    - name: customer_oia_alerts_fault
+    #      file: ./artifacts/dashboards/customer_oia_alerts_fault.json
+    #      creation_policy: overwrite
+    #    - name: customer_oia_incidents
+    #      file: ./artifacts/dashboards/customer_oia_incidents.json
+    #      creation_policy: overwrite
+    - name: customer_overview
+      file: ./artifacts/dashboards/customer_overview.json
+      creation_policy: overwrite
+    #    - name: customer_SNMP_Traps
+    #      file: ./artifacts/dashboards/customer_SNMP_Traps.json
+    #      creation_policy: overwrite
+    #    - name: customer_syslogs
+    #      file: ./artifacts/dashboards/customer_syslogs.json
+    #      creation_policy: overwrite
+    - name: device_alerts_from_alert
+      file: ./artifacts/dashboards/device_alerts_from_alert.json
+      creation_policy: overwrite
+    - name: device_inventory_from_alert
+      file: ./artifacts/dashboards/device_inventory_from_alert.json
+      creation_policy: overwrite
+    - name: device_monitoring_stream
+      file: ./artifacts/dashboards/device_monitoring_stream.json
+      creation_policy: overwrite
+    - name: device_SNMP_Traps_from_alerts
+      file: ./artifacts/dashboards/device_SNMP_Traps_from_alerts.json
+      creation_policy: overwrite
+    - name: device_syslog_from_alert
+      file: ./artifacts/dashboards/device_syslog_from_alert.json
+      creation_policy: overwrite
+    #    - name: incident-details-activities
+    #      file: ./artifacts/dashboards/incident-details-activities.json
+    #      creation_policy: overwrite
+    #    - name: incident-details-alerts
+    #      file: ./artifacts/dashboards/incident-details-alerts.json
+    #      creation_policy: overwrite
+    #    - name: incident-details-app
+    #      file: ./artifacts/dashboards/incident-details-app.json
+    #      creation_policy: overwrite
+    #    - name: incident-details-collaboration
+    #      file: ./artifacts/dashboards/incident-details-collaboration.json
+    #      creation_policy: overwrite
+    #    - name: incident-details-diagnostics
+    #      file: ./artifacts/dashboards/incident-details-diagnostics.json
+    #      creation_policy: overwrite
+    #    - name: incident-details-insights
+    #      file: ./artifacts/dashboards/incident-details-insights.json
+    #      creation_policy: overwrite
+    #    - name: incident-details-metrics
+    #      file: ./artifacts/dashboards/incident-details-metrics.json
+    #      creation_policy: overwrite
+    #    - name: incident-details-remediation
+    #      file: ./artifacts/dashboards/incident-details-remediation.json
+    #      creation_policy: overwrite
+    #    - name: incident-details-topology
+    #      file: ./artifacts/dashboards/incident-details-topology.json
+    #      creation_policy: overwrite
+    - name: logs
+      file: ./artifacts/dashboards/logs.json
+      creation_policy: overwrite
+    - name: mobility_device_mapping_admin
+      file: ./artifacts/dashboards/mobility_device_mapping_admin.json
+      creation_policy: overwrite
+    - name: mobility_ingestion_tracker
+      file: ./artifacts/dashboards/mobility_ingestion_tracker.json
+      creation_policy: overwrite
+    - name: mobility_kpi_computation_jobs
+      file: ./artifacts/dashboards/mobility_kpi_computation_jobs.json
+      creation_policy: overwrite
+    - name: mobility_kpi_list_validation
+      file: ./artifacts/dashboards/mobility_kpi_list_validation.json
+      creation_policy: overwrite
+    - name: mobility_raw_data
+      file: ./artifacts/dashboards/mobility_raw_data.json
+      creation_policy: overwrite
+    - name: node_details_app
+      file: ./artifacts/dashboards/node_details_app.json
+      creation_policy: overwrite
+    - name: nso_execute_command
+      file: ./artifacts/dashboards/nso_execute_command.json
+      creation_policy: overwrite
+    - name: discovery_logs
+      file: ./artifacts/dashboards/discovery_logs.json
+      creation_policy: overwrite
+    - name: mobility-devices-report-device
+      file: ./artifacts/dashboards/mobility-devices-report-device.json
+      creation_policy: overwrite
+    - name: mobility-devices-report-schema
+      file: ./artifacts/dashboards/mobility-devices-report-schema.json
+      creation_policy: overwrite
+    - name: mobility-devices-report-kpi
+      file: ./artifacts/dashboards/mobility-devices-report-kpi.json
+      creation_policy: overwrite
+    - name: mobility-view-trace-data
+      file: ./artifacts/dashboards/mobility-view-trace-data.json
+      creation_policy: overwrite
+    - name: network-configure-and-manage
+      file: ./artifacts/dashboards/network-configure-and-manage.json
+      creation_policy: overwrite
+    - name: mobility-devices-kpi-reports
+      file: ./artifacts/dashboards/mobility-devices-kpi-reports.json
+      creation_policy: overwrite
+    - name: StarOS_APN_NAT_Pilot_Packets_Sent_Per_APN
+      file: ./artifacts/dashboards/StarOS_APN_NAT_Pilot_Packets_Sent_Per_APN.json
+      creation_policy: overwrite
+    - name: StarOS_APN_Aggregate_Rejected_Bearers_Statistics
+      file: ./artifacts/dashboards/StarOS_APN_Aggregate_Rejected_Bearers_Statistics.json
+      creation_policy: overwrite
+    - name: StarOS_BCMCS_A11_BC_Deregistration_Errors
+      file: ./artifacts/dashboards/StarOS_BCMCS_A11_BC_Deregistration_Errors.json
+      creation_policy: overwrite
+    - name: StarOS_BCMCS_A11_BC_Registration_Update_Acks
+      file: ./artifacts/dashboards/StarOS_BCMCS_A11_BC_Registration_Update_Acks.json
+      creation_policy: overwrite
+    - name: StarOS_KPI_CPU_Load_Busy_Percentage_Last_5_Mins_Peak_ASR5500_v21
+      file: ./artifacts/dashboards/StarOS_KPI_CPU_Load_Busy_Percentage_Last_5_Mins_Peak_ASR5500_v21.json
+      creation_policy: overwrite
+    - name: StarOS_APN_GGSN_Interface_Traffic_Statistics
+      file: ./artifacts/dashboards/StarOS_APN_GGSN_Interface_Traffic_Statistics.json
+      creation_policy: overwrite
+    - name: StarOS_KPI_GGSN_PDP_Context_Current_Number
+      file: ./artifacts/dashboards/StarOS_KPI_GGSN_PDP_Context_Current_Number.json
+      creation_policy: overwrite
+    - name: mobility-devices-kpi-reports
+      file: ./artifacts/dashboards/mobility-devices-kpi-reports.json
+      creation_policy: overwrite
+    - name: StarOS_KPI_CPU_Load_Busy_Percentage_Last_5_Mins_Average_ASR5500_v21
+      file: ./artifacts/dashboards/StarOS_KPI_CPU_Load_Busy_Percentage_Last_5_Mins_Average_ASR5500_v21.json
+      creation_policy: overwrite
+    - name: StarOS_KPI_APN_Subscriber_Success_Rate
+      file: ./artifacts/dashboards/StarOS_KPI_APN_Subscriber_Success_Rate.json
+      creation_policy: overwrite
+    - name: StarOS_KPI_APN_Total_Number_of_Default_Bearers_Setup
+      file: ./artifacts/dashboards/StarOS_KPI_APN_Total_Number_of_Default_Bearers_Setup.json
+      creation_policy: overwrite
+    - name: StarOS_KPI_GGSN_CPC_Request_Total_Number
+      file: ./artifacts/dashboards/StarOS_KPI_GGSN_CPC_Request_Total_Number.json
+      creation_policy: overwrite
+    - name: StarOS_APN_Aggregate_PDP_Contexts_IP_Address_Statistics
+      file: ./artifacts/dashboards/StarOS_APN_Aggregate_PDP_Contexts_IP_Address_Statistics.json
+      creation_policy: overwrite
+    - name: StarOS_KPI_GGSN_Dynamic_IPv4_PDP_Context_Activation_Total_Number
+      file: ./artifacts/dashboards/StarOS_KPI_GGSN_Dynamic_IPv4_PDP_Context_Activation_Total_Number.json
+      creation_policy: overwrite
+    - name: StarOS_KPI_CPU_Memory_Usage_Percentage_Last_5_Mins_Peak_ASR5500
+      file: ./artifacts/dashboards/StarOS_KPI_CPU_Memory_Usage_Percentage_Last_5_Mins_Peak_ASR5500.json
+      creation_policy: overwrite
+    - name: StarOS_BCMCS_A11_BC_Service_Req_Denied_Bad_Request
+      file: ./artifacts/dashboards/StarOS_BCMCS_A11_BC_Service_Req_Denied_Bad_Request.json
+      creation_policy: overwrite
+    - name: StarOS_KPI_PGW_APN_IP_Address_Allocation_Method_Distribution
+      file: ./artifacts/dashboards/StarOS_KPI_PGW_APN_IP_Address_Allocation_Method_Distribution.json
+      creation_policy: overwrite
+    - name: StarOS_KPI_DHCP_Success_Rate_Percentage
+      file: ./artifacts/dashboards/StarOS_KPI_DHCP_Success_Rate_Percentage.json
+      creation_policy: overwrite
+    - name: StarOS_APN_Aggregate_User_Data_Pps_Statistics
+      file: ./artifacts/dashboards/StarOS_APN_Aggregate_User_Data_Pps_Statistics.json
+      creation_policy: overwrite
+    - name: StarOS_BCMCS_A11_BC_Renewal_Service_Requests_by_PSDN
+      file: ./artifacts/dashboards/StarOS_BCMCS_A11_BC_Renewal_Service_Requests_by_PSDN.json
+      creation_policy: overwrite
+    - name: StarOS_KPI_GGSN_Downlink_Packets_Dropped_Total_Number
+      file: ./artifacts/dashboards/StarOS_KPI_GGSN_Downlink_Packets_Dropped_Total_Number.json
+      creation_policy: overwrite
+    - name: StarOS_KPI_APN_Total_Number_of_Modified_Bearers_UE_Initiated
+      file: ./artifacts/dashboards/StarOS_KPI_APN_Total_Number_of_Modified_Bearers_UE_Initiated.json
+      creation_policy: overwrite
+    - name: StarOS_APN_Aggregate_IPv4_In_IPv6_Sessions_Statistics
+      file: ./artifacts/dashboards/StarOS_APN_Aggregate_IPv4_In_IPv6_Sessions_Statistics.json
+      creation_policy: overwrite
+    - name: StarOS_KPI_GGSN_Downlink_Bytes_Total_Number
+      file: ./artifacts/dashboards/StarOS_KPI_GGSN_Downlink_Bytes_Total_Number.json
+      creation_policy: overwrite
+    - name: StarOS_KPI_APN_Total_Number_of_Modified_Bearers_Network_Initiated
+      file: ./artifacts/dashboards/StarOS_KPI_APN_Total_Number_of_Modified_Bearers_Network_Initiated.json
+      creation_policy: overwrite
+    - name: StarOS_KPI_GGSN_Uplink_Packets_Total_Number
+      file: ./artifacts/dashboards/StarOS_KPI_GGSN_Uplink_Packets_Total_Number.json
+      creation_policy: overwrite
+    - name: StarOS_BCMCS_A11_BC_Registration_Req_Denied_Resource
+      file: ./artifacts/dashboards/StarOS_BCMCS_A11_BC_Registration_Req_Denied_Resource.json
+      creation_policy: overwrite
+    - name: StarOS_BCMCS_A11_BC_Service_Error_Stats
+      file: ./artifacts/dashboards/StarOS_BCMCS_A11_BC_Service_Error_Stats.json
+      creation_policy: overwrite
+    - name: StarOS_BCMCS_Security_Violations
+      file: ./artifacts/dashboards/StarOS_BCMCS_Security_Violations.json
+      creation_policy: overwrite
+    - name: StarOS_APN_Aggregate_IP_Packets_Fragmentation_Statistics
+      file: ./artifacts/dashboards/StarOS_APN_Aggregate_IP_Packets_Fragmentation_Statistics.json
+      creation_policy: overwrite
+    - name: StarOS_BCMCS_A11_BC_Deregistration_Service_Requests
+      file: ./artifacts/dashboards/StarOS_BCMCS_A11_BC_Deregistration_Service_Requests.json
+      creation_policy: overwrite
+    - name: StarOS_KPI_APN_Total_Number_of_Active_IPv4_Sessions
+      file: ./artifacts/dashboards/StarOS_KPI_APN_Total_Number_of_Active_IPv4_Sessions.json
+      creation_policy: overwrite
+    - name: StarOS_KPI_PGW_APN_Current_Number_Of_Sessions_System
+      file: ./artifacts/dashboards/StarOS_KPI_PGW_APN_Current_Number_Of_Sessions_System.json
+      creation_policy: overwrite
+    - name: StarOS_APN_Dedicated_Bearers_Statistics
+      file: ./artifacts/dashboards/StarOS_APN_Dedicated_Bearers_Statistics.json
+      creation_policy: overwrite
+    - name: StarOS_KPI_CPU_Memory_Usage_Percentage_Last_5_Mins_Peak_ASR5500_v21
+      file: ./artifacts/dashboards/StarOS_KPI_CPU_Memory_Usage_Percentage_Last_5_Mins_Peak_ASR5500_v21.json
+      creation_policy: overwrite
+    - name: StarOS_APN_Aggregate_QOS_Priority_Sent_Statistics
+      file: ./artifacts/dashboards/StarOS_APN_Aggregate_QOS_Priority_Sent_Statistics.json
+      creation_policy: overwrite
+    - name: StarOS_KPI_APN_Percentage_of_Active_WLAN_Sessions
+      file: ./artifacts/dashboards/StarOS_KPI_APN_Percentage_of_Active_WLAN_Sessions.json
+      creation_policy: overwrite
+    - name: StarOS_KPI_APN_Total_Number_of_Active_IPv6_Sessions
+      file: ./artifacts/dashboards/StarOS_KPI_APN_Total_Number_of_Active_IPv6_Sessions.json
+      creation_policy: overwrite
+    - name: StarOS_BCMCS_A11_BC_Service_Req_Denied_Insufficient
+      file: ./artifacts/dashboards/StarOS_BCMCS_A11_BC_Service_Req_Denied_Insufficient.json
+      creation_policy: overwrite
+    - name: StarOS_KPI_APN_Active_4G_Sessions
+      file: ./artifacts/dashboards/StarOS_KPI_APN_Active_4G_Sessions.json
+      creation_policy: overwrite
+    - name: StarOS_APN_Aggregate_PDP_Contexts_Statistics
+      file: ./artifacts/dashboards/StarOS_APN_Aggregate_PDP_Contexts_Statistics.json
+      creation_policy: overwrite
+    - name: StarOS_KPI_Card_Average_CPU_Utilization_Imsi_Mgr_ASR5500
+      file: ./artifacts/dashboards/StarOS_KPI_Card_Average_CPU_Utilization_Imsi_Mgr_ASR5500.json
+      creation_policy: overwrite
+    - name: StarOS_BCMCS_A11_BC_Service_Responses_by_PSDN_Stats
+      file: ./artifacts/dashboards/StarOS_BCMCS_A11_BC_Service_Responses_by_PSDN_Stats.json
+      creation_policy: overwrite
+    - name: StarOS_PGW_UE_Modification_Failure_Session_Statistics
+      file: ./artifacts/dashboards/StarOS_PGW_UE_Modification_Failure_Session_Statistics.json
+      creation_policy: overwrite
+    - name: StarOS_APN_Aggregate_Released_Bearers_Statistics
+      file: ./artifacts/dashboards/StarOS_APN_Aggregate_Released_Bearers_Statistics.json
+      creation_policy: overwrite
+    - name: StarOS_KPI_APN_Percentage_of_Active_4G_Sessions
+      file: ./artifacts/dashboards/StarOS_KPI_APN_Percentage_of_Active_4G_Sessions.json
+      creation_policy: overwrite
+    - name: StarOS_APN_Aggregate_Authentication_Statistics
+      file: ./artifacts/dashboards/StarOS_APN_Aggregate_Authentication_Statistics.json
+      creation_policy: overwrite
+    - name: StarOS_BCMCS_A11_BC_Renewal_Registration_Requests
+      file: ./artifacts/dashboards/StarOS_BCMCS_A11_BC_Renewal_Registration_Requests.json
+      creation_policy: overwrite
+    - name: StarOS_APN_Accounting_Statistics
+      file: ./artifacts/dashboards/StarOS_APN_Accounting_Statistics.json
+      creation_policy: overwrite
+    - name: StarOS_APN_Aggregate_Background_QOS_Sent_Statistics
+      file: ./artifacts/dashboards/StarOS_APN_Aggregate_Background_QOS_Sent_Statistics.json
+      creation_policy: overwrite
+    - name: StarOS_APN_Aggregate_Modified_Bearers_Statistics
+      file: ./artifacts/dashboards/StarOS_APN_Aggregate_Modified_Bearers_Statistics.json
+      creation_policy: overwrite
+    - name: StarOS_KPI_GGSN_Outbound_Packets_Dropped_due_to_ACL_Filtering_Total_Number
+      file: ./artifacts/dashboards/StarOS_KPI_GGSN_Outbound_Packets_Dropped_due_to_ACL_Filtering_Total_Number.json
+      creation_policy: overwrite
+    - name: StarOS_KPI_PGW_EPS_Bearers_Modification_Failures_NW_Error
+      file: ./artifacts/dashboards/StarOS_KPI_PGW_EPS_Bearers_Modification_Failures_NW_Error.json
+      creation_policy: overwrite
+    - name: StarOS_BCMCS_A11_BC_Registration_Requests_Denied
+      file: ./artifacts/dashboards/StarOS_BCMCS_A11_BC_Registration_Requests_Denied.json
+      creation_policy: overwrite
+    - name: StarOS_BCMCS_A11_BC_Registration_Responses
+      file: ./artifacts/dashboards/StarOS_BCMCS_A11_BC_Registration_Responses.json
+      creation_policy: overwrite
+    - name: StarOS_KPI_GGSN_Uplink_Bytes_Dropped_Total_Number
+      file: ./artifacts/dashboards/StarOS_KPI_GGSN_Uplink_Bytes_Dropped_Total_Number.json
+      creation_policy: overwrite
+    - name: StarOS_BCMCS_A11_BC_Registration_Requests
+      file: ./artifacts/dashboards/StarOS_BCMCS_A11_BC_Registration_Requests.json
+      creation_policy: overwrite
+    - name: StarOS_KPI_CPU_Memory_Usage_Percentage_Last_5_Mins_Average_ASR5500
+      file: ./artifacts/dashboards/StarOS_KPI_CPU_Memory_Usage_Percentage_Last_5_Mins_Average_ASR5500.json
+      creation_policy: overwrite
+    - name: StarOS_BCMCS_A11_BC_Registration_Requests_Errors
+      file: ./artifacts/dashboards/StarOS_BCMCS_A11_BC_Registration_Requests_Errors.json
+      creation_policy: overwrite
+    - name: StarOS_KPI_GGSN_PDP_Context_Activation_Success_Rate_Per_APN
+      file: ./artifacts/dashboards/StarOS_KPI_GGSN_PDP_Context_Activation_Success_Rate_Per_APN.json
+      creation_policy: overwrite
+    - name: StarOS_BCMCS_A11_BC_Registration_Denied_Stats
+      file: ./artifacts/dashboards/StarOS_BCMCS_A11_BC_Registration_Denied_Stats.json
+      creation_policy: overwrite
+    - name: StarOS_KPI_PGW_EPS_Bearers_Modification_Failures_UE
+      file: ./artifacts/dashboards/StarOS_KPI_PGW_EPS_Bearers_Modification_Failures_UE.json
+      creation_policy: overwrite
+    - name: StarOS_KPI_GGSN_Downlink_Bytes_Dropped_Total_Number
+      file: ./artifacts/dashboards/StarOS_KPI_GGSN_Downlink_Bytes_Dropped_Total_Number.json
+      creation_policy: overwrite
+    - name: StarOS_KPI_GGSN_Received_Packets_Dropped_due_to_Bad_Header_Total_Number
+      file: ./artifacts/dashboards/StarOS_KPI_GGSN_Received_Packets_Dropped_due_to_Bad_Header_Total_Number.json
+      creation_policy: overwrite
+    - name: StarOS_APN_Aggregate_Packets_Dropped_Data_Statistics
+      file: ./artifacts/dashboards/StarOS_APN_Aggregate_Packets_Dropped_Data_Statistics.json
+      creation_policy: overwrite
+    - name: StarOS_BCMCS_A11_BC_Registration_Updates_Stats
+      file: ./artifacts/dashboards/StarOS_BCMCS_A11_BC_Registration_Updates_Stats.json
+      creation_policy: overwrite
+    - name: StarOS_KPI_PGW_EPS_Bearers_Modification_Distribution
+      file: ./artifacts/dashboards/StarOS_KPI_PGW_EPS_Bearers_Modification_Distribution.json
+      creation_policy: overwrite
+    - name: StarOS_BCMCS_A11_BC_Registration_Req_Denied_Bad_Req
+      file: ./artifacts/dashboards/StarOS_BCMCS_A11_BC_Registration_Req_Denied_Bad_Req.json
+      creation_policy: overwrite
+    - name: StarOS_APN_Aggregate_Miscellaneous_Statistics
+      file: ./artifacts/dashboards/StarOS_APN_Aggregate_Miscellaneous_Statistics.json
+      creation_policy: overwrite
+    - name: StarOS_APN_Aggregate_IPv4_Sessions_Statistics
+      file: ./artifacts/dashboards/StarOS_APN_Aggregate_IPv4_Sessions_Statistics.json
+      creation_policy: overwrite
+    - name: StarOS_BCMCS_A11_BC_Service_Requests_by_PSDN_Stats
+      file: ./artifacts/dashboards/StarOS_BCMCS_A11_BC_Service_Requests_by_PSDN_Stats.json
+      creation_policy: overwrite
+    - name: StarOS_KPI_GGSN_Uplink_Packets_Dropped_Total_Number
+      file: ./artifacts/dashboards/StarOS_KPI_GGSN_Uplink_Packets_Dropped_Total_Number.json
+      creation_policy: overwrite
+    - name: StarOS_APN_Aggregate_QOS_Sent_Statistics
+      file: ./artifacts/dashboards/StarOS_APN_Aggregate_QOS_Sent_Statistics.json
+      creation_policy: overwrite
+    - name: StarOS_KPI_GGSN_Inbound_Packets_Dropped_due_to_ACL_Filtering_Total_Number
+      file: ./artifacts/dashboards/StarOS_KPI_GGSN_Inbound_Packets_Dropped_due_to_ACL_Filtering_Total_Number.json
+      creation_policy: overwrite
+    - name: StarOS_APN_Aggregate_Bearers_Statistics
+      file: ./artifacts/dashboards/StarOS_APN_Aggregate_Bearers_Statistics.json
+      creation_policy: overwrite
+    - name: StarOS_KPI_GGSN_PDP_Context_Total_Number
+      file: ./artifacts/dashboards/StarOS_KPI_GGSN_PDP_Context_Total_Number.json
+      creation_policy: overwrite
+    - name: StarOS_BCMCS_Current_Sessions
+      file: ./artifacts/dashboards/StarOS_BCMCS_Current_Sessions.json
+      creation_policy: overwrite
+    - name: StarOS_APN_Aggregate_IP_Packets_Dropped_Statistics
+      file: ./artifacts/dashboards/StarOS_APN_Aggregate_IP_Packets_Dropped_Statistics.json
+      creation_policy: overwrite
+    - name: StarOS_KPI_PGW_LTE_Throughput_per_User_UL
+      file: ./artifacts/dashboards/StarOS_KPI_PGW_LTE_Throughput_per_User_UL.json
+      creation_policy: overwrite
+    - name: StarOS_KPI_APN_Total_Number_of_Active_IPv4_in_IPv6_Sessions
+      file: ./artifacts/dashboards/StarOS_KPI_APN_Total_Number_of_Active_IPv4_in_IPv6_Sessions.json
+      creation_policy: overwrite
+    - name: StarOS_KPI_PGW_EPS_Bearers_Modification_Failures_Network
+      file: ./artifacts/dashboards/StarOS_KPI_PGW_EPS_Bearers_Modification_Failures_Network.json
+      creation_policy: overwrite
+    - name: StarOS_APN_Aggregate_Bytes_Dropped_Data_Statistics
+      file: ./artifacts/dashboards/StarOS_APN_Aggregate_Bytes_Dropped_Data_Statistics.json
+      creation_policy: overwrite
+    - name: StarOS_BCMCS_A11_BC_Service_Requests_Denied_Stats
+      file: ./artifacts/dashboards/StarOS_BCMCS_A11_BC_Service_Requests_Denied_Stats.json
+      creation_policy: overwrite
+    - name: StarOS_KPI_CPU_Load_Busy_Percentage_Last_5_Mins_Average_ASR5500
+      file: ./artifacts/dashboards/StarOS_KPI_CPU_Load_Busy_Percentage_Last_5_Mins_Average_ASR5500.json
+      creation_policy: overwrite
+    - name: StarOS_APN_Aggregate_IPv6_Sessions_Statistics
+      file: ./artifacts/dashboards/StarOS_APN_Aggregate_IPv6_Sessions_Statistics.json
+      creation_policy: overwrite
+    - name: StarOS_APN_Aggregate_Interface_Traffic_Statistics
+      file: ./artifacts/dashboards/StarOS_APN_Aggregate_Interface_Traffic_Statistics.json
+      creation_policy: overwrite
+    - name: StarOS_PGW_NW_Modification_Failure_Session_Statistics
+      file: ./artifacts/dashboards/StarOS_PGW_NW_Modification_Failure_Session_Statistics.json
+      creation_policy: overwrite
+    - name: StarOS_PGW_Modified_Session_Statistics
+      file: ./artifacts/dashboards/StarOS_PGW_Modified_Session_Statistics.json
+      creation_policy: overwrite
+    - name: StarOS_KPI_APN_Total_Number_of_Dedicated_Bearers_Setup
+      file: ./artifacts/dashboards/StarOS_KPI_APN_Total_Number_of_Dedicated_Bearers_Setup.json
+      creation_policy: overwrite
+    - name: StarOS_BCMCS_A11_BC_Registration_Req_Denied_Congestion
+      file: ./artifacts/dashboards/StarOS_BCMCS_A11_BC_Registration_Req_Denied_Congestion.json
+      creation_policy: overwrite
+    - name: StarOS_KPI_APN_Total_Number_of_IPv4_Sessions_Setup
+      file: ./artifacts/dashboards/StarOS_KPI_APN_Total_Number_of_IPv4_Sessions_Setup.json
+      creation_policy: overwrite
+    - name: StarOS_APN_PDP_Contexts_Statistics
+      file: ./artifacts/dashboards/StarOS_APN_PDP_Contexts_Statistics.json
+      creation_policy: overwrite
+    - name: StarOS_BCMCS_A11_BC_Registration_Updates_PCF_Stats
+      file: ./artifacts/dashboards/StarOS_BCMCS_A11_BC_Registration_Updates_PCF_Stats.json
+      creation_policy: overwrite
+    - name: StarOS_APN_Aggregate_Interface_Dropped_Traffic_Statistics
+      file: ./artifacts/dashboards/StarOS_APN_Aggregate_Interface_Dropped_Traffic_Statistics.json
+      creation_policy: overwrite
+    - name: StarOS_KPI_Card_Average_CPU_Utilization_Link_Mgr_ASR5500
+      file: ./artifacts/dashboards/StarOS_KPI_Card_Average_CPU_Utilization_Link_Mgr_ASR5500.json
+      creation_policy: overwrite
+    - name: StarOS_KPI_GGSN_Downlink_Packets_Total_Number
+      file: ./artifacts/dashboards/StarOS_KPI_GGSN_Downlink_Packets_Total_Number.json
+      creation_policy: overwrite
+    - name: StarOS_KPI_CPU_Memory_Usage_Percentage_Last_5_Mins_Average_ASR5500_v21
+      file: ./artifacts/dashboards/StarOS_KPI_CPU_Memory_Usage_Percentage_Last_5_Mins_Average_ASR5500_v21.json
+      creation_policy: overwrite
+    - name: StarOS_KPI_Bearer_Modification_Success_Rate
+      file: ./artifacts/dashboards/StarOS_KPI_Bearer_Modification_Success_Rate.json
+      creation_policy: overwrite
+    - name: StarOS_APN_Aggregate_IP_PDP_Contexts_Request_Statistics
+      file: ./artifacts/dashboards/StarOS_APN_Aggregate_IP_PDP_Contexts_Request_Statistics.json
+      creation_policy: overwrite
+    - name: StarOS_KPI_CPU_Memory_Usage_Percentage_ASR5500_v21
+      file: ./artifacts/dashboards/StarOS_KPI_CPU_Memory_Usage_Percentage_ASR5500_v21.json
+      creation_policy: overwrite
+    - name: StarOS_KPI_APN_Total_Number_of_IPv6_Sessions_Setup
+      file: ./artifacts/dashboards/StarOS_KPI_APN_Total_Number_of_IPv6_Sessions_Setup.json
+      creation_policy: overwrite
+    - name: StarOS_KPI_APN_Active_3G_Sessions
+      file: ./artifacts/dashboards/StarOS_KPI_APN_Active_3G_Sessions.json
+      creation_policy: overwrite
+    - name: StarOS_APN_Aggregate_User_Data_Bps_Statistics
+      file: ./artifacts/dashboards/StarOS_APN_Aggregate_User_Data_Bps_Statistics.json
+      creation_policy: overwrite
+    - name: StarOS_KPI_CPU_Load_Busy_Percentage_ASR5500
+      file: ./artifacts/dashboards/StarOS_KPI_CPU_Load_Busy_Percentage_ASR5500.json
+      creation_policy: overwrite
+    - name: StarOS_KPI_GGSN_Uplink_Bytes_Total_Number
+      file: ./artifacts/dashboards/StarOS_KPI_GGSN_Uplink_Bytes_Total_Number.json
+      creation_policy: overwrite
+    - name: StarOS_BCMCS_A11_BC_Initial_Registration_Requests
+      file: ./artifacts/dashboards/StarOS_BCMCS_A11_BC_Initial_Registration_Requests.json
+      creation_policy: overwrite
+    - name: StarOS_KPI_APN_Default_Bearer_Subscriber_Success_Rate
+      file: ./artifacts/dashboards/StarOS_KPI_APN_Default_Bearer_Subscriber_Success_Rate.json
+      creation_policy: overwrite
+    - name: StarOS_KPI_CPU_Memory_Usage_Percentage_ASR5500
+      file: ./artifacts/dashboards/StarOS_KPI_CPU_Memory_Usage_Percentage_ASR5500.json
+      creation_policy: overwrite
+    - name: StarOS_KPI_APN_Active_WLAN_Sessions
+      file: ./artifacts/dashboards/StarOS_KPI_APN_Active_WLAN_Sessions.json
+      creation_policy: overwrite
+    - name: StarOS_KPI_PGW_LTE_Throughput_per_User_DL
+      file: ./artifacts/dashboards/StarOS_KPI_PGW_LTE_Throughput_per_User_DL.json
+      creation_policy: overwrite
+    - name: StarOS_KPI_APN_Dedicated_Bearer_Subscriber_Success_Rate
+      file: ./artifacts/dashboards/StarOS_KPI_APN_Dedicated_Bearer_Subscriber_Success_Rate.json
+      creation_policy: overwrite
+    - name: StarOS_KPI_CPU_Load_Busy_Percentage_ASR5500_v21
+      file: ./artifacts/dashboards/StarOS_KPI_CPU_Load_Busy_Percentage_ASR5500_v21.json
+      creation_policy: overwrite
+    - name: StarOS_KPI_APN_Packet_Drop_Ratio
+      file: ./artifacts/dashboards/StarOS_KPI_APN_Packet_Drop_Ratio.json
+      creation_policy: overwrite
+    - name: StarOS_BCMCS_A11_BC_Registration_Acknowledges_Stats
+      file: ./artifacts/dashboards/StarOS_BCMCS_A11_BC_Registration_Acknowledges_Stats.json
+      creation_policy: overwrite
+    - name: StarOS_KPI_Accounting_Success_Rate_Ga_Interface
+      file: ./artifacts/dashboards/StarOS_KPI_Accounting_Success_Rate_Ga_Interface.json
+      creation_policy: overwrite
+    - name: StarOS_KPI_CPU_Load_Busy_Percentage_Last_5_Mins_Peak_ASR5500
+      file: ./artifacts/dashboards/StarOS_KPI_CPU_Load_Busy_Percentage_Last_5_Mins_Peak_ASR5500.json
+      creation_policy: overwrite
+    - name: StarOS_APN_Aggregate_PDP_Contexts_Request_Statistics
+      file: ./artifacts/dashboards/StarOS_APN_Aggregate_PDP_Contexts_Request_Statistics.json
+      creation_policy: overwrite
+    - name: StarOS_KPI_APN_Percentage_of_Active_3G_Sessions
+      file: ./artifacts/dashboards/StarOS_KPI_APN_Percentage_of_Active_3G_Sessions.json
+      creation_policy: overwrite
+    - name: StarOS_KPI_APN_Bearer_Modification_Success_Rate
+      file: ./artifacts/dashboards/StarOS_KPI_APN_Bearer_Modification_Success_Rate.json
+      creation_policy: overwrite
+    - name: StarOS_KPI_APN_Total_Number_of_IPv4_in_IPv6_Sessions_Setup
+      file: ./artifacts/dashboards/StarOS_KPI_APN_Total_Number_of_IPv4_in_IPv6_Sessions_Setup.json
+      creation_policy: overwrite
+    - name: StarOS_BCMCS_A11_BC_Initial_Service_Requests_by_PSDN
+      file: ./artifacts/dashboards/StarOS_BCMCS_A11_BC_Initial_Service_Requests_by_PSDN.json
+      creation_policy: overwrite
+    - name: mobility_search_project
+      file: ./artifacts/dashboards/mobility_search_project.json
+      creation_policy: overwrite
+
+
+  blueprints:
+    - name: epm_trap_sender
+      file: ./artifacts/blueprints/epm_trap_sender.yaml
+      creation_policy: overwrite
+    - name: notify_send_email_on_incident_create
+      file: ./artifacts/blueprints/notify_send_email_on_incident_create.yaml
+      creation_policy: overwrite
+    - name: network_device_discovery_single_tenant
+      file: ./artifacts/blueprints/network_device_discovery_single_tenant.yaml
+      creation_policy: overwrite
+
+
+  datasets:
+    - name: device_mappings_with_latlongv1
+      data_file: ./data/device_mappings_with_latlongv1.csv
+      folder: MobilityPack
+    - name: onboard_devices
+      data_file: ./data/onboard_devices.csv
+      folder: MobilityPack
+    - name: managed_snmptraps
+      data_file: ./data/managed_snmptraps.csv
+      folder: MobilityPack
+    - name: pipeline_inputs
+      data_file: ./data/pipeline_inputs.csv
+      folder: MobilityPack
+    - name: managed_syslogs
+      data_file: ./data/managed_syslogs.csv
+      folder: MobilityPack
+    - name: notify_on_incident_create_dict_filter
+      data_file: ./data/notify_on_incident_create_dict_filter.csv
+      folder: MobilityPack
+    - name: notify_on_incident_create_email_recipients
+      data_file: ./data/notify_on_incident_create_email_recipients.csv
+      folder: MobilityPack
+    - name: pipeline_inputs_hierarchyIds
+      data_file: ./data/pipeline_inputs_hierarchyIds.csv
+      folder: MobilityPack
+    - name: access_verification_method
+      data_file: ./data/access_verification_method.csv
+      folder: MobilityPack
+    - name: bulkstats_variables
+      data_file: ./data/bulkstats_variables.csv
+      folder: MobilityPack
+    - name: Autox_KPI_list_new
+      data_file: ./data/Autox_KPI_list_new.csv
+      folder: MobilityPack
+    - name: mobility_reports_metadata
+      data_file: ./data/mobility_reports_metadata.csv
+      folder: MobilityPack
