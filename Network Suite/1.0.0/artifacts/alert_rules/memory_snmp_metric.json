@@ -1,0 +1,60 @@
+{
+    "type": "metric",
+    "name": "memory_snmp_metric",
+    "description": "Memory Usage CFX",
+    "enabled": false,
+    "schedule": {
+        "minutes": 5
+    },
+    "data": {
+        "stream": "rda_snmp_metrics",
+        "query": "name == 'memory'",
+        "unique_keys": [
+            "target_ip",
+            "memory_name",
+            "name"
+        ],
+        "groupby": [
+            "target_ip",
+            "memory_name",
+            "name"
+        ],
+        "additional_columns": [
+            "device_hostname",
+            "device_model",
+            "device_vendor",
+            "memory_usage",
+            "sys_name"
+        ],
+        "custom_unique_keys": [],
+        "data_transformations": []
+    },
+    "actions": [
+        {
+            "state": "OPEN",
+            "threshold": "85",
+            "agg_column": "memory_usage",
+            "agg_func": "max",
+            "repeat_count": 2,
+            "attributes": {
+                "severity": "CRITICAL",
+                "metric_name": "memory_usage",
+                "alert_message": "critical memory usage on {{sys_name}} ({{target_ip}}) ({{memory_name}}={{memory_usage}}%)"
+            },
+            "notification_profile": "snmp_metrics_notification_profile"
+        },
+        {
+            "state": "CLEAR",
+            "agg_column": "memory_usage",
+            "agg_func": "max",
+            "threshold": "60",
+            "attributes": {
+                "severity": "INFO",
+                "metric_name": "memory_usage",
+                "alert_message": "memory usage normalized on {{sys_name}} ({{target_ip}}) ({{memory_name}}={{memory_usage}}%)"
+            },
+            "notification_profile": "snmp_metrics_notification_profile"
+        }
+    ],
+    "saved_time": "2026-04-15T05:57:54.536639"
+}

@@ -1,0 +1,337 @@
+{
+    "name": "network_device_sensor_metrics_drilldown",
+    "label": "Network Device Sensor Metrics",
+    "description": "Network Device Sensor Metrics",
+    "dashboard_folder": "Network Device",
+    "version": "1.0.0",
+    "enabled": true,
+    "stream": "rda_snmp_metrics",
+    "dashboard_type": "template",
+    "live_edit": true,
+    "template_variables": {
+        "DEVICE_IP": {
+            "contextId": "target_ip"
+        },
+        "DEVICE_VENDOR": {
+            "contextId": "device_vendor"
+        },
+        "DEVICE_NAME": {
+            "contextId": "sys_name"
+        }
+    },
+    "dashboard_filters": {
+        "time_filter": true,
+        "extra_filter1": "target_ip is '{{DEVICE_IP}}'",
+        "default_time_filter_labels": [
+            "Last 24 hours"
+        ],
+        "columns_filter": [],
+        "group_filters": []
+    },
+    "dashboard_sections": [
+        {
+            "title": "Device Drilldown (Metrics - Sensors)",
+            "show_filter": true,
+            "widgets": [
+                {
+                    "title": "Device Info",
+                    "widget_type": "label",
+                    "min_width": 12,
+                    "max_width": 12,
+                    "height": 1,
+                    "label": "<h4 style='margin:0;padding:10px;background:#f5f5f5;color:#0066ff;border-radius:4px;text-align:center'>Device Name: {{DEVICE_NAME}} | IP Address: {{DEVICE_IP}} | Vendor: {{DEVICE_VENDOR}}</h4>",
+                    "widget_id": "5ed447a2"
+                },
+                {
+                    "title": "Temperature (C)",
+                    "widget_type": "counter",
+                    "stream": "rda_snmp_metrics",
+                    "ts_column": "timestamp",
+                    "column": "sensor_value",
+                    "agg": "last",
+                    "extra_filter": "target_ip is '{{DEVICE_IP}}' and ((sensor_type_label contains 'temperature' or sensor_type_label contains 'celsius') or sensor_units_label = 'Celsius' or sensor_units_label = 'C') and (sensor_value is not empty and sensor_value != 65535 and sensor_value < 150)",
+                    "min_width": 2,
+                    "max_width": 2,
+                    "height": 4,
+                    "widget_id": "bdbf888a"
+                },
+                {
+                    "title": "Sensor Status",
+                    "widget_type": "label",
+                    "min_width": 10,
+                    "max_width": 10,
+                    "height": 4,
+                    "uses_reporting_engine": true,
+                    "label": "attachment://Sensor_Health",
+                    "widget_id": "f900ad50"
+                },
+                {
+                    "title": "Power Sensor Status",
+                    "widget_type0": "label",
+                    "min_width": 3,
+                    "max_width": 3,
+                    "height": 4,
+                    "label": "attachment://Sensor_Status_Label",
+                    "fixed_variables": {
+                        "count_label": "Power Status"
+                    },
+                    "advanced": true,
+                    "segments": [
+                        {
+                            "variable": "sensor_status",
+                            "stream": "rda_snmp_metrics",
+                            "ts_column": "timestamp",
+                            "extra_filter": "sensor_type = 'power' and target_ip is '{{DEVICE_IP}}'",
+                            "column": "sensor_status_label",
+                            "agg": "last_record"
+                        }
+                    ],
+                    "widget_id": "de89b759"
+                },
+                {
+                    "title": "Fan Sensor Status",
+                    "widget_type0": "label",
+                    "min_width": 3,
+                    "max_width": 3,
+                    "height": 4,
+                    "label": "attachment://Sensor_Status_Label",
+                    "fixed_variables": {
+                        "count_label": "FAN Status"
+                    },
+                    "advanced": true,
+                    "segments": [
+                        {
+                            "variable": "sensor_status",
+                            "stream": "rda_snmp_metrics",
+                            "ts_column": "timestamp",
+                            "extra_filter": "sensor_type = 'fan'",
+                            "column": "sensor_status",
+                            "agg": "first"
+                        }
+                    ],
+                    "widget_id": "bb917ef2"
+                },
+                {
+                    "title": "Temperature Status",
+                    "widget_type0": "label",
+                    "label": "attachment://Sensor_Status_Label",
+                    "fixed_variables": {
+                        "count_label": "Temperature Status"
+                    },
+                    "advanced": true,
+                    "segments": [
+                        {
+                            "variable": "sensor_status",
+                            "stream": "rda_snmp_metrics",
+                            "ts_column": "timestamp",
+                            "extra_filter": "target_ip is '{{DEVICE_IP}}' and sensor_type = 'chassis_temperature'",
+                            "column": "sensor_status",
+                            "agg": "first"
+                        }
+                    ],
+                    "min_width": 3,
+                    "max_width": 3,
+                    "height": 4,
+                    "widget_id": "cb282d5e"
+                },
+                {
+                    "title": "Temperature (C)",
+                    "widget_type": "timeseries",
+                    "stream": "rda_snmp_metrics",
+                    "extra_filter": "target_ip is '{{DEVICE_IP}}' and (collection is 'environmental_temperature' or sensor_type_label contains 'celsius' or sensor_units_label = 'Celsius' or sensor_units_label = 'C') and (sensor_value is not empty and sensor_value != 65535 and sensor_value < 150)",
+                    "ts_column": "timestamp",
+                    "min_width": 6,
+                    "max_width": 6,
+                    "height": 4,
+                    "group_by": [
+                        "target_ip"
+                    ],
+                    "chartProperties": {
+                        "yAxisLabel": "Tempertaure (C)",
+                        "xAxisLabel": "Time",
+                        "legendLocation": "right"
+                    },
+                    "interval": "auto",
+                    "series_spec": [
+                        {
+                            "column": "sensor_value",
+                            "agg": "avg",
+                            "type": "float",
+                            "label": "Temperature (C)"
+                        }
+                    ],
+                    "widget_id": "78ba5c7a"
+                },
+                {
+                    "title": "Power (Watts / dBm)",
+                    "widget_type": "timeseries",
+                    "stream": "rda_snmp_metrics",
+                    "extra_filter": "target_ip is '{{DEVICE_IP}}' and (sensor_type_label is not empty and (sensor_type_label = 'watts' or sensor_type_label = 'dBm' ))",
+                    "ts_column": "timestamp",
+                    "min_width": 6,
+                    "max_width": 6,
+                    "height": 4,
+                    "group_by": [
+                        "sensor_name"
+                    ],
+                    "chartProperties": {
+                        "yAxisLabel": "Power (Watts / dBm)",
+                        "xAxisLabel": "Time",
+                        "legendLocation": "right"
+                    },
+                    "interval": "auto",
+                    "series_spec": [
+                        {
+                            "column": "sensor_value",
+                            "agg": "avg",
+                            "type": "float",
+                            "label": "Power (Watts / dBm)"
+                        }
+                    ],
+                    "widget_id": "3258bda8"
+                },
+                {
+                    "title": "Power (A)",
+                    "widget_type": "timeseries",
+                    "stream": "rda_snmp_metrics",
+                    "extra_filter": "target_ip is '{{DEVICE_IP}}' and (sensor_type_label is not empty and sensor_type_label = 'amperes')",
+                    "ts_column": "timestamp",
+                    "min_width": 6,
+                    "max_width": 6,
+                    "height": 4,
+                    "group_by": [
+                        "sensor_name"
+                    ],
+                    "chartProperties": {
+                        "yAxisLabel": "Power (A)",
+                        "xAxisLabel": "Time",
+                        "legendLocation": "right"
+                    },
+                    "interval": "auto",
+                    "series_spec": [
+                        {
+                            "column": "sensor_value",
+                            "agg": "avg",
+                            "type": "float",
+                            "label": "Power (A)"
+                        }
+                    ],
+                    "widget_id": "9c1e3ed5"
+                },
+                {
+                    "title": "Power (V)",
+                    "widget_type": "timeseries",
+                    "stream": "rda_snmp_metrics",
+                    "extra_filter": "target_ip is '{{DEVICE_IP}}' and (sensor_type_label is not empty and (sensor_type_label = 'voltsAC' or sensor_type_label = 'voltsDC'))",
+                    "ts_column": "timestamp",
+                    "min_width": 6,
+                    "max_width": 6,
+                    "height": 4,
+                    "group_by": [
+                        "sensor_name"
+                    ],
+                    "chartProperties": {
+                        "yAxisLabel": "Power (V)",
+                        "xAxisLabel": "Time",
+                        "legendLocation": "right"
+                    },
+                    "interval": "auto",
+                    "series_spec": [
+                        {
+                            "column": "sensor_value",
+                            "agg": "max",
+                            "type": "float",
+                            "label": ""
+                        }
+                    ],
+                    "widget_id": "a3140408"
+                },
+                {
+                    "title": "Sensors Status",
+                    "widget_type": "tabular",
+                    "stream": "rda_snmp_metrics",
+                    "ts_column": "timestamp",
+                    "extra_filter": "target_ip is '{{DEVICE_IP}}' and collection contains 'environmental'",
+                    "min_width": 12,
+                    "max_width": 12,
+                    "height": 10,
+                    "paginated": true,
+                    "remote_searchable": true,
+                    "remote_searchable_cols": [
+                        "sensor_name"
+                    ],
+                    "columns": {
+                        "sys_name": "Device Hostname",
+                        "target_ip": "Device IP",
+                        "sensor_name": "Sensor Name"
+                    },
+                    "agg_size0": 250,
+                    "pivot": {
+                        "pivot_type": "advanced",
+                        "group_by": [
+                            "sys_name",
+                            "target_ip",
+                            "sensor_name"
+                        ],
+                        "series": [
+                            {
+                                "column": "sensor_status",
+                                "agg": "max",
+                                "type": "int",
+                                "label": "sensor_status_num"
+                            },
+                            {
+                                "column": "sensor_status_label",
+                                "agg": "last_record",
+                                "type": "str",
+                                "label": "Sensor_Status"
+                            }
+                        ]
+                    },
+                    "custom_columns": [
+                        {
+                            "id": "Sensor_Status_Label",
+                            "label": "Sensor Status",
+                            "expr": "Sensor_Status",
+                            "visible": true,
+                            "type": "DYNAMIC_HTML",
+                            "htmlTemplate": "{%raw%}<span class='badge' :style=\"{backgroundColor: rowData.Sensor_Status == 'ok'?'#2ecc71':rowData.Sensor_Status == 'normal'?'#2ecc71':rowData.Sensor_Status == 'active'?'#2ecc71':rowData.Sensor_Status == 'warning'?'#f39c12':rowData.Sensor_Status == 'critical'?'#e74c3c':rowData.Sensor_Status == 'nonoperational'?'#e74c3c':'#95a5a6', color:'#fff', padding:'4px 8px', borderRadius:'4px'}\">{{ rowData.Sensor_Status }}</span>{%endraw%}"
+                        }
+                    ],
+                    "hide_columns": [
+                        "sensor_status_num",
+                        "Sensor_Status"
+                    ],
+                    "widget_id": "afce383f"
+                }
+            ]
+        }
+    ],
+    "saved_time": "2026-05-05T06:00:27.819383",
+    "attachments": [
+        {
+            "name": "Sensor_Status_Label",
+            "value": "{%raw%}\n<div style='width:100%;height:100%;'>\n  <div style=\"width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center\">\n    <div style='text-align: center; margin-bottom: 8px; color: #424242; font-size: 14px;'>{{count_label}}</div>\n    {% set status = (sensor_status_label or 'NA') | string | lower %}\n    <div style=\"text-align: center; font-size: 24px; font-weight: 600; {% if status == 'down' %}color: #e53935;{% else %}color: #43a047;{% endif %}\">{{ sensor_status_label or 'NA' }}</div>\n  </div>\n</div>\n{%endraw%}"
+        },
+        {
+            "name": "Sensor_Status",
+            "value": "{%raw%}\n<div style='width:100%;height:100%;'>\n  <div style=\"width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center\">\n    <div style='text-align: center; margin-bottom: 8px; color: #424242; font-size: 14px;'>{{count_label}}</div>\n    {% set raw = sensor_status or 'OK' %}\n    {% set status = raw | string | lower %}\n    {% if status in ['ok','up','normal','1'] %}\n        {% set display = 'OK' %}\n        {% set color = '#43a047' %}\n{% elif status in ['warning'] %}\n  {% set display = 'WARNING' %}\n  {% set color = '#f39c12' %}\n{% elif status in ['critical','down','failed'] %}\n  {% set display = 'CRITICAL' %}\n  {% set color = '#e53935' %}\n{% else %}\n  {% set display = 'OK' %}\n  {% set color = '#43a047' %}\n{% endif %}\n    <div style=\"text-align: center; font-size: 24px; font-weight: 600; color: {{ color }};\">{{ sensor_status or 'NA' }}</div>\n  </div>\n</div>\n{%endraw%}"
+        },
+        {
+            "name": "Sensor_Health",
+            "value": "{% raw %}\n{% set target_ip = context.target_ip %}\n{% set power_query = \"target_ip is '\" ~ target_ip ~ \"' and sensor_type_label is not empty\" %}\n\n{% set power_data = engine.query_stream_data(\n    stream=\"rda_snmp_metrics\",\n    cfxql_query=power_query,\n    sorting=[{\"timestamp\": \"desc\"}],\n    limit=300,\n    max_rows=300\n) %}\n\n{% set grouped_data = {} %}\n\n{% for record in power_data %}\n    {% set vendor = record.vendor | default('') | lower %}\n    {% set group_key = record.sensor_type_label %}\n\n    {% if group_key and group_key not in grouped_data %}\n        {% set _ = grouped_data.update({group_key: record}) %}\n    {% endif %}\n{% endfor %}\n\n<div style='width:100%;height:100%; padding:20px; display:flex; flex-direction:column;'>\n\n  <div style='margin-bottom:15px; color:#424242; font-size:16px; font-weight:600;'>\n    Sensor Health: {{ grouped_data|length }}\n  </div>\n\n  <div style=\"width:100%; flex:1; display:flex; gap:20px; overflow-x:auto;\">\n\n    {% if grouped_data %}\n\n      {% for group_key, record in grouped_data.items() %}\n\n        {% set sensor_type_label = record.sensor_type_label | default('') | lower %}\n        {% set status = (\n            record.sensor_status_label\n            or 'N/A'\n        ) | lower %}\n\n        {% set heading =\n            'Voltage AC' if 'voltsac' in sensor_type_label or 'voltsAC' in sensor_type_label else\n            'Voltage DC' if 'voltsdc' in sensor_type_label or 'voltsDC' in sensor_type_label else\n            'Voltage' if 'volts' in sensor_type_label else\n            'Current' if 'ampere' in sensor_type_label else\n            'Power' if 'watt' in sensor_type_label or 'power' in sensor_type_label else\n            'Temperature' if 'celsius' in sensor_type_label or 'temperature' in sensor_type_label else\n            'Fan' if 'rpm' in sensor_type_label or 'fan' in sensor_type_label else\n            'Unknown'\n        %}\n\n        {% set color_map = {\n            'ok': '#2e7d32',\n            'normal': '#2e7d32',\n            'active': '#2e7d32',\n            'down': '#f39c12',\n            'warning': '#f39c12',\n            'critical': '#e74c3c',\n            'shutdown': '#8e44ad',\n            'unavailable': '#7f8c8d',\n            'notSupported': '#7f8c8d',\n            'not installed': '#7f8c8d',\n            'nonoperational': '#95a5a6',\n            \n        } %}\n\n        {% set color = color_map.get(status, '#95a5a6') %}\n\n        <div style=\"display:flex; flex-direction:column; align-items:center;\n                    padding:15px; border:1px solid #ddd;\n                    border-radius:8px; min-width:200px; flex-shrink:0;\">\n\n          <div style='margin-bottom:8px; font-size:16px; font-weight:600;'>\n            {{ heading }}\n          </div>\n\n          <div style=\"font-size:24px; font-weight:600; color:{{ color }};\">\n            {{ status | upper }}\n          </div>\n\n        </div>\n\n      {% endfor %}\n\n    {% else %}\n      <div style=\"align-self:center;\">No data available</div>\n    {% endif %}\n\n  </div>\n</div>\n{% endraw %}\n",
+            "additionalFields": {
+                "valueType": "",
+                "description": ""
+            }
+        },
+        {
+            "name": "Sensor_Health_bkp",
+            "value": "{% raw %}\r\n{% set target_ip = context.target_ip  %}\r\n{% set power_query = \"target_ip is '\" ~ target_ip ~ \"' and sensor_type_label is not empty\" %}\r\n\r\n{% set power_data = engine.query_stream_data(\r\n    stream=\"rda_snmp_metrics\",\r\n    cfxql_query=power_query,\r\n    sorting=[{\"timestamp\": \"desc\"}],\r\n    limit=10000,\r\n    max_rows=10000\r\n) %}\r\n\r\n{% set grouped_data = {} %}\r\n{% if power_data and power_data|length > 0 %}\r\n  {% for record in power_data %}\r\n    {% set vendor = record.get(\"vendor\", \"\") | string | lower %}\r\n    {% if vendor == 'cisco' %}\r\n      {# For Cisco: group by sensor_type_label #}\r\n      {% set group_key = record.get(\"sensor_type_label\", \"\") %}\r\n      {% if group_key and group_key not in grouped_data %}\r\n        {% set _ = grouped_data.update({group_key: record}) %}\r\n      {% endif %}\r\n    {% else %}\r\n      {# For non-Cisco: group by sensor_type #}\r\n      {% set group_key = record.get(\"sensor_type\", \"\") %}\r\n      {% if group_key and group_key not in grouped_data %}\r\n        {% set _ = grouped_data.update({group_key: record}) %}\r\n      {% endif %}\r\n    {% endif %}\r\n  {% endfor %}\r\n{% endif %}\r\n\r\n<div style='width:100%;height:100%; padding: 20px; display: flex; flex-direction: column;'>\r\n  <div style='margin-bottom: 15px; color: #424242; font-size: 16px; font-weight: 600;'>\r\n    Sensor Health: {{ grouped_data|length if grouped_data else 0 }}\r\n  </div>\r\n  \r\n  <div style=\"width: 100%; flex: 1; display: flex; flex-direction: row; gap: 20px; overflow-x: auto; overflow-y: hidden;\">\r\n    {% if grouped_data and grouped_data|length > 0 %}\r\n      {% for group_key in grouped_data %}\r\n        {% set record = grouped_data[group_key] %}\r\n        {% set sensor_status_label = record.get(\"sensor_status_label\", \"\") %}\r\n        {% set sensor_state = record.get(\"sensor_state\", \"\") %}\r\n        {% set sensor_type_label = record.get(\"sensor_type_label\", \"\") | string | lower %}\r\n        {% set vendor = record.get(\"vendor\", \"\") | string | lower %}\r\n        \r\n        {% set display_value = sensor_status_label %}\r\n        {% if not sensor_status_label or sensor_status_label|trim == '' %}\r\n          {% if sensor_state and sensor_state|trim != '' %}\r\n            {% set display_value = sensor_state %}\r\n          {% else %}\r\n            {% set display_value = 'Not Available' %}\r\n          {% endif %}\r\n        {% endif %}\r\n        \r\n        {# Determine heading - apply same mapping for all vendors #}\r\n        {% set heading = group_key %}\r\n        {# Map sensor_type_label to friendly names #}\r\n        {% if 'voltsac' in sensor_type_label %}\r\n          {% set heading = 'Voltage AC' %}\r\n        {% elif 'voltsdc' in sensor_type_label %}\r\n          {% set heading = 'Voltage DC' %}\r\n        {% elif 'ampere' in sensor_type_label %}\r\n          {% set heading = 'Current' %}\r\n        {% elif 'watt' in sensor_type_label or 'power' in sensor_type_label %}\r\n          {% set heading = 'Power' %}\r\n        {% elif 'celsius' in sensor_type_label or 'celcius' in sensor_type_label or 'temperature' in sensor_type_label %}\r\n          {% set heading = 'Temperature' %}\r\n        {% elif 'rpm' in sensor_type_label or 'fan' in sensor_type_label %}\r\n          {% set heading = 'Fan' %}\r\n        {% else %}\r\n          {% set heading = 'Unknown' %}\r\n        {% endif %}\r\n        \r\n        {% set status = (display_value or 'N/A') | string | lower %}\r\n        {% set color = '#95a5a6' %}\r\n        {% if status == 'ok' %}{% set color = '#2e7d32' %}{% endif %}\r\n        {% if status == 'down' %}{% set color = '#f39c12' %}{% endif %}\r\n        {% if status == 'warning' %}{% set color = '#f39c12' %}{% endif %}\r\n        {% if status == 'critical' %}{% set color = '#e74c3c' %}{% endif %}\r\n        {% if status == 'shutdown' %}{% set color = '#8e44ad' %}{% endif %}\r\n        {% if status == 'unavailable' %}{% set color = '#7f8c8d' %}{% endif %}\r\n        {% if status == 'nonoperational' %}{% set color = '#95a5a6' %}{% endif %}\r\n        \r\n        <div style=\"display: flex; flex-direction: column; align-items: center; padding: 15px; border: 1px solid #ddd; border-radius: 8px; min-width: 200px; flex-shrink: 0;\">\r\n          <div style='text-align: center; margin-bottom: 8px; color: #424242; font-size: 16px; font-weight: 600;'>{{ heading }}</div>\r\n          <div style=\"text-align: center; font-size: 24px; font-weight: 600; color: {{ color }};\">{{ display_value or 'N/A' }}</div>\r\n        </div>\r\n      {% endfor %}\r\n    {% else %}\r\n      <div style=\"text-align: center; color: #424242; font-size: 14px; align-self: center;\">No data available</div>\r\n    {% endif %}\r\n  </div>\r\n</div>\r\n{% endraw %}",
+            "additionalFields": {
+                "valueType": "",
+                "description": ""
+            }
+        }
+    ]
+}

@@ -1,0 +1,31 @@
+# SNMP Trap Events
+[[inputs.rda_snmp_trap]]
+  enabled = true
+
+  input_definition = '''
+collector:
+  snmp_trap_properties:
+    bind_host: "0.0.0.0"
+    port: 162
+    template_path: "/event_gw_config/snmptrap/trap_template.json"
+    community: "cfxrda"
+    ip_specific:
+      - ip_spec: ".*"
+        version: "3"
+        msg_flags: "authPriv"
+        auth_protocol: "SHA"
+        auth_passphrase: "AuthPass123"
+        priv_protocol: "DES"
+        priv_passphrase: "PrivPass123"
+
+  output_stream:
+    name: "snmp_trap_event_stream"
+    type: "pstream"
+
+  tags:
+    site_code: "event_gateway_site01"
+    archive_name: "snmp_trap_events_archive"
+    customerId: "dcc8bd538e7348f78dc9d70d83b33abf"
+    projectId: "bac3e686-ee54-11f0-bc9f-ced489f103b8"
+    customerTag: "CFX"
+'''

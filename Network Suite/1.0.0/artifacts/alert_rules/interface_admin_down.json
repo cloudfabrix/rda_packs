@@ -1,0 +1,77 @@
+{
+    "type": "log",
+    "name": "interface_admin_down",
+    "description": "Interface administratively down CFX",
+    "enabled": false,
+    "schedule": {
+        "minutes": 5
+    },
+    "data": {
+        "stream": "syslog_udp_events_stream",
+        "query": "((syslog_code in ['ETHPORT-5-IF_UP','ETHPORT-5-IF_DOWN_ADMIN_DOWN']) and raw does not contains 'Serial')",
+        "unique_keys": [
+            "rda_gw_client_ip",
+            "interface_name"
+        ],
+        "groupby": [
+            "rda_gw_client_ip",
+            "interface_name"
+        ],
+        "additional_columns": [
+            "raw",
+            "device_hostname",
+            "device_model",
+            "device_vendor"
+        ],
+        "custom_unique_keys": [
+            "alarm_class"
+        ],
+        "data_transformations": [
+            {
+                "type": "eval",
+                "columns": {
+                    "alarm_class": {
+                        "expr": "'Interface'"
+                    }
+                }
+            }
+        ],
+        "padding_time_seconds": 60,
+        "limit": 1000
+    },
+    "actions": [
+        {
+            "state": "OPEN",
+            "extra_query": "((syslog_code is 'ETHPORT-5-IF_DOWN_ADMIN_DOWN') and (interface_name is not empty))",
+            "attributes": {
+                "severity": "CRITICAL",
+                "alert_message": "Interface line protocol changed state to DOWN",
+                "recommendedaction": "Check physical layer connectivity and port configuration."
+            },
+            "throttle": {
+                "value": 60,
+                "unit": "MINUTES"
+            },
+            "notification_profile": "snmp_metrics_notification_profile",
+            "notification": [
+                {
+                    "channel": "asm_syslog_webhook"
+                }
+            ]
+        },
+        {
+            "state": "CLEAR",
+            "extra_query": "((syslog_code is 'ETHPORT-5-IF_UP') and (interface_name is not empty))",
+            "attributes": {
+                "severity": "CRITICAL"
+            },
+            "notification_profile": "snmp_metrics_notification_profile",
+            "notification": [
+                {
+                    "channel": "asm_syslog_webhook"
+                }
+            ]
+        }
+    ],
+    "saved_time": "2026-04-16T06:02:31.441881"
+}

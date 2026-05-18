@@ -1,0 +1,59 @@
+{
+    "type": "metric",
+    "name": "out_discards_snmp_metric",
+    "description": "Interface out Discards CFX",
+    "enabled": false,
+    "schedule": {
+        "minutes": 5
+    },
+    "data": {
+        "stream": "rda_snmp_metrics",
+        "query": "collection = 'interface' and interface_type = '6' and out_discards >= 0",
+        "unique_keys": [
+            "target_ip",
+            "interface_description",
+            "name"
+        ],
+        "groupby": [
+            "target_ip",
+            "interface_description",
+            "name"
+        ],
+        "additional_columns": [
+            "device_hostname",
+            "device_model",
+            "device_vendor",
+            "out_discards_delta",
+            "sys_name"
+        ],
+        "custom_unique_keys": [],
+        "data_transformations": []
+    },
+    "actions": [
+        {
+            "state": "OPEN",
+            "threshold": "50",
+            "agg_column": "out_discards_delta",
+            "agg_func": "sum",
+            "attributes": {
+                "severity": "CRITICAL",
+                "metric_name": "out_discards",
+                "alert_message": "Critical outbound packet drops on {{sys_name}} ({{target_ip}}) interface {{interface_description}} (discards={{out_discards_delta}})"
+            },
+            "notification_profile": "snmp_metrics_notification_profile"
+        },
+        {
+            "state": "CLEAR",
+            "agg_column": "out_discards_delta",
+            "agg_func": "sum",
+            "threshold": "5",
+            "attributes": {
+                "severity": "INFO",
+                "metric_name": "out_discards",
+                "alert_message": "Outbound packet drops cleared on {{sys_name}} ({{target_ip}}) interface {{interface_description}}"
+            },
+            "notification_profile": "snmp_metrics_notification_profile"
+        }
+    ],
+    "saved_time": "2026-04-15T05:48:41.085498"
+}

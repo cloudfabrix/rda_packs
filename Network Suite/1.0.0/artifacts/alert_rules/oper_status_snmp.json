@@ -1,0 +1,57 @@
+{
+    "type": "log",
+    "enabled": false,
+    "name": "oper_status_snmp",
+    "description": "Interface Status CFX",
+    "schedule": {
+        "minutes": 5
+    },
+    "data": {
+        "stream": "rda_snmp_metrics",
+        "query": "collection = 'interface' and interface_type = '6' and oper_status_label is not empty",
+        "unique_keys": [
+            "target_ip",
+            "interface_description",
+            "name"
+        ],
+        "groupby": [
+            "target_ip",
+            "interface_description",
+            "name"
+        ],
+        "additional_columns": [
+            "device_hostname",
+            "device_model",
+            "device_vendor",
+            "admin_status_label",
+            "oper_status_label",
+            "interface_description",
+            "sys_name"
+        ],
+        "custom_unique_keys": [],
+        "data_transformations": []
+    },
+    "actions": [
+        {
+            "state": "OPEN",
+            "extra_query": "oper_status_label = 'Down' and admin_status_label is 'Up'",
+            "attributes": {
+                "severity": "CRITICAL",
+                "metric_name": "interface_status",
+                "alert_message": "Interface {{interface_description}} is down on {{device_hostname}} ({{target_ip}})"
+            },
+            "notification_profile": "snmp_metrics_notification_profile"
+        },
+        {
+            "state": "CLEAR",
+            "extra_query": "oper_status_label = 'Up' and admin_status_label is 'Up'",
+            "attributes": {
+                "severity": "INFO",
+                "metric_name": "interface_status",
+                "alert_message": "Interface {{interface_description}} is up on {{device_hostname}} ({{target_ip}})"
+            },
+            "notification_profile": "snmp_metrics_notification_profile"
+        }
+    ],
+    "saved_time": "2026-04-16T09:11:04.508761"
+}

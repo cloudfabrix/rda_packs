@@ -1,0 +1,263 @@
+{
+    "name": "network_device_l3services_metrics_drilldown",
+    "description": "Network Device L3 Services Metrics",
+    "label": "Network Device L3 Services Metrics",
+    "enabled": false,
+    "dashboard_type": "template",
+    "dashboard_style": "auto",
+    "dashboard_folder": "Nework Device",
+    "context_label_id": "target_ip",
+    "live_edit": true,
+    "template_variables": {
+        "DEVICE_IP": {
+            "contextId": "target_ip"
+        },
+        "DEVICE_VENDOR": {
+            "contextId": "device_vendor"
+        },
+        "DEVICE_NAME": {
+            "contextId": "sys_name"
+        }
+    },
+    "dashboard_filters": {
+        "time_filter": true,
+        "extra_filter": "target_ip is '{{DEVICE_IP}}'",
+        "default_time_filter_labels": [
+            "Last 24 hours"
+        ],
+        "columns_filter": [],
+        "group_filters": []
+    },
+    "dashboard_sections": [
+        {
+            "title": "L3 Services",
+            "show_filter": true,
+            "widgets": [
+                {
+                    "title": "Device Info",
+                    "widget_type": "label",
+                    "min_width": 12,
+                    "max_width": 12,
+                    "height": 1,
+                    "label": "<h4 style='margin:0;padding:10px;background:#f5f5f5;color:#0066ff;border-radius:4px;text-align:center'>Device Name: {{DEVICE_NAME}} | IP Address: {{DEVICE_IP}} | Vendor: {{DEVICE_VENDOR}}</h4>",
+                    "widget_id": "2bb12570"
+                },
+                {
+                    "widget_type": "tabular",
+                    "title": "OSPF Neighbor State Distribution",
+                    "stream": "rda_snmp_metrics",
+                    "ts_column": "timestamp",
+                    "max_width": 6,
+                    "min_width": 6,
+                    "extra_filter": "target_ip is '{{DEVICE_IP}}' and collection = 'ospf_neighbors'",
+                    "columns": {
+                        "target_ip": "Device IP"
+                    },
+                    "pivot": {
+                        "pivot_type": "advanced",
+                        "group_by": [
+                            "ospf_neighbor_state_label",
+                            "target_ip"
+                        ],
+                        "series": [
+                            {
+                                "column": "ospf_neighbor_ip_address",
+                                "agg": "cardinality",
+                                "type": "int",
+                                "label": "Neighbor Count"
+                            }
+                        ]
+                    },
+                    "widget_id": "239e5460"
+                },
+                {
+                    "title": "OSPF Interface Role Distribution",
+                    "widget_type": "tabular",
+                    "stream": "rda_snmp_metrics",
+                    "ts_column": "timestamp",
+                    "extra_filter": "target_ip is '{{DEVICE_IP}}' and collection = 'ospf_interfaces'",
+                    "min_width": 6,
+                    "max_width": 6,
+                    "height": 8,
+                    "columns": {
+                        "ospf_interface_state_label": "Interface State"
+                    },
+                    "pivot": {
+                        "pivot_type": "advanced",
+                        "group_by": [
+                            "ospf_interface_state_label"
+                        ],
+                        "series": [
+                            {
+                                "column": "count_",
+                                "agg": "value_count",
+                                "type": "int",
+                                "label": "Interface Count"
+                            }
+                        ]
+                    },
+                    "widget_id": "d2d25999"
+                },
+                {
+                    "title": "OSPF Neighbor Event Trend",
+                    "description": "Tracks OSPF neighbor instability over time",
+                    "widget_type": "timeseries",
+                    "stream": "rda_snmp_metrics",
+                    "ts_column": "timestamp",
+                    "max_width": 6,
+                    "height": 6,
+                    "min_width": 6,
+                    "chartProperties": {
+                        "yAxisLabel": "Neighbor Event Rate",
+                        "xAxisLabel": "Time",
+                        "legendLocation": "bottom"
+                    },
+                    "group_by": [
+                        "target_ip"
+                    ],
+                    "interval": "5m",
+                    "extra_filter": "target_ip is '{{DEVICE_IP}}' and collection = 'ospf_neighbors'",
+                    "series_spec": [
+                        {
+                            "column": "ospf_neighbor_events_rate",
+                            "agg": "avg",
+                            "type": "float"
+                        }
+                    ],
+                    "widget_id": "8e2167da"
+                },
+                {
+                    "widget_type": "tabular",
+                    "title": "OSPF Neighbor Health Summary",
+                    "stream": "rda_snmp_metrics",
+                    "ts_column": "timestamp",
+                    "max_width": 6,
+                    "min_width": 6,
+                    "extra_filter": "target_ip is '{{DEVICE_IP}}' and collection = 'ospf_neighbors'",
+                    "columns": {
+                        "target_ip": "Device IP"
+                    },
+                    "pivot": {
+                        "pivot_type": "advanced",
+                        "group_by": [
+                            "target_ip"
+                        ],
+                        "series": [
+                            {
+                                "column": "count_",
+                                "agg": "value_count",
+                                "type": "int",
+                                "label": "Total_Neighbors"
+                            },
+                            {
+                                "column": "ospf_neighbor_state_label",
+                                "agg": "value_count",
+                                "type": "int",
+                                "label": "Full_Neighbors",
+                                "extra_filter": "ospf_neighbor_state_label = 'full'"
+                            }
+                        ]
+                    },
+                    "custom_columns": [
+                        {
+                            "id": "ospf_health_percent",
+                            "label": "OSPF Health (%)",
+                            "expr": "(Full_Neighbors * 100 / Total_Neighbors)",
+                            "type": "DYNAMIC_HTML",
+                            "htmlTemplate": "{%raw%}<div style=\"width:100%;height:18px;background:#fff;border:1px solid #d0d0d0;border-radius:3px;overflow:hidden;position:relative\"><div :style=\"{width:Math.min(Number(rowData.ospf_health_percent||0),100)+'%',height:'100%',backgroundColor:Number(rowData.ospf_health_percent)>=95?'#2ecc71':Number(rowData.ospf_health_percent)>=80?'#f39c12':'#e74c3c'}\"></div><div style=\"position:absolute;top:0;left:0;width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:11px;color:#000\">{{(Number(rowData.ospf_health_percent)||0).toFixed(0)}}%</div></div>{%endraw%}",
+                            "visible": true
+                        }
+                    ],
+                    "hide_columns": [
+                        "Total_Neighbors",
+                        "Full_Neighbors"
+                    ],
+                    "widget_id": "4632fb23"
+                },
+                {
+                    "title": "OSPF Interface Summary",
+                    "widget_type": "tabular",
+                    "stream": "rda_snmp_metrics",
+                    "ts_column": "timestamp",
+                    "extra_filter": "target_ip is '{{DEVICE_IP}}' and collection = 'ospf_interfaces'",
+                    "min_width": 6,
+                    "max_width": 6,
+                    "height": 10,
+                    "pivot": {
+                        "pivot_type": "advanced",
+                        "group_by": [
+                            "sys_name",
+                            "target_ip",
+                            "ospf_interface_state_label"
+                        ],
+                        "series": [
+                            {
+                                "column": "index",
+                                "agg": "value_count",
+                                "type": "int",
+                                "label": "Index Count"
+                            }
+                        ]
+                    },
+                    "columns": {
+                        "target_ip": "Device IP",
+                        "sys_name": "Hostname"
+                    },
+                    "custom_columns": [
+                        {
+                            "id": "colored_state",
+                            "label": "Interface State",
+                            "expr": "ospf_interface_state_label"
+                        }
+                    ],
+                    "hide_columns": [
+                        "ospf_interface_state_label"
+                    ],
+                    "widget_id": "f2ba27a3"
+                },
+                {
+                    "title": "BGP Session Summary",
+                    "widget_type": "tabular",
+                    "stream": "rda_snmp_metrics",
+                    "ts_column": "timestamp",
+                    "extra_filter": "target_ip is '{{DEVICE_IP}}' and collection = 'bgp_peers'",
+                    "min_width": 6,
+                    "max_width": 6,
+                    "height": 10,
+                    "pivot": {
+                        "pivot_type": "advanced",
+                        "group_by": [
+                            "sys_name",
+                            "target_ip",
+                            "bgp_peer_state_label"
+                        ],
+                        "series": [
+                            {
+                                "column": "bgp_peer_remote_ip",
+                                "agg": "cardinality",
+                                "type": "int",
+                                "label": "Peer Count"
+                            }
+                        ]
+                    },
+                    "columns": {
+                        "target_ip": "Device IP",
+                        "sys_name": "Hostname"
+                    },
+                    "custom_columns": [
+                        {
+                            "id": "colored_bgp_state",
+                            "label": "Peer State",
+                            "expr": "bgp_peer_state_label"
+                        }
+                    ],
+                    "hide_columns": [
+                        "bgp_peer_state_label"
+                    ],
+                    "widget_id": "7299c28d"
+                }
+            ]
+        }
+    ],
+    "saved_time": "2026-03-18T06:40:25.212796"
+}

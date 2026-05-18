@@ -1,0 +1,65 @@
+{
+    "type": "metric",
+    "name": "environmental_temperature_status",
+    "description": "Temperature Usage CFX",
+    "enabled": false,
+    "schedule": {
+        "minutes": 5
+    },
+    "data": {
+        "stream": "rda_snmp_metrics",
+        "query": "name in ['environmental_temperature']",
+        "unique_keys": [
+            "target_ip",
+            "sensor_name",
+            "name"
+        ],
+        "groupby": [
+            "target_ip",
+            "sensor_name",
+            "name"
+        ],
+        "additional_columns": [
+            "device_hostname",
+            "device_model",
+            "device_vendor",
+            "sensor_status_label",
+            "sensor_type_label",
+            "sensor_value",
+            "sensor_threshold",
+            "sys_name"
+        ],
+        "custom_unique_keys": [],
+        "data_transformations": []
+    },
+    "actions": [
+        {
+            "state": "OPEN",
+            "extra_query": "",
+            "agg_column": "sensor_value",
+            "agg_func": "max",
+            "threshold": "85",
+            "repeat_count": 2,
+            "attributes": {
+                "severity": "CRITICAL",
+                "metric_name": "temperature",
+                "alert_message": "High temperature detected on {{sys_name}} ({{target_ip}}) sensor {{sensor_name}} (current={{sensor_value}} centigrade)"
+            },
+            "notification_profile": "snmp_metrics_notification_profile"
+        },
+        {
+            "state": "CLEAR",
+            "extra_query": "",
+            "agg_column": "sensor_value",
+            "agg_func": "max",
+            "threshold": "50",
+            "attributes": {
+                "severity": "INFO",
+                "metric_name": "temperature",
+                "alert_message": "Temperature is normal on {{sys_name}} ({{target_ip}}) sensor {{sensor_name}} (current={{sensor_value}}centigrade)"
+            },
+            "notification_profile": "snmp_metrics_notification_profile"
+        }
+    ],
+    "saved_time": "2026-04-15T05:57:42.418365"
+}

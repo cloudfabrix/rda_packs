@@ -1,0 +1,63 @@
+{
+    "type": "log",
+    "name": "memory_allocation_failure",
+    "description": "Memory allocation failure detected CFX",
+    "enabled": false,
+    "schedule": {
+        "minutes": 5
+    },
+    "data": {
+        "stream": "syslog_udp_events_stream",
+        "query": "(syslog_code in ['MEM_ECC-2-MALLOC','L2-L2RIB-3-MALLOC_FAILED','MEM_MGR-3-MALLOC_NO_MEM','HA-LRD-3-MEM_ALLOC_FAIL','ROUTING-FIB-3-MALLOC_FAILED'])",
+        "unique_keys": [
+            "rda_gw_client_ip",
+            "syslog_code"
+        ],
+        "groupby": [
+            "rda_gw_client_ip",
+            "syslog_code"
+        ],
+        "additional_columns": [
+            "raw",
+            "device_hostname",
+            "device_model",
+            "device_vendor"
+        ],
+        "custom_unique_keys": [
+            "alarm_class"
+        ],
+        "data_transformations": [
+            {
+                "type": "eval",
+                "columns": {
+                    "alarm_class": {
+                        "expr": "'MemoryAllocationFailure'"
+                    }
+                }
+            }
+        ],
+        "padding_time_seconds": 60,
+        "limit": 1000
+    },
+    "actions": [
+        {
+            "state": "OPEN",
+            "attributes": {
+                "severity": "CRITICAL",
+                "alert_message": "System Memory Exhaustion: Malloc No Memory",
+                "recommendedaction": "Check system memory using 'show memory summary'. Identify top consumers using 'show processes memory sorted'. For FIB/L2 issues, verify route/mac scale. Reboot may be required if memory leak persists."
+            },
+            "throttle": {
+                "value": 60,
+                "unit": "MINUTES"
+            },
+            "notification_profile": "snmp_metrics_notification_profile",
+            "notification": [
+                {
+                    "channel": "asm_syslog_webhook"
+                }
+            ]
+        }
+    ],
+    "saved_time": "2026-04-15T04:39:29.154668"
+}

@@ -1,0 +1,63 @@
+%% stream = no and limit = 0
+
+## creating dictionaries
+@c:new-block
+    --> @dm:query-persistent-stream-iterate-by-chunk name="network-devices-inventory" and batch_size="10000" and query="asset_object equals 'CDP'"
+    --> @dm:save name="temp-cdp" and append="yes"
+    --> @dm:gc
+
+--> @c:new-block
+    --> @dm:recall name="temp-cdp" and return_empty="yes"
+    --> @dm:gc
+    --> @dm:save name="cisco_device_interface_cdp_dict"
+    --> @dm:gc
+
+--> @c:new-block
+    --> @dm:query-persistent-stream-iterate-by-chunk name="network-devices-inventory" and batch_size="10000" and query="asset_object equals 'Chassis'"
+    --> @dm:gc
+    --> @dm:save name="temp-cisco_device_chassis_dict" and append="yes"
+    --> @dm:gc
+
+--> @c:new-block
+    --> @dm:empty
+    --> #dm:query-persistent-stream * with-input name="rda_snmp_entity_physical_inventory" & limit = 0
+    --> @dm:save name="rda_snmp_entity_physical_inventory"
+    --> @dm:selectcolumns include = "target_ip|index|description"
+    --> @dm:rename-columns interface_description = 'description'
+    --> @dm:save name="interface_ethernet_inventory"
+
+--> @c:new-block
+    --> @dm:recall name="temp-cisco_device_chassis_dict" and return_empty="yes"
+    --> @dm:gc
+    --> @dm:eval device_status = "'MANAGED'"
+    --> @dm:gc
+    --> @dm:save name="network_device_chassis_dict"
+    --> @dm:gc
+    --> @dm:eval additional_ips= "ip_address if not additional_ips or additional_ips  in  ['Not Available' , ''] else additional_ips"
+    --> @dm:gc
+    --> @dm:explode column ="additional_ips" and sep=","
+    --> @dm:gc
+    --> @dm:save name="cisco_device_additional_ip_dict"
+    --> @dm:gc
+
+## creating dictionaries
+--> @c:new-block
+    --> @dm:query-persistent-stream-iterate-by-chunk name="network-devices-inventory" and batch_size="10000" and query="asset_object equals 'Interface'"
+    --> @dm:save name="temp-cisco_device_interface_data" and append="yes"
+    --> @dm:gc
+
+--> @c:new-block
+    --> @dm:recall name="temp-cisco_device_interface_data" and return_empty="yes"
+    --> @dm:gc
+    --> @dm:add-missing-columns columns="device_int_index,remote_device_int_index"
+    --> @dm:gc
+    --> @dm:to-type columns = 'device_int_index,remote_device_int_index' & type = 'str'
+    --> @dm:gc
+    ## --> @dm:eval device_int_index = "device_int_index.split('.')[0] if '.' in device_int_index else device_int_index"
+    --> @dm:manipulate-string from="device_int_index" and to="device_int_index" and func="match" and value="^[^.]+"
+    --> @dm:gc
+    ## --> @dm:eval remote_device_int_index = "remote_device_int_index.split('.')[0] if '.' in remote_device_int_index else remote_device_int_index"
+    --> @dm:manipulate-string from="remote_device_int_index" and to="remote_device_int_index" and func="match" and value="^[^.]+"
+    --> @dm:gc
+    --> @dm:save name="cisco_device_interface_data"
+

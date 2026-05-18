@@ -1,0 +1,100 @@
+{
+    "type": "log",
+    "name": "device_fan_failure",
+    "description": "Fan or cooling system failure detected CFX",
+    "enabled": false,
+    "schedule": {
+        "minutes": 5
+    },
+    "data": {
+        "stream": "syslog_udp_events_stream",
+        "query": "(syslog_code in ['PLATFORM-ENVMON-2-FAN_FAIL','PLATFORM-ENVMON-2-FANTRAY_FAIL','PLATFORM-1-FAN_FAIL','PLATFORM_ENV-1-FAN','PLATFORM_ENV-1-FRU_PS_FAN_FAILED','PLATFORM-ENVMON-2-FAN_CLEAR','PLATFORM-ENVMON-2-FANTRAY_CLEAR','PLATFORM_ENV-1-FRU_FAN_OK','PLATFORM_ENV-1-FRU_PS_FAN_OK'])",
+        "query0": "(syslog_code in ['PLATFORM_ENV-1-FAN','PLATFORM_ENV-1-FRU_FAN_OK'])",
+        "unique_keys": [
+            "rda_gw_client_ip",
+            "syslog_code"
+        ],
+        "groupby": [
+            "rda_gw_client_ip",
+            "syslog_code",
+            "device_hostname"
+        ],
+        "additional_columns": [
+            "device_hostname",
+            "device_model",
+            "device_vendor",
+            "syslog_code",
+            "raw",
+            "fan_id",
+            "tray_id"
+        ],
+        "custom_unique_keys": [
+            "component_type",
+            "component_id",
+            "status"
+        ],
+        "data_transformations": [
+            {
+                "type": "eval",
+                "columns": {
+                    "alarm_class": {
+                        "expr": "'FanFailure'"
+                    },
+                    "psu_id": {
+                        "expr": "raw.split('Power Supply ')[1].split(' ')[0] if 'Power Supply ' in raw else ''"
+                    },
+                    "component_type": {
+                        "expr": "'psu_fan' if 'PS_FAN' in syslog_code else 'fan_tray' if 'FANTRAY' in syslog_code else 'fan'"
+                    },
+                    "component_id": {
+                        "expr": "str(fan_id) if fan_id else str(tray_id) if tray_id else (raw.split('Power Supply ')[1].split(' ')[0] if 'Power Supply ' in raw else 'tray')"
+                    },
+                    "status": {
+                        "expr": "'clear' if ('CLEAR' in syslog_code or 'OK' in syslog_code) else 'failure'"
+                    },
+                    "fan_id_safe": {
+                        "expr": "fan_id if fan_id else ''"
+                    }
+                }
+            }
+        ],
+        "padding_time_seconds": 60,
+        "limit": 1000
+    },
+    "actions": [
+        {
+            "state": "OPEN",
+            "extra_query": "",
+            "attributes": {
+                "severity": "{{'CRITICAL' if status == 'failure' else 'WARNING'}}",
+                "alert_message": "Fan failure on {{device_hostname}} ({{rda_gw_client_ip}}) type={{component_type}} id={{component_id}}",
+                "recommendedaction": "Check fan status using 'show environment fan'. Inspect airflow, clean dust, and replace faulty fan, tray, or PSU fan."
+            },
+            "throttle": {
+                "value": 60,
+                "unit": "MINUTES"
+            },
+            "notification_profile": "snmp_metrics_notification_profile",
+            "notification": [
+                {
+                    "channel": "asm_syslog_webhook"
+                }
+            ]
+        },
+        {
+            "state": "CLEAR",
+            "extra_query": "",
+            "attributes": {
+                "severity": "{{'INFO' if status == 'clear' else 'status'}}",
+                "alert_message": "Fan restored on {{device_hostname}} ({{rda_gw_client_ip}}) type={{component_type}} id={{component_id}}"
+            },
+            "notification_profile": "snmp_metrics_notification_profile",
+            "notification": [
+                {
+                    "channel": "asm_syslog_webhook"
+                }
+            ]
+        }
+    ],
+    "saved_time": "2026-04-16T03:01:17.352007"
+}

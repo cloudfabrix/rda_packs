@@ -1,0 +1,48 @@
+%% stream = no and limit = 0
+
+@exec:get-input
+    --> @dm:save name = "temp-ip-list-input"
+
+## Path 1: From form - selected devices(select all matching critaria) --> write to kafka
+--> @c:new-block
+    --> @dm:recall name = "temp-ip-list-input" and return_empty = "yes"
+    --> @dm:check-columns must_contain="Others_additional_info" and action="skip-block"
+    --> @dm:skip-block-if-shape row_count = 0
+    --> @dm:selectcolumns include = "Others_additional_info"
+    --> @dm:explode-json column = "Others_additional_info"
+    --> @dm:save name="temp-smc"
+
+--> @c:data-loop columns="query" and dataset="temp-smc" and return_empty = "yes"
+    --> @dm:query-persistent-stream-iterate-by-chunk name="network_access_verification_final" and query="$query"
+    --> *dm:filter snmp_status="Success"
+    --> @dm:add-missing-columns columns = "svi_ip_list" & value = ""
+    --> @dm:selectcolumns include = "ip_address|snmp_status|ssh_status|icmp_status|discovery_scope|svi_ip_list"
+    --> @dm:save name="temp-stream_data"
+    --> @dm:recall name = "temp-smc" and return_empty = "yes"
+    --> @dm:check-columns must_contain="useFilterCriteria" and action="skip-block"
+    --> @dm:recall name="temp-stream_data"
+    --> @dn:write-stream name = "network_ip_address_stream"
+
+## Path 2: From form – selected devices (Others) -→ write to Kafka
+--> @c:new-block
+    --> @dm:recall name = "temp-ip-list-input" and return_empty = "yes"
+    --> @dm:skip-block-if-shape row_count = 0
+    --> @dm:check-columns must_not_contain="Others_additional_info" and action="skip-block"
+    --> @dm:selectcolumns include = "Others"
+    --> @dm:explode-json column = "Others"
+    --> @dm:eval ip_address = "ip_address if ip_address is not None else device_ip"
+    --> *dm:filter ip_address is not empty
+    --> @dm:map attr = "ip_address" & func = 'strip'
+    --> @dm:add-missing-columns columns = "svi_ip_list" & value = ""
+    --> @dn:write-stream name = "network_ip_address_stream"
+
+## Path 3: Manual run – no form input -→ credential check stream → Kafka
+--> @c:new-block
+    --> @dm:recall name = "temp-ip-list-input" and return_empty = "yes"
+    --> @dm:skip-block-if-shape row_count > 0
+    --> @dm:empty
+    --> #dm:query-persistent-stream snmp_status="Success" with-input name = 'network_access_verification_final' and limit = 0
+    --> @dm:add-missing-columns columns = "svi_ip_list" & value = ""
+    --> @dm:selectcolumns include = "ip_address|snmp_status|ssh_status|icmp_status|discovery_scope|svi_ip_list"
+    --> @dn:write-stream name = "network_ip_address_stream"
+

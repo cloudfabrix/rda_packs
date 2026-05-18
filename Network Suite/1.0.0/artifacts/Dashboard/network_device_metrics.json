@@ -1,0 +1,1133 @@
+{
+    "name": "network_device_metrics",
+    "label": "Network Devices Operations Summary",
+    "description": "Network Devices Operations Summary Dashboard",
+    "dashboard_folder": "Network Device",
+    "version": "1.0.0",
+    "enabled": true,
+    "stream": "rda_snmp_metrics",
+    "dashboard_type": "dashboard",
+    "live_edit": true,
+    "dashboard_filters": {
+        "time_filter": true,
+        "default_time_filter_labels": [
+            "Last 24 hours"
+        ],
+        "columns_filter": [
+            {
+                "id": "sys_name",
+                "label": "Device Hostname",
+                "type": "TEXT"
+            },
+            {
+                "id": "target_ip",
+                "label": "Device IP",
+                "type": "TEXT"
+            },
+            {
+                "id": "device_vendor",
+                "label": "Device Vendor",
+                "type": "TEXT"
+            }
+        ],
+        "group_filters": [
+            {
+                "stream": "rda_snmp_metrics",
+                "title": "Device IP",
+                "group_by": [
+                    "target_ip"
+                ],
+                "ts_column": "timestamp",
+                "agg": "cardinality",
+                "column": "target_ip",
+                "limit": 50,
+                "type": "int"
+            },
+            {
+                "stream": "rda_snmp_metrics",
+                "title": "Device Name",
+                "group_by": [
+                    "sys_name"
+                ],
+                "ts_column": "timestamp",
+                "agg": "cardinality",
+                "column": "sys_name",
+                "limit": 50,
+                "type": "int"
+            },
+            {
+                "stream": "rda_snmp_metrics",
+                "title": "Device Vendor",
+                "extra_filter": null,
+                "group_by": [
+                    "device_vendor"
+                ],
+                "ts_column": "timestamp",
+                "agg": "cardinality",
+                "column": "device_vendor",
+                "limit": 50,
+                "type": "int"
+            }
+        ]
+    },
+    "dashboard_sections": [
+        {
+            "title": "Operations Summary",
+            "show_filter": true,
+            "widgets": [
+                {
+                    "title": "Total Devices",
+                    "widget_type": "counter",
+                    "stream": "rda_icmp_ping_metrics",
+                    "ts_column": "timestamp",
+                    "extra_filter": "name is 'rda_ping'",
+                    "column": "target_ip",
+                    "agg": "cardinality",
+                    "type": "int",
+                    "style": {
+                        "color-list": [
+                            "#1e88e5"
+                        ]
+                    },
+                    "min_width": 2.4,
+                    "max_width": 2.4,
+                    "height": 3,
+                    "widget_id": "79224924"
+                },
+                {
+                    "title": "Devices Up",
+                    "widget_type": "expression_counter",
+                    "stream": "rda_icmp_ping_metrics",
+                    "ts_column": "timestamp",
+                    "extra_filter": "name is 'rda_ping' and result_status is 'Up'",
+                    "expression": "status",
+                    "color": "#2E7D32",
+                    "min_width": 2.4,
+                    "max_width": 2.4,
+                    "height": 3,
+                    "segments": [
+                        {
+                            "variable": "status",
+                            "stream": "rda_icmp_ping_metrics",
+                            "ts_column": "timestamp",
+                            "column": "target_ip",
+                            "extra_filter": "result_status is 'Up'",
+                            "agg": "cardinality",
+                            "type": "int"
+                        }
+                    ],
+                    "widget_id": "73def84e"
+                },
+                {
+                    "title": "Devices Down",
+                    "widget_type": "expression_counter",
+                    "stream": "rda_icmp_ping_metrics",
+                    "ts_column": "timestamp",
+                    "extra_filter": "name is 'rda_ping' and result_status is 'Down'",
+                    "expression": "status",
+                    "color": "#c62828",
+                    "min_width": 2.4,
+                    "max_width": 2.4,
+                    "height": 3,
+                    "segments": [
+                        {
+                            "variable": "status",
+                            "stream": "rda_icmp_ping_metrics",
+                            "ts_column": "timestamp",
+                            "column": "target_ip",
+                            "extra_filter": "result_status is 'Down'",
+                            "agg": "cardinality",
+                            "type": "int"
+                        }
+                    ],
+                    "widget_id": "63ecc656"
+                },
+                {
+                    "title": "Interfaces UP",
+                    "widget_type": "custom_counter",
+                    "min_width": 2.4,
+                    "max_width": 2.4,
+                    "stream": "rda_snmp_network_interfaces_inventory",
+                    "ts_column": "timestamp",
+                    "extra_filter": "name is 'interface_inventory' and interface_type is '6' and oper_status_label is 'up'",
+                    "column": "_RDA_Id",
+                    "style": {
+                        "color-list": [
+                            "#0000FF"
+                        ]
+                    },
+                    "agg": "value_count",
+                    "type": "str",
+                    "widget_id": "44998fd9"
+                },
+                {
+                    "title": "Interfaces Down",
+                    "widget_type": "custom_counter",
+                    "min_width": 2.4,
+                    "max_width": 2.4,
+                    "stream": "rda_snmp_network_interfaces_inventory",
+                    "ts_column": "timestamp",
+                    "extra_filter": "name is 'interface_inventory' and interface_type is '6' and oper_status_label is 'down'",
+                    "column": "_RDA_Id",
+                    "style": {
+                        "color-list": [
+                            "#c62828"
+                        ]
+                    },
+                    "agg": "value_count",
+                    "type": "str",
+                    "widget_id": "bc728702"
+                },
+                {
+                    "title": "SSL Certificate Status",
+                    "widget_type": "tabular",
+                    "stream": "rda_ssl_certificate_metrics",
+                    "ts_column": "timestamp",
+                    "extra_filter": "name = 'rda_cert'",
+                    "min_width": 6,
+                    "max_width": 6,
+                    "height": 6,
+                    "paginated": true,
+                    "agg_size": 100,
+                    "pivot": {
+                        "pivot_type": "advanced",
+                        "agg_sort_order": "asc",
+                        "group_by": [
+                            "host",
+                            "port",
+                            "expiry_status"
+                        ],
+                        "series": [
+                            {
+                                "column": "expiry_days",
+                                "agg": "min",
+                                "type": "int",
+                                "label": "expiry_days"
+                            }
+                        ]
+                    },
+                    "columns": {
+                        "host": {
+                            "title": "DNS / Hostname",
+                            "key": true
+                        },
+                        "port": {
+                            "title": "Port",
+                            "key": true
+                        },
+                        "expiry_status": {
+                            "title": "Cert Status",
+                            "key": true,
+                            "type": "DYNAMIC_HTML",
+                            "htmlTemplate": "<span class='badge' :style=\"{backgroundColor: rowData.expiry_status == 'healthy'?'#2ecc71':rowData.expiry_status == 'warning'?'#f39c12':rowData.expiry_status == 'critical'?'#e74c3c':'#95a5a6', color:'#fff', padding:'4px 8px', borderRadius:'4px'}\">{{ rowData.expiry_status }}</span>"
+                        }
+                    },
+                    "sorting": [
+                        {
+                            "column": "expiry_days",
+                            "order": "asc"
+                        }
+                    ],
+                    "widget_id": "215288f3"
+                },
+                {
+                    "title": "TCP Port Status",
+                    "widget_type": "tabular",
+                    "stream": "network_response_result",
+                    "ts_column": "timestamp",
+                    "extra_filter": "name = 'rda_net_response'",
+                    "min_width": 6,
+                    "max_width": 6,
+                    "height": 6,
+                    "paginated": true,
+                    "agg_size": 100,
+                    "pivot": {
+                        "pivot_type": "advanced",
+                        "agg_sort_order": "desc",
+                        "group_by": [
+                            "server",
+                            "port",
+                            "result"
+                        ],
+                        "series": [
+                            {
+                                "column": "result_code",
+                                "agg": "max",
+                                "type": "int",
+                                "label": "result_code"
+                            }
+                        ]
+                    },
+                    "columns": {
+                        "server": {
+                            "title": "Hostname",
+                            "key": true
+                        },
+                        "port": {
+                            "title": "Port",
+                            "key": true
+                        },
+                        "result": {
+                            "title": "Port Status",
+                            "key": true,
+                            "type": "DYNAMIC_HTML",
+                            "htmlTemplate": "<span class='badge' :style=\"{backgroundColor: rowData.result == 'success'?'#2ecc71':rowData.result == 'failed'?'#e74c3c':'#95a5a6', color:'#fff', padding:'4px 8px', borderRadius:'4px'}\">{{ rowData.result }}</span>"
+                        }
+                    },
+                    "hide_columns": [
+                        "result_code"
+                    ],
+                    "widget_id": "a95e260f"
+                },
+                {
+                    "title": "Top 20 CPU Usage Devices",
+                    "widget_type": "tabular",
+                    "stream": "rda_snmp_metrics",
+                    "ts_column": "timestamp",
+                    "extra_filter": "collection is 'cpu' & cpu_usage is not empty",
+                    "min_width": 6,
+                    "max_width": 6,
+                    "height": 6,
+                    "paginated": true,
+                    "agg_size": 20,
+                    "pivot": {
+                        "pivot_type": "advanced",
+                        "agg_sort_order": "desc",
+                        "group_by": [
+                            "sys_name",
+                            "target_ip",
+                            "device_vendor"
+                        ],
+                        "series": [
+                            {
+                                "column": "cpu_usage",
+                                "agg": "avg",
+                                "type": "float",
+                                "label": "cpu_usage_avg"
+                            }
+                        ]
+                    },
+                    "columns": {
+                        "sys_name": {
+                            "title": "Device Name",
+                            "key": true
+                        },
+                        "target_ip": {
+                            "title": "Device IP",
+                            "key": true
+                        },
+                        "device_vendor": {
+                            "title": "Device Vendor",
+                            "key": true
+                        }
+                    },
+                    "custom_columns": [
+                        {
+                            "id": "cpu_usage_pct",
+                            "label": "CPU Usage (%)",
+                            "expr": "cpu_usage_avg",
+                            "visible": true,
+                            "type": "DYNAMIC_HTML",
+                            "htmlTemplate": "<div style=\"width:100%;height:18px;background:#fff;border:1px solid #d0d0d0;border-radius:3px;overflow:hidden;position:relative\"><div :style=\"{width:Math.max(Number(rowData.cpu_usage_pct),5)+'%',height:'100%',backgroundColor:Number(rowData.cpu_usage_pct)<50?'#2ecc71':Number(rowData.cpu_usage_pct)<=80?'#f39c12':'#e74c3c'}\"></div><div style=\"position:absolute;top:0;left:0;width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:11px;color:#000\">{{Number(rowData.cpu_usage_pct).toFixed(2)}}%</div></div>"
+                        }
+                    ],
+                    "hide_columns": [
+                        "cpu_usage_avg"
+                    ],
+                    "actions": [
+                        {
+                            "appName": "user-dashboard/network_device_metrics_drilldown",
+                            "permission": "aia:page:view",
+                            "drillDownContext": "target_ip",
+                            "drillDownLinkField": "target_ip",
+                            "identifier": "target_ip",
+                            "selectionType": "SINGLE",
+                            "stateName": "app.featureapp",
+                            "title": "View Device Details",
+                            "type": "GO_TO_APP_STATE"
+                        }
+                    ],
+                    "widget_id": "119a8608"
+                },
+                {
+                    "title": "Top 20 Memory Usage Devices",
+                    "widget_type": "tabular",
+                    "stream": "rda_snmp_metrics",
+                    "ts_column": "timestamp",
+                    "extra_filter": "collection = 'memory' & memory_usage is not empty",
+                    "min_width": 6,
+                    "max_width": 6,
+                    "height": 6,
+                    "paginated": true,
+                    "agg_size": 20,
+                    "pivot": {
+                        "pivot_type": "advanced",
+                        "agg_sort_order": "desc",
+                        "group_by": [
+                            "sys_name",
+                            "target_ip",
+                            "device_vendor"
+                        ],
+                        "series": [
+                            {
+                                "column": "memory_usage",
+                                "agg": "avg",
+                                "type": "float",
+                                "label": "memory_usage_avg"
+                            }
+                        ]
+                    },
+                    "columns": {
+                        "sys_name": {
+                            "title": "Device Name",
+                            "key": true
+                        },
+                        "target_ip": {
+                            "title": "Device IP",
+                            "key": true
+                        },
+                        "device_vendor": {
+                            "title": "Device Vendor",
+                            "key": true
+                        }
+                    },
+                    "custom_columns": [
+                        {
+                            "id": "memory_usage_pct",
+                            "label": "Memory Usage (%)",
+                            "expr": "memory_usage_avg",
+                            "visible": true,
+                            "type": "DYNAMIC_HTML",
+                            "htmlTemplate": "<div style=\"width:100%;height:18px;background:#fff;border:1px solid #d0d0d0;border-radius:3px;overflow:hidden;position:relative\"><div :style=\"{width:Math.max(Number(rowData.memory_usage_pct),5)+'%',height:'100%',backgroundColor:Number(rowData.memory_usage_pct)<50?'#2ecc71':Number(rowData.memory_usage_pct)<=80?'#f39c12':'#e74c3c'}\"></div><div style=\"position:absolute;top:0;left:0;width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:11px;color:#000\">{{Number(rowData.memory_usage_pct).toFixed(2)}}%</div></div>"
+                        }
+                    ],
+                    "hide_columns": [
+                        "memory_usage_avg"
+                    ],
+                    "actions": [
+                        {
+                            "appName": "user-dashboard/network_device_metrics_drilldown",
+                            "permission": "aia:page:view",
+                            "drillDownContext": "target_ip",
+                            "drillDownLinkField": "target_ip",
+                            "identifier": "target_ip",
+                            "selectionType": "SINGLE",
+                            "stateName": "app.featureapp",
+                            "title": "View Device Details",
+                            "type": "GO_TO_APP_STATE"
+                        }
+                    ],
+                    "widget_id": "89459cbe"
+                },
+                {
+                    "title": "Devices by Uptime",
+                    "widget_type": "tabular",
+                    "stream": "rda_snmp_metrics",
+                    "ts_column": "timestamp",
+                    "extra_filter": "collection = 'uptime' & uptime_seconds is not empty",
+                    "min_width": 6,
+                    "max_width": 6,
+                    "height": 6,
+                    "paginated": true,
+                    "agg_size": 100,
+                    "pivot": {
+                        "pivot_type": "advanced",
+                        "agg_sort_order": "desc",
+                        "group_by": [
+                            "sys_name",
+                            "target_ip",
+                            "device_vendor"
+                        ],
+                        "series": [
+                            {
+                                "column": "uptime_seconds",
+                                "agg": "max",
+                                "type": "float",
+                                "label": "uptime_sec"
+                            }
+                        ]
+                    },
+                    "columns": {
+                        "sys_name": {
+                            "title": "Device Name",
+                            "key": true
+                        },
+                        "target_ip": {
+                            "title": "Device IP",
+                            "key": true
+                        },
+                        "device_vendor": {
+                            "title": "Device Vendor",
+                            "key": true
+                        }
+                    },
+                    "custom_columns": [
+                        {
+                            "id": "uptime_display",
+                            "label": "Uptime",
+                            "expr": "uptime_sec",
+                            "visible": true,
+                            "type": "DYNAMIC_HTML",
+                            "htmlTemplate": "<span>{{ Number(rowData.uptime_sec) >= 86400 ? (Number(rowData.uptime_sec) / 86400).toFixed(2) + ' days' : Number(rowData.uptime_sec) >= 3600 ? (Number(rowData.uptime_sec) / 3600).toFixed(2) + ' hours' : Number(rowData.uptime_sec).toFixed(0) + ' seconds' }}</span>"
+                        },
+                        {
+                            "id": "oper_status_label",
+                            "label": "Status",
+                            "expr": "uptime_sec",
+                            "visible": true,
+                            "type": "DYNAMIC_HTML",
+                            "htmlTemplate": "<span class='badge' :style=\"{backgroundColor: Number(rowData.uptime_sec) > 0 ? '#2ecc71' : '#e74c3c', color: '#fff', padding: '4px 8px', borderRadius: '4px'}\">{{ Number(rowData.uptime_sec) > 0 ? 'Up' : 'Down' }}</span>"
+                        }
+                    ],
+                    "sorting": [
+                        {
+                            "column": "uptime_sec",
+                            "order": "desc"
+                        }
+                    ],
+                    "hide_columns": [
+                        "uptime_sec"
+                    ],
+                    "actions": [
+                        {
+                            "appName": "user-dashboard/network_device_metrics_drilldown",
+                            "permission": "aia:page:view",
+                            "drillDownContext": "target_ip",
+                            "drillDownLinkField": "target_ip",
+                            "identifier": "target_ip",
+                            "selectionType": "SINGLE",
+                            "stateName": "app.featureapp",
+                            "title": "View Device Details",
+                            "type": "GO_TO_APP_STATE"
+                        }
+                    ],
+                    "widget_id": "a250e531"
+                },
+                {
+                    "title": "Top 50 Port Utilization",
+                    "widget_type": "tabular",
+                    "stream": "rda_snmp_metrics",
+                    "extra_filter": "collection = 'interface'",
+                    "ts_column": "timestamp",
+                    "paginated": true,
+                    "min_width": 6,
+                    "max_width": 6,
+                    "height": 6,
+                    "agg_size": 50,
+                    "pivot": {
+                        "pivot_type": "advanced",
+                        "group_by": [
+                            "target_ip",
+                            "sys_name",
+                            "interface_description",
+                            "device_vendor"
+                        ],
+                        "series": [
+                            {
+                                "column": "interface_utilization",
+                                "agg": "avg",
+                                "type": "float",
+                                "label": "interface_utilization_avg"
+                            }
+                        ]
+                    },
+                    "columns": {
+                        "sys_name": {
+                            "title": "Device Name",
+                            "key": true
+                        },
+                        "target_ip": {
+                            "title": "Device IP",
+                            "key": true
+                        },
+                        "interface_description": {
+                            "title": "Interface",
+                            "key": true
+                        },
+                        "device_vendor": {
+                            "title": "Device Vendor",
+                            "key": true
+                        }
+                    },
+                    "custom_columns": [
+                        {
+                            "id": "total_utilization",
+                            "label": "Total Utilization (%)",
+                            "expr": "interface_utilization_avg",
+                            "visible": true,
+                            "type": "DYNAMIC_HTML",
+                            "htmlTemplate": "<div style=\"width:100%;height:18px;background:#fff;border:1px solid #d0d0d0;border-radius:3px;overflow:hidden;position:relative\">\n        <div :style=\"{width:Math.min(Number(rowData.total_utilization),100)+'%',height:'100%',backgroundColor:Number(rowData.total_utilization)<50?'#2ecc71':Number(rowData.total_utilization)<=80?'#f39c12':'#e74c3c'}\"></div>\n        <div style=\"position:absolute;top:0;left:0;width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:11px;color:#000\">\n        {{Number(rowData.total_utilization).toFixed(2)}}%\n        </div></div>"
+                        }
+                    ],
+                    "hide_columns": [
+                        "interface_utilization_avg"
+                    ],
+                    "actions": [
+                        {
+                            "appName": "user-dashboard/network_device_metrics_drilldown",
+                            "permission": "aia:page:view",
+                            "drillDownContext": "target_ip",
+                            "drillDownLinkField": "target_ip",
+                            "identifier": "target_ip",
+                            "selectionType": "SINGLE",
+                            "stateName": "app.featureapp",
+                            "title": "View Device Details",
+                            "type": "GO_TO_APP_STATE"
+                        }
+                    ],
+                    "widget_id": "92ef17e8"
+                },
+                {
+                    "title": "Top 50 Port Discards (In)",
+                    "widget_type": "tabular",
+                    "stream": "rda_snmp_metrics",
+                    "extra_filter": "collection = 'interface'",
+                    "ts_column": "timestamp",
+                    "paginated": true,
+                    "min_width": 6,
+                    "max_width": 6,
+                    "height": 6,
+                    "agg_size": 50,
+                    "pivot": {
+                        "pivot_type": "advanced",
+                        "agg_sort_order": "desc",
+                        "group_by": [
+                            "target_ip",
+                            "sys_name",
+                            "interface_description",
+                            "vendor"
+                        ],
+                        "series": [
+                            {
+                                "column": "in_discards_delta",
+                                "agg": "sum",
+                                "type": "float",
+                                "label": "in_discards_sum"
+                            }
+                        ]
+                    },
+                    "columns": {
+                        "sys_name": {
+                            "title": "Device Name",
+                            "key": true
+                        },
+                        "target_ip": {
+                            "title": "Device IP",
+                            "key": true
+                        },
+                        "interface_description": {
+                            "title": "Interface",
+                            "key": true
+                        },
+                        "vendor": {
+                            "title": "Device Vendor",
+                            "key": true
+                        }
+                    },
+                    "custom_columns": [
+                        {
+                            "id": "in_discards",
+                            "label": "In Discards",
+                            "expr": "(in_discards_sum)",
+                            "visible": true,
+                            "type": "DYNAMIC_HTML",
+                            "htmlTemplate": "<div style=\"width:100%;height:18px;background:#fff;border:1px solid #d0d0d0;border-radius:3px;overflow:hidden;position:relative\"><div :style=\"{width:'100%',height:'100%',backgroundColor:Number(rowData.in_discards)<=100?'#3498db':Number(rowData.in_discards)<=1000?'#f1c40f':'#e74c3c'}\"></div><div style=\"position:absolute;top:0;left:0;width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:11px;color:#000\">{{Number(rowData.in_discards).toFixed(0)}}</div></div>"
+                        }
+                    ],
+                    "hide_columns": [
+                        "in_discards_sum"
+                    ],
+                    "actions": [
+                        {
+                            "appName": "user-dashboard/network_device_metrics_drilldown",
+                            "permission": "aia:page:view",
+                            "drillDownContext": "target_ip",
+                            "drillDownLinkField": "target_ip",
+                            "identifier": "target_ip",
+                            "selectionType": "SINGLE",
+                            "contextParamList": {
+                                "contextParams": [
+                                    {
+                                        "paramKey": "vendor",
+                                        "paramId": "device_vendor"
+                                    }
+                                ]
+                            },
+                            "stateName": "app.featureapp",
+                            "title": "View Device Details",
+                            "type": "GO_TO_APP_STATE"
+                        }
+                    ],
+                    "widget_id": "e28d9184"
+                },
+                {
+                    "title": "Top 50 Port Discards (Out)",
+                    "widget_type": "tabular",
+                    "stream": "rda_snmp_metrics",
+                    "extra_filter": "collection = 'interface'",
+                    "ts_column": "timestamp",
+                    "paginated": true,
+                    "min_width": 6,
+                    "max_width": 6,
+                    "height": 6,
+                    "agg_size": 50,
+                    "pivot": {
+                        "pivot_type": "advanced",
+                        "agg_sort_order": "desc",
+                        "group_by": [
+                            "target_ip",
+                            "sys_name",
+                            "interface_description",
+                            "vendor"
+                        ],
+                        "series": [
+                            {
+                                "column": "out_discards_delta",
+                                "agg": "sum",
+                                "type": "float",
+                                "label": "out_discards_sum"
+                            }
+                        ]
+                    },
+                    "columns": {
+                        "sys_name": {
+                            "title": "Device Name",
+                            "key": true
+                        },
+                        "target_ip": {
+                            "title": "Device IP",
+                            "key": true
+                        },
+                        "interface_description": {
+                            "title": "Interface",
+                            "key": true
+                        },
+                        "vendor": {
+                            "title": "Device Vendor",
+                            "key": true
+                        }
+                    },
+                    "custom_columns": [
+                        {
+                            "id": "out_discards",
+                            "label": "Out Discards",
+                            "expr": "out_discards_sum if out_discards_sum and out_discards_sum != '' else 0",
+                            "visible": true,
+                            "type": "DYNAMIC_HTML",
+                            "htmlTemplate": "<div style=\"width:100%;height:18px;background:#fff;border:1px solid #d0d0d0;border-radius:3px;overflow:hidden;position:relative\"><div :style=\"{width:'100%',height:'100%',backgroundColor:Number(rowData.out_discards)<=100?'#3498db':Number(rowData.out_discards)<=1000?'#f1c40f':'#e74c3c'}\"></div><div style=\"position:absolute;top:0;left:0;width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:11px;color:#000\">{{Number(rowData.out_discards).toFixed(0)}}</div></div>"
+                        }
+                    ],
+                    "hide_columns": [
+                        "out_discards_sum"
+                    ],
+                    "actions": [
+                        {
+                            "appName": "user-dashboard/network_device_metrics_drilldown",
+                            "permission": "aia:page:view",
+                            "drillDownContext": "target_ip",
+                            "drillDownLinkField": "target_ip",
+                            "identifier": "target_ip",
+                            "selectionType": "SINGLE",
+                            "contextParamList": {
+                                "contextParams": [
+                                    {
+                                        "paramKey": "vendor",
+                                        "paramId": "device_vendor"
+                                    }
+                                ]
+                            },
+                            "stateName": "app.featureapp",
+                            "title": "View Device Details",
+                            "type": "GO_TO_APP_STATE"
+                        }
+                    ],
+                    "widget_id": "94b5aa04"
+                },
+                {
+                    "title": "Top 50 Port CRC Errors",
+                    "widget_type": "tabular",
+                    "stream": "rda_snmp_metrics",
+                    "ts_column": "timestamp",
+                    "extra_filter": "name = 'interface_crc_errors' & crc_errors is not empty",
+                    "paginated": true,
+                    "min_width": 6,
+                    "max_width": 6,
+                    "height": 6,
+                    "agg_size": 50,
+                    "pivot": {
+                        "pivot_type": "advanced",
+                        "agg_sort_order": "desc",
+                        "group_by": [
+                            "target_ip",
+                            "sys_name",
+                            "interface_description",
+                            "vendor"
+                        ],
+                        "series": [
+                            {
+                                "column": "crc_errors_delta",
+                                "agg": "sum",
+                                "type": "int",
+                                "label": "crc_errors_sum"
+                            }
+                        ]
+                    },
+                    "columns": {
+                        "sys_name": {
+                            "title": "Device Name",
+                            "key": true
+                        },
+                        "target_ip": {
+                            "title": "Device IP",
+                            "key": true
+                        },
+                        "interface_description": {
+                            "title": "Interface",
+                            "key": true
+                        },
+                        "vendor": {
+                            "title": "Device Vendor",
+                            "key": true
+                        }
+                    },
+                    "custom_columns": [
+                        {
+                            "id": "crc_errors",
+                            "label": "CRC Errors",
+                            "expr": "crc_errors_sum if crc_errors_sum else 0",
+                            "visible": true,
+                            "type": "DYNAMIC_HTML",
+                            "htmlTemplate": "<div style=\"width:100%;height:18px;background:#fff;border:1px solid #d0d0d0;border-radius:3px;overflow:hidden;position:relative\"><div :style=\"{width:'100%',height:'100%',backgroundColor:Number(rowData.crc_errors)<=100?'#3498db':Number(rowData.crc_errors)<=1000?'#f1c40f':'#e74c3c'}\"></div><div style=\"position:absolute;top:0;left:0;width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:11px;color:#000\">{{Number(rowData.crc_errors).toFixed(0)}}</div></div>"
+                        }
+                    ],
+                    "hide_columns": [
+                        "crc_errors_sum"
+                    ],
+                    "actions": [
+                        {
+                            "appName": "user-dashboard/network_device_metrics_drilldown",
+                            "permission": "aia:page:view",
+                            "drillDownContext": "target_ip",
+                            "drillDownLinkField": "target_ip",
+                            "identifier": "target_ip",
+                            "selectionType": "SINGLE",
+                            "contextParamList": {
+                                "contextParams": [
+                                    {
+                                        "paramKey": "vendor",
+                                        "paramId": "device_vendor"
+                                    }
+                                ]
+                            },
+                            "stateName": "app.featureapp",
+                            "title": "View Device Details",
+                            "type": "GO_TO_APP_STATE"
+                        }
+                    ],
+                    "widget_id": "e9ed1223"
+                },
+                {
+                    "title": "Top 20 Temperature Usage Devices",
+                    "widget_type": "tabular",
+                    "stream": "rda_snmp_metrics",
+                    "ts_column": "timestamp",
+                    "extra_filter": "sensor_type_label in ['temperature','celsius'] and sensor_value < 150",
+                    "min_width": 6,
+                    "max_width": 6,
+                    "height": 6,
+                    "paginated": true,
+                    "agg_size": 20,
+                    "pivot": {
+                        "pivot_type": "advanced",
+                        "agg_sort_order": "desc",
+                        "group_by": [
+                            "sys_name",
+                            "sensor_name",
+                            "vendor",
+                            "target_ip"
+                        ],
+                        "series": [
+                            {
+                                "column": "sensor_value",
+                                "agg": "max",
+                                "type": "float",
+                                "label": "temperature_value"
+                            }
+                        ]
+                    },
+                    "columns": {
+                        "sys_name": {
+                            "title": "Device Name",
+                            "key": true
+                        },
+                        "vendor": "vendor",
+                        "target_ip": {
+                            "title": "Device IP",
+                            "key": true
+                        },
+                        "sensor_name": {
+                            "title": "Sensor Name",
+                            "key": true
+                        }
+                    },
+                    "custom_columns": [
+                        {
+                            "id": "temperature_usage_custom",
+                            "label": "Temperature (Celsius)",
+                            "expr": "temperature_value",
+                            "visible": true,
+                            "type": "DYNAMIC_HTML",
+                            "htmlTemplate": "<div style=\"width:100%;height:18px;background:#fff;border:1px solid #d0d0d0;border-radius:3px;overflow:hidden;position:relative\"><div :style=\"{width:Math.max(Math.min(Number(rowData.temperature_usage_custom),100),5)+'%',height:'100%',backgroundColor:Number(rowData.temperature_usage_custom)<50?'#2ecc71':Number(rowData.temperature_usage_custom)<=80?'#f39c12':'#e74c3c'}\"></div><div style=\"position:absolute;top:0;left:0;width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:11px;color:#000\">{{Number(rowData.temperature_usage_custom).toFixed(2)}}</div></div>"
+                        }
+                    ],
+                    "hide_columns": [
+                        "temperature_value"
+                    ],
+                    "actions": [
+                        {
+                            "appName": "user-dashboard/network_device_metrics_drilldown",
+                            "permission": "aia:page:view",
+                            "drillDownContext": "target_ip",
+                            "drillDownLinkField": "target_ip",
+                            "contextParamList": {
+                                "contextParams": [
+                                    {
+                                        "paramKey": "vendor",
+                                        "paramId": "device_vendor"
+                                    }
+                                ]
+                            },
+                            "identifier": "target_ip",
+                            "selectionType": "SINGLE",
+                            "stateName": "app.featureapp",
+                            "title": "View Device Details",
+                            "type": "GO_TO_APP_STATE"
+                        }
+                    ],
+                    "widget_id": "18f653fc"
+                },
+                {
+                    "title": "Top 10 Highest PoE Usage Ports",
+                    "widget_type": "tabular",
+                    "stream": "rda_snmp_metrics",
+                    "ts_column": "timestamp",
+                    "extra_filter": "collection is 'poe_port' and (poe_usage_percent is not empty or poe_power_consumption is not empty)",
+                    "min_width": 6,
+                    "max_width": 6,
+                    "height": 6,
+                    "paginated": true,
+                    "agg_size": 10,
+                    "pivot": {
+                        "pivot_type": "advanced",
+                        "agg_sort_order": "desc",
+                        "group_by": [
+                            "sys_name",
+                            "target_ip",
+                            "interface_description",
+                            "device_vendor"
+                        ],
+                        "series": [
+                            {
+                                "column": "poe_usage_percent",
+                                "agg": "max",
+                                "type": "float",
+                                "label": "poe_usage_pct"
+                            },
+                            {
+                                "column": "poe_power_consumption",
+                                "agg": "max",
+                                "type": "float",
+                                "label": "poe_power_w"
+                            },
+                            {
+                                "column": "poe_max_power",
+                                "agg": "max",
+                                "type": "float",
+                                "label": "poe_max_w"
+                            }
+                        ]
+                    },
+                    "columns": {
+                        "sys_name": {
+                            "title": "Device Name",
+                            "key": true
+                        },
+                        "target_ip": {
+                            "title": "Device IP",
+                            "key": true
+                        },
+                        "interface_description": {
+                            "title": "Port",
+                            "key": true
+                        },
+                        "device_vendor": {
+                            "title": "Vendor",
+                            "key": true
+                        }
+                    },
+                    "custom_columns": [
+                        {
+                            "id": "poe_usage_display",
+                            "label": "PoE Usage (%)",
+                            "expr": "poe_usage_pct",
+                            "visible": true,
+                            "defaultWidth": 100,
+                            "type": "DYNAMIC_HTML",
+                            "htmlTemplate": "<div style=\"width:100%;height:18px;background:#fff;border:1px solid #d0d0d0;border-radius:3px;overflow:hidden;position:relative\"><div :style=\"{width:Math.max(Math.min(Number(rowData.poe_usage_display || 0),100),5)+'%',height:'100%',backgroundColor:Number(rowData.poe_usage_display)<50?'#2ecc71':Number(rowData.poe_usage_display)<=80?'#f39c12':'#e74c3c'}\"></div><div style=\"position:absolute;top:0;left:0;width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:11px;color:#000;white-space:nowrap\">{{(Number(rowData.poe_usage_display) || 0).toFixed(2)}}%</div></div>"
+                        },
+                        {
+                            "id": "poe_power_display",
+                            "label": "Power (W)",
+                            "expr": "poe_power_w",
+                            "visible": true,
+                            "type": "DYNAMIC_HTML",
+                            "htmlTemplate": "<span>{{ (Number(rowData.poe_power_display) || 0).toFixed(2) }} W</span>"
+                        },
+                        {
+                            "id": "poe_max_display",
+                            "label": "Max (W)",
+                            "expr": "poe_max_w",
+                            "visible": false,
+                            "type": "DYNAMIC_HTML",
+                            "htmlTemplate": "<span>{{ (Number(rowData.poe_max_display) || 0).toFixed(2) }} W</span>"
+                        }
+                    ],
+                    "hide_columns": [
+                        "poe_usage_pct",
+                        "poe_power_w",
+                        "poe_max_w"
+                    ],
+                    "actions": [
+                        {
+                            "appName": "user-dashboard/network_device_metrics_drilldown",
+                            "permission": "aia:page:view",
+                            "drillDownContext": "target_ip",
+                            "drillDownLinkField": "target_ip",
+                            "identifier": "target_ip",
+                            "selectionType": "SINGLE",
+                            "stateName": "app.featureapp",
+                            "title": "View Device Detail (Counters & Time Series)",
+                            "type": "GO_TO_APP_STATE"
+                        }
+                    ],
+                    "widget_id": "6ea0b659"
+                },
+                {
+                    "title": "PoE Capacity Report",
+                    "widget_type": "tabular",
+                    "stream": "rda_snmp_metrics",
+                    "ts_column": "timestamp",
+                    "extra_filter": "collection is 'poe_chassis' and timestamp is after -10min and poe_usage_percent is not Empty",
+                    "min_width": 6,
+                    "max_width": 6,
+                    "height": 6,
+                    "paginated": true,
+                    "agg_size": 50,
+                    "pivot": {
+                        "pivot_type": "advanced",
+                        "group_by": [
+                            "sys_name",
+                            "target_ip",
+                            "device_vendor"
+                        ],
+                        "series": [
+                            {
+                                "column": "poe_total_power",
+                                "agg": "sum",
+                                "type": "float",
+                                "label": "total_w"
+                            },
+                            {
+                                "column": "poe_available_power",
+                                "agg": "sum",
+                                "type": "float",
+                                "label": "available_w"
+                            },
+                            {
+                                "column": "poe_used_power",
+                                "agg": "sum",
+                                "type": "float",
+                                "label": "used_w"
+                            },
+                            {
+                                "column": "poe_usage_percent",
+                                "agg": "avg",
+                                "type": "float",
+                                "label": "used_percent_w"
+                            }
+                        ]
+                    },
+                    "columns": {
+                        "sys_name": {
+                            "title": "Device Name",
+                            "key": true
+                        },
+                        "target_ip": {
+                            "title": "Device IP",
+                            "key": true
+                        },
+                        "device_vendor": {
+                            "title": "Vendor",
+                            "key": true
+                        }
+                    },
+                    "custom_columns": [
+                        {
+                            "id": "total_power",
+                            "label": "Total Power (W)",
+                            "expr": "total_w",
+                            "visible": true,
+                            "type": "DYNAMIC_HTML",
+                            "htmlTemplate": "<span>{{ (Number(rowData.total_power) || 0).toFixed(2) }}</span>"
+                        },
+                        {
+                            "id": "consumption",
+                            "label": "User Power (W)",
+                            "expr": "used_w",
+                            "visible": true,
+                            "type": "DYNAMIC_HTML",
+                            "htmlTemplate": "<span>{{ (Number(rowData.consumption) || 0).toFixed(2) }}</span>"
+                        },
+                        {
+                            "id": "available",
+                            "label": "Available Power (W)",
+                            "expr": "available_w",
+                            "visible": true,
+                            "type": "DYNAMIC_HTML",
+                            "htmlTemplate": "<span>{{ (Number(rowData.available) || 0).toFixed(2) }}</span>"
+                        },
+                        {
+                            "id": "used_percent",
+                            "label": "Used Power (%)",
+                            "expr": "used_percent_w",
+                            "visible": true,
+                            "type": "DYNAMIC_HTML",
+                            "htmlTemplate": "<div style=\"width:100%;height:18px;background:#fff;border:1px solid #d0d0d0;border-radius:3px;overflow:hidden;position:relative\"><div :style=\"{width:Math.max(Math.min(Number(rowData.used_percent || 0),100),5)+'%',height:'100%',backgroundColor:Number(rowData.used_percent)<50?'#2ecc71':Number(rowData.used_percent)<=80?'#f39c12':'#e74c3c'}\"></div><div style=\"position:absolute;top:0;left:0;width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:11px;color:#000;white-space:nowrap\">{{(Number(rowData.used_percent) || 0).toFixed(2)}}%</div></div>"
+                        }
+                    ],
+                    "hide_columns": [
+                        "total_w",
+                        "available_w",
+                        "used_w",
+                        "used_percent_w"
+                    ],
+                    "actions": [
+                        {
+                            "appName": "user-dashboard/network_device_metrics_drilldown",
+                            "permission": "aia:page:view",
+                            "drillDownContext": "target_ip",
+                            "drillDownLinkField": "target_ip",
+                            "identifier": "target_ip",
+                            "selectionType": "SINGLE",
+                            "stateName": "app.featureapp",
+                            "title": "View Device Detail (Counters & Time Series)",
+                            "type": "GO_TO_APP_STATE"
+                        }
+                    ],
+                    "widget_id": "e41e9da3"
+                }
+            ]
+        }
+    ],
+    "saved_time": "2026-05-04T02:28:56.357085"
+}

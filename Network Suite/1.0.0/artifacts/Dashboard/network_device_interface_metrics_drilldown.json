@@ -1,0 +1,601 @@
+{
+    "name": "network_device_interface_metrics_drilldown",
+    "description": "Network Device Interface Metrics",
+    "label": "Network Device Interface Metrics",
+    "enabled": false,
+    "dashboard_type": "template",
+    "dashboard_style": "auto",
+    "dashboard_folder": "Nework Device",
+    "context_label_id": "target_ip",
+    "live_edit": true,
+    "template_variables": {
+        "DEVICE_IP": {
+            "contextId": "target_ip"
+        },
+        "DEVICE_VENDOR": {
+            "contextId": "device_vendor"
+        },
+        "DEVICE_NAME": {
+            "contextId": "sys_name"
+        }
+    },
+    "dashboard_filters": {
+        "time_filter": true,
+        "extra_filter": "target_ip is '{{DEVICE_IP}}'",
+        "default_time_filter_labels": [
+            "Last 24 hours"
+        ],
+        "columns_filter": [],
+        "group_filters": [
+            {
+                "stream": "rda_snmp_metrics",
+                "title": "Interface Name",
+                "extra_filter": "target_ip is '{{DEVICE_IP}}' and interface_type = '6'",
+                "group_by": [
+                    "interface_description"
+                ],
+                "ts_column": "timestamp",
+                "agg": "cardinality",
+                "column": "interface_description",
+                "limit": 250,
+                "type": "int"
+            },
+            {
+                "stream": "rda_snmp_metrics",
+                "title": "Admin Status",
+                "extra_filter": "target_ip is '{{DEVICE_IP}}' and interface_type = '6'",
+                "group_by": [
+                    "admin_status_label"
+                ],
+                "ts_column": "timestamp",
+                "agg": "cardinality",
+                "column": "admin_status_label",
+                "type": "int"
+            },
+            {
+                "stream": "rda_snmp_metrics",
+                "title": "Oper Status",
+                "extra_filter": "target_ip is '{{DEVICE_IP}}' and interface_type = '6'",
+                "group_by": [
+                    "oper_status_label"
+                ],
+                "ts_column": "timestamp",
+                "agg": "cardinality",
+                "column": "oper_status_label",
+                "type": "int"
+            }
+        ]
+    },
+    "dashboard_sections": [
+        {
+            "title": "Interfaces",
+            "show_filter": true,
+            "widgets": [
+                {
+                    "title": "Device Info",
+                    "widget_type": "label",
+                    "min_width": 12,
+                    "max_width": 12,
+                    "height": 1,
+                    "label": "<h4 style='margin:0;padding:10px;background:#f5f5f5;color:#0066ff;border-radius:4px;text-align:center'>Device Name: {{DEVICE_NAME}} | IP Address: {{DEVICE_IP}} | Vendor: {{DEVICE_VENDOR}}</h4>",
+                    "widget_id": "3128d84b"
+                },
+                {
+                    "title": "Total Ports",
+                    "widget_type": "custom_counter",
+                    "stream": "rda_snmp_metrics",
+                    "ts_column": "timestamp",
+                    "extra_filter": "target_ip is '{{DEVICE_IP}}' and interface_type is '6' and collection is 'interface' ",
+                    "min_width": 4,
+                    "max_width": 4,
+                    "height": 3,
+                    "column": "interface_description",
+                    "agg": "cardinality",
+                    "type": "str",
+                    "style": {
+                        "color-list": [
+                            "#3f51b5"
+                        ]
+                    },
+                    "widget_id": "f4bb2f63"
+                },
+                {
+                    "title": " Ports up",
+                    "widget_type": "custom_counter",
+                    "stream": "rda_snmp_metrics",
+                    "ts_column": "timestamp",
+                    "extra_filter": "target_ip is '{{DEVICE_IP}}' and interface_type is  '6' and collection is 'interface' and oper_status_label contains 'Up'",
+                    "min_width": 4,
+                    "max_width": 4,
+                    "height": 3,
+                    "column": "interface_description",
+                    "agg": "cardinality",
+                    "type": "str",
+                    "style": {
+                        "color-list": [
+                            "#3f51b5"
+                        ]
+                    },
+                    "widget_id": "c40bcfe6"
+                },
+                {
+                    "title": " Ports down",
+                    "widget_type": "custom_counter",
+                    "stream": "rda_snmp_metrics",
+                    "ts_column": "timestamp",
+                    "extra_filter": "target_ip is '{{DEVICE_IP}}' and interface_type = '6' and collection is 'interface' and oper_status_label does not contains 'Up'",
+                    "min_width": 4,
+                    "max_width": 4,
+                    "height": 3,
+                    "column": "interface_description",
+                    "agg": "cardinality",
+                    "type": "str",
+                    "style": {
+                        "color-list": [
+                            "#c62828"
+                        ]
+                    },
+                    "widget_id": "473f7571"
+                },
+                {
+                    "title": "Interface Utilization",
+                    "widget_type": "timeseries",
+                    "stream": "rda_snmp_metrics",
+                    "ts_column": "timestamp",
+                    "interval": "auto",
+                    "min_width": 12,
+                    "max_width": 12,
+                    "height": 6,
+                    "extra_filter": "target_ip is '{{DEVICE_IP}}' and interface_type = '6' and oper_status_label = 'Up'",
+                    "group_by": [
+                        "interface_description"
+                    ],
+                    "chartProperties": {
+                        "yAxisLabel": "%",
+                        "xAxisLabel": "Interface Name",
+                        "legendLocation": "right",
+                        "options": {
+                            "scales": {
+                                "yAxes": [
+                                    {
+                                        "ticks": {
+                                            "min": 0,
+                                            "max": 100
+                                        }
+                                    }
+                                ]
+                            },
+                            "elements": {
+                                "line": {
+                                    "borderWidth": 2
+                                },
+                                "point": {
+                                    "radius": 2,
+                                    "hitRadius": 3,
+                                    "hoverRadius": 2
+                                }
+                            }
+                        }
+                    },
+                    "series_spec": [
+                        {
+                            "column": "interface_utilization",
+                            "agg": "max",
+                            "type": "float"
+                        }
+                    ],
+                    "widget_id": "1338b706"
+                },
+                {
+                    "title": "Interface Throughput (In)",
+                    "widget_type": "timeseries",
+                    "stream": "rda_snmp_metrics",
+                    "ts_column": "timestamp",
+                    "interval": "auto",
+                    "min_width": 6,
+                    "max_width": 6,
+                    "height": 6,
+                    "converting": {
+                        "unit": "bits"
+                    },
+                    "extra_filter": "target_ip is '{{DEVICE_IP}}' and interface_type = '6'",
+                    "group_by": [
+                        "interface_description"
+                    ],
+                    "chartProperties": {
+                        "yAxisLabel": "Bytes",
+                        "xAxisLabel": "Interface Name",
+                        "legendLocation": "right",
+                        "options": {
+                            "elements": {
+                                "line": {
+                                    "borderWidth": 2
+                                },
+                                "point": {
+                                    "radius": 2,
+                                    "hitRadius": 3,
+                                    "hoverRadius": 2
+                                }
+                            }
+                        }
+                    },
+                    "series_spec": [
+                        {
+                            "column": "in_octets_delta",
+                            "agg": "max",
+                            "type": "float"
+                        }
+                    ],
+                    "widget_id": "d9992a90"
+                },
+                {
+                    "title": "Interface Throughput (Out)",
+                    "widget_type": "timeseries",
+                    "stream": "rda_snmp_metrics",
+                    "ts_column": "timestamp",
+                    "interval": "auto",
+                    "min_width": 6,
+                    "max_width": 6,
+                    "height": 6,
+                    "converting": {
+                        "unit": "bits"
+                    },
+                    "extra_filter": "target_ip is '{{DEVICE_IP}}' and interface_type = '6'",
+                    "group_by": [
+                        "interface_description"
+                    ],
+                    "chartProperties": {
+                        "yAxisLabel": "Bytes",
+                        "xAxisLabel": "Interface Name",
+                        "legendLocation": "right",
+                        "options": {
+                            "elements": {
+                                "line": {
+                                    "borderWidth": 2
+                                },
+                                "point": {
+                                    "radius": 2,
+                                    "hitRadius": 3,
+                                    "hoverRadius": 2
+                                }
+                            }
+                        }
+                    },
+                    "series_spec": [
+                        {
+                            "column": "out_octets_delta",
+                            "agg": "max",
+                            "type": "float"
+                        }
+                    ],
+                    "widget_id": "a383312e"
+                },
+                {
+                    "title": "Interface Discards (In)",
+                    "widget_type": "timeseries",
+                    "stream": "rda_snmp_metrics",
+                    "ts_column": "timestamp",
+                    "extra_filter": "target_ip is '{{DEVICE_IP}}' and interface_type = '6'",
+                    "formatting": {
+                        "notation": "compact"
+                    },
+                    "group_by": [
+                        "interface_description"
+                    ],
+                    "min_width": 6,
+                    "max_width": 6,
+                    "height": 6,
+                    "interval": "auto",
+                    "chartProperties": {
+                        "yAxisLabel": "Count",
+                        "xAxisLabel": "Interface Name",
+                        "legendLocation": "right",
+                        "options": {
+                            "elements": {
+                                "line": {
+                                    "borderWidth": 2
+                                },
+                                "point": {
+                                    "radius": 2,
+                                    "hitRadius": 3,
+                                    "hoverRadius": 2
+                                }
+                            }
+                        }
+                    },
+                    "series_spec": [
+                        {
+                            "column": "in_discards_delta",
+                            "agg": "sum",
+                            "type": "float",
+                            "label": "In Discards"
+                        }
+                    ],
+                    "widget_id": "baaae773"
+                },
+                {
+                    "title": "Interface Discards (Out)",
+                    "widget_type": "timeseries",
+                    "stream": "rda_snmp_metrics",
+                    "ts_column": "timestamp",
+                    "extra_filter": "target_ip is '{{DEVICE_IP}}' and interface_type = '6'",
+                    "formatting": {
+                        "notation": "compact"
+                    },
+                    "group_by": [
+                        "interface_description"
+                    ],
+                    "min_width": 6,
+                    "max_width": 6,
+                    "height": 6,
+                    "interval": "auto",
+                    "chartProperties": {
+                        "yAxisLabel": "Count",
+                        "xAxisLabel": "Interface Name",
+                        "legendLocation": "right",
+                        "options": {
+                            "elements": {
+                                "line": {
+                                    "borderWidth": 2
+                                },
+                                "point": {
+                                    "radius": 2,
+                                    "hitRadius": 3,
+                                    "hoverRadius": 2
+                                }
+                            }
+                        }
+                    },
+                    "series_spec": [
+                        {
+                            "column": "out_discards_delta",
+                            "agg": "sum",
+                            "type": "float",
+                            "label": "Out Discards"
+                        }
+                    ],
+                    "widget_id": "19b5e023"
+                },
+                {
+                    "title": "Interface Errors (In)",
+                    "widget_type": "timeseries",
+                    "stream": "rda_snmp_metrics",
+                    "ts_column": "timestamp",
+                    "extra_filter": "target_ip is '{{DEVICE_IP}}' and interface_type = '6'",
+                    "formatting": {
+                        "notation": "compact"
+                    },
+                    "min_width": 6,
+                    "max_width": 6,
+                    "height": 6,
+                    "chartProperties": {
+                        "yAxisLabel": "Count",
+                        "xAxisLabel": "Interface Name",
+                        "legendLocation": "right",
+                        "options": {
+                            "elements": {
+                                "line": {
+                                    "borderWidth": 2
+                                },
+                                "point": {
+                                    "radius": 2,
+                                    "hitRadius": 3,
+                                    "hoverRadius": 2
+                                }
+                            }
+                        }
+                    },
+                    "interval": "auto",
+                    "group_by": [
+                        "interface_description"
+                    ],
+                    "series_spec": [
+                        {
+                            "column": "in_errors_delta",
+                            "agg": "max",
+                            "type": "float",
+                            "label": "In Errors"
+                        }
+                    ],
+                    "widget_id": "2f1a7ad7"
+                },
+                {
+                    "title": "Interface Errors (Out)",
+                    "widget_type": "timeseries",
+                    "stream": "rda_snmp_metrics",
+                    "ts_column": "timestamp",
+                    "extra_filter": "target_ip is '{{DEVICE_IP}}' and interface_type = '6'",
+                    "formatting": {
+                        "notation": "compact"
+                    },
+                    "min_width": 6,
+                    "max_width": 6,
+                    "height": 6,
+                    "chartProperties": {
+                        "yAxisLabel": "Count",
+                        "xAxisLabel": "Interface Name",
+                        "legendLocation": "right",
+                        "options": {
+                            "elements": {
+                                "line": {
+                                    "borderWidth": 2
+                                },
+                                "point": {
+                                    "radius": 2,
+                                    "hitRadius": 3,
+                                    "hoverRadius": 2
+                                }
+                            }
+                        }
+                    },
+                    "interval": "auto",
+                    "group_by": [
+                        "interface_description"
+                    ],
+                    "series_spec": [
+                        {
+                            "column": "out_errors_delta",
+                            "agg": "max",
+                            "type": "float",
+                            "label": "Out Errors"
+                        }
+                    ],
+                    "widget_id": "1dbc6331"
+                },
+                {
+                    "title": "Interface CRC Errors",
+                    "widget_type": "timeseries",
+                    "stream": "rda_snmp_metrics",
+                    "ts_column": "timestamp",
+                    "extra_filter": "target_ip is '{{DEVICE_IP}}' and name = 'interface_crc_errors' and crc_errors is not empty",
+                    "formatting": {
+                        "notation": "compact"
+                    },
+                    "min_width": 12,
+                    "max_width": 12,
+                    "height": 6,
+                    "chartProperties": {
+                        "yAxisLabel": "Count",
+                        "xAxisLabel": "Interface Name",
+                        "legendLocation": "right",
+                        "options": {
+                            "elements": {
+                                "line": {
+                                    "borderWidth": 2
+                                },
+                                "point": {
+                                    "radius": 2,
+                                    "hitRadius": 3,
+                                    "hoverRadius": 2
+                                }
+                            }
+                        }
+                    },
+                    "interval": "auto",
+                    "group_by": [
+                        "interface_description"
+                    ],
+                    "series_spec": [
+                        {
+                            "column": "crc_errors_delta",
+                            "agg": "sum",
+                            "type": "float",
+                            "label": "CRC Errors"
+                        }
+                    ],
+                    "widget_id": "5dcb3d66"
+                },
+                {
+                    "title": "Interface Details",
+                    "widget_type": "tabular",
+                    "stream": "rda_snmp_metrics",
+                    "ts_column": "timestamp",
+                    "extra_filter": "target_ip is '{{DEVICE_IP}}' and collection = 'interface' and interface_type = '6'",
+                    "min_width": 12,
+                    "max_width": 12,
+                    "height": 10,
+                    "paginated": true,
+                    "remote_searchable": true,
+                    "remote_searchable_cols": [
+                        "interface_description",
+                        "interface_alias",
+                        "interface_index",
+                        "oper_status_label"
+                    ],
+                    "columns": {
+                        "sys_name": "Device Hostname",
+                        "target_ip": "Device IP",
+                        "interface_description": "Interface Description",
+                        "high_speed": "Interface Speed",
+                        "oper_color": {
+                            "type": "COLOR-MAP",
+                            "source-column": "oper_status_label",
+                            "color-map": {
+                                "Up": "#2ecc71",
+                                "Down": "#e74c3c"
+                            }
+                        },
+                        "admin_color": {
+                            "type": "COLOR-MAP",
+                            "source-column": "admin_status_label",
+                            "color-map": {
+                                "Up": "#2ecc71",
+                                "Down": "#e74c3c"
+                            }
+                        },
+                        "oper_status_label": {
+                            "title": "Oper Status",
+                            "key": true,
+                            "htmlTemplateForRow": "{%raw%}<span class='badge' style='background-color: {{ row.oper_color }}' > {{ row.oper_status_label }} </span>{%endraw%}"
+                        },
+                        "admin_status_label": {
+                            "title": "Admin Status",
+                            "key": true,
+                            "htmlTemplateForRow": "{%raw%}<span class='badge' style='background-color: {{ row.admin_color }}' > {{ row.admin_status_label }} </span>{%endraw%}"
+                        }
+                    },
+                    "agg_size0": 250,
+                    "pivot": {
+                        "pivot_type": "advanced",
+                        "group_by": [
+                            "sys_name",
+                            "target_ip",
+                            "interface_description",
+                            "interface_index",
+                            "interface_type",
+                            "high_speed",
+                            "oper_status_label",
+                            "admin_status_label"
+                        ],
+                        "series": [
+                            {
+                                "column": "in_octets_delta",
+                                "agg": "sum",
+                                "type": "float",
+                                "label": "In Octets"
+                            },
+                            {
+                                "column": "interface_utilization",
+                                "agg": "last_record",
+                                "type": "float",
+                                "label": "Interface Util (%)"
+                            },
+                            {
+                                "column": "out_octets_delta",
+                                "agg": "sum",
+                                "type": "float",
+                                "label": "Out Octets"
+                            },
+                            {
+                                "column": "in_discards_delta",
+                                "agg": "sum",
+                                "type": "float",
+                                "label": "In Discards"
+                            },
+                            {
+                                "column": "out_discards_delta",
+                                "agg": "sum",
+                                "type": "float",
+                                "label": "Out Discards"
+                            },
+                            {
+                                "column": "in_errors_delta",
+                                "agg": "sum",
+                                "type": "float",
+                                "label": "In Errors"
+                            },
+                            {
+                                "column": "out_errors_delta",
+                                "agg": "sum",
+                                "type": "float",
+                                "label": "Out Errors"
+                            }
+                        ]
+                    },
+                    "widget_id": "d9dd0adb"
+                }
+            ]
+        }
+    ],
+    "saved_time": "2026-03-16T19:40:14.954494"
+}

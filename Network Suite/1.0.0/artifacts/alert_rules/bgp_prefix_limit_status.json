@@ -1,0 +1,82 @@
+{
+    "type": "log",
+    "name": "bgp_prefix_limit_status",
+    "description": "BGP neighbor prefix limit status CFX",
+    "enabled": false,
+    "schedule": {
+        "minutes": 500
+    },
+    "data": {
+        "stream": "syslog_udp_events_stream",
+        "query": "(syslog_code in ['BGP-4-MAXPFX','BGP-3-MAXPFXEXCEED'])",
+        "unique_keys": [
+            "rda_gw_client_ip",
+            "neighbor_ip",
+            "syslog_code"
+        ],
+        "groupby": [
+            "rda_gw_client_ip",
+            "neighbor_ip",
+            "syslog_code"
+        ],
+        "additional_columns": [
+            "raw",
+            "device_hostname",
+            "device_model",
+            "device_vendor",
+            "syslog_code",
+            "neighbor_ip",
+            "reason"
+        ],
+        "custom_unique_keys": [
+            "alarm_class",
+            "event_type"
+        ],
+        "data_transformations": [
+            {
+                "type": "eval",
+                "columns": {
+                    "alarm_class": {
+                        "expr": "'BGP'"
+                    },
+                    "event_type": {
+                        "expr": "'exceeded' if syslog_code == 'BGP-3-MAXPFXEXCEED' else 'threshold' if syslog_code == 'BGP-4-MAXPFX' else 'unknown'"
+                    },
+                    "event_priority": {
+                        "expr": "'critical' if syslog_code == 'BGP-3-MAXPFXEXCEED' else 'warning' if syslog_code == 'BGP-4-MAXPFX' else 'info'"
+                    },
+                    "prefix_count": {
+                        "expr": "reason.split('reach ')[1].split(',')[0] if 'reach ' in reason else ''"
+                    },
+                    "max_limit": {
+                        "expr": "reason.split('max ')[1] if 'max ' in reason else ''"
+                    }
+                }
+            }
+        ],
+        "padding_time_seconds": 60,
+        "limit": 1000
+    },
+    "actions": [
+        {
+            "state": "OPEN",
+            "extra_query": "",
+            "attributes": {
+                "severity": "{{'CRITICAL' if event_priority == 'critical' else 'WARNING'}}",
+                "alert_message": "BGP prefix {{event_type}} for neighbor {{neighbor_ip}} on {{device_hostname}} ({{rda_gw_client_ip}}) received={{prefix_count}} limit={{max_limit}}",
+                "recommendedaction": "Check BGP neighbor using 'show ip bgp neighbors {{neighbor_ip}}'. Investigate abnormal route growth or route leaks. Adjust 'maximum-prefix' if required."
+            },
+            "throttle": {
+                "value": 60,
+                "unit": "MINUTES"
+            },
+            "notification_profile": "snmp_metrics_notification_profile",
+            "notification": [
+                {
+                    "channel": "asm_syslog_webhook"
+                }
+            ]
+        }
+    ],
+    "saved_time": "2026-04-15T08:37:24.573418"
+}

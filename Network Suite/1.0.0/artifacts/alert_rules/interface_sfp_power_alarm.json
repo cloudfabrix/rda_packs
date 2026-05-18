@@ -1,0 +1,99 @@
+{
+    "type": "log",
+    "name": "interface_sfp_power_alarm",
+    "description": "SFP optical power alarm detected CFX",
+    "enabled": false,
+    "schedule": {
+        "minutes": 500
+    },
+    "data": {
+        "stream": "syslog_udp_events_stream",
+        "query": "syslog_code == 'ETHPORT-3-IF_SFP_ALARM'",
+        "unique_keys": [
+            "rda_gw_client_ip",
+            "interface_name"
+        ],
+        "groupby": [
+            "rda_gw_client_ip",
+            "interface_name",
+            "device_hostname"
+        ],
+        "additional_columns": [
+            "device_hostname",
+            "device_model",
+            "device_vendor",
+            "interface_name",
+            "raw",
+            "direction1",
+            "level1",
+            "direction2",
+            "level2"
+        ],
+        "custom_unique_keys": [
+            "alarm_class",
+            "interface_name",
+            "direction_norm",
+            "level_norm"
+        ],
+        "data_transformations": [
+            {
+                "type": "eval",
+                "columns": {
+                    "alarm_class": {
+                        "expr": "'SFPPowerAlarm'"
+                    },
+                    "direction_norm": {
+                        "expr": "(direction1 if direction1 else direction2).lower() if (direction1 or direction2) else 'unknown'"
+                    },
+                    "level_norm": {
+                        "expr": "(level1 if level1 else level2).lower() if (level1 or level2) else 'unknown'"
+                    },
+                    "status": {
+                        "expr": "'clear' if 'cleared' in raw.lower() else 'alarm'"
+                    },
+                    "severity_level": {
+                        "expr": "'CRITICAL' if ((level1 if level1 else level2).lower() == 'high') else 'WARNING'"
+                    }
+                }
+            }
+        ],
+        "padding_time_seconds": 60,
+        "limit": 1000
+    },
+    "actions": [
+        {
+            "state": "OPEN",
+            "extra_query": "",
+            "attributes": {
+                "severity": "{{'CRITICAL' if status == 'alarm' else 'WARNING'}}",
+                "alert_message": "SFP {{direction_norm}} power {{level_norm}} on {{device_hostname}} ({{rda_gw_client_ip}}) interface {{interface_name}}",
+                "recommendedaction": "Check fiber connections, clean connectors, verify optics compatibility, and inspect optical levels using 'show interface transceiver details'."
+            },
+            "throttle": {
+                "value": 60,
+                "unit": "MINUTES"
+            },
+            "notification_profile": "snmp_metrics_notification_profile",
+            "notification": [
+                {
+                    "channel": "asm_syslog_webhook"
+                }
+            ]
+        },
+        {
+            "state": "CLEAR",
+            "extra_query": "raw.match_phrase contain 'Cleared' or raw.match_phrase contain 'cleared'",
+            "attributes": {
+                "severity": "INFO",
+                "alert_message": "SFP {{direction_norm}} power {{level_norm}} normalized on {{device_hostname}} ({{rda_gw_client_ip}}) interface {{interface_name}}"
+            },
+            "notification_profile": "snmp_metrics_notification_profile",
+            "notification": [
+                {
+                    "channel": "asm_syslog_webhook"
+                }
+            ]
+        }
+    ],
+    "saved_time": "2026-04-16T05:46:45.477059"
+}

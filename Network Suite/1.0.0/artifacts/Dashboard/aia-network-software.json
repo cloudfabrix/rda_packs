@@ -1,0 +1,897 @@
+{
+  "name": "aia-network-software",
+  "label": "Software - Network",
+  "description": "Software Network",
+  "dashboard_folder": "AIA_Network_Software",
+  "version": "22.12.1.1",
+  "enabled": true,
+  "live_edit": true,
+  "stream": "network-devices-inventory",
+  "dashboard_type": "navigation-dashboard",
+  "section_as_dashboard": true,
+  "dashboard_filters": {
+      "time_filter": true,
+      "default_time_filter_labels": [
+          "All Time"
+      ],
+      "extra_filter": "`asset_status` notin [\"DECOMMISSION\", \"TO BE PURGED\"]",
+      "columns_filter": [
+          {
+              "id": "unique_id",
+              "label": "Unique ID",
+              "type": "TEXT"
+          },
+          {
+              "id": "bucket_id",
+              "label": "Bucket ID",
+              "type": "TEXT"
+          },
+          {
+              "id": "org_id",
+              "label": "Organization Id",
+              "type": "TEXT"
+          },
+          {
+              "id": "org_name",
+              "label": "Organization Name",
+              "type": "TEXT"
+          },
+          {
+              "id": "equipment_type",
+              "label": "Equipment Type",
+              "type": "TEXT"
+          },
+          {
+              "id": "equipment_name",
+              "label": "Equipment Name",
+              "type": "TEXT"
+          },
+          {
+              "id": "product_type",
+              "label": "Product Type",
+              "type": "TEXT"
+          },
+          {
+              "id": "product_family",
+              "label": "Product Family",
+              "type": "TEXT"
+          },
+          {
+              "id": "product_id",
+              "label": "Product ID",
+              "type": "TEXT"
+          },
+          {
+              "id": "product_category",
+              "label": "Product Category",
+              "type": "TEXT"
+          },
+          {
+              "id": "vendor",
+              "label": "Vendor",
+              "type": "TEXT"
+          },
+          {
+              "id": "serial_number",
+              "label": "Serial Number",
+              "type": "TEXT"
+          },
+          {
+              "id": "ip_address",
+              "label": "IP Address",
+              "type": "TEXT"
+          },
+          {
+              "id": "equipment_age",
+              "label": "Equipment Age",
+              "type": "TEXT"
+          },
+          {
+              "id": "hw_revision",
+              "label": "HW Revision",
+              "type": "TEXT"
+          },
+          {
+              "id": "sw_version",
+              "label": "SW Version",
+              "type": "TEXT"
+          },
+          {
+              "id": "sw_version_details",
+              "label": "SW Version Details",
+              "type": "TEXT"
+          },
+          {
+              "id": "hostname",
+              "label": "Hostname",
+              "type": "TEXT"
+          },
+          {
+              "id": "parent_serial_number",
+              "label": "Parent SN",
+              "type": "TEXT"
+          },
+          {
+              "id": "hw_status",
+              "label": "HW Status",
+              "type": "TEXT"
+          },
+          {
+              "id": "hw_expiring_year",
+              "label": "HW Expiring Year",
+              "type": "TEXT"
+          },
+          {
+              "id": "hw_expiring_qtr",
+              "label": "HW Expiring Quarter",
+              "type": "TEXT"
+          },
+          {
+              "id": "sw_ldos",
+              "label": "SW LDoS",
+              "type": "DATETIME"
+          },
+          {
+              "id": "product_name",
+              "label": "Product Name",
+              "type": "TEXT"
+          },
+          {
+              "id": "product_description",
+              "label": "Product Description",
+              "type": "TEXT"
+          },
+          {
+              "id": "source_filename",
+              "label": "Source Filename",
+              "type": "TEXT"
+          },
+          {
+              "id": "fex_number",
+              "label": "FEX Number",
+              "type": "TEXT"
+          },
+          {
+              "id": "fex_state",
+              "label": "FEX State",
+              "type": "TEXT"
+          },
+          {
+              "id": "fex_description",
+              "label": "FEX Description",
+              "type": "TEXT"
+          },
+          {
+              "id": "fex_name",
+              "label": "FEX Name",
+              "type": "TEXT"
+          },
+          {
+              "id": "fex_grid",
+              "label": "FEX Grid",
+              "type": "TEXT"
+          },
+          {
+              "id": "asset_status",
+              "label": "Asset State",
+              "type": "TEXT"
+          },
+          {
+              "id": "asset_mode",
+              "label": "Asset State Transfer Mode",
+              "type": "TEXT"
+          },
+          {
+              "id": "device_additional_ips",
+              "label": "Device Additional IP's",
+              "type": "TEXT"
+          },
+          {
+              "id": "poe_summary",
+              "label": "PoE Summary",
+              "type": "TEXT"
+          },
+          {
+              "id": "dns_name",
+              "label": "DNS Name",
+              "type": "TEXT"
+          },
+          {
+              "id": "asset_type",
+              "label": "Asset Type",
+              "type": "TEXT"
+          },
+          {
+              "id": "sys_objectId",
+              "label": "sysObjectId",
+              "type": "TEXT"
+          },
+          {
+              "id": "sys_contact",
+              "label": "sysContact",
+              "type": "TEXT"
+          },
+          {
+              "id": "sys_descr",
+              "label": "sysDescr",
+              "type": "TEXT"
+          },
+          {
+              "id": "sw_type",
+              "label": "SW Type",
+              "type": "TEXT"
+          },
+          {
+              "id": "address",
+              "label": "Address",
+              "type": "TEXT"
+          },
+          {
+              "id": "snmp_syslocation",
+              "label": "SNMP Syslocation",
+              "type": "TEXT"
+          },
+          {
+              "id": "parent_pid",
+              "label": "Parent PID",
+              "type": "TEXT"
+          },
+          {
+              "id": "up_eth_ports",
+              "label": "Up Ethernet Ports",
+              "type": "DOUBLE"
+          },
+          {
+              "id": "down_eth_ports",
+              "label": "Down Ethernet Ports",
+              "type": "DOUBLE"
+          },
+          {
+              "id": "total_eth_ports",
+              "label": "Total Ethernet Ports",
+              "type": "DOUBLE"
+          },
+          {
+              "id": "admin_down_eth_ports",
+              "label": "Admin Down Ethernet Ports",
+              "type": "DOUBLE"
+          },
+          {
+              "id": "hw_ldos",
+              "label": "HW LDoS Date",
+              "type": "DATETIME"
+          },
+          {
+              "id": "price",
+              "label": "Price",
+              "type": "DOUBLE"
+          },
+          {
+              "id": "end_of_sale",
+              "label": "End of Sale",
+              "type": "DATETIME"
+          },
+          {
+              "id": "first_seen",
+              "label": "First Seen",
+              "type": "DATETIME"
+          },
+          {
+              "id": "last_seen",
+              "label": "Last Seen",
+              "type": "DATETIME"
+          },
+          {
+              "id": "end_of_ext_announcement_date",
+              "label": "End Of External Announcement Date",
+              "type": "DATETIME"
+          },
+          {
+              "id": "end_of_routine_fail_date",
+              "label": "End Of Routine Failure Analysis Date",
+              "type": "DATETIME"
+          },
+          {
+              "id": "end_of_contract_renew_date",
+              "label": "End Of Contract Renewal Date",
+              "type": "DATETIME"
+          },
+          {
+              "id": "end_of_svc_attach_date",
+              "label": "End Of Svc Attach Date",
+              "type": "DATETIME"
+          },
+          {
+              "id": "end_of_sec_sup_date",
+              "label": "End Of Security Vul Support Date",
+              "type": "DATETIME"
+          },
+          {
+              "id": "end_of_sw_maint",
+              "label": "End Of SW Maintenance",
+              "type": "DATETIME"
+          },
+          {
+              "id": "__state_updated_time",
+              "label": "Asset State Updated Time",
+              "type": "DATETIME"
+          },
+          {
+              "id": "management_ip",
+              "label": "Management IP",
+              "type": "TEXT"
+          },
+          {
+              "id": "system_vendor_sub_id",
+              "label": "SystemVendorSubID",
+              "type": "TEXT"
+          },
+          {
+              "id": "system_vendor_os",
+              "label": "systemVendorOS",
+              "type": "TEXT"
+          },
+          {
+              "id": "fex_serial",
+              "label": "FEX Serial",
+              "type": "TEXT"
+          },
+          {
+              "id": "fex_model",
+              "label": "FEX Model",
+              "type": "TEXT"
+          },
+          {
+              "id": "sys_uptime",
+              "label": "Device Uptime (Days)",
+              "type": "DOUBLE"
+          },
+          {
+              "id": "cdp_global_deviceId",
+              "label": "cdpGlobalDeviceId",
+              "type": "TEXT"
+          },
+          {
+              "id": "is_poe_capable",
+              "label": "PoE Capable",
+              "type": "TEXT"
+          },
+          {
+              "id": "poe_admin_auto",
+              "label": "PoE Admin Status (Auto)",
+              "type": "TEXT"
+          },
+          {
+              "id": "poe_admin_off",
+              "label": "PoE Admin Status (Off)",
+              "type": "TEXT"
+          },
+          {
+              "id": "poe_admin_static",
+              "label": "PoE Admin Status (Static)",
+              "type": "TEXT"
+          },
+          {
+              "id": "poe_oper_off",
+              "label": "PoE Status (Off)",
+              "type": "TEXT"
+          },
+          {
+              "id": "poe_oper_faulty",
+              "label": "PoE Status (Faulty)",
+              "type": "TEXT"
+          },
+          {
+              "id": "poe_oper_on",
+              "label": "PoE Status (On)",
+              "type": "TEXT"
+          },
+          {
+              "id": "poe_oper_power_deny",
+              "label": "PoE Power Status (Deny)",
+              "type": "TEXT"
+          },
+          {
+              "id": "poe_used_watts",
+              "label": "PoE Used Watts",
+              "type": "DOUBLE"
+          },
+          {
+              "id": "poe_total_watts",
+              "label": "PoE Total Watts",
+              "type": "DOUBLE"
+          },
+          {
+              "id": "poe_remaining_watts",
+              "label": "PoE Available Watts",
+              "type": "DOUBLE"
+          },
+          {
+              "id": "poe_watts_categorization",
+              "label": "PoE Watts Categorization",
+              "type": "TEXT"
+          },
+          {
+              "id": "api_status",
+              "label": "API Status",
+              "type": "TEXT"
+          },
+          {
+              "id": "sys_uptime_days",
+              "label": "Device Uptime (Categorization)",
+              "type": "TEXT"
+          },
+          {
+              "id": "uptime_since",
+              "label": "Up Since",
+              "type": "DATETIME"
+          },
+          {
+              "id": "ntwk_license_name",
+              "label": "Network License Name",
+              "type": "TEXT"
+          },
+          {
+              "id": "up_ports_categorization",
+              "label": "Used Ports Categorization",
+              "type": "TEXT"
+          },
+          {
+              "id": "down_ports_categorization",
+              "label": "Unused Ports Categorization",
+              "type": "TEXT"
+          },
+          {
+              "id": "child_devices",
+              "label": "No. of Child Devices",
+              "type": "TEXT"
+          }
+      ],
+      "group_filters": [
+          {
+              "stream": "network-devices-inventory",
+              "title": "Vendor",
+              "extra_filter": "asset_object in 'Chassis' and product_family not in 'Cisco Nexus 2000 Series Fabric Extenders'",
+              "group_by": [
+                  "vendor"
+              ],
+              "agg": "value_count",
+              "ts_column": "timestamp",
+              "duration_hours": 1080,
+              "limit": 3000,
+              "column": "unique_id.keyword",
+              "type": "int"
+          },
+          {
+              "stream": "network-devices-inventory",
+              "title": "Software Versions",
+              "extra_filter": "asset_object in 'Chassis' and product_family not in 'Cisco Nexus 2000 Series Fabric Extenders'",
+              "group_by": [
+                  "sw_version"
+              ],
+              "agg": "value_count",
+              "ts_column": "timestamp",
+              "duration_hours": 1080,
+              "limit": 200,
+              "column": "unique_id.keyword",
+              "type": "int"
+          },
+          {
+              "stream": "network-devices-inventory",
+              "title": "Product ID",
+              "extra_filter": "asset_object in 'Chassis' and product_family not in 'Cisco Nexus 2000 Series Fabric Extenders'",
+              "group_by": [
+                  "product_id"
+              ],
+              "ts_column": "timestamp",
+              "duration_hours": 1080,
+              "limit": 200,
+              "agg": "value_count",
+              "column": "unique_id",
+              "type": "int"
+          }
+      ],
+      "additional_datetime_column_filters": [
+          {
+              "id": "last_updated_time",
+              "label": "Last Updated Time"
+          },
+          {
+              "id": "created_time",
+              "label": "Created Time"
+          }
+      ]
+  },
+  "navigation_dashboards": {
+      "Dashboards": [
+          {
+              "section": "Software Assets by Product",
+              "label": "SW Assets by Product"
+          },
+          {
+              "section": "Software Assets by EOL/EOS",
+              "label": "SW Assets by EOL/EOS"
+          }
+      ]
+  },
+  "dashboard_sections": [
+      {
+          "title": "Software Assets by Product",
+          "show_filter": true,
+          "widgets": [
+              {
+                  "widget_type": "pie_chart",
+                  "title": "SW Assets by Software Type",
+                  "stream": "network-devices-inventory",
+                  "ts_column": "timestamp",
+                  "duration_hours": 1080,
+                  "extra_filter": "asset_object in 'Software'",
+                  "column": "unique_id.keyword",
+                  "agg": "value_count",
+                  "group_by": [
+                      "sw_type"
+                  ],
+                  "type": "str",
+                  "min_width": 3,
+                  "height": 5,
+                  "max_width": 3,
+                  "widget_id": "wLqp2hmu"
+              },
+              {
+                  "widget_type": "pie_chart",
+                  "title": "SW Assets by Vendor",
+                  "stream": "network-devices-inventory",
+                  "ts_column": "timestamp",
+                  "duration_hours": 1080,
+                  "extra_filter": "asset_object in 'Software'",
+                  "column": "unique_id.keyword",
+                  "agg": "value_count",
+                  "group_by": [
+                      "vendor"
+                  ],
+                  "type": "str",
+                  "min_width": 3,
+                  "height": 5,
+                  "max_width": 3,
+                  "widget_id": "fcd6ef8c"
+              },
+              {
+                  "widget_type": "pie_chart",
+                  "title": "SW Assets by Product ID",
+                  "stream": "network-devices-inventory",
+                  "ts_column": "timestamp",
+                  "duration_hours": 1080,
+                  "extra_filter": "asset_object in 'Software'",
+                  "column": "unique_id.keyword",
+                  "agg": "value_count",
+                  "group_by": [
+                      "product_id"
+                  ],
+                  "type": "str",
+                  "min_width": 3,
+                  "height": 5,
+                  "max_width": 3,
+                  "widget_id": "eUa3zNBw"
+              },
+              {
+                  "widget_type": "pie_chart",
+                  "title": "SW Assets by Product Description",
+                  "stream": "network-devices-inventory",
+                  "ts_column": "timestamp",
+                  "duration_hours": 1080,
+                  "extra_filter": "asset_object in 'Software'",
+                  "column": "unique_id.keyword",
+                  "agg": "value_count",
+                  "group_by": [
+                      "product_description"
+                  ],
+                  "type": "str",
+                  "min_width": 3,
+                  "height": 5,
+                  "max_width": 3,
+                  "widget_id": "deGjfK0q"
+              },
+              {
+                  "title": "SW Assets by Equipment Type",
+                  "widget_type": "tabular",
+                  "max_width": 12,
+                  "height": 4,
+                  "min_width": 6,
+                  "stream": "network-devices-inventory",
+                  "ts_column": "timestamp",
+                  "duration_hours": 1080,
+                  "extra_filter": "asset_object in 'Software'",
+                  "columns": {
+                      "equipment_type": "Equipment Type"
+                  },
+                  "pivot": {
+                      "pivot_type": "advanced",
+                      "series": [
+                          {
+                              "column": "count_",
+                              "agg": "value_count",
+                              "type": "int",
+                              "label": "Count"
+                          }
+                      ],
+                      "group_by": [
+                          "equipment_type"
+                      ],
+                      "column": "asset_object.keyword",
+                      "agg": "value_count"
+                  },
+                  "widget_id": "6eT0NYh1"
+              },
+              {
+                  "title": "Device Software Versions",
+                  "widget_type": "tabular",
+                  "max_width": 12,
+                  "height": 8,
+                  "min_width": 12,
+                  "stream": "network-devices-inventory",
+                  "ts_column": "timestamp",
+                  "duration_hours": 1080,
+                  "extra_filter": "asset_object in 'Chassis' and product_family not in 'Cisco Nexus 2000 Series Fabric Extenders'",
+                  "columns": {
+                      "org_name": {
+                          "title": "Organization Name",
+                          "type": "TEXT",
+                          "visible": false
+                      },
+                      "org_id": {
+                          "title": "Organization ID",
+                          "type": "TEXT",
+                          "hidden": true,
+                          "visible": false
+                      },
+                      "dns_name": "DNS Name",
+                      "ip_address": "IP Address",
+                      "hostname": "Hostname",
+                      "parent_serial_number": "Parent SN",
+                      "serial_number": "Serial Number",
+                      "product_id": "Product ID",
+                      "product_family": "Product Family",
+                      "equipment_type": "Equipment Type",
+                      "sw_type": "SW Type",
+                      "sw_version": "SW Version",
+                      "sys_uptime": {
+                          "title": "Device Uptime (Days)",
+                          "type": "DOUBLE",
+                          "visible": true
+                      },
+                      "uptime_since": {
+                          "title": "Up Since",
+                          "type": "DATE",
+                          "visible": true
+                      },
+                      "vendor": {
+                          "title": "Vendor",
+                          "type": "TEXT",
+                          "visible": false
+                      },
+                      "management_ip": {
+                          "title": "Management IP",
+                          "type": "TEXT",
+                          "visible": false
+                      },
+                      "device_additional_ips": {
+                          "title": "Device Additional IPs",
+                          "type": "TEXT",
+                          "formatter": "truncate",
+                          "visible": false
+                      },
+                      "unique_id": {
+                          "title": "Unique ID",
+                          "type": "TEXT",
+                          "hidden": true,
+                          "visible": false
+                      }
+                  },
+                  "widget_id": "kV9VMjne"
+              },
+              {
+                  "title": "SW Assets",
+                  "widget_type": "tabular",
+                  "max_width": 12,
+                  "height": 8,
+                  "min_width": 12,
+                  "stream": "network-devices-inventory",
+                  "ts_column": "timestamp",
+                  "duration_hours": 1080,
+                  "extra_filter": "asset_object in 'Software'",
+                  "columns": {
+                      "org_name": {
+                          "title": "Organization Name",
+                          "type": "TEXT",
+                          "visible": false
+                      },
+                      "vendor": {
+                          "title": "Vendor",
+                          "type": "TEXT",
+                          "visible": false
+                      },
+                      "sw_type": "SW Type",
+                      "sw_version": "SW Version",
+                      "end_of_sale": {
+                          "title": "End of Sale",
+                          "type": "DATE",
+                          "visible": false
+                      },
+                      "sw_ldos": {
+                          "title": "SW LDoS",
+                          "type": "DATE"
+                      },
+                      "end_of_ext_announcement_date": {
+                          "title": "End Of External Announcement Date",
+                          "type": "DATE"
+                      },
+                      "end_of_routine_fail_date": {
+                          "title": "End Of Routine Failure Analysis Date",
+                          "type": "DATE"
+                      },
+                      "end_of_contract_renew_date": {
+                          "title": "End Of Contract Renewal Date",
+                          "type": "DATE"
+                      },
+                      "end_of_svc_attach_date": {
+                          "title": "End Of Svc Attach Date",
+                          "type": "DATE"
+                      },
+                      "end_of_sec_sup_date": {
+                          "title": "End Of Security Vul Support Date",
+                          "type": "DATE"
+                      },
+                      "end_of_sw_maint": {
+                          "title": "End Of SW Maintenance",
+                          "type": "DATE"
+                      },
+                      "unique_id": {
+                          "title": "Unique ID",
+                          "type": "TEXT",
+                          "visible": false
+                      }
+                  },
+                  "widget_id": "GYYBgXHD"
+              }
+          ]
+      },
+      {
+          "title": "Software Assets by EOL/EOS",
+          "show_filter": true,
+          "widgets": [
+              {
+                  "title": "Device Software Versions",
+                  "widget_type": "tabular",
+                  "max_width": 12,
+                  "height": 8,
+                  "min_width": 12,
+                  "stream": "network-devices-inventory",
+                  "ts_column": "timestamp",
+                  "duration_hours": 1080,
+                  "extra_filter": "asset_object in 'Chassis' and product_family not in 'Cisco Nexus 2000 Series Fabric Extenders'",
+                  "columns": {
+                      "org_name": {
+                          "title": "Organization Name",
+                          "type": "TEXT",
+                          "visible": false
+                      },
+                      "org_id": {
+                          "title": "Organization ID",
+                          "type": "TEXT",
+                          "hidden": true,
+                          "visible": false
+                      },
+                      "dns_name": "DNS Name",
+                      "ip_address": "IP Address",
+                      "hostname": "Hostname",
+                      "parent_serial_number": "Parent SN",
+                      "serial_number": "Serial Number",
+                      "product_id": "Product ID",
+                      "product_family": "Product Family",
+                      "equipment_type": "Equipment Type",
+                      "sw_type": "SW Type",
+                      "sw_version": "SW Version",
+                      "sys_uptime": {
+                          "title": "Device Uptime (Days)",
+                          "type": "DOUBLE",
+                          "visible": true
+                      },
+                      "uptime_since": {
+                          "title": "Up Since",
+                          "type": "DATE",
+                          "visible": true
+                      },
+                      "vendor": {
+                          "title": "Vendor",
+                          "type": "TEXT",
+                          "visible": false
+                      },
+                      "management_ip": {
+                          "title": "Management IP",
+                          "type": "TEXT",
+                          "visible": false
+                      },
+                      "device_additional_ips": {
+                          "title": "Device Additional IPs",
+                          "type": "TEXT",
+                          "formatter": "truncate",
+                          "visible": false
+                      },
+                      "unique_id": {
+                          "title": "Unique ID",
+                          "type": "TEXT",
+                          "hidden": true,
+                          "visible": false
+                      }
+                  },
+                  "widget_id": "sYNnwt21"
+              },
+              {
+                  "title": "SW Assets",
+                  "widget_type": "tabular",
+                  "max_width": 12,
+                  "height": 8,
+                  "min_width": 12,
+                  "stream": "network-devices-inventory",
+                  "ts_column": "timestamp",
+                  "duration_hours": 1080,
+                  "extra_filter": "asset_object in 'Software'",
+                  "columns": {
+                      "org_name": {
+                          "title": "Organization Name",
+                          "type": "TEXT",
+                          "visible": false
+                      },
+                      "vendor": {
+                          "title": "Vendor",
+                          "type": "TEXT",
+                          "visible": false
+                      },
+                      "sw_type": "SW Type",
+                      "sw_version": "SW Version",
+                      "end_of_sale": {
+                          "title": "End of Sale",
+                          "type": "DATE",
+                          "visible": false
+                      },
+                      "sw_ldos": {
+                          "title": "SW LDoS",
+                          "type": "DATE"
+                      },
+                      "end_of_ext_announcement_date": {
+                          "title": "End Of External Announcement Date",
+                          "type": "DATE"
+                      },
+                      "end_of_routine_fail_date": {
+                          "title": "End Of Routine Failure Analysis Date",
+                          "type": "DATE"
+                      },
+                      "end_of_contract_renew_date": {
+                          "title": "End Of Contract Renewal Date",
+                          "type": "DATE"
+                      },
+                      "end_of_svc_attach_date": {
+                          "title": "End Of Svc Attach Date",
+                          "type": "DATE"
+                      },
+                      "end_of_sec_sup_date": {
+                          "title": "End Of Security Vul Support Date",
+                          "type": "DATE"
+                      },
+                      "end_of_sw_maint": {
+                          "title": "End Of SW Maintenance",
+                          "type": "DATE"
+                      },
+                      "unique_id": {
+                          "title": "Unique ID",
+                          "type": "TEXT",
+                          "visible": false
+                      }
+                  },
+                  "widget_id": "mSqEY6iy"
+              }
+          ]
+      }
+  ],
+  "saved_time": "2026-02-06T05:01:47.783293"
+}

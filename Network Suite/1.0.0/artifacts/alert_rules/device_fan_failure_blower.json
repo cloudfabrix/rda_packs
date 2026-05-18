@@ -1,0 +1,76 @@
+{
+    "type": "log",
+    "name": "device_fan_failure_blower",
+    "description": "Chassis fan or blower failure detected CFX",
+    "enabled": false,
+    "schedule": {
+        "minutes": 50
+    },
+    "data": {
+        "stream": "syslog_udp_events_stream",
+        "query": "syslog_code in ['CI-3-BLOWER']",
+        "unique_keys": [
+            "rda_gw_client_ip",
+            "syslog_code"
+        ],
+        "groupby": [
+            "rda_gw_client_ip",
+            "syslog_code"
+        ],
+        "additional_columns": [
+            "raw",
+            "device_hostname",
+            "device_model",
+            "device_vendor",
+            "syslog_code",
+            "blower_id",
+            "status"
+        ],
+        "custom_unique_keys": [
+            "alarm_class"
+        ],
+        "data_transformations": [
+            {
+                "type": "eval",
+                "columns": {
+                    "alarm_class": {
+                        "expr": "'FanFailure'"
+                    },
+                    "blower_id": {
+                        "expr": "raw.split('Blower ')[1].split(' ')[0] if 'Blower ' in raw else 'unknown'"
+                    },
+                    "status": {
+                        "expr": "'failure' if 'failed' in raw.lower() else 'unknown'"
+                    },
+                    "failure_type": {
+                        "expr": "'removed_or_failed' if 'removed' in raw.lower() else 'failed'"
+                    }
+                }
+            }
+        ],
+        "padding_time_seconds": 60,
+        "limit": 1000
+    },
+    "actions": [
+        {
+            "state": "OPEN",
+            "extra_query": "",
+            "attributes": {
+                "severity": "{{'CRITICAL' if status == 'failure' else 'WARNING'}}",
+                "alert_message": "Blower {{blower_id}} failure on {{device_hostname}} ({{rda_gw_client_ip}}) status={{failure_type}}",
+                "recommendedaction": "Check blower/fan tray seating and airflow. Verify using 'show environment fan'. Replace blower unit if failure persists."
+            },
+            "throttle": {
+                "value": 60,
+                "unit": "MINUTES"
+            },
+            "notification_profile": "snmp_metrics_notification_profile",
+            "notification": [
+                {
+                    "channel": "asm_syslog_webhook"
+                }
+            ]
+        }
+    ],
+    "saved_time": "2026-04-15T09:03:15.855878"
+}

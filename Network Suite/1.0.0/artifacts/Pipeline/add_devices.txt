@@ -1,0 +1,84 @@
+%% stream = no and limit = 0
+
+@exec:get-input
+    --> @dm:save name="temp-data"
+
+--> @c:new-block
+    --> @dm:recall name="temp-data" and return_empty = "yes"
+    --> @dm:to-type columns = 'discovery' & type = 'str'
+    --> @dm:manipulate-string from="discovery" and to="discovery" and func="lower"
+    --> *dm:filter discovery contains "true"
+    --> @dm:skip-block-if-shape row_count=0
+    --> @dm:eval type="'discovery'"
+    --> @dm:explode column="device_ip"
+    --> @dm:eval device_ip = "device_ip.strip() if device_ip else device_ip"
+    --> *dm:filter device_ip is not null and device_ip != ''
+    --> @dm:eval unique_id = "str(device_ip) + '_' + str(type)"
+    --> @dm:eval collection_scope="'yes'"
+    --> @dm:selectcolumns include = "^(device_ip|discovery_scope|cdp_field|lldp_field|ospf_field|bgp_field|isis_field|unique_id|type|collection_scope)$"
+    --> @rn:write-stream name="discovery"
+
+--> @c:new-block
+    --> @dm:recall name="temp-data" and return_empty = "yes"
+    --> @dm:to-type columns = 'icmp_field' & type = 'str'
+    --> @dm:manipulate-string from="icmp_field" and to="icmp_field" and func="lower"
+    --> *dm:filter icmp_field contains "true"
+    --> @dm:skip-block-if-shape row_count=0
+    --> @dm:eval type="'icmp_metrics'"
+    --> @dm:explode column="ip_icmp"
+    --> @dm:selectcolumns include = "^(ip_icmp|type)$"
+    --> @dm:rename-columns device_ip="ip_icmp"
+    --> @dm:eval device_ip = "device_ip.strip() if device_ip else device_ip"
+    --> *dm:filter device_ip is not null and device_ip != ''
+    --> @dm:eval unique_id = "str(device_ip) + '_' + str(type)"
+    --> @dm:eval collection_scope="'yes'"
+    --> @rn:write-stream name="discovery"
+
+--> @c:new-block
+    --> @dm:recall name="temp-data" and return_empty = "yes"
+    --> @dm:to-type columns = 'snmp_field' & type = 'str'
+    --> @dm:manipulate-string from="snmp_field" and to="snmp_field" and func="lower"
+    --> *dm:filter snmp_field contains "true"
+    --> @dm:skip-block-if-shape row_count=0
+    --> @dm:eval type="'snmp_metrics'"
+    --> @dm:explode column="ip_snmp"
+    --> @dm:selectcolumns include = "^(ip_snmp|type)$"
+    --> @dm:rename-columns device_ip="ip_snmp"
+    --> @dm:eval device_ip = "device_ip.strip() if device_ip else device_ip"
+    --> *dm:filter device_ip is not null and device_ip != ''
+    --> @dm:eval unique_id = "str(device_ip) + '_' + str(type)"
+    --> @dm:eval collection_scope="'yes'"
+    --> @rn:write-stream name="discovery"
+
+--> @c:new-block
+    --> @dm:recall name="temp-data" and return_empty = "yes"
+    --> @dm:to-type columns = 'ssl_field' & type = 'str'
+    --> @dm:manipulate-string from="ssl_field" and to="ssl_field" and func="lower"
+    --> *dm:filter ssl_field contains "true"
+    --> @dm:skip-block-if-shape row_count=0
+    --> @dm:eval type="'ssl_metrics'"
+    --> @dm:explode column="url_field"
+    --> @dm:eval url_field = "url_field.strip() if url_field else url_field"
+    --> *dm:filter url_field is not null and url_field != ''
+    --> @dm:eval unique_id = "str(url_field) + '_' + str(type)"
+    --> @dm:selectcolumns include = "^(url_field|type|unique_id)$"
+    --> @dm:eval collection_scope="'yes'"
+    --> @rn:write-stream name="discovery"
+
+--> @c:new-block
+    --> @dm:recall name="temp-data" and return_empty = "yes"
+    --> @dm:to-type columns = 'port_metrics' & type = 'str'
+    --> @dm:manipulate-string from="port_metrics" and to="port_metrics" and func="lower"
+    --> *dm:filter port_metrics contains "true"
+    --> @dm:skip-block-if-shape row_count=0
+    --> @dm:eval type="'port_metrics'"
+    --> @dm:explode column="url"
+    --> @dm:selectcolumns include = "^(url|type|tcp_field)$"
+    --> @dm:rename-columns url_field="url" and protocol="tcp_field"
+    --> @dm:eval url_field = "url_field.strip() if url_field else url_field"
+    --> @dm:eval protocol = "protocol.strip() if protocol else protocol"
+    --> *dm:filter url_field is not null and url_field != '' and protocol is not null and protocol != ''
+    --> @dm:eval unique_id = "str(url_field) + '_' + str(type) + '_' + str(protocol)"
+    --> @dm:eval collection_scope="'yes'"
+    --> @rn:write-stream name="discovery"
+

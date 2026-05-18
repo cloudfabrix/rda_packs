@@ -1,0 +1,351 @@
+{
+    "name": "poe_drilldown_dashboard",
+    "label": "PoE Device Detail (Drill-down)",
+    "description": "Opens when user clicks target_ip from a PoE tabular report. Shows counters, gauges, time-series, and PoE charts for the selected device.",
+    "dashboard_folder": "Network Device",
+    "version": "1.0.0",
+    "enabled": true,
+    "stream": "rda_snmp_metrics",
+    "dashboard_type": "template",
+    "dashboard_style": "auto",
+    "context_label_id": "target_ip",
+    "live_edit": true,
+    "template_variables": {
+        "DEVICE_IP": {
+            "contextId": "target_ip"
+        },
+        "DEVICE_VENDOR": {
+            "contextId": "device_vendor"
+        },
+        "DEVICE_NAME": {
+            "contextId": "sys_name"
+        }
+    },
+    "dashboard_filters": {
+        "time_filter": true,
+        "extra_filter": "target_ip is '{{DEVICE_IP}}'",
+        "default_time_filter_labels": [
+            "Last 24 hours",
+            "Last 7 days"
+        ],
+        "columns_filter": [],
+        "group_filters": []
+    },
+    "dashboard_sections": [
+        {
+            "title": "PoE Device Detail",
+            "show_filter": true,
+            "widgets": [
+                {
+                    "title": "Device Info",
+                    "widget_type": "label",
+                    "min_width": 12,
+                    "max_width": 12,
+                    "height": 1,
+                    "label": "<h4 style='margin:0;padding:10px;background:#f5f5f5;color:#0066ff;border-radius:4px;text-align:center'>Device Name: {{DEVICE_NAME}} | IP Address: {{DEVICE_IP}} | Vendor: {{DEVICE_VENDOR}}</h4>",
+                    "widget_id": "2bb12570"
+                },
+                {
+                    "title": "Total PoE Ports",
+                    "widget_type": "counter",
+                    "stream": "rda_snmp_metrics",
+                    "ts_column": "timestamp",
+                    "extra_filter": "target_ip is '{{DEVICE_IP}}' and collection is 'poe_port'",
+                    "column": "interface_description",
+                    "agg": "cardinality",
+                    "type": "int",
+                    "style": {
+                        "color-list": [
+                            "#1e88e5"
+                        ]
+                    },
+                    "min_width": 6,
+                    "max_width": 6,
+                    "height": 4,
+                    "widget_id": "6886e7d5"
+                },
+                {
+                    "title": "Ports In Use",
+                    "widget_type": "counter",
+                    "stream": "rda_snmp_metrics",
+                    "ts_column": "timestamp",
+                    "extra_filter": "target_ip is '{{DEVICE_IP}}' and collection is 'poe_port' and poe_power_consumption > 0",
+                    "column": "interface_description",
+                    "agg": "cardinality",
+                    "type": "int",
+                    "style": {
+                        "color-list": [
+                            "#2E7D32"
+                        ]
+                    },
+                    "min_width": 6,
+                    "max_width": 6,
+                    "height": 4,
+                    "widget_id": "f9e099ac"
+                },
+                {
+                    "title": "",
+                    "widget_type0": "gauge_widget",
+                    "stream": "rda_snmp_metrics",
+                    "ts_column": "timestamp",
+                    "extra_filter": "target_ip is '{{DEVICE_IP}}' and collection is 'poe_port' and poe_usage_percent is not empty and poe_usage_percent > 0 and timestamp is after -10 minutes",
+                    "column": "poe_usage_percent",
+                    "agg": "avg",
+                    "type": "float",
+                    "min_width": 6,
+                    "max_width": 6,
+                    "height": 4,
+                    "refreshRequired": true,
+                    "label": "Total PoE Usage (%)",
+                    "group_by": [
+                        "interface_description"
+                    ],
+                    "chartProperties": {
+                        "isSingleZoned": false,
+                        "showPointer": true,
+                        "pointer": {
+                            "length": 85,
+                            "strokeWidth": 25,
+                            "color": "red"
+                        },
+                        "minLabel": "0",
+                        "maxLabel": "100",
+                        "minValue": 0,
+                        "maxValue": 100,
+                        "arcWidth": 10,
+                        "valueFontSize": 30,
+                        "bgZonesMode": "percent",
+                        "bgZones": [
+                            {
+                                "from": 0,
+                                "to": 50,
+                                "bgColor": "green",
+                                "label": "Low"
+                            },
+                            {
+                                "from": 51,
+                                "to": 80,
+                                "bgColor": "orange",
+                                "label": "Medium"
+                            },
+                            {
+                                "from": 81,
+                                "to": 100,
+                                "bgColor": "red",
+                                "label": "High"
+                            }
+                        ]
+                    },
+                    "widget_id": "552f4ce3"
+                },
+                {
+                    "title": "",
+                    "widget_type": "gauge_widget",
+                    "stream": "rda_snmp_metrics",
+                    "ts_column": "timestamp",
+                    "extra_filter": "target_ip is '{{DEVICE_IP}}' and collection is 'poe_port' and poe_power_consumption is not empty and poe_power_consumption > 0 and timestamp is after -10 minutes",
+                    "column": "poe_power_consumption",
+                    "agg": "avg",
+                    "type": "float",
+                    "min_width": 6,
+                    "max_width": 6,
+                    "height": 4,
+                    "refreshRequired": true,
+                    "label": "Total Power Consumption (W)",
+                    "group_by": [
+                        "interface_description"
+                    ],
+                    "chartProperties": {
+                        "isSingleZoned": false,
+                        "showPointer": true,
+                        "pointer": {
+                            "length": 85,
+                            "strokeWidth": 25,
+                            "color": "red"
+                        },
+                        "minLabel": "0",
+                        "maxLabel": "200",
+                        "minValue": 0,
+                        "maxValue": 200,
+                        "arcWidth": 10,
+                        "valueFontSize": 30,
+                        "bgZonesMode": "percent",
+                        "bgZones": [
+                            {
+                                "from": 0,
+                                "to": 40,
+                                "bgColor": "green",
+                                "label": "Low (0\u20138000 W)"
+                            },
+                            {
+                                "from": 41,
+                                "to": 70,
+                                "bgColor": "yellow",
+                                "label": "Normal (8000\u201314000 W)"
+                            },
+                            {
+                                "from": 71,
+                                "to": 90,
+                                "bgColor": "orange",
+                                "label": "High (14000\u201318000 W)"
+                            },
+                            {
+                                "from": 91,
+                                "to": 100,
+                                "bgColor": "red",
+                                "label": "Critical (18000\u201320000 W)"
+                            }
+                        ],
+                        "bgZones1": [
+                            {
+                                "from": 0,
+                                "to": 50,
+                                "bgColor": "green",
+                                "label": "Low"
+                            },
+                            {
+                                "from": 51,
+                                "to": 80,
+                                "bgColor": "orange",
+                                "label": "Medium"
+                            },
+                            {
+                                "from": 81,
+                                "to": 100,
+                                "bgColor": "red",
+                                "label": "High"
+                            }
+                        ]
+                    },
+                    "widget_id": "0adb3858"
+                },
+                {
+                    "title": "PoE Power Trend by Interface",
+                    "description": "PoE power consumption over time, one line per port (interface_description)",
+                    "widget_type": "timeseries",
+                    "stream": "rda_snmp_metrics",
+                    "ts_column": "timestamp",
+                    "extra_filter": "target_ip is '{{DEVICE_IP}}' and collection is 'poe_port' and poe_power_consumption is > 0",
+                    "interval": "auto",
+                    "chartProperties": {
+                        "yAxisLabel": "Power (W)",
+                        "xAxisLabel": "Time",
+                        "legendLocation": "right"
+                    },
+                    "group_by": [
+                        "interface_description"
+                    ],
+                    "series_spec": [
+                        {
+                            "column": "poe_power_consumption",
+                            "agg": "max",
+                            "type": "float"
+                        }
+                    ],
+                    "min_width": 6,
+                    "max_width": 6,
+                    "height": 6,
+                    "widget_id": "21294020"
+                },
+                {
+                    "title": "Power Consumption by Interface",
+                    "widget_type": "bar_chart",
+                    "stream": "rda_snmp_metrics",
+                    "ts_column": "timestamp",
+                    "extra_filter": "target_ip is '{{DEVICE_IP}}' and collection is 'poe_port' and poe_power_consumption is not empty and poe_power_consumption > 0",
+                    "column": "poe_power_consumption",
+                    "agg": "last",
+                    "group_by": [
+                        "interface_description"
+                    ],
+                    "type": "float",
+                    "chartProperties": {
+                        "orientation": "vertical",
+                        "xAxisLabel": "Port",
+                        "yAxisLabel": "Power (W)"
+                    },
+                    "min_width": 6,
+                    "height": 4,
+                    "max_width": 6,
+                    "widget_id": "9693eb3e"
+                },
+                {
+                    "title": "PoE Usage % by interface",
+                    "widget_type": "bar_chart",
+                    "stream": "rda_snmp_metrics",
+                    "ts_column": "timestamp",
+                    "extra_filter": "target_ip is '{{DEVICE_IP}}' and collection is 'poe_port' and poe_usage_percent > 0",
+                    "column": "poe_usage_percent",
+                    "agg": "max",
+                    "group_by": [
+                        "interface_description"
+                    ],
+                    "type": "TEXT",
+                    "chartProperties": {
+                        "orientation": "vertical",
+                        "xAxisLabel": "Port",
+                        "yAxisLabel": "Usage (%)"
+                    },
+                    "min_width": 6,
+                    "height": 6,
+                    "max_width": 6,
+                    "widget_id": "ccdcde1a"
+                },
+                {
+                    "title": "Allocated Power by interface",
+                    "widget_type": "bar_chart",
+                    "stream": "rda_snmp_metrics",
+                    "ts_column": "timestamp",
+                    "extra_filter": "target_ip is '{{DEVICE_IP}}' and collection is 'poe_port' and (poe_allocated_power is not empty or poe_available_power is not empty) and poe_allocated_power > 0",
+                    "column": "poe_allocated_power",
+                    "agg": "last",
+                    "group_by": [
+                        "interface_description"
+                    ],
+                    "type": "float",
+                    "chartProperties": {
+                        "orientation": "vertical",
+                        "xAxisLabel": "Port",
+                        "yAxisLabel": "Allocated (W)"
+                    },
+                    "min_width": 6,
+                    "height": 6,
+                    "max_width": 6,
+                    "widget_id": "4b8cf421"
+                },
+                {
+                    "title": "PoE Metrics Details",
+                    "widget_type": "tabular",
+                    "stream": "rda_snmp_metrics",
+                    "ts_column": "timestamp",
+                    "duration_hours": 24,
+                    "extra_filter": "collection is 'poe_port'",
+                    "paginated": true,
+                    "max_rows": 50,
+                    "columns": {
+                        "target_ip": "Target IP",
+                        "device_hostname": "Device",
+                        "device_vendor": "Vendor",
+                        "interface_description": "Interface",
+                        "poe_port_status_label": "Port Status",
+                        "poe_power_consumption": "Power (W)",
+                        "poe_max_power": "Max Power (W)",
+                        "poe_usage_percent": "Usage (%)",
+                        "poe_allocated_power": "Allocated (W)",
+                        "poe_available_power": "Available (W)"
+                    },
+                    "sort_by": [
+                        {
+                            "timestamp": "desc"
+                        }
+                    ],
+                    "min_width": 12,
+                    "max_width": 12,
+                    "height": 6,
+                    "widget_id": "c3fa766a"
+                }
+            ]
+        }
+    ],
+    "saved_time": "2026-05-05T10:35:42.289680"
+}

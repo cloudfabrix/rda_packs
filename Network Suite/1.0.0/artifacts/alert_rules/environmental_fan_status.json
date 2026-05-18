@@ -1,0 +1,56 @@
+{
+    "type": "log",
+    "name": "environmental_fan_status",
+    "description": "Fan Status CFX",
+    "enabled": false,
+    "schedule": {
+        "minutes": 5
+    },
+    "data": {
+        "stream": "rda_snmp_metrics",
+        "query": "name in ['environmental_fan']",
+        "unique_keys": [
+            "target_ip",
+            "sensor_name",
+            "name"
+        ],
+        "groupby": [
+            "target_ip",
+            "sensor_name",
+            "name"
+        ],
+        "additional_columns": [
+            "device_hostname",
+            "device_model",
+            "device_vendor",
+            "sensor_status_label",
+            "sensor_type_label",
+            "sys_name"
+        ],
+        "custom_unique_keys": [],
+        "data_transformations": []
+    },
+    "actions": [
+        {
+            "state": "OPEN",
+            "extra_query": "sensor_status_label != 'ok'",
+            "attributes": {
+                "severity": "CRITICAL",
+                "metric_name": "sensor_name",
+                "alert_message": "Fan issue detected on {{sys_name}} ({{target_ip}}) sensor {{sensor_name}} (status={{sensor_status_label}})"
+            },
+            "notification_profile": "snmp_metrics_notification_profile"
+        },
+        {
+            "state": "CLEAR",
+            "extra_query": "sensor_status_label == 'ok'",
+            "attributes": {
+                "severity": "INFO",
+                "metric_name": "sensor_name",
+                "alert_message": "Fan status normal on {{sys_name}} ({{target_ip}}) sensor {{sensor_name}}"
+            },
+            "notification_profile": "snmp_metrics_notification_profile"
+        }
+    ],
+    "saved_time": "2026-04-16T09:11:20.363749"
+}
