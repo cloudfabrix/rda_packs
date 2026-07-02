@@ -1,0 +1,36 @@
+--> @c:new-block
+        --> @dm:empty
+        --> @dm:addrow dbname = '3b996b88f1aa4b01bc9805a430a1cf44_ml_config' and table = 'cluster'
+        --> #mysqlv2:read  
+        --> @dm:to_type  columns = 'attributes' &
+            type  = 'str' 
+        -->  @dm:change-time-format
+            columns='createdAt,updatedAt' &
+            from_format='datetimestr' &
+            to_format='%Y-%m-%dT%H:%M:%S'
+        --> @rn:write-stream name = 'ml-clusters'    
+        
+--> @c:new-block
+        --> @dm:empty
+        --> @dm:addrow dbname = '3b996b88f1aa4b01bc9805a430a1cf44_ml_config' and table = 'job'
+        --> #mysqlv2:read  
+        --> @dm:to_type  columns = 'attributes' &
+            type  = 'str' 
+        -->  @dm:change-time-format
+            columns='completedAt,startedAt,lastTrainedAt,nextTrainedAt' &
+            from_format='datetimestr' &
+            to_format='%Y-%m-%dT%H:%M:%S'
+        --> @rn:write-stream name = 'ml-jobs'   
+        
+--> @c:new-block
+        --> @dm:empty
+        --> @dm:addrow dbname = '3b996b88f1aa4b01bc9805a430a1cf44_ml_config' and table = 'versions'
+        --> #mysqlv2:read  --> @dm:to_type  columns = 'pipeline' &
+            type  = 'str' 
+        --> @rn:write-stream name = 'ml-versions'   
+
+--> @c:new-block
+        --> @dm:empty
+        --> @dm:addrow dbname = '3b996b88f1aa4b01bc9805a430a1cf44_ml_config' and table = 'modelmeta'
+        --> #mysqlv2:read  
+        --> @rn:write-stream name = 'ml-model-meta'

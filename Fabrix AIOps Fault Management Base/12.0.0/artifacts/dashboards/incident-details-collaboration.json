@@ -1,0 +1,84 @@
+{
+    "name": "incident-details-collaboration",
+    "description": "Incident Collaboration Details",
+    "label": "Incident Collaboration Details",
+    "enabled": true,
+    "exportable": false,
+    "dashboard_type": "template",
+    "dashboard_style": "auto",
+    "version": "22.10.7.1",
+    "template_variables": {
+        "INCIDENT_ID": {
+            "contextId": "incident_id"
+        },
+        "PROJECT_ID": {
+            "contextId": "project_id"
+        }
+    },
+    "custom_context": {
+        "alert-context": true
+    },
+    "dashboard_filters": {
+        "time_filter": false
+    },
+    "dashboard_sections": [
+        {
+            "title": "Collaboration",
+            "show_filter": false,
+            "widgets": [
+                {
+                    "title": "Teams",
+                    "min_width": 12,
+                    "height": 2,
+                    "widget_type": "portal_html",
+                    "widget_template": "cfx-oia/collaboration-teams",
+                    "reportId": "dummy-report-id",
+                    "api-endpoint": {
+                        "service-name": "cfxdimensions-app-collaboration",
+                        "namespace": "io.cfx.dimensions.app",
+                        "version": "*",
+                        "methodName": "invokeAppApi:getIRTeams",
+                        "stringified-params": true,
+                        "parse-output": false,
+                        "params": [
+                            {
+                                "url": "uri:///inline-report/cfxdimensions-app-collaboration/Teams",
+                                "filters": []
+                            }
+                        ]
+                    },
+                    "widget_id": "6e67b2f1"
+                },
+                {
+                    "title": "Collaboration Activity",
+                    "widget_type": "portal_list",
+                    "widget_template": "cfx-oia/collaboration",
+                    "min_width": 12,
+                    "height": 12,
+                    "max_width": 12,
+                    "paginated": true,
+                    "refreshRequired": true,
+                    "timebased": false,
+                    "max_rows": 100,
+                    "exportSupported": false,
+                    "api-endpoint": {
+                        "service-name": "cfxdimensions-app-collaboration",
+                        "namespace": "io.cfx.dimensions.app",
+                        "version": "*",
+                        "methodName": "invokeAppApi:getIncidentMessageHistory",
+                        "stringified-params": true,
+                        "parse-output": false,
+                        "params": [
+                            {
+                                "url": "uri:///inline-report/cfxdimensions-app-collaboration/Collaboration-Activity",
+                                "filters": []
+                            }
+                        ]
+                    },
+                    "widget_id": "6e69b2f1"
+                }
+            ]
+        }
+    ],
+    "saved_time": "2023-12-11T13:52:57.816861"
+}

@@ -1,0 +1,132 @@
+{
+    "name": "organizations_tree_navigator",
+    "label": "Organizations",
+    "description": "Organizations",
+    "dashboard_folder": "Default",
+    "version": "23.4.14.1",
+    "enabled": true,
+    "short_label": "Organizations",
+    "live_edit": true,
+    "context_label_id": "customerName",
+    "dashboard_type": "template",
+    "dashboard_filters": {
+        "columns_filter": [
+            {
+                "id": "id",
+                "label": "Policy Id",
+                "type": "TEXT"
+            },
+            {
+                "id": "policytype",
+                "label": "Type",
+                "type": "TEXT"
+            },
+            {
+                "id": "precedence",
+                "label": "Precedence",
+                "type": "TEXT"
+            },
+            {
+                "id": "name",
+                "label": "Name",
+                "type": "TEXT"
+            },
+            {
+                "id": "description",
+                "label": "Description",
+                "type": "TEXT"
+            },
+            {
+                "id": "criteriastring",
+                "label": "Filter",
+                "type": "TEXT"
+            },
+            {
+                "id": "project_id",
+                "label": "Organizations",
+                "type": "TEXT"
+            },
+            {
+                "id": "groupbyasstring",
+                "label": "GroupBy",
+                "type": "TEXT"
+            },
+            {
+                "id": "graphname",
+                "label": "Graph",
+                "type": "TEXT"
+            },
+            {
+                "id": "relationshipmap",
+                "label": "Relationship Map",
+                "type": "TEXT"
+            },
+            {
+                "id": "createdat",
+                "label": "Created At",
+                "type": "DATETIME"
+            },
+            {
+                "id": "updatedat",
+                "label": "Updated At",
+                "type": "DATETIME"
+            }
+        ]
+    },
+    "template_variables": {
+        "SELECTED_PROJECT_ID": {
+            "contextId": [
+                "navigatorSelectionContexts",
+                "projectId"
+            ]
+        }
+    },
+    "import": [
+        {
+            "from": "oia-alert-policies",
+            "as": "policy"
+        }
+    ],
+    "navigation_dashboards": {
+        "default_category_label": "Organizations",
+        "tree_data": {
+            "api-endpoint": {
+                "service-name": "cfxdimensions-app-resource-manager",
+                "namespace": "io.cfx.dimensions.app",
+                "methodName": "invokeAppApi:getOrganizationsByUser",
+                "params": [
+                    "getOrganizationsByUser",
+                    {}
+                ],
+                "parse-output": false,
+                "stringified-params": true,
+                "useReportContext": true
+            },
+            "column_name": "projectId",
+            "display_column": "customerName",
+            "include_icon_url": false,
+            "show_counts": false
+        }
+    },
+    "dashboard_sections": [
+        {
+            "title": "Correlation Policies",
+            "widgets": [
+                {
+                    "extends": "policy:correlation_policy",
+                    "widget_id": "94a3fc11"
+                }
+            ]
+        },
+        {
+            "title": "Suppression Policies",
+            "widgets": [
+                {
+                    "extends": "policy:suppression_policy",
+                    "widget_id": "d92074d2"
+                }
+            ]
+        }
+    ],
+    "saved_time": "2025-10-15T04:14:37.539628"
+}

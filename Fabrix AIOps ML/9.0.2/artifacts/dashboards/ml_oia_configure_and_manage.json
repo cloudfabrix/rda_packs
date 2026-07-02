@@ -1,0 +1,530 @@
+{
+    "name": "ml_oia_configure_and_manage",
+    "label": "ML Configure and Manage",
+    "description": "ML configure and management dashboard",
+    "version": "24.10.24.1",
+    "enabled": false,
+    "live_edit": true,
+    "dashboard_type": "template",
+    "dashboard_style": "auto",
+    "dashboard_folder": "MLInventory",
+    "template_variables": {
+        "CUST_ID": {
+            "contextId": "customerId"
+        },
+        "PROJ_ID": {
+            "contextId": "projectId"
+        },
+        "CUST_TAG": {
+            "contextId": "customerTag"
+        }
+    },
+    "dashboard_filters": {
+        "time_filter": true,
+        "columns_filter": [],
+        "default_time_filter_labels": [
+            "Last 1 month"
+        ],
+        "group_filters": []
+    },
+    "dashboard_sections": [
+        {
+            "title": "ML Credential",
+            "widgets": [
+                {
+                    "title": "ML Credential Management",
+                    "widget_type": "tabular",
+                    "stream": "rda_secrets_meta",
+                    "extra_filter": "type in ['cfxai_regression'] and (customerTag is '{{CUST_TAG}}' or customerTag is empty)",
+                    "timebased": false,
+                    "remote_searchable_cols": [
+                        "name",
+                        "type",
+                        "typeDescription"
+                    ],
+                    "ts_column": "saved_time",
+                    "paginated": true,
+                    "height": 10,
+                    "min_wdith": 12,
+                    "columns": {
+                        "name": {
+                            "title": "Name",
+                            "key": true
+                        },
+                        "type": {
+                            "title": "Type",
+                            "key": true
+                        },
+                        "typeDescription": {
+                            "title": "Description"
+                        },
+                        "has_credential_check": {
+                            "title": "Credential Check",
+                            "visible": false
+                        },
+                        "saved_time": {
+                            "title": "Saved Time",
+                            "type": "DATETIME"
+                        },
+                        "timestamp": {
+                            "title": "When",
+                            "type": "HUMANIZE_TIME_DELTA",
+                            "source-column": "saved_time",
+                            "sortable": false
+                        }
+                    },
+                    "custom_columns": [
+                        {
+                            "id": "rowStyleClass",
+                            "hidden": true,
+                            "visiblle": false,
+                            "expr": "'bg-fading-blue' if time_now_as_ms() - isoformat_to_ms(saved_time) <= 120000 else None"
+                        },
+                        {
+                            "id": "artifact_name",
+                            "label": "Artifact Name",
+                            "expr": "name",
+                            "key": true,
+                            "visible": false,
+                            "sortable": false
+                        },
+                        {
+                            "id": "artifact_type",
+                            "label": "Artifact Type",
+                            "expr": "'source'",
+                            "key": true,
+                            "visible": false,
+                            "sortable": false
+                        }
+                    ],
+                    "actions": [
+                        {
+                            "permission": "rda:credential:add",
+                            "title": "Add",
+                            "icon": "mdi mdi-plus",
+                            "type": "POPUP_FORM",
+                            "selectionType": "NONE",
+                            "identifier": "saas-service-action:vault-add",
+                            "api-endpoint": {
+                                "service-name": "saas-reports",
+                                "methodName": "getForm",
+                                "stringified-params": true,
+                                "parse-output": false,
+                                "params": [
+                                    {
+                                        "formId": "rda.saas.vault.add",
+                                        "extension_types": [
+                                            "cfxai_regression"
+                                        ]
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "permission": "rda:credential:edit",
+                            "title": "Edit",
+                            "type": "POPUP_FORM",
+                            "selectionType": "SINGLE",
+                            "identifier": "saas-service-action:vault-edit",
+                            "api-endpoint": {
+                                "service-name": "saas-reports",
+                                "methodName": "getForm",
+                                "stringified-params": true,
+                                "parse-output": false,
+                                "params": [
+                                    {
+                                        "formId": "rda.saas.vault.edit"
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "permission": "rda:credential:view",
+                            "title": "View",
+                            "type": "POPUP_FORM",
+                            "selectionType": "SINGLE",
+                            "displayLabelColumnId": "name",
+                            "drillDownLinkField": "name",
+                            "identifier": "saas-service-action:vault-view",
+                            "api-endpoint": {
+                                "service-name": "saas-reports",
+                                "methodName": "getForm",
+                                "stringified-params": true,
+                                "parse-output": false,
+                                "params": [
+                                    {
+                                        "formId": "rda.saas.vault.view"
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "permission": "rda:credential:verify",
+                            "title": "Verify Credentials",
+                            "type": "POPUP_FORM",
+                            "selectionType": "SINGLE",
+                            "identifier": "saas-service-action:vault-edit",
+                            "actionCondition": {
+                                "actionControl": "HIDE_IF",
+                                "conditionalField": [
+                                    {
+                                        "conditionType": "EQUAL",
+                                        "conditionValue": "false",
+                                        "fieldId": "has_credential_check"
+                                    }
+                                ]
+                            },
+                            "api-endpoint": {
+                                "service-name": "saas-reports",
+                                "methodName": "getForm",
+                                "stringified-params": true,
+                                "parse-output": false,
+                                "params": [
+                                    {
+                                        "formId": "rda.saas.vault.validateConenctivity"
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "permission": "rda:credential:verify",
+                            "title": "Delete",
+                            "type": "POPUP_FORM",
+                            "selectionType": "SINGLE",
+                            "identifier": "saas-service-action:vault-delete",
+                            "api-endpoint": {
+                                "service-name": "saas-reports",
+                                "methodName": "getForm",
+                                "stringified-params": true,
+                                "parse-output": false,
+                                "params": [
+                                    {
+                                        "formId": "rda.saas.vault.delete"
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "widget_id": "01dc3a55"
+                }
+            ]
+        },
+        {
+            "title": "Run Discovery",
+            "show_filter": false,
+            "widgets": [
+                {
+                    "title": "Service Blueprint",
+                    "widget_type": "tabular",
+                    "stream": "rda_blueprints_meta",
+                    "extra_filter": "id contains '{{CUST_TAG}}_ml_oia' or id contains 'ml_oia'",
+                    "duration_hours": 87600,
+                    "ts_column": "timestamp",
+                    "min_width": 12,
+                    "height": 3,
+                    "max_width": 12,
+                    "paginated": true,
+                    "refreshRequired": true,
+                    "timebased": false,
+                    "max_rows": 50,
+                    "remote_searchable": true,
+                    "remote_searchable_cols": [
+                        "id",
+                        "name",
+                        "comment",
+                        "category",
+                        "note",
+                        "url"
+                    ],
+                    "columns": {
+                        "name": {
+                            "title": "Name",
+                            "key": false
+                        },
+                        "id": {
+                            "title": "Id",
+                            "key": true
+                        },
+                        "deployment_id": {
+                            "title": "Id",
+                            "key": true,
+                            "hidden": true
+                        },
+                        "comment": {
+                            "title": "Description"
+                        },
+                        "category": {
+                            "title": "Category",
+                            "key": true,
+                            "visible": false
+                        },
+                        "auto_deploy": {
+                            "title": "Auto Deploy",
+                            "visible": false
+                        },
+                        "note": {
+                            "title": "Note",
+                            "visible": false
+                        },
+                        "url": {
+                            "title": "URL",
+                            "key": true,
+                            "visible": false
+                        }
+                    },
+                    "custom_columns": [
+                        {
+                            "id": "enabled",
+                            "label": "Enabled",
+                            "expr": "'yes' if enabled else 'no'",
+                            "htmlTemplateForRow": "{%raw%}<span class='badge' style='background-color: {{ row.enableColor }}' > {{ row.enabled }} </span>{%endraw%}"
+                        },
+                        {
+                            "id": "enableColor",
+                            "label": "Enable Color",
+                            "expr": "['#4CAF50'] if enabled == 'yes' else ['#9E9E9E']",
+                            "hidden": true,
+                            "visible": false,
+                            "sortable": false
+                        },
+                        {
+                            "id": "warningColor",
+                            "label": "Warning Color",
+                            "expr": "['#FFA726'] if warnings > 0 else ['#03A9F4']",
+                            "hidden": true,
+                            "visible": false,
+                            "sortable": false
+                        },
+                        {
+                            "id": "errorColor",
+                            "label": "Error Color",
+                            "expr": "['#B71C1C'] if errors > 0  else ['#03A9F4']",
+                            "hidden": true,
+                            "visible": false,
+                            "sortable": false
+                        },
+                        {
+                            "id": "errors",
+                            "label": "Audit Errors",
+                            "htmlTemplateForRow": "{%raw%}<span class='badge' style='background-color: {{ row.errorColor }}' > {{ row.errors }} </span>{%endraw%}"
+                        },
+                        {
+                            "id": "warnings",
+                            "label": "Audit Warnings",
+                            "htmlTemplateForRow": "{%raw%}<span class='badge' style='background-color: {{ row.warningColor }}' > {{ row.warnings }} </span>{%endraw%}"
+                        },
+                        {
+                            "id": "artifact_name",
+                            "label": "Artifact Name",
+                            "expr": "id",
+                            "key": true,
+                            "visible": false,
+                            "sortable": false
+                        },
+                        {
+                            "id": "artifact_type",
+                            "label": "Artifact Type",
+                            "expr": "'blueprint'",
+                            "key": true,
+                            "visible": false,
+                            "sortable": false
+                        },
+                        {
+                            "id": "custom_run_mode",
+                            "label": "Custom Run Mode",
+                            "expr": "{%raw%}{{custom_run_mode}}{%endraw%}",
+                            "expr0": "'Not Set'",
+                            "key": false,
+                            "visible": false,
+                            "sortable": false
+                        }
+                    ],
+                    "actions": [
+                        {
+                            "permission": "rda:deploymentspec:import",
+                            "title": "Dashboard",
+                            "type": "GO_TO_APP_STATE",
+                            "appName": "dynamic-dashboard",
+                            "selectionType": "SINGLE",
+                            "identifier": "saas-service-action:dspecs-view-dashboard",
+                            "drillDownLinkField": "name"
+                        },
+                        {
+                            "permission": "rda:deploymentspec:view",
+                            "title": "View",
+                            "type": "POPUP_FORM",
+                            "selectionType": "SINGLE",
+                            "identifier": "saas-service-action:dspecs-view-spec",
+                            "api-endpoint": {
+                                "service-name": "saas-reports",
+                                "methodName": "getForm",
+                                "stringified-params": false,
+                                "parse-output": false,
+                                "params": [
+                                    {
+                                        "formId": "rda.saas.deploymentspec.view"
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "permission": "rda:deploymentspec:edit",
+                            "title": "Edit",
+                            "type": "POPUP_FORM",
+                            "selectionType": "SINGLE",
+                            "identifier": "saas-service-action:dspecs-edit-spec",
+                            "api-endpoint": {
+                                "service-name": "saas-reports",
+                                "methodName": "getForm",
+                                "stringified-params": false,
+                                "parse-output": false,
+                                "params": [
+                                    {
+                                        "formId": "rda.saas.deploymentspec.edit"
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "widget_id": "70200583"
+                },
+                {
+                    "title": "All Jobs",
+                    "widget_type": "tabular",
+                    "stream": "rda_system_job_tracker",
+                    "extra_filter0": "attributes_deployment_id is '{{CUST_TAG}}_ml_oia' or attributes_deployment_id is 'ml_oia'",
+                    "extra_filter": "pipeline_name in ['ml-metrics-selection','genai-incident-recommendation-parent','genai-incident-recommendation-child']",
+                    "refreshOptions": {
+                        "refreshType": "Periodic",
+                        "refreshInterval": 30000
+                    },
+                    "duration_hours": 87600,
+                    "ts_column": "timestamp",
+                    "min_width": 12,
+                    "height": 6,
+                    "max_width": 12,
+                    "paginated": true,
+                    "refreshRequired": true,
+                    "timebased": false,
+                    "max_rows": 10,
+                    "remote_searchable": true,
+                    "columns": {
+                        "jobid": {
+                            "title": "Job ID",
+                            "key": true
+                        },
+                        "pid": {
+                            "title": "PID",
+                            "key": true
+                        },
+                        "pod_id": {
+                            "title": "POD ID"
+                        },
+                        "pipeline_name": {
+                            "title": "Pipeline Name",
+                            "key": true,
+                            "visible": true
+                        },
+                        "attributes_pipeline_version": {
+                            "title": "Pipeline Version",
+                            "visible": false
+                        },
+                        "status": {
+                            "title": "Status",
+                            "visible": true
+                        },
+                        "reason": {
+                            "title": "Reason",
+                            "key": true,
+                            "visible": true
+                        },
+                        "start_time": {
+                            "title": "Job Created",
+                            "type": "DATETIME",
+                            "key": true,
+                            "visible": true
+                        },
+                        "ended_time": {
+                            "title": "Job Ended",
+                            "type": "DATETIME",
+                            "key": true,
+                            "visible": true
+                        },
+                        "age": {
+                            "title": "Duration",
+                            "key": true,
+                            "visible": true
+                        },
+                        "attributes_deployment_run_mode": {
+                            "title": "Run Mode",
+                            "key": true,
+                            "visible": false,
+                            "hidden": true
+                        },
+                        "attributes_deployment_name": {
+                            "title": "Service Blueprint Name",
+                            "key": true,
+                            "visible": true,
+                            "hidden": false
+                        }
+                    },
+                    "custom_columns": [
+                        {
+                            "id": "run_mode",
+                            "label": "Run Mode",
+                            "expr6": "if(attributes_deployment_run_mode, attributes_deployment_run_mode, 'manual')",
+                            "expr7": "if(attributes_deployment_run_mode in ['manual','schedule'], attributes_deployment_run_mode, 'manual')",
+                            "expr4": "attributes_deployment_run_mode if attributes_deployment_run_mode in ['manual','schedule'] else 'manual'",
+                            "expr8": "attributes_deployment_run_mode if attributes_deployment_run_mode else 'manual'",
+                            "expr": "attributes_deployment_run_mode if attributes_deployment_name == 'ml_oia' else 'manual'",
+                            "expr0": "'manual' if attributes_deployment_run_mode is None else attributes_deployment_run_mode",
+                            "expr2": "'manual' if attributes_deployment_run_mode == '' else attributes_deployment_run_mode",
+                            "visible": true,
+                            "key": true
+                        }
+                    ],
+                    "actions": [
+                        {
+                            "permission": "rda:jobs:view",
+                            "title": "View Traces",
+                            "type": "POPUP_REPORT",
+                            "selectionType": "SINGLE",
+                            "identifier": "saas-service-action:job-traces",
+                            "api-endpoint": {
+                                "service-name": "saas-reports",
+                                "methodName": "getReport",
+                                "stringified-params": false,
+                                "parse-output": false,
+                                "params": [
+                                    {
+                                        "reportId": "rda.saas.worker.traces"
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "permission": "rda:logs:view",
+                            "title": "View Logs",
+                            "type": "POPUP_REPORT",
+                            "selectionType": "SINGLE",
+                            "identifier": "saas-service-action:job-logs",
+                            "api-endpoint": {
+                                "service-name": "saas-reports",
+                                "methodName": "getReport",
+                                "stringified-params": false,
+                                "parse-output": false,
+                                "params": [
+                                    {
+                                        "reportId": "rda.saas.worker.logs"
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "widget_id": "0c070112"
+                }
+            ]
+        }
+    ],
+    "saved_time": "2025-05-18T12:30:46.664038"
+}

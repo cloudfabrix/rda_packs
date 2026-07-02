@@ -1,0 +1,30 @@
+@c:bookmark-loop   bookmark = "metrics-live-regression" & initial_value="NONE"
+-->  @dm:empty
+-->  @dm:addrow     bookmark='$bookmark'
+-->  @dm:eval     bookmark="to_datetime(time_now_as_seconds()-3600,unit='s') if bookmark=='NONE' else bookmark"
+-->  @dm:eval     name="'oia-metrics-data'" and limit='0' and max_rows='10000'
+-->  #dm:query-persistent-stream     metric_timestamp is after '{{row.bookmark}}'
+-->  @dm:enrich-using-pstream     dict='ml-metrics-regression-per-asset' and src_key_cols='asset_id,metric_id' and
+            dict_key_cols='asset_id,metric_id' and enrich_cols='model_name,customer_tag,customer_id' and dedup_dict='no'
+-->  @dm:add-missing-columns     columns='metric_id,asset_id,model_name,asset_name,metric_name'
+    ## filter out devices for which regression model is not available
+-->  *dm:filter     model_name is not null
+-->  @cfxml:regression-multi-proc     ts_column='metric_timestamp' & value_column='value' & agg_func='mean' &
+            frequency='1H' &
+            action='predict' &
+            groupby='model_name' &
+            job_name_column='model_name' &
+            skip_errors='yes' &
+            keep_columns='model_name,asset_id,asset_name,metric_id,metric_name,customer_tag,customer_id'
+-->  @dm:add-missing-columns     columns='timestamp,baseline,anomaly,live_timestamp,jobName,model_name,asset_id'
+-->  @dm:eval     job_name='jobName' and baseline="None if baseline == '' else baseline" and anomaly="None if anomaly == '' else anomaly"
+-->  @dm:eval     baseline="baseline if anomaly is None else None"
+-->  @dm:change-time-format     columns='live_timestamp' and from_format='datetimestr' and to_format='%Y-%m-%dT%H:%M:%S'
+-->  @rn:write-stream     name="ml-metrics-regression-live-output"
+-->  *exec:if-shape     num_rows>0
+           -->  @dm:save_bookmark     name = "metrics-live-regression" &
+                       value_column = "live_timestamp" &
+                       value_type = "timestamp" &
+                       value_func = "max"
+-->  @exec:end-if
+-->  @dm:sleep     seconds=3600

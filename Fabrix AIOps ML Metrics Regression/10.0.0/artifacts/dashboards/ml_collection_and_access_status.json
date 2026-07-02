@@ -1,0 +1,117 @@
+{
+    "name": "ml_collection_and_access_status",
+    "label": "ML Collection status",
+    "description": "ML collection and access verification status",
+    "dashboard_folder": "MLInventory",
+    "version": "1.0.3",
+    "enabled": false,
+    "dashboard_type": "template",
+    "template_variables": {
+        "CUST_ID": {
+            "contextId": "customerId"
+        },
+        "PROJ_ID": {
+            "contextId": "projectId"
+        },
+        "CUST_TAG": {
+            "contextId": "customerTag"
+        }
+    },
+    "dashboard_sections": [
+        {
+            "title": "Access Verifcation Status",
+            "show_filter": true,
+            "widgets": [
+                {
+                    "title": "Access Verifcation Status",
+                    "widget_type": "tabular",
+                    "stream": "ml_access_verification_status",
+                    "extra_filter": "(customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "height": 4,
+                    "max_width": 12,
+                    "min_width": 12,
+                    "columns": {
+                        "collection_timestamp": {
+                            "title": "Verification Time",
+                            "type": "DATETIME",
+                            "visible": true
+                        },
+                        "collection_status": {
+                            "title": "Status",
+                            "htmlTemplateForRow": "{%raw%}<span class='badge' style='background-color: {{ row.status_color }}' > {{ row.collection_status }} </span>{%endraw%}"
+                        },
+                        "bot_source_name": {
+                            "title": "Credential Used"
+                        },
+                        "bot_name": {
+                            "title": "Bot Name",
+                            "visible": false
+                        },
+                        "reason": {
+                            "title": "Failure Reason"
+                        }
+                    },
+                    "custom_columns": [
+                        {
+                            "id": "status_color",
+                            "label": "Discovery Scope Color",
+                            "key": false,
+                            "visible": false,
+                            "expr": "'#008000' if collection_status == 'Success' else '#FF0000'"
+                        }
+                    ],
+                    "widget_id": "b2c8d81c"
+                }
+            ]
+        },
+        {
+            "title": "Collection Status",
+            "show_filter": true,
+            "widgets": [
+                {
+                    "title": "Collection Status",
+                    "widget_type": "tabular",
+                    "stream": "asset_inventory_collection_status_stream",
+                    "extra_filter": "(customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "height": 4,
+                    "max_width": 12,
+                    "min_width": 12,
+                    "columns": {
+                        "collection_timestamp": {
+                            "title": "Collection time",
+                            "type": "DATETIME",
+                            "visible": true
+                        },
+                        "collection_status": {
+                            "title": "Status",
+                            "htmlTemplateForRow": "{%raw%}<span class='badge' style='background-color: {{ row.status_color }}' > {{ row.collection_status }} </span>{%endraw%}"
+                        },
+                        "bot_source_name": {
+                            "title": "Bot Source Name"
+                        },
+                        "bot_source_type": {
+                            "title": "Bot Source Type"
+                        },
+                        "bot_name": {
+                            "title": "Bot Name"
+                        },
+                        "reason": {
+                            "title": "Failure Reason"
+                        }
+                    },
+                    "custom_columns": [
+                        {
+                            "id": "status_color",
+                            "label": "Discovery Scope Color",
+                            "key": false,
+                            "visible": false,
+                            "expr": "'#008000' if collection_status == 'Success' else '#FF0000'"
+                        }
+                    ],
+                    "widget_id": "b585247a"
+                }
+            ]
+        }
+    ],
+    "saved_time": "2025-05-06T10:04:45.535920"
+}

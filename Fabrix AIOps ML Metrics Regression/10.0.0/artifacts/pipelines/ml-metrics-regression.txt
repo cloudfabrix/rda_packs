@@ -1,0 +1,81 @@
+%% stream = no and limit = 0
+
+## get high variance metrics list
+@dm:empty
+    --> @dm:addrow name = "ml-variance-metrics-list" and limit="0" and max_rows="10000"
+    --> #dm:query-persistent-stream variance is greater than 100
+    --> @dm:skip-pipeline-if-shape row_count=0
+    --> @dm:save name='temp-variance-selected-metrics'
+
+## function to query metrics data
+--> @c:new-block
+    --> @dm:empty
+    --> @exec:define-function name = "query-data"
+       --> #dm:query-persistent-stream asset_id is '{{row.asset_id}}' and metric_id is '{{row.metric_id}}'
+       --> @dm:add-missing-columns columns='model_name' and value="{{row.metric_id}}-{{row.asset_id}}"
+       --> @exec:return-function
+    --> @exec:end-function
+
+## function to delete live data for a model after retraining
+--> @c:new-block
+    --> @dm:empty
+    --> @exec:define-function name = "delete-live-data"
+       --> @dm:add-missing-columns columns='key' and value='1'
+       --> @dm:implode key_columns='key' and merge_columns='model_name'
+       --> @dm:eval model_name="model_name.split(',')"
+       --> @dm:eval name="'ml-metrics-regression-live-output'" and conflicts="'proceed'" and timeout='500'
+       --> #dm:pstream-delete-data-by-query job_name in {{row.model_name}}
+       --> @exec:return-function
+    --> @exec:end-function
+
+## create empty dataset after processing each batch
+--> @c:new-block
+    --> @dm:empty
+    --> @exec:define-function name = "empty"
+       --> @dm:empty
+       --> @dm:save name='temp-metrics-data'
+    --> @exec:end-function
+
+## run regression parallely for multiple metrics in batches
+--> @c:new-block
+    --> @dm:recall name='temp-variance-selected-metrics'
+    --> @dm:add-missing-columns columns='name' and value="oia-metrics-data"
+    --> @dm:add-missing-columns columns='limit' and value="0"
+    --> @dm:add-missing-columns columns='max_rows' and value="10000"
+    ## pass 10 metrics at a time for regression
+    --> @exec:for-loop num_rows=10
+       --> @exec:for-loop num_rows=1
+          --> @exec:call-function name='query-data'
+          --> @dm:save name='temp-metrics-data' and append='yes'
+       --> @exec:end-loop
+       --> @dm:recall name='temp-metrics-data'
+       --> @cfxml:regression-multi-proc ts_column='metric_timestamp' & value_column='value' & agg_func='mean' &
+               frequency='1H' &
+               prediction_duration='7D' &
+               groupby='model_name' &
+               job_name_column='model_name' &
+               skip_errors='yes' &
+               keep_columns='model_name,asset_id,asset_name,metric_id,unit,metric_name,metric_source'
+       --> @dm:enrich dict='temp-variance-selected-metrics' and src_key_cols='asset_id,metric_id' and
+               dict_key_cols='asset_id,metric_id' and enrich_cols='customer_id,customer_tag'
+       --> @dm:add-missing-columns columns='timestamp,anomalies,asset_id,job_name,model_name'
+       --> @dm:change-time-format columns='timestamp' and from_format='datetimestr' and to_format='%Y-%m-%dT%H:%M:%S'
+       ## write regression output and anomalies in chunks
+       --> @exec:for-loop num_rows=10000
+          --> @rn:write-stream name="ml-metrics-regression-train-output"
+          --> *dm:safe-filter anomalies is not None
+          --> @dm:to-type columns='asset_id' and type='str'
+          --> @dm:explode column='asset_id' and sep=','
+          --> @rn:write-stream name="ml-metrics-regression-anomalies"
+       --> @exec:end-loop
+       --> @dm:dedup columns='model_name'
+       --> @dm:save name='temp-regression-models'
+       --> *exec:if-shape num_rows > 0
+          --> @exec:call-function name='delete-live-data'
+       --> @exec:end-if
+       --> @dm:recall name='temp-regression-models'
+       --> @dm:selectcolumns include='^asset_name$|^asset_id$|^metric_id$|^model_name$|^metric_name$|^unit$|^metric_source$|^accuracy$|^anomalies_count$|^anomalies_percent$|^seasonality$|^overall_trend$|^customer_id$|^customer_tag$'
+       --> @rn:write-stream name="ml-metrics-regression-per-asset"
+       --> @exec:call-function name='empty'
+    --> @exec:end-loop
+

@@ -1,0 +1,160 @@
+%% stream = no and limit = 0
+
+@exec:get-input
+    --> @dm:skip-pipeline-if-shape row_count=0
+    --> @dm:save name='temp-incidents'
+
+## get impacted assets for the incidents
+--> @c:data-loop columns='incident_id,project_id' and dataset='temp-incidents'
+    --> @dm:empty
+    --> @dm:addrow name='oia-alerts-stream' and aggs='cardinality:a_en_metric_asset_id' and groupby='a_incident_id,project_id,a_en_metric_asset_id'
+    --> #dm:query-persistent-stream a_incident_id is '$incident_id' and project_id is '$project_id'
+    --> @dm:implode key_columns='a_incident_id' and merge_columns='a_en_metric_asset_id' and keep_columns='a_incident_id'
+    --> @dm:eval assetIds="a_en_metric_asset_id.split(',')"
+    --> @dm:eval asset_count='len(assetIds)'
+    --> @dm:add-missing-columns columns='incident_id' and value="$incident_id"
+    --> @dm:save name='temp-incident-impacted-assets' and append='yes'
+    --> *exec:if-shape num_rows=0
+       --> @dm:empty
+       --> @dm:addrow incident_id="$incident_id" and asset_count=0
+       --> @dm:save name='temp-incident-impacted-assets' and append='yes'
+    --> @exec:end-if
+
+## enrich the incidents with impacted assets
+--> @c:new-block
+    --> @dm:recall name='temp-incidents'
+    --> @dm:enrich dict='temp-incident-impacted-assets' and src_key_cols='incident_id' and dict_key_cols='incident_id' and enrich_cols='assetIds,asset_count'
+    --> @dm:save name='temp-incidents'
+
+## get alerts for incident
+--> @c:new-block
+    --> @dm:empty
+    --> @exec:define-function name="get_alerts_for_incident"
+       --> @exec:set-variable name="incident"
+       --> @dm:empty
+       --> @dm:addrow name="oia-alerts-stream" & max_rows=1000 & limit=0
+       --> #dm:query-persistent-stream a_incident_id is "{{v.incident.row['incident_id']}}" and a_source_systemname is not 'Alert Group'
+       --> @dm:save name='temp-incident-alerts' and append='yes'
+       --> *exec:if-shape num_rows=0
+          --> @dm:empty
+          --> @dm:addrow a_incident_id="{{v.incident.row['incident_id']}}"
+          --> @dm:save name='temp-incident-alerts' and append='yes'
+       --> @exec:end-if
+    --> @exec:end-function
+
+## run diagnostic tool for impacted assets
+--> @c:new-block
+    --> @dm:empty
+    --> @exec:define-function name="run_diagnostic_tool_for_impacted_assets"
+       --> @exec:set-variable name="incident"
+       --> @dm:empty
+       --> @dm:addrow asset_count={{v.incident.row['asset_count']}} and assetIds="{{v.incident.row['assetIds']}}"
+       --> *exec:if-condition asset_count > 0
+          --> @dm:eval ip=`assetIds[1:-1].replace("'","").replace(" ","")`
+          --> @diagnostictools:ping column_name_host = 'ip'
+          --> @dm:add-missing-columns columns='incident_id' and value="{{v.incident.row['incident_id']}}"
+          --> @dm:save name='temp-incident-diagnostic-tool-output' and append='yes'
+       --> @exec:end-if
+       --> *exec:if-condition asset_count = 0
+          --> @dm:empty
+          --> @dm:addrow incident_id="{{v.incident.row['incident_id']}}"
+          --> @dm:save name='temp-incident-diagnostic-tool-output' and append='yes'
+       --> @exec:end-if
+    --> @exec:end-function
+
+## get metric anomalies for incident
+--> @c:new-block
+    --> @dm:empty
+    --> @exec:define-function name="get_metric_anomalies_for_incident"
+       --> @exec:set-variable name="incident"
+       --> *exec:if-condition asset_count = 0
+          --> @dm:empty
+          --> @dm:addrow incident_id="{{v.incident.row['incident_id']}}"
+          --> @dm:save name='temp-incident-anomalies' and append='yes'
+       --> @exec:end-if
+       --> *exec:if-condition asset_count > 0
+          --> @dm:empty
+          --> @dm:addrow name="oia-ml-metrics-regression-output" & max_rows=1000 & limit=0
+          --> #dm:query-persistent-stream asset_id in {{v.incident.row['assetIds']}} and timestamp is after "{{v.incident.row['fromTime']}}" and timestamp is before "{{v.incident.row['toTime']}}" and anomalies_severity is 'High' GET timestamp,anomalies,upperBound,lowerBound,asset_id,asset_name,metric_source,metric_id,metric_label
+          --> @dm:add-missing-columns columns='incident_id' and value="{{v.incident.row['incident_id']}}"
+          --> @dm:save name='temp-incident-anomalies' and append='yes'
+       --> @exec:end-if
+    --> @exec:end-function
+
+## get change requests for incident
+--> @c:new-block
+    --> @dm:empty
+    --> @exec:define-function name="get_change_requests_for_incident"
+       --> @exec:set-variable name="incident"
+       --> *exec:if-condition asset_count = 0
+          --> @dm:empty
+          --> @dm:addrow incident_id="{{v.incident.row['incident_id']}}"
+          --> @dm:save name='temp-incident-change-requests' and append='yes'
+       --> @exec:end-if
+       --> *exec:if-condition asset_count > 0
+          --> @dm:empty
+          --> @dm:addrow name="change_requests_stream" & max_rows=1000 & limit=0
+          --> #dm:query-persistent-stream asset_id in {{v.incident.row['assetIds']}} and timestamp is after "{{v.incident.row['fromTime']}}" and timestamp is before "{{v.incident.row['toTime']}}"
+          --> @dm:add-missing-columns columns='incident_id' and value="{{v.incident.row['incident_id']}}"
+          --> @dm:save name='temp-incident-change-requests' and append='yes'
+       --> @exec:end-if
+    --> @exec:end-function
+
+## get recommendation for incident from OpenAI
+--> @c:new-block
+    --> @dm:empty
+    --> @exec:define-function name="get_incident_recommendations"
+       --> @exec:set-variable name="incident"
+       --> @dm:empty
+       --> @dm:addrow name='temp-incident-alerts' and description='Alerts for the incident' and query='a_incident_id is "{{v.incident.row['incident_id']}}"'
+       --> @dm:addrow name='temp-incident-anomalies' and description='Anomalies for the incident' and query='incident_id is "{{v.incident.row['incident_id']}}"'
+       --> @dm:addrow name='temp-incident-change-requests' and description='Change requests for the incident' and query='incident_id is "{{v.incident.row['incident_id']}}"'
+       --> @dm:addrow name='temp-incident-diagnostic-tool-output' and description='Diagnostic tool output for the impacted assets' and query='incident_id is "{{v.incident.row['incident_id']}}"'
+       --> @dm:save name='temp-meta-df'
+       --> @gpt:prompt prompt = 'Summarize the incident and provide recommendations by analyzing and correlating the above alerts, output of diagnostic tool, metric anomalies, and change requests for the impacted assets. ' &
+               prefix = "Please generate a response in simple HTML format based on the provided CSV data, which includes a list of alerts, diagnostic tool outputs, metric anomalies, and change requests for the impacted assets. Follow these guidelines:\n Bold important keywords and numbers.\n Use appropriate labels instead of exact column names.\n Beautify the response with bullet points.\n Structure the response using only these HTML tags: <html>, <body>, <p>, <b>, <ul>, <li>, <br>.\n Provide a summary of the data in a paragraph, without detailed explanations of each alert and anomaly.\n If there is no data for any section (alerts, diagnostic tool outputs, metric anomalies, or change requests), mention that there is no data for that section.\n Do not print the response in a single line or use tables" and
+               attach_datasets = 'temp-meta-df' and debug='yes' and temperature=0.7
+       --> @dm:add-missing-columns columns='incident_id' and value="{{v.incident.row['incident_id']}}"
+       --> @dm:rename-columns i_recommendation='response_content'
+    --> @exec:end-function
+
+## clear temp datasets
+--> @c:new-block
+    --> @dm:empty
+    --> @exec:define-function name="clear_temp_datasets"
+       --> @dm:empty
+       --> @dm:save name='temp-incident-alerts'
+       --> @dm:save name='temp-incident-diagnostic-tool-output'
+       --> @dm:save name='temp-incident-anomalies'
+       --> @dm:save name='temp-incident-change-requests'
+       --> @dm:save name='temp-recommendations'
+    --> @exec:end-function
+
+--> @c:data-loop columns='incident_id' and dataset='temp-incidents'
+    --> @dm:recall-query name='temp-incidents' and query="incident_id is '$incident_id'"
+    --> @exec:call-function name='get_alerts_for_incident'
+    --> @dm:recall-query name='temp-incidents' and query="incident_id is '$incident_id'"
+    --> @exec:call-function name='run_diagnostic_tool_for_impacted_assets'
+    --> @dm:recall-query name='temp-incidents' and query="incident_id is '$incident_id'"
+    --> @exec:call-function name='get_metric_anomalies_for_incident'
+    --> @dm:recall-query name='temp-incidents' and query="incident_id is '$incident_id'"
+    --> @exec:call-function name='get_change_requests_for_incident'
+    --> @dm:recall-query name='temp-incidents' and query="incident_id is '$incident_id'"
+    --> @exec:call-function name='get_incident_recommendations'
+    --> @dm:save name='temp-recommendations' and append='yes'
+
+--> @c:new-block
+    --> @exec:call-function name='clear_temp_datasets'
+    --> @dm:recall name='temp-incidents'
+    --> @dm:selectcolumns exclude="^i_recommendation$"
+    --> @dm:enrich dict='temp-recommendations' and src_key_cols='incident_id' and dict_key_cols='incident_id' and enrich_cols='i_recommendation'
+    --> @dm:rename-columns roomid='project_id' and incidentid='incident_id'
+    --> @dm:eval name="'i_recommendation'" and value='i_recommendation'
+    --> @dm:to-json include_columns='^name$|^value$' and output_column='recommendation_value' and keep_original_columns='yes'
+    --> @dm:eval name="'i_recommendation_ts'" and value="int(time_now_as_seconds() * 1000)"
+    --> @dm:to-json include_columns='^name$|^value$' and output_column='recommendation_ts' and keep_original_columns='yes'
+    --> @dm:eval attributes='json_loads("[" + recommendation_value + "," + recommendation_ts + "]")'
+    --> @dm:selectcolumns include="roomid|incidentid|attributes"
+    --> @agent:agent-irm:irmagent:updateIncidents
+    --> @dm:sleep seconds=10
+
