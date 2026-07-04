@@ -1,0 +1,148 @@
+name: Workflow Base
+label: Workflow Base
+version: 1.0.0
+type: feature
+published_date: 2026-06-19
+publisher: Fabrix.ai
+scope: system
+description:
+  md: ./description.md
+
+fabric_services:
+ - name: worker
+   version: ">=8.2.1"
+ - name: api-server
+   version: ">=8.2.1"
+   
+artifacts:
+  credentials:
+    - name: workflow
+      type: workflow
+      remove_on_deactivation: true
+  pipelines:
+  - name: run_rda_workflow
+    file: artifacts/Pipelines/run_rda_workflow.txt
+    version: 2026.03.26.1
+    folder: Default
+    skip_validation: true
+    remove_on_deactivation: false
+    creation_policy: skip
+  dashboards:
+  - name: ai_workflow_output
+    file: artifacts/Dashboard/ai_workflow_output.json
+    remove_on_deactivation: false
+    creation_policy: skip
+  - name: workflow_page
+    file: artifacts/Dashboard/workflow_page.json
+    remove_on_deactivation: true
+    creation_policy: overwrite
+  ##- name: rda-artifact-dependencies-app
+  ##  file: artifacts/Dashboard/rda-artifact-dependencies-app.json
+  ##  remove_on_deactivation: false
+  ##  creation_policy: skip
+  - name: ai_review_details
+    file: artifacts/Dashboard/ai_review_details.json
+    remove_on_deactivation: false
+    creation_policy: skip
+  - name: workflow_jobs_page
+    file: artifacts/Dashboard/workflow_jobs_page.json
+    remove_on_deactivation: true
+    creation_policy: overwrite
+  - name: ai_conversation_details_tools_only
+    file: artifacts/Dashboard/ai_conversation_details_tools_only.json
+    remove_on_deactivation: false
+    creation_policy: skip
+  - name: workflow_dynamic_lovs_page
+    file: artifacts/Dashboard/workflow_dynamic_lovs_page.json
+    remove_on_deactivation: true
+    creation_policy: overwrite
+  - name: ai_conversation_sequence
+    file: artifacts/Dashboard/ai_conversation_sequence.json
+    remove_on_deactivation: false
+    creation_policy: skip
+  - name: workflow_job_status
+    file: artifacts/Dashboard/workflow_job_status.json
+    remove_on_deactivation: false
+    creation_policy: skip
+  - name: ai_conversation_details_app
+    file: artifacts/Dashboard/ai_conversation_details_app.json
+    remove_on_deactivation: false
+    creation_policy: skip
+  - name: workflow_administration_app
+    file: artifacts/Dashboard/workflow_administration_app.json
+    remove_on_deactivation: true
+    creation_policy: overwrite
+  - name: ai_fabaio_output
+    file: artifacts/Dashboard/ai_fabaio_output.json
+    remove_on_deactivation: false
+    creation_policy: skip
+  - name: cache_documents
+    file: artifacts/Dashboard/cache_documents.json
+    remove_on_deactivation: false
+    creation_policy: skip
+  - name: ai_canvas_dashboard
+    file: artifacts/Dashboard/ai_canvas_dashboard.json
+    remove_on_deactivation: false
+    creation_policy: skip
+  - name: workflow_remote_tasks_vm_credentials
+    file: artifacts/Dashboard/workflow_remote_tasks_vm_credentials.json
+    remove_on_deactivation: true
+    creation_policy: overwrite
+  - name: workflow_details
+    file: artifacts/Dashboard/workflow_details.json
+    remove_on_deactivation: false
+    creation_policy: skip
+  - name: ai_conversation_details
+    file: artifacts/Dashboard/ai_conversation_details.json
+    remove_on_deactivation: false
+    creation_policy: skip
+  pstreams:
+  - name: rda_meta_cache_documents
+    attributes:
+      unique_keys:
+      - conversation_id
+      - document_name
+    source: OpenSearch
+    remove_on_deactivation: false
+    creation_policy: skip
+  - name: rda_workflow_logs
+    attributes:
+      retention_days: 7
+      search_case_insensitive: true
+    source: OpenSearch
+    remove_on_deactivation: false
+    creation_policy: skip
+  - name: rda_chat_sessions
+    attributes:
+      retention_days: 310
+      search_case_insensitive: true
+    source: OpenSearch
+    remove_on_deactivation: false
+    creation_policy: skip
+  - name: rda_workflow_status
+    attributes:
+      unique_keys:
+      - jobId
+      search_case_insensitive: true
+    source: OpenSearch
+    remove_on_deactivation: false
+    creation_policy: skip
+  - name: agent_output_stream
+    attributes:
+      search_case_insensitive: true
+    source: OpenSearch
+    remove_on_deactivation: false
+    creation_policy: skip
+  ##- name: rda_orchestrator_flow_meta
+  ##  attributes:
+  ##    system_defined: 'yes'
+  ##    unique_keys:
+  ##    - name
+  ##    flatten_json: false
+  ##    _mappings:
+  ##      properties:
+  ##        saved_time:
+  ##          type: date
+  ##  source: OpenSearch
+  ##  remove_on_deactivation: true
+  ##  creation_policy: overwrite

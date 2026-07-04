@@ -1,0 +1,58 @@
+{
+    "type": "log",
+    "name": "interface_down",
+    "description": "Interface operational status CFX",
+    "enabled": false,
+    "schedule": {
+        "minutes": 5
+    },
+    "data": {
+        "stream": "snmp_trap_events_stream",
+        "query": "ifOperStatus is not null",
+        "unique_keys": [
+            "device",
+            "ifIndex"
+        ],
+        "additional_columns": [
+            "ifIndex",
+            "ifOperStatus",
+            "device_hostname",
+            "snmpTrapName"
+        ],
+        "custom_unique_keys": [
+            "alarm_class"
+        ],
+        "data_transformations": [
+            {
+                "type": "eval",
+                "columns": {
+                    "alarm_class": {
+                        "expr": "'Interface'"
+                    }
+                }
+            }
+        ]
+    },
+    "actions": [
+        {
+            "state": "OPEN",
+            "extra_query": "(snmpTrapName is 'linkDown' and ifOperStatus == 'up')",
+            "attributes": {
+                "severity": "CRITICAL",
+                "alert_message": "Interface {{ifIndex}} DOWN on {{device_hostname}}",
+                "recommendedaction": "Check cable and interface status."
+            },
+            "notification_profile": "snmp_metrics_notification_profile"
+        },
+        {
+            "state": "CLEAR",
+            "extra_query": "(snmpTrapName is 'linkUp' and ifOperStatus == 'up')",
+            "attributes": {
+                "severity": "INFO",
+                "alert_message": "Interface {{ifIndex}} restored"
+            },
+            "notification_profile": "snmp_metrics_notification_profile"
+        }
+    ],
+    "saved_time": "2026-04-20T03:29:27.149362"
+}

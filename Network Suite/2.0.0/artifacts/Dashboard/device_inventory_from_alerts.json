@@ -1,0 +1,323 @@
+{
+    "name": "device_inventory_from_alerts",
+    "label": "Inventory",
+    "description": "Device Inventory",
+    "dashboard_folder": "NetworkDevicePack",
+    "version": "24.05.20.2",
+    "enabled": false,
+    "stream": "network-devices-inventory",
+    "dashboard_type": "template",
+    "live_edit": true,
+    "template_variables": {
+        "CUST_ID": {
+            "contextId": "customerId"
+        },
+        "PROJ_ID": {
+            "contextId": "project_id"
+        },
+        "PROJ_ID_SINGLE": {
+            "contextId": "project_id"
+        },
+        "CUST_TAG": {
+            "contextId": "customer_tag"
+        },
+        "SERIAL_NUM": {
+            "contextId": "parent_serial_number"
+        },
+        "DEVICE_IP": {
+            "contextId": "ip_address"
+        }
+    },
+    "computedContext0": {
+        "org_id": {
+            "expr": "'single_tenant' if customer_id is empty else customer_id",
+            "defaultValue": "single_tenant"
+        }
+    },
+    "dashboard_filters": {
+        "time_filter": true,
+        "extra_filter0": "(ip_address is '{{DEVICE_IP}}') and  (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+        "extra_filter": "ip_address is '{{DEVICE_IP}}'",
+        "default_time_filter_labels": [
+            "Last 1 month"
+        ],
+        "columns_filter": [
+            {
+                "id": "ip_address",
+                "label": "IP Address",
+                "type": "TEXT"
+            },
+            {
+                "id": "interface_description",
+                "label": "Interface Name",
+                "type": "TEXT"
+            },
+            {
+                "id": "interface_oper_status_label",
+                "label": "Operational Status",
+                "type": "TEXT"
+            },
+            {
+                "id": "interface_admin_status_label",
+                "label": "Admin Status",
+                "type": "TEXT"
+            },
+            {
+                "id": "timestamp",
+                "label": "Timestamp",
+                "type": "DATETIME"
+            },
+            {
+                "id": "delta",
+                "label": "Last Polled",
+                "type": "HUMANIZE_TIME_DELTA"
+            },
+            {
+                "id": "project_id",
+                "label": "Project ID",
+                "type": "TEXT"
+            },
+            {
+                "id": "ip_address",
+                "label": "IP Address",
+                "type": "TEXT"
+            },
+            {
+                "id": "hostname",
+                "label": "Hostname",
+                "type": "TEXT"
+            },
+            {
+                "id": "product_id",
+                "label": "Device Model",
+                "type": "TEXT"
+            },
+            {
+                "id": "serial_number",
+                "label": "Device Serial Number",
+                "type": "TEXT"
+            },
+            {
+                "id": "vendor",
+                "label": "Device Vendor",
+                "type": "TEXT"
+            },
+            {
+                "id": "interface_description",
+                "label": "Device Interface Name",
+                "type": "TEXT"
+            },
+            {
+                "id": "interface_name",
+                "label": "Device Interface Short Name",
+                "type": "TEXT"
+            },
+            {
+                "id": "CLLI_code",
+                "label": "CLLI Code",
+                "type": "TEXT"
+            },
+            {
+                "id": "remote_device_ip",
+                "label": "Remote IP Address",
+                "type": "TEXT"
+            },
+            {
+                "id": "remote_device_id",
+                "label": "Remote Device ID",
+                "type": "TEXT"
+            },
+            {
+                "id": "remote_device_int_name",
+                "label": "Remote Interface Name",
+                "type": "TEXT"
+            },
+            {
+                "id": "remote_device_capabilities",
+                "label": "Remote Device Capabilities",
+                "type": "TEXT"
+            },
+            {
+                "id": "asset_object",
+                "label": "Asset Object",
+                "type": "TEXT"
+            }
+        ],
+        "group_filters": []
+    },
+    "dashboard_sections": [
+        {
+            "title": "Device View",
+            "show_filter": true,
+            "widgets": [
+                {
+                    "title": "Asset Summary",
+                    "widget_type": "summary",
+                    "max_width": 6,
+                    "height": 5,
+                    "min_width": 6,
+                    "stream": "network-devices-inventory",
+                    "duration_hours": 1080,
+                    "ts_column": "timestamp",
+                    "extra_filter0": "(parent_serial_number in '{{SERIAL_NUM}}') and asset_object contains 'chassis' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "columns": {
+                        "product_id": "Product ID",
+                        "equipment_type": "Equipment Type",
+                        "vendor": "Vendor",
+                        "ip_address": "IP Address",
+                        "hostname": "Hostname",
+                        "parent_serial_number": "Parent Serial Number",
+                        "asset_object": "Asset Object"
+                    },
+                    "widget_id": "63ea4c7f"
+                },
+                {
+                    "title": "Asset Additional Details",
+                    "widget_type": "summary",
+                    "max_width": 6,
+                    "height": 5,
+                    "min_width": 6,
+                    "stream": "network-devices-inventory",
+                    "ts_column": "timestamp",
+                    "duration_hours": 1080,
+                    "extra_filter": "(ip_address is '{{DEVICE_IP}}' or parent_serial_number is '{{SERIAL_NUM}}') and equipment_type in ['chassis','CHASSIS'] and asset_object contains 'Chassis'",
+                    "extra_filter1": "(customer_id is '{{CUST_ID}}') and (project_id in {{PROJ_ID}}) and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty) and (parent_serial_number in '{{SERIAL_NUM}}') and equipment_type contains 'chassis'",
+                    "extra_filter3": "(parent_serial_number in '{{SERIAL_NUM}}') and equipment_type contains 'chassis' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "columns": {
+                        "sw_version": "FW Version",
+                        "equipment_name": "Description"
+                    },
+                    "widget_id": "d1c8efad"
+                },
+                {
+                    "title": "Asset Hierarchy",
+                    "widget_type": "device_tree_view",
+                    "max_width": 6,
+                    "height": 6,
+                    "min_width": 6,
+                    "stream": "network-devices-inventory",
+                    "extra_filter1": "(customer_id is '{{CUST_ID}}') and (parent_serial_number in '{{SERIAL_NUM}}')",
+                    "ts_column": "timestamp",
+                    "duration_hours": 1080,
+                    "widget_id": "e77160db",
+                    "context_filter": "org_id not in ['','Not Available']"
+                },
+                {
+                    "title": "Asset Ops View",
+                    "widget_type": "device_ops_view",
+                    "max_width": 6,
+                    "height": 6,
+                    "min_width": 6,
+                    "stream": "network-devices-inventory",
+                    "extra_filter2": "(customer_id is '{{CUST_ID}}') and (parent_serial_number in '{{SERIAL_NUM}}')",
+                    "ts_column": "timestamp",
+                    "duration_hours": 1080,
+                    "widget_id": "9a4be5df",
+                    "context_filter": "org_id not in ['','Not Available']"
+                },
+                {
+                    "title": "Interface Status",
+                    "widget_type": "tabular",
+                    "stream": "network-devices-inventory",
+                    "extra_filter": "(ip_address is '{{DEVICE_IP}}' or serial_number is '{{SERIAL_NUM}}') and asset_object is 'Interface' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "max_width": 12,
+                    "height": 8,
+                    "min_width": 12,
+                    "remote_searchable": true,
+                    "remote_searchable_cols": [
+                        "ip_address",
+                        "dns_name",
+                        "interface_name",
+                        "interface_description"
+                    ],
+                    "columns": {
+                        "ip_address": {
+                            "title": "IP Address",
+                            "visible": false
+                        },
+                        "dns_name": "Hostname",
+                        "interface_description": {
+                            "title": "Interface Name",
+                            "key": true
+                        },
+                        "device_interface_status_color": {
+                            "type": "COLOR-MAP",
+                            "source-column": "interface_oper_status_label",
+                            "color-map": {
+                                "Up": "#008000",
+                                "Down": "#FF0000",
+                                "up": "#008000",
+                                "down": "#FF0000"
+                            }
+                        },
+                        "device_interface_admin_status_color": {
+                            "type": "COLOR-MAP",
+                            "source-column": "interface_admin_status_label",
+                            "color-map": {
+                                "Up": "#008000",
+                                "Down": "#FF0000",
+                                "up": "#008000",
+                                "down": "#FF0000"
+                            }
+                        },
+                        "interface_oper_status_label": {
+                            "title": "Operational Status",
+                            "htmlTemplateForRow": "{% raw %}<span class='badge' style='background-color: {{ row.device_interface_status_color }}' > {{ row.interface_oper_status_label }} </span>{% endraw %}"
+                        },
+                        "interface_admin_status_label": {
+                            "title": "Admin Status",
+                            "htmlTemplateForRow": "{% raw %}<span class='badge' style='background-color: {{ row.device_interface_admin_status_color}}' > {{ row.interface_admin_status_label }} </span>{% endraw %}"
+                        },
+                        "if_last_change": "Interface Up/Down (Days)",
+                        "timestamp": {
+                            "title": "Timestamp",
+                            "type": "DATETIME",
+                            "visible": false
+                        }
+                    },
+                    "widget_id": "a5f3aaf7"
+                },
+                {
+                    "title": "Neighbors",
+                    "widget_type": "tabular",
+                    "max_width": 12,
+                    "height": 8,
+                    "min_width": 12,
+                    "stream": "network-devices-inventory",
+                    "extra_filter0": "(ip_address is '{{DEVICE_IP}}' or serial_number is '{{SERIAL_NUM}}') and remote_device_int_name not equals 'Not Available' and asset_object is 'CDP' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "extra_filter": "( ip_address is '{{DEVICE_IP}}' or serial_number in '{{SERIAL_NUM}}') and remote_device_int_name not equals 'Not Available' and asset_object is 'CDP'  ",
+                    "ts_column": "timestamp",
+                    "duration_hours": 1080,
+                    "remote_searchable": true,
+                    "remote_searchable_cols": [
+                        "ip_address",
+                        "hostname",
+                        "product_id",
+                        "serial_number",
+                        "vendor",
+                        "interface_description",
+                        "remote_device_ip"
+                    ],
+                    "columns": {
+                        "ip_address": "IP Address",
+                        "hostname": "Hostname",
+                        "product_id": "Device Model",
+                        "serial_number": "Device Serial Number",
+                        "vendor": "Device Vendor",
+                        "interface_description": "Device Interface Name",
+                        "interface_name": "Device Interface Short Name",
+                        "remote_device_ip": "Remote IP Address",
+                        "remote_device_id": "Remote Device ID",
+                        "remote_device_int_name": "Remote Interface Name",
+                        "timestamp": {
+                            "title": "Timestamp",
+                            "type": "DATETIME"
+                        }
+                    },
+                    "widget_id": "66c9ad65"
+                }
+            ]
+        }
+    ],
+    "saved_time": "2026-02-26T07:02:05.289299"
+}

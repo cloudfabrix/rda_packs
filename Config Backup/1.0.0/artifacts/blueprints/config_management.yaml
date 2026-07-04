@@ -1,0 +1,31 @@
+name: config_backup
+id: config_backup
+version: config_backup
+category: ConfigBackupPack
+comment: Config Backup
+enabled: true
+type: Service
+provider: CloudFabrix Software, Inc.
+attrs: {}
+run_context:
+    customer_tag: $PKG_CONTEXT_CUSTOMER_TAG
+    customer_id: $PKG_CONTEXT_CUSTOMER_ID
+service_pipelines:
+    -   name: syslog_rda_gw_client_ip_data
+        label: Syslog Config Backup
+        version: '*'
+        site: ${PKG_CONTEXT_CUSTOMER_TAG}-.*
+        site_type: regex
+        instances: 1
+        scaling_policy:
+            min_instances: 1
+            max_instances: 1
+scheduled_pipelines:
+    -   name: syslog-backup-all-pipeline
+        label: Devices Config Backup
+        version: '*'
+        site: ${PKG_CONTEXT_CUSTOMER_TAG}-.*
+        site_type: regex
+        instances: 1
+        cron_expression: 0 0 * * 0
+saved_time: '2026-02-26T18:06:59.172456'

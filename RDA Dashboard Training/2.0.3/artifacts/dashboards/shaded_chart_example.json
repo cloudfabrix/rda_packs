@@ -1,0 +1,83 @@
+{
+    "name": "shaded_chart_example",
+    "label": "Shaded Chart",
+    "description": "Shaded Chart example",
+    "version": "10.12.24.1",
+    "enabled": true,
+    "showTitle": true,
+    "dashboard_style": "auto",
+    "live_edit": true,
+    "status_poller": {},
+    "dashboard_generator": {
+        "attachment": "widget_code_generator"
+    },
+    "dashboard_type": "dashboard",
+    "dashboard_pages": [],
+    "dashboard_filters": {
+        "time_filter": true,
+        "default_time_filter_labels": [
+            "All Time"
+        ],
+        "columns_filter": [],
+        "group_filters": []
+    },
+    "dashboard_sections": [
+        {
+            "title": "Shaded Chart",
+            "show_filter": true,
+            "widgets": [
+                {
+                    "widget_type": "shaded_chart_multisource",
+                    "title": "Shaded Chart Example",
+                    "show-markers": true,
+                    "max_width": 12,
+                    "duration_hours": 24000,
+                    "min_width": 12,
+                    "height": 8,
+                    "chartProperties": {
+                        "yAxisLabel": "Value",
+                        "xAxisLabel": "Time"
+                    },
+                    "sources": [
+                        {
+                            "type": "train",
+                            "downsample": false,
+                            "stream": "shaded_chart",
+                            "ts_column": "timestamp",
+                            "baseline_column": "baseline",
+                            "anomalies_column": "anomalies",
+                            "predicted_column": "predicted",
+                            "predicted_anomalies": "predicted_anomalies",
+                            "upperBound_column": "upperBound",
+                            "lowerBound_column": "lowerBound",
+                            "duration_hours": 24000,
+                            "synchronized-group": 0
+                        },
+                        {
+                            "type": "predict",
+                            "downsample": false,
+                            "stream": "shaded_chart",
+                            "ts_column": "live_timestamp",
+                            "baseline_column": "baseline",
+                            "anomalies_column": "anomaly",
+                            "predicted_column": "predicted",
+                            "predicted_anomalies": "predicted_anomalies",
+                            "upperBound_column": "upperBound",
+                            "lowerBound_column": "lowerBound",
+                            "duration_hours": 24000,
+                            "synchronized-group": 0
+                        }
+                    ],
+                    "widget_id": "7a134625"
+                }
+            ]
+        }
+    ],
+    "saved_time": "2025-03-14T19:46:35.493032",
+    "attachments": [
+        {
+            "name": "widget_code_generator",
+            "value": "{%- set widgets =  dashboard[\"dashboard_sections\"][0][\"widgets\"] -%}\r\n{%- set new_widgets =  [] -%}\r\n{%- set ns =  namespace(count=0) -%}\r\n\r\n{%- for w in widgets -%}\r\n    {%- if w.get(\"widget_type\") -%}\r\n        {%-\r\n            set nw = {\r\n                \"title\": \"JSON\",\r\n                \"widget_group\": \"g\"+str(ns.count),\r\n                \"min_width\": w.get(\"min_width\", 6),\r\n                \"max_width\": w.get(\"max_width\", 6),\r\n                \"height\": w.get(\"height\", 4),\r\n                \"widget_type\": \"codeblock\",\r\n                \"content\": json_dumps_indent(w, 2),\r\n                \"lang\": \"json\",\r\n                \"widget_id\": w.get(\"widget_id\", str(ns.count)) + \"_code\"\r\n            }\r\n        -%}\r\n        {%- set _ = w.update({\"widget_group\":  \"g\"+str(ns.count) }) -%}\r\n        {%- set _ = new_widgets.append(nw) -%}\r\n        {%- set ns.count = ns.count + 1 -%}\r\n    {%- endif -%}\r\n{%- endfor -%}\r\n\r\n{%- set _ = widgets.extend(new_widgets) -%}"
+        }
+    ]
+}

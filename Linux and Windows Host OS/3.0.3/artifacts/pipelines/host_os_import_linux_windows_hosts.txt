@@ -1,0 +1,109 @@
+%% stream = no and limit = 0
+%%template_type="jinja"
+%%start_inline_object name="context_dynamic_form" and type="data" and format="json"
+{
+    "formFieldList": [
+        {
+            "fieldId": "customer_tag",
+            "label": "Tag of the customer",
+            "required": false,
+            "dataType": "string"
+        }
+    ]
+}
+%%end_inline_object
+
+{% if customer_tag %} 
+      {% set customer_id = customer_id %}
+      {% set customer_tag = customer_tag %}
+      {% set customerTag = customer_tag %}
+   {% elif customerTag %} 
+      {% set customer_id = customer_id %}
+      {% set customer_tag = customerTag %}
+   {% else %}
+      {% set customer_id = '' %}
+      {% set customer_tag = '' %}
+   {% endif %}   
+
+@c:new-block
+    --> @dm:empty
+    --> @exec:get-input
+    --> @dm:save name="temp-linux-windows-input-dataset"
+    {% if customer_tag %} 
+         --> @dm:save name="{{customer_tag}}-linux-windows-input-dataset"
+    {% else %}
+        --> @dm:save name="linux-windows-input-dataset"
+    {% endif %} 
+    
+--> @c:new-block
+    {% if customer_tag %} 
+         --> @dm:recall name="{{customer_tag}}-linux-windows-input-dataset"
+    {% else %}
+        --> @dm:recall name="linux-windows-input-dataset"
+    {% endif %} 
+    --> @dm:replace-data columns="fileUpload" and expr="'" and replace='"'
+    --> @dm:to-type columns="replace" and type="str"
+    --> @dm:explode-json column="fileUpload"
+    --> @dm:save name ="temp-linux-windows-input-dataset"
+
+--> @c:new-block
+    --> @dm:empty
+    {% if customer_tag %} 
+         --> #dm:query-persistent-stream customer_tag is '{{customer_tag}}' with-input name = "linux_windows_on_boarded_hosts" & limit = "0"
+    {% else %} 
+        --> #dm:query-persistent-stream customer_tag is empty with-input name = "linux_windows_on_boarded_hosts" & limit = "0"
+    {% endif %} 
+    --> @dm:save name ="temp-onboarded-devices"
+    --> @dm:save name ="temp-customer-old-data"
+
+--> @c:data-loop dataset="temp-linux-windows-input-dataset" and columns="bucketName,objectName"
+    --> @dm:recall name="temp-linux-windows-input-dataset"
+    --> *dm:filter replace=="True"
+    --> @dm:skip-block-if-shape row_count=0
+    --> @dm:get-from-location path="$bucketName/$objectName"
+    --> @dm:to-type columns="ip_address,type,discovery_scope,credential,port" & type = "str"
+    --> @dm:dedup columns="ip_address"
+    --> @dm:map attr = 'ip_address' & func = 'strip'
+    --> @dm:map attr = 'type' & func = 'strip'
+    --> @dm:map attr = 'port' & func = 'strip'
+    --> @dm:map attr = 'type' & func = 'lower'
+    --> @dm:map attr = 'discovery_scope' & func = 'strip'
+    --> @dm:map attr = 'discovery_scope' & func = 'lower'
+    --> @dm:map attr = 'credential' & func = 'strip'
+    --> @dm:map attr = 'timestamp' & func = 'ts_to_datetimestr' & unit = 'ms'
+    --> @dm:to-type columns="port" & type = "int"
+    --> @dm:eval customer_tag = "'{{customer_tag}}'"
+    --> @dm:eval customer_id = "'{{customer_id}}'"
+    --> @dm:save name="temp-uploaded-file-data"
+    --> @rn:write-stream name="linux_windows_on_boarded_hosts"
+    --> @dm:sleep seconds = 2
+    --> @dm:skip-pipeline-if-shape row_count > 0
+
+--> @c:new-block
+
+--> @c:data-loop dataset="temp-linux-windows-input-dataset" and columns="bucketName,objectName"
+    --> @dm:recall name="temp-linux-windows-input-dataset"
+    --> *dm:filter replace =="False"
+    --> @dm:skip-block-if-shape row_count=0
+    --> @dm:get-from-location path="$bucketName/$objectName"
+    --> @dm:to-type columns="ip_address,type,discovery_scope,credential,port" & type = "str"
+    --> @dm:map attr = 'ip_address' & func = 'strip'
+    --> @dm:map attr = 'type' & func = 'strip'
+    --> @dm:map attr = 'port' & func = 'strip'
+    --> @dm:map attr = 'type' & func = 'lower'
+    --> @dm:map attr = 'discovery_scope' & func = 'strip'
+    --> @dm:map attr = 'discovery_scope' & func = 'lower'
+    --> @dm:map attr = 'credential' & func = 'strip'
+    --> @dm:to-type columns="port" & type = "int"
+    --> @dm:save name="temp-uploaded-file-data"
+    --> @dm:recall name ="temp-customer-old-data"
+    --> @dm:save name="temp-uploaded-file-data" and append= "yes"
+    --> @dm:recall name="temp-uploaded-file-data"
+    --> @dm:dedup columns="ip_address" and keep='last'
+    --> *dm:filter ip_address is not null
+    --> @dm:map attr = 'timestamp' & func = 'ts_to_datetimestr' & unit = 'ms'
+    --> @dm:eval customer_tag = "'{{customer_tag}}'"
+    --> @dm:eval customer_id = "'{{customer_id}}'"
+    --> @rn:write-stream name="linux_windows_on_boarded_hosts"
+    --> @dm:sleep seconds = 2
+

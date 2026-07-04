@@ -1,0 +1,87 @@
+{
+    "name": "Multi_widget_support",
+    "label": "Multi Support Widget",
+    "description": "GH_2745",
+    "version": "24.01.03.1",
+    "enabled": true,
+    "dashboard_type": "dashboard",
+    "live_edit": true,
+    "showTitle": true,
+    "dashboard_generator": {
+        "attachment": "widget_code_generator"
+    },
+    "status_poller": {},
+    "dashboard_filters": {
+        "time_filter": true,
+        "default_time_filter_labels": [
+            "All Time"
+        ],
+        "columns_filter": [],
+        "group_filters": []
+    },
+    "dashboard_folder": "Default",
+    "dashboard_sections": [
+        {
+            "title": "Student Details",
+            "show_filter": true,
+            "widgets": [
+                {
+                    "widget_group": "group2",
+                    "title": "Student city",
+                    "widget_type": "pie_chart",
+                    "stream": "main_enhanced",
+                    "column": "count_",
+                    "min_width": 6,
+                    "duration_hours": 24000,
+                    "group_by": [
+                        "city"
+                    ],
+                    "type": "int",
+                    "agg": "value_count",
+                    "ts_column": "timestamp",
+                    "widget_id": "d59e6d13"
+                },
+                {
+                    "widget_group": "group2",
+                    "title": "Student name",
+                    "widget_type": "counter",
+                    "duration_hours": 24000,
+                    "stream": "main_enhanced",
+                    "column": "count_",
+                    "min_width": 6,
+                    "group_by": [
+                        "name"
+                    ],
+                    "type": "int",
+                    "agg": "value_count",
+                    "ts_column": "timestamp",
+                    "widget_id": "335c0a35"
+                },
+                {
+                    "title": "Student donation",
+                    "label": "Donation",
+                    "widget_group": "group2",
+                    "widget_type": "bar_chart",
+                    "min_width": 6,
+                    "duration_hours": 24000,
+                    "stream": "main_enhanced",
+                    "column": "count_",
+                    "group_by": [
+                        "donation"
+                    ],
+                    "type": "int",
+                    "agg": "value_count",
+                    "ts_column": "timestamp",
+                    "widget_id": "7d022fc8"
+                }
+            ]
+        }
+    ],
+    "saved_time": "2025-03-14T19:49:54.710329",
+    "attachments": [
+        {
+            "name": "widget_code_generator",
+            "value": "{%- set widgets =  dashboard[\"dashboard_sections\"][0][\"widgets\"] -%}\r\n{%- set new_widgets =  [] -%}\r\n{%- set ns =  namespace(count=0) -%}\r\n\r\n{%- for w in widgets -%}\r\n    {%- if w.get(\"widget_type\") -%}\r\n        {%-\r\n            set nw = {\r\n                \"title\": \"JSON\",\r\n                \"widget_group\": \"g\"+str(ns.count),\r\n                \"min_width\": w.get(\"min_width\", 6),\r\n                \"max_width\": w.get(\"max_width\", 6),\r\n                \"height\": w.get(\"height\", 4),\r\n                \"widget_type\": \"codeblock\",\r\n                \"content\": json_dumps_indent(w, 2),\r\n                \"lang\": \"json\",\r\n                \"widget_id\": w.get(\"widget_id\", str(ns.count)) + \"_code\"\r\n            }\r\n        -%}\r\n        {%- set _ = w.update({\"widget_group\":  \"g\"+str(ns.count) }) -%}\r\n        {%- set _ = new_widgets.append(nw) -%}\r\n        {%- set ns.count = ns.count + 1 -%}\r\n    {%- endif -%}\r\n{%- endfor -%}\r\n\r\n{%- set _ = widgets.extend(new_widgets) -%}"
+        }
+    ]
+}

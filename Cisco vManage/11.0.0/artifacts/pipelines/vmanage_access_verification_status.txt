@@ -1,0 +1,159 @@
+%% stream = no and limit = 0
+%%template_type="jinja"
+
+%% import_src_type = "cisco_vmanage"
+
+%%start_inline_object name="context_dynamic_form" and type="data" and format="json"
+{
+    "formFieldList": [
+        {
+            "fieldId": "customer_tag",
+            "label": "Tag of the customer",
+            "required": false,
+            "dataType": "string"
+        }
+    ]
+}
+%%end_inline_object
+@dm:empty
+    --> @dm:save name = "temp-customer-context"
+
+## Run-context validation: run only when Tag of the customer matches activated customer (or is empty in single-tenant)
+{% set _run_context_tag = customerTag | default('') %}
+{% set _form_tag = customer_tag | default('') %}
+{% if _run_context_tag == '' %}
+   {% set allow_run = (_form_tag == '') %}
+{% else %}
+   {% set allow_run = (_form_tag == _run_context_tag) %}
+{% endif %}
+{% if allow_run %}
+   {% set customer_tag = _run_context_tag %}
+   {% set customerTag = _run_context_tag %}
+   {% set customer_id = customer_id | default('') %}
+{% else %}
+   {% set customer_tag = '' %}
+   {% set customerTag = '' %}
+   {% set customer_id = '' %}
+{% endif %}
+
+
+
+--> @dm:empty
+    --> @dm:save name = 'temp-variable-dataset'
+    --> @dm:save name = 'temp-variable-dataset-interim'
+    --> @dm:save name = 'temp-vmanage-sources'
+
+--> @c:new-block
+    --> @exec:get-input
+    --> @dm:selectcolumns include = "Others"
+    ## --> @dm:skip-pipeline-if-shape column_count = 0
+    --> @dm:explode-json column="Others"
+    --> @dm:save name = 'temp-variable-dataset'
+
+## When tag is wrong/random (allow_run false): do not use form input; ensure no rows and skip rest
+{% if not allow_run %}
+--> @c:new-block name="exit-when-tag-mismatch"
+    --> @dm:empty
+    --> @dm:save name = 'temp-variable-dataset'
+    --> @dm:skip-pipeline-if-shape row_count = 0
+{% endif %}
+
+--> @c:new-block
+    --> @dm:recall name = 'temp-variable-dataset'
+    --> *exec:if-shape num_rows = 0
+       --> @dm:empty
+       {% if allow_run %}
+         {% if customer_tag %}
+         --> #dm:query-persistent-stream type contains 'cisco_vmanage' and customerTag contains '{{customer_tag}}' with-input name = 'rda_secrets_meta' and limit= 0
+         {% else %}
+         --> #dm:query-persistent-stream type contains 'cisco_vmanage' and customerTag is empty with-input name = 'rda_secrets_meta' and limit= 0
+         {% endif %}
+       {% else %}
+         --> #dm:query-persistent-stream type contains 'cisco_vmanage' and customerTag contains '___INVALID_NEVER_MATCH___' with-input name = 'rda_secrets_meta' and limit= 0
+       {% endif %}
+       --> @dm:save name = 'temp-vmanage-sources'
+
+       --> @exec:for-loop num_rows = 1
+       {% if allow_run %}
+         {% if customer_tag %}
+          --> #dm:query-persistent-stream name is '{%-raw-%}{{row["name"]}}{%-endraw-%}'  and customer_tag is '{{customer_tag}}' with-input name = 'vmanage_perf_on_boarded_devices' and limit= 0
+         {% else %}
+          --> #dm:query-persistent-stream name is '{%-raw-%}{{row["name"]}}{%-endraw-%}' and customer_tag is empty with-input name = 'vmanage_perf_on_boarded_devices' and limit= 0
+         {% endif %}
+       {% else %}
+          --> #dm:query-persistent-stream name is '{%-raw-%}{{row["name"]}}{%-endraw-%}' and customer_tag is '___INVALID_NEVER_MATCH___' with-input name = 'vmanage_perf_on_boarded_devices' and limit= 0
+       {% endif %}
+          --> @dm:save name = 'temp-variable-dataset-interim' & append='yes' & return_appended_dataset = 'yes'
+
+       --> @exec:end-loop
+       --> @dm:recall name = 'temp-variable-dataset-interim'
+       --> *exec:if-shape num_rows = 0
+         --> @dm:recall name = 'temp-vmanage-sources'
+         --> @dm:eval  discovery_scope = "'yes'"
+         --> @dm:save name = 'temp-variable-dataset'
+      --> @exec:end-if
+
+      --> *exec:if-shape num_rows > 0
+         --> *dm:safe-filter discovery_scope == 'yes'
+         ##--> @dm:eval  discovery_scope = "'yes'"
+         ##--> @dm:rename-columns vmanage_src_name = 'name'
+         --> @dm:save name = 'temp-variable-dataset'
+     --> @exec:end-if
+    --> @exec:end-if
+##Add customer context to the dataset
+--> @c:new-block
+    --> @dm:recall name = 'temp-variable-dataset'
+    --> @dm:eval customer_id =  "'{{ customer_id }}'"
+    --> @dm:eval customer_tag =  "'{{ customer_tag }}'"
+   --> @dm:save name = 'temp-vmanage-main-cust-variable-dataset'
+
+
+
+
+## vManage Performance Metrics Access Verification
+## Loop through the temp-vmanage-main-cust-variable-dataset & verify access to each vManage
+## source_ip and collection_timestamp come from query-api; add-missing-columns ensures stream write does not fail when API omits them
+--> @c:data-loop dataset="temp-vmanage-main-cust-variable-dataset" and columns="name,customer_tag,customer_id"
+    --> @$name:query-api path = 'device' and continue_on_failure = 'yes'
+    --> @dm:add-missing-columns columns="collection_status,reason,customer_id,customer_tag,source_ip,collection_timestamp"
+    --> @dm:eval customer_id = "'$customer_id'"
+    --> @dm:eval customer_tag = "'$customer_tag'"
+    --> *exec:if-condition collection_status != 'Success'
+       --> @dm:map to = 'collection_timestamp' & func = 'time_now'
+       --> @dm:dedup columns="source_ip"
+       --> *dm:safe-filter * get source_ip as 'asset_id',collection_status,collection_timestamp,reason,customer_id,customer_tag
+       --> @dm:eval bot_source_name = "'$name'"
+       --> @dm:eval bot_source_type = "'cisco-vmanage'"
+       --> @dm:eval bot_name = "'query-api device'"
+       --> @dm:eval customer_id = "'' if customer_id == 'Not Available' else customer_id"
+       --> @dm:eval customer_tag = "'' if customer_tag == 'Not Available' else customer_tag"
+       
+    --> @exec:end-if
+   --> *exec:if-condition collection_status = 'Success'
+      --> @dm:eval vmanage_name = "'$name'"
+      --> @dm:save name = 'temp-vmanage_device_inventory' & append = 'yes'
+      --> @dm:dedup columns = 'source_ip'
+      --> *dm:safe-filter * get source_ip as 'asset_id',collection_status,collection_timestamp,reason,customer_id,customer_tag
+      --> @dm:eval bot_source_name = "'$name'"
+      --> @dm:eval bot_source_type = "'cisco-vmanage'"
+      --> @dm:eval bot_name = "'query-api device'"
+      --> @dm:eval customer_id = "'' if customer_id == 'Not Available' else customer_id"
+      --> @dm:eval customer_tag = "'' if customer_tag == 'Not Available' else customer_tag"
+      --> @dm:save name="vmanage_perf_access_verification_status-$loop_index"
+   --> @exec:end-if
+
+## Concat all the vManage responses to a dataset
+--> @c:new-block
+    --> @dm:concat names="vmanage_perf_access_verification_status-.*"
+    --> @dm:save name="vmanage_perf_access_verification_status"
+
+## Write to stream
+--> @c:new-block
+    --> @dm:recall name="vmanage_perf_access_verification_status"
+    --> @dm:skip-block-if-shape row_count="0"
+    --> @dm:copy-columns from="collection_timestamp" and to="timestamp"
+    --> @dm:eval customer_id = "'' if customer_id == 'Not Available' else customer_id"
+    --> @dm:eval customer_tag = "'' if customer_tag == 'Not Available' else customer_tag"
+    --> @rn:write-stream name="vmanage_access_verification_status_stream"
+
+

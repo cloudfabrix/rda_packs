@@ -1,0 +1,422 @@
+{
+    "name": "vco_edge_drilldown",
+    "description": "vco_edge",
+    "label": "vco_edge",
+    "enabled": false,
+    "dashboard_type": "template",
+    "dashboard_folder": "VCOSystemPack",
+    "live_edit": true,
+    "version": "23.9.6.1",
+    "template_variables": {
+        "CUST_ID": {
+            "contextId": "customerId"
+        },
+        "CUST_TAG": {
+            "contextId": "customerTag"
+        }
+    },
+    "dashboard_filters": {
+        "time_filter": true,
+        "default_time_filter_labels": []
+    },
+    "dashboard_sections": [
+        {
+            "title": "demo",
+            "show_filter": true,
+            "widgets": [
+                {
+                    "widget_type": "label",
+                    "max_width": 12,
+                    "height": 0.5,
+                    "min_width": 12,
+                    "label": "<div style='text-align:center;width:100%;'><h1><a style='text-decoration:none;color:#0066ff;' target='_blank'>Customer Egdes</a></h1></div>",
+                    "widget_id": "33317e49"
+                },
+                {
+                    "title": "Total Edges",
+                    "widget_type": "custom_counter",
+                    "duration_hours": 1080,
+                    "stream": "vco_1",
+                    "ts_column": "timestamp",
+                    "extra_filter": "(customerTag is '{{CUST_TAG}}' or customerTag is empty) and source is 'edge'",
+                    "column": "_RDA_Id",
+                    "agg": "value_count",
+                    "type": "int",
+                    "min_width": 4,
+                    "height": 4,
+                    "max_width": 4,
+                    "style": {
+                        "color-list": [
+                            "#0000FF"
+                        ]
+                    },
+                    "include_context_in_query": true,
+                    "include_context_keys": [
+                        "gateway_ip"
+                    ],
+                    "widget_id": "f5585184"
+                },
+                {
+                    "title": "Activation State",
+                    "widget_type": "counter",
+                    "duration_hours": 1080,
+                    "stream": "vco_1",
+                    "ts_column": "timestamp",
+                    "extra_filter": "(customerTag is '{{CUST_TAG}}' or customerTag is empty) and source is 'edge'",
+                    "min_width": 4,
+                    "height": 4,
+                    "max_width": 4,
+                    "group_by": [
+                        "activationState"
+                    ],
+                    "style": {
+                        "color-map": {
+                            "ACTIVATED": "#4CAF50",
+                            "REACTIVATION_PENDING": " #FF9800"
+                        }
+                    },
+                    "column": "_RDA_Id",
+                    "agg": "value_count",
+                    "include_context_in_query": true,
+                    "include_context_keys": [
+                        "gateway_ip"
+                    ],
+                    "widget_id": "9b046285"
+                },
+                {
+                    "title": "Total IsHub",
+                    "widget_type": "counter",
+                    "duration_hours": 1080,
+                    "stream": "vco_1",
+                    "ts_column": "timestamp",
+                    "extra_filter": "(customerTag is '{{CUST_TAG}}' or customerTag is empty) and source is 'edge'",
+                    "min_width": 4,
+                    "height": 4,
+                    "max_width": 4,
+                    "group_by": [
+                        "isHub"
+                    ],
+                    "style": {
+                        "color-map": {
+                            "True": "#4CAF50",
+                            "False": "#F44336"
+                        }
+                    },
+                    "column": "_RDA_Id",
+                    "agg": "value_count",
+                    "include_context_in_query": true,
+                    "include_context_keys": [
+                        "gateway_ip"
+                    ],
+                    "widget_id": "8a25e4a8"
+                },
+                {
+                    "title": "System Up Since",
+                    "widget_type": "counter",
+                    "duration_hours": 1080,
+                    "stream": "vco_1",
+                    "ts_column": "timestamp",
+                    "extra_filter": "(customerTag is '{{CUST_TAG}}' or customerTag is empty) and source is 'edge'",
+                    "min_width": 6,
+                    "height": 4,
+                    "max_width": 6,
+                    "sort_type": "asc",
+                    "group_by": [
+                        "systemUpSince_days_category"
+                    ],
+                    "style": {
+                        "color-map": {
+                            "<30": "#F44336",
+                            "30-100": " #FF9800",
+                            ">100": "#4CAF50"
+                        }
+                    },
+                    "column": "_RDA_Id",
+                    "agg": "value_count",
+                    "include_context_in_query": true,
+                    "include_context_keys": [
+                        "gateway_ip"
+                    ],
+                    "widget_id": "d256e229"
+                },
+                {
+                    "title": "Service Up Since",
+                    "widget_type": "counter",
+                    "duration_hours": 1080,
+                    "stream": "vco_1",
+                    "ts_column": "timestamp",
+                    "extra_filter": "(customerTag is '{{CUST_TAG}}' or customerTag is empty) and source is 'edge'",
+                    "min_width": 6,
+                    "height": 4,
+                    "sort_type": "asc",
+                    "max_width": 6,
+                    "group_by": [
+                        "serviceUpSince_days_category"
+                    ],
+                    "style": {
+                        "color-map": {
+                            "<30": "#F44336",
+                            "30-100": " #FF9800",
+                            ">100": "#4CAF50"
+                        }
+                    },
+                    "column": "_RDA_Id",
+                    "agg": "value_count",
+                    "include_context_in_query": true,
+                    "include_context_keys": [
+                        "gateway_ip"
+                    ],
+                    "widget_id": "7e8bec86"
+                },
+                {
+                    "widget_type": "pie_chart",
+                    "title": "Edges by Family",
+                    "stream": "vco_1",
+                    "ts_column": "timestamp",
+                    "duration_hours": 1080,
+                    "column": "_RDA_Id",
+                    "agg": "value_count",
+                    "extra_filter": "(customerTag is '{{CUST_TAG}}' or customerTag is empty) and source is 'edge'",
+                    "group_by": [
+                        "deviceFamily"
+                    ],
+                    "type": "str",
+                    "min_width": 4,
+                    "orientation": "vertical",
+                    "height": 4,
+                    "max_width": 4,
+                    "include_context_in_query": true,
+                    "include_context_keys": [
+                        "gateway_ip"
+                    ],
+                    "widget_id": "45ecc884"
+                },
+                {
+                    "widget_type": "pie_chart",
+                    "title": "Edges by Edgestate",
+                    "stream": "vco_1",
+                    "ts_column": "timestamp",
+                    "duration_hours": 1080,
+                    "column": "_RDA_Id",
+                    "agg": "value_count",
+                    "extra_filter": "(customerTag is '{{CUST_TAG}}' or customerTag is empty) and source is 'edge'",
+                    "group_by": [
+                        "edgeState"
+                    ],
+                    "style": {
+                        "color-map": {
+                            "CONNECTED": "#4CAF50",
+                            "NEVER_ACTIVATED": " #FF9800",
+                            "OFFLINE": " #F44336"
+                        }
+                    },
+                    "type": "str",
+                    "min_width": 4,
+                    "height": 4,
+                    "max_width": 4,
+                    "include_context_in_query": true,
+                    "include_context_keys": [
+                        "gateway_ip"
+                    ],
+                    "widget_id": "5a495920"
+                },
+                {
+                    "widget_type": "pie_chart",
+                    "title": "Edges by Software Version",
+                    "stream": "vco_1",
+                    "ts_column": "timestamp",
+                    "duration_hours": 1080,
+                    "column": "_RDA_Id",
+                    "agg": "value_count",
+                    "group_by": [
+                        "softwareVersion"
+                    ],
+                    "type": "str",
+                    "min_width": 4,
+                    "extra_filter": "(customerTag is '{{CUST_TAG}}' or customerTag is empty) and source is 'edge'",
+                    "height": 4,
+                    "max_width": 4,
+                    "include_context_in_query": true,
+                    "include_context_keys": [
+                        "gateway_ip"
+                    ],
+                    "widget_id": "1c8d8051"
+                },
+                {
+                    "title": "Edges by Recent Links Interface",
+                    "widget_type": "bar_chart",
+                    "stream": "vco_1",
+                    "ts_column": "timestamp",
+                    "chartProperties": {
+                        "yAxisLabel": null,
+                        "xAxisLabel": "Recent Links Interface",
+                        "stacked": true,
+                        "legendLocation": "none",
+                        "orientation": "horizontal"
+                    },
+                    "duration_hours": 1080,
+                    "min_width": 6,
+                    "height": 4,
+                    "max_width": 6,
+                    "extra_filter": "(customerTag is '{{CUST_TAG}}' or customerTag is empty) and source is 'edge'",
+                    "group_by": [
+                        "recentLinks_interface"
+                    ],
+                    "column": "_RDA_Id",
+                    "agg": "value_count",
+                    "type": "str",
+                    "include_context_in_query": true,
+                    "include_context_keys": [
+                        "gateway_ip"
+                    ],
+                    "widget_id": "f4786acb"
+                },
+                {
+                    "title": "Edges by Model",
+                    "widget_type": "bar_chart",
+                    "stream": "vco_1",
+                    "ts_column": "timestamp",
+                    "chartProperties": {
+                        "yAxisLabel": null,
+                        "xAxisLabel": "models",
+                        "stacked": true,
+                        "legendLocation": "none",
+                        "orientation": "horizontal"
+                    },
+                    "duration_hours": 1080,
+                    "min_width": 6,
+                    "height": 4,
+                    "max_width": 6,
+                    "extra_filter": "(customerTag is '{{CUST_TAG}}' or customerTag is empty) and source is 'edge'",
+                    "group_by": [
+                        "modelNumber"
+                    ],
+                    "column": "_RDA_Id",
+                    "agg": "value_count",
+                    "type": "str",
+                    "include_context_in_query": true,
+                    "include_context_keys": [
+                        "gateway_ip"
+                    ],
+                    "widget_id": "57dc3bf5"
+                },
+                {
+                    "title": "Edges Details",
+                    "widget_type": "tabular",
+                    "stream": "vco_1",
+                    "duration_hours": 1080,
+                    "query": "*",
+                    "min_width": 12,
+                    "height": 8,
+                    "max_width": 12,
+                    "extra_filter": "(customerTag is '{{CUST_TAG}}' or customerTag is empty) and source is 'edge'",
+                    "include_context_in_query": true,
+                    "remote_searchable": true,
+                    "remote_searchable_cols": [
+                        "deviceFamily"
+                    ],
+                    "include_context_keys": [
+                        "gateway_ip"
+                    ],
+                    "paginated": true,
+                    "max_rows": 50,
+                    "columns": {
+                        "deviceId": {
+                            "title": "Device ID",
+                            "type": "TEXT",
+                            "hidden": true
+                        },
+                        "name": " Name",
+                        "deviceFamily": {
+                            "title": "Device Family",
+                            "type": "TEXT",
+                            "key": true
+                        },
+                        "description": {
+                            "title": "Device Eq Description",
+                            "type": "TEXT",
+                            "key": true
+                        },
+                        "activationState_color": {
+                            "type": "COLOR-MAP",
+                            "visible": true,
+                            "source-column": "activationState",
+                            "color-map": {
+                                "ACTIVATED": "#4CAF50",
+                                "REACTIVATION_PENDING": " #FF9800"
+                            }
+                        },
+                        "activationState": {
+                            "title": "Activation State",
+                            "type": "TEXT",
+                            "key": true,
+                            "htmlTemplateForRow": "{% raw %} <span class='badge' style='background-color: {{ row.activationState_color }}' > {{ row.activationState}} </span> {% endraw %}"
+                        },
+                        "modelNumber": {
+                            "title": "Device Model",
+                            "key": false
+                        },
+                        "edgeState_color": {
+                            "type": "COLOR-MAP",
+                            "visible": true,
+                            "source-column": "edgeState",
+                            "color-map": {
+                                "CONNECTED": "#4CAF50",
+                                "NEVER_ACTIVATED": " #FF9800",
+                                "OFFLINE": " #F44336"
+                            }
+                        },
+                        "edgeState": {
+                            "title": "Edge State",
+                            "type": "TEXT",
+                            "key": true,
+                            "htmlTemplateForRow": "{% raw %} <span class='badge' style='background-color: {{ row.edgeState_color }}' > {{ row.edgeState}} </span> {% endraw %}"
+                        },
+                        "isHub": "IsHub",
+                        "softwareVersion": "Device SW Version",
+                        "factorySoftwareVersion": "Device Factory SW Version",
+                        "source_ip": {
+                            "title": "SourceIP",
+                            "type": "TEXT",
+                            "hidden": true
+                        }
+                    },
+                    "actions": [
+                        {
+                            "permission": "rda:user_dashboard:view",
+                            "appName": "user-dashboard/vco_inventory",
+                            "drillDownLinkField": "name",
+                            "stateName": "app.featureapp",
+                            "contextParamList": {
+                                "contextParams": [
+                                    {
+                                        "paramKey": "name",
+                                        "paramId": "name"
+                                    },
+                                    {
+                                        "paramKey": "edge_ip",
+                                        "paramId": "edge_ip"
+                                    },
+                                    {
+                                        "paramKey": "edge_id",
+                                        "paramId": "edge_id"
+                                    },
+                                    {
+                                        "paramKey": "serialNumber",
+                                        "paramId": "serialNumber"
+                                    }
+                                ]
+                            },
+                            "identifier": "launch.dashboard.device_view_app",
+                            "selectionType": "SINGLE",
+                            "title": "View Details",
+                            "type": "GO_TO_APP_STATE"
+                        }
+                    ],
+                    "widget_id": "4c2cfdd7"
+                }
+            ]
+        }
+    ],
+    "saved_time": "2025-03-27T16:00:33.630239"
+}

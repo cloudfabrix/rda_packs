@@ -1,0 +1,25 @@
+name: Collection Blueprint
+id: collection_blueprint
+version: 20240802
+category: MibCollection
+comment: Mib Collection Groups
+enabled: true
+type: Service
+provider: CloudFabrix Software, Inc.
+attrs: {}
+scheduled_pipelines:
+    -   name: mibs_access_verification_main_pipeline
+        label: Access Verification pipeline
+        version: '*'
+        site: .*
+        site_type: regex
+        instances: 1
+        cron_expression: 0 0 * * *
+    -   name: mibs_collection
+        label: Mibs Group Data Collection
+        version: '*'
+        site: .*
+        site_type: regex
+        instances: 1
+        cron_expression: 5 0 * * *
+saved_time: '2026-03-26T22:36:25.774346'

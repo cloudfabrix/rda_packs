@@ -1,0 +1,239 @@
+%% stream = no and limit = 0
+
+%% import_source = "cfxaia"
+
+@c:flex-block
+    --> @dm:empty
+    --> @exec:define-function name="define_child_pipelines"
+       --> @exec:run-pipeline name ="product_type_enrichment_pipeline" & import_functions = "yes"
+       --> @exec:run-pipeline name ="aia_utility_functions" & import_functions = "yes"
+    --> @exec:end-function
+
+--> @c:flex-block
+    --> @dm:empty
+    --> @exec:define-function name= "process_inventory_data"
+       --> @asset-discovery:get-collection-files path_column = 'minio_location'
+       --> @dm:explode-json column = 'output' & prefix_parent_key = 'yes'
+       --> @dm:fixcolumns
+       --> @dm:to-type columns = 'device_identities,output_collection_profile,output_collection_type,collection_status,tags,environment' & type = 'str'
+       --> @dm:eval output_data = "json_dumps(output_data) if output_data else None"
+       --> @dm:save name = 'temp-network_device_inventory_data'
+       --> *exec:if-condition output_groupname = 'base'
+          --> *exec:if-shape num_rows > 0
+             --> @dm:explode-json column = 'output_data'
+             --> @dm:eval vendor_required="'yes'"
+             --> @dm:add-missing-columns columns="systemVendorID"
+             --> *dm:filter systemVendorID is not empty
+             --> @dm:skip-block-if-shape row_count = 0
+             --> @dm:to-type columns = "systemVendorID" & type = "int"
+             --> @dm:to-type columns = "systemVendorID" & type = "str"
+             --> @dm:replace-data columns="systemVendorID" and expr=".0" and replace=""
+             --> @dm:save name="temp-network_device_inventory_base"
+             ## ###########################################################
+             ## Cisco Network Devices: Inventory Data Processing
+             ## ###########################################################
+             --> *exec:if-condition systemVendorID in ["9"] and sysObjectID not in ['1.3.6.1.4.1.9.1.1348']
+                --> @dm:save name="temp-cisco_network_device_inventory"
+                --> @dm:recall name="temp-network_device_inventory_data"
+                --> @dm:enrich dict="temp-cisco_network_device_inventory" and
+                        src_key_cols="asset_ip" and
+                        dict_key_cols="asset_ip" and
+                        enrich_cols="vendor_required"
+                --> *dm:filter vendor_required is not empty
+                --> *exec:if-shape num_rows > 0
+                   ## Debugger
+                   --> @dm:save name="temp-child-pipeline-input"
+                   --> @dm:sort columns="asset_ip"
+                   --> @dm:eval merge_key_dummy="'merge_key_dummy'"
+                   --> @dm:implode key_columns="merge_key_dummy" and merge_columns="asset_ip"
+                   --> @dm:rename-columns _cisco="asset_ip"
+                   --> @dm:save name="temp-job-debugger-vendor"
+                   --> @dm:recall name="temp-job-debugger"
+                   --> @dm:enrich dict="temp-job-debugger-vendor" and src_key_cols="merge_key_dummy" and dict_key_cols="merge_key_dummy" and enrich_cols="_cisco"
+                   --> @dm:save name="temp-job-debugger"
+                   --> @dm:empty
+                   --> @dm:addrow pipename="cisco_network_devices_inventory_processing_pipeline"
+                   --> @exec:run-pipeline-by-row pipeline_col="pipename" and pipeline_type="published" and input_dataset="temp-child-pipeline-input"
+                   ## Debugger
+                   --> @dm:eval merge_key_dummy="'merge_key_dummy'"
+                   --> @dm:add-missing-columns columns="pipline_exec_failure_reason,pipline_exec_status"
+                   --> @dm:eval cisco_pipeline_failure_reason="pipline_exec_failure_reason" and cisco_pipeline_exec_status="pipline_exec_status"
+                   --> @dm:save name="temp-failure-debug"
+                   --> @dm:recall name="temp-job-debugger"
+                   --> @dm:enrich dict="temp-failure-debug" and src_key_cols="merge_key_dummy" and dict_key_cols="merge_key_dummy" and enrich_cols="cisco_pipeline_failure_reason,cisco_pipeline_exec_status"
+                   --> @dm:save name="temp-job-debugger"
+                ## End of Debugger
+                --> @exec:end-if
+             --> @exec:end-if
+             ## ###########################################################
+             ## Juniper Network Devices: Inventory Data Processing
+             ## ###########################################################
+             --> *exec:if-condition systemVendorID in ["2636"]
+                --> @dm:save name="temp-juniper_network_device_inventory"
+                --> @dm:recall name="temp-network_device_inventory_data"
+                --> @dm:enrich dict="temp-juniper_network_device_inventory" and
+                        src_key_cols="asset_ip" and
+                        dict_key_cols="asset_ip" and
+                        enrich_cols="vendor_required"
+                --> *dm:filter vendor_required is not empty
+                --> *exec:if-shape num_rows > 0
+                   ## Debugger
+                   --> @dm:save name="temp-child-pipeline-input"
+                   --> @dm:sort columns="asset_ip"
+                   --> @dm:eval merge_key_dummy="'merge_key_dummy'"
+                   --> @dm:implode key_columns="merge_key_dummy" and merge_columns="asset_ip"
+                   --> @dm:rename-columns _juniper="asset_ip"
+                   --> @dm:save name="temp-job-debugger-vendor"
+                   --> @dm:recall name="temp-job-debugger"
+                   --> @dm:enrich dict="temp-job-debugger-vendor" and src_key_cols="merge_key_dummy" and dict_key_cols="merge_key_dummy" and enrich_cols="_juniper"
+                   --> @dm:save name="temp-job-debugger"
+                   --> @dm:empty
+                   --> @dm:addrow pipename="juniper_network_devices_inventory_processing_pipeline"
+                   --> @exec:run-pipeline-by-row pipeline_col="pipename" and pipeline_type="published" and input_dataset="temp-child-pipeline-input"
+                   ## --> @dm:recall name="temp-child-pipeline-input"
+                   ## --> @exec:run-pipeline name="juniper_network_devices_inventory_processing_pipeline"
+                   ## Debugger
+                   --> @dm:eval merge_key_dummy="'merge_key_dummy'"
+                   --> @dm:add-missing-columns columns="pipline_exec_failure_reason,pipline_exec_status"
+                   --> @dm:eval juniper_pipeline_failure_reason="pipline_exec_failure_reason" and juniper_pipeline_exec_status="pipline_exec_status"
+                   --> @dm:save name="temp-failure-debug"
+                   --> @dm:recall name="temp-job-debugger"
+                   --> @dm:enrich dict="temp-failure-debug" and src_key_cols="merge_key_dummy" and dict_key_cols="merge_key_dummy" and enrich_cols="juniper_pipeline_failure_reason,juniper_pipeline_exec_status"
+                   --> @dm:save name="temp-job-debugger"
+                ## End of Debugger
+                --> @exec:end-if
+             --> @exec:end-if
+             ## ###########################################################
+             ## Viptela Network Devices: Inventory Data Processing
+             ## ###########################################################
+             --> *exec:if-condition systemVendorID in ["41916"]
+                --> @dm:save name="temp-viptela_network_device_inventory"
+                --> @dm:recall name="temp-network_device_inventory_data"
+                --> @dm:enrich dict="temp-viptela_network_device_inventory" and
+                        src_key_cols="asset_ip" and
+                        dict_key_cols="asset_ip" and
+                        enrich_cols="vendor_required"
+                --> *dm:filter vendor_required is not empty
+                --> *exec:if-shape num_rows > 0
+                   ## Debugger
+                   --> @dm:save name="temp-child-pipeline-input"
+                   --> @dm:sort columns="asset_ip"
+                   --> @dm:eval merge_key_dummy="'merge_key_dummy'"
+                   --> @dm:implode key_columns="merge_key_dummy" and merge_columns="asset_ip"
+                   --> @dm:rename-columns _viptela="asset_ip"
+                   --> @dm:save name="temp-job-debugger-vendor"
+                   --> @dm:recall name="temp-job-debugger"
+                   --> @dm:enrich dict="temp-job-debugger-vendor" and src_key_cols="merge_key_dummy" and dict_key_cols="merge_key_dummy" and enrich_cols="_viptela"
+                   --> @dm:save name="temp-job-debugger"
+                   ## --> @dm:recall name="temp-child-pipeline-input"
+                   ## End of Debugger
+                   --> @dm:empty
+                   --> @dm:addrow pipename="viptela_network_devices_inventory_processing_pipeline"
+                   --> @exec:run-pipeline-by-row pipeline_col="pipename" and pipeline_type="published" and input_dataset="temp-child-pipeline-input"
+                   --> @dm:recall name="temp-child-pipeline-input"
+                   --> @dm:eval debug_timestamp="time_now_as_isoformat()"
+                   --> @dm:save name="debug-viptela-{{row.debug_timestamp}}"
+                   --> @dm:selectcolumns exclude="debug_timestamp"
+                   ## --> @exec:run-pipeline name="viptela_network_devices_inventory_processing_pipeline"
+                   ## Debugger
+                   --> @dm:eval merge_key_dummy="'merge_key_dummy'"
+                   --> @dm:add-missing-columns columns="pipline_exec_failure_reason,pipline_exec_status"
+                   --> @dm:eval viptela_pipeline_failure_reason="pipline_exec_failure_reason" and viptela_pipeline_exec_status="pipline_exec_status"
+                   --> @dm:save name="temp-failure-debug"
+                   --> @dm:recall name="temp-job-debugger"
+                   --> @dm:enrich dict="temp-failure-debug" and src_key_cols="merge_key_dummy" and dict_key_cols="merge_key_dummy" and enrich_cols="viptela_pipeline_failure_reason,viptela_pipeline_exec_status"
+                   --> @dm:save name="temp-job-debugger"
+                ## End of Debugger
+                --> @exec:end-if
+             --> @exec:end-if
+             ## ###########################################################
+             ## Other Vendor Network Devices: Inventory Data Processing
+             ## ###########################################################
+             --> *exec:if-condition systemVendorID not in ["2636","41916","12356","9"] and systemVendorID not null
+                --> @dm:save name="temp-other_vendor_network_device_inventory"
+                --> @dm:recall name="temp-network_device_inventory_data"
+                --> @dm:enrich dict="temp-other_vendor_network_device_inventory" and
+                        src_key_cols="asset_ip" and
+                        dict_key_cols="asset_ip" and
+                        enrich_cols="vendor_required"
+                --> *dm:filter vendor_required is not empty
+                --> *exec:if-shape num_rows > 0
+                   ## Debugger
+                   --> @dm:save name="temp-child-pipeline-input"
+                   --> @dm:sort columns="asset_ip"
+                   --> @dm:eval merge_key_dummy="'merge_key_dummy'"
+                   --> @dm:implode key_columns="merge_key_dummy" and merge_columns="asset_ip"
+                   --> @dm:rename-columns _othervendor="asset_ip"
+                   --> @dm:save name="temp-job-debugger-vendor"
+                   --> @dm:recall name="temp-job-debugger"
+                   --> @dm:enrich dict="temp-job-debugger-vendor" and src_key_cols="merge_key_dummy" and dict_key_cols="merge_key_dummy" and enrich_cols="_othervendor"
+                   --> @dm:save name="temp-job-debugger"
+                   ## --> @dm:recall name="temp-child-pipeline-input"
+                   ## End of Debugger
+                   --> @dm:empty
+                   --> @dm:addrow pipename="other_vendor_network_device_inventory_processing_pipeline"
+                   --> @exec:run-pipeline-by-row pipeline_col="pipename" and pipeline_type="published" and input_dataset="temp-child-pipeline-input"
+                   ## --> @dm:recall name="temp-child-pipeline-input"
+                   ## --> @exec:run-pipeline name="other_vendor_network_device_inventory_processing_pipeline"
+                   ## Debugger
+                   --> @dm:eval merge_key_dummy="'merge_key_dummy'"
+                   --> @dm:add-missing-columns columns="pipline_exec_failure_reason,pipline_exec_status"
+                   --> @dm:eval othervendor_pipeline_failure_reason="pipline_exec_failure_reason" and othervendor_pipeline_exec_status="pipline_exec_status"
+                   --> @dm:save name="temp-failure-debug"
+                   --> @dm:recall name="temp-job-debugger"
+                   --> @dm:enrich dict="temp-failure-debug" and src_key_cols="merge_key_dummy" and dict_key_cols="merge_key_dummy" and enrich_cols="othervendor_pipeline_failure_reason,othervendor_pipeline_exec_status"
+                   --> @dm:save name="temp-job-debugger"
+                ## End of Debugger
+                --> @exec:end-if
+             --> @exec:end-if
+          --> @exec:end-if
+       --> @exec:end-if
+    --> @exec:end-function
+
+## Network Inventory Data Processing
+--> @c:new-block
+    --> @dn:read-stream name="network_inventory_files_stream" and
+            group="network_inventory_files_stream_group" and
+            batch_size=200 and
+            lazy_commit="yes" and
+            max_poll_interval_ms=7200000 and offset_reset="earliest" and
+            batch_wait=60
+    --> @dm:save name="temp-parser-debug-1"
+    --> @dm:add-missing-columns columns="type_,is_duplicate,collection_status"
+    --> @dm:to-type columns = 'type_,is_duplicate,collection_status' & type = 'str'
+    --> *dm:filter type_ is "device_status" and is_duplicate does not contain "True"
+    --> @dm:skip-block-if-shape row_count=0
+    --> *dm:filter collection_status is "Success"
+    --> @dm:skip-block-if-shape row_count=0
+    --> @dm:save name="temp-devices-to-process"
+    ## Generate Job Dedugger details
+    --> @dm:sort columns="asset_ip"
+    --> @dm:eval merge_key_dummy="'merge_key_dummy'"
+    --> @dm:implode key_columns="merge_key_dummy" and merge_columns="asset_ip"
+    --> @dm:rename-columns _all="asset_ip"
+    --> @dm:add-checksum checksum_type="rows-only" and row_checksum_column="batch_identifier" and key="yes"
+    --> @dm:eval jobuid="'{{row.batch_identifier}}'"
+    --> @dm:save name="temp-job-debugger"
+    ## Job Debugger
+    --> @dm:recall name="temp-devices-to-process"
+    --> @exec:call-function name = "process_inventory_data"
+    ## Debugger
+    --> @dm:recall name="temp-job-debugger"
+    --> @dm:sleep seconds="5"
+    --> #dm:query-persistent-stream query contains "{{row.uid}}" GET jobid
+            with-input name="rda_system_worker_traces" and
+            limit="1"
+    --> @dm:add-missing-columns columns="jobid"
+    --> @dm:eval merge_key_dummy="'merge_key_dummy'"
+    --> @dm:save name="temp-pipeline-jodid"
+    --> @dm:recall name="temp-job-debugger"
+    --> @dm:enrich dict="temp-pipeline-jodid" and src_key_cols="merge_key_dummy" and dict_key_cols="merge_key_dummy" and enrich_cols="jobid"
+    --> @dm:selectcolumns exclude="merge_key_dummy|jobuid"
+    --> @rn:write-stream name="network_device_parser_debugger"
+    --> *exec:if-condition cisco_pipeline_failure_reason is not empty or juniper_pipeline_failure_reason is not empty or viptela_pipeline_failure_reason is not empty or othervendor_pipeline_failure_reason is not empty
+       --> @dm:fail-if-shape row_count > 0
+    --> @exec:end-if
+    ## End of Debugger
+    --> @dm:recall name="temp-parser-debug-1" and return_empty="yes"
+    --> @dm:empty
+

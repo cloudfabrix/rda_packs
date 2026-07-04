@@ -1,0 +1,93 @@
+{
+    "name": "customer_discovery_runs_details_total_devices",
+    "label": "Total Devices",
+    "description": "onboarded_devices: Insights",
+    "dashboard_folder": "NetworkDevicePack",
+    "version": "1.0.3",
+    "enabled": false,
+    "dashboard_type": "template",
+    "live_edit": true,
+    "template_variables": {
+        "CUST_ID": {
+            "contextId": "customerId"
+        },
+        "PROJ_ID": {
+            "contextId": "project_id"
+        },
+        "CUST_TAG": {
+            "contextId": "customerTag"
+        },
+        "INGESTION_ID": {
+            "contextId": "ingestion_id"
+        }
+    },
+    "dashboard_filters": {
+        "time_filter": true,
+        "extra_filter0": "ingestion_id is '{{FILENAME}}' and source contains 'Logs' and and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+        "default_time_filter_labels0": [
+            "Last 1 month"
+        ],
+        "columns_filter": [
+            {
+                "id": "timestamp",
+                "label": "Timestamp",
+                "type": "DATETIME"
+            }
+        ],
+        "group_filters": []
+    },
+    "dashboard_sections": [
+        {
+            "title": "Onboarded Devices",
+            "show_filter": true,
+            "widgets": [
+                {
+                    "title": "Total Devices",
+                    "widget_type": "tabular",
+                    "stream": "discovery_status",
+                    "extra_filter0": "customer_tag is '{{CUST_TAG}}'",
+                    "extra_filter": "(jobname contains '{{CUST_TAG}}' or jobname is empty or jobname contains 'job' or jobname is 'None') and type_ is 'device_status' and ingestion_id is '{{INGESTION_ID}}'",
+                    "duration_hours": 1080,
+                    "height": 4,
+                    "max_width": 12,
+                    "min_width": 12,
+                    "sorting": [
+                        {
+                            "timestamp": "desc"
+                        }
+                    ],
+                    "columns": {
+                        "asset_ip": {
+                            "title": "IP Address",
+                            "type": "TEXT"
+                        },
+                        "collection_status": {
+                            "title": "Status",
+                            "type": "DATETIME"
+                        },
+                        "collection_start_time": {
+                            "title": "Collection Start Time",
+                            "type": "DATETIME",
+                            "visible": true
+                        },
+                        "collection_timestamp": {
+                            "title": "Collection End Time",
+                            "type": "DATETIME"
+                        },
+                        "reason": {
+                            "title": "Reason",
+                            "type": "TEXT"
+                        },
+                        "jobname": {
+                            "title": "Jobname",
+                            "type": "TEXT",
+                            "hidden": true
+                        }
+                    },
+                    "widget_id": "7a63dacd"
+                }
+            ]
+        }
+    ],
+    "saved_time": "2025-12-16T19:34:11.118624"
+}

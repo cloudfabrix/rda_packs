@@ -1,0 +1,395 @@
+{
+    "name": "meraki_integration_management",
+    "label": "Meraki Integration Management",
+    "description": "Meraki Integration Management dashboard",
+    "version": "25.10.15.2",
+    "enabled": false,
+    "dashboard_type": "template",
+    "dashboard_folder": "MerakiIntegartionPack",
+    "dashboard_style": "auto",
+    "template_variables": {
+        "CUST_ID": {
+            "contextId": "customerId"
+        },
+        "PROJ_ID": {
+            "contextId": "projectId"
+        },
+        "CUST_TAG": {
+            "contextId": "customerTag"
+        }
+    },
+    "dashboard_filters": {
+        "time_filter": true,
+        "default_time_filter_labels": [
+            "Last 1 month"
+        ]
+    },
+    "live_edit": true,
+    "dashboard_sections": [
+        {
+            "title": "Integration Credentials",
+            "widgets": [
+                {
+                    "title": "Integration Credential Management",
+                    "widget_type": "tabular",
+                    "stream": "rda_secrets_meta",
+                    "extra_filter": "(type in ['splunk_v2','workflow'] and customerTag is '{{CUST_TAG}}') or (type in ['splunk_v2','workflow'] and customerTag is empty)",
+                    "timebased": false,
+                    "remote_searchable_cols": [
+                        "name",
+                        "type",
+                        "typeDescription"
+                    ],
+                    "ts_column": "saved_time",
+                    "paginated": true,
+                    "height": 10,
+                    "min_wdith": 12,
+                    "columns": {
+                        "name": {
+                            "title": "Name",
+                            "key": true
+                        },
+                        "type": {
+                            "title": "Type",
+                            "key": true
+                        },
+                        "typeDescription": {
+                            "title": "description"
+                        },
+                        "has_credential_check": {
+                            "title": "Credential Check",
+                            "visible": false
+                        },
+                        "saved_time": {
+                            "title": "Saved Time",
+                            "type": "DATETIME"
+                        },
+                        "timestamp": {
+                            "title": "When",
+                            "type": "HUMANIZE_TIME_DELTA",
+                            "source-column": "saved_time",
+                            "sortable": false
+                        }
+                    },
+                    "custom_columns": [
+                        {
+                            "id": "rowStyleClass",
+                            "hidden": true,
+                            "visiblle": false,
+                            "expr": "'bg-fading-blue' if time_now_as_ms() - isoformat_to_ms(saved_time) <= 120000 else None"
+                        },
+                        {
+                            "id": "artifact_name",
+                            "label": "Artifact Name",
+                            "expr": "name",
+                            "key": true,
+                            "visible": false,
+                            "sortable": false
+                        },
+                        {
+                            "id": "artifact_type",
+                            "label": "Artifact Type",
+                            "expr": "'source'",
+                            "key": true,
+                            "visible": false,
+                            "sortable": false
+                        }
+                    ],
+                    "actions": [
+                        {
+                            "permission": "rda:credential:add",
+                            "title": "Add",
+                            "icon": "mdi mdi-plus",
+                            "type": "POPUP_FORM",
+                            "selectionType": "NONE",
+                            "identifier": "saas-service-action:vault-add",
+                            "api-endpoint": {
+                                "service-name": "saas-reports",
+                                "methodName": "getForm",
+                                "stringified-params": true,
+                                "parse-output": false,
+                                "params": [
+                                    {
+                                        "formId": "rda.saas.vault.add",
+                                        "extension_types": [
+                                            "splunk_v2"
+                                        ]
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "permission": "rda:credential:edit",
+                            "title": "Edit",
+                            "type": "POPUP_FORM",
+                            "selectionType": "SINGLE",
+                            "identifier": "saas-service-action:vault-edit",
+                            "api-endpoint": {
+                                "service-name": "saas-reports",
+                                "methodName": "getForm",
+                                "stringified-params": true,
+                                "parse-output": false,
+                                "params": [
+                                    {
+                                        "formId": "rda.saas.vault.edit"
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "permission": "rda:credential:view",
+                            "title": "View",
+                            "type": "POPUP_FORM",
+                            "selectionType": "SINGLE",
+                            "displayLabelColumnId": "name",
+                            "drillDownLinkField": "name",
+                            "identifier": "saas-service-action:vault-view",
+                            "api-endpoint": {
+                                "service-name": "saas-reports",
+                                "methodName": "getForm",
+                                "stringified-params": true,
+                                "parse-output": false,
+                                "params": [
+                                    {
+                                        "formId": "rda.saas.vault.view"
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "permission": "rda:credential:verify",
+                            "title": "Verify Credentials",
+                            "type": "POPUP_FORM",
+                            "selectionType": "SINGLE",
+                            "identifier": "saas-service-action:vault-edit",
+                            "actionCondition": {
+                                "actionControl": "HIDE_IF",
+                                "conditionalField": [
+                                    {
+                                        "conditionType": "EQUAL",
+                                        "conditionValue": "false",
+                                        "fieldId": "has_credential_check"
+                                    }
+                                ]
+                            },
+                            "api-endpoint": {
+                                "service-name": "saas-reports",
+                                "methodName": "getForm",
+                                "stringified-params": true,
+                                "parse-output": false,
+                                "params": [
+                                    {
+                                        "formId": "rda.saas.vault.validateConenctivity"
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "permission": "rda:credential:verify",
+                            "title": "Delete",
+                            "type": "POPUP_FORM",
+                            "selectionType": "SINGLE",
+                            "identifier": "saas-service-action:vault-delete",
+                            "api-endpoint": {
+                                "service-name": "saas-reports",
+                                "methodName": "getForm",
+                                "stringified-params": true,
+                                "parse-output": false,
+                                "params": [
+                                    {
+                                        "formId": "rda.saas.vault.delete"
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "widget_id": "01dc3a55"
+                }
+            ]
+        },
+        {
+            "title": "Configure Artifacts",
+            "show_filters": true,
+            "widgets": [
+                {
+                    "title": "Datasets",
+                    "widget_type": "tabular",
+                    "stream": "rda_datasets_meta",
+                    "extra_filter": "(name in ['reference_list_v2'])",
+                    "duration_hours": 87600,
+                    "remote_searchable": true,
+                    "remote_searchable_cols": [
+                        "name",
+                        "folder",
+                        "format",
+                        "schema"
+                    ],
+                    "ts_column": "saved_time",
+                    "paginated": true,
+                    "height": 10,
+                    "min_wdith": 12,
+                    "columns": {
+                        "folder": {
+                            "title": "Folder"
+                        },
+                        "name": {
+                            "title": "Name",
+                            "key": true
+                        },
+                        "format": {
+                            "title": "Format"
+                        },
+                        "mem_size_mb": {
+                            "title": "Size (MB)"
+                        },
+                        "num_rows": {
+                            "title": "Rows"
+                        },
+                        "num_columns": {
+                            "title": "Columns"
+                        },
+                        "saved_time": {
+                            "title": "Dataset Saved",
+                            "type": "DATETIME"
+                        },
+                        "tags": {
+                            "title": "Tags",
+                            "type": "TEXT",
+                            "key": true
+                        },
+                        "dataset_tags": {
+                            "title": "Dataset Tags",
+                            "type": "TEXT"
+                        },
+                        "schema": {
+                            "title": "Schema"
+                        },
+                        "timestamp": {
+                            "title": "When",
+                            "type": "HUMANIZE_TIME_DELTA",
+                            "source-column": "saved_time",
+                            "sortable": false
+                        }
+                    },
+                    "custom_columns": [
+                        {
+                            "id": "artifact_name",
+                            "label": "Artifact Name",
+                            "expr": "name",
+                            "key": true,
+                            "visible": false,
+                            "sortable": false
+                        },
+                        {
+                            "id": "artifact_type",
+                            "label": "Artifact Type",
+                            "expr": "'dataset'",
+                            "key": true,
+                            "visible": false,
+                            "sortable": false
+                        }
+                    ],
+                    "actions": [
+                        {
+                            "permission": "rda:dataset:view",
+                            "title": "View Metadata",
+                            "type": "POPUP_FORM",
+                            "selectionType": "SINGLE",
+                            "identifier": "saas-service-action:dataset-view-metadata",
+                            "api-endpoint": {
+                                "service-name": "saas-reports",
+                                "methodName": "getForm",
+                                "stringified-params": false,
+                                "parse-output": true,
+                                "params": [
+                                    {
+                                        "formId": "rda.saas.dataset.metadata"
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "permission": "rda:dataset:view",
+                            "title": "View Data",
+                            "type": "POPUP_REPORT",
+                            "selectionType": "SINGLE",
+                            "displayLabelColumnId": "name",
+                            "drillDownLinkField": "name",
+                            "identifier": "saas-service-action:dataset-view-metadata",
+                            "paginated": true,
+                            "api-endpoint": {
+                                "service-name": "saas-reports",
+                                "methodName": "getReport",
+                                "stringified-params": false,
+                                "parse-output": false,
+                                "params": [
+                                    {
+                                        "reportId": "rda.saas.dataset.head100"
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "permission": "rda:dataset:view",
+                            "title": "View Data Types",
+                            "type": "POPUP_REPORT",
+                            "selectionType": "SINGLE",
+                            "identifier": "saas-service-action:dataset-view-datatypes",
+                            "api-endpoint": {
+                                "service-name": "saas-reports",
+                                "methodName": "getReport",
+                                "stringified-params": false,
+                                "parse-output": false,
+                                "params": [
+                                    {
+                                        "reportId": "rda.saas.dataset.datatypes"
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "permission": "rda:dataset:delete",
+                            "title": "Delete",
+                            "type": "POPUP_FORM",
+                            "selectionType": "SINGLE",
+                            "identifier": "saas-service-action:dataset-delete",
+                            "api-endpoint": {
+                                "service-name": "saas-reports",
+                                "methodName": "getForm",
+                                "stringified-params": false,
+                                "parse-output": true,
+                                "params": [
+                                    {
+                                        "formId": "rda.saas.dataset.delete"
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "permission": "rda:dataset:update",
+                            "title": "Manage Data",
+                            "type": "POPUP_REPORT",
+                            "selectionType": "SINGLE",
+                            "identifier": "saas-service-action:dataset-manage-data",
+                            "paginated": true,
+                            "api-endpoint": {
+                                "service-name": "saas-reports",
+                                "methodName": "getReport",
+                                "stringified-params": false,
+                                "parse-output": false,
+                                "params": [
+                                    {
+                                        "reportId": "rda.saas.dataset.data.table"
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "widget_id": "1f2ed2e5"
+                }
+            ],
+            "widget_id": "02abf055"
+        }
+    ],
+    "saved_time": "2026-01-20T07:46:47.734657"
+}

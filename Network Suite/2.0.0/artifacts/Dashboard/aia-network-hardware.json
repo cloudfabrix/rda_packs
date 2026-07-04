@@ -1,0 +1,2283 @@
+{
+    "name": "aia-network-hardware",
+    "label": "Hardware - Network",
+    "description": "Hardware Network",
+    "dashboard_folder": "AIA_Network_Hardware",
+    "version": "22.12.1.2",
+    "enabled": true,
+    "live_edit": true,
+    "stream": "network-devices-inventory",
+    "dashboard_type": "navigation-dashboard",
+    "section_as_dashboard": true,
+    "dashboard_filters": {
+        "time_filter": true,
+        "default_time_filter_labels": [
+            "All Time"
+        ],
+        "extra_filter": "`asset_status` notin [\"DECOMMISSION\", \"TO BE PURGED\"]",
+        "columns_filter": [
+            {
+                "id": "unique_id",
+                "label": "Unique ID",
+                "type": "TEXT"
+            },
+            {
+                "id": "bucket_id",
+                "label": "Bucket ID",
+                "type": "TEXT"
+            },
+            {
+                "id": "org_id",
+                "label": "Organization Id",
+                "type": "TEXT"
+            },
+            {
+                "id": "org_name",
+                "label": "Organization Name",
+                "type": "TEXT"
+            },
+            {
+                "id": "equipment_type",
+                "label": "Equipment Type",
+                "type": "TEXT"
+            },
+            {
+                "id": "equipment_name",
+                "label": "Equipment Name",
+                "type": "TEXT"
+            },
+            {
+                "id": "product_type",
+                "label": "Product Type",
+                "type": "TEXT"
+            },
+            {
+                "id": "product_family",
+                "label": "Product Family",
+                "type": "TEXT"
+            },
+            {
+                "id": "product_id",
+                "label": "Product ID",
+                "type": "TEXT"
+            },
+            {
+                "id": "product_category",
+                "label": "Product Category",
+                "type": "TEXT"
+            },
+            {
+                "id": "vendor",
+                "label": "Vendor",
+                "type": "TEXT"
+            },
+            {
+                "id": "serial_number",
+                "label": "Serial Number",
+                "type": "TEXT"
+            },
+            {
+                "id": "ip_address",
+                "label": "IP Address",
+                "type": "TEXT"
+            },
+            {
+                "id": "equipment_age",
+                "label": "Equipment Age",
+                "type": "TEXT"
+            },
+            {
+                "id": "hw_revision",
+                "label": "HW Revision",
+                "type": "TEXT"
+            },
+            {
+                "id": "sw_version",
+                "label": "SW Version",
+                "type": "TEXT"
+            },
+            {
+                "id": "sw_version_details",
+                "label": "SW Version Details",
+                "type": "TEXT"
+            },
+            {
+                "id": "hostname",
+                "label": "Hostname",
+                "type": "TEXT"
+            },
+            {
+                "id": "parent_serial_number",
+                "label": "Parent SN",
+                "type": "TEXT"
+            },
+            {
+                "id": "hw_status",
+                "label": "HW Status",
+                "type": "TEXT"
+            },
+            {
+                "id": "hw_expiring_year",
+                "label": "HW Expiring Year",
+                "type": "TEXT"
+            },
+            {
+                "id": "hw_expiring_qtr",
+                "label": "HW Expiring Quarter",
+                "type": "TEXT"
+            },
+            {
+                "id": "sw_ldos",
+                "label": "SW LDoS",
+                "type": "DATETIME"
+            },
+            {
+                "id": "product_name",
+                "label": "Product Name",
+                "type": "TEXT"
+            },
+            {
+                "id": "product_description",
+                "label": "Product Description",
+                "type": "TEXT"
+            },
+            {
+                "id": "source_filename",
+                "label": "Source Filename",
+                "type": "TEXT"
+            },
+            {
+                "id": "fex_number",
+                "label": "FEX Number",
+                "type": "TEXT"
+            },
+            {
+                "id": "fex_state",
+                "label": "FEX State",
+                "type": "TEXT"
+            },
+            {
+                "id": "fex_description",
+                "label": "FEX Description",
+                "type": "TEXT"
+            },
+            {
+                "id": "fex_name",
+                "label": "FEX Name",
+                "type": "TEXT"
+            },
+            {
+                "id": "fex_grid",
+                "label": "FEX Grid",
+                "type": "TEXT"
+            },
+            {
+                "id": "asset_status",
+                "label": "Asset State",
+                "type": "TEXT"
+            },
+            {
+                "id": "asset_mode",
+                "label": "Asset State Transfer Mode",
+                "type": "TEXT"
+            },
+            {
+                "id": "additional_ips",
+                "label": "Device Additional IP's",
+                "type": "TEXT"
+            },
+            {
+                "id": "poe_summary",
+                "label": "PoE Summary",
+                "type": "TEXT"
+            },
+            {
+                "id": "dns_name",
+                "label": "DNS Name",
+                "type": "TEXT"
+            },
+            {
+                "id": "sys_object_id",
+                "label": "sysObjectId",
+                "type": "TEXT"
+            },
+            {
+                "id": "sys_contact",
+                "label": "sysContact",
+                "type": "TEXT"
+            },
+            {
+                "id": "sys_descr",
+                "label": "sysDescr",
+                "type": "TEXT"
+            },
+            {
+                "id": "sw_type",
+                "label": "SW Type",
+                "type": "TEXT"
+            },
+            {
+                "id": "sys_location",
+                "label": "SNMP Syslocation",
+                "type": "TEXT"
+            },
+            {
+                "id": "parent_pid",
+                "label": "Parent PID",
+                "type": "TEXT"
+            },
+            {
+                "id": "total_up_ports",
+                "label": "Up Ethernet Ports",
+                "type": "DOUBLE"
+            },
+            {
+                "id": "total_down_ports",
+                "label": "Down Ethernet Ports",
+                "type": "DOUBLE"
+            },
+            {
+                "id": "total_eth_ports",
+                "label": "Total Ethernet Ports",
+                "type": "DOUBLE"
+            },
+            {
+                "id": "total_admin_down_ports",
+                "label": "Admin Down Ethernet Ports",
+                "type": "DOUBLE"
+            },
+            {
+                "id": "hw_ldos",
+                "label": "HW LDoS Date",
+                "type": "DATETIME"
+            },
+            {
+                "id": "hw_ldos_string",
+                "label": "HW LDoS",
+                "type": "TEXT"
+            },
+            {
+                "id": "price",
+                "label": "Price",
+                "type": "DOUBLE"
+            },
+            {
+                "id": "end_of_sale",
+                "label": "End of Sale",
+                "type": "DATETIME"
+            },
+            {
+                "id": "first_seen",
+                "label": "First Seen",
+                "type": "DATETIME"
+            },
+            {
+                "id": "last_seen",
+                "label": "Last Seen",
+                "type": "DATETIME"
+            },
+            {
+                "id": "end_of_ext_announcement_date",
+                "label": "End Of External Announcement Date",
+                "type": "DATETIME"
+            },
+            {
+                "id": "end_of_routine_fail_date",
+                "label": "End Of Routine Failure Analysis Date",
+                "type": "DATETIME"
+            },
+            {
+                "id": "end_of_contract_renew_date",
+                "label": "End Of Contract Renewal Date",
+                "type": "DATETIME"
+            },
+            {
+                "id": "end_of_svc_attach_date",
+                "label": "End Of Svc Attach Date",
+                "type": "DATETIME"
+            },
+            {
+                "id": "end_of_sec_sup_date",
+                "label": "End Of Security Vul Support Date",
+                "type": "DATETIME"
+            },
+            {
+                "id": "end_of_sw_maint",
+                "label": "End Of SW Maintenance",
+                "type": "DATETIME"
+            },
+            {
+                "id": "__state_updated_time",
+                "label": "Asset State Updated Time",
+                "type": "TEXT"
+            },
+            {
+                "id": "management_ip",
+                "label": "Management IP",
+                "type": "TEXT"
+            },
+            {
+                "id": "system_vendor_sub_id",
+                "label": "SystemVendorSubID",
+                "type": "TEXT"
+            },
+            {
+                "id": "system_vendor_os",
+                "label": "systemVendorOS",
+                "type": "TEXT"
+            },
+            {
+                "id": "fex_serial",
+                "label": "FEX Serial",
+                "type": "TEXT"
+            },
+            {
+                "id": "fex_model",
+                "label": "FEX Model",
+                "type": "TEXT"
+            },
+            {
+                "id": "sys_uptime",
+                "label": "Device Uptime (Days)",
+                "type": "DOUBLE"
+            },
+            {
+                "id": "cdp_global_deviceId",
+                "label": "cdpGlobalDeviceId",
+                "type": "TEXT"
+            },
+            {
+                "id": "is_poe_capable",
+                "label": "PoE Capable",
+                "type": "TEXT"
+            },
+            {
+                "id": "poe_admin_auto",
+                "label": "PoE Admin Status (Auto)",
+                "type": "TEXT"
+            },
+            {
+                "id": "poe_admin_off",
+                "label": "PoE Admin Status (Off)",
+                "type": "TEXT"
+            },
+            {
+                "id": "poe_admin_static",
+                "label": "PoE Admin Status (Static)",
+                "type": "TEXT"
+            },
+            {
+                "id": "poe_oper_off",
+                "label": "PoE Status (Off)",
+                "type": "TEXT"
+            },
+            {
+                "id": "poe_oper_faulty",
+                "label": "PoE Status (Faulty)",
+                "type": "TEXT"
+            },
+            {
+                "id": "poe_oper_on",
+                "label": "PoE Status (On)",
+                "type": "TEXT"
+            },
+            {
+                "id": "poe_oper_power_deny",
+                "label": "PoE Power Status (Deny)",
+                "type": "TEXT"
+            },
+            {
+                "id": "poe_used_watts",
+                "label": "PoE Used Watts",
+                "type": "DOUBLE"
+            },
+            {
+                "id": "poe_total_watts",
+                "label": "PoE Total Watts",
+                "type": "DOUBLE"
+            },
+            {
+                "id": "poe_remaining_watts",
+                "label": "PoE Available Watts",
+                "type": "DOUBLE"
+            },
+            {
+                "id": "poe_watts_categorization",
+                "label": "PoE Watts Categorization",
+                "type": "TEXT"
+            },
+            {
+                "id": "api_status",
+                "label": "API Status",
+                "type": "TEXT"
+            },
+            {
+                "id": "sys_uptime_days",
+                "label": "Device Uptime (Categorization)",
+                "type": "TEXT"
+            },
+            {
+                "id": "uptime_since",
+                "label": "Up Since",
+                "type": "DATETIME"
+            },
+            {
+                "id": "ntwk_license_name",
+                "label": "Network License Name",
+                "type": "TEXT"
+            },
+            {
+                "id": "up_ports_categorization",
+                "label": "Used Ports Categorization",
+                "type": "TEXT"
+            },
+            {
+                "id": "down_ports_categorization",
+                "label": "Unused Ports Categorization",
+                "type": "TEXT"
+            },
+            {
+                "id": "child_devices",
+                "label": "No. of Child Devices",
+                "type": "TEXT"
+            },
+            {
+                "id": "total_input_drops",
+                "label": "Total Input Drops",
+                "type": "TEXT"
+            },
+            {
+                "id": "total_output_drops",
+                "label": "Total Output Drops",
+                "type": "TEXT"
+            }
+        ],
+        "group_filters": [
+            {
+                "stream": "network-devices-inventory",
+                "title": "Vendor",
+                "extra_filter": "asset_object in ['Chassis', 'MODULE', 'FAN', 'POWERSUPPLY']",
+                "group_by": [
+                    "vendor"
+                ],
+                "ts_column": "timestamp",
+                "duration_hours": 1080,
+                "limit": 200,
+                "agg": "value_count",
+                "column": "unique_id.keyword",
+                "type": "int"
+            },
+            {
+                "stream": "network-devices-inventory",
+                "title": "Equipment Type",
+                "extra_filter": "asset_object in ['Chassis', 'MODULE', 'FAN', 'POWERSUPPLY']",
+                "group_by": [
+                    "equipment_type"
+                ],
+                "ts_column": "timestamp",
+                "duration_hours": 1080,
+                "limit": 200,
+                "agg": "value_count",
+                "column": "unique_id.keyword",
+                "type": "int"
+            },
+            {
+                "stream": "network-devices-inventory",
+                "title": "Product ID",
+                "extra_filter": "asset_object in ['Chassis', 'MODULE', 'FAN', 'POWERSUPPLY']",
+                "group_by": [
+                    "product_id"
+                ],
+                "ts_column": "timestamp",
+                "duration_hours": 1080,
+                "limit": 200,
+                "agg": "value_count",
+                "column": "unique_id",
+                "type": "int"
+            }
+        ],
+        "additional_datetime_column_filters": [
+            {
+                "id": "last_updated_time",
+                "label": "Last Updated Time"
+            },
+            {
+                "id": "created_time",
+                "label": "Created Time"
+            }
+        ]
+    },
+    "navigation_dashboards": {
+        "Network Devices": [
+            {
+                "section": "Hardware Assets by Product",
+                "label": "HW Assets by Product"
+            },
+            {
+                "section": "Hardware Assets Utilization",
+                "label": "HW Assets Utilization"
+            },
+            {
+                "section": "Hardware Assets by EOL/EOS",
+                "label": "HW Assets by EOL/EOS"
+            },
+            {
+                "section": "Hardware Assets by POE",
+                "label": "HW Assets by PoE"
+            }
+        ]
+    },
+    "dashboard_sections": [
+        {
+            "title": "Hardware Assets Utilization",
+            "show_filter": true,
+            "widgets": [
+                {
+                    "widget_type": "pie_chart",
+                    "title": "Device Uptime Days",
+                    "stream": "network-devices-inventory",
+                    "ts_column": "timestamp",
+                    "duration_hours": 10800,
+                    "extra_filter": "(asset_object in 'Chassis') and (is_parent in 'Yes')",
+                    "column": "unique_id",
+                    "style": {
+                        "color-map": {
+                            "<150": "#4CAF50",
+                            "150-180": "#FFC107",
+                            ">180": "#F44336",
+                            "Not Available": "#b0bec5"
+                        }
+                    },
+                    "agg": "value_count",
+                    "group_by": [
+                        "sys_uptime_days"
+                    ],
+                    "type": "int",
+                    "min_width": 4,
+                    "height": 4,
+                    "max_width": 4,
+                    "widget_id": "yr3CrWV5"
+                },
+                {
+                    "widget_type": "pie_chart",
+                    "title": "Interfaces Downtime Days",
+                    "stream": "network-devices-inventory",
+                    "ts_column": "timestamp",
+                    "duration_hours": 1080,
+                    "extra_filter": "(asset_object is 'Interface') and (interface_oper_status_label is 'down')",
+                    "style": {
+                        "color-map": {
+                            "<60": "#4CAF50",
+                            "60-120": "#FFC107",
+                            ">120": "#F44336",
+                            "Not Available": "#b0bec5"
+                        }
+                    },
+                    "column": "interface_name",
+                    "agg": "value_count",
+                    "group_by": [
+                        "interface_change_days"
+                    ],
+                    "type": "int",
+                    "min_width": 4,
+                    "height": 4,
+                    "max_width": 4,
+                    "widget_id": "QucMm7XM"
+                },
+                {
+                    "title": "Zero Port Switches",
+                    "widget_type": "custom_counter",
+                    "extra_filter": "(asset_object in 'Chassis') and (`total_up_ports` = 0.0) and (`total_eth_ports` != 0.0)",
+                    "stream": "network-devices-inventory",
+                    "ts_column": "timestamp",
+                    "duration_hours": 1080,
+                    "column": "unique_id.keyword",
+                    "agg": "value_count",
+                    "type": "int",
+                    "min_width": 4,
+                    "height": 4,
+                    "max_width": 4,
+                    "widget_id": "rcxRq8SF"
+                },
+                {
+                    "title": "Ports Usage Summary",
+                    "widget_type": "tabular",
+                    "max_width": 6,
+                    "height": 4,
+                    "min_width": 6,
+                    "stream": "network-devices-inventory",
+                    "ts_column": "timestamp",
+                    "duration_hours": 1080,
+                    "extra_filter": "(asset_object is 'Chassis') and (total_eth_ports != 0.0)",
+                    "columns": {
+                        "asset_status": {
+                            "title": "Asset Status",
+                            "type": "TEXT",
+                            "hidden": true,
+                            "visible": false
+                        }
+                    },
+                    "pivot": {
+                        "pivot_type": "advanced",
+                        "group_by": [
+                            "asset_status"
+                        ],
+                        "series": [
+                            {
+                                "column": "total_up_ports",
+                                "agg": "sum",
+                                "type": "int",
+                                "label": "Up Ethernet Ports"
+                            },
+                            {
+                                "column": "total_down_ports",
+                                "agg": "sum",
+                                "type": "int",
+                                "label": "Down Ethernet Ports"
+                            },
+                            {
+                                "column": "total_admin_down_ports",
+                                "agg": "sum",
+                                "type": "int",
+                                "label": "Admin Down Ethernet Ports"
+                            },
+                            {
+                                "column": "total_eth_ports",
+                                "agg": "sum",
+                                "type": "int",
+                                "label": "Total Ethernet Ports"
+                            }
+                        ]
+                    },
+                    "widget_id": "ZXQU8cOl"
+                },
+                {
+                    "title": "Zero Usage Port Switches",
+                    "widget_type": "tabular",
+                    "max_width": 6,
+                    "height": 6,
+                    "min_width": 6,
+                    "stream": "network-devices-inventory",
+                    "ts_column": "timestamp",
+                    "duration_hours": 1080,
+                    "extra_filter": "(asset_object in 'Chassis') and (`total_up_ports` = 0.0) and (`total_eth_ports` != 0.0)",
+                    "sorting": [
+                        {
+                            "dns_name": "asc"
+                        }
+                    ],
+                    "columns": {
+                        "dns_name": "DNS Name",
+                        "ip_address": "IP Address",
+                        "product_id": "Product ID",
+                        "serial_number": "Serial Number",
+                        "equipment_name": "Equipment Name"
+                    },
+                    "pivot": {
+                        "pivot_type": "advanced",
+                        "series": [
+                            {
+                                "column": "count_",
+                                "agg": "value_count",
+                                "type": "int",
+                                "label": "Count"
+                            }
+                        ],
+                        "group_by": [
+                            "dns_name",
+                            "ip_address",
+                            "product_id",
+                            "serial_number",
+                            "equipment_name"
+                        ]
+                    },
+                    "widget_id": "7aWFoT"
+                },
+                {
+                    "title": "Devices by Uptime (Days)",
+                    "widget_type": "tabular",
+                    "max_width": 12,
+                    "height": 8,
+                    "min_width": 12,
+                    "stream": "network-devices-inventory",
+                    "ts_column": "timestamp",
+                    "duration_hours": 1080,
+                    "extra_filter": "(asset_object in 'Chassis') and (is_parent in 'Yes')",
+                    "sorting": [
+                        {
+                            "sys_uptime": "desc"
+                        }
+                    ],
+                    "columns": {
+                        "dns_name": "DNS Name",
+                        "serial_number": "Serial Number",
+                        "ip_address": "IP Address",
+                        "sys_uptime": {
+                            "title": "Device Uptime (Days)",
+                            "type": "DOUBLE"
+                        },
+                        "rowStyle": {
+                            "title": "Row Style",
+                            "type": "TEXT",
+                            "hidden": true,
+                            "visible": false
+                        }
+                    },
+                    "custom_columns": [
+                        {
+                            "id": "rowStyle",
+                            "label": "Row Style",
+                            "expr": "\"{'background-color':'#ef9a9a'}\" if sys_uptime_days in[\">180\"] else \"{'background-color':'#fff59d'}\" if sys_uptime_days  in[\"150-180\"] else \"{'background-color':'#a5d6a7'}\" if sys_uptime_days  in[\"<150\"] else  \"{'background-color':'#b0bec5'}\"",
+                            "visible": false,
+                            "default": null
+                        }
+                    ],
+                    "widget_id": "bc58a8f5"
+                },
+                {
+                    "title": "Device Up Ports",
+                    "widget_type": "tabular",
+                    "max_width": 6,
+                    "height": 6,
+                    "min_width": 6,
+                    "stream": "network-devices-inventory",
+                    "ts_column": "timestamp",
+                    "duration_hours": 1080,
+                    "extra_filter": "(asset_object in 'Chassis') and (`total_eth_ports` != 0.0)",
+                    "sorting": [
+                        {
+                            "total_up_ports": "asc"
+                        }
+                    ],
+                    "columns": {
+                        "dns_name": "DNS Name",
+                        "ip_address": "IP Address",
+                        "serial_number": "Serial Number",
+                        "total_up_ports": {
+                            "title": "Up Ethernet Ports",
+                            "type": "DOUBLE",
+                            "visible": true
+                        },
+                        "up_ports_categorization": {
+                            "title": "Used Ports Categorization",
+                            "type": "TEXT",
+                            "visible": false
+                        },
+                        "rowStyle": {
+                            "title": "Row Style",
+                            "type": "TEXT",
+                            "hidden": true,
+                            "visible": false
+                        },
+                        "value": {
+                            "title": "Ethernet Ports",
+                            "type": "TEXT",
+                            "hidden": true,
+                            "visible": false
+                        }
+                    },
+                    "custom_columns": [
+                        {
+                            "id": "rowStyle",
+                            "label": "Row Style",
+                            "expr": "\"{'background-color':'#ef9a9a'}\" if up_ports_categorization in[\"0\", \"0.0\"] else \"{'background-color':'#fff59d'}\" if up_ports_categorization  in[\"1-5\"] else \"{'background-color':'#a5d6a7'}\" if up_ports_categorization  in[\"6+\"] else  \"{'background-color':'#b0bec5'}\"",
+                            "visible": false,
+                            "default": null
+                        }
+                    ],
+                    "widget_id": "94RHfebF"
+                },
+                {
+                    "title": "Device Down Ports",
+                    "widget_type": "tabular",
+                    "max_width": 6,
+                    "height": 6,
+                    "min_width": 6,
+                    "stream": "network-devices-inventory",
+                    "ts_column": "timestamp",
+                    "duration_hours": 1080,
+                    "extra_filter": "(asset_object in 'Chassis') and (`total_eth_ports` != 0.0)",
+                    "sorting": [
+                        {
+                            "total_down_ports": "asc"
+                        }
+                    ],
+                    "columns": {
+                        "dns_name": "DNS Name",
+                        "ip_address": "IP Address",
+                        "serial_number": "Serial Number",
+                        "total_up_ports": {
+                            "title": "Up Ethernet Ports",
+                            "type": "TEXT",
+                            "visible": false
+                        },
+                        "total_down_ports": {
+                            "title": "Down Ethernet Ports",
+                            "type": "TEXT",
+                            "visible": true
+                        },
+                        "total_eth_ports": {
+                            "title": "Total Ethernet Ports",
+                            "type": "TEXT",
+                            "visible": false
+                        },
+                        "down_ports_categorization": {
+                            "title": "Unused Ports Categorization",
+                            "type": "TEXT",
+                            "visible": false
+                        },
+                        "rowStyle": {
+                            "title": "Row Style",
+                            "type": "TEXT",
+                            "hidden": true,
+                            "visible": false
+                        }
+                    },
+                    "custom_columns": [
+                        {
+                            "id": "rowStyle",
+                            "label": "Row Style",
+                            "expr": "\"{'background-color':'#ef9a9a'}\" if down_ports_categorization in[\"0-3\"] else \"{'background-color':'#fff59d'}\" if down_ports_categorization  in[\"4-8\"] else \"{'background-color':'#a5d6a7'}\" if down_ports_categorization  in[\"9+\"] else  \"{'background-color':'#b0bec5'}\"",
+                            "visible": false,
+                            "default": null
+                        }
+                    ],
+                    "widget_id": "lsM4WSqA"
+                },
+                {
+                    "widget_type": "multi_bar_chart",
+                    "title": "Interfaces Up/Down(Days) by PID",
+                    "stream": "network-devices-inventory",
+                    "ts_column": "timestamp",
+                    "duration_hours": 10800,
+                    "extra_filter": "(asset_object in 'Interface')",
+                    "min_width": 6,
+                    "height": 6,
+                    "max_width": 12,
+                    "group_by": [
+                        "interface_change_days",
+                        "product_id"
+                    ],
+                    "agg": "value_count",
+                    "column": "unique_id.keyword",
+                    "style": {
+                        "color-map": {
+                            "<60": "#a5d6a7",
+                            "60-120": "#fff59d",
+                            ">120": "#ef9a9a",
+                            "Not Available": "#b0bec5"
+                        }
+                    },
+                    "type": "int",
+                    "chartProperties": {
+                        "legendLocation": "right",
+                        "stacked": true,
+                        "xAxisLabel": "Product ID",
+                        "yAxisLabel": "Count"
+                    },
+                    "widget_id": "SV8dBARp"
+                },
+                {
+                    "title": "HW Assets Details",
+                    "widget_type": "tabular",
+                    "max_width": 12,
+                    "height": 8,
+                    "min_width": 12,
+                    "stream": "network-devices-inventory",
+                    "ts_column": "timestamp",
+                    "duration_hours": 1080,
+                    "extra_filter": "asset_type in 'Hardware' and asset_object in ['Chassis', 'MODULE', 'FAN','POWERSUPPLY']",
+                    "sorting": [
+                        {
+                            "equipment_type": "asc"
+                        }
+                    ],
+                    "columns": {
+                        "org_name": {
+                            "title": "Organization Name",
+                            "type": "TEXT",
+                            "visible": false
+                        },
+                        "org_id": {
+                            "title": "Organization ID",
+                            "type": "TEXT",
+                            "key": true,
+                            "hidden": true,
+                            "visible": false
+                        },
+                        "hostname": "Hostname",
+                        "ip_address": {
+                            "title": "IP Address",
+                            "key": true
+                        },
+                        "dns_name": "DNS Name",
+                        "parent_serial_number": {
+                            "title": "Parent SN",
+                            "key": true
+                        },
+                        "id": {
+                            "title": "ID",
+                            "value": "user-dashboard-aia-network-drilldown-app",
+                            "key": true,
+                            "type": "FIXED_VALUE",
+                            "hidden": true,
+                            "visible": false
+                        },
+                        "asset_status": "Asset State",
+                        "first_seen": {
+                            "title": "First Seen",
+                            "type": "DATETIME",
+                            "visible": true
+                        },
+                        "last_seen": {
+                            "title": "Last Seen",
+                            "type": "DATETIME",
+                            "visible": true
+                        },
+                        "asset_mode": "Asset State Transfer Mode",
+                        "sys_location": {
+                            "title": "SNMP Syslocation",
+                            "type": "TEXT",
+                            "visible": false
+                        },
+                        "serial_number": "Serial Number",
+                        "asset_type": {
+                            "title": "Asset Type",
+                            "type": "TEXT",
+                            "visible": true
+                        },
+                        "product_id": "Product ID",
+                        "product_family": "Product Family",
+                        "product_category": {
+                            "title": "Product Category",
+                            "type": "TEXT",
+                            "visible": false
+                        },
+                        "fex_number": "FEX Number",
+                        "fex_state": "FEX State",
+                        "fex_description": "FEX Description",
+                        "fex_grid": "FEX Grid",
+                        "sw_type": {
+                            "title": "SW Type",
+                            "type": "TEXT",
+                            "visible": false
+                        },
+                        "sw_version": "SW Version",
+                        "total_up_ports": {
+                            "title": "Up Ethernet Ports",
+                            "type": "DOUBLE",
+                            "visible": false
+                        },
+                        "total_down_ports": {
+                            "title": "Down Ethernet Ports",
+                            "type": "DOUBLE",
+                            "visible": false
+                        },
+                        "total_admin_down_ports": {
+                            "title": "Admin Down Ethernet Ports",
+                            "type": "DOUBLE",
+                            "visible": false
+                        },
+                        "total_eth_ports": {
+                            "title": "Total Ethernet Ports",
+                            "type": "DOUBLE",
+                            "visible": false
+                        },
+                        "vendor": {
+                            "title": "Vendor",
+                            "type": "TEXT",
+                            "visible": false
+                        },
+                        "created_time": {
+                            "title": "Created Time",
+                            "type": "DATETIME",
+                            "visible": false
+                        },
+                        "last_updated_time": {
+                            "title": "Last Updated Time",
+                            "type": "DATETIME",
+                            "visible": false
+                        },
+                        "hw_ldos_string": {
+                            "title": "HW LDoS",
+                            "type": "TEXT",
+                            "visible": true
+                        },
+                        "hw_status": {
+                            "title": "HW Status",
+                            "type": "TEXT",
+                            "visible": false
+                        },
+                        "hw_expiring_year": {
+                            "title": "HW Expiring Year",
+                            "type": "TEXT",
+                            "visible": false
+                        },
+                        "hw_expiring_qtr": {
+                            "title": "HW Expiring Quarter",
+                            "type": "TEXT",
+                            "visible": false
+                        },
+                        "__state_updated_time": {
+                            "title": "Asset State Updated Time",
+                            "type": "TEXT",
+                            "visible": true
+                        },
+                        "end_of_ext_announcement_date": {
+                            "title": "End Of External Announcement Date",
+                            "type": "DATE",
+                            "visible": false
+                        },
+                        "end_of_routine_fail_date": {
+                            "title": "End Of Routine Failure Analysis Date",
+                            "type": "DATE",
+                            "visible": false
+                        },
+                        "end_of_contract_renew_date": {
+                            "title": "End Of Contract Renewal Date",
+                            "type": "DATE",
+                            "visible": false
+                        },
+                        "end_of_svc_attach_date": {
+                            "title": "End Of Service Attachment Date",
+                            "type": "DATE",
+                            "visible": false
+                        },
+                        "end_of_sec_sup_date": {
+                            "title": "End Of Security Vul Support Date",
+                            "type": "DATE",
+                            "visible": false
+                        },
+                        "end_of_sw_maint": {
+                            "title": "End Of SW Maintenance",
+                            "type": "DATE",
+                            "visible": false
+                        },
+                        "management_ip": {
+                            "title": "Management IP",
+                            "type": "TEXT",
+                            "visible": false
+                        },
+                        "additional_ips": {
+                            "title": "Device Additional IPs",
+                            "type": "TEXT",
+                            "formatter": "truncate",
+                            "visible": false
+                        },
+                        "unique_id": {
+                            "title": "Unique ID",
+                            "type": "TEXT",
+                            "visible": false
+                        },
+                        "ntwk_license_name": {
+                            "title": "Network License Name",
+                            "type": "TEXT",
+                            "visible": false
+                        }
+                    },
+                    "actions": [
+                        {
+                            "appName": "user-dashboard",
+                            "permission": "aia:page:view",
+                            "drillDownContext": "id",
+                            "drillDownLinkField": "hostname",
+                            "identifier": "hostname",
+                            "selectionType": "SINGLE",
+                            "stateName": "app.featureapp",
+                            "title": "View Details",
+                            "actionCondition": {
+                                "actionControl": "SHOW_IF",
+                                "conditionalField": [
+                                    {
+                                        "conditionType": "EQUAL",
+                                        "conditionValue": "CHASSIS",
+                                        "fieldId": "equipment_type"
+                                    }
+                                ]
+                            },
+                            "type": "GO_TO_APP_STATE",
+                            "contextParamList": {
+                                "contextParams": [
+                                    {
+                                        "paramKey": "ip_address",
+                                        "paramId": "target_ip"
+                                    },
+                                    {
+                                        "paramKey": "hostname",
+                                        "paramId": "sys_name"
+                                    },
+                                    {
+                                        "paramKey": "vendor",
+                                        "paramId": "device_vendor"
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "widget_id": "eYsdAvDR"
+                },
+                {
+                    "title": "Interfaces Details",
+                    "widget_type": "tabular",
+                    "max_width": 12,
+                    "height": 8,
+                    "min_width": 12,
+                    "stream": "network-devices-inventory",
+                    "ts_column": "timestamp",
+                    "extra_filter": "(asset_object in 'Interface')",
+                    "duration_hours": 1080,
+                    "columns": {
+                        "org_name": {
+                            "title": "Organization Name",
+                            "type": "TEXT",
+                            "visible": false
+                        },
+                        "dns_name": "DNS Name",
+                        "ip_address": "IP Address",
+                        "product_id": {
+                            "title": "Product ID",
+                            "type": "TEXT",
+                            "visible": false
+                        },
+                        "parent_serial_number": "Parent SN",
+                        "serial_number": "Chassis SN",
+                        "vendor": "Vendor",
+                        "equipment_type": "Equipment Type",
+                        "interface_ip": "Interface IP Address",
+                        "interface_name": "Interface Name",
+                        "interface_alias": "Interface Alias",
+                        "interface_description": "Interface Description",
+                        "if_last_change": "Up/Down Change Days",
+                        "if_change_since": {
+                            "title": "Up/Down Since",
+                            "type": "DATE",
+                            "visible": true
+                        },
+                        "interface_admin_status_label": "Admin Status Label",
+                        "interface_admin_status": "Admin Status",
+                        "interface_type_index": "Interface Type",
+                        "interface_oper_status": "Operational Status",
+                        "interface_oper_status_label": "Operational Status Label",
+                        "interface_shortname": "Interface Short Name",
+                        "uplink_port": "Uplink Port",
+                        "interface_status": "Interface Status",
+                        "interface_status_name": "Interface Status Name",
+                        "interface_duplex": "Duplex",
+                        "interface_status_type": "Interface Status Type",
+                        "interface_vlan": "Interface Status VLAN",
+                        "interface_speed": "Interface Speed",
+                        "rc_interface_vlan": "Interface VLAN",
+                        "rc_config_speed": "Config Speed",
+                        "rc_port_type": "Port Type",
+                        "rc_other_configs": "Other Configs",
+                        "rc_config_duplex": "Config Duplex",
+                        "rc_channel_group": "Channel Group",
+                        "rc_config_vlan": "Config VLAN",
+                        "source_filename": {
+                            "title": "Source Filename",
+                            "type": "TEXT",
+                            "visible": false
+                        },
+                        "total_input_drops": {
+                            "title": "Total Input Drops",
+                            "type": "TEXT",
+                            "visible": false
+                        },
+                        "total_output_drops": {
+                            "title": "Total Output Drops",
+                            "type": "TEXT",
+                            "visible": false
+                        }
+                    },
+                    "widget_id": "4HEk4KgH"
+                }
+            ]
+        },
+        {
+            "title": "Hardware Assets by Product",
+            "show_filter": true,
+            "widgets": [
+                {
+                    "widget_type": "pie_chart",
+                    "title": "HW Assets by Vendor",
+                    "stream": "network-devices-inventory",
+                    "ts_column": "timestamp",
+                    "duration_hours": 1080,
+                    "extra_filter": "asset_type in 'Hardware' and asset_object in ['Chassis', 'MODULE', 'FAN','POWERSUPPLY']",
+                    "column": "unique_id.keyword",
+                    "agg": "value_count",
+                    "group_by": [
+                        "vendor"
+                    ],
+                    "type": "str",
+                    "min_width": 4,
+                    "height": 4,
+                    "max_width": 6,
+                    "widget_id": "D3xshDpS"
+                },
+                {
+                    "widget_type": "pie_chart",
+                    "title": "HW Assets by Equipment Type",
+                    "stream": "network-devices-inventory",
+                    "ts_column": "timestamp",
+                    "duration_hours": 1080,
+                    "extra_filter": "asset_type in 'Hardware' and asset_object in ['Chassis', 'MODULE', 'FAN','POWERSUPPLY']",
+                    "column": "unique_id.keyword",
+                    "agg": "value_count",
+                    "group_by": [
+                        "equipment_type"
+                    ],
+                    "type": "str",
+                    "min_width": 4,
+                    "height": 4,
+                    "max_width": 6,
+                    "widget_id": "WenjgGGi"
+                },
+                {
+                    "title": "HW Assets by Product Category",
+                    "widget_type": "bar_chart",
+                    "stream": "network-devices-inventory",
+                    "ts_column": "timestamp",
+                    "duration_hours": 1080,
+                    "extra_filter": "asset_type in 'Hardware' and asset_object in ['Chassis', 'MODULE', 'FAN','POWERSUPPLY']",
+                    "chartProperties": {
+                        "yAxisLabel": "Product Category",
+                        "xAxisLabel": "Count",
+                        "stacked": true,
+                        "legendLocation": "none",
+                        "orientation": "horizontal"
+                    },
+                    "group_by": [
+                        "product_category"
+                    ],
+                    "column": "unique_id.keyword",
+                    "limit": 10,
+                    "agg": "value_count",
+                    "widget_id": "Z6bWBW0X"
+                },
+                {
+                    "title": "HW Assets by Product Type",
+                    "widget_type": "bar_chart",
+                    "stream": "network-devices-inventory",
+                    "ts_column": "timestamp",
+                    "duration_hours": 1080,
+                    "extra_filter": "asset_type in 'Hardware' and asset_object in ['Chassis', 'MODULE', 'FAN','POWERSUPPLY']",
+                    "chartProperties": {
+                        "yAxisLabel": "Count",
+                        "xAxisLabel": "Product Type",
+                        "stacked": true,
+                        "legendLocation": "none",
+                        "orientation": "vertical"
+                    },
+                    "group_by": [
+                        "product_type"
+                    ],
+                    "column": "unique_id.keyword",
+                    "limit": 10,
+                    "agg": "value_count",
+                    "widget_id": "MPYi6H8U"
+                },
+                {
+                    "widget_type0": "pie_chart",
+                    "title0": "HW Assets by Product Description",
+                    "stream": "network-devices-inventory",
+                    "ts_column": "timestamp",
+                    "duration_hours": 1080,
+                    "extra_filter": "asset_type in 'Hardware' and asset_object in ['Chassis', 'MODULE', 'FAN','POWERSUPPLY']",
+                    "column": "unique_id.keyword",
+                    "agg": "value_count",
+                    "group_by": [
+                        "product_description"
+                    ],
+                    "type": "str",
+                    "min_width": 3,
+                    "height": 5,
+                    "max_width": 6,
+                    "widget_id": "dX1YC8TH"
+                },
+                {
+                    "title": "HW Assets Details",
+                    "widget_type": "tabular",
+                    "max_width": 12,
+                    "height": 8,
+                    "min_width": 6,
+                    "stream": "network-devices-inventory",
+                    "ts_column": "timestamp",
+                    "duration_hours": 1080,
+                    "extra_filter": "asset_type in 'Hardware' and asset_object in ['Chassis', 'MODULE', 'FAN','POWERSUPPLY']",
+                    "sorting": [
+                        {
+                            "equipment_type": "asc"
+                        }
+                    ],
+                    "columns": {
+                        "org_name": {
+                            "title": "Organization Name",
+                            "type": "TEXT",
+                            "visible": false
+                        },
+                        "org_id": {
+                            "title": "Organization ID",
+                            "type": "TEXT",
+                            "key": true,
+                            "hidden": true,
+                            "visible": false
+                        },
+                        "hostname": "Hostname",
+                        "ip_address": {
+                            "title": "IP Address",
+                            "key": true
+                        },
+                        "dns_name": "DNS Name",
+                        "parent_serial_number": {
+                            "title": "Parent SN",
+                            "key": true
+                        },
+                        "id": {
+                            "title": "ID",
+                            "value": "user-dashboard-aia-network-drilldown-app",
+                            "key": true,
+                            "type": "FIXED_VALUE",
+                            "hidden": true,
+                            "visible": false
+                        },
+                        "asset_status": "Asset State",
+                        "first_seen": {
+                            "title": "First Seen",
+                            "type": "DATETIME",
+                            "visible": true
+                        },
+                        "last_seen": {
+                            "title": "Last Seen",
+                            "type": "DATETIME",
+                            "visible": true
+                        },
+                        "asset_mode": "Asset State Transfer Mode",
+                        "sys_location": {
+                            "title": "SNMP Syslocation",
+                            "type": "TEXT",
+                            "visible": false
+                        },
+                        "serial_number": "Serial Number",
+                        "asset_type": {
+                            "title": "Asset Type",
+                            "type": "TEXT",
+                            "visible": true
+                        },
+                        "product_id": "Product ID",
+                        "product_family": "Product Family",
+                        "product_category": {
+                            "title": "Product Category",
+                            "type": "TEXT",
+                            "visible": false
+                        },
+                        "fex_number": "FEX Number",
+                        "fex_state": "FEX State",
+                        "fex_description": "FEX Description",
+                        "fex_grid": "FEX Grid",
+                        "sw_type": {
+                            "title": "SW Type",
+                            "type": "TEXT",
+                            "visible": false
+                        },
+                        "sw_version": "SW Version",
+                        "total_up_ports": {
+                            "title": "Up Ethernet Ports",
+                            "type": "DOUBLE",
+                            "visible": false
+                        },
+                        "total_down_ports": {
+                            "title": "Down Ethernet Ports",
+                            "type": "DOUBLE",
+                            "visible": false
+                        },
+                        "total_admin_down_ports": {
+                            "title": "Admin Down Ethernet Ports",
+                            "type": "DOUBLE",
+                            "visible": false
+                        },
+                        "total_eth_ports": {
+                            "title": "Total Ethernet Ports",
+                            "type": "DOUBLE",
+                            "visible": false
+                        },
+                        "vendor": {
+                            "title": "Vendor",
+                            "type": "TEXT",
+                            "visible": false
+                        },
+                        "created_time": {
+                            "title": "Created Time",
+                            "type": "DATETIME",
+                            "visible": false
+                        },
+                        "last_updated_time": {
+                            "title": "Last Updated Time",
+                            "type": "DATETIME",
+                            "visible": false
+                        },
+                        "hw_ldos_string": {
+                            "title": "HW LDoS",
+                            "type": "TEXT",
+                            "visible": true
+                        },
+                        "hw_status": {
+                            "title": "HW Status",
+                            "type": "TEXT",
+                            "visible": false
+                        },
+                        "hw_expiring_year": {
+                            "title": "HW Expiring Year",
+                            "type": "TEXT",
+                            "visible": false
+                        },
+                        "hw_expiring_qtr": {
+                            "title": "HW Expiring Quarter",
+                            "type": "TEXT",
+                            "visible": false
+                        },
+                        "__state_updated_time": {
+                            "title": "Asset State Updated Time",
+                            "type": "TEXT",
+                            "visible": true
+                        },
+                        "end_of_ext_announcement_date": {
+                            "title": "End Of External Announcement Date",
+                            "type": "DATE",
+                            "visible": false
+                        },
+                        "end_of_routine_fail_date": {
+                            "title": "End Of Routine Failure Analysis Date",
+                            "type": "DATE",
+                            "visible": false
+                        },
+                        "end_of_contract_renew_date": {
+                            "title": "End Of Contract Renewal Date",
+                            "type": "DATE",
+                            "visible": false
+                        },
+                        "end_of_svc_attach_date": {
+                            "title": "End Of Service Attachment Date",
+                            "type": "DATE",
+                            "visible": false
+                        },
+                        "end_of_sec_sup_date": {
+                            "title": "End Of Security Vul Support Date",
+                            "type": "DATE",
+                            "visible": false
+                        },
+                        "end_of_sw_maint": {
+                            "title": "End Of SW Maintenance",
+                            "type": "DATE",
+                            "visible": false
+                        },
+                        "management_ip": {
+                            "title": "Management IP",
+                            "type": "TEXT",
+                            "visible": false
+                        },
+                        "additional_ips": {
+                            "title": "Device Additional IPs",
+                            "type": "TEXT",
+                            "formatter": "truncate",
+                            "visible": false
+                        },
+                        "unique_id": {
+                            "title": "Unique ID",
+                            "type": "TEXT",
+                            "visible": false
+                        },
+                        "ntwk_license_name": {
+                            "title": "Network License Name",
+                            "type": "TEXT",
+                            "visible": false
+                        }
+                    },
+                    "actions": [
+                        {
+                            "appName": "user-dashboard",
+                            "permission": "aia:page:view",
+                            "drillDownContext": "id",
+                            "drillDownLinkField": "hostname",
+                            "identifier": "hostname",
+                            "selectionType": "SINGLE",
+                            "stateName": "app.featureapp",
+                            "title": "View Details",
+                            "actionCondition": {
+                                "actionControl": "SHOW_IF",
+                                "conditionalField": [
+                                    {
+                                        "conditionType": "EQUAL",
+                                        "conditionValue": "CHASSIS",
+                                        "fieldId": "equipment_type"
+                                    }
+                                ]
+                            },
+                            "type": "GO_TO_APP_STATE",
+                            "contextParamList": {
+                                "contextParams": [
+                                    {
+                                        "paramKey": "ip_address",
+                                        "paramId": "target_ip"
+                                    },
+                                    {
+                                        "paramKey": "hostname",
+                                        "paramId": "sys_name"
+                                    },
+                                    {
+                                        "paramKey": "vendor",
+                                        "paramId": "device_vendor"
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "widget_id": "atOJyX4B"
+                }
+            ]
+        },
+        {
+            "title": "Hardware Assets by EOL/EOS",
+            "show_filter": true,
+            "widgets": [
+                {
+                    "widget_type": "multi_bar_chart",
+                    "title": "HW Assets Equipment Type by Support End Year",
+                    "stream": "network-devices-inventory",
+                    "ts_column": "timestamp",
+                    "duration_hours": 1080,
+                    "extra_filter": "asset_type in 'Hardware' and asset_object in ['Chassis', 'MODULE', 'FAN','POWERSUPPLY']",
+                    "min_width": 6,
+                    "height": 6,
+                    "max_width": 12,
+                    "group_by": [
+                        "equipment_type",
+                        "hw_expiring_year"
+                    ],
+                    "others_spec": {
+                        "limit": 15,
+                        "label": "Others",
+                        "equipment_type": {
+                            "largest": false,
+                            "descending_order": false,
+                            "name_based_limit": false
+                        },
+                        "hw_expiring_year": {
+                            "largest": false,
+                            "descending_order": false,
+                            "name_based_limit": true
+                        }
+                    },
+                    "agg": "value_count",
+                    "column": "unique_id.keyword",
+                    "type": "int",
+                    "chartProperties": {
+                        "legendLocation": "right",
+                        "stacked": true,
+                        "xAxisLabel": "Year",
+                        "yAxisLabel": "Count"
+                    },
+                    "widget_id": "f5P9VUFr"
+                },
+                {
+                    "widget_type": "multi_bar_chart",
+                    "title": "HW Assets Equipment Type by Support End Quarter",
+                    "stream": "network-devices-inventory",
+                    "ts_column": "timestamp",
+                    "duration_hours": 1080,
+                    "extra_filter": "asset_type in 'Hardware' and asset_object in ['Chassis', 'MODULE', 'FAN','POWERSUPPLY']",
+                    "min_width": 6,
+                    "height": 6,
+                    "max_width": 12,
+                    "group_by": [
+                        "equipment_type",
+                        "hw_expiring_qtr"
+                    ],
+                    "others_spec": {
+                        "limit": 15,
+                        "label": "Others",
+                        "equipment_type": {
+                            "largest": false,
+                            "descending_order": false,
+                            "name_based_limit": false
+                        },
+                        "hw_expiring_qtr": {
+                            "largest": false,
+                            "descending_order": false,
+                            "name_based_limit": true
+                        }
+                    },
+                    "agg": "value_count",
+                    "column": "unique_id.keyword",
+                    "type": "int",
+                    "chartProperties": {
+                        "legendLocation": "right",
+                        "stacked": true,
+                        "xAxisLabel": "Year and QTR",
+                        "yAxisLabel": "Count"
+                    },
+                    "widget_id": "JJqB4v1o"
+                },
+                {
+                    "title": "HW Expiry Summary by Year",
+                    "widget_type": "tabular",
+                    "max_width": 12,
+                    "height": 6,
+                    "min_width": 6,
+                    "stream": "network-devices-inventory",
+                    "ts_column": "timestamp",
+                    "duration_hours": 1080,
+                    "extra_filter": "asset_type in 'Hardware' and asset_object in ['Chassis', 'MODULE', 'FAN','POWERSUPPLY']",
+                    "columns": {
+                        "hw_expiring_year": "HW Expiring Year"
+                    },
+                    "pivot": {
+                        "pivot_type": "advanced",
+                        "series": [
+                            {
+                                "column": "count_",
+                                "agg": "value_count",
+                                "type": "int",
+                                "label": "Count"
+                            }
+                        ],
+                        "group_by": [
+                            "hw_expiring_year"
+                        ]
+                    },
+                    "widget_id": "0dcee779"
+                },
+                {
+                    "title": "HW Expiry Summary by Severity",
+                    "widget_type": "tabular",
+                    "max_width": 12,
+                    "height": 6,
+                    "min_width": 6,
+                    "stream": "network-devices-inventory",
+                    "ts_column": "timestamp",
+                    "duration_hours": 1080,
+                    "extra_filter": "asset_type in 'Hardware' and asset_object in ['Chassis', 'MODULE', 'FAN','POWERSUPPLY']",
+                    "columns": {
+                        "hw_status": "HW Status"
+                    },
+                    "pivot": {
+                        "group_by": [
+                            "hw_status"
+                        ],
+                        "pivot_type": "advanced",
+                        "series": [
+                            {
+                                "column": "count_",
+                                "agg": "value_count",
+                                "type": "int",
+                                "label": "Count"
+                            }
+                        ]
+                    },
+                    "widget_id": "ea34bcb4"
+                },
+                {
+                    "widget_type": "multi_bar_chart",
+                    "title": "HW Assets Status by Equipment Type",
+                    "stream": "network-devices-inventory",
+                    "ts_column": "timestamp",
+                    "duration_hours": 1080,
+                    "extra_filter": "asset_type in 'Hardware' and asset_object in ['Chassis', 'MODULE', 'FAN','POWERSUPPLY']",
+                    "min_width": 6,
+                    "height": 6,
+                    "max_width": 12,
+                    "group_by": [
+                        "hw_status",
+                        "equipment_type"
+                    ],
+                    "agg": "value_count",
+                    "column": "unique_id.keyword",
+                    "type": "int",
+                    "chartProperties": {
+                        "legendLocation": "right",
+                        "stacked": true,
+                        "xAxisLabel": "Equipment Type",
+                        "yAxisLabel": "Count"
+                    },
+                    "widget_id": "hSlor3au"
+                },
+                {
+                    "widget_type": "multi_bar_chart",
+                    "title": "HW Assets Status by Vendor",
+                    "stream": "network-devices-inventory",
+                    "ts_column": "timestamp",
+                    "duration_hours": 1080,
+                    "extra_filter": "asset_type in 'Hardware' and asset_object in ['Chassis', 'MODULE', 'FAN','POWERSUPPLY']",
+                    "min_width": 6,
+                    "height": 6,
+                    "max_width": 12,
+                    "group_by": [
+                        "hw_status",
+                        "vendor"
+                    ],
+                    "agg": "value_count",
+                    "column": "unique_id.keyword",
+                    "type": "int",
+                    "chartProperties": {
+                        "legendLocation": "right",
+                        "stacked": true,
+                        "xAxisLabel": "Vendor",
+                        "yAxisLabel": "Count"
+                    },
+                    "widget_id": "gxxIMWQp"
+                },
+                {
+                    "title": "HW Assets Details",
+                    "widget_type": "tabular",
+                    "max_width": 12,
+                    "height": 8,
+                    "min_width": 12,
+                    "stream": "network-devices-inventory",
+                    "ts_column": "timestamp",
+                    "duration_hours": 1080,
+                    "extra_filter": "asset_type in 'Hardware' and asset_object in ['Chassis', 'MODULE', 'FAN','POWERSUPPLY']",
+                    "sorting": [
+                        {
+                            "equipment_type": "asc"
+                        }
+                    ],
+                    "columns": {
+                        "org_name": {
+                            "title": "Organization Name",
+                            "type": "TEXT",
+                            "visible": false
+                        },
+                        "org_id": {
+                            "title": "Organization ID",
+                            "type": "TEXT",
+                            "key": true,
+                            "hidden": true,
+                            "visible": false
+                        },
+                        "hostname": "Hostname",
+                        "ip_address": {
+                            "title": "IP Address",
+                            "key": true
+                        },
+                        "dns_name": "DNS Name",
+                        "parent_serial_number": {
+                            "title": "Parent SN",
+                            "key": true
+                        },
+                        "id": {
+                            "title": "ID",
+                            "value": "user-dashboard-aia-network-drilldown-app",
+                            "key": true,
+                            "type": "FIXED_VALUE",
+                            "hidden": true,
+                            "visible": false
+                        },
+                        "asset_status": "Asset State",
+                        "first_seen": {
+                            "title": "First Seen",
+                            "type": "DATETIME",
+                            "visible": true
+                        },
+                        "last_seen": {
+                            "title": "Last Seen",
+                            "type": "DATETIME",
+                            "visible": true
+                        },
+                        "asset_mode": "Asset State Transfer Mode",
+                        "sys_location": {
+                            "title": "SNMP Syslocation",
+                            "type": "TEXT",
+                            "visible": false
+                        },
+                        "serial_number": "Serial Number",
+                        "asset_type": {
+                            "title": "Asset Type",
+                            "type": "TEXT",
+                            "visible": true
+                        },
+                        "product_id": "Product ID",
+                        "product_family": "Product Family",
+                        "product_category": {
+                            "title": "Product Category",
+                            "type": "TEXT",
+                            "visible": false
+                        },
+                        "fex_number": "FEX Number",
+                        "fex_state": "FEX State",
+                        "fex_description": "FEX Description",
+                        "fex_grid": "FEX Grid",
+                        "sw_type": {
+                            "title": "SW Type",
+                            "type": "TEXT",
+                            "visible": false
+                        },
+                        "sw_version": "SW Version",
+                        "total_up_ports": {
+                            "title": "Up Ethernet Ports",
+                            "type": "DOUBLE",
+                            "visible": false
+                        },
+                        "total_down_ports": {
+                            "title": "Down Ethernet Ports",
+                            "type": "DOUBLE",
+                            "visible": false
+                        },
+                        "total_admin_down_ports": {
+                            "title": "Admin Down Ethernet Ports",
+                            "type": "DOUBLE",
+                            "visible": false
+                        },
+                        "total_eth_ports": {
+                            "title": "Total Ethernet Ports",
+                            "type": "DOUBLE",
+                            "visible": false
+                        },
+                        "vendor": {
+                            "title": "Vendor",
+                            "type": "TEXT",
+                            "visible": false
+                        },
+                        "created_time": {
+                            "title": "Created Time",
+                            "type": "DATETIME",
+                            "visible": false
+                        },
+                        "last_updated_time": {
+                            "title": "Last Updated Time",
+                            "type": "DATETIME",
+                            "visible": false
+                        },
+                        "hw_ldos_string": {
+                            "title": "HW LDoS",
+                            "type": "TEXT",
+                            "visible": true
+                        },
+                        "hw_status": {
+                            "title": "HW Status",
+                            "type": "TEXT",
+                            "visible": false
+                        },
+                        "hw_expiring_year": {
+                            "title": "HW Expiring Year",
+                            "type": "TEXT",
+                            "visible": false
+                        },
+                        "hw_expiring_qtr": {
+                            "title": "HW Expiring Quarter",
+                            "type": "TEXT",
+                            "visible": false
+                        },
+                        "__state_updated_time": {
+                            "title": "Asset State Updated Time",
+                            "type": "TEXT",
+                            "visible": true
+                        },
+                        "end_of_ext_announcement_date": {
+                            "title": "End Of External Announcement Date",
+                            "type": "DATE",
+                            "visible": false
+                        },
+                        "end_of_routine_fail_date": {
+                            "title": "End Of Routine Failure Analysis Date",
+                            "type": "DATE",
+                            "visible": false
+                        },
+                        "end_of_contract_renew_date": {
+                            "title": "End Of Contract Renewal Date",
+                            "type": "DATE",
+                            "visible": false
+                        },
+                        "end_of_svc_attach_date": {
+                            "title": "End Of Service Attachment Date",
+                            "type": "DATE",
+                            "visible": false
+                        },
+                        "end_of_sec_sup_date": {
+                            "title": "End Of Security Vul Support Date",
+                            "type": "DATE",
+                            "visible": false
+                        },
+                        "end_of_sw_maint": {
+                            "title": "End Of SW Maintenance",
+                            "type": "DATE",
+                            "visible": false
+                        },
+                        "management_ip": {
+                            "title": "Management IP",
+                            "type": "TEXT",
+                            "visible": false
+                        },
+                        "additional_ips": {
+                            "title": "Device Additional IPs",
+                            "type": "TEXT",
+                            "formatter": "truncate",
+                            "visible": false
+                        },
+                        "unique_id": {
+                            "title": "Unique ID",
+                            "type": "TEXT",
+                            "visible": false
+                        },
+                        "ntwk_license_name": {
+                            "title": "Network License Name",
+                            "type": "TEXT",
+                            "visible": false
+                        }
+                    },
+                    "actions": [
+                        {
+                            "appName": "user-dashboard",
+                            "permission": "aia:page:view",
+                            "drillDownContext": "id",
+                            "drillDownLinkField": "hostname",
+                            "identifier": "hostname",
+                            "selectionType": "SINGLE",
+                            "stateName": "app.featureapp",
+                            "title": "View Details",
+                            "actionCondition": {
+                                "actionControl": "SHOW_IF",
+                                "conditionalField": [
+                                    {
+                                        "conditionType": "EQUAL",
+                                        "conditionValue": "CHASSIS",
+                                        "fieldId": "equipment_type"
+                                    }
+                                ]
+                            },
+                            "type": "GO_TO_APP_STATE",
+                            "contextParamList": {
+                                "contextParams": [
+                                    {
+                                        "paramKey": "ip_address",
+                                        "paramId": "target_ip"
+                                    },
+                                    {
+                                        "paramKey": "hostname",
+                                        "paramId": "sys_name"
+                                    },
+                                    {
+                                        "paramKey": "vendor",
+                                        "paramId": "device_vendor"
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "widget_id": "MvuI34bj"
+                }
+            ]
+        },
+        {
+            "title": "Hardware Assets by POE",
+            "show_filter": true,
+            "widgets": [
+                {
+                    "widget_type": "pie_chart",
+                    "title": "PoE Status by Available Watts",
+                    "stream": "network-devices-inventory",
+                    "ts_column": "timestamp",
+                    "duration_hours": 1080,
+                    "extra_filter": "((asset_object in 'Chassis') and (is_poe_capable in 'Yes') and (asset_type not in 'Software'))",
+                    "column": "unique_id.keyword",
+                    "agg": "value_count",
+                    "style": {
+                        "color-map": {
+                            ">100": "#4CAF50",
+                            "60-100": "#FFC107",
+                            "<60": "#F44336",
+                            "Not Available": "#b0bec5"
+                        }
+                    },
+                    "group_by": [
+                        "poe_watts_categorization"
+                    ],
+                    "type": "str",
+                    "min_width": 3,
+                    "height": 4,
+                    "max_width": 6,
+                    "widget_id": "aPm19mFE"
+                },
+                {
+                    "widget_type": "custom_counter",
+                    "title": "PoE Enabled Deivces",
+                    "stream": "network-devices-inventory",
+                    "ts_column": "timestamp",
+                    "duration_hours": 1080,
+                    "extra_filter": "(asset_object in 'Chassis') and (`is_poe_capable` in \"Yes\") and (`asset_object` not in \"Software\")",
+                    "min_width": 2,
+                    "height": 2,
+                    "max_width": 2,
+                    "agg": "value_count",
+                    "column": "is_poe_capable.keyword",
+                    "type": "str",
+                    "widget_id": "L8V8EVkd"
+                },
+                {
+                    "widget_type": "custom_counter",
+                    "title": "PoE Disabled Deivces",
+                    "stream": "network-devices-inventory",
+                    "ts_column": "timestamp",
+                    "duration_hours": 1080,
+                    "extra_filter": "(asset_object in 'Chassis')  and (`is_poe_capable` in \"No\") and (`asset_object` not in \"Software\")",
+                    "min_width": 2,
+                    "height": 2,
+                    "max_width": 2,
+                    "agg": "value_count",
+                    "column": "is_poe_capable.keyword",
+                    "type": "str",
+                    "widget_id": "6Hltg3Xp"
+                },
+                {
+                    "widget_type": "custom_counter",
+                    "title": "Active Ports",
+                    "stream": "network-devices-inventory",
+                    "ts_column": "timestamp",
+                    "duration_hours": 1080,
+                    "extra_filter": "(asset_object in 'Chassis') and (`asset_object` not in \"Software\")",
+                    "min_width": 2,
+                    "height": 2,
+                    "max_width": 2,
+                    "agg": "sum",
+                    "column": "total_up_ports",
+                    "type": "str",
+                    "widget_id": "YAiSBUi7"
+                },
+                {
+                    "widget_type": "custom_counter",
+                    "title": "Down Ports",
+                    "stream": "network-devices-inventory",
+                    "ts_column": "timestamp",
+                    "duration_hours": 1080,
+                    "extra_filter": "(asset_object in 'Chassis') and (`asset_object` not in \"Software\")",
+                    "min_width": 2,
+                    "height": 2,
+                    "max_width": 2,
+                    "agg": "sum",
+                    "column": "total_down_ports",
+                    "type": "str",
+                    "widget_id": "Q4zgroNN"
+                },
+                {
+                    "title": "PoE Status by Product ID",
+                    "widget_type": "multi_bar_chart",
+                    "stream": "network-devices-inventory",
+                    "extra_filter1": "asset_object in 'Chassis'",
+                    "extra_filter": "(`is_poe_capable` in \"Yes\") and (`asset_type` not in \"Software\")",
+                    "ts_column": "timestamp",
+                    "duration_hours": 1080,
+                    "style": {
+                        "color-map": {
+                            ">100": "#4CAF50",
+                            "60-100": "#FFC107",
+                            "<60": "#F44336",
+                            "Not Available": "#b0bec5"
+                        }
+                    },
+                    "group_by": [
+                        "poe_watts_categorization",
+                        "product_id"
+                    ],
+                    "chartProperties": {
+                        "yAxisLabel": "Product ID",
+                        "xAxisLabel": "Count",
+                        "stacked": true,
+                        "legendLocation": "right",
+                        "orientation": "horizontal"
+                    },
+                    "column": "unique_id.keyword",
+                    "agg": "value_count",
+                    "type": "int",
+                    "min_width": 6,
+                    "height": 6,
+                    "max_width": 12,
+                    "widget_id": "Q8ZLJwRS"
+                },
+                {
+                    "title": "PoE Device by Available Watts",
+                    "widget_type": "tabular",
+                    "max_width": 12,
+                    "height": 8,
+                    "min_width": 12,
+                    "stream": "network-devices-inventory",
+                    "ts_column": "timestamp",
+                    "duration_hours": 1080,
+                    "extra_filter": "(asset_object in 'Chassis') and (`is_poe_capable` in \"Yes\") and (`asset_object` not in \"Software\")",
+                    "sorting": [
+                        {
+                            "poe_remaining_watts": "desc"
+                        }
+                    ],
+                    "columns": {
+                        "dns_name": "DNS Name",
+                        "serial_number": "Serial Number",
+                        "ip_address": "IP Address",
+                        "poe_remaining_watts": "Available Watts",
+                        "poe_total_watts": {
+                            "title": "PoE Watts Categorization",
+                            "type": "TEXT",
+                            "hidden": true,
+                            "visible": false
+                        },
+                        "rowStyle": {
+                            "title": "Row Style",
+                            "type": "TEXT",
+                            "hidden": true,
+                            "visible": false
+                        }
+                    },
+                    "custom_columns": [
+                        {
+                            "id": "rowStyle",
+                            "label": "Row Style",
+                            "expr": "\"{'background-color':'#ef9a9a'}\" if poe_watts_categorization in[\"<60\"] else \"{'background-color':'#fff59d'}\" if poe_watts_categorization  in[\"60-100\"] else \"{'background-color':'#a5d6a7'}\" if poe_watts_categorization  in[\">100\"] else  \"{'background-color':'#b0bec5'}\"",
+                            "visible": false,
+                            "default": null
+                        }
+                    ],
+                    "widget_id": "UIPF4uWZ"
+                },
+                {
+                    "title": "PoE Device End Points",
+                    "widget_type": "bar_chart",
+                    "max_width": 12,
+                    "height": 6,
+                    "min_width": 6,
+                    "stream": "network-devices-inventory",
+                    "ts_column": "timestamp",
+                    "duration_hours": 1080,
+                    "extra_filter": "(asset_object in 'Interface') and (`poe_device` not in \"Not Available\")",
+                    "chartProperties": {
+                        "yAxisLabel": "Count",
+                        "xAxisLabel": "Device End Points",
+                        "stacked": true,
+                        "legendLocation": "none"
+                    },
+                    "group_by": [
+                        "poe_device"
+                    ],
+                    "column": "unique_id.keyword",
+                    "agg": "value_count",
+                    "widget_id": "g1KaRtZs"
+                },
+                {
+                    "title": "PoE Device Details",
+                    "widget_type": "tabular",
+                    "max_width": 12,
+                    "height": 8,
+                    "min_width": 12,
+                    "stream": "network-devices-inventory",
+                    "ts_column": "timestamp",
+                    "duration_hours": 1080,
+                    "extra_filter": "(asset_object in 'Chassis') and (`asset_object` not in \"Software\")",
+                    "columns": {
+                        "org_name": {
+                            "title": "Organization Name",
+                            "type": "TEXT",
+                            "visible": false
+                        },
+                        "hostname": "Hostname",
+                        "ip_address": "IP Address",
+                        "dns_name": "DNS Name",
+                        "product_id": "Product ID",
+                        "equipment_type": "Equipment Type",
+                        "product_category": "Product Category",
+                        "serial_number": "Serial Number",
+                        "parent_serial_number": {
+                            "title": "Parent SN",
+                            "key": true
+                        },
+                        "id": {
+                            "title": "ID",
+                            "value": "user-dashboard-aia-network-drilldown-app",
+                            "key": true,
+                            "type": "FIXED_VALUE",
+                            "hidden": true,
+                            "visible": false
+                        },
+                        "total_up_ports": {
+                            "title": "Up Ethernet Ports",
+                            "type": "DOUBLE",
+                            "visible": false
+                        },
+                        "total_down_ports": {
+                            "title": "Down Ethernet Ports",
+                            "type": "DOUBLE",
+                            "visible": false
+                        },
+                        "total_admin_down_ports": {
+                            "title": "Admin Down Ethernet Ports",
+                            "type": "DOUBLE",
+                            "visible": false
+                        },
+                        "total_eth_ports": {
+                            "title": "Total Ethernet Ports",
+                            "type": "DOUBLE",
+                            "visible": false
+                        },
+                        "asset_status": "Asset State",
+                        "first_seen": "First Seen",
+                        "last_seen": "Last Seen",
+                        "asset_mode": "Asset State Transfer Mode",
+                        "source_filename": "Source Filename",
+                        "is_poe_capable": "Is PoE Capable",
+                        "poe_admin_auto": "PoE Admin Status (Auto)",
+                        "poe_admin_off": "PoE Admin Status (Off)",
+                        "poe_admin_static": "PoE Admin Status (Static)",
+                        "poe_oper_off": "PoE Status (Off)",
+                        "poe_oper_faulty": "PoE Status (Faulty)",
+                        "poe_oper_on": "PoE Status (On)",
+                        "poe_oper_power_deny": "PoE Power Status (Deny)",
+                        "poe_used_watts": "PoE Used Watts",
+                        "poe_total_watts": "PoE Total Watts",
+                        "poe_remaining_watts": "PoE Remaining Watts",
+                        "poe_watts_categorization": "PoE Watts Categorization",
+                        "org_id": {
+                            "title": "Organization ID",
+                            "type": "TEXT",
+                            "key": true,
+                            "hidden": true,
+                            "visible": false
+                        },
+                        "unique_id": {
+                            "title": "Unique ID",
+                            "type": "TEXT",
+                            "hidden": true,
+                            "visible": false
+                        }
+                    },
+                    "actions": [
+                        {
+                            "appName": "user-dashboard",
+                            "permission": "aia:page:view",
+                            "drillDownContext": "id",
+                            "drillDownLinkField": "hostname",
+                            "identifier": "hostname",
+                            "selectionType": "SINGLE",
+                            "stateName": "app.featureapp",
+                            "title": "View Details",
+                            "type": "GO_TO_APP_STATE",
+                            "contextParamList": {
+                                "contextParams": [
+                                    {
+                                        "paramKey": "ip_address",
+                                        "paramId": "target_ip"
+                                    },
+                                    {
+                                        "paramKey": "hostname",
+                                        "paramId": "sys_name"
+                                    },
+                                    {
+                                        "paramKey": "vendor",
+                                        "paramId": "device_vendor"
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "widget_id": "OwXt8atG"
+                }
+            ]
+        }
+    ],
+    "saved_time": "2026-03-20T09:08:40.119853"
+}

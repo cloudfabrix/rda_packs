@@ -1,0 +1,561 @@
+{
+    "name": "vmanage_topology_drilldown",
+    "label": "SD-WAN Asset Stack View",
+    "description": "Cisco vManage SD-WAN topology drill-down — focused stack view for a selected node.",
+    "enabled": true,
+    "dashboard_style": "auto",
+    "dashboard_type": "template",
+    "dashboard_folder": "VmanagePerformance",
+    "context_label_id": "node_label",
+    "version": "26.06.24.1",
+    "short_label": "Asset Stack",
+    "live_edit": true,
+    "showTitle": true,
+    "dashboard_filters": {
+        "time_filter": true,
+        "extra_filter": "(customer_tag is '{{CUST_TAG}}' or customer_tag is empty or customer_tag is '' or customer_tag is 'None')"
+    },
+    "computedContext": {
+        "show_geomap": {
+            "defaultValue": "no"
+        }
+    },
+    "template_variables": {
+        "CUST_TAG": {
+            "contextId": "customerTag"
+        },
+        "PROJ_ID": {
+            "contextId": "projectId"
+        },
+        "NODE_ID": {
+            "contextId": "node_id"
+        },
+        "LAYER": {
+            "contextId": "layer"
+        },
+        "NODE_TYPE": {
+            "contextId": "node_type"
+        }
+    },
+    "dashboard_sections": [
+        {
+            "title": "Full Stack",
+            "widgets": [
+                {
+                    "title": "Full Stack",
+                    "widget_type": "topology_stack_view",
+                    "widget_template": "asv/application-stack-view",
+                    "chunk_size": 100,
+                    "layer_order": [
+                        "vsmart",
+                        "vmanage",
+                        "vbond",
+                        "vedge"
+                    ],
+                    "stack1": "cfx_rdaf_topology",
+                    "stack_type": "dynamic",
+                    "stack_definition": {
+                        "is_dynamic": true,
+                        "dynamic_nodes": {
+                            "column_name": "node_type",
+                            "db_name": "cfx_rdaf_topology",
+                            "nodes_collection": "cfx_rdaf_topology_nodes",
+                            "stream": "graphdb://cfx_rdaf_topology/cfx_rdaf_topology_nodes",
+                            "query": "topology_source is 'cisco_vmanage' and node_type in ['vedge','vmanage','vbond','vsmart'] and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty or customer_tag is '' or customer_tag is 'None')"
+                        },
+                        "dynamic_relationships": {
+                            "db_name": "cfx_rdaf_topology",
+                            "edges_collection": "cfx_rdaf_topology_edges",
+                            "graph_name": "cfx_rdaf_topology_graph",
+                            "relation_map": "rdaf_topology_relationships",
+                            "stream": "graphdb://cfx_rdaf_topology/cfx_rdaf_topology_edges",
+                            "query": "topology_source is 'cisco_vmanage' and edge_source is 'vmanage_edge' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty or customer_tag is '' or customer_tag is 'None') and relation_type is 'connected-to'"
+                        },
+                        "display_options": {
+                            "stack_type": "dynamic",
+                            "auto_group": false,
+                            "expand_all": false,
+                            "limit_initially": false,
+                            "register_search_endpoints": false,
+                            "node_list": [
+                                {
+                                    "node_id": "{{NODE_ID}}"
+                                }
+                            ]
+                        }
+                    },
+                    "alert_source": {
+                        "alerts_stream": "oia-alerts-stream",
+                        "group_by": [
+                            "a_en_node_id",
+                            "a_severity",
+                            "a_status"
+                        ],
+                        "duration_hours": 3000,
+                        "extra_filter": "a_source_systemname is not 'Alert Group'",
+                        "ts_column": "timestamp",
+                        "agg": "value_count",
+                        "column": "count_",
+                        "type": "int",
+                        "limit": 1000,
+                        "alerts_chunk_size": 200
+                    },
+                    "alert_detail_columns": {
+                        "a_message": {
+                            "title": "Message",
+                            "type": "GROUPED",
+                            "formatter": "truncate",
+                            "group": {
+                                "a_source_systemname": "Source",
+                                "a_asset_ip_address": "Asset IP Address",
+                                "a_status": "Status",
+                                "a_asset_name": "Asset Name"
+                            },
+                            "color-column": "severity_color"
+                        },
+                        "severity_color": {
+                            "type": "COLOR-MAP",
+                            "source-column": "a_severity",
+                            "color-map": {
+                                "CRITICAL": "#e53935",
+                                "HIGH": "#f57c00",
+                                "LOW": "#ffd54f",
+                                "MAJOR": "#f57c00",
+                                "MINOR": "#ffa726",
+                                "MODERATE": "#ffa726",
+                                "PLANNING": "#35e535",
+                                "WARNING": "#ffd54f"
+                            }
+                        },
+                        "a_raised_ts": {
+                            "title": "Raised At",
+                            "type": "DATETIME"
+                        },
+                        "a_cleared_ts": {
+                            "title": "Cleared At",
+                            "type": "DATETIME"
+                        },
+                        "a_severity": {
+                            "title": "Severity",
+                            "htmlTemplateForRow": "{% raw %}<span class='badge' style='background-color: {{row.severity_color}}' > {{row.a_severity}} </span>{% endraw %}"
+                        }
+                    },
+                    "edge_detail_columns": {
+                        "left_id": {
+                            "key": true,
+                            "title": "Source Tunnel IP"
+                        },
+                        "left_label": {
+                            "key": false,
+                            "title": "Source Label"
+                        },
+                        "right_id": {
+                            "key": true,
+                            "title": "Destination Tunnel IP"
+                        },
+                        "right_label": {
+                            "key": false,
+                            "title": "Destination Label"
+                        },
+                        "relation_type": {
+                            "key": false,
+                            "title": "Relation"
+                        },
+                        "color": {
+                            "key": false,
+                            "title": "Tunnel Color"
+                        },
+                        "state": {
+                            "key": false,
+                            "title": "State"
+                        },
+                        "proto": {
+                            "key": false,
+                            "title": "Protocol"
+                        }
+                    },
+                    "node_context_actions": [
+                        {
+                            "id": "view_summary",
+                            "icon": "mdi-eye",
+                            "title": "View Details",
+                            "selectionType": "SINGLE"
+                        },
+                        {
+                            "title": "Asset Stack View",
+                            "icon": "mdi-open-in-new",
+                            "type": "GO_TO_APP_STATE",
+                            "appName": "user-dashboard/vmanage_topology_drilldown",
+                            "selectionType": "SINGLE",
+                            "identifier": "launch-action:view-dashboard"
+                        }
+                    ],
+                    "height": 12,
+                    "min_width": 12,
+                    "max_width": 12,
+                    "widget_id": "vmanage_drilldown_fullstack"
+                }
+            ]
+        },
+        {
+            "title": "Asset Map",
+            "show_filter": false,
+            "widgets": [
+                {
+                    "widget_type": "topology",
+                    "title": "Asset Map",
+                    "reportId": "rda.saas.stack.view.topo",
+                    "chartProperties": {
+                        "hasToolbar": true,
+                        "shortToolbar": false,
+                        "enableControlPanel": false,
+                        "userZoomingEnabled": true
+                    },
+                    "nodes_report": {
+                        "reportMetaData": {
+                            "sorting": true,
+                            "filtering": true,
+                            "title": "Nodes",
+                            "remote_searchable": false,
+                            "remote_searchable_cols": [
+                                "node_label",
+                                "node_id",
+                                "node_type",
+                                "IP",
+                                "system_ip"
+                            ],
+                            "reportColumnDefinitionList": [
+                                {
+                                    "identifier": "node_label",
+                                    "title": "Label",
+                                    "key": true
+                                },
+                                {
+                                    "identifier": "node_type",
+                                    "key": false,
+                                    "title": "Type"
+                                },
+                                {
+                                    "identifier": "node_id",
+                                    "title": "Tunnel IP",
+                                    "key": false
+                                },
+                                {
+                                    "identifier": "IP",
+                                    "key": false,
+                                    "title": "IP Address"
+                                },
+                                {
+                                    "identifier": "system_ip",
+                                    "key": false,
+                                    "title": "System IP"
+                                },
+                                {
+                                    "identifier": "port",
+                                    "key": false,
+                                    "title": "Port"
+                                },
+                                {
+                                    "identifier": "source_ip",
+                                    "key": false,
+                                    "title": "Source IP",
+                                    "hidden": true
+                                },
+                                {
+                                    "identifier": "node_id",
+                                    "key": true,
+                                    "hidden": true
+                                }
+                            ],
+                            "actions": [
+                                {
+                                    "title": "Asset Stack View",
+                                    "icon": "mdi-open-in-new",
+                                    "type": "GO_TO_APP_STATE",
+                                    "appName": "user-dashboard/vmanage_topology_drilldown",
+                                    "selectionType": "SINGLE",
+                                    "identifier": "launch-action:view-dashboard"
+                                }
+                            ]
+                        }
+                    },
+                    "edges_report": {
+                        "reportId": "rda.saas.topology.edges.report",
+                        "reportMetaData": {
+                            "sorting": true,
+                            "filtering": true,
+                            "title": "Edges",
+                            "reportColumnDefinitionList": [
+                                {
+                                    "hidden": false,
+                                    "id": "left_id",
+                                    "identifier": "left_id",
+                                    "key": true,
+                                    "title": "Source Tunnel IP",
+                                    "type": "TEXT",
+                                    "visible": true
+                                },
+                                {
+                                    "hidden": false,
+                                    "id": "left_label",
+                                    "identifier": "left_label",
+                                    "key": false,
+                                    "title": "Source Label",
+                                    "type": "TEXT",
+                                    "visible": true
+                                },
+                                {
+                                    "hidden": false,
+                                    "id": "right_id",
+                                    "identifier": "right_id",
+                                    "key": true,
+                                    "title": "Destination Tunnel IP",
+                                    "type": "TEXT",
+                                    "visible": true
+                                },
+                                {
+                                    "hidden": false,
+                                    "id": "right_label",
+                                    "identifier": "right_label",
+                                    "key": false,
+                                    "title": "Destination Label",
+                                    "type": "TEXT",
+                                    "visible": true
+                                },
+                                {
+                                    "hidden": false,
+                                    "id": "relation_type",
+                                    "identifier": "relation_type",
+                                    "key": false,
+                                    "title": "Relation",
+                                    "type": "TEXT",
+                                    "visible": true
+                                },
+                                {
+                                    "identifier": "color",
+                                    "key": false,
+                                    "title": "Tunnel Color",
+                                    "type": "TEXT",
+                                    "visible": true
+                                },
+                                {
+                                    "identifier": "state",
+                                    "key": false,
+                                    "title": "State",
+                                    "type": "TEXT",
+                                    "visible": true
+                                },
+                                {
+                                    "identifier": "proto",
+                                    "key": false,
+                                    "title": "Protocol",
+                                    "type": "TEXT",
+                                    "visible": true
+                                }
+                            ],
+                            "actions": []
+                        }
+                    },
+                    "max_width": 12,
+                    "min_width": 6,
+                    "height": 12,
+                    "widget_id": "vmanage_drilldown_map"
+                }
+            ]
+        },
+        {
+            "title": "Relationships",
+            "show_filter": false,
+            "widgets": [
+                {
+                    "widget_type": "graphdb",
+                    "title": "Relationships",
+                    "reportId": "rda.saas.stack.view.topo.graph",
+                    "stack_name": "cfx_rdaf_topology",
+                    "nodes_collection1": "cfx_rdaf_topology_nodes",
+                    "edges_collection1": "cfx_rdaf_topology_edges",
+                    "graph_name1": "cfx_rdaf_topology_graph",
+                    "relation_map1": "rdaf_topology_relationships",
+                    "graph_report_extra_node_fields": [
+                        "node_type",
+                        "system_ip",
+                        "IP",
+                        "port"
+                    ],
+                    "node_context_actions": [
+                        {
+                            "title": "Asset Stack View",
+                            "icon": "mdi-open-in-new",
+                            "type": "GO_TO_APP_STATE",
+                            "appName": "user-dashboard/vmanage_topology_drilldown",
+                            "selectionType": "SINGLE",
+                            "identifier": "launch-action:view-dashboard"
+                        }
+                    ],
+                    "height": 12,
+                    "min_width": 12,
+                    "max_width": 12,
+                    "widget_id": "vmanage_drilldown_graphdb"
+                }
+            ]
+        },
+        {
+            "title": "Geo Map",
+            "context_filter": "show_geomap=='yes'",
+            "visibility_on_error": false,
+            "widgets": [
+                {
+                    "title": "Geomap",
+                    "widget_type": "topology_geomap",
+                    "widget_enabled": false,
+                    "widget_template": "common/geo-map",
+                    "reportId": "vmanage_topology_drilldown_geomap",
+                    "mapProperties": {
+                        "initialMapZoom": 5,
+                        "mapTableWidth": 250
+                    },
+                    "edge_colors": [
+                        "#455a64",
+                        "#f57c00",
+                        "#fbc02d",
+                        "#388e3c",
+                        "#0097a7",
+                        "#1976d2",
+                        "#8e24aa",
+                        "#d81b60",
+                        "#d32f2f"
+                    ],
+                    "has_more_data_flag": false,
+                    "expand_all": true,
+                    "auto_group": false,
+                    "stack_type": "dynamic",
+                    "chunked_mode": true,
+                    "chunk_size": 25,
+                    "stack_definition": {
+                        "is_dynamic": true,
+                        "dynamic_nodes": {
+                            "column_name": "node_type",
+                            "db_name": "cfx_rdaf_topology",
+                            "nodes_collection": "cfx_rdaf_topology_nodes",
+                            "stream": "graphdb://cfx_rdaf_topology/cfx_rdaf_topology_nodes",
+                            "query": "topology_source is 'cisco_vmanage' and node_type in ['vedge','vmanage','vbond','vsmart'] and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty or customer_tag is '' or customer_tag is 'None')"
+                        },
+                        "dynamic_relationships": {
+                            "db_name": "cfx_rdaf_topology",
+                            "edges_collection": "cfx_rdaf_topology_edges",
+                            "graph_name": "cfx_rdaf_topology_graph",
+                            "relation_map": "rdaf_topology_relationships",
+                            "stream": "graphdb://cfx_rdaf_topology/cfx_rdaf_topology_edges",
+                            "query": "topology_source is 'cisco_vmanage' and edge_source is 'vmanage_edge' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty or customer_tag is '' or customer_tag is 'None') and relation_type is 'connected-to'"
+                        },
+                        "display_options": {
+                            "stack_type": "dynamic",
+                            "auto_group": false,
+                            "expand_all": false,
+                            "limit_initially": false,
+                            "register_search_endpoints": false,
+                            "chunked_mode": true,
+                            "chunk_size": 25
+                        }
+                    },
+                    "nodes_report": {
+                        "reportMetaData": {
+                            "sorting": true,
+                            "filtering": true,
+                            "title": "Nodes",
+                            "remote_searchable": true,
+                            "remote_searchable_cols": [
+                                "node_label",
+                                "node_id",
+                                "node_type",
+                                "system_ip",
+                                "IP"
+                            ],
+                            "reportColumnDefinitionList": [
+                                {
+                                    "identifier": "node_label",
+                                    "title": "Name",
+                                    "key": true
+                                },
+                                {
+                                    "identifier": "node_type",
+                                    "key": false,
+                                    "title": "Type"
+                                },
+                                {
+                                    "identifier": "system_ip",
+                                    "key": false,
+                                    "title": "System IP"
+                                },
+                                {
+                                    "identifier": "IP",
+                                    "key": false,
+                                    "title": "Tunnel IP"
+                                },
+                                {
+                                    "identifier": "node_id",
+                                    "key": true,
+                                    "hidden": true
+                                }
+                            ],
+                            "actions": []
+                        }
+                    },
+                    "edges_report": {
+                        "reportId": "rda.saas.topology.edges.report",
+                        "reportMetaData": {
+                            "sorting": true,
+                            "filtering": true,
+                            "title": "Edges",
+                            "reportColumnDefinitionList": [
+                                {
+                                    "identifier": "left_id",
+                                    "key": true,
+                                    "title": "Source",
+                                    "type": "TEXT",
+                                    "visible": true
+                                },
+                                {
+                                    "identifier": "left_label",
+                                    "key": false,
+                                    "title": "Source Label",
+                                    "type": "TEXT",
+                                    "visible": true
+                                },
+                                {
+                                    "identifier": "right_id",
+                                    "key": true,
+                                    "title": "Destination",
+                                    "type": "TEXT",
+                                    "visible": true
+                                },
+                                {
+                                    "identifier": "right_label",
+                                    "key": false,
+                                    "title": "Destination Label",
+                                    "type": "TEXT",
+                                    "visible": true
+                                },
+                                {
+                                    "identifier": "relation_type",
+                                    "key": false,
+                                    "title": "Relation",
+                                    "type": "TEXT",
+                                    "visible": true
+                                }
+                            ],
+                            "actions": []
+                        }
+                    },
+                    "height": 8,
+                    "max_width": 12,
+                    "widget_id": "vmanage_drilldown_geomap"
+                }
+            ]
+        }
+    ],
+    "saved_time": "2026-06-24T00:00:00.000000",
+    "menu_folder_path": [
+        "Topology"
+    ]
+}

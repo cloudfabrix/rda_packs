@@ -1,0 +1,30 @@
+{
+  "name": "Vmanage",
+  "description": "Cisco vManage SD-WAN topology stack",
+  "saved_time": "2024-12-31T10:34:51.997847",
+  "is_dynamic": true,
+  "hierarchical": false,
+  "with_graphdb": true,
+  "dynamic_nodes": {
+    "column_name": "node_type",
+    "stream0": "vmanage_topology_nodes",
+    "db_name": "cfx_rdaf_topology",
+    "nodes_collection": "cfx_rdaf_topology_nodes",
+    "stream": "graphdb://cfx_rdaf_topology/cfx_rdaf_topology_nodes",
+    "query": "topology_source is 'cisco_vmanage' and node_type in ['vedge','vmanage','vbond','vsmart'] and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty or customer_tag is '' or customer_tag is 'None')",
+    "limit": 0,
+    "sorting": null
+  },
+  "dynamic_relationships": {
+    "stream0": "vmanage_topology_edges",
+    "db_name": "cfx_rdaf_topology",
+    "edges_collection": "cfx_rdaf_topology_edges",
+    "stream": "graphdb://cfx_rdaf_topology/cfx_rdaf_topology_edges",
+    "graph_name": "cfx_rdaf_topology_graph",
+    "relation_map": "rdaf_topology_relationships",
+    "query": "topology_source is 'cisco_vmanage' and edge_source is 'vmanage_edge' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty or customer_tag is '' or customer_tag is 'None') and relation_type is 'connected-to'",
+    "limit": 0,
+    "sorting": null
+  },
+  "views": []
+}

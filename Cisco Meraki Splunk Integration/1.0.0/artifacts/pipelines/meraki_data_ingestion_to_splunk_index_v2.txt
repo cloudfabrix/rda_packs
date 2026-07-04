@@ -1,0 +1,77 @@
+%% stream = no and limit = 0
+%%template_type="jinja"
+%% import_src_type = "splunk_v2"
+
+%%start_inline_object name="context_dynamic_form" and type="data" and format="json"
+{
+    "formFieldList": [
+        {
+            "fieldId": "customer_tag",
+            "label": "Tag of the customer",
+            "required": false,
+            "dataType": "string"
+        }
+    ]
+}
+%%end_inline_object
+@dm:empty
+    --> @dm:save name = "temp-customer-context"
+
+{% set row = "" %}
+
+   {% if customer_tag %}
+      {% set customer_id = customer_id %}
+      {% set customer_tag = customer_tag %}
+      {% set customerTag = customer_tag %}
+   {% elif customerTag %}
+      {% set customer_id = customer_id %}
+      {% set customer_tag = customerTag %}
+   {% else %}
+      {% set customer_id = '' %}
+      {% set customer_tag = '' %}
+   {% endif %}
+
+--> @c:new-block
+       --> @dm:empty
+       {% if customer_tag %} 
+         --> #dm:query-persistent-stream type contains 'splunk_v2' and customerTag contains '{{customer_tag}}' with-input name = 'rda_secrets_meta' and limit= 0
+       {% else %}
+         --> #dm:query-persistent-stream type contains 'splunk_v2' and customerTag is empty with-input name = 'rda_secrets_meta' and limit= 0
+       {% endif %}  
+       --> @dm:rename-columns splunk_src_name = 'name'
+       --> @dm:eval key_col ="'key'"
+       --> @dm:save name = 'temp-splunk-sources'
+
+
+--> @c:new-block
+    --> @dm:empty
+    --> @dm:addrow key="1"
+    --> @dm:load-bookmark name="meraki_data_ingestion_to_splunk_index_bkmrk2" & default="2025-01-01T01:00:01.000+0000"
+    --> *exec:if-shape num_rows > 0
+       --> @dm:map to="key" & func="fixed" & value="1"
+       --> @dm:rename-columns bookmark="value"
+       --> @dm:save name="temp-bkmrk"
+    ## --> @dm:save name="test-bkmrk1"
+    --> @exec:end-if
+    --> *exec:if-shape num_rows = 0
+       --> @dm:empty
+       --> @dm:addrow key="1" & bookmark="2025-01-01T01:00:01.000+0000"
+       --> @dm:save name="temp-bkmrk"
+    ## --> @dm:save name="test-bkmrk2"
+    --> @exec:end-if
+
+--> @c:new-block
+    --> @dm:recall name="reference_list_v2"
+    --> @dm:map to="key" & func="fixed" & value="1"
+    --> @dm:enrich dict='temp-bkmrk' & dict_key_cols='key' & src_key_cols='key' & enrich_cols='bookmark'
+    --> @dm:eval key_col ="'key'"
+    --> @dm:enrich dict	 = "temp-splunk-sources" and src_key_cols	 = "key_col" and dict_key_cols	="key_col" and enrich_cols	="splunk_src_name" & dedup_dict = "no"
+    
+    --> @dm:save name="temp-pipeline-input"
+
+ --> @dm:save name="test-pipeline-input-splunk"
+--> @c:data-loop dataset = "temp-pipeline-input" and columns = "stream,splunk_index,extra_filter,bookmark,index_type,splunk_src_name"
+    --> @dm:empty
+    --> @dm:addrow stream = "$stream" & splunk_index="$splunk_index" & extra_filter="$extra_filter" & bookmark="$bookmark" & index_type="$index_type" & splunk_src_name = "$splunk_src_name"
+    --> @exec:run-pipeline name="meraki_data_ingestion_to_splunk_index_query_v2" & ignore_failures="yes"
+

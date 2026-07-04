@@ -1,0 +1,115 @@
+%%template_type="jinja"
+
+##%% import_src_type = "asset-discovery"
+%%start_inline_object name="context_dynamic_form" and type="data" and format="json"
+{
+    "formFieldList": [
+        {
+            "fieldId": "customer_tag",
+            "label": "Tag of the customer",
+            "required": false,
+            "dataType": "string"
+        }
+    ]
+}
+%%end_inline_object
+
+@dm:empty
+    --> @dm:save name = "temp-customer-context"
+
+
+   {% if customer_tag %} 
+      {% set customer_id = customer_id %}
+      {% set customer_tag = customer_tag %}
+      {% set customerTag = customer_tag %}
+   {% elif customerTag %} 
+      {% set customer_id = customer_id %}
+      {% set customer_tag = customerTag %}
+   {% else %}
+      {% set customer_id = '' %}
+      {% set customer_tag = '' %}
+   {% endif %}   
+
+
+
+--> @c:flex-block
+    --> @dm:empty
+    --> @exec:define-function name = 'test-func'
+
+       --> @exec:run-pipeline name="mibs_collection_main"
+       
+    --> @exec:end-function
+
+
+--> @c:new-block
+    --> @exec:get-input
+    ##--> @dm:save name = "ondemand-inp-ui-data"
+    --> @dm:save name = "temp-discovery-ondemand-data"
+    ## explode others and enrich the discovery_scope
+    --> @dm:selectcolumns include = "Others|customer_tag|customer_id"
+    ## --> @dm:eval Others = 'Others.replace("\'", "\"")'
+    --> @dm:explode-json column="Others"
+    --> @dm:eval key ="'key'"
+    -->  @dm:add-missing-columns     columns = "customer_tag,customer_id"  & value = "None"
+    --> @dm:rename-columns device_ip  = "device"
+    --> *dm:filter device_ip is not empty
+    --> @dm:map attr = "device_ip" & func = 'strip'
+    --> @dm:save name = "temp-discovery-ondemand"
+
+## ondemand discovery
+--> @c:new-block
+    --> @dm:recall name = "temp-discovery-ondemand-data" and return_empty = "yes"
+    --> @dm:skip-block-if-shape row_count = 0
+    --> @dm:recall name = "temp-discovery-ondemand" and return_empty = "yes"
+    --> @dm:eval current_time ='int(time_now_as_ms())'
+    --> @dm:eval ondemand_discovery ="'yes'"
+    --> @dm:eval pipeline_name="'mibs_collection_main'"
+    ##--> @dm:rename-columns discovery_enabled = "discovery_scope"
+    -->  @dm:add-missing-columns     columns = "discovery_enabled"  & value = "yes"
+    --> @dm:save name="temp-ondemand-discovery"
+    --> @exec:run-pipeline name="mibs_collection_main" 
+    --> @dm:save name="temp-run_discovery-result"
+   
+    
+## scheduled execution
+--> @c:new-block
+    --> @dm:recall name = "temp-discovery-ondemand-data" and return_empty = "yes"
+    --> @dm:skip-block-if-shape row_count > 0
+    --> @dm:empty
+    {% if customer_tag %}
+        --> #dm:query-persistent-stream protocol is 'SNMP' and auth_state is 'Success' and (customer_tag is '{{customer_tag}}') 
+            with-input name = "mibs_network_access_verification" & limit = "0"
+    {% else %}
+        --> #dm:query-persistent-stream protocol is 'SNMP' and auth_state is 'Success' and (customer_tag is empty or customer_tag is 'None')
+         with-input name = "mibs_network_access_verification" & limit = "0"
+    {% endif %}
+    --> @dm:selectcolumns
+            include = 'ip_address|discovery_scope|protocol|auth_state|customer_tag|customer_id'
+    -->@dm:save name="temp-device-discovery-scope"
+    --> @dm:empty
+    {% if customer_tag %}
+        --> #dm:query-persistent-stream onboarding_status  = 'Success' and (customer_tag is '{{customer_tag}}') 
+            with-input name = "snmp_onboarded_devices" & limit = "0"
+    {% else %}
+        --> #dm:query-persistent-stream onboarding_status  = 'Success' and (customer_tag is empty or customer_tag is 'None')
+         with-input name = "snmp_onboarded_devices" & limit = "0"
+    {% endif %}  
+    --> @dm:selectcolumns exclude= "limit|index|name|discovery_scope"
+    --> @dm:add-missing-columns columns = "customer_tag,customer_id"
+    --> @dm:rename-columns device_ip  = "device"
+    --> @dm:save name="temp-input-data-set"
+    -->@dm:enrich dict="temp-device-discovery-scope" and dict_key_cols="ip_address" and src_key_cols="device_ip" and enrich_cols="discovery_scope,protocol,auth_state"
+    --> @dm:rename-columns discovery_enabled="discovery_scope" and name = "credential"
+    
+    -->  @dm:add-missing-columns     columns = "discovery_enabled"  & value = "yes"
+    --> *dm:filter discovery_enabled is "yes" and protocol is 'SNMP' and auth_state is 'Success'
+    --> @dm:eval pipeline_name="'mibs_collection_main'"
+    --> @dm:save name="temp-customer-details"
+     
+    
+    --> @dm:selectcolumns exclude= "count_|_RDA_Id|timestamp|key"
+    --> @dm:eval key ="'key'"
+    --> @dm:save name = "temp-discovery"    
+    --> @exec:run-pipeline-multi-proc name="mibs_collection_main"
+    --> @dm:save name="temp-run_discovery-result"
+    

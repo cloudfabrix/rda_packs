@@ -1,0 +1,46 @@
+{
+    "name": "code_viewer",
+    "label": "Code Viewer Widgets",
+    "live_edit": true,
+    "version": "25.2.25.1",
+    "description": "Documentation Widgets",
+    "dashboard_type": "dashboard",
+    "enabled": false,
+    "dashboard_sections": [
+        {
+            "title": "Documentation",
+            "widgets": [
+                {
+                    "title": "Documentation",
+                    "widget_type": "custom_widget",
+                    "widget_implementation": "code_viewer/code_viewer_widget",
+                    "min_width": 12,
+                    "min_height": 12,
+                    "widget_id": "4e2d534c",
+                    "fixed_variables": {
+                        "codeSnippet": "Hello\nWorld",
+                        "lang": "json"
+                    }
+                }
+            ]
+        }
+    ],
+    "custom_widgets": {
+        "code_viewer_widget": {
+            "artifacts": {
+                "main": {
+                    "attachment": "main.html",
+                    "content_type": "text/html",
+                    "is_template": true
+                }
+            }
+        }
+    },
+    "saved_time": "2025-03-14T19:30:24.195584",
+    "attachments": [
+        {
+            "name": "main.html",
+            "value": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n    <meta charset=\"UTF-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n    <title>r</title>\n    <style>\n        body {\n            font-family: Avenir, Helvetica, Arial, sans-serif;\n            height:100%;\n            padding: 5px;\n            max-width0: 1000px;\n            margin: auto;\n            background-color: #121212;\n            color: #fff;\n        }\n        .editor-container {\n            width: 100%;\n            height: 100%;\n            position: absolute !important;\n            top: 0;\n            left: 0;\n            min-height: 200px;\n            display: flex;\n            margin: auto;\n            border: 0px solid #ccc;\n        }\n     \n        h2 {\n            color:#90CAF9;\n            border-bottom: 1px solid #607D8B;\n            padding-bottom: 5px;\n            margin-top: 55px;\n        }\n        h3 {\n            color: #BBDEFB;\n        }\n        p {\n            line-height: 1.6;\n            font-size: 14px;\n        }\n        ol{\n            font-size: 14px;\n        }\n        a {\n            color: #42A5F5;\n            text-decoration: none;\n        }\n        ul{\n            list-style:none;\n        }\n        li {\n            margin: 8px 0;\n        }\n        a:hover {\n            text-decoration: underline;\n        }\n        img {\n            max-width: 100%;\n            height: auto;\n            margin-top: 10px;\n            border-radius: 5px;\n        }\n        \n    </style>\n    <script src=\"https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js\"></script>\n    <script>\n        window.MonacoEnvironment = {\n            getWorkerUrl: function (workerId, label) {\n                return `data:text/javascript;charset=utf-8,` +\n                    `importScripts('https://unpkg.com/monaco-editor@0.34.0/min/vs/base/worker/workerMain.js');`;\n            }\n        };\n    </script>\n    <script src=\"https://unpkg.com/monaco-editor@0.34.0/min/vs/loader.js\"></script>\n</head>\n<body>\n  \n    \n<div class=\"editor-container\" data-language=\"{{lang}}\" data-theme=\"vs-dark\">\n{{codeSnippet}}\n</div>\n\n    <script>\n        require.config({ paths: { 'vs': 'https://unpkg.com/monaco-editor@0.34.0/min/vs' } });\n\n        require(['vs/editor/editor.main'], function () {\n            document.querySelectorAll('.editor-container').forEach(container => {\n                let code = container.textContent.trim();\n                let language = container.getAttribute('data-language') || 'javascript';\n                let theme = container.getAttribute('data-theme') || 'vs-dark';\n\n                container.innerHTML = \"\"; // Clear text to prevent duplication\n\n                monaco.editor.create(container, {\n                    value: code,\n                    language: language,\n                    theme: theme,\n                    readOnly: true,\n                    automaticLayout: true\n                });\n            });\n        });\n    </script>\n</body>\n</html>\n"
+        }
+    ]
+}

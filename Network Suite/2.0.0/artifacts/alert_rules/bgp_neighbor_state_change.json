@@ -1,0 +1,91 @@
+{
+    "type": "log",
+    "name": "bgp_neighbor_state_change",
+    "description": "BGP neighbor state changed CFX",
+    "enabled": false,
+    "schedule": {
+        "minutes": 5
+    },
+    "data": {
+        "stream": "syslog_udp_events_stream",
+        "query": "syslog_code in ['%ROUTING-BGP-5-ADJCHANGE_DETAIL','%BGP-5-ADJCHANGE']",
+        "unique_keys": [
+            "rda_gw_client_ip",
+            "neighbor_ip"
+        ],
+        "groupby": [
+            "rda_gw_client_ip",
+            "neighbor_ip",
+            "device_hostname"
+        ],
+        "additional_columns": [
+            "raw",
+            "device_hostname",
+            "rda_gw_client_ip",
+            "device_model",
+            "device_vendor",
+            "neighbor_ip",
+            "state",
+            "details",
+            "interface"
+        ],
+        "custom_unique_keys": [
+            "alarm_class",
+            "neighbor_ip"
+        ],
+        "data_transformations": [
+            {
+                "type": "eval",
+                "columns": {
+                    "alarm_class": {
+                        "expr": "'BGP'"
+                    },
+                    "details_safe": {
+                        "expr": "details if details else ''"
+                    },
+                    "interface_name": {
+                        "expr": "interface if interface else ''"
+                    }
+                }
+            }
+        ],
+        "padding_time_seconds": 60,
+        "limit": 1000
+    },
+    "actions": [
+        {
+            "state": "OPEN",
+            "extra_query": "state == 'Down'",
+            "attributes": {
+                "severity": "CRITICAL",
+                "alert_message": "BGP neighbor {{neighbor_ip}} DOWN on {{device_hostname}} ({{rda_gw_client_ip}}) {{details_safe}} {{interface_name}}",
+                "recommendedaction": "Check BGP neighbor using 'show ip bgp summary'. Verify reachability, interface, timers, and routing policy."
+            },
+            "throttle": {
+                "value": 60,
+                "unit": "MINUTES"
+            },
+            "notification_profile": "snmp_metrics_notification_profile",
+            "notification": [
+                {
+                    "channel": "asm_syslog_webhook"
+                }
+            ]
+        },
+        {
+            "state": "CLEAR",
+            "extra_query": "state == 'Up'",
+            "attributes": {
+                "severity": "INFO",
+                "alert_message": "BGP neighbor {{neighbor_ip}} restored on {{device_hostname}} ({{rda_gw_client_ip}})"
+            },
+            "notification_profile": "snmp_metrics_notification_profile",
+            "notification": [
+                {
+                    "channel": "asm_syslog_webhook"
+                }
+            ]
+        }
+    ],
+    "saved_time": "2026-04-16T03:48:34.459442"
+}

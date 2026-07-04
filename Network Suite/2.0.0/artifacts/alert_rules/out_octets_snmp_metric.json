@@ -1,0 +1,59 @@
+{
+    "type": "metric",
+    "name": "out_octets_snmp_metric",
+    "description": "Interface Out Octets CFX",
+    "enabled": false,
+    "schedule": {
+        "minutes": 5
+    },
+    "data": {
+        "stream": "rda_snmp_metrics",
+        "query": "collection = 'interface' and interface_type = '6' and out_octets >= 0",
+        "unique_keys": [
+            "target_ip",
+            "interface_description",
+            "name"
+        ],
+        "groupby": [
+            "target_ip",
+            "interface_description",
+            "name"
+        ],
+        "additional_columns": [
+            "device_hostname",
+            "device_model",
+            "device_vendor",
+            "out_octets_delta",
+            "sys_name"
+        ],
+        "custom_unique_keys": [],
+        "data_transformations": []
+    },
+    "actions": [
+        {
+            "state": "OPEN",
+            "threshold": "10000000",
+            "agg_column": "out_octets_delta",
+            "agg_func": "sum",
+            "attributes": {
+                "severity": "CRITICAL",
+                "metric_name": "out_octets",
+                "alert_message": "Critical outbound traffic on {{sys_name}} ({{target_ip}}) interface {{interface_description}} (bytes={{out_octets_delta}})"
+            },
+            "notification_profile": "snmp_metrics_notification_profile"
+        },
+        {
+            "state": "CLEAR",
+            "agg_column": "out_octets_delta",
+            "agg_func": "sum",
+            "threshold": "3000000",
+            "attributes": {
+                "severity": "INFO",
+                "metric_name": "out_octets",
+                "alert_message": "Outbound traffic normalized on {{sys_name}} ({{target_ip}}) interface {{interface_description}}"
+            },
+            "notification_profile": "snmp_metrics_notification_profile"
+        }
+    ],
+    "saved_time": "2026-04-15T05:48:07.413064"
+}

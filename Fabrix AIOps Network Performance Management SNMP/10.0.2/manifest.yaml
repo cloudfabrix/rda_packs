@@ -1,0 +1,489 @@
+name: Fabrix AIOps Network Performance Management SNMP
+version: 10.0.2
+folder: /collection/network/fabrix_aiops_network_performance_management_snmp
+published_date: 2026-06-19
+publisher: Fabrix.ai
+label: Fabrix AIOps Network Performance Management SNMP
+scope: system
+description:
+  value: ""
+  md: ./description.md
+type: collection
+requires:
+  - name: Network Device Discovery
+    version: ">=9.0.1"
+    auto_install_requires: true
+  
+fabric_services:
+ - name: worker
+   version: ">=8.2.0"
+ - name: api-server
+   version: ">=8.2.0"
+ 
+
+
+artifacts:
+  pstreams:
+  - name: rda_snmp_metrics
+    description: ''
+    attributes:
+      os_external: false
+      ism:
+        rollover:
+          min_index_age: 3d
+          min_size: 60gb
+        delete:
+          min_index_age: 15d
+        index_settings:
+          index.mapping.total_fields.limit: '1500'
+          index.refresh_interval: 60s
+          index.number_of_shards: '3'
+          index.number_of_replicas: '1'
+        index_mappings:
+          dynamic: strict
+          properties:
+            cpu_total_5sec_rev:
+              type: long
+            cpu_total_1min_rev:
+              type: long
+            cpu_total_5min_rev:
+              type: long
+            cpu_usage:
+              type: double
+            memory_free:
+              type: long
+            memory_used:
+              type: long
+            memory_total:
+              type: long
+            memory_usage:
+              type: double
+            memory_units:
+              type: long
+            in_octets:
+              type: long
+            out_octets:
+              type: long
+            in_octets_delta:
+              type: long
+            in_octets_rate:
+              type: double
+            in_octets_time_delta:
+              type: double
+            out_octets_delta:
+              type: long
+            out_octets_rate:
+              type: double
+            out_octets_time_delta:
+              type: double
+            in_errors:
+              type: long
+            in_errors_delta:
+              type: long
+            in_errors_rate:
+              type: double
+            in_errors_time_delta:
+              type: double
+            out_errors:
+              type: long
+            out_errors_delta:
+              type: long
+            out_errors_rate:
+              type: double
+            out_errors_time_delta:
+              type: double
+            in_discards:
+              type: long
+            in_discards_delta:
+              type: long
+            in_discards_rate:
+              type: double
+            in_discards_time_delta:
+              type: double
+            out_discards:
+              type: long
+            out_discards_delta:
+              type: long
+            out_discards_rate:
+              type: double
+            out_discards_time_delta:
+              type: double
+            high_speed:
+              type: long
+            interface_speed:
+              type: long
+            index:
+              type: double
+            interface_index:
+              type: long
+            interface_type:
+              type: long
+            input_utilization:
+              type: double
+            output_utilization:
+              type: double
+            interface_utilization:
+              type: double
+            oper_status:
+              type: long
+            admin_status:
+              type: long
+            last_change:
+              type: long
+            crc_errors:
+              type: long
+            crc_errors_delta:
+              type: long
+            crc_errors_rate:
+              type: double
+            crc_errors_time_delta:
+              type: double
+            alignment_errors:
+              type: long
+            alignment_errors_delta:
+              type: long
+            alignment_errors_rate:
+              type: double
+            alignment_errors_time_delta:
+              type: double
+            frame_too_longs:
+              type: long
+            frame_too_longs_delta:
+              type: long
+            frame_too_longs_rate:
+              type: double
+            frame_too_longs_time_delta:
+              type: double
+            symbol_errors:
+              type: long
+            symbol_errors_delta:
+              type: long
+            symbol_errors_rate:
+              type: double
+            symbol_errors_time_delta:
+              type: double
+            ntp_status:
+              type: long
+            ntp_time_precision_ms:
+              type: double
+            ntp_time_precision:
+              type: long
+            sensor_value:
+              type: long
+            sensor_threshold:
+              type: long
+            sensor_last_shutdown:
+              type: long
+            sensor_status:
+              type: long
+            sensor_type:
+              type: long
+            ospf_neighbor_events:
+              type: long
+            ospf_neighbor_events_delta:
+              type: long
+            ospf_neighbor_events_rate:
+              type: double
+            ospf_neighbor_events_time_delta:
+              type: double
+            ospf_interface_events:
+              type: long
+            ospf_interface_events_delta:
+              type: long
+            ospf_interface_events_rate:
+              type: double
+            ospf_interface_events_time_delta:
+              type: double
+            ospf_neighbor_state:
+              type: long
+            ospf_admin_status:
+              type: long
+            ospf_interface_state:
+              type: long
+            bgp_peer_admin_status:
+              type: long
+            bgp_peer_in_messages:
+              type: long
+            bgp_peer_in_messages_delta:
+              type: long
+            bgp_peer_in_messages_rate:
+              type: double
+            bgp_peer_in_messages_time_delta:
+              type: double
+            bgp_peer_out_messages:
+              type: long
+            bgp_peer_out_messages_delta:
+              type: long
+            bgp_peer_out_messages_rate:
+              type: double
+            bgp_peer_out_messages_time_delta:
+              type: double
+            bgp_peer_in_updates:
+              type: long
+            bgp_peer_in_updates_delta:
+              type: long
+            bgp_peer_in_updates_rate:
+              type: double
+            bgp_peer_in_updates_time_delta:
+              type: double
+            bgp_peer_out_updates:
+              type: long
+            bgp_peer_out_updates_delta:
+              type: long
+            bgp_peer_out_updates_rate:
+              type: double
+            bgp_peer_out_updates_time_delta:
+              type: double
+            bgp_peer_local_port:
+              type: long
+            bgp_peer_remote_port:
+              type: long
+            bgp_peer_remote_as:
+              type: long
+            bgp_peer_state:
+              type: long
+            bgp_peer_uptime:
+              type: long
+            result_code:
+              type: long
+    remove_on_deactivation: true
+    source: OpenSearch
+  - name: rda_snmp_network_interfaces_inventory
+    attributes:
+      unique_keys:
+      - target_ip
+      - interface_index
+      retention_days: 15
+    autocreate: true
+    remove_on_deactivation: true
+  - name: rda_snmp_entity_physical_inventory
+    attributes:
+      unique_keys:
+      - target_ip
+      - index
+      retention_days: 30
+    autocreate: true
+    remove_on_deactivation: true
+
+  dashboards:
+    - name: kpi-workbench
+      file: ./artifacts/dashboards/kpi-workbench.json
+      creation_policy: overwrite
+    - name: preview_kpi_dashboard
+      file: ./artifacts/dashboards/preview_kpi_dashboard.json
+      creation_policy: overwrite
+    - name: snmp_metrics_navigator
+      file: ./artifacts/dashboards/snmp_metrics_navigator.json
+      creation_policy: overwrite
+    - name: performance_snmp_management
+      file: ./artifacts/dashboards/performance_snmp_management.json
+      creation_policy: overwrite
+    
+  
+
+customer_level:  
+  launch_locations:
+
+  - pstream_name: rda_packs_dynamic_groups_and_pages
+    dashboard_group_name: groupMetrics 
+    dashboard_group_label: Metrics
+    dashboard_group_icon: "insights.svg"
+    dashboard_page_name: kpi-workbench
+    dashboard_page_label: "Metrics Workbench"
+    dashboard_page_icon: "insights.svg"
+    dashboard_app_name: "NetworkMain"
+  
+  - pstream_name: rda_packs_dynamic_groups_and_pages
+    dashboard_group_name: groupMetrics 
+    dashboard_group_label: SNMP Metrics Navigator
+    dashboard_group_icon: "settings.svg"
+    dashboard_page_name: snmp_metrics_navigator
+    dashboard_page_label: "SNMP Metrics Navigator"
+    dashboard_page_icon: "settings.svg"
+    dashboard_app_name: "NetworkMain"
+  
+  - pstream_name: rda_packs_dynamic_groups_and_pages
+    dashboard_group_name: groupDiscovery
+    dashboard_group_label: Device Onboarding
+    dashboard_group_icon: "library.svg"
+    dashboard_page_name: performance_snmp_management
+    dashboard_page_label: SNMP Metrics Management
+    dashboard_page_icon: "library.svg"
+    dashboard_app_name: "NetworkMain"
+
+  artifacts:
+  
+    endpoints:
+      - name: asm_snmp
+        file: ./artifacts/endpoints/asm_snmp.json
+      
+    mappings:
+      - name: asm_snmp_log_mapper
+        file: ./artifacts/mappings/asm_snmp_log_mapper.json
+        creation_policy: overwrite
+      - name: asm_snmp_metrics_mapper
+        file: ./artifacts/mappings/asm_snmp_metrics_mapper.json
+        creation_policy: overwrite
+
+    notification_channels:      
+      - name: telegraf_snmp_metrics
+        file: ./artifacts/notification_channels/telegraf_snmp_metrics.json
+        remove_on_deactivation: true 
+    
+
+    alert_rules:      
+      - name: cpu_usage_snmp_metric
+        file: ./artifacts/alert_rules_multi_tenant/cpu_usage_snmp_metric.json
+        remove_on_deactivation: true
+        creation_policy: overwrite
+
+      ##- name: device_availability_snmp
+      ##  file: ./artifacts/alert_rules_multi_tenant/device_availability_snmp.json
+      ##  remove_on_deactivation: true
+      ##  creation_policy: overwrite
+
+      - name: interface_in_discards_snmp_metric
+        file: ./artifacts/alert_rules_multi_tenant/interface_in_discards_snmp_metric.json
+        remove_on_deactivation: true
+        creation_policy: overwrite
+
+      - name: interface_in_errors_snmp_metric
+        file: ./artifacts/alert_rules_multi_tenant/interface_in_errors_snmp_metric.json
+        remove_on_deactivation: true
+        creation_policy: overwrite
+
+      - name: interface_in_octets_snmp_metric
+        file: ./artifacts/alert_rules_multi_tenant/interface_in_octets_snmp_metric.json
+        remove_on_deactivation: true
+        creation_policy: overwrite
+
+      - name: memory_usage_snmp_metric
+        file: ./artifacts/alert_rules_multi_tenant/memory_usage_snmp_metric.json
+        remove_on_deactivation: true
+        creation_policy: overwrite
+
+      - name: interface_oper_status_snmp_metric
+        file: ./artifacts/alert_rules_multi_tenant/interface_oper_status_snmp_metric.json
+        remove_on_deactivation: true
+        creation_policy: overwrite
+
+      - name: interface_out_discards_snmp_metric
+        file: ./artifacts/alert_rules_multi_tenant/interface_out_discards_snmp_metric.json
+        remove_on_deactivation: true
+        creation_policy: overwrite
+
+      - name: interface_out_errors_snmp_metric
+        file: ./artifacts/alert_rules_multi_tenant/interface_out_errors_snmp_metric.json
+        remove_on_deactivation: true
+        creation_policy: overwrite
+
+      - name: interface_out_octets_snmp_metric
+        file: ./artifacts/alert_rules_multi_tenant/interface_out_octets_snmp_metric.json
+        remove_on_deactivation: true
+        creation_policy: overwrite
+
+  
+
+single_tenant:
+  launch_dashboard: network_discovery_main_app  
+  launch_locations:
+
+  - pstream_name: rda_packs_dynamic_groups_and_pages
+    dashboard_group_name: groupMetrics 
+    dashboard_group_label: Metrics
+    dashboard_group_icon: "insights.svg"
+    dashboard_page_name: kpi-workbench
+    dashboard_page_label: "Metrics Workbench"
+    dashboard_page_icon: "insights.svg"
+    dashboard_app_name: "NetworkMain"
+  
+  - pstream_name: rda_packs_dynamic_groups_and_pages
+    dashboard_group_name: groupMetrics 
+    dashboard_group_label: Metrics
+    dashboard_group_icon: "settings.svg"
+    dashboard_page_name: snmp_metrics_navigator
+    dashboard_page_label: "SNMP Metrics Navigator"
+    dashboard_page_icon: "settings.svg"
+    dashboard_app_name: "NetworkMain"
+
+  - pstream_name: rda_packs_dynamic_groups_and_pages
+    dashboard_group_name: groupConfigure
+    dashboard_group_label: Configure and Manage
+    dashboard_group_icon: "library.svg"
+    dashboard_page_name: performance_snmp_management
+    dashboard_page_label: SNMP Metrics Management
+    dashboard_page_icon: "library.svg"
+    dashboard_app_name: "NetworkMain"
+
+  artifacts:
+    endpoints:
+      - name: asm_snmp
+        file: ./artifacts/endpoints/asm_snmp.json
+      
+    mappings:
+      - name: asm_snmp_log_mapper
+        file: ./artifacts/mappings/asm_snmp_log_mapper.json
+        creation_policy: overwrite
+      - name: asm_snmp_metrics_mapper
+        file: ./artifacts/mappings/asm_snmp_metrics_mapper.json
+        creation_policy: overwrite
+    
+    notification_channels:      
+      - name: telegraf_snmp_metrics
+        file: ./artifacts/notification_channels/telegraf_snmp_metrics.json
+        remove_on_deactivation: true
+   
+
+
+    alert_rules:      
+      - name: cpu_usage_snmp_metric
+        file: ./artifacts/alert_rules/cpu_usage_snmp_metric.json
+        remove_on_deactivation: true
+        creation_policy: overwrite
+
+      ##- name: device_availability_snmp
+      ##  file: ./artifacts/alert_rules/device_availability_snmp.json
+      ##  remove_on_deactivation: true
+      ##  creation_policy: overwrite
+
+      - name: interface_in_discards_snmp_metric
+        file: ./artifacts/alert_rules/interface_in_discards_snmp_metric.json
+        remove_on_deactivation: true
+        creation_policy: overwrite
+
+      - name: interface_in_errors_snmp_metric
+        file: ./artifacts/alert_rules/interface_in_errors_snmp_metric.json
+        remove_on_deactivation: true
+        creation_policy: overwrite
+
+      - name: interface_in_octets_snmp_metric
+        file: ./artifacts/alert_rules/interface_in_octets_snmp_metric.json
+        remove_on_deactivation: true
+        creation_policy: overwrite
+
+      - name: memory_usage_snmp_metric
+        file: ./artifacts/alert_rules/memory_usage_snmp_metric.json
+        remove_on_deactivation: true
+        creation_policy: overwrite
+
+      - name: interface_oper_status_snmp_metric
+        file: ./artifacts/alert_rules/interface_oper_status_snmp_metric.json
+        remove_on_deactivation: true
+        creation_policy: overwrite
+
+      - name: interface_out_discards_snmp_metric
+        file: ./artifacts/alert_rules/interface_out_discards_snmp_metric.json
+        remove_on_deactivation: true
+        creation_policy: overwrite
+
+      - name: interface_out_errors_snmp_metric
+        file: ./artifacts/alert_rules/interface_out_errors_snmp_metric.json
+        remove_on_deactivation: true
+        creation_policy: overwrite
+
+      - name: interface_out_octets_snmp_metric
+        file: ./artifacts/alert_rules/interface_out_octets_snmp_metric.json
+        remove_on_deactivation: true
+        creation_policy: overwrite
+
+  

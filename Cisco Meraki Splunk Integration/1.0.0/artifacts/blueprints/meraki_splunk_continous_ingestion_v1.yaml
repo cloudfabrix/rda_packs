@@ -1,0 +1,27 @@
+name: meraki_splunk_continous_ingestion_v1
+id: meraki_splunk_continous_ingestion_v1
+version: '2026_03_20_1'
+category: Data
+comment: Blueprint for Continous Ingestion to Splunk using Reference List Dataset
+enabled: true
+type: Service
+auto_deploy: false
+provider: CloudFabrix Software Inc.
+attrs: {}
+run_context:
+    customer_tag: $PKG_CONTEXT_CUSTOMER_TAG
+    customer_id: $PKG_CONTEXT_CUSTOMER_ID
+scheduled_pipelines:
+    -   name: meraki_data_ingestion_to_splunk_index_v2
+        label: RDAF PStream to Splunk
+        version: '*'
+        form: {}
+        site: ${PKG_CONTEXT_CUSTOMER_TAG}-.*
+        site_type: regex
+        instances: 1
+        cron_expression: '*/10 * * * *'
+        scaling_policy:
+            min_instances: 1
+            max_instances: 1
+dashboard_type: dashboard
+saved_time: '2026-03-20T09:14:13.435109'

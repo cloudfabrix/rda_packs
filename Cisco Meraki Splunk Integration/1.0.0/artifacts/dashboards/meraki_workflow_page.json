@@ -1,0 +1,262 @@
+{
+    "name": "meraki_workflow_page",
+    "label": "Workflows",
+    "is_template": false,
+    "description": "Workflows",
+    "version": "25.07.10.1",
+    "enabled": true,
+    "live_edit": true,
+    "dashboard_filters": {
+        "time_filter": true,
+        "columns_filter": [
+            {
+                "id": "timestamp",
+                "label": "Timestamp",
+                "type": "DATETIME"
+            }
+        ],
+        "duration": 10000
+    },
+    "computedContext": {
+        "flow_type": {
+            "defaultValue": "workflow"
+        }
+    },
+    "dashboard_type": "dashboard",
+    "dashboard_folder": "Default",
+    "dashboard_style": "auto",
+    "dashboard_sections": [
+        {
+            "title": "Workflows",
+            "widgets": [
+                {
+                    "title": "Workflows",
+                    "widget_type": "tabular",
+                    "stream": "rda_orchestrator_flow_meta",
+                    "timebased": true,
+                    "remote_searchable": true,
+                    "ts_column": "timestamp",
+                    "paginated": true,
+                    "height": 6,
+                    "min_wdith": 12,
+                    "extra_filter": "orchestration_type is 'workflow' and flow_type is 'workflow' and name is 'meraki-workflow'",
+                    "custom_columns": [
+                        {
+                            "id": "flow_name",
+                            "label": "Name",
+                            "expr": "str(name)",
+                            "key": true,
+                            "visible": false
+                        }
+                    ],
+                    "columns": {
+                        "name": {
+                            "title": "Workflow",
+                            "key": true,
+                            "visible": true
+                        },
+                        "description": {
+                            "title": "Description",
+                            "key": false,
+                            "visible": true
+                        },
+                        "timestamp": {
+                            "title": "Created",
+                            "type": "DATETIME",
+                            "key": false,
+                            "visible": false
+                        },
+                        "saved_time": {
+                            "title": "Last Updated",
+                            "type": "DATETIME",
+                            "key": false,
+                            "visible": true
+                        },
+                        "orchestration_type": {
+                            "title": "orchestration_type",
+                            "key": true,
+                            "visible": false
+                        }
+                    },
+                    "actions": [
+                        {
+                            "permission": "rda:github:view",
+                            "title": "Add Workflow",
+                            "type": "GO_TO_APP_STATE",
+                            "selectionType": "NONE",
+                            "appName": "new-app/workflow-editor",
+                            "identifier": "orchestrator-action:workflow-add",
+                            "addTimeToContext": true
+                        },
+                        {
+                            "permission": "rda:github:view",
+                            "title": "Import",
+                            "type": "POPUP_FORM",
+                            "selectionType": "NONE",
+                            "identifier": "orchestrator-action:workflow-import",
+                            "api-endpoint": {
+                                "service-name": "saas-reports",
+                                "methodName": "getForm",
+                                "stringified-params": true,
+                                "parse-output": false,
+                                "params": [
+                                    {
+                                        "formId": "rda.saas.orchestrator.workflow.import"
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "permission": "rda:github:view",
+                            "title": "View Details",
+                            "type": "GO_TO_APP_STATE",
+                            "selectionType": "SINGLE",
+                            "appName": "user-dashboard/workflow_details",
+                            "identifier": "orchestrator-action:workflow-details"
+                        },
+                        {
+                            "permission": "rda:github:view",
+                            "title": "Edit",
+                            "type": "GO_TO_APP_STATE",
+                            "selectionType": "SINGLE",
+                            "appName": "new-app/workflow-editor",
+                            "identifier": "orchestrator-action:workflow-edit"
+                        },
+                        {
+                            "permission": "rda:github:view",
+                            "title": "Clone",
+                            "type": "POPUP_FORM",
+                            "selectionType": "SINGLE",
+                            "identifier": "orchestrator-action:workflow-clone",
+                            "api-endpoint": {
+                                "service-name": "saas-reports",
+                                "methodName": "getForm",
+                                "stringified-params": true,
+                                "parse-output": false,
+                                "params": [
+                                    {
+                                        "formId": "rda.saas.orchestrator.workflow.clone"
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "permission": "rda:github:view",
+                            "title": "Run",
+                            "type": "POPUP_FORM",
+                            "selectionType": "SINGLE",
+                            "identifier": "saas-service-action:run-pipeline",
+                            "api-endpoint": {
+                                "service-name": "saas-reports",
+                                "methodName": "getForm",
+                                "stringified-params": true,
+                                "parse-output": false,
+                                "params": [
+                                    {
+                                        "formId": "rda.saas.orchestrator.workflow.run"
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "permission": "rda:github:view",
+                            "title": "Delete",
+                            "type": "POPUP_FORM",
+                            "selectionType": "SINGLE",
+                            "identifier": "saas-service-action:delete-orchestrator-flow",
+                            "api-endpoint": {
+                                "methodName": "getForm",
+                                "params": [
+                                    {
+                                        "formId": "rda.saas.orchestrator.flow.delete"
+                                    }
+                                ],
+                                "parse-output": false,
+                                "service-name": "saas-reports",
+                                "stringified-params": true
+                            }
+                        },
+                        {
+                            "permission": "rda:github:view",
+                            "title": "Export",
+                            "type": "POPUP_FORM",
+                            "selectionType": "SINGLE",
+                            "identifier": "orchestrator-action:workflow-export",
+                            "api-endpoint": {
+                                "service-name": "saas-reports",
+                                "methodName": "getForm",
+                                "stringified-params": true,
+                                "parse-output": false,
+                                "params": [
+                                    {
+                                        "formId": "rda.saas.orchestrator.workflow.export"
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "widget_id": "08bda3b5"
+                },
+                {
+                    "title": "Workflow Jobs",
+                    "widget_type": "tabular",
+                    "stream": "rda_workflow_status",
+                    "extra_filter": "workflow_name == 'meraki-workflow' and workflowType=='workflow'",
+                    "timebased": false,
+                    "remote_searchable": true,
+                    "ts_column": "timestamp",
+                    "paginated": true,
+                    "height": 8,
+                    "min_wdith": 12,
+                    "columns": {
+                        "workflow_name": {
+                            "title": "Agent",
+                            "key": true
+                        },
+                        "jobId": {
+                            "title": "Job ID",
+                            "key": true
+                        },
+                        "status_color": {
+                            "title": "Color",
+                            "type": "COLOR-MAP",
+                            "source-column": "status",
+                            "color-map": {
+                                "Failed": "#E53935",
+                                "Completed": "#3CD733",
+                                "In-progress": "#03A9F4"
+                            }
+                        },
+                        "status": {
+                            "title": "Status",
+                            "key": false,
+                            "htmlTemplateForRow": "<span class='badge' style='background-color: {{ row.status_color }};' > {{ row.status }} </span>"
+                        },
+                        "failure_reason": {
+                            "title": "Failure Reason",
+                            "key": false
+                        }
+                    },
+                    "actions": [
+                        {
+                            "permission": "rda:page:view",
+                            "title": "View Details",
+                            "selectionType": "SINGLE",
+                            "drillDownLinkField": "job_id",
+                            "identifier": "saas-service-action:workflow-job-status",
+                            "appName": "user-dashboard/workflow_job_status",
+                            "stateName": "app.featureapp",
+                            "type": "GO_TO_APP_STATE"
+                        }
+                    ],
+                    "refreshOptions": {
+                        "refreshType": "Periodic",
+                        "refreshInterval": 60000
+                    },
+                    "widget_id": "7c3c59f6"
+                }
+            ]
+        }
+    ],
+    "saved_time": "2026-01-20T08:36:43.099937"
+}

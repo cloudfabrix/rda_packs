@@ -1,0 +1,82 @@
+{
+    "type": "log",
+    "name": "isis_neighbor_state_change",
+    "description": "ISIS neighbor state changed CFX",
+    "enabled": false,
+    "schedule": {
+        "minutes": 5
+    },
+    "data": {
+        "stream": "syslog_udp_events_stream",
+        "query": "syslog_code in ['ROUTING-ISIS-5-ADJCHANGE']",
+        "unique_keys": [
+            "rda_gw_client_ip",
+            "interface_name"
+        ],
+        "groupby": [
+            "rda_gw_client_ip",
+            "interface_name",
+            "device_hostname"
+        ],
+        "additional_columns": [
+            "raw",
+            "device_hostname",
+            "rda_gw_client_ip",
+            "device_model",
+            "device_vendor",
+            "neighbor_name",
+            "interface_name"
+        ],
+        "custom_unique_keys": [
+            "alarm_class",
+            "interface_name"
+        ],
+        "data_transformations": [
+            {
+                "type": "eval",
+                "columns": {
+                    "alarm_class": {
+                        "expr": "'ISIS'"
+                    }
+                }
+            }
+        ],
+        "padding_time_seconds": 60,
+        "limit": 1000
+    },
+    "actions": [
+        {
+            "state": "OPEN",
+            "extra_query": "((raw.match_phrase contains 'changed state from Up to Down') or (raw.match_phrase contains 'changed state to Down'))",
+            "attributes": {
+                "severity": "CRITICAL",
+                "alert_message": "IS-IS Neighbor Adjacency Lost or Down",
+                "recommendedaction": "Check IS-IS neighbor status with 'show isis neighbors'. Verify Level-1/Level-2 area consistency, MTU settings (IS-IS requires 1492+ bytes), and Hello padding."
+            },
+            "throttle": {
+                "value": 60,
+                "unit": "MINUTES"
+            },
+            "notification_profile": "snmp_metrics_notification_profile",
+            "notification": [
+                {
+                    "channel": "asm_syslog_webhook"
+                }
+            ]
+        },
+        {
+            "state": "CLEAR",
+            "extra_query": "((raw.match_phrase contains 'changed state from Down to Up') or (raw.match_phrase contains 'changed state to Up'))",
+            "attributes": {
+                "severity": "CRITICAL"
+            },
+            "notification_profile": "snmp_metrics_notification_profile",
+            "notification": [
+                {
+                    "channel": "asm_syslog_webhook"
+                }
+            ]
+        }
+    ],
+    "saved_time": "2026-04-16T04:45:52.036153"
+}

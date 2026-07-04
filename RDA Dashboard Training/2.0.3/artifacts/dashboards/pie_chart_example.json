@@ -1,0 +1,234 @@
+{
+    "name": "pie_chart_example",
+    "label": "Pie Chart",
+    "description": "Pie Chart example",
+    "version": "10.12.24.2",
+    "enabled": true,
+    "dashboard_style": "auto",
+    "live_edit": true,
+    "status_poller": {},
+    "dashboard_type": "dashboard",
+    "dashboard_pages": [],
+    "showTitle": true,
+    "dashboard_generator": {
+        "attachment": "widget_code_generator"
+    },
+    "dashboard_filters": {
+        "time_filter": true,
+        "default_time_filter_labels": [
+            "All Time"
+        ],
+        "columns_filter": [],
+        "group_filters": []
+    },
+    "dashboard_sections": [
+        {
+            "title": "Pie Chart",
+            "show_filter": true,
+            "widgets": [
+                {
+                    "widget_type": "pie_chart",
+                    "title": "Pie Chart ",
+                    "stream": "main_enhanced",
+                    "duration_hours": 24000,
+                    "extra_filter": "",
+                    "ts_column": "timestamp",
+                    "column": "_id",
+                    "agg": "value_count",
+                    "group_by": [
+                        "severity"
+                    ],
+                    "type": "str",
+                    "widget_id": "7dbdc404"
+                },
+                {
+                    "widget_type": "pie_chart",
+                    "title": "Pie Chart Using Extra Filter Example",
+                    "stream": "main_enhanced",
+                    "extra_filter": "severity in ['MINOR', 'WARNING'] ",
+                    "ts_column": "timestamp",
+                    "column": "_id",
+                    "duration_hours": 24000,
+                    "agg": "value_count",
+                    "group_by": [
+                        "severity"
+                    ],
+                    "type": "str",
+                    "widget_id": "b105f0a4"
+                },
+                {
+                    "widget_type": "pie_chart",
+                    "title": "Pie Chart with Color Map Example",
+                    "stream": "main_enhanced",
+                    "ts_column": "timestamp",
+                    "column": "_id",
+                    "agg": "value_count",
+                    "duration_hours": 24000,
+                    "group_by": [
+                        "severity"
+                    ],
+                    "type": "str",
+                    "style": {
+                        "color-map": {
+                            "CRITICAL": [
+                                "#ef5350",
+                                "#ffffff"
+                            ],
+                            "WARNING": [
+                                "#FFA726",
+                                "#ffffff"
+                            ],
+                            "MAJOR": [
+                                "#388e3c",
+                                "#ffffff"
+                            ],
+                            "MINOR": [
+                                "#000000",
+                                "#ffffff"
+                            ],
+                            "INFORMATION": [
+                                "#bcaaa4",
+                                "#ffffff"
+                            ]
+                        }
+                    },
+                    "widget_id": "8e2f3701"
+                },
+                {
+                    "widget_type": "pie_chart",
+                    "title": "Pie Chart Using Formatting Options",
+                    "duration_hours": 24000,
+                    "stream": "main_enhanced",
+                    "ts_column": "timestamp",
+                    "extra_filter": null,
+                    "column": "count_",
+                    "agg": "sum",
+                    "group_by": [
+                        "city"
+                    ],
+                    "formatting": {
+                        "style": "unit",
+                        "unit": "percent",
+                        "notation": "compact",
+                        "maximumFractionDigits": 5,
+                        "minimumFractionDigits": 1,
+                        "signDisplay": "always"
+                    },
+                    "type": "int",
+                    "min_width": 4,
+                    "height": 3,
+                    "max_width": 4,
+                    "widget_id": "110211e9"
+                },
+                {
+                    "widget_type": "pie_chart",
+                    "title": "Pie Chart with botton N values",
+                    "duration_hours": 24000,
+                    "stream": "main_enhanced",
+                    "ts_column": "timestamp",
+                    "extra_filter": null,
+                    "column": "count_",
+                    "agg": "sum",
+                    "group_by": [
+                        "city"
+                    ],
+                    "bottom_n": 3,
+                    "type": "int",
+                    "min_width": 3,
+                    "height": 3,
+                    "max_width": 6,
+                    "widget_id": "d9b1b5bd"
+                },
+                {
+                    "widget_type": "pie_chart",
+                    "title": "Pie chart Using Spec",
+                    "duration_hours": 10800,
+                    "stream": "main_enhanced",
+                    "ts_column": "timestamp",
+                    "extra_filter": null,
+                    "column": "count_",
+                    "agg": "sum",
+                    "group_by": [
+                        "city"
+                    ],
+                    "others_spec": {
+                        "city": {
+                            "name_based_limit": true
+                        }
+                    },
+                    "type": "int",
+                    "min_width": 4,
+                    "height": 6,
+                    "max_width": 4,
+                    "widget_id": "90da0cbb"
+                },
+                {
+                    "widget_type": "pie_chart",
+                    "title": "Pie Chart Using Segment Filter ",
+                    "stream": "main_enhanced",
+                    "duration_hours": 24000,
+                    "ts_column": "timestamp",
+                    "description": "Pie Charts",
+                    "segment_filter": false,
+                    "column": "donation",
+                    "agg": "sum",
+                    "group_by": [
+                        "city"
+                    ],
+                    "min_width": 4,
+                    "max_width": 4,
+                    "type": "str",
+                    "widget_id": "1eaf21b8"
+                },
+                {
+                    "widget_type": "pie_chart",
+                    "title": "Pie Chart Using Sorting",
+                    "duration_hours": 24000,
+                    "stream": "main_enhanced",
+                    "ts_column": "timestamp",
+                    "extra_filter": null,
+                    "column": "count_",
+                    "agg": "value_count",
+                    "group_by": [
+                        "date"
+                    ],
+                    "groups_meta": {
+                        "type": "date",
+                        "format": "%d-%b-%y"
+                    },
+                    "type": "int",
+                    "limit": 15,
+                    "min_width": 6,
+                    "height": 5,
+                    "max_width": 6,
+                    "widget_id": "eece4844"
+                },
+                {
+                    "widget_type": "pie_chart",
+                    "title": "Pie Chart Using No Filter Option ",
+                    "stream": "main_enhanced",
+                    "ts_column": "timestamp",
+                    "duration_hours": 24000,
+                    "description": "Pie Charts",
+                    "segment_filter": false,
+                    "column": "donation",
+                    "agg": "sum",
+                    "group_by": [
+                        "city"
+                    ],
+                    "min_width": 3,
+                    "max_width": 4,
+                    "type": "str",
+                    "widget_id": "74186fd4"
+                }
+            ]
+        }
+    ],
+    "saved_time": "2025-03-14T19:44:20.685416",
+    "attachments": [
+        {
+            "name": "widget_code_generator",
+            "value": "{%- set widgets =  dashboard[\"dashboard_sections\"][0][\"widgets\"] -%}\n{%- set new_widgets =  [] -%}\n{%- set ns =  namespace(count=0) -%}\n\n{%- for w in widgets -%}\n    {%- if w.get(\"widget_type\") -%}\n        {%-\n            set nw = {\n                \"title\": \"JSON\",\n                \"widget_group\": \"g\"+str(ns.count),\n                \"min_width\": w.get(\"min_width\", 6),\n                \"max_width\": w.get(\"max_width\", 6),\n                \"height\": w.get(\"height\", 4),\n                \"widget_type\": \"codeblock\",\n                \"content\": json_dumps_indent(w, 2),\n                \"lang\": \"json\",\n                \"widget_id\": w.get(\"widget_id\", str(ns.count)) + \"_code\"\n            }\n        -%}\n        {%- set _ = w.update({\"widget_group\":  \"g\"+str(ns.count) }) -%}\n        {%- set _ = new_widgets.append(nw) -%}\n        {%- set ns.count = ns.count + 1 -%}\n    {%- endif -%}\n{%- endfor -%}\n\n{%- set _ = widgets.extend(new_widgets) -%}"
+        }
+    ]
+}

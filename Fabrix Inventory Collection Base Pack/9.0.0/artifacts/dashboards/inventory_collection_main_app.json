@@ -1,0 +1,112 @@
+{
+    "name": "inventory_collection_main_app",
+    "label": "Inventory Collection Main App",
+    "description": "Inventory Collection Main App",
+    "version": "25.10.16",
+    "dashboard_folder": "InventoryCollection",
+    "enabled": true,
+    "custom_context": {
+        "rda-dashboard-live-edit": true
+    },
+    "dashboard_filters": {
+        "time_filter": true,
+        "columns_filter": []
+    },
+    "dashboard_generator": {
+        "attachment": "add_pages_for_activated_collection_packs"
+    },
+    "context_enrichment": [
+        {
+            "stream": "discovery",
+            "query_template": "ospf is 'yes' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+            "enrich_columns": [
+                "ospf"
+            ],
+            "rename_columns": {
+                "ospf": "show_ospf_topo"
+            },
+            "defaultValues": {
+                "show_ospf_topo": "no"
+            }
+        },
+        {
+            "stream": "discovery",
+            "query_template": "bgp is 'yes' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+            "enrich_columns": [
+                "bgp"
+            ],
+            "rename_columns": {
+                "bgp": "show_bgp_topo"
+            },
+            "defaultValues": {
+                "show_bgp_topo": "no"
+            }
+        },
+        {
+            "stream": "discovery",
+            "query_template": "isis is 'yes' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+            "enrich_columns": [
+                "isis"
+            ],
+            "rename_columns": {
+                "bgp": "show_isis_topo"
+            },
+            "defaultValues": {
+                "show_isis_topo": "no"
+            }
+        }
+    ],
+    "dashboard_sections": [],
+    "dashboard_type": "app",
+    "dashboard_groups": {
+        "groupAlerts": {
+            "icon": "alert.svg",
+            "label": "Alerts and Incidents"
+        },
+        "groupPolicies": {
+            "icon": "alert.svg",
+            "label": "Policies"
+        },
+        "groupMetrics": {
+            "icon": "topology.svg",
+            "label": "Metrics"
+        },
+        "groupData": {
+            "icon": "overall.svg",
+            "label": "Events"
+        },
+        "groupAssetNavigator": {
+            "icon": "activities.svg",
+            "label": "Asset Navigator"
+        },
+        "groupTopo": {
+            "icon": "topology.svg",
+            "label": "Topology"
+        },
+        "groupInventory": {
+            "icon": "hardware.svg",
+            "label": "Inventory"
+        },
+        "groupStatus": {
+            "icon": "history.svg",
+            "label": "Status"
+        },
+        "groupConfigure": {
+            "icon": "settings.svg",
+            "label": "Configure and Manage"
+        }
+    },
+    "dashboard_pages": [
+        {
+            "name": "solution_base_pack_ops_overview_page",
+            "label": "Overview",
+            "icon": "settings.svg"
+        }
+    ],
+    "attachments": [
+        {
+            "name": "add_pages_for_activated_collection_packs",
+            "value": "{%- set existing_groups = dashboard[\"dashboard_groups\"] -%}\n{%- set d_pages = [] -%}\n{%- set d_groups = [] -%}\n\n{# Step 1: Load original dlist #}\n{%- set dlist = engine.query_stream_data(stream=\"rda_packs_dynamic_groups_and_pages\", cfxql_query=\"customer_tag is empty\") or [] -%}\n\n{# Helper: Convert version string to list of integers #}\n{%- macro version_to_list(version) -%}\n    {%- set parts = [] -%}\n    {%- set current = \"\" -%}\n    {%- for c in version ~ \".\" -%}\n        {%- if c == \".\" -%}\n            {%- if current != \"\" -%}\n                {%- set _ = parts.append(current|int) -%}\n            {%- else -%}\n                {%- set _ = parts.append(0) -%}\n            {%- endif -%}\n            {%- set current = \"\" -%}\n        {%- else -%}\n            {%- set current = current + c -%}\n        {%- endif -%}\n    {%- endfor -%}\n    {{ parts }}\n{%- endmacro -%}\n\n{# Helper: pad version list to desired length #}\n{%- macro pad_version_list(vlist, max_len) -%}\n    {%- set padded = vlist[:] -%}\n    {%- for i in range(max_len - (vlist|length)) -%}\n        {%- set _ = padded.append(0) -%}\n    {%- endfor -%}\n    {{ padded }}\n{%- endmacro -%}\n\n{# Group dlist by pack_id #}\n{%- set grouped = {} -%}\n{%- for row in dlist -%}\n    {%- set pid = row.pack_id -%}\n    {%- if pid not in grouped -%}\n        {%- set _ = grouped.update({pid: [row]}) -%}\n    {%- else -%}\n        {%- set _ = grouped[pid].append(row) -%}\n    {%- endif -%}\n{%- endfor -%}\n\n{%- set filtered_dlist = [] -%}\n\n{%- for pid, rows in grouped.items() -%}\n\n    {# If only one row exists for this pack_id, include it #}\n    {%- if rows|length == 1 -%}\n        {%- set _ = filtered_dlist.append(rows[0]) -%}\n    {%- else -%}\n\n        {# Step 1: Build raw version lists #}\n        {%- set version_lists = [] -%}\n        {%- for r in rows -%}\n            {%- set v = version_to_list(r.pack_version) -%}\n            {%- set _ = version_lists.append(v) -%}\n        {%- endfor -%}\n\n        {# Step 2: Find max length of version segments #}\n        {%- set max_len = 0 -%}\n        {%- for v in version_lists -%}\n            {%- if v|length > max_len -%}\n                {%- set max_len = v|length -%}\n            {%- endif -%}\n        {%- endfor -%}\n\n        {# Step 3: Pad all versions #}\n        {%- set padded_versions = [] -%}\n        {%- for v in version_lists -%}\n            {%- set pv = pad_version_list(v, max_len) -%}\n            {%- set _ = padded_versions.append(pv) -%}\n        {%- endfor -%}\n\n        {# Step 4: Find max version  #}\n        {%- set max_version = padded_versions[0] -%}\n        {%- for pv in padded_versions -%}\n            {%- if pv > max_version -%}\n                {%- set max_version = pv -%}\n            {%- endif -%}\n        {%- endfor -%}\n\n        {# Step 5: Append rows matching latest version #}\n        {%- for idx in range(padded_versions|length) -%}\n            {%- if padded_versions[idx] == max_version -%}\n                {%- set _ = filtered_dlist.append(rows[idx]) -%}\n            {%- endif -%}\n        {%- endfor -%}\n    {%- endif -%}\n\n{%- endfor -%}\n\n{# Replace original dlist with filtered version #}\n{%- set dlist = filtered_dlist -%}\n\n\n{# =============================== #}\n{# Continue with your existing logic #}\n{# =============================== #}\n\n{%- if dlist -%}\n   {# Filter the pages list into a new variable #}\n    {%- set filtered_pages = dashboard[\"dashboard_pages\"]\n        | rejectattr(\"name\", \"equalto\", \"solution_base_pack_ops_overview_page\")\n        | list -%}\n    \n    {# Clear and repopulate dashboard_pages #}\n    {%- set _ = dashboard[\"dashboard_pages\"].clear() -%}\n    {%- for p in filtered_pages -%}\n        {%- set _ = dashboard[\"dashboard_pages\"].append(p) -%}\n    {%- endfor -%}\n    \n    {# Process the dlist to populate dashboard groups and pages #}\n    {%- for i in dlist -%}\n        {%- set page_name = i[\"dashboard_page_name\"] -%}\n\n        {# Skip certain known pages and those starting with 'multi' #}\n        {%- if page_name != \"device_SNMP_Traps_from_alerts_fault\"\n              and page_name != \"device_syslog_from_alert_fault\"\n              and page_name != \"device_alerts_from_alert_fault\"\n           and page_name != \"device_incidents_from_alerts\"\n           and not page_name.startswith(\"multi\") -%}\n\n            {%- set dgroup_ = {\n                \"g_name\": i[\"dashboard_group_name\"],\n                \"g_label\": i[\"dashboard_group_label\"],\n                \"g_icon\": i[\"dashboard_group_icon\"]\n            } -%}\n            {{ d_groups.append(dgroup_) }}\n\n            {%- set dpage_ = {\n                \"name\": i[\"dashboard_page_name\"],\n                \"label\": i[\"dashboard_page_label\"],\n                \"icon\": i[\"dashboard_page_icon\"],\n                \"group\": i[\"dashboard_page_group\"]\n            } -%}\n            {{ d_pages.append(dpage_) }}\n\n        {%- endif -%}\n    {%- endfor -%}\n\n    {# Update dashboard groups #}\n    {%- for group in d_groups -%}\n        {%- if group.g_name not in existing_groups | map(attribute='g_name') | list -%}\n            {%- set _ = dashboard[\"dashboard_groups\"].update({\n                group.g_name: {\n                    \"icon\": group.g_icon,\n                    \"label\": group.g_label\n                }\n            }) -%}\n        {%- endif -%}\n    {%- endfor -%}\n\n    {# Update dashboard pages #}\n    {%- for page in d_pages -%}\n        {%- set _ = dashboard[\"dashboard_pages\"].append({\n            \"name\": page.name,\n            \"label\": page.label,\n            \"icon\": page.icon,\n            \"group\": page.group\n        }) -%}\n    {%- endfor -%}\n\n{%- endif -%}\n"
+        }
+    ]
+}

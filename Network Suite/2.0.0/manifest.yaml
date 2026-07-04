@@ -1,0 +1,1245 @@
+name: Network Suite
+version: 2.0.0
+folder: /collection/network/aia_pages_grouping_app
+published_date: 2026-05-19
+publisher: Fabrix.ai
+label: Network Suite
+scope: system
+description:
+  value: ""
+  md: "./description.md"
+
+type: collection
+
+
+requires:
+   - name: Fabrix Inventory Collection Base Pack
+     version: ">=7.2.1"
+     auto_install_requires: true
+   - name: Fabrix AIOps Fault Management Base 
+     version: ">=9.0.14"
+     auto_install_requires: true
+
+fabric_services:
+ - name: worker
+   version: ">=8.2.1"
+ - name: api-server
+   version: ">=8.2.1"
+
+artifacts:
+  credentials:
+    - name: cfxaia
+      type: cfxaia
+      remove_on_deactivation: true
+    - name: asset-discovery
+      type: asset-discovery
+      remove_on_deactivation: true
+    - name: graph
+      type: graphdb
+      remove_on_deactivation: true
+    - name: diagnostictools
+      type: diagnostictools
+      remove_on_deactivation: true
+
+
+  datasets:
+  - name: all_models
+    data_file: ./data/all_models.csv
+    folder: NetworkDevicePack
+    remove_on_deactivation: true
+  - name: ifTypeLabel_dict
+    data_file: ./data/ifTypeLabel_dict.csv
+    folder: NetworkDevicePack
+    remove_on_deactivation: true
+
+  data_mapping_models:
+  - name: cdp_model
+    file: ./artifacts/data_mapping_models/cdp_model.json
+    remove_on_deactivation: true
+    creation_policy: overwrite
+  - name: interface_model
+    file: ./artifacts/data_mapping_models/interface_model.json
+    remove_on_deactivation: true
+    creation_policy: overwrite
+  - name: network_assets_model
+    file: ./artifacts/data_mapping_models/network_assets_model.json
+    remove_on_deactivation: true
+    creation_policy: overwrite
+    
+  pstreams:
+  - name: syslog_udp_events_stream
+    description: ''
+    attributes:
+      os_external: false
+      timestamp: rda_gw_timestamp
+      ism:
+        rollover:
+          min_index_age: 3d
+          min_size: 60gb
+        delete:
+          min_index_age: 7d
+        index_settings:
+          index.refresh_interval: 60s
+          index.number_of_shards: '3'
+          index.number_of_replicas: '1'
+        index_mappings:
+          properties:
+            rda_gw_timestamp:
+              type: date
+            Timestamp:
+              type: date
+            syslog_facility_num:
+              type: long
+            syslog_priority:
+              type: long
+            syslog_severity_num:
+              type: long
+            rda_gw_seq:
+              type: long
+    remove_on_deactivation: true
+    source: OpenSearch
+  - name: syslog_tcp_json_events_stream
+    description: ''
+    attributes:
+      os_external: false
+      timestamp: rda_gw_timestamp
+      ism:
+        rollover:
+          min_index_age: 3d
+          min_size: 60gb
+        delete:
+          min_index_age: 7d
+        index_settings:
+          index.refresh_interval: 60s
+          index.number_of_shards: '3'
+          index.number_of_replicas: '1'
+        index_mappings:
+          properties:
+            rda_gw_timestamp:
+              type: date
+            Timestamp:
+              type: date
+    remove_on_deactivation: true
+    source: OpenSearch
+  - name: syslog_tcp_events_stream
+    description: ''
+    attributes:
+      os_external: false
+      timestamp: rda_gw_timestamp
+      ism:
+        rollover:
+          min_index_age: 3d
+          min_size: 60gb
+        delete:
+          min_index_age: 7d
+        index_settings:
+          index.refresh_interval: 60s
+          index.number_of_shards: '3'
+          index.number_of_replicas: '1'
+        index_mappings:
+          properties:
+            rda_gw_timestamp:
+              type: date
+            Timestamp:
+              type: date
+            syslog_facility_num:
+              type: long
+            syslog_priority:
+              type: long
+            syslog_severity_num:
+              type: long
+            rda_gw_seq:
+              type: long
+    remove_on_deactivation: true
+    source: OpenSearch
+  - name: network_device_parser_debugger
+    description: ''
+    attributes:
+      unique_keys:
+      - batch_identifier
+      retention_days: 15
+    remove_on_deactivation: true
+    source: OpenSearch
+  - name: network-devices-inventory
+    description: ''
+    attributes:
+      unique_keys:
+      - unique_id
+      search_case_insensitive: true
+      _settings:
+        number_of_shards: 3
+        number_of_replicas: 1
+        refresh_interval: 30s
+    remove_on_deactivation: true
+    source: OpenSearch
+  - name: discovery
+    attributes:
+      unique_keys:
+      - unique_id
+      search_case_insensitive: true
+      _settings:
+        number_of_shards: 1
+        number_of_replicas: 1
+      system_defined: 'no'
+    autocreate: true
+    remove_on_deactivation: true
+  - name: rda_icmp_ping_metrics
+    description: ''
+    attributes:
+      os_external: false
+      ism:
+        rollover:
+          min_index_age: 3d
+          min_size: 60gb
+        delete:
+          min_index_age: 15d
+        index_settings:
+          index.refresh_interval: 60s
+          index.number_of_shards: '3'
+          index.number_of_replicas: '1'
+        index_mappings:
+          dynamic: strict
+          properties:
+            average_response_ms:
+              type: double
+            maximum_response_ms:
+              type: double
+            minimum_response_ms:
+              type: double
+            packets_received:
+              type: long
+            packets_transmitted:
+              type: long
+            percent_packet_loss:
+              type: long
+            result_code:
+              type: long
+            standard_deviation_ms:
+              type: double
+      system_defined: 'no'
+    remove_on_deactivation: true
+    source: OpenSearch
+  - name: snmp_trap_events_stream
+    description: ''
+    attributes:
+      os_external: false
+      timestamp: rda_gw_timestamp
+      ism:
+        rollover:
+          min_index_age: 3d
+          min_size: 60gb
+        delete:
+          min_index_age: 7d
+        index_settings:
+          index.refresh_interval: 60s
+          index.number_of_shards: '3'
+          index.number_of_replicas: '1'
+        index_mappings:
+          properties:
+            rda_gw_timestamp:
+              type: date
+    remove_on_deactivation: true
+  - name: network_device_data_processing_debug
+    description: ''
+    attributes:
+      retention_days: 7
+    remove_on_deactivation: true
+    source: OpenSearch
+  - name: rda_snmp_metrics
+    description: ''
+    attributes:
+      os_external: false
+      ism:
+        rollover:
+          min_index_age: 3d
+          min_size: 60gb
+        delete:
+          min_index_age: 7d
+        index_settings:
+          index.mapping.total_fields.limit: '1500'
+          index.refresh_interval: 60s
+          index.number_of_shards: '3'
+          index.number_of_replicas: '1'
+        index_mappings:
+          dynamic: strict
+          properties:
+            cpu_total_5sec_rev:
+              type: long
+            cpu_total_1min_rev:
+              type: long
+            cpu_total_5min_rev:
+              type: long
+            cpu_usage:
+              type: double
+            memory_free:
+              type: long
+            memory_used:
+              type: long
+            memory_total:
+              type: long
+            memory_usage:
+              type: double
+            memory_units:
+              type: long
+            in_octets:
+              type: long
+            out_octets:
+              type: long
+            in_octets_delta:
+              type: long
+            in_octets_rate:
+              type: double
+            in_octets_time_delta:
+              type: double
+            out_octets_delta:
+              type: long
+            out_octets_rate:
+              type: double
+            out_octets_time_delta:
+              type: double
+            in_errors:
+              type: long
+            in_errors_delta:
+              type: long
+            in_errors_rate:
+              type: double
+            in_errors_time_delta:
+              type: double
+            out_errors:
+              type: long
+            out_errors_delta:
+              type: long
+            out_errors_rate:
+              type: double
+            out_errors_time_delta:
+              type: double
+            in_discards:
+              type: long
+            in_discards_delta:
+              type: long
+            in_discards_rate:
+              type: double
+            in_discards_time_delta:
+              type: double
+            out_discards:
+              type: long
+            out_discards_delta:
+              type: long
+            out_discards_rate:
+              type: double
+            out_discards_time_delta:
+              type: double
+            high_speed:
+              type: long
+            interface_speed:
+              type: long
+            index:
+              type: double
+            interface_index:
+              type: long
+            interface_type:
+              type: long
+            input_utilization:
+              type: double
+            output_utilization:
+              type: double
+            interface_utilization:
+              type: double
+            oper_status:
+              type: long
+            admin_status:
+              type: long
+            last_change:
+              type: long
+            crc_errors:
+              type: long
+            crc_errors_delta:
+              type: long
+            crc_errors_rate:
+              type: double
+            crc_errors_time_delta:
+              type: double
+            alignment_errors:
+              type: long
+            alignment_errors_delta:
+              type: long
+            alignment_errors_rate:
+              type: double
+            alignment_errors_time_delta:
+              type: double
+            frame_too_longs:
+              type: long
+            frame_too_longs_delta:
+              type: long
+            frame_too_longs_rate:
+              type: double
+            frame_too_longs_time_delta:
+              type: double
+            symbol_errors:
+              type: long
+            symbol_errors_delta:
+              type: long
+            symbol_errors_rate:
+              type: double
+            symbol_errors_time_delta:
+              type: double
+            ntp_status:
+              type: long
+            ntp_time_precision_ms:
+              type: double
+            ntp_time_precision:
+              type: long
+            sensor_value:
+              type: long
+            sensor_threshold:
+              type: long
+            sensor_last_shutdown:
+              type: long
+            sensor_status:
+              type: long
+            sensor_type:
+              type: long
+            ospf_neighbor_events:
+              type: long
+            ospf_neighbor_events_delta:
+              type: long
+            ospf_neighbor_events_rate:
+              type: double
+            ospf_neighbor_events_time_delta:
+              type: double
+            ospf_interface_events:
+              type: long
+            ospf_interface_events_delta:
+              type: long
+            ospf_interface_events_rate:
+              type: double
+            ospf_interface_events_time_delta:
+              type: double
+            ospf_neighbor_state:
+              type: long
+            ospf_admin_status:
+              type: long
+            ospf_interface_state:
+              type: long
+            bgp_peer_admin_status:
+              type: long
+            bgp_peer_in_messages:
+              type: long
+            bgp_peer_in_messages_delta:
+              type: long
+            bgp_peer_in_messages_rate:
+              type: double
+            bgp_peer_in_messages_time_delta:
+              type: double
+            bgp_peer_out_messages:
+              type: long
+            bgp_peer_out_messages_delta:
+              type: long
+            bgp_peer_out_messages_rate:
+              type: double
+            bgp_peer_out_messages_time_delta:
+              type: double
+            bgp_peer_in_updates:
+              type: long
+            bgp_peer_in_updates_delta:
+              type: long
+            bgp_peer_in_updates_rate:
+              type: double
+            bgp_peer_in_updates_time_delta:
+              type: double
+            bgp_peer_out_updates:
+              type: long
+            bgp_peer_out_updates_delta:
+              type: long
+            bgp_peer_out_updates_rate:
+              type: double
+            bgp_peer_out_updates_time_delta:
+              type: double
+            bgp_peer_local_port:
+              type: long
+            bgp_peer_remote_port:
+              type: long
+            bgp_peer_remote_as:
+              type: long
+            bgp_peer_state:
+              type: long
+            bgp_peer_uptime:
+              type: long
+            poe_allocated_power:
+              type: long
+            poe_available_power:
+              type: long
+            poe_max_power:
+              type: long
+            poe_port_index:
+              type: long
+            poe_port_status:
+              type: long
+            poe_usage_percent:
+              type: double
+            poe_power_consumption:
+              type: long
+    remove_on_deactivation: true
+  - name: routing_protocol_data
+    attributes:
+      unique_keys:
+      - collection_status
+      - profile
+      - source_ip
+      system_defined: 'no'
+    autocreate: true
+    remove_on_deactivation: true
+  - name: network_access_verification_final
+    attributes:
+      unique_keys:
+      - ip_address
+      - protocol
+    autocreate: true
+    remove_on_deactivation: true
+  - name: network_ip_address_stream
+    attributes:
+      retention_days: 15
+      search_case_insensitive: true
+      messaging_platform_settings:
+        platform: kafka
+        kafka-params:
+          topics:
+          - network_ip_address_stream
+          auto.offset.reset: earliest
+          consumer_poll_timeout: 1.0
+          batch_max_size: 10000
+          batch_max_time_seconds: 1
+    autocreate: true
+    remove_on_deactivation: true
+  - name: asset_inventory_collection_status_stream
+    autocreate: true
+    remove_on_deactivation: true
+  - name: network_inventory_files_stream
+    attributes:
+      retention_days: 15
+      search_case_insensitive: true
+      messaging_platform_settings:
+        platform: kafka
+        kafka-params:
+          topics:
+          - network_inventory_files_stream
+          auto.offset.reset: earliest
+          consumer_poll_timeout: 1.0
+          batch_max_size: 10000
+          batch_max_time_seconds: 1
+    autocreate: true
+    remove_on_deactivation: true
+  - name: network_inventory_collection_status_stream
+    attributes:
+      retention_days: 15
+      search_case_insensitive: true
+      messaging_platform_settings:
+        platform: kafka
+        kafka-params:
+          topics:
+          - network_inventory_collection_status_stream
+          auto.offset.reset: earliest
+          consumer_poll_timeout: 1.0
+          batch_max_size: 10000
+          batch_max_time_seconds: 1
+    autocreate: true
+    remove_on_deactivation: true
+  - name: network_access_verification
+    attributes:
+      unique_keys:
+      - ip_address
+      - protocol
+      - used_cred
+      - customer_tag
+      system_defined: 'no'
+    autocreate: true
+    remove_on_deactivation: true
+  - name: network_response_result
+    autocreate: true
+    remove_on_deactivation: true
+  - name: rda_ssl_certificate_metrics
+    attributes:
+    os_external: false
+    ism:
+      rollover:
+        min_index_age: 3d
+        min_size: 60gb
+      delete:
+        min_index_age: 15d
+      index_settings:
+        index.refresh_interval: 60s
+        index.number_of_shards: '3'
+        index.number_of_replicas: '1'
+      index_mappings:
+        dynamic: strict
+        properties:
+          startdate:
+            type: date
+          enddate:
+            type: date
+          expiry:
+            type: long
+          expiry_days:
+            type: double
+          not_after:
+            type: date
+          not_before:
+            type: date
+          port:
+            type: long
+          verification_code:
+            type: long
+    system_defined: 'no'
+    remove_on_deactivation: true
+  - name: rda_port_health_metrics
+    description: ''
+    attributes:
+      os_external: false
+      ism:
+        rollover:
+          min_index_age: 3d
+          min_size: 60gb
+        delete:
+          min_index_age: 15d
+        index_settings:
+          index.refresh_interval: 60s
+          index.number_of_shards: '3'
+          index.number_of_replicas: '1'
+        index_mappings:
+          dynamic: strict
+          properties:
+            port:
+              type: long
+            response_time:
+              type: double
+            result_code:
+              type: long
+    remove_on_deactivation: true
+  - name: rda_snmp_network_interfaces_inventory
+    attributes:
+      unique_keys:
+      - target_ip
+      - interface_index
+      retention_days: 15
+    autocreate: true
+    remove_on_deactivation: true
+  - name: rda_snmp_entity_physical_inventory
+    attributes:
+      unique_keys:
+      - target_ip
+      - index
+      retention_days: 30
+    autocreate: true
+    remove_on_deactivation: true
+  pipelines:
+    - name: add_devices
+      file: artifacts/Pipeline/add_devices.txt
+      version: 2026.02.19.01
+      folder: NetworkDevicePack
+      remove_on_deactivation: true
+    - name: delete_devices
+      file: artifacts/Pipeline/delete_devices.txt
+      version: 2026.02.27.01
+      folder: NetworkDevicePack
+      remove_on_deactivation: true
+    - name: network_access_verification_pipeline
+      file: artifacts/Pipeline/network_access_verification_pipeline.txt
+      version: 2026.02.02.02
+      folder: NetworkDevicePack
+      remove_on_deactivation: true
+
+    - name: asset_discovery_refresh_datasets
+      file: artifacts/Pipeline/asset_discovery_refresh_datasets.txt
+      version: 2026.02.18.01
+      folder: NetworkDevicePack
+      remove_on_deactivation: true
+    - name: cisco_network_devices_inventory_processing_pipeline
+      file: artifacts/Pipeline/cisco_network_devices_inventory_processing_pipeline.txt
+      version: 2026.02.02.02
+      folder: NetworkDevicePack
+      remove_on_deactivation: true
+    - name: asset_discovery_main
+      file: artifacts/Pipeline/asset_discovery_main.txt
+      version: 2026.02.04.04
+      folder: NetworkDevicePack
+      remove_on_deactivation: true
+    - name: network_inventory_collection_status
+      file: artifacts/Pipeline/network_inventory_collection_status.txt
+      version: 2026.02.03.02
+      folder: NetworkDevicePack
+      remove_on_deactivation: true
+    - name: bgp_topology_calculation
+      file: artifacts/Pipeline/bgp_topology_calculation.txt
+      version: 2025.12.31.1
+      folder: NetworkDevicePack
+      remove_on_deactivation: true
+    - name: juniper_network_devices_inventory_processing_pipeline
+      file: artifacts/Pipeline/juniper_network_devices_inventory_processing_pipeline.txt
+      version: 2026.02.02.02
+      folder: NetworkDevicePack
+      remove_on_deactivation: true
+    - name: aia_utility_functions
+      file: artifacts/Pipeline/aia_utility_functions.txt
+      version: 2026.02.02.02
+      folder: NetworkDevicePack
+      remove_on_deactivation: true
+    - name: viptela_network_devices_inventory_processing_pipeline
+      file: artifacts/Pipeline/viptela_network_devices_inventory_processing_pipeline.txt
+      version: 2026.02.02.02
+      folder: NetworkDevicePack
+      remove_on_deactivation: true
+    - name: lldp_topology_calculation
+      file: artifacts/Pipeline/lldp_topology_calculation.txt
+      version: 2025.12.31.1
+      folder: NetworkDevicePack
+      remove_on_deactivation: true
+    - name: network_inventory_parser
+      file: artifacts/Pipeline/network_inventory_parser.txt
+      version: 2026.02.02.04
+      folder: NetworkDevicePack
+      remove_on_deactivation: true
+    - name: product_type_enrichment_pipeline
+      file: artifacts/Pipeline/product_type_enrichment_pipeline.txt
+      version: 2026.02.02.03
+      folder: NetworkDevicePack
+      remove_on_deactivation: true
+    - name: isis_topology_calculation
+      file: artifacts/Pipeline/isis_topology_calculation.txt
+      version: 2025.12.31.1
+      folder: NetworkDevicePack
+      remove_on_deactivation: true
+    - name: network_device_topology_calculation
+      file: artifacts/Pipeline/network_device_topology_calculation.txt
+      version: 2025.12.31.1
+      folder: NetworkDevicePack
+      remove_on_deactivation: true
+    - name: ospf_topology_calculation
+      file: artifacts/Pipeline/ospf_topology_calculation.txt
+      version: 2025.12.31.1
+      folder: NetworkDevicePack
+      remove_on_deactivation: true
+    - name: cdp_topology_calculation
+      file: artifacts/Pipeline/cdp_topology_calculation.txt
+      version: 2025.12.31.1
+      folder: NetworkDevicePack
+      remove_on_deactivation: true
+    - name: other_vendor_network_device_inventory_processing_pipeline
+      file: artifacts/Pipeline/other_vendor_network_device_inventory_processing_pipeline.txt
+      version: 2026.02.02.02
+      folder: NetworkDevicePack
+      remove_on_deactivation: true
+    - name: network_inventory_collection
+      file: artifacts/Pipeline/network_inventory_collection.txt
+      version: 2026.02.02.04
+      folder: NetworkDevicePack
+      remove_on_deactivation: true
+    - name: import-customer-devices
+      file: artifacts/Pipeline/import-customer-devices.txt
+      version: 2025.12.31.1
+      folder: NetworkDevicePack
+      remove_on_deactivation: true
+    - name: access_verification_pipeline_main
+      file: artifacts/Pipeline/access_verification_pipeline_main.txt
+      version: 2025.12.31.1
+      folder: NetworkDevicePack
+      remove_on_deactivation: true
+
+  dashboards:
+    - name: poe_drilldown_dashboard
+      file: artifacts/Dashboard/poe_drilldown_dashboard.json
+      remove_on_deactivation: true
+    - name: aia-network-hardware
+      file: artifacts/Dashboard/aia-network-hardware.json
+      remove_on_deactivation: true
+    - name: network_device_chassis_metrics_drilldown
+      file: artifacts/Dashboard/network_device_chassis_metrics_drilldown.json
+      remove_on_deactivation: true
+    - name: preview_topology_dashboard
+      file: artifacts/Dashboard/preview_topology_dashboard.json
+      remove_on_deactivation: true
+    - name: aia-network-drilldown-app
+      file: artifacts/Dashboard/aia-network-drilldown-app.json
+      remove_on_deactivation: true
+    - name: network_device_interface_metrics_drilldown
+      file: artifacts/Dashboard/network_device_interface_metrics_drilldown.json
+      remove_on_deactivation: true
+    - name: aia-network-assetslist
+      file: artifacts/Dashboard/aia-network-assetslist.json
+      remove_on_deactivation: true
+    - name: customer_topology
+      file: artifacts/Dashboard/customer_topology.json
+      remove_on_deactivation: true
+    - name: device_inventory_from_alerts
+      file: artifacts/Dashboard/device_inventory_from_alerts.json
+      remove_on_deactivation: true
+    - name: topology-workbench
+      file: artifacts/Dashboard/topology-workbench.json
+      remove_on_deactivation: true
+    - name: customer_syslogs_drilldown
+      file: artifacts/Dashboard/customer_syslogs_drilldown.json
+      remove_on_deactivation: true
+    - name: customer_syslogs
+      file: artifacts/Dashboard/customer_syslogs.json
+      remove_on_deactivation: true
+    - name: aia-network-device-template
+      file: artifacts/Dashboard/aia-network-device-template.json
+      remove_on_deactivation: true
+    - name: aia-network-configure-and-manage
+      file: artifacts/Dashboard/aia-network-configure-and-manage.json
+      remove_on_deactivation: true
+    - name: customer_SNMP_Traps
+      file: artifacts/Dashboard/customer_SNMP_Traps.json
+      remove_on_deactivation: true
+    - name: aia-pages-grouping-app
+      file: artifacts/Dashboard/aia-pages-grouping-app.json
+      remove_on_deactivation: true
+    - name: topology_geomap_dashboard
+      file: artifacts/Dashboard/topology_geomap_dashboard.json
+      remove_on_deactivation: true
+    - name: node_details_app
+      file: artifacts/Dashboard/node_details_app.json
+      remove_on_deactivation: true
+    - name: customer_SNMP_Traps_drilldown
+      file: artifacts/Dashboard/customer_SNMP_Traps_drilldown.json
+      remove_on_deactivation: true
+    - name: customer_topology_with_context
+      file: artifacts/Dashboard/customer_topology_with_context.json
+      remove_on_deactivation: true
+    - name: network_device_sensor_metrics_drilldown
+      file: artifacts/Dashboard/network_device_sensor_metrics_drilldown.json
+      remove_on_deactivation: true
+    - name: aia-network-software
+      file: artifacts/Dashboard/aia-network-software.json
+      remove_on_deactivation: true
+    - name: network_device_metrics_drilldown
+      file: artifacts/Dashboard/network_device_metrics_drilldown.json
+      remove_on_deactivation: true
+    - name: aia-network-overall
+      file: artifacts/Dashboard/aia-network-overall.json
+      remove_on_deactivation: true
+    - name: network_device_metrics
+      file: artifacts/Dashboard/network_device_metrics.json
+      remove_on_deactivation: true
+    - name: network_device_l3services_metrics_drilldown
+      file: artifacts/Dashboard/network_device_l3services_metrics_drilldown.json
+      remove_on_deactivation: true
+    - name: device_alerts_detailed_view
+      file: artifacts/Dashboard/device_alerts_detailed_view.json
+      remove_on_deactivation: true
+    - name: device_alerts_detailed_view_drilldown
+      file: artifacts/Dashboard/device_alerts_detailed_view_drilldown.json
+      remove_on_deactivation: true
+    - name: device_metric_collection_health
+      file: artifacts/Dashboard/device_metric_collection_health.json
+      remove_on_deactivation: true
+    - name: device_metric_collection_health_drilldown
+      file: artifacts/Dashboard/device_metric_collection_health_drilldown.json
+      remove_on_deactivation: true
+  textfsms:
+    - name: cisco_ios_show_ip_interface_brief
+      version: 2025.10.05
+      folder: Cisco_IOS
+      description: Template for parsing show ip interface brief for cisco ios devices
+      template_file: ./artifacts/textfsms/cisco_ios_show_ip_interface_brief.textfsm 
+      remove_on_deactivation: true  
+    - name: cisco_xr_show_ip_interface_brief
+      version: 2025.10.05
+      folder: Cisco_XR
+      description: Template for parsing show ip interface brief for cisco xr devices
+      template_file: ./artifacts/textfsms/cisco_xr_show_ip_interface_brief.textfsm 
+      remove_on_deactivation: true  
+    - name: cisco_ios_show_ip_ospf_neighbor_detail
+      version: 2025.10.05
+      folder: Cisco_IOS
+      description: Template for parsing show ip ospf neighbor detail for cisco ios devices
+      template_file: ./artifacts/textfsms/cisco_ios_show_ip_ospf_neighbor_detail.textfsm 
+      remove_on_deactivation: true  
+    - name: cisco_xr_show_ip_ospf_neighbor_detail
+      version: 2025.10.05
+      folder: Cisco_XR
+      description: Template for parsing show ip ospf neighbor detail for cisco xr devices
+      template_file: ./artifacts/textfsms/cisco_xr_show_ip_ospf_neighbor_detail.textfsm 
+      remove_on_deactivation: true  
+    - name: cisco_ios_show_ip_bgp_neighbors_1
+      version: 2025.10.05
+      folder: Cisco_IOS
+      description: Template for parsing show ip bgp neighbors for cisco ios devices
+      template_file: ./artifacts/textfsms/cisco_ios_show_ip_bgp_neighbors_1.textfsm 
+      remove_on_deactivation: true  
+    - name: cisco_xr_show_ip_bgp_neighbors_1
+      version: 2025.10.05
+      folder: Cisco_XR
+      description: Template for parsing show ip bgp neighbors for cisco xr devices
+      template_file: ./artifacts/textfsms/cisco_xr_show_ip_bgp_neighbors_1.textfsm 
+      remove_on_deactivation: true  
+    - name: cisco_ios_show_ip_ospf_include_id
+      version: 2025.10.05
+      folder: Cisco_IOS
+      description: Template for parsing show ip bgp neighbors for cisco ios devices
+      template_file: ./artifacts/textfsms/cisco_ios_show_ip_ospf_include_id.textfsm 
+      remove_on_deactivation: true  
+    - name: cisco_xr_show_ip_ospf_include_id
+      version: 2025.10.05
+      folder: Cisco_XR
+      description: Template for parsing show ip bgp neighbors for cisco xr devices
+      template_file: ./artifacts/textfsms/cisco_xr_show_ip_ospf_include_id.textfsm 
+      remove_on_deactivation: true  
+    - name: cisco_ios_show_ip_ospf_interface_brief
+      version: 2025.10.05
+      folder: Cisco_IOS
+      description: Template for parsing show ip ospf interface brief for cisco ios devices
+      template_file: ./artifacts/textfsms/cisco_ios_show_ip_ospf_interface_brief.textfsm 
+      remove_on_deactivation: true  
+    - name: cisco_xr_show_ip_ospf_interface_brief
+      version: 2025.10.05
+      folder: Cisco_XR
+      description: Template for parsing show ip ospf interface brief for cisco xr devices
+      template_file: ./artifacts/textfsms/cisco_xr_show_ip_ospf_interface_brief.textfsm 
+      remove_on_deactivation: true  
+    - name: cisco_ios_show_isis_neighbors_detail
+      version: 2025.10.05
+      folder: Cisco_IOS
+      description: Template for parsing show isis neighbors detail for cisco ios devices
+      template_file: ./artifacts/textfsms/cisco_ios_show_isis_neighbors_detail.textfsm  
+      remove_on_deactivation: true  
+    - name: cisco_xr_show_isis_neighbors_detail
+      version: 2025.10.05
+      folder: Cisco_XR
+      description: Template for parsing show isis neighbors detail for cisco xr devices
+      template_file: ./artifacts/textfsms/cisco_xr_show_isis_neighbors_detail.textfsm 
+      remove_on_deactivation: true  
+
+customer_level:
+  launch_locations:
+  - pstream_name: rda_packs_dynamic_groups_and_pages
+    dashboard_group_name: groupTopo
+    dashboard_group_label: Topology
+    dashboard_group_icon: ""
+    dashboard_page_name: customer_topology
+    dashboard_page_label: Network Topology
+    dashboard_page_icon: "topology.svg"
+
+  - pstream_name: rda_packs_dynamic_groups_and_pages
+    dashboard_group_name: groupTopo
+    dashboard_group_label: Topology
+    dashboard_group_icon: ""
+    dashboard_page_name: topology-workbench
+    dashboard_page_label: Path Visualization
+    dashboard_page_icon: "topology.svg"
+
+  - pstream_name: rda_packs_dynamic_groups_and_pages
+    dashboard_group_name: groupTopo
+    dashboard_group_label: Topology
+    dashboard_group_icon: ""
+    dashboard_page_name: topology_geomap_dashboard
+    dashboard_page_label: Topology Geomap
+    dashboard_page_icon: "topology.svg"
+
+  - pstream_name: rda_packs_dynamic_groups_and_pages
+    dashboard_group_name: groupInventory
+    dashboard_group_label: Inventory
+    dashboard_group_icon: ""
+    dashboard_page_name: aia-network-assetslist
+    dashboard_page_label: Network Assets
+    dashboard_page_icon: "hardware.svg"
+
+  - pstream_name: rda_packs_dynamic_groups_and_pages
+    dashboard_group_name: groupInventory
+    dashboard_group_label: Inventory
+    dashboard_group_icon: ""
+    dashboard_page_name: aia-network-hardware
+    dashboard_page_label: Network Hardware
+    dashboard_page_icon: "hardware.svg"
+
+  - pstream_name: rda_packs_dynamic_groups_and_pages
+    dashboard_group_name: groupInventory
+    dashboard_group_label: Inventory
+    dashboard_group_icon: ""
+    dashboard_page_name: aia-network-software
+    dashboard_page_label: Network Software
+    dashboard_page_icon: "hardware.svg"
+
+  - pstream_name: rda_packs_dynamic_groups_and_pages
+    dashboard_group_name: groupMetrics
+    dashboard_group_label: Metrics
+    dashboard_group_icon: ""
+    dashboard_page_name: network_device_metrics
+    dashboard_page_label: Network Device Metrics
+    dashboard_page_icon: "insights.svg"
+
+  - pstream_name: rda_packs_dynamic_groups_and_pages
+    dashboard_group_name: groupMetrics
+    dashboard_group_label: Metrics
+    dashboard_group_icon: ""
+    dashboard_page_name: aia-network-overall
+    dashboard_page_label: Network Overview
+    dashboard_page_icon: "insights.svg"
+
+  - pstream_name: rda_packs_dynamic_groups_and_pages
+    dashboard_group_name: groupLogs
+    dashboard_group_label: Logs
+    dashboard_group_icon: ""
+    dashboard_page_name: customer_syslogs
+    dashboard_page_label: Syslogs
+    dashboard_page_icon: "overall.svg"
+
+  - pstream_name: rda_packs_dynamic_groups_and_pages
+    dashboard_group_name: groupLogs
+    dashboard_group_label: Logs
+    dashboard_group_icon: ""
+    dashboard_page_name: customer_SNMP_Traps
+    dashboard_page_label: SNMP Traps
+    dashboard_page_icon: "overall.svg"
+
+  - pstream_name: rda_packs_dynamic_groups_and_pages
+    dashboard_group_name: groupConfigure
+    dashboard_group_label: Configure and Manage
+    dashboard_group_icon: ""
+    dashboard_page_name: aia-network-configure-and-manage
+    dashboard_page_label: Network Management
+    dashboard_page_icon: "asset.svg"
+
+
+
+single_tenant:
+  launch_dashboard: aia-pages-grouping-app
+  launch_locations:
+    - pstream_name: rda_packs_dynamic_groups_and_pages
+      dashboard_group_name: groupTopo
+      dashboard_group_label: Topology
+      dashboard_group_icon: "topology.svg"
+      dashboard_page_name: customer_topology
+      dashboard_page_label: Network Topology
+      dashboard_page_icon: "topology.svg"
+    - pstream_name: rda_packs_dynamic_groups_and_pages
+      dashboard_group_name: groupTopo
+      dashboard_group_label: Topology
+      dashboard_group_icon: "topology.svg"
+      dashboard_page_name: topology-workbench
+      dashboard_page_label: Path Visualization
+      dashboard_page_icon: "topology.svg"
+    - pstream_name: rda_packs_dynamic_groups_and_pages
+      dashboard_group_name: groupTopo
+      dashboard_group_label: Topology
+      dashboard_group_icon: "topology.svg"
+      dashboard_page_name: topology_geomap_dashboard
+      dashboard_page_label: Topology Geomap
+      dashboard_page_icon: "topology.svg"
+    - pstream_name: rda_packs_dynamic_groups_and_pages
+      dashboard_group_name: groupInventory
+      dashboard_group_label: Inventory
+      dashboard_group_icon: "asset.svg"
+      dashboard_page_name: aia-network-assetslist
+      dashboard_page_label: Network Assets
+      dashboard_page_icon: "asset.svg"
+    - pstream_name: rda_packs_dynamic_groups_and_pages
+      dashboard_group_name: groupInventory
+      dashboard_group_label: Inventory
+      dashboard_group_icon: "asset.svg"
+      dashboard_page_name: aia-network-hardware
+      dashboard_page_label: Network Hardware
+      dashboard_page_icon: "asset.svg"
+    - pstream_name: rda_packs_dynamic_groups_and_pages
+      dashboard_group_name: groupInventory
+      dashboard_group_label: Inventory
+      dashboard_group_icon: "asset.svg"
+      dashboard_page_name: aia-network-software
+      dashboard_page_label: Network Software
+      dashboard_page_icon: "asset.svg"
+    - pstream_name: rda_packs_dynamic_groups_and_pages
+      dashboard_group_name: groupMetrics
+      dashboard_group_label: Metrics
+      dashboard_group_icon: "insights.svg"
+      dashboard_page_name: network_device_metrics
+      dashboard_page_label: Network Device Metrics
+      dashboard_page_icon: "insights.svg"
+    - pstream_name: rda_packs_dynamic_groups_and_pages
+      dashboard_group_name: groupMetrics
+      dashboard_group_label: Metrics
+      dashboard_group_icon: "insights.svg"
+      dashboard_page_name: aia-network-overall
+      dashboard_page_label: Network Overview
+      dashboard_page_icon: "insights.svg"
+    - pstream_name: rda_packs_dynamic_groups_and_pages
+      dashboard_group_name: groupLogs
+      dashboard_group_label: Logs
+      dashboard_group_icon: "overall.svg"
+      dashboard_page_name: customer_syslogs
+      dashboard_page_label: Syslogs
+      dashboard_page_icon: "overall.svg"
+    - pstream_name: rda_packs_dynamic_groups_and_pages
+      dashboard_group_name: groupLogs
+      dashboard_group_label: Logs
+      dashboard_group_icon: "overall.svg"
+      dashboard_page_name: customer_SNMP_Traps
+      dashboard_page_label: SNMP Traps
+      dashboard_page_icon: "overall.svg"
+    - pstream_name: rda_packs_dynamic_groups_and_pages
+      dashboard_group_name: groupConfigure
+      dashboard_group_label: Configure and Manage
+      dashboard_group_icon: "library.svg"
+      dashboard_page_name: aia-network-configure-and-manage
+      dashboard_page_label: Network Management
+      dashboard_page_icon: "library.svg"
+  artifacts:
+    blueprints:
+      - name: Network Device Discovery
+        file: artifacts/Blueprint/Network Device Discovery.yaml
+        remove_on_deactivation: true
+    datasets:
+      - name: geo_location
+        data_file: ./data/geo_location.csv
+        folder: NetworkDevicePack
+        remove_on_deactivation: true
+      - name: access_verification_method
+        data_file: ./data/access_verification_method.csv
+        folder: NetworkDevicePack
+        remove_on_deactivation: true
+    endpoints:
+      - name: asm_snmp
+        file: ./artifacts/endpoints/asm_snmp.json
+        remove_on_deactivation: true
+      - name: asm_syslog
+        file: ./artifacts/endpoints/asm_syslog.json
+        remove_on_deactivation: true
+    mappings:
+      - name: asm_snmp_metrics_mapper
+        file: ./artifacts/mappings/asm_snmp_metrics_mapper.json
+        creation_policy: overwrite
+        remove_on_deactivation: true
+      - name: asm_syslog_mapper
+        file: ./artifacts/mappings/asm_syslog_mapper.json
+        creation_policy: overwrite
+        remove_on_deactivation: true
+    notification_channels:
+      - name: telegraf_snmp_metrics
+        file: ./artifacts/notification_channels/telegraf_snmp_metrics.json
+        remove_on_deactivation: true
+      - name: asm_syslog_webhook
+        file: ./artifacts/notification_channels/asm_syslog_webhook.json
+        remove_on_deactivation: true
+    notification_channel_profiles:      
+    - name: snmp_metrics_notification_profile
+      file: ./artifacts/notification_channels_profiles/snmp_metrics_notification_profile.json
+      remove_on_deactivation: true
+    alert_rules:
+      - name: cpu_snmp_metric
+        file: ./artifacts/alert_rules/cpu_snmp_metric.json
+        remove_on_deactivation: true
+        creation_policy: overwrite
+      - name: in_discards_snmp_metric
+        file: ./artifacts/alert_rules/in_discards_snmp_metric.json
+        remove_on_deactivation: true
+        creation_policy: overwrite
+      - name: in_errors_snmp_metric
+        file: ./artifacts/alert_rules/in_errors_snmp_metric.json
+        remove_on_deactivation: true
+        creation_policy: overwrite
+      - name: in_octets_snmp_metric
+        file: ./artifacts/alert_rules/in_octets_snmp_metric.json
+        remove_on_deactivation: true
+        creation_policy: overwrite
+      - name: memory_snmp_metric
+        file: ./artifacts/alert_rules/memory_snmp_metric.json
+        remove_on_deactivation: true
+        creation_policy: overwrite
+      - name: oper_status_snmp
+        file: ./artifacts/alert_rules/oper_status_snmp.json
+        remove_on_deactivation: true
+        creation_policy: overwrite
+      - name: out_discards_snmp_metric
+        file: ./artifacts/alert_rules/out_discards_snmp_metric.json
+        remove_on_deactivation: true
+        creation_policy: overwrite
+      - name: out_errors_snmp_metric
+        file: ./artifacts/alert_rules/out_errors_snmp_metric.json
+        remove_on_deactivation: true
+        creation_policy: overwrite
+      - name: out_octets_snmp_metric
+        file: ./artifacts/alert_rules/out_octets_snmp_metric.json
+        remove_on_deactivation: true
+        creation_policy: overwrite
+      - name: device_power_supply_failure
+        file: ./artifacts/alert_rules/device_power_supply_failure.json
+        remove_on_deactivation: true
+        creation_policy: overwrite
+      - name: device_uptime_snmp
+        file: ./artifacts/alert_rules/device_uptime_snmp.json
+        remove_on_deactivation: true
+        creation_policy: overwrite
+      - name: environmental_temperature_status
+        file: ./artifacts/alert_rules/environmental_temperature_status.json
+        remove_on_deactivation: true
+        creation_policy: overwrite
+      - name: interface_crc_errors_snmp
+        file: ./artifacts/alert_rules/interface_crc_errors_snmp.json
+        remove_on_deactivation: true
+        creation_policy: overwrite
+      - name: interface_link_status_change
+        file: ./artifacts/alert_rules/interface_link_status_change.json
+        remove_on_deactivation: true
+        creation_policy: overwrite
+      - name: interface_down
+        file: ./artifacts/alert_rules/interface_down.json
+        remove_on_deactivation: true
+        creation_policy: overwrite
+      - name: ntp_status_snmp
+        file: ./artifacts/alert_rules/ntp_status_snmp.json
+        remove_on_deactivation: true
+        creation_policy: overwrite
+      - name: snmp_availability
+        file: ./artifacts/alert_rules/snmp_availability.json
+        remove_on_deactivation: true
+        creation_policy: overwrite
+      - name: ospf_neighbor_state_change
+        file: ./artifacts/alert_rules/ospf_neighbor_state_change.json
+        remove_on_deactivation: true
+        creation_policy: overwrite
+      - name: ospf_neighbor_state
+        file: ./artifacts/alert_rules/ospf_neighbor_state.json
+        remove_on_deactivation: true
+        creation_policy: overwrite
+      - name: bgp_neighbor_state_change
+        file: ./artifacts/alert_rules/bgp_neighbor_state_change.json
+        remove_on_deactivation: true
+        creation_policy: overwrite
+      - name: isis_neighbor_state_change
+        file: ./artifacts/alert_rules/isis_neighbor_state_change.json
+        remove_on_deactivation: true
+        creation_policy: overwrite
+      - name: bgp_prefix_limit_status
+        file: ./artifacts/alert_rules/bgp_prefix_limit_status.json
+        remove_on_deactivation: true
+        creation_policy: overwrite
+      - name: device_fan_failure
+        file: ./artifacts/alert_rules/device_fan_failure.json
+        remove_on_deactivation: true
+        creation_policy: overwrite
+      - name: device_fan_failure_blower
+        file: ./artifacts/alert_rules/device_fan_failure_blower.json
+        remove_on_deactivation: true
+        creation_policy: overwrite
+      - name: device_temperature_critical
+        file: ./artifacts/alert_rules/device_temperature_critical.json
+        remove_on_deactivation: true
+        creation_policy: overwrite
+      - name: interface_sfp_power_alarm
+        file: ./artifacts/alert_rules/interface_sfp_power_alarm.json
+        remove_on_deactivation: true
+        creation_policy: overwrite
+      - name: memory_allocation_failure
+        file: ./artifacts/alert_rules/memory_allocation_failure.json
+        remove_on_deactivation: true
+        creation_policy: overwrite
+      - name: interface_admin_down
+        file: ./artifacts/alert_rules/interface_admin_down.json
+        remove_on_deactivation: true
+        creation_policy: overwrite
+      - name: environmental_power_status
+        file: ./artifacts/alert_rules/environmental_power_status.json
+        remove_on_deactivation: true
+        creation_policy: overwrite
+      - name: environmental_fan_status
+        file: ./artifacts/alert_rules/environmental_fan_status.json
+        remove_on_deactivation: true
+        creation_policy: overwrite

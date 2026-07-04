@@ -1,0 +1,536 @@
+{
+    "name": "network_device_chassis_metrics_drilldown",
+    "description": "Network Device Chassis Metrics",
+    "label": "Network Device Chassis Metrics",
+    "enabled": false,
+    "dashboard_type": "template",
+    "dashboard_style": "auto",
+    "dashboard_folder": "Network Device",
+    "context_label_id": "target_ip",
+    "live_edit": true,
+    "template_variables": {
+        "DEVICE_IP": {
+            "contextId": "target_ip"
+        },
+        "DEVICE_VENDOR": {
+            "contextId": "device_vendor"
+        },
+        "DEVICE_NAME": {
+            "contextId": "sys_name"
+        }
+    },
+    "dashboard_filters": {
+        "time_filter": true,
+        "extra_filter": "target_ip is '{{DEVICE_IP}}' or ip_address is '{{DEVICE_IP}}' ",
+        "default_time_filter_labels": [
+            "Last 24 hours"
+        ],
+        "columns_filter": [],
+        "group_filters": []
+    },
+    "dashboard_sections": [
+        {
+            "title": "Chassis",
+            "show_filter": false,
+            "widgets": [
+                {
+                    "title": "Device Info",
+                    "widget_type": "label",
+                    "min_width": 12,
+                    "max_width": 12,
+                    "height": 1,
+                    "label": "<h4 style='margin:0;padding:10px;background:#f5f5f5;color:#0066ff;border-radius:4px;text-align:center'>Device Name: {{DEVICE_NAME}} | IP Address: {{DEVICE_IP}} | Vendor: {{DEVICE_VENDOR}}</h4>",
+                    "widget_id": "device_info_label"
+                },
+                {
+                    "title": "Uptime",
+                    "min_width": 2.4,
+                    "height": 3,
+                    "max_width": 2.4,
+                    "widget_type": "expression_counter",
+                    "expression": "uptime_seconds / 86400",
+                    "unit": "days",
+                    "extra_filter": "target_ip is '{{DEVICE_IP}}' and collection = 'uptime'",
+                    "stream": "rda_snmp_metrics",
+                    "ts_column": "timestamp",
+                    "segments": [
+                        {
+                            "variable": "uptime_seconds",
+                            "stream": "rda_snmp_metrics",
+                            "ts_column": "timestamp",
+                            "column": "uptime_seconds",
+                            "agg": "max",
+                            "group_by": [
+                                "target_ip"
+                            ],
+                            "type": "float"
+                        }
+                    ],
+                    "widget_id": "4db07169"
+                },
+                {
+                    "title": "Devices UP",
+                    "widget_type": "expression_counter",
+                    "stream": "rda_icmp_ping_metrics",
+                    "color": "#2E7D32",
+                    "min_width": 2.4,
+                    "height": 3,
+                    "max_width": 2.4,
+                    "ts_column": "timestamp",
+                    "extra_filter": "target_ip is '{{DEVICE_IP}}' and name is 'rda_ping' and result_status is 'UP'",
+                    "expression": "status",
+                    "segments": [
+                        {
+                            "variable": "status",
+                            "stream": "rda_icmp_ping_metrics",
+                            "ts_column": "timestamp",
+                            "column": "target_ip",
+                            "extra_filter": "result_status is 'UP'",
+                            "agg": "cardinality",
+                            "type": "int"
+                        }
+                    ],
+                    "widget_id": "6cb57e97"
+                },
+                {
+                    "title": "Devices Down",
+                    "widget_type": "expression_counter",
+                    "stream": "rda_icmp_ping_metrics",
+                    "color": "#c62828",
+                    "min_width": 2.4,
+                    "height": 3,
+                    "max_width": 2.4,
+                    "ts_column": "timestamp",
+                    "extra_filter": "target_ip is '{{DEVICE_IP}}' and name is 'rda_ping' and result_status is 'Down'",
+                    "expression": "status",
+                    "segments": [
+                        {
+                            "variable": "status",
+                            "stream": "rda_icmp_ping_metrics",
+                            "ts_column": "timestamp",
+                            "column": "target_ip",
+                            "extra_filter": "result_status is 'Down'",
+                            "agg": "cardinality",
+                            "type": "int"
+                        }
+                    ],
+                    "widget_id": "6edff564"
+                },
+                {
+                    "title": "Interfaces Up",
+                    "widget_type": "expression_counter",
+                    "stream": "rda_snmp_metrics",
+                    "color": "#2E7D32",
+                    "ts_column": "timestamp",
+                    "extra_filter": "name is 'interface' and interface_type is '6' and oper_status_label is 'Up'",
+                    "expression": "status",
+                    "min_width": 2.4,
+                    "height": 3,
+                    "max_width": 2.4,
+                    "segments": [
+                        {
+                            "variable": "status",
+                            "stream": "rda_snmp_metrics",
+                            "ts_column": "timestamp",
+                            "column": "interface_description",
+                            "extra_filter": "interface_type is '6' and oper_status_label is 'Up'",
+                            "agg": "cardinality",
+                            "type": "int"
+                        }
+                    ],
+                    "group_by": [
+                        "oper_status_label"
+                    ],
+                    "column": "interface_description",
+                    "agg": "cardinality",
+                    "type": "int",
+                    "widget_id": "29a42355"
+                },
+                {
+                    "title": "Interfaces Down",
+                    "widget_type": "expression_counter",
+                    "stream": "rda_snmp_metrics",
+                    "color": "#c62828",
+                    "ts_column": "timestamp",
+                    "extra_filter": "name is 'interface' and interface_type is '6' and oper_status_label is 'Down'",
+                    "expression": "status",
+                    "min_width": 2.4,
+                    "height": 3,
+                    "max_width": 2.4,
+                    "segments": [
+                        {
+                            "variable": "status",
+                            "stream": "rda_snmp_metrics",
+                            "ts_column": "timestamp",
+                            "column": "interface_description",
+                            "extra_filter": "oper_status_label is 'Down'",
+                            "agg": "cardinality",
+                            "type": "int"
+                        }
+                    ],
+                    "group_by": [
+                        "oper_status_label"
+                    ],
+                    "column": "interface_description",
+                    "agg": "cardinality",
+                    "type": "int",
+                    "widget_id": "737633e6"
+                },
+                {
+                    "title": "",
+                    "widget_type": "gauge_widget",
+                    "stream": "rda_snmp_metrics",
+                    "ts_column": "timestamp",
+                    "extra_filter": "target_ip is '{{DEVICE_IP}}' and cpu_usage is not empty",
+                    "column": "cpu_usage",
+                    "agg": "avg",
+                    "min_width": 6,
+                    "height": 4,
+                    "max_width": 6,
+                    "refreshRequired": true,
+                    "label": "CPU Usage",
+                    "group_by0": [
+                        "cpu_usage"
+                    ],
+                    "chartProperties": {
+                        "isSingleZoned": false,
+                        "showPointer": true,
+                        "pointer": {
+                            "length": 85,
+                            "strokeWidth": 25,
+                            "color": "red"
+                        },
+                        "minLabel": "0",
+                        "maxLabel": "100",
+                        "minValue": 0,
+                        "maxValue": 100,
+                        "arcWidth": 10,
+                        "valueFontSize": 30,
+                        "bgZonesMode": "percent",
+                        "bgZones": [
+                            {
+                                "from": 0,
+                                "to": 50,
+                                "bgColor": "green",
+                                "label": "N-1"
+                            },
+                            {
+                                "from": 51,
+                                "to": 80,
+                                "bgColor": "orange",
+                                "label": "N-2"
+                            },
+                            {
+                                "from": 81,
+                                "to": 100,
+                                "bgColor": "red",
+                                "label": "N-3"
+                            }
+                        ]
+                    },
+                    "widget_id": "e2935bd4"
+                },
+                {
+                    "title": "",
+                    "widget_type": "gauge_widget",
+                    "stream": "rda_snmp_metrics",
+                    "ts_column": "timestamp",
+                    "extra_filter": "target_ip is '{{DEVICE_IP}}' and memory_usage is not empty",
+                    "column": "memory_usage",
+                    "agg": "avg",
+                    "min_width": 6,
+                    "height": 4,
+                    "max_width": 6,
+                    "refreshRequired": true,
+                    "label": "Memory Usage",
+                    "chartProperties": {
+                        "isSingleZoned": false,
+                        "showPointer": true,
+                        "pointer": {
+                            "length": 85,
+                            "strokeWidth": 25,
+                            "color": "red"
+                        },
+                        "minLabel": "0",
+                        "maxLabel": "100",
+                        "minValue": 0,
+                        "maxValue": 100,
+                        "arcWidth": 10,
+                        "valueFontSize": 30,
+                        "bgZonesMode": "percent",
+                        "bgZones": [
+                            {
+                                "from": 0,
+                                "to": 50,
+                                "bgColor": "green",
+                                "label": "N-1"
+                            },
+                            {
+                                "from": 51,
+                                "to": 80,
+                                "bgColor": "orange",
+                                "label": "N-2"
+                            },
+                            {
+                                "from": 81,
+                                "to": 100,
+                                "bgColor": "red",
+                                "label": "N-3"
+                            }
+                        ]
+                    },
+                    "widget_id": "cdaab1f1"
+                },
+                {
+                    "title": "Ping Status Timeline ( custom widget)",
+                    "widget_type": "custom_widget",
+                    "widget_implementation": "network_device_chassis_metrics_drilldown/ping_timeline_widget_index_with_legend_filter",
+                    "height": 4.5,
+                    "min_width": 12,
+                    "max_width": 12,
+                    "widget_id": "24012537"
+                },
+                {
+                    "title": "SNMP Status Timeline ( custom widget)",
+                    "widget_type": "custom_widget",
+                    "widget_implementation": "network_device_chassis_metrics_drilldown/snmp_timeline_widget_index_with_legend_filter",
+                    "height": 4.5,
+                    "min_width": 12,
+                    "max_width": 12,
+                    "widget_id": "ef6cf8f7"
+                },
+                {
+                    "title": "ICMP Performance",
+                    "description": "ICMP Performance",
+                    "widget_type": "timeseries",
+                    "stream": "rda_icmp_ping_metrics",
+                    "ts_column": "timestamp",
+                    "max_width": 6,
+                    "height": 6,
+                    "min_width": 6,
+                    "interval": "auto",
+                    "chartProperties": {
+                        "yAxisLabel": "Latency (ms)",
+                        "xAxisLabel": "Time",
+                        "legendLocation": "right"
+                    },
+                    "group_by": [
+                        "target_ip"
+                    ],
+                    "series_spec": [
+                        {
+                            "column": "maximum_response_ms",
+                            "agg": "max",
+                            "type": "float",
+                            "label": "Max Response"
+                        }
+                    ],
+                    "widget_id": "3aeac577"
+                },
+                {
+                    "title": "ICMP Status",
+                    "description": "ICMP Staus",
+                    "widget_type": "timeseries",
+                    "stream": "rda_icmp_ping_metrics",
+                    "ts_column": "timestamp",
+                    "max_width": 6,
+                    "height": 6,
+                    "min_width": 6,
+                    "interval": "auto",
+                    "chartProperties": {
+                        "yAxisLabel": "0 = UP / 1 = Down",
+                        "xAxisLabel": "Time",
+                        "legendLocation": "right"
+                    },
+                    "group_by": [
+                        "target_ip",
+                        "result_status"
+                    ],
+                    "series_spec": [
+                        {
+                            "column": "result_code",
+                            "agg": "max",
+                            "type": "float",
+                            "label": "Ping Status"
+                        }
+                    ],
+                    "widget_id": "957386db"
+                },
+                {
+                    "title": "CPU Usage",
+                    "description": "CPU Usage",
+                    "widget_type": "timeseries",
+                    "stream": "rda_snmp_metrics",
+                    "extra_filter": "target_ip is '{{DEVICE_IP}}' and collection = 'cpu'",
+                    "ts_column": "timestamp",
+                    "max_width": 6,
+                    "height": 6,
+                    "min_width": 6,
+                    "interval": "auto",
+                    "chartProperties": {
+                        "yAxisLabel": "CPU Usage(%)",
+                        "xAxisLabel": "Time",
+                        "legendLocation": "right",
+                        "options": {
+                            "scales": {
+                                "yAxes": [
+                                    {
+                                        "ticks": {
+                                            "min": 0,
+                                            "max": 100
+                                        }
+                                    }
+                                ]
+                            }
+                        }
+                    },
+                    "group_by": [
+                        "target_ip"
+                    ],
+                    "series_spec": [
+                        {
+                            "column": "cpu_usage",
+                            "agg": "max",
+                            "type": "float"
+                        }
+                    ],
+                    "widget_id": "b7d9fcb6"
+                },
+                {
+                    "title": "Memory Usage",
+                    "description": "Memory Usage Trend",
+                    "widget_type": "timeseries",
+                    "stream": "rda_snmp_metrics",
+                    "ts_column": "timestamp",
+                    "max_width": 6,
+                    "height": 6,
+                    "min_width": 6,
+                    "interval": "auto",
+                    "extra_filter": "target_ip is '{{DEVICE_IP}}' and collection = 'memory'",
+                    "chartProperties": {
+                        "yAxisLabel": "Memory Usage(%)",
+                        "xAxisLabel": "Time",
+                        "legendLocation": "right",
+                        "options": {
+                            "scales": {
+                                "yAxes": [
+                                    {
+                                        "ticks": {
+                                            "min": 0,
+                                            "max": 100
+                                        }
+                                    }
+                                ]
+                            }
+                        }
+                    },
+                    "group_by": [
+                        "target_ip"
+                    ],
+                    "series_spec": [
+                        {
+                            "column": "memory_usage",
+                            "agg": "max",
+                            "type": "float"
+                        }
+                    ],
+                    "widget_id": "a1bbdd9a"
+                },
+                {
+                    "title": "NTP Time Precision",
+                    "widget_type": "timeseries",
+                    "stream": "rda_snmp_metrics",
+                    "ts_column": "timestamp",
+                    "extra_filter": "target_ip is '{{DEVICE_IP}}' and collection = 'ntp' and ntp_time_precision_ms is not empty",
+                    "min_width": 6,
+                    "max_width": 6,
+                    "height": 6,
+                    "interval": "auto",
+                    "group_by": [
+                        "target_ip"
+                    ],
+                    "series_spec": [
+                        {
+                            "column": "ntp_time_precision_ms",
+                            "agg": "max",
+                            "type": "float"
+                        }
+                    ],
+                    "chartProperties": {
+                        "yAxisLabel": "NTP Time Precision (ms)",
+                        "xAxisLabel": "Time",
+                        "legendLocation": "right"
+                    },
+                    "widget_id": "6ee2e1a9"
+                },
+                {
+                    "title": "NTP Time Sync Status",
+                    "widget_type": "timeseries",
+                    "stream": "rda_snmp_metrics",
+                    "ts_column": "timestamp",
+                    "extra_filter": "target_ip is '{{DEVICE_IP}}' and collection = 'ntp' and ntp_status_label is not empty",
+                    "chartProperties": {
+                        "yAxisLabel": "NTP Sync Status",
+                        "xAxisLabel": "Time",
+                        "legendLocation": "right"
+                    },
+                    "min_width": 6,
+                    "max_width": 6,
+                    "height": 6,
+                    "interval": "auto",
+                    "group_by": [
+                        "target_ip",
+                        "ntp_status_label"
+                    ],
+                    "series_spec": [
+                        {
+                            "column": "ntp_status",
+                            "agg": "max",
+                            "type": "int"
+                        }
+                    ],
+                    "widget_id": "cbbd29c5"
+                }
+            ]
+        }
+    ],
+    "custom_widgets": {
+        "ping_timeline_widget_index_with_legend_filter": {
+            "artifacts": {
+                "main": {
+                    "attachment": "index_with_legend_filter.html",
+                    "content_type": "text/html",
+                    "is_template": true
+                }
+            }
+        },
+        "snmp_timeline_widget_index_with_legend_filter": {
+            "artifacts": {
+                "main": {
+                    "attachment": "snmp_status_with_legend_filter.html",
+                    "content_type": "text/html",
+                    "is_template": true
+                }
+            }
+        }
+    },
+    "saved_time": "2026-03-05T06:03:11.389470",
+    "attachments": [
+        {
+            "name": "index_with_legend_filter.html",
+            "value": "<!DOCTYPE html>\r\n<html lang=\"en\">\r\n<head>\r\n<meta charset=\"UTF-8\" />\r\n<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\" />\r\n<title>Dense Ping Timeline </title>\r\n\r\n<style>\r\n* { margin: 0; padding: 0; box-sizing: border-box; }\r\n\r\nbody {\r\n  font-family: Arial, sans-serif;\r\n  background: #f5f5f5;\r\n  padding: 30px;\r\n}\r\n\r\n.container {\r\n  max-width: 1200px;\r\n  margin: auto;\r\n  background: #fff;\r\n  padding: 30px;\r\n  border-radius: 8px;\r\n  box-shadow: 0 2px 10px rgba(0,0,0,0.08);\r\n}\r\n\r\n.title {\r\n  font-size: 18px;\r\n  margin-bottom: 20px;\r\n  font-weight: 600;\r\n}\r\n\r\n.timeline-wrapper {\r\n  position: relative;\r\n}\r\n\r\n.timeline {\r\n  position: relative;\r\n  width: 100%;\r\n  height: 40px;\r\n  border: 1px solid #e0e0e0;\r\n  border-radius: 4px;\r\n  overflow: hidden;\r\n  background: #fff;\r\n}\r\n\r\n.bar-slice {\r\n  position: absolute;\r\n  top: 0;\r\n  bottom: 0;\r\n  transition: opacity 0.15s linear, transform 0.15s;\r\n}\r\n\r\n.bar-slice:hover {\r\n  opacity: 0.85;\r\n  transform: scaleY(1.2);\r\n}\r\n\r\n.x-axis {\r\n  display: flex;\r\n  justify-content: space-between;\r\n  font-size: 12px;\r\n  margin-top: 6px;\r\n  color: #666;\r\n}\r\n\r\n.legend {\r\n  display: flex;\r\n  gap: 20px;\r\n  margin-top: 18px;\r\n  font-size: 14px;\r\n}\r\n\r\n.legend-item {\r\n  display: flex;\r\n  align-items: center;\r\n  gap: 8px;\r\n  cursor: pointer;\r\n}\r\n\r\n.legend-color {\r\n  width: 18px;\r\n  height: 12px;\r\n  border-radius: 2px;\r\n}\r\n\r\n.legend-item.disabled .legend-color {\r\n  opacity: 0.3;\r\n}\r\n\r\n.tooltip {\r\n  position: absolute;\r\n  background: rgba(0,0,0,0.85);\r\n  color: #fff;\r\n  padding: 8px 12px;\r\n  border-radius: 6px;\r\n  font-size: 12px;\r\n  pointer-events: none;\r\n  z-index: 9999;\r\n  white-space: nowrap;\r\n  display: none;\r\n}\r\n</style>\r\n</head>\r\n\r\n<body>\r\n\r\n<div class=\"container\">\r\n  <div class=\"title\">Ping Status Timeline</div>\r\n\r\n  <div class=\"timeline-wrapper\">\r\n    <div id=\"timeline\" class=\"timeline\"></div>\r\n    <div id=\"x-axis\" class=\"x-axis\"></div>\r\n  </div>\r\n\r\n  <div class=\"legend\">\r\n    <div class=\"legend-item\" data-type=\"success\">\r\n      <div class=\"legend-color\" style=\"background:#4caf50;\"></div>\r\n      <span>Success</span>\r\n    </div>\r\n    <div class=\"legend-item\" data-type=\"failure\">\r\n      <div class=\"legend-color\" style=\"background:#f44336;\"></div>\r\n      <span>Failure</span>\r\n    </div>\r\n  </div>\r\n</div>\r\n\r\n<div id=\"tooltip\" class=\"tooltip\"></div>\r\n\r\n<script>\r\nconst CONFIG = {\r\n  successColor: '#4caf50',\r\n  failureColor: '#f44336'\r\n};\r\n\r\nclass DenseTimeline {\r\n  constructor(containerId) {\r\n    this.container = document.getElementById(containerId);\r\n    this.xAxis = document.getElementById('x-axis');\r\n    this.tooltip = document.getElementById('tooltip');\r\n\r\n    this.data = [];\r\n    this.processed = [];\r\n    this.visibleTypes = { success: true, failure: true };\r\n    this.containerWidth = 0;\r\n  }\r\n\r\n  async init() {\r\n    await this.loadData();\r\n    this.containerWidth = this.container.clientWidth;\r\n    this.processData();\r\n    this.render();\r\n    this.renderXAxis();\r\n    this.setupLegend();\r\n    this.setupResize();\r\n  }\r\n\r\n  async loadData() {\r\n    // Server-side Jinja filter\r\n    {% set ping_query = \"target_ip is '\" ~ target_ip ~ \"'\" %}\r\n    const response = {{ engine.query_stream_data(\r\n      stream=\"rda_icmp_ping_metrics\",\r\n      sorting=[{\"timestamp\":\"desc\"}],\r\n      limit=2000,\r\n      max_rows=2000,\r\n      cfxql_query=ping_query\r\n    ) | tojson }};\r\n    this.data = response;\r\n  }\r\n\r\n  formatTimestampWithMs(input) {\r\n    const date = new Date(input);\r\n    const main = date.toLocaleString('en-US', {\r\n      year: 'numeric',\r\n      month: 'short',\r\n      day: 'numeric',\r\n      hour: '2-digit',\r\n      minute: '2-digit',\r\n      second: '2-digit',\r\n      hour12: true\r\n    });\r\n    const ms = String(date.getMilliseconds()).padStart(3,'0');\r\n    return `${main}.${ms}`;\r\n  }\r\n\r\n  processData(data=this.data) {\r\n  if (!data || data.length === 0) {\r\n    this.processed = [];\r\n    return;\r\n  }\r\n\r\n  const sorted = [...data].sort((a,b) => new Date(a.timestamp) - new Date(b.timestamp));\r\n  const times = sorted.map(d => new Date(d.timestamp).getTime());\r\n  this.minTime = Math.min(...times);\r\n  this.maxTime = Math.max(...times);\r\n  const totalDuration = this.maxTime - this.minTime || 1;\r\n\r\n  this.processed = sorted.map((item, i) => {\r\n    const timestamp = new Date(item.timestamp).getTime();\r\n    const position = ((timestamp - this.minTime) / totalDuration) * this.containerWidth;\r\n\r\n    let width;\r\n    if (i < sorted.length - 1) {\r\n      const nextTimestamp = new Date(sorted[i+1].timestamp).getTime();\r\n      const nextPos = ((nextTimestamp - this.minTime) / totalDuration) * this.containerWidth;\r\n      // round to cover fractional gaps\r\n      width = Math.ceil(nextPos) - Math.floor(position);\r\n    } else {\r\n      width = this.containerWidth - Math.floor(position);\r\n    }\r\n\r\n    return {\r\n      position: Math.floor(position),\r\n      width: Math.max(1, width),\r\n      type: item.result_code === 0 ? 'success' : 'failure',\r\n      color: item.result_code === 0 ? CONFIG.successColor : CONFIG.failureColor,\r\n      data: item\r\n    };\r\n  });\r\n}\r\n\r\nrender() {\r\n  this.container.innerHTML = '';\r\n  const fragment = document.createDocumentFragment();\r\n\r\n  this.processed.forEach(slice => {\r\n    if(!this.visibleTypes[slice.type]) return;\r\n\r\n    const el = document.createElement('div');\r\n    el.className='bar-slice';\r\n    el.style.left = slice.position + 'px';\r\n    el.style.width = slice.width + 'px';\r\n    el.style.backgroundColor = slice.color;\r\n\r\n    el.addEventListener('mouseenter', e => this.showTooltip(e, slice));\r\n    el.addEventListener('mousemove', e => this.moveTooltip(e));\r\n    el.addEventListener('mouseleave', () => this.hideTooltip());\r\n\r\n    fragment.appendChild(el);\r\n  });\r\n\r\n  this.container.appendChild(fragment);\r\n}\r\n\r\n\r\n  renderXAxis() {\r\n    if(!this.minTime || !this.maxTime) return;\r\n    this.xAxis.innerHTML = `\r\n      <span>${this.formatTimestampWithMs(this.minTime)}</span>\r\n      <span>${this.formatTimestampWithMs(this.maxTime)}</span>\r\n    `;\r\n  }\r\n\r\n  setupLegend() {\r\n    document.querySelectorAll('.legend-item').forEach(item => {\r\n      item.addEventListener('click', () => {\r\n        const type = item.dataset.type;\r\n        this.visibleTypes[type] = !this.visibleTypes[type];\r\n        item.classList.toggle('disabled', !this.visibleTypes[type]);\r\n        this.render();\r\n      });\r\n    });\r\n  }\r\n\r\n  setupResize() {\r\n    new ResizeObserver(() => {\r\n      const newWidth = this.container.clientWidth;\r\n      if(newWidth !== this.containerWidth){\r\n        this.containerWidth = newWidth;\r\n        this.processData();\r\n        this.render();\r\n        this.renderXAxis();\r\n      }\r\n    }).observe(this.container);\r\n  }\r\n\r\n  showTooltip(e,slice) {\r\n    const ts = this.formatTimestampWithMs(slice.data.timestamp);\r\n    const result = slice.type === 'success' ? 'Success' : 'Failure';\r\n    const ip = slice.data.target_ip || 'N/A';\r\n    this.tooltip.innerHTML = `${ts}<br>IP: ${ip}<br>${result}`;\r\n    this.tooltip.style.display = 'block';\r\n    this.moveTooltip(e);\r\n  }\r\n\r\n  moveTooltip(e) {\r\n    const tooltipRect = this.tooltip.getBoundingClientRect();\r\n    let left = e.pageX + 10;\r\n    let top = e.pageY + 10;\r\n\r\n    if(left + tooltipRect.width > window.innerWidth) left -= tooltipRect.width + 20;\r\n    if(top + tooltipRect.height > window.innerHeight) top -= tooltipRect.height + 20;\r\n\r\n    this.tooltip.style.left = left + 'px';\r\n    this.tooltip.style.top = top + 'px';\r\n  }\r\n\r\n  hideTooltip() {\r\n    this.tooltip.style.display = 'none';\r\n  }\r\n}\r\n\r\ndocument.addEventListener('DOMContentLoaded', () => {\r\n  const widget = new DenseTimeline('timeline');\r\n  widget.init();\r\n});\r\n</script>\r\n\r\n</body>\r\n</html>\r\n",
+            "additionalFields": {
+                "valueType": "",
+                "description": ""
+            }
+        },
+        {
+            "name": "snmp_status_with_legend_filter.html",
+            "value": "<!DOCTYPE html>\r\n<html lang=\"en\">\r\n<head>\r\n<meta charset=\"UTF-8\" />\r\n<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\" />\r\n<title>Dense SNMP Status Timeline</title>\r\n\r\n<style>\r\n* { margin: 0; padding: 0; box-sizing: border-box; }\r\n\r\nbody {\r\n  font-family: Arial, sans-serif;\r\n  background: #f5f5f5;\r\n  padding: 30px;\r\n}\r\n\r\n.container {\r\n  max-width: 1200px;\r\n  margin: auto;\r\n  background: #fff;\r\n  padding: 30px;\r\n  border-radius: 8px;\r\n  box-shadow: 0 2px 10px rgba(0,0,0,0.08);\r\n}\r\n\r\n.title {\r\n  font-size: 18px;\r\n  margin-bottom: 20px;\r\n  font-weight: 600;\r\n}\r\n\r\n.timeline-wrapper { position: relative; }\r\n\r\n.timeline {\r\n  position: relative;\r\n  width: 100%;\r\n  height: 40px;\r\n  border: 1px solid #e0e0e0;\r\n  border-radius: 4px;\r\n  overflow: hidden;\r\n  background: #fff;\r\n}\r\n\r\n.bar-slice {\r\n  position: absolute;\r\n  top: 0;\r\n  bottom: 0;\r\n  transition: opacity 0.15s linear, transform 0.15s;\r\n}\r\n\r\n.bar-slice:hover {\r\n  opacity: 0.85;\r\n  transform: scaleY(1.2);\r\n}\r\n\r\n.x-axis {\r\n  display: flex;\r\n  justify-content: space-between;\r\n  font-size: 12px;\r\n  margin-top: 6px;\r\n  color: #666;\r\n}\r\n\r\n.legend {\r\n  display: flex;\r\n  gap: 20px;\r\n  margin-top: 18px;\r\n  font-size: 14px;\r\n}\r\n\r\n.legend-item {\r\n  display: flex;\r\n  align-items: center;\r\n  gap: 8px;\r\n  cursor: pointer;\r\n}\r\n\r\n.legend-color {\r\n  width: 18px;\r\n  height: 12px;\r\n  border-radius: 2px;\r\n}\r\n\r\n.legend-item.disabled .legend-color {\r\n  opacity: 0.3;\r\n}\r\n\r\n.tooltip {\r\n  position: absolute;\r\n  background: rgba(0,0,0,0.85);\r\n  color: #fff;\r\n  padding: 8px 12px;\r\n  border-radius: 6px;\r\n  font-size: 12px;\r\n  pointer-events: none;\r\n  z-index: 9999;\r\n  white-space: nowrap;\r\n  display: none;\r\n}\r\n</style>\r\n</head>\r\n\r\n<body>\r\n\r\n<div class=\"container\">\r\n  <div class=\"title\">SNMP Status Timeline</div>\r\n\r\n  <div class=\"timeline-wrapper\">\r\n    <div id=\"timeline\" class=\"timeline\"></div>\r\n    <div id=\"x-axis\" class=\"x-axis\"></div>\r\n  </div>\r\n\r\n  <div class=\"legend\">\r\n    <div class=\"legend-item\" data-type=\"success\">\r\n      <div class=\"legend-color\" style=\"background:#4caf50;\"></div>\r\n      <span>Up</span>\r\n    </div>\r\n    <div class=\"legend-item\" data-type=\"failure\">\r\n      <div class=\"legend-color\" style=\"background:#f44336;\"></div>\r\n      <span>Down</span>\r\n    </div>\r\n  </div>\r\n</div>\r\n\r\n<div id=\"tooltip\" class=\"tooltip\"></div>\r\n\r\n<script>\r\nconst CONFIG = {\r\n  successColor: '#4caf50',\r\n  failureColor: '#f44336'\r\n};\r\n\r\nclass DenseTimeline {\r\n  constructor(containerId) {\r\n    this.container = document.getElementById(containerId);\r\n    this.xAxis = document.getElementById('x-axis');\r\n    this.tooltip = document.getElementById('tooltip');\r\n\r\n    this.data = [];\r\n    this.processed = [];\r\n    this.visibleTypes = { success: true, failure: true };\r\n    this.containerWidth = 0;\r\n  }\r\n\r\n  async init() {\r\n    await this.loadData();\r\n    this.containerWidth = this.container.clientWidth;\r\n    this.processData();\r\n    this.render();\r\n    this.renderXAxis();\r\n    this.setupLegend();\r\n    this.setupResize();\r\n  }\r\n\r\n  async loadData() {\r\n    {% set snmp_query = \"collection is 'snmp_status' and target_ip is '\" ~ target_ip ~ \"'\" %}\r\n\r\n    const response = {{ engine.query_stream_data(\r\n      stream=\"rda_snmp_metrics\",\r\n      sorting=[{\"timestamp\":\"desc\"}],\r\n      limit=2000,\r\n      max_rows=2000,\r\n      cfxql_query=snmp_query\r\n    ) | tojson }};\r\n\r\n    this.data = response || [];\r\n  }\r\n\r\n  formatTimestampWithMs(input) {\r\n    const date = new Date(input);\r\n    const main = date.toLocaleString('en-US', {\r\n      year: 'numeric',\r\n      month: 'short',\r\n      day: 'numeric',\r\n      hour: '2-digit',\r\n      minute: '2-digit',\r\n      second: '2-digit',\r\n      hour12: true\r\n    });\r\n    const ms = String(date.getMilliseconds()).padStart(3,'0');\r\n    return `${main}.${ms}`;\r\n  }\r\n\r\n  processData(data=this.data) {\r\n    if (!data || data.length === 0) {\r\n      this.processed = [];\r\n      return;\r\n    }\r\n\r\n    const sorted = [...data].sort((a,b) => \r\n      new Date(a.timestamp) - new Date(b.timestamp)\r\n    );\r\n\r\n    const times = sorted.map(d => new Date(d.timestamp).getTime());\r\n    this.minTime = Math.min(...times);\r\n    this.maxTime = Math.max(...times);\r\n    const totalDuration = this.maxTime - this.minTime || 1;\r\n\r\n    this.processed = sorted.map((item, i) => {\r\n\r\n      const timestamp = new Date(item.timestamp).getTime();\r\n      const position = ((timestamp - this.minTime) / totalDuration) * this.containerWidth;\r\n\r\n      let width;\r\n      if (i < sorted.length - 1) {\r\n        const nextTimestamp = new Date(sorted[i+1].timestamp).getTime();\r\n        const nextPos = ((nextTimestamp - this.minTime) / totalDuration) * this.containerWidth;\r\n        width = Math.ceil(nextPos) - Math.floor(position);\r\n      } else {\r\n        width = this.containerWidth - Math.floor(position);\r\n      }\r\n\r\n      const statusValue = (item.status || '').toLowerCase();\r\n\r\n      return {\r\n        position: Math.floor(position),\r\n        width: Math.max(1, width),\r\n        type: statusValue === 'up' ? 'success' : 'failure',\r\n        color: statusValue === 'up' ? CONFIG.successColor : CONFIG.failureColor,\r\n        data: item\r\n      };\r\n    });\r\n  }\r\n\r\n  render() {\r\n    this.container.innerHTML = '';\r\n    const fragment = document.createDocumentFragment();\r\n\r\n    this.processed.forEach(slice => {\r\n      if(!this.visibleTypes[slice.type]) return;\r\n\r\n      const el = document.createElement('div');\r\n      el.className='bar-slice';\r\n      el.style.left = slice.position + 'px';\r\n      el.style.width = slice.width + 'px';\r\n      el.style.backgroundColor = slice.color;\r\n\r\n      el.addEventListener('mouseenter', e => this.showTooltip(e, slice));\r\n      el.addEventListener('mousemove', e => this.moveTooltip(e));\r\n      el.addEventListener('mouseleave', () => this.hideTooltip());\r\n\r\n      fragment.appendChild(el);\r\n    });\r\n\r\n    this.container.appendChild(fragment);\r\n  }\r\n\r\n  renderXAxis() {\r\n    if(!this.minTime || !this.maxTime) return;\r\n    this.xAxis.innerHTML = `\r\n      <span>${this.formatTimestampWithMs(this.minTime)}</span>\r\n      <span>${this.formatTimestampWithMs(this.maxTime)}</span>\r\n    `;\r\n  }\r\n\r\n  setupLegend() {\r\n    document.querySelectorAll('.legend-item').forEach(item => {\r\n      item.addEventListener('click', () => {\r\n        const type = item.dataset.type;\r\n        this.visibleTypes[type] = !this.visibleTypes[type];\r\n        item.classList.toggle('disabled', !this.visibleTypes[type]);\r\n        this.render();\r\n      });\r\n    });\r\n  }\r\n\r\n  setupResize() {\r\n    new ResizeObserver(() => {\r\n      const newWidth = this.container.clientWidth;\r\n      if(newWidth !== this.containerWidth){\r\n        this.containerWidth = newWidth;\r\n        this.processData();\r\n        this.render();\r\n        this.renderXAxis();\r\n      }\r\n    }).observe(this.container);\r\n  }\r\n\r\n  showTooltip(e,slice) {\r\n    const ts = this.formatTimestampWithMs(slice.data.timestamp);\r\n    const result = slice.type === 'success' ? 'Up' : 'Down';\r\n    const ip = slice.data.target_ip || 'N/A';\r\n    this.tooltip.innerHTML = `${ts}<br>IP: ${ip}<br>Status: ${result}`;\r\n    this.tooltip.style.display = 'block';\r\n    this.moveTooltip(e);\r\n  }\r\n\r\n  moveTooltip(e) {\r\n    const tooltipRect = this.tooltip.getBoundingClientRect();\r\n    let left = e.pageX + 10;\r\n    let top = e.pageY + 10;\r\n\r\n    if(left + tooltipRect.width > window.innerWidth) left -= tooltipRect.width + 20;\r\n    if(top + tooltipRect.height > window.innerHeight) top -= tooltipRect.height + 20;\r\n\r\n    this.tooltip.style.left = left + 'px';\r\n    this.tooltip.style.top = top + 'px';\r\n  }\r\n\r\n  hideTooltip() {\r\n    this.tooltip.style.display = 'none';\r\n  }\r\n}\r\n\r\ndocument.addEventListener('DOMContentLoaded', () => {\r\n  const widget = new DenseTimeline('timeline');\r\n  widget.init();\r\n});\r\n</script>\r\n\r\n</body>\r\n</html>",
+            "additionalFields": {
+                "valueType": "",
+                "description": ""
+            }
+        }
+    ]
+}

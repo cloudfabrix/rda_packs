@@ -1,0 +1,62 @@
+{
+    "name": "training_sankey_diagram_examples",
+    "label": "Apache Echarts Sankey Diagram Examples",
+    "description": "Apache Echarts Sankey Diagram Examples",
+    "dashboard_folder": "Training",
+    "version": "2025.03.12.01",
+    "enabled": false,
+    "stream": "training-oia-alerts-stream",
+    "dashboard_type": "dashboard",
+    "use_storyboard": false,
+    "live_edit": true,
+    "dashboard_filters": {
+        "time_filter": true,
+        "default_time_filter_labels": [
+            "Last 12 months"
+        ]
+    },
+    "dashboard_sections": [
+        {
+            "title": "Sankey Diagram",
+            "show_filter": true,
+            "widgets": [
+                {
+                    "title": "K8S Traffic Insights Sankey",
+                    "widget_type": "custom_widget",
+                    "widget_implementation": "training_custom_widgets_examples/sankey_diagram",
+                    "height": 12,
+                    "min_width": 12,
+                    "max_width": 12,
+                    "widget_id": "sankey_example_123"
+                }
+            ]
+        }
+    ],
+    "custom_widgets": {
+        "sankey_diagram": {
+            "artifacts": {
+                "main": {
+                    "attachment": "sankey.html",
+                    "content_type": "text/html",
+                    "is_template": false
+                },
+                "style.css": {
+                    "attachment": "sankey.css",
+                    "content_type": "text/css",
+                    "is_template": false
+                }
+            }
+        }
+    },
+    "saved_time": "2025-06-30T07:22:07.503646",
+    "attachments": [
+        {
+            "name": "sankey.html",
+            "value": "<!DOCTYPE html>\n<html>\n<head>\n  <meta charset=\"UTF-8\">\n  <title>K8S Traffic Insights: Sankey</title>\n  <!-- ECharts (v5) from a CDN -->\n  <script src=\"https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js\"></script>\n  <!-- Our CSS -->\n  <link rel=\"stylesheet\" href=\"style.css\">\n</head>\n<body>\n<div class=\"widget-container\">\n  <h2>K8S Traffic Insights: Sankey</h2>\n  <div id=\"sankeyContainer\"></div>\n</div>\n\n<script>\ndocument.addEventListener('DOMContentLoaded', () => {\n\n  // 1) Initialize ECharts\n  const chartEl = document.getElementById('sankeyContainer');\n  const myChart = echarts.init(chartEl);\n\n  // 2) Define the node data (same as before, but you can adjust names/values if needed)\n  const nodes = [\n    // Column 1\n    { name: 'kube-system (4.05 Gbits)' },\n    { name: 'netobserv (4.02 Gbits)' },\n    { name: 'Other (misc)' },\n    { name: 'robot-shop (33.68 Gbits)' },\n    { name: 'rg-sesveven-kn1 (3.07 Gbits)' },\n    { name: 'web-dc7f5d6a (20.56 Gbits)' },\n    { name: 'fip-7snmct (734.29 Mbits)' },\n\n    // Column 2\n    { name: 'rg-sesveven-kn1 [C2] (1.69 Gbits)' },\n    { name: 'web [C2] (10.28 Gbits)' },\n    { name: '9.46.92.176 [C2] (11.51 Gbits)' },\n    { name: 'rs-website [C2] (10.79 Gbits)' },\n    { name: '9.46.91.171 [C2] (6.86 Gbits)' },\n\n    // Column 3\n    { name: '10.42.0.111 [C3] (31.8 Gbits)' },\n    { name: 'From Client [C3] (16.6 Gbits)' },\n    { name: 'fip-7snmct [C3] (734.29 Mbits)' },\n\n    // Column 4\n    { name: '10.42.1.39 [C4] (21.25 Gbits)' },\n    { name: 'bh-in-fss [C4] (268.71 Mbits)' },\n    { name: '151.101.66.x [C4] (1.99 Gbits)' },\n    { name: '9.37.38.24 [C4] (1.11 Gbits)' },\n    { name: 'cdn-lbs-19 [C4] (1.02 Gbits)' },\n\n    // Column 5\n    { name: 'cdn-185-189 [C5] (~1.58 Gbits)' },\n    { name: '10.43.32.245 [C5] (10.28 Gbits)' },\n\n    // Column 6\n    { name: 'rs-website [C6] (31.54 Gbits)' },\n    { name: 'rg-sesve [C6] (15.4 Gbits)' },\n\n    // Column 7\n    { name: 'kube-system [C7] (4.05 Gbits)' },\n    { name: 'netobserv [C7] (4.02 Gbits)' },\n\n    // Column 8\n    { name: 'robot-shop [C8] (45.59 Gbits)' },\n    { name: 'rg-sesve [C8] (48.26 Gbits)' },\n\n    // Column 9\n    { name: 'Remaining Traffic [C9] (26.51 Gbits)' }\n  ];\n\n  // 3) Define link flows\n  const links = [\n    // C1 -> C2\n    { source: 'kube-system (4.05 Gbits)', target: 'rg-sesveven-kn1 [C2] (1.69 Gbits)', value: 1.69 },\n    { source: 'kube-system (4.05 Gbits)', target: '9.46.92.176 [C2] (11.51 Gbits)', value: 2.36 },\n    { source: 'netobserv (4.02 Gbits)', target: 'web [C2] (10.28 Gbits)', value: 3.0 },\n    { source: 'netobserv (4.02 Gbits)', target: 'rs-website [C2] (10.79 Gbits)', value: 1.02 },\n    { source: 'Other (misc)', target: '9.46.91.171 [C2] (6.86 Gbits)', value: 2.0 },\n    { source: 'robot-shop (33.68 Gbits)', target: 'rg-sesveven-kn1 [C2] (1.69 Gbits)', value: 3.07 },\n    { source: 'robot-shop (33.68 Gbits)', target: 'web-dc7f5d6a (20.56 Gbits)', value: 20.56 },\n    { source: 'robot-shop (33.68 Gbits)', target: 'rs-website [C2] (10.79 Gbits)', value: 10.05 },\n    { source: 'rg-sesveven-kn1 (3.07 Gbits)', target: 'rs-website [C2] (10.79 Gbits)', value: 3.07 },\n    { source: 'web-dc7f5d6a (20.56 Gbits)', target: 'web [C2] (10.28 Gbits)', value: 10.28 },\n    { source: 'web-dc7f5d6a (20.56 Gbits)', target: '9.46.91.171 [C2] (6.86 Gbits)', value: 4.0 },\n    { source: 'fip-7snmct (734.29 Mbits)', target: '9.46.92.176 [C2] (11.51 Gbits)', value: 0.734 },\n\n    // C2 -> C3\n    { source: 'rg-sesveven-kn1 [C2] (1.69 Gbits)', target: 'From Client [C3] (16.6 Gbits)', value: 1.69 },\n    { source: 'web [C2] (10.28 Gbits)', target: '10.42.0.111 [C3] (31.8 Gbits)', value: 10.28 },\n    { source: '9.46.92.176 [C2] (11.51 Gbits)', target: 'From Client [C3] (16.6 Gbits)', value: 11.51 },\n    { source: 'rs-website [C2] (10.79 Gbits)', target: 'fip-7snmct [C3] (734.29 Mbits)', value: 0.79 },\n    { source: 'rs-website [C2] (10.79 Gbits)', target: '10.42.0.111 [C3] (31.8 Gbits)', value: 10.0 },\n    { source: '9.46.91.171 [C2] (6.86 Gbits)', target: 'fip-7snmct [C3] (734.29 Mbits)', value: 1.5 },\n    { source: '9.46.91.171 [C2] (6.86 Gbits)', target: 'From Client [C3] (16.6 Gbits)', value: 5.36 },\n\n    // C3 -> C4\n    { source: '10.42.0.111 [C3] (31.8 Gbits)', target: '10.42.1.39 [C4] (21.25 Gbits)', value: 15.0 },\n    { source: '10.42.0.111 [C3] (31.8 Gbits)', target: 'bh-in-fss [C4] (268.71 Mbits)', value: 0.27 },\n    { source: 'From Client [C3] (16.6 Gbits)', target: '151.101.66.x [C4] (1.99 Gbits)', value: 1.99 },\n    { source: 'From Client [C3] (16.6 Gbits)', target: '9.37.38.24 [C4] (1.11 Gbits)', value: 1.11 },\n    { source: 'fip-7snmct [C3] (734.29 Mbits)', target: 'cdn-lbs-19 [C4] (1.02 Gbits)', value: 0.73 },\n\n    // C4 -> C5\n    { source: '10.42.1.39 [C4] (21.25 Gbits)', target: 'cdn-185-189 [C5] (~1.58 Gbits)', value: 1.58 },\n    { source: '10.42.1.39 [C4] (21.25 Gbits)', target: '10.43.32.245 [C5] (10.28 Gbits)', value: 10.28 },\n    { source: 'bh-in-fss [C4] (268.71 Mbits)', target: 'cdn-185-189 [C5] (~1.58 Gbits)', value: 0.27 },\n    { source: '151.101.66.x [C4] (1.99 Gbits)', target: '10.43.32.245 [C5] (10.28 Gbits)', value: 1.99 },\n    { source: '9.37.38.24 [C4] (1.11 Gbits)', target: 'cdn-185-189 [C5] (~1.58 Gbits)', value: 1.11 },\n    { source: 'cdn-lbs-19 [C4] (1.02 Gbits)', target: '10.43.32.245 [C5] (10.28 Gbits)', value: 1.02 },\n\n    // C5 -> C6\n    { source: 'cdn-185-189 [C5] (~1.58 Gbits)', target: 'rs-website [C6] (31.54 Gbits)', value: 1.58 },\n    { source: '10.43.32.245 [C5] (10.28 Gbits)', target: 'rg-sesve [C6] (15.4 Gbits)', value: 10.28 },\n\n    // C6 -> C7\n    { source: 'rs-website [C6] (31.54 Gbits)', target: 'kube-system [C7] (4.05 Gbits)', value: 4.05 },\n    { source: 'rs-website [C6] (31.54 Gbits)', target: 'netobserv [C7] (4.02 Gbits)', value: 4.02 },\n    { source: 'rg-sesve [C6] (15.4 Gbits)', target: 'kube-system [C7] (4.05 Gbits)', value: 2.0 },\n    { source: 'rg-sesve [C6] (15.4 Gbits)', target: 'netobserv [C7] (4.02 Gbits)', value: 2.0 },\n\n    // C7 -> C8\n    { source: 'kube-system [C7] (4.05 Gbits)', target: 'robot-shop [C8] (45.59 Gbits)', value: 4.05 },\n    { source: 'netobserv [C7] (4.02 Gbits)', target: 'rg-sesve [C8] (48.26 Gbits)', value: 4.02 },\n\n    // C8 -> C9\n    { source: 'robot-shop [C8] (45.59 Gbits)', target: 'Remaining Traffic [C9] (26.51 Gbits)', value: 26.51 },\n    { source: 'rg-sesve [C8] (48.26 Gbits)', target: 'Remaining Traffic [C9] (26.51 Gbits)', value: 10.0 },\n  ];\n\n  // 4) Create a custom, more-muted color palette\n  //    (a mix of soft/pastel tones - adjust to your taste)\n  const pastelColors = [\n    '#8dd3c7', '#bebada', '#fb8072', '#80b1d3',\n    '#fdb462', '#b3de69', '#fccde5', '#d9d9d9',\n    '#bc80bd', '#ccebc5', '#ffed6f', '#c48cff'\n  ];\n\n  // 5) Build the Sankey chart option\n  const option = {\n    backgroundColor: '#2c2c2c',\n    // Apply the custom palette so nodes get these softer colors\n    color: pastelColors,\n    tooltip: {\n      trigger: 'item',\n      triggerOn: 'mousemove'\n    },\n    textStyle: {\n      color: '#fff',\n      fontSize: 14\n    },\n    series: [\n      {\n        type: 'sankey',\n        layout: 'none',\n        nodeWidth: 28,\n        nodeGap: 20,\n        nodeAlign: 'justify',\n        draggable: false,\n        data: nodes,\n        links: links,\n        // Make lines inherit color from the source node, with partial opacity\n        lineStyle: {\n          color: 'source',\n          opacity: 0.6,\n          curveness: 0.3\n        },\n        // Node shape border\n        itemStyle: {\n          borderWidth: 1,\n          borderColor: '#666'\n        },\n        // Node labels\n        label: {\n          color: '#fff',\n          fontSize: 12,\n          overflow: 'break'\n        },\n        emphasis: {\n          focus: 'adjacency'\n        }\n      }\n    ]\n  };\n\n  myChart.setOption(option);\n});\n</script>\n</body>\n</html>"
+        },
+        {
+            "name": "sankey.css",
+            "value": ".widget-container {\n  background: #1e1e1e;\n  color: #fff;\n  font-family: sans-serif;\n  padding: 16px;\n  border-radius: 8px;\n  /* Remove or adjust max-width for a wide display */\n  margin: 20px auto;\n}\n\nh2 {\n  margin: 0 0 12px;\n  font-size: 1.4rem;\n  font-weight: 500;\n}\n\n/* Larger chart area so everything fits comfortably */\n#sankeyContainer {\n  width: 1400px;\n  height: 700px;\n  border: 1px solid #444;\n  border-radius: 4px;\n  margin: 0 auto; /* Center in the page */\n}"
+        }
+    ]
+}

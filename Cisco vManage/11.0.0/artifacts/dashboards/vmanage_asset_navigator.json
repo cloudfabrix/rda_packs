@@ -1,0 +1,295 @@
+{
+    "name": "vmanage_asset_navigator_v2",
+    "label": "Asset Navigator",
+    "description": "Cisco vManage SD-WAN asset navigator with GraphDB — tunnel IP based topology navigation.",
+    "dashboard_folder": "VmanagePerformance",
+    "version": "26.06.24.1",
+    "live_edit": true,
+    "enabled": true,
+    "short_label": "Stack",
+    "context_label_id": "stack_name",
+    "dashboard_type": "navigation-dashboard",
+    "dashboard_style": "tabbed",
+    "dashboard_filters": {
+        "time_filter": true,
+        "default_time_filter_labels": [
+            "Last 24 hours",
+            "Last 7 days"
+        ]
+    },
+    "template_variables": {
+        "NODE_ID": {
+            "contextId": [
+                "navigatorSelectionContexts",
+                "secondaryListSelection",
+                "node_id"
+            ]
+        },
+        "NODE_TYPE": {
+            "contextId": [
+                "navigatorSelectionContexts",
+                "secondaryListSelection",
+                "node_type"
+            ]
+        },
+        "CUST_TAG": {
+            "contextId": "customerTag"
+        },
+        "PROJ_ID": {
+            "contextId": "projectId"
+        }
+    },
+    "navigation_dashboards": {
+        "tree_data": {
+            "column_name": "node_type",
+            "pstream_name": "graphdb://cfx_rdaf_topology/cfx_rdaf_topology_nodes",
+            "pstream_name0": "cfx_rdaf_topology_nodes",
+            "cfxql_query": "topology_source is 'cisco_vmanage' and node_type in ['vedge','vmanage','vbond','vsmart'] and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty or customer_tag is '' or customer_tag is 'None') and timestamp is after -90d"
+        },
+        "tree_detail": {
+            "pstream_name": "graphdb://cfx_rdaf_topology/cfx_rdaf_topology_nodes",
+            "display_column": "node_label",
+            "selected_columns": {
+                "node_id": "Tunnel IP",
+                "node_label": "Node Label",
+                "node_type": "Node Type"
+            },
+            "cfxql_query": "topology_source is 'cisco_vmanage' and node_type in ['vedge','vmanage','vbond','vsmart'] and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty or customer_tag is '' or customer_tag is 'None') and timestamp is after -90d"
+        },
+        "showNodeIcon": true,
+        "showSearchBox": true
+    },
+    "dashboard_sections": [
+        {
+            "title": "Topology",
+            "widgets": [
+                {
+                    "title": "Topology",
+                    "widget_type": "topology",
+                    "register_search_endpoints": true,
+                    "reportId": "rda.saas.stack.view.topo",
+                    "requires_node_id": true,
+                    "nodes_report": {
+                        "reportMetaData": {
+                            "sorting": true,
+                            "filtering": true,
+                            "title": "Nodes",
+                            "remote_searchable": false,
+                            "remote_searchable_cols": [
+                                "node_label",
+                                "node_id",
+                                "node_type",
+                                "IP",
+                                "system_ip"
+                            ],
+                            "actions": [
+                                {
+                                    "title": "Asset Stack View",
+                                    "icon": "mdi-open-in-new",
+                                    "type": "GO_TO_APP_STATE",
+                                    "appName": "user-dashboard/vmanage_topology_drilldown",
+                                    "selectionType": "SINGLE",
+                                    "identifier": "launch-action:view-dashboard"
+                                }
+                            ],
+                            "reportColumnDefinitionList": [
+                                {
+                                    "identifier": "node_label",
+                                    "title": "Label",
+                                    "key": false
+                                },
+                                {
+                                    "identifier": "node_type",
+                                    "key": false,
+                                    "title": "Type"
+                                },
+                                {
+                                    "identifier": "IP",
+                                    "key": false,
+                                    "title": "IP Address"
+                                },
+                                {
+                                    "identifier": "system_ip",
+                                    "key": false,
+                                    "title": "System IP"
+                                },
+                                {
+                                    "identifier": "port",
+                                    "key": false,
+                                    "title": "Port"
+                                },
+                                {
+                                    "identifier": "source_ip",
+                                    "key": false,
+                                    "title": "Source IP",
+                                    "hidden": true
+                                },
+                                {
+                                    "identifier": "node_id",
+                                    "key": true,
+                                    "hidden": true
+                                }
+                            ]
+                        }
+                    },
+                    "edges_report": {
+                        "reportId": "rda.saas.topology.edges.report",
+                        "reportMetaData": {
+                            "sorting": true,
+                            "filtering": true,
+                            "title": "Edges",
+                            "reportColumnDefinitionList": [
+                                {
+                                    "hidden": false,
+                                    "id": "left_id",
+                                    "identifier": "left_id",
+                                    "key": true,
+                                    "title": "Source Tunnel IP",
+                                    "type": "TEXT",
+                                    "visible": true
+                                },
+                                {
+                                    "hidden": false,
+                                    "id": "left_label",
+                                    "identifier": "left_label",
+                                    "key": false,
+                                    "title": "Source Label",
+                                    "type": "TEXT",
+                                    "visible": true
+                                },
+                                {
+                                    "hidden": false,
+                                    "id": "right_id",
+                                    "identifier": "right_id",
+                                    "key": true,
+                                    "title": "Destination Tunnel IP",
+                                    "type": "TEXT",
+                                    "visible": true
+                                },
+                                {
+                                    "hidden": false,
+                                    "id": "right_label",
+                                    "identifier": "right_label",
+                                    "key": false,
+                                    "title": "Destination Label",
+                                    "type": "TEXT",
+                                    "visible": true
+                                },
+                                {
+                                    "hidden": false,
+                                    "id": "relation_type",
+                                    "identifier": "relation_type",
+                                    "key": false,
+                                    "title": "Relation",
+                                    "type": "TEXT",
+                                    "visible": true
+                                },
+                                {
+                                    "identifier": "color",
+                                    "key": false,
+                                    "title": "Tunnel Color",
+                                    "type": "TEXT",
+                                    "visible": true
+                                },
+                                {
+                                    "identifier": "state",
+                                    "key": false,
+                                    "title": "State",
+                                    "type": "TEXT",
+                                    "visible": true
+                                },
+                                {
+                                    "identifier": "proto",
+                                    "key": false,
+                                    "title": "Protocol",
+                                    "type": "TEXT",
+                                    "visible": true
+                                }
+                            ],
+                            "actions": []
+                        }
+                    },
+                    "stack_type": "dynamic",
+                    "stack_definition": {
+                        "name": "Vmanage",
+                        "description": "Cisco vManage SD-WAN topology stack",
+                        "is_dynamic": true,
+                        "hierarchical": false,
+                        "dynamic_nodes": {
+                            "db_name": "cfx_rdaf_topology",
+                            "nodes_collection": "cfx_rdaf_topology_nodes",
+                            "stream": "graphdb://cfx_rdaf_topology/cfx_rdaf_topology_nodes",
+                            "query": "topology_source is 'cisco_vmanage' and node_type in ['vedge','vmanage','vbond','vsmart'] and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty or customer_tag is '' or customer_tag is 'None')"
+                        },
+                        "dynamic_relationships": {
+                            "db_name": "cfx_rdaf_topology",
+                            "edges_collection": "cfx_rdaf_topology_edges",
+                            "stream": "graphdb://cfx_rdaf_topology/cfx_rdaf_topology_edges",
+                            "graph_name": "cfx_rdaf_topology_graph",
+                            "relation_map": "rdaf_topology_relationships",
+                            "query": "topology_source is 'cisco_vmanage' and edge_source is 'vmanage_edge' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty or customer_tag is '' or customer_tag is 'None') and relation_type is 'connected-to'"
+                        }
+                    },
+                    "oia_details": {
+                        "alert_source": {
+                            "stream": "oia-alerts-stream",
+                            "group_by": [
+                                "a_en_node_id",
+                                "a_severity",
+                                "a_status"
+                            ],
+                            "extra_filter": "a_source_systemname is not 'Alert Group'",
+                            "ts_column": "timestamp",
+                            "duration_hours": 2000,
+                            "agg": "value_count",
+                            "column": "count_",
+                            "type": "int"
+                        }
+                    },
+                    "height": 14,
+                    "min_wdith": 14,
+                    "widget_id": "vmanage_nav_topo"
+                }
+            ]
+        },
+        {
+            "title": "Node Details",
+            "widgets": [
+                {
+                    "title": "Summary",
+                    "widget_type": "portal_summary",
+                    "reportId": "rda.saas.topology.node_details.report",
+                    "max_width": 12,
+                    "height": 12,
+                    "min_width": 12,
+                    "widget_id": "vmanage_nav_summary"
+                }
+            ]
+        },
+        {
+            "title": "Relations",
+            "show_filter": false,
+            "widgets": [
+                {
+                    "widget_type": "graphdb",
+                    "title": "Relations",
+                    "stack_name": "cfx_rdaf_topology",
+                    "db_name": "cfx_rdaf_topology",
+                    "nodes_collection": "cfx_rdaf_topology_nodes",
+                    "edges_collection": "cfx_rdaf_topology_edges",
+                    "graph_name": "cfx_rdaf_topology_graph",
+                    "relation_map": "rdaf_topology_relationships",
+                    "graph_report_extra_node_fields": [
+                        "node_type",
+                        "system_ip",
+                        "IP",
+                        "port",
+                        "source_ip"
+                    ],
+                    "widget_id": "vmanage_nav_graphdb"
+                }
+            ]
+        }
+    ],
+    "saved_time": "2026-06-24T00:00:00.000000"
+}

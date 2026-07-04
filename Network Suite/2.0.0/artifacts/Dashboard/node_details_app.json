@@ -1,0 +1,61 @@
+{
+  "name": "node_details_app",
+  "label": "Node Details App",
+  "description": "Node Details App",
+  "dashboard_folder": "NetworkDevicePack",
+  "context_label_id": "a_asset_name",
+  "version": "24.1.13.3",
+  "debug": true,
+  "enabled": true,
+  "dashboard_generator0": {
+      "attachment": "add_pages_for_activated_fault_packs"
+  },
+  "custom_context": {
+      "rda-dashboard-live-edit": true
+  },
+  "context_enrichment": [
+      {
+          "stream": "network-devices-inventory",
+          "stream0": "mp_nodes",
+          "enrich_columns": [
+              "asset_object",
+              "hostname"
+          ],
+          "query_template0": "project_id = '$project_id' and customer_tag = '$customer_tag' and (device_ip = '$device_ip' or edge_ip is '$edge_ip')",
+          "query_template1": "(device_ip = '$device_ip' or edge_ip is '$edge_ip')",
+          "query_template": "(ip_address = '$ip_address')",
+          "defaultValues": {}
+      }
+  ],
+  "dashboard_sections": [
+      {
+          "title": "Org Ops"
+      }
+  ],
+  "dashboard_type": "app",
+  "dashboard_groups0": {
+      "from_to": {
+          "icon": "alert.svg",
+          "label": "Inventory"
+      },
+      "topo": {
+          "icon": "topology.svg",
+          "label": "Topology"
+      }
+  },
+  "dashboard_pages": [
+      {
+          "name": "device_inventory_from_alerts",
+          "label": "Inventory",
+          "icon": "alert.svg",
+          "context_filter0": "asset_object is 'Chassis'"
+      },
+      {
+          "name": "topology_geomap_dashboard",
+          "label": "Topology",
+          "icon": "stack.svg",
+          "context_filter0": "node_type is 'CHASSIS'"
+      }
+  ],
+  "saved_time": "2026-02-09T04:30:47.771629"
+}

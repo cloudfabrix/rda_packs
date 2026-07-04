@@ -1,0 +1,180 @@
+{
+    "name": "collection_files_data",
+    "label": "Collection Files Data",
+    "description": "Collection files data",
+    "version": "26.04.06",
+    "enabled": false,
+    "dashboard_type": "template",
+    "dashboard_folder": "MibsCollection",
+    "dashboard_style": "auto",
+    "template_variables": {
+        "CUST_ID": {
+            "contextId": "customerId"
+        },
+        "PROJ_ID": {
+            "contextId": "projectId"
+        },
+        "CUST_TAG": {
+            "contextId": "customerTag"
+        }
+    },
+    "live_edit": true,
+    "dashboard_filters": {
+        "time_filter": true,
+        "columns_filter": [
+            {
+                "asset_ip": "asset_ip",
+                "label": "Asset IP",
+                "type": "TEXT"
+            },
+            {
+                "id": "groupname",
+                "label": "Group Name",
+                "type": "TEXT"
+            }
+        ],
+        "group_filters": [
+            {
+                "stream": "collection_files_data",
+                "extra_filter": "(customer_tag is '{{CUST_TAG}}' or customer_tag is empty or customer_tag is 'None')",
+                "title": "Group Name",
+                "group_by": [
+                    "groupname"
+                ],
+                "ts_column": "timestamp",
+                "agg": "value_count",
+                "column": "_id",
+                "type": "int"
+            },
+            {
+                "stream": "collection_files_data",
+                "extra_filter": "(customer_tag is '{{CUST_TAG}}' or customer_tag is empty or customer_tag is 'None')",
+                "title": "Collection Status",
+                "group_by": [
+                    "collection_status"
+                ],
+                "ts_column": "timestamp",
+                "agg": "value_count",
+                "column": "_id",
+                "limit": 100,
+                "type": "int"
+            }
+        ]
+    },
+    "dashboard_sections": [
+        {
+            "title": "Collection Files Data",
+            "show_filter": true,
+            "widgets": [
+                {
+                    "widget_type": "pie_chart",
+                    "title": "Data Collection Status",
+                    "duration_hours": 1080,
+                    "stream": "collection_files_data",
+                    "ts_column": "timestamp",
+                    "extra_filter": null,
+                    "column": "count_",
+                    "agg": "sum",
+                    "group_by": [
+                        "collection_status"
+                    ],
+                    "type": "int",
+                    "min_width": 3,
+                    "height": 3,
+                    "max_width": 12,
+                    "widget_id": "e14df47b"
+                },
+                {
+                    "title": "Collection Files Data",
+                    "widget_type": "tabular",
+                    "stream": "collection_files_data",
+                    "extra_filter": "(customer_tag is '{{CUST_TAG}}' or customer_tag is 'None' or customer_tag is empty)",
+                    "duration_hours": 1080,
+                    "height": 8,
+                    "max_width": 12,
+                    "min_width": 12,
+                    "columns": {
+                        "asset_ip": "IP Address",
+                        "discovery_start_time": "Discovery Start Time",
+                        "collection_status": "Collection Status",
+                        "groupname": {
+                            "title": "Group Name",
+                            "type": "TEXT",
+                            "visible": true
+                        },
+                        "data": {
+                            "title": "Collection File Data",
+                            "type": "TEXT",
+                            "visible": false
+                        },
+                        "jobname": {
+                            "title": "Jobname",
+                            "type": "TEXT",
+                            "hidden": true
+                        },
+                        "job_id": {
+                            "title": "Job ID",
+                            "type": "TEXT",
+                            "hidden": true
+                        },
+                        "minio_location": {
+                            "title": "Minio Location",
+                            "type": "TEXT",
+                            "hidden": false
+                        },
+                        "ingestion_id": {
+                            "title": "Ingestion Id",
+                            "type": "TEXT",
+                            "hidden": true
+                        },
+                        "reason": "Reason"
+                    },
+                    "actions": [
+                        {
+                            "permission": "aia:page:view",
+                            "drillDownLinkField": "asset_ip",
+                            "identifier": "asset_ip",
+                            "selectionType": "SINGLE",
+                            "stateName": "app.featureapp",
+                            "title": "View Collection Data",
+                            "contextParamList": {
+                                "contextParams": [
+                                    {
+                                        "paramKey": "asset_ip",
+                                        "paramId": "asset_ip"
+                                    },
+                                    {
+                                        "paramKey": "ingestion_id",
+                                        "paramId": "ingestion_id"
+                                    },
+                                    {
+                                        "paramKey": "groupname",
+                                        "paramId": "groupname"
+                                    },
+                                    {
+                                        "paramKey": "customer_tag",
+                                        "paramId": "customer_tag"
+                                    }
+                                ]
+                            },
+                            "actionCondition": {
+                                "actionControl": "SHOW_IF",
+                                "conditionalField": [
+                                    {
+                                        "conditionType": "EQUAL",
+                                        "conditionValue": "Success",
+                                        "fieldId": "collection_status"
+                                    }
+                                ]
+                            },
+                            "type": "GO_TO_APP_STATE",
+                            "appName": "user-dashboard/collection_data_for_device"
+                        }
+                    ],
+                    "widget_id": "7f039657"
+                }
+            ]
+        }
+    ],
+    "saved_time": "2026-05-01T00:28:42.893991"
+}

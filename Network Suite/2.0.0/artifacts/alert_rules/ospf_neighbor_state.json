@@ -1,0 +1,61 @@
+{
+    "type": "log",
+    "name": "ospf_neighbor_state",
+    "description": "OSPF neighbor state change CFX",
+    "enabled": false,
+    "schedule": {
+        "minutes": 5
+    },
+    "data": {
+        "stream": "snmp_trap_events_stream",
+        "query": "ospfNbrState is not null",
+        "unique_keys": [
+            "device",
+            "ospfNbrIpAddr"
+        ],
+        "additional_columns": [
+            "device",
+            "ospfNbrIpAddr",
+            "ospfNbrState",
+            "device_hostname",
+            "device_model",
+            "device_vendor"
+        ],
+        "custom_unique_keys": [
+            "device",
+            "alarm_class",
+            "ospfNbrIpAddr"
+        ],
+        "data_transformations": [
+            {
+                "type": "eval",
+                "columns": {
+                    "alarm_class": {
+                        "expr": "'OSPF'"
+                    }
+                }
+            }
+        ]
+    },
+    "actions": [
+        {
+            "state": "OPEN",
+            "extra_query": "ospfNbrState != 'full'",
+            "attributes": {
+                "severity": "CRITICAL",
+                "alert_message": "OSPF neighbor {{ospfNbrIpAddr}} NOT FULL"
+            },
+            "notification_profile": "snmp_metrics_notification_profile"
+        },
+        {
+            "state": "CLEAR",
+            "extra_query": "ospfNbrState == 'full'",
+            "attributes": {
+                "severity": "INFO",
+                "alert_message": "OSPF neighbor {{ospfNbrIpAddr}} FULL"
+            },
+            "notification_profile": "snmp_metrics_notification_profile"
+        }
+    ],
+    "saved_time": "2026-04-20T03:54:00.503225"
+}

@@ -1,0 +1,51 @@
+{
+    "type": "log",
+    "name": "snmp_availability",
+    "description": "SNMP Availability Status CFX",
+    "enabled": false,
+    "schedule": {
+        "minutes": 5
+    },
+    "data": {
+        "stream": "rda_snmp_metrics",
+        "query": "name == 'rda_snmp'",
+        "unique_keys": [
+            "target_ip"
+        ],
+        "groupby": [
+            "target_ip"
+        ],
+        "additional_columns": [
+            "device_hostname",
+            "result_status",
+            "response_time",
+            "status",
+            "sys_name"
+        ],
+        "custom_unique_keys": [],
+        "data_transformations": []
+    },
+    "actions": [
+        {
+            "state": "OPEN",
+            "extra_query": "result_code != 0",
+            "attributes": {
+                "severity": "CRITICAL",
+                "metric_name": "snmp_status",
+                "alert_message": "SNMP {{status}} on {{sys_name}} ({{target_ip}}) status={{result_status}}"
+            },
+            "notification_profile": "snmp_metrics_notification_profile"
+        },
+        {
+            "state": "CLEAR",
+            "extra_query": "result_code == 0",
+            "attributes": {
+                "severity": "INFO",
+                "metric_name": "snmp_status",
+                "alert_message": "SNMP {{status}}  on {{sys_name}} ({{target_ip}})"
+            },
+            "notification_profile": "snmp_metrics_notification_profile"
+        }
+    ],
+    "saved_time": "2026-04-16T09:11:38.084975"
+}

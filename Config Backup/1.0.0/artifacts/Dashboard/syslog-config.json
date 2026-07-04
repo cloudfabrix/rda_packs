@@ -1,0 +1,318 @@
+{
+    "name": "syslog-config",
+    "label": "Config Details",
+    "description": "Config Insights",
+    "dashboard_folder": "ConfigBackupPack",
+    "version": "25.05.23",
+    "enabled": false,
+    "stream": "syslog-config-backup-stream",
+    "dashboard_type": "template",
+    "template_variables": {
+        "CUST_ID": {
+            "contextId": "customerId"
+        },
+        "PROJ_ID": {
+            "contextId": "projectId"
+        },
+        "CUST_TAG": {
+            "contextId": "customerTag"
+        }
+    },
+    "live_edit": true,
+    "dashboard_filters": {
+        "time_filter": true,
+        "default_time_filter_labels": [
+            "All Time"
+        ],
+        "group_filters": [
+            {
+                "stream": "syslog-config-backup-stream",
+                "extra_filter": "(customer_tag is '{{CUST_TAG}}' or customer_tag is empty or customer_tag is 'None')",
+                "title": "Type",
+                "group_by": [
+                    "device_fw_type"
+                ],
+                "ts_column": "collection_timestamp",
+                "agg": "cardinality",
+                "column": "source_ip",
+                "limit0": 200,
+                "type": "int"
+            }
+        ]
+    },
+    "dashboard_sections": [
+        {
+            "title": "Config Details",
+            "show_filter": true,
+            "widgets": [
+                {
+                    "title": "Devices backed up (last 30 days)",
+                    "widget_type": "custom_counter",
+                    "stream": "syslog-config-backup-stream",
+                    "ts_column": "backup_time",
+                    "duration_hours": 720,
+                    "extra_filter": "(customer_tag is '{{CUST_TAG}}' or customer_tag is empty or customer_tag is 'None') and status is 'Success' and backup_time is not NULL and backup_time is after -30 days",
+                    "column": "source_ip",
+                    "agg": "cardinality",
+                    "type": "str",
+                    "min_width": 4,
+                    "height": 3,
+                    "max_width": 4,
+                    "widget_id": "cb01a100"
+                },
+                {
+                    "title": "Devices not backed up (last 30 days)",
+                    "widget_type": "custom_counter",
+                    "stream": "syslog-config-backup-stream",
+                    "ts_column": "backup_time",
+                    "duration_hours": 720,
+                    "extra_filter": "(customer_tag is '{{CUST_TAG}}' or customer_tag is empty or customer_tag is 'None') and status is 'Failed' and backup_time is not NULL and backup_time is after -30 days",
+                    "column": "source_ip",
+                    "agg": "cardinality",
+                    "type": "str",
+                    "min_width": 4,
+                    "height": 3,
+                    "max_width": 4,
+                    "widget_id": "cb02a100"
+                },
+                {
+                    "title": "Config changes for devices (last 30 days)",
+                    "widget_type": "custom_counter",
+                    "stream": "syslog-config-backup-stream",
+                    "ts_column": "config_change_time",
+                    "duration_hours": 720,
+                    "extra_filter": "(customer_tag is '{{CUST_TAG}}' or customer_tag is empty or customer_tag is 'None') and backup_mode is 'Event Driven' and config_change_time is not NULL and config_change_time is after -30 days",
+                    "column": "config_id",
+                    "agg": "value_count",
+                    "type": "str",
+                    "min_width": 4,
+                    "height": 3,
+                    "max_width": 4,
+                    "widget_id": "cb05a100"
+                },
+                {
+                    "title": "Config Backups",
+                    "widget_type": "tabular",
+                    "stream": "syslog-config-backup-stream",
+                    "extra_filter": "(customer_tag is '{{CUST_TAG}}' or customer_tag is empty or customer_tag is 'None') and status is 'Success'",
+                    "min_width": 12,
+                    "height": 6,
+                    "max_width": 12,
+                    "columns": {
+                        "id": {
+                            "title": "ID",
+                            "type": "FIXED_VALUE",
+                            "value": "user-dashboard-Config_dashboard",
+                            "key": true,
+                            "hidden": true
+                        },
+                        "Total Configs": {
+                            "title": "Config_count",
+                            "key": true,
+                            "hidden": true,
+                            "visible": false
+                        },
+                        "Type": {
+                            "title": "Type",
+                            "key": true,
+                            "hidden": true,
+                            "visible": false
+                        },
+                        "source_ip": {
+                            "title": "Source IP",
+                            "type": "TEXT",
+                            "key": true,
+                            "hidden": false
+                        },
+                        "customer_tag": {
+                            "title": "Customer Tag",
+                            "type": "TEXT",
+                            "key": true,
+                            "hidden": true
+                        },
+                        "customer_id": {
+                            "title": "Customer Id",
+                            "type": "TEXT",
+                            "key": true,
+                            "hidden": true
+                        }
+                    },
+                    "actions": [
+                        {
+                            "appName": "user-dashboard",
+                            "permission": "ml:ml-jobs:viewSampledata",
+                            "identifier": "source_ip",
+                            "selectionType": "SINGLE",
+                            "stateName": "app.featureapp",
+                            "drillDownContext": "id",
+                            "drillDownLinkField": "source_ip",
+                            "title": "Config History",
+                            "type": "GO_TO_APP_STATE",
+                            "context": {
+                                "pstreamDataCfxql": "source_ip is '{{source_ip}}' and status is 'Success'"
+                            },
+                            "contextParamList": {
+                                "contextParams": [
+                                    {
+                                        "paramKey": "source_ip",
+                                        "paramId": "source_ip"
+                                    },
+                                    {
+                                        "paramKey": "customerTag",
+                                        "paramId": "customer_tag"
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "permission": "rda:github:view",
+                            "title": "Backup All",
+                            "type": "POPUP_FORM",
+                            "selectionType": "NONE",
+                            "identifier": "saas-service-action:userdashboard-add-yaml",
+                            "api-endpoint": {
+                                "service-name": "saas-reports",
+                                "methodName": "getForm",
+                                "stringified-params": true,
+                                "parse-output": false,
+                                "params": [
+                                    {
+                                        "formId": "rda.saas.dynamic.form",
+                                        "formActionList": {
+                                            "formActions": [
+                                                {
+                                                    "identifier": "Submit",
+                                                    "actionLabel": "Backup"
+                                                }
+                                            ]
+                                        },
+                                        "formDefinition": {
+                                            "id": "rda.saas.dynamic.form",
+                                            "refreshRequired": true,
+                                            "formFieldList": [
+                                                {
+                                                    "help": "Are you sure you want to take a backup of all device? ?",
+                                                    "dataType": "string",
+                                                    "controlType": "LABEL",
+                                                    "required": false,
+                                                    "editable": false,
+                                                    "label": "Are you sure you want to take a backup of all devices",
+                                                    "hidden": false,
+                                                    "fieldId": "name"
+                                                }
+                                            ]
+                                        },
+                                        "actions": [
+                                            {
+                                                "type": "RUN_PIPELINE",
+                                                "pipelineName": "syslog-backup-all-pipeline",
+                                                "isSync": false,
+                                                "workerGroup": "{{CUST_TAG}}.*"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "permission": "rda:github:view",
+                            "title": "Backup Now",
+                            "type": "POPUP_FORM",
+                            "selectionType": "SINGLE",
+                            "identifier": "saas-service-action:userdashboard-add-yaml",
+                            "api-endpoint": {
+                                "service-name": "saas-reports",
+                                "methodName": "getForm",
+                                "stringified-params": true,
+                                "parse-output": false,
+                                "params": [
+                                    {
+                                        "formId": "rda.saas.dynamic.form",
+                                        "formActionList": {
+                                            "formActions": [
+                                                {
+                                                    "identifier": "Submit",
+                                                    "actionLabel": "Backup"
+                                                }
+                                            ]
+                                        },
+                                        "formDefinition": {
+                                            "id": "rda.saas.dynamic.form",
+                                            "refreshRequired": true,
+                                            "formFieldList": [
+                                                {
+                                                    "help": "Are you sure you want to take a backup of this device? ?",
+                                                    "dataType": "string",
+                                                    "controlType": "LABEL",
+                                                    "required": false,
+                                                    "editable": false,
+                                                    "label": "Are you sure you want to take a backup of this devices",
+                                                    "hidden": false,
+                                                    "fieldId": "name"
+                                                }
+                                            ]
+                                        },
+                                        "actions": [
+                                            {
+                                                "type": "RUN_PIPELINE",
+                                                "pipelineName": "syslog-backup-standalone-ip",
+                                                "isSync": false,
+                                                "workerGroup": "{{CUST_TAG}}.*"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "pivot": {
+                        "pivot_type": "advanced",
+                        "group_by": [
+                            "source_ip"
+                        ],
+                        "series": [
+                            {
+                                "column": "count_",
+                                "agg": "value_count",
+                                "type": "int",
+                                "label": "Total Configs"
+                            },
+                            {
+                                "column": "backup_time",
+                                "agg": "last",
+                                "type": "DATETIME",
+                                "label": "Last Backup"
+                            },
+                            {
+                                "column": "config_change_time",
+                                "agg": "last",
+                                "type": "DATETIME",
+                                "label": "Config Change Time"
+                            },
+                            {
+                                "column": "config_size",
+                                "agg": "last",
+                                "type": "TEXT",
+                                "label": "Size"
+                            },
+                            {
+                                "column": "device_user",
+                                "agg": "last",
+                                "type": "TEXT",
+                                "label": "User"
+                            },
+                            {
+                                "column": "device_fw_type",
+                                "agg": "last",
+                                "type": "TEXT",
+                                "label": "Type"
+                            }
+                        ]
+                    },
+                    "widget_id": "307f4e52"
+                }
+            ]
+        }
+    ],
+    "saved_time": "2026-05-13T17:44:08.693305"
+}

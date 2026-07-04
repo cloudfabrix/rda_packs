@@ -1,0 +1,2194 @@
+{
+  "flowName": "meraki-workflow",
+  "flowDesc": "Performs end-to-end orchestration and onboarding of Cisco Meraki artifacts in Splunk ITSI",
+  "flowData": {
+    "nodes": [
+      {
+        "id": "start",
+        "type": "start",
+        "initialized": false,
+        "position": {
+          "x": 135,
+          "y": -180
+        },
+        "data": {
+          "name": "start",
+          "label": "Start",
+          "input_ports": [],
+          "output_ports": [
+            {
+              "id": "start",
+              "label": "",
+              "min_connections": 1,
+              "max_connections": 1,
+              "config_schema": {
+                "model": {},
+                "uiSchema": {}
+              },
+              "connection_restrictions": [],
+              "connected_to": [
+                "cfx-c3e7ac8f-9f7f-4209-8d3f-d4c960465540"
+              ]
+            }
+          ]
+        },
+        "deletable": false,
+        "label": "Start"
+      },
+      {
+        "id": "cfx-c3e7ac8f-9f7f-4209-8d3f-d4c960465540",
+        "type": "wtask",
+        "initialized": false,
+        "position": {
+          "x": 150,
+          "y": -120
+        },
+        "data": {
+          "name": "create_splunk_index",
+          "label": "Create Meraki Indexes",
+          "description": "attachment://attachments/user_guide.html",
+          "main": "splunk_tasks.splunk_commands.CreateIndex",
+          "icon": "/assets/img/icons/apiCompanies/pngIcons/splunk.png",
+          "input_document_count": 0,
+          "parameter_model": {
+            "type": "object",
+            "properties": {
+              "secret_name": {
+                "type": "string"
+              },
+              "index_names": {
+                "type": "array",
+                "description": "A collection of index names",
+                "items": {
+                  "type": "object",
+                  "required": [
+                    "name"
+                  ],
+                  "properties": {
+                    "name": {
+                      "type": "string",
+                      "description": "Unique identifier for the index name"
+                    }
+                  }
+                }
+              }
+            },
+            "required": [
+              "secret_name",
+              "index_names"
+            ]
+          },
+          "ui_schema": {
+            "type": "VerticalLayout",
+            "elements": [
+              {
+                "type": "Control",
+                "scope": "#/properties/secret_name"
+              },
+              {
+                "type": "Control",
+                "scope": "#/properties/index_names"
+              }
+            ]
+          },
+          "category": "Splunk Tasks",
+          "input_ports": [
+            {
+              "label": "",
+              "min_connections": 1,
+              "max_connections": 1,
+              "id": "input_1"
+            }
+          ],
+          "output_ports": [
+            {
+              "label": "",
+              "min_connections": 1,
+              "max_connections": 1,
+              "id": "output_1",
+              "connected_to": [
+                "cfx-b546f646-f947-46ea-a0a0-edb33ad25c16"
+              ]
+            }
+          ],
+          "formData": {
+            "index_names": [
+              {
+                "name": "fabrix_meraki_metrics",
+                "type": "metric"
+              },
+              {
+                "name": "fabrix_meraki_inventory_collection",
+                "type": "event"
+              }
+            ],
+            "globalVarMap": {
+              "secret_name": "credential_name"
+            }
+          }
+        },
+        "label": "Create Meraki Indexes",
+        "sourcePosition": "right",
+        "targetPosition": "left"
+      },
+      {
+        "id": "cfx-b546f646-f947-46ea-a0a0-edb33ad25c16",
+        "type": "wtask",
+        "initialized": false,
+        "position": {
+          "x": 150,
+          "y": -30
+        },
+        "data": {
+          "name": "create_splunk_service",
+          "label": "Create ITSI Services for Meraki",
+          "description": "attachment://attachments/user_guide.html",
+          "main": "splunk_tasks.splunk_commands.CreateService",
+          "icon": "/assets/img/icons/apiCompanies/pngIcons/splunk.png",
+          "input_document_count": 0,
+          "parameter_model": {
+            "type": "object",
+            "properties": {
+              "secret_name": {
+                "type": "string"
+              },
+              "services": {
+                "type": "array",
+                "description": "A collection of service definitions",
+                "items": {
+                  "type": "object",
+                  "required": [
+                    "service_name",
+                    "service_description",
+                    "service_type"
+                  ],
+                  "properties": {
+                    "service_name": {
+                      "type": "string",
+                      "description": "Unique identifier for the service"
+                    },
+                    "service_description": {
+                      "type": "string",
+                      "description": "Description of the service"
+                    },
+                    "service_type": {
+                      "type": "string",
+                      "description": "Service type (business or technical) "
+                    },
+                    "enabled": {
+                      "type": "boolean",
+                      "description": "Enable service, default will be true"
+                    },
+                    "importance": {
+                      "type": "string",
+                      "description": "Importance of the service"
+                    }
+                  },
+                  "additionalProperties": true
+                }
+              }
+            },
+            "required": [
+              "secret_name",
+              "services"
+            ]
+          },
+          "ui_schema": {
+            "type": "VerticalLayout",
+            "elements": [
+              {
+                "type": "Control",
+                "scope": "#/properties/secret_name"
+              },
+              {
+                "type": "Control",
+                "scope": "#/properties/services"
+              }
+            ]
+          },
+          "category": "Splunk Tasks",
+          "input_ports": [
+            {
+              "label": "",
+              "min_connections": 1,
+              "max_connections": 1,
+              "id": "input_1"
+            }
+          ],
+          "output_ports": [
+            {
+              "label": "",
+              "min_connections": 1,
+              "max_connections": 1,
+              "id": "output_1",
+              "connected_to": [
+                "cfx-f0bea296-19cd-4984-d943-6a17190f1406"
+              ]
+            }
+          ],
+          "formData": {
+            "globalVarMap": {
+              "secret_name": "credential_name"
+            },
+            "services": [
+              {
+                "service_name": "Meraki Network",
+                "service_description": "Campus Network Services",
+                "service_type": "ACME",
+                "enabled": true,
+                "importance": "5"
+              },
+              {
+                "service_name": "Meraki Wireless",
+                "service_description": "Campus Wireless Network Services",
+                "service_type": "ACME",
+                "enabled": true,
+                "importance": "5"
+              },
+              {
+                "service_name": "Meraki Switches",
+                "service_description": "Campus Wired Network Services",
+                "service_type": "ACME",
+                "enabled": true,
+                "importance": "5"
+              },
+              {
+                "service_name": "Meraki Sensor",
+                "service_description": "Campus Network Sensors",
+                "service_type": "ACME",
+                "enabled": true,
+                "importance": "5"
+              },
+              {
+                "service_name": "Meraki Security Appliance",
+                "service_description": "Campus Security Appliance Services",
+                "service_type": "ACME",
+                "enabled": true,
+                "importance": "5"
+              }
+            ]
+          }
+        },
+        "label": "Create ITSI Services for Meraki",
+        "sourcePosition": "right",
+        "targetPosition": "left"
+      },
+      {
+        "id": "cfx-f0bea296-19cd-4984-d943-6a17190f1406",
+        "type": "wtask",
+        "initialized": false,
+        "position": {
+          "x": 150,
+          "y": 75
+        },
+        "data": {
+          "name": "create_splunk_service_kpi",
+          "label": "Create ITSI KPIs for Meraki Wireless",
+          "description": "attachment://attachments/user_guide.html",
+          "main": "splunk_tasks.splunk_commands.CreateServiceKPI",
+          "icon": "/assets/img/icons/apiCompanies/pngIcons/splunk.png",
+          "input_document_count": 0,
+          "parameter_model": {
+            "type": "object",
+            "properties": {
+              "secret_name": {
+                "type": "string"
+              },
+              "kpis": {
+                "type": "array",
+                "description": "A collection of service KPIs",
+                "items": {
+                  "type": "object",
+                  "required": [
+                    "service_name",
+                    "title"
+                  ],
+                  "properties": {
+                    "service_name": {
+                      "type": "string"
+                    },
+                    "title": {
+                      "type": "string",
+                      "description": "name of the KPI"
+                    },
+                    "base_search": {
+                      "type": "string",
+                      "description": "KPI search defined by user for this KPI. All generated searches for the KPI are based on this search."
+                    },
+                    "description": {
+                      "type": "string",
+                      "description": "Description for the KPI."
+                    },
+                    "search_type": {
+                      "type": "string",
+                      "description": "The Search Type"
+                    },
+                    "is_entity_breakdown": {
+                      "type": "boolean",
+                      "description": "is_entity_breakdown"
+                    },
+                    "threshold_field": {
+                      "type": "string",
+                      "description": "threshold_field"
+                    },
+                    "entity_breakdown_id_fields": {
+                      "type": "string",
+                      "description": "entity_breakdown_id_fields"
+                    },
+                    "unit": {
+                      "type": "string",
+                      "description": "unit"
+                    },
+                    "aggregate_statop": {
+                      "type": "string",
+                      "description": "aggregate_statop"
+                    },
+                    "entity_statop": {
+                      "type": "string",
+                      "description": "entity_statop"
+                    },
+                    "urgency": {
+                      "type": "integer",
+                      "description": "urgency"
+                    },
+                    "alert_period": {
+                      "type": "integer",
+                      "description": "alert_period"
+                    },
+                    "search_alert_earliest": {
+                      "type": "integer",
+                      "description": "search_alert_earliest"
+                    },
+                    "aggregate_thresholds": {
+                      "type": "object",
+                      "description": "aggregate_thresholds",
+                      "properties": {
+                        "metricField": {
+                          "type": "string",
+                          "description": "metricField"
+                        },
+                        "thresholdLevels": {
+                          "type": "array",
+                          "description": "thresholdLevels",
+                          "items": {
+                            "type": "object",
+                            "required": [
+                              "severityLabel",
+                              "thresholdValue"
+                            ],
+                            "properties": {
+                              "severityLabel": {
+                                "type": "string",
+                                "description": "severityLabel"
+                              },
+                              "thresholdValue": {
+                                "type": "number",
+                                "description": "thresholdValue"
+                              }
+                            },
+                            "additionalProperties": true
+                          },
+                          "additionalProperties": true
+                        }
+                      }
+                    }
+                  },
+                  "additionalProperties": true
+                }
+              }
+            }
+          },
+          "required": [
+            "secret_name",
+            "kpis"
+          ],
+          "ui_schema": {
+            "type": "VerticalLayout",
+            "elements": [
+              {
+                "type": "Control",
+                "scope": "#/properties/secret_name"
+              },
+              {
+                "type": "Control",
+                "scope": "#/properties/kpis"
+              }
+            ]
+          },
+          "category": "Splunk Tasks",
+          "input_ports": [
+            {
+              "label": "",
+              "min_connections": 1,
+              "max_connections": 1,
+              "id": "input_1"
+            }
+          ],
+          "output_ports": [
+            {
+              "label": "",
+              "min_connections": 1,
+              "max_connections": 1,
+              "id": "output_1",
+              "connected_to": [
+                "cfx-ff73d73d-7916-4351-f4c4-5f9a8b02ab7f"
+              ]
+            }
+          ],
+          "formData": {
+            "globalVarMap": {
+              "secret_name": "credential_name"
+            },
+            "kpis": [
+              {
+                "service_name": "Meraki Wireless",
+                "title": "Active Wireless Clients",
+                "base_search": "index=fabrix_meraki_metrics metric_category=\"Clients\" earliest=-90d latest=now | where isnotnull(mac) AND mac!=\"\" | where isnotnull(ip) AND ip!=\"\" | eval mac=lower(trim(mac)) | eval ip=lower(trim(ip)) | stats count as active_clients by ip",
+                "description": "Total number of active wireless clients in the network",
+                "search_type": "adhoc",
+                "is_entity_breakdown": true,
+                "threshold_field": "active_clients",
+                "entity_breakdown_id_fields": "ip",
+                "aggregate_statop": "sum",
+                "entity_statop": "sum",
+                "urgency": 5,
+                "alert_period": 15,
+                "search_alert_earliest": 5,
+                "aggregate_thresholds": {
+                  "thresholdLevels": []
+                }
+              },
+              {
+                "service_name": "Meraki Wireless",
+                "title": "Client Application Usage",
+                "base_search": "index=fabrix_meraki_metrics metric_category=\"client-application-usage\" earliest=-90d latest=now | where isnotnull(clientIp) AND clientIp!=\"\" | where isnotnull(application) AND application!=\"\" | eval clientIp=lower(trim(clientIp)) | eval application=lower(trim(application)) | stats sum(value) as app_usage by application | table application, app_usage",
+                "description": "Aggregate network data usage by wireless clients",
+                "search_type": "adhoc",
+                "is_entity_breakdown": true,
+                "threshold_field": "app_usage",
+                "entity_breakdown_id_fields": "application",
+                "unit": "Kbps",
+                "entity_statop": "avg",
+                "urgency": 3,
+                "alert_period": 5,
+                "search_alert_earliest": 15,
+                "aggregate_statop": "avg"
+              },
+              {
+                "service_name": "Meraki Wireless",
+                "base_search": "index=fabrix_meraki_metrics metric_category=\"Clients\" metric_name=\"usage_total\" earliest=-90d latest=now | where isnotnull(ip) AND ip!=\"\" | eval ip=lower(trim(ip)) | stats avg(usage_total) as avg_bandwidth_usage by ip | dedup ip | table ip, avg_bandwidth_usage",
+                "title": "Average Client Bandwidth Usage",
+                "description": "Aggregate bandwidth usage by all wireless clients",
+                "search_type": "adhoc",
+                "is_entity_breakdown": true,
+                "threshold_field": "avg_bandwidth_usage",
+                "entity_breakdown_id_fields": "ip",
+                "unit": "Kbps",
+                "aggregate_statop": "avg",
+                "entity_statop": "avg",
+                "urgency": 3,
+                "alert_period": 5,
+                "search_alert_earliest": 15
+              },
+              {
+                "service_name": "Meraki Wireless",
+                "title": "Download vs Upload Ratio",
+                "base_search": "index=fabrix_meraki_metrics metric_category=\"Clients\" earliest=-90d latest=now | where isnotnull(ip) AND ip!=\"\" | eval ip=lower(trim(ip)) | stats avg(usage_recv) as avg_download, avg(usage_sent) as avg_upload by ip | eval ratio = if(avg_upload > 0, round(avg_download / avg_upload, 2), 0) | table ip, avg_download, avg_upload, ratio",
+                "search_type": "adhoc",
+                "is_entity_breakdown": true,
+                "description": "Measures the ratio of data upload compared to data download ",
+                "threshold_field": "ratio",
+                "entity_breakdown_id_fields": "ip",
+                "aggregate_statop": "avg",
+                "entity_statop": "avg",
+                "urgency": 3,
+                "alert_period": 5,
+                "search_alert_earliest": 15
+              },
+              {
+                "service_name": "Meraki Wireless",
+                "title": "Meraki Access Point Firmware Info",
+                "description": "Measures if Access Points have expected Firmware version",
+                "base_search": "index=fabrix_meraki_inventory_collection earliest=-90d latest=now | search productTypes_0=\"wireless\" | dedup name | eval has_firmware = if(isnotnull(firmware), 1, 0) | table name, has_firmware",
+                "search_type": "adhoc",
+                "is_entity_breakdown": true,
+                "threshold_field": "has_firmware",
+                "entity_breakdown_id_fields": "name",
+                "aggregate_statop": "avg",
+                "entity_statop": "avg",
+                "urgency": 3,
+                "alert_period": 5,
+                "search_alert_earliest": 15
+              }
+            ]
+          }
+        },
+        "label": "Create ITSI KPIs for Meraki Wireless",
+        "sourcePosition": "right",
+        "targetPosition": "left"
+      },
+      {
+        "id": "cfx-ff73d73d-7916-4351-f4c4-5f9a8b02ab7f",
+        "type": "wtask",
+        "initialized": false,
+        "position": {
+          "x": 150,
+          "y": 195
+        },
+        "data": {
+          "name": "create_splunk_service_kpi",
+          "label": "Create ITSI KPIs for Meraki Switches",
+          "description": "attachment://attachments/user_guide.html",
+          "main": "splunk_tasks.splunk_commands.CreateServiceKPI",
+          "icon": "/assets/img/icons/apiCompanies/pngIcons/splunk.png",
+          "input_document_count": 0,
+          "parameter_model": {
+            "type": "object",
+            "properties": {
+              "secret_name": {
+                "type": "string"
+              },
+              "kpis": {
+                "type": "array",
+                "description": "A collection of service KPIs",
+                "items": {
+                  "type": "object",
+                  "required": [
+                    "service_name",
+                    "title"
+                  ],
+                  "properties": {
+                    "service_name": {
+                      "type": "string"
+                    },
+                    "title": {
+                      "type": "string",
+                      "description": "name of the KPI"
+                    },
+                    "base_search": {
+                      "type": "string",
+                      "description": "KPI search defined by user for this KPI. All generated searches for the KPI are based on this search."
+                    },
+                    "description": {
+                      "type": "string",
+                      "description": "Description for the KPI."
+                    },
+                    "search_type": {
+                      "type": "string",
+                      "description": "The Search Type"
+                    },
+                    "is_entity_breakdown": {
+                      "type": "boolean",
+                      "description": "is_entity_breakdown"
+                    },
+                    "threshold_field": {
+                      "type": "string",
+                      "description": "threshold_field"
+                    },
+                    "entity_breakdown_id_fields": {
+                      "type": "string",
+                      "description": "entity_breakdown_id_fields"
+                    },
+                    "unit": {
+                      "type": "string",
+                      "description": "unit"
+                    },
+                    "aggregate_statop": {
+                      "type": "string",
+                      "description": "aggregate_statop"
+                    },
+                    "entity_statop": {
+                      "type": "string",
+                      "description": "entity_statop"
+                    },
+                    "urgency": {
+                      "type": "integer",
+                      "description": "urgency"
+                    },
+                    "alert_period": {
+                      "type": "integer",
+                      "description": "alert_period"
+                    },
+                    "search_alert_earliest": {
+                      "type": "integer",
+                      "description": "search_alert_earliest"
+                    },
+                    "aggregate_thresholds": {
+                      "type": "object",
+                      "description": "aggregate_thresholds",
+                      "properties": {
+                        "metricField": {
+                          "type": "string",
+                          "description": "metricField"
+                        },
+                        "thresholdLevels": {
+                          "type": "array",
+                          "description": "thresholdLevels",
+                          "items": {
+                            "type": "object",
+                            "required": [
+                              "severityLabel",
+                              "thresholdValue"
+                            ],
+                            "properties": {
+                              "severityLabel": {
+                                "type": "string",
+                                "description": "severityLabel"
+                              },
+                              "thresholdValue": {
+                                "type": "number",
+                                "description": "thresholdValue"
+                              }
+                            },
+                            "additionalProperties": true
+                          },
+                          "additionalProperties": true
+                        }
+                      }
+                    }
+                  },
+                  "additionalProperties": true
+                }
+              }
+            }
+          },
+          "required": [
+            "secret_name",
+            "kpis"
+          ],
+          "ui_schema": {
+            "type": "VerticalLayout",
+            "elements": [
+              {
+                "type": "Control",
+                "scope": "#/properties/secret_name"
+              },
+              {
+                "type": "Control",
+                "scope": "#/properties/kpis"
+              }
+            ]
+          },
+          "category": "Splunk Tasks",
+          "input_ports": [
+            {
+              "label": "",
+              "min_connections": 1,
+              "max_connections": 1,
+              "id": "input_1"
+            }
+          ],
+          "output_ports": [
+            {
+              "label": "",
+              "min_connections": 1,
+              "max_connections": 1,
+              "id": "output_1",
+              "connected_to": [
+                "cfx-759c3891-46c3-45f3-c619-55241c5bc3a4"
+              ]
+            }
+          ],
+          "formData": {
+            "globalVarMap": {
+              "secret_name": "credential_name"
+            },
+            "kpis": [
+              {
+                "service_name": "Meraki Switches",
+                "title": "Device Status",
+                "base_search": "index=fabrix_meraki_metrics metric_category=\"device-status\" earliest=-90d latest=now | eval mac=lower(trim(mac)) | table mac, device_status",
+                "description": "Aggregate staus of wired network devices",
+                "search_type": "adhoc",
+                "is_entity_breakdown": true,
+                "threshold_field": "device_status",
+                "entity_breakdown_id_fields": "mac",
+                "aggregate_statop": "avg",
+                "entity_statop": "avg",
+                "urgency": 3,
+                "alert_period": 5,
+                "search_alert_earliest": 15
+              },
+              {
+                "title": "Meraki Switches Static LAN IP",
+                "service_name": "Meraki Switches",
+                "base_search": "index=fabrix_meraki_inventory_collection earliest=-90d latest=now | search productTypes_0=\"switch\" | dedup name | eval static_ip = if(isnotnull(lanIp), 1, 0) | table name, static_ip",
+                "description": "Number of network switches configured with static LAN IP",
+                "search_type": "adhoc",
+                "is_entity_breakdown": true,
+                "threshold_field": "static_ip",
+                "entity_breakdown_id_fields": "name",
+                "aggregate_statop": "avg",
+                "entity_statop": "avg",
+                "urgency": 3,
+                "alert_period": 5,
+                "search_alert_earliest": 15
+              }
+            ]
+          }
+        },
+        "label": "Create ITSI KPIs for Meraki Switches",
+        "sourcePosition": "right",
+        "targetPosition": "left"
+      },
+      {
+        "id": "cfx-759c3891-46c3-45f3-c619-55241c5bc3a4",
+        "type": "wtask",
+        "initialized": false,
+        "position": {
+          "x": 330,
+          "y": -120
+        },
+        "data": {
+          "name": "create_splunk_service_kpi",
+          "label": "Create ITSI KPIs for Meraki Sensor",
+          "description": "attachment://attachments/user_guide.html",
+          "main": "splunk_tasks.splunk_commands.CreateServiceKPI",
+          "icon": "/assets/img/icons/apiCompanies/pngIcons/splunk.png",
+          "input_document_count": 0,
+          "parameter_model": {
+            "type": "object",
+            "properties": {
+              "secret_name": {
+                "type": "string"
+              },
+              "kpis": {
+                "type": "array",
+                "description": "A collection of service KPIs",
+                "items": {
+                  "type": "object",
+                  "required": [
+                    "service_name",
+                    "title"
+                  ],
+                  "properties": {
+                    "service_name": {
+                      "type": "string"
+                    },
+                    "title": {
+                      "type": "string",
+                      "description": "name of the KPI"
+                    },
+                    "base_search": {
+                      "type": "string",
+                      "description": "KPI search defined by user for this KPI. All generated searches for the KPI are based on this search."
+                    },
+                    "description": {
+                      "type": "string",
+                      "description": "Description for the KPI."
+                    },
+                    "search_type": {
+                      "type": "string",
+                      "description": "The Search Type"
+                    },
+                    "is_entity_breakdown": {
+                      "type": "boolean",
+                      "description": "is_entity_breakdown"
+                    },
+                    "threshold_field": {
+                      "type": "string",
+                      "description": "threshold_field"
+                    },
+                    "entity_breakdown_id_fields": {
+                      "type": "string",
+                      "description": "entity_breakdown_id_fields"
+                    },
+                    "unit": {
+                      "type": "string",
+                      "description": "unit"
+                    },
+                    "aggregate_statop": {
+                      "type": "string",
+                      "description": "aggregate_statop"
+                    },
+                    "entity_statop": {
+                      "type": "string",
+                      "description": "entity_statop"
+                    },
+                    "urgency": {
+                      "type": "integer",
+                      "description": "urgency"
+                    },
+                    "alert_period": {
+                      "type": "integer",
+                      "description": "alert_period"
+                    },
+                    "search_alert_earliest": {
+                      "type": "integer",
+                      "description": "search_alert_earliest"
+                    },
+                    "aggregate_thresholds": {
+                      "type": "object",
+                      "description": "aggregate_thresholds",
+                      "properties": {
+                        "metricField": {
+                          "type": "string",
+                          "description": "metricField"
+                        },
+                        "thresholdLevels": {
+                          "type": "array",
+                          "description": "thresholdLevels",
+                          "items": {
+                            "type": "object",
+                            "required": [
+                              "severityLabel",
+                              "thresholdValue"
+                            ],
+                            "properties": {
+                              "severityLabel": {
+                                "type": "string",
+                                "description": "severityLabel"
+                              },
+                              "thresholdValue": {
+                                "type": "number",
+                                "description": "thresholdValue"
+                              }
+                            },
+                            "additionalProperties": true
+                          },
+                          "additionalProperties": true
+                        }
+                      }
+                    }
+                  },
+                  "additionalProperties": true
+                }
+              }
+            }
+          },
+          "required": [
+            "secret_name",
+            "kpis"
+          ],
+          "ui_schema": {
+            "type": "VerticalLayout",
+            "elements": [
+              {
+                "type": "Control",
+                "scope": "#/properties/secret_name"
+              },
+              {
+                "type": "Control",
+                "scope": "#/properties/kpis"
+              }
+            ]
+          },
+          "category": "Splunk Tasks",
+          "input_ports": [
+            {
+              "label": "",
+              "min_connections": 1,
+              "max_connections": 1,
+              "id": "input_1"
+            }
+          ],
+          "output_ports": [
+            {
+              "label": "",
+              "min_connections": 1,
+              "max_connections": 1,
+              "id": "output_1",
+              "connected_to": [
+                "cfx-a1f92af7-249b-45d0-ddd7-cb3b8fa9c048"
+              ]
+            }
+          ],
+          "formData": {
+            "globalVarMap": {
+              "secret_name": "credential_name"
+            },
+            "kpis": [
+              {
+                "service_name": "Meraki Sensor",
+                "title": "Meraki Sensor Geo Location Mapping",
+                "base_search": "index=fabrix_meraki_inventory_collection earliest=-90d latest=now | search productTypes_0=\"sensor\" | dedup name | eval has_location = if(isnotnull(lat) AND isnotnull(lng), 1, 0) | table name, has_location",
+                "description": "Measures number of sensors enabled with geo location mapping",
+                "search_type": "adhoc",
+                "is_entity_breakdown": true,
+                "threshold_field": "has_location",
+                "entity_breakdown_id_fields": "name",
+                "aggregate_statop": "avg",
+                "entity_statop": "avg",
+                "urgency": 3,
+                "alert_period": 5,
+                "search_alert_earliest": 15
+              }
+            ]
+          }
+        },
+        "label": "Create ITSI KPIs for Meraki Sensor",
+        "sourcePosition": "right",
+        "targetPosition": "left"
+      },
+      {
+        "id": "cfx-a1f92af7-249b-45d0-ddd7-cb3b8fa9c048",
+        "type": "wtask",
+        "initialized": false,
+        "position": {
+          "x": 330,
+          "y": -15
+        },
+        "data": {
+          "name": "create_splunk_service_kpi",
+          "label": "Create ITSI KPIs for Meraki Security Appliance",
+          "description": "attachment://attachments/user_guide.html",
+          "main": "splunk_tasks.splunk_commands.CreateServiceKPI",
+          "icon": "/assets/img/icons/apiCompanies/pngIcons/splunk.png",
+          "input_document_count": 0,
+          "parameter_model": {
+            "type": "object",
+            "properties": {
+              "secret_name": {
+                "type": "string"
+              },
+              "kpis": {
+                "type": "array",
+                "description": "A collection of service KPIs",
+                "items": {
+                  "type": "object",
+                  "required": [
+                    "service_name",
+                    "title"
+                  ],
+                  "properties": {
+                    "service_name": {
+                      "type": "string"
+                    },
+                    "title": {
+                      "type": "string",
+                      "description": "name of the KPI"
+                    },
+                    "base_search": {
+                      "type": "string",
+                      "description": "KPI search defined by user for this KPI. All generated searches for the KPI are based on this search."
+                    },
+                    "description": {
+                      "type": "string",
+                      "description": "Description for the KPI."
+                    },
+                    "search_type": {
+                      "type": "string",
+                      "description": "The Search Type"
+                    },
+                    "is_entity_breakdown": {
+                      "type": "boolean",
+                      "description": "is_entity_breakdown"
+                    },
+                    "threshold_field": {
+                      "type": "string",
+                      "description": "threshold_field"
+                    },
+                    "entity_breakdown_id_fields": {
+                      "type": "string",
+                      "description": "entity_breakdown_id_fields"
+                    },
+                    "unit": {
+                      "type": "string",
+                      "description": "unit"
+                    },
+                    "aggregate_statop": {
+                      "type": "string",
+                      "description": "aggregate_statop"
+                    },
+                    "entity_statop": {
+                      "type": "string",
+                      "description": "entity_statop"
+                    },
+                    "urgency": {
+                      "type": "integer",
+                      "description": "urgency"
+                    },
+                    "alert_period": {
+                      "type": "integer",
+                      "description": "alert_period"
+                    },
+                    "search_alert_earliest": {
+                      "type": "integer",
+                      "description": "search_alert_earliest"
+                    },
+                    "aggregate_thresholds": {
+                      "type": "object",
+                      "description": "aggregate_thresholds",
+                      "properties": {
+                        "metricField": {
+                          "type": "string",
+                          "description": "metricField"
+                        },
+                        "thresholdLevels": {
+                          "type": "array",
+                          "description": "thresholdLevels",
+                          "items": {
+                            "type": "object",
+                            "required": [
+                              "severityLabel",
+                              "thresholdValue"
+                            ],
+                            "properties": {
+                              "severityLabel": {
+                                "type": "string",
+                                "description": "severityLabel"
+                              },
+                              "thresholdValue": {
+                                "type": "number",
+                                "description": "thresholdValue"
+                              }
+                            },
+                            "additionalProperties": true
+                          },
+                          "additionalProperties": true
+                        }
+                      }
+                    }
+                  },
+                  "additionalProperties": true
+                }
+              }
+            }
+          },
+          "required": [
+            "secret_name",
+            "kpis"
+          ],
+          "ui_schema": {
+            "type": "VerticalLayout",
+            "elements": [
+              {
+                "type": "Control",
+                "scope": "#/properties/secret_name"
+              },
+              {
+                "type": "Control",
+                "scope": "#/properties/kpis"
+              }
+            ]
+          },
+          "category": "Splunk Tasks",
+          "input_ports": [
+            {
+              "label": "",
+              "min_connections": 1,
+              "max_connections": 1,
+              "id": "input_1"
+            }
+          ],
+          "output_ports": [
+            {
+              "label": "",
+              "min_connections": 1,
+              "max_connections": 1,
+              "id": "output_1",
+              "connected_to": [
+                "cfx-8eeb9592-c622-4852-cb92-2929997a6311"
+              ]
+            }
+          ],
+          "formData": {
+            "globalVarMap": {
+              "secret_name": "credential_name"
+            },
+            "kpis": [
+              {
+                "service_name": "Meraki Security Appliance",
+                "title": "Meraki Security Appliance with Dual WAN IPs",
+                "base_search": "index=fabrix_meraki_inventory_collection earliest=-90d latest=now | search productTypes_0=\"appliance\" | dedup name | eval dual_wan = if(isnotnull(wan1Ip) AND isnotnull(wan2Ip), 1, 0) | table name, dual_wan",
+                "description": "Percentage of security appliances with dual WAN IPs",
+                "search_type": "adhoc",
+                "is_entity_breakdown": true,
+                "threshold_field": "dual_wan",
+                "entity_breakdown_id_fields": "name",
+                "unit": "%",
+                "aggregate_statop": "avg",
+                "entity_statop": "avg",
+                "urgency": 3,
+                "alert_period": 5,
+                "search_alert_earliest": 15
+              },
+              {
+                "service_name": "Meraki Security Appliance",
+                "title": "WAN Uplink Loss Average",
+                "base_search": "index=fabrix_meraki_metrics metric_category=\"device-uplink-loss-latency\" metric_name=\"lossPercent\" earliest=-90d latest=now | eval ip=lower(trim(ip)) | stats avg(value) as avg_uplink_loss by ip | table ip, avg_uplink_loss",
+                "description": "Average packet loss experienced over WAN uplinks",
+                "search_type": "adhoc",
+                "is_entity_breakdown": true,
+                "threshold_field": "avg_uplink_loss",
+                "entity_breakdown_id_fields": "ip",
+                "aggregate_statop": "avg",
+                "entity_statop": "avg",
+                "urgency": 3,
+                "alert_period": 5,
+                "search_alert_earliest": 15
+              }
+            ]
+          }
+        },
+        "label": "Create ITSI KPIs for Meraki Security Appliance",
+        "sourcePosition": "right",
+        "targetPosition": "left"
+      },
+      {
+        "id": "cfx-8eeb9592-c622-4852-cb92-2929997a6311",
+        "type": "wtask",
+        "initialized": false,
+        "position": {
+          "x": 330,
+          "y": 105
+        },
+        "data": {
+          "name": "create_splunk_service_dependency",
+          "label": "Create ITSI Service Dependency",
+          "description": "attachment://attachments/user_guide.html",
+          "main": "splunk_tasks.splunk_commands.CreateServiceDependency",
+          "icon": "/assets/img/icons/apiCompanies/pngIcons/splunk.png",
+          "input_document_count": 0,
+          "parameter_model": {
+            "type": "object",
+            "properties": {
+              "secret_name": {
+                "type": "string"
+              },
+              "dependencies": {
+                "type": "array",
+                "description": "A collection of service dependencies",
+                "items": {
+                  "type": "object",
+                  "required": [
+                    "service_name",
+                    "depends_on",
+                    "parent_kpis"
+                  ],
+                  "properties": {
+                    "service_name": {
+                      "type": "string",
+                      "description": "Name of the service"
+                    },
+                    "depends_on": {
+                      "type": "string",
+                      "description": "Name of the service it depends on"
+                    },
+                    "parent_kpis": {
+                      "type": "string",
+                      "description": "Parent Service KPIs"
+                    }
+                  },
+                  "additionalProperties": true
+                }
+              }
+            },
+            "required": [
+              "secret_name"
+            ]
+          },
+          "ui_schema": {
+            "type": "VerticalLayout",
+            "elements": [
+              {
+                "type": "Control",
+                "scope": "#/properties/secret_name"
+              },
+              {
+                "type": "Control",
+                "scope": "#/properties/dependencies"
+              }
+            ]
+          },
+          "category": "Splunk Tasks",
+          "input_ports": [
+            {
+              "label": "",
+              "min_connections": 1,
+              "max_connections": 1,
+              "id": "input_1"
+            }
+          ],
+          "output_ports": [
+            {
+              "label": "",
+              "min_connections": 1,
+              "max_connections": 1,
+              "id": "output_1",
+              "connected_to": [
+                "cfx-1108454a-5d61-4149-d9c7-bc3a336cbcf1"
+              ]
+            }
+          ],
+          "formData": {
+            "globalVarMap": {
+              "secret_name": "credential_name"
+            },
+            "dependencies": [
+              {
+                "service_name": "Meraki Network",
+                "depends_on": "Meraki Wireless",
+                "parent_kpis": "ServiceHealthScore"
+              },
+              {
+                "service_name": "Meraki Network",
+                "depends_on": "Meraki Switches",
+                "parent_kpis": "ServiceHealthScore"
+              },
+              {
+                "service_name": "Meraki Network",
+                "depends_on": "Meraki Sensor",
+                "parent_kpis": "ServiceHealthScore"
+              },
+              {
+                "service_name": "Meraki Network",
+                "depends_on": "Meraki Security Appliance",
+                "parent_kpis": "ServiceHealthScore"
+              }
+            ]
+          }
+        },
+        "label": "Create ITSI Service Dependency",
+        "sourcePosition": "right",
+        "targetPosition": "left"
+      },
+      {
+        "id": "cfx-1108454a-5d61-4149-d9c7-bc3a336cbcf1",
+        "type": "wtask",
+        "initialized": false,
+        "position": {
+          "x": 330,
+          "y": 210
+        },
+        "data": {
+          "name": "create_entity_type",
+          "label": "Create Splunk Entity Types",
+          "icon": "/assets/img/icons/apiCompanies/pngIcons/splunk.png",
+          "logo": "/assets/img/icons/apiCompanies/pngIcons/splunk.png",
+          "description": "attachment://attachments/user_guide.html",
+          "main": "splunk_tasks.splunk_commands.CreateEntityType",
+          "input_document_count": 0,
+          "parameter_model": {
+            "type": "object",
+            "properties": {
+              "secret_name": {
+                "type": "string"
+              },
+              "entity_types": {
+                "type": "array",
+                "description": "A collection of entity type definitions",
+                "items": {
+                  "type": "object",
+                  "required": [
+                    "entity_type_name",
+                    "entity_type_description",
+                    "entity_type_domain"
+                  ],
+                  "properties": {
+                    "entity_type_name": {
+                      "type": "string",
+                      "description": "Unique identifier for the entity type"
+                    },
+                    "entity_type_description": {
+                      "type": "string",
+                      "description": "Description of the entity type"
+                    },
+                    "entity_type_domain": {
+                      "type": "string",
+                      "description": "Domain to which the entity type belongs"
+                    },
+                    "data_drilldowns": {
+                      "type": "array",
+                      "description": "Filters or links to raw data related to entities type"
+                    },
+                    "dashboard_drilldowns": {
+                      "type": "array",
+                      "description": "An array of dashboard drilldown objects."
+                    }
+                  },
+                  "additionalProperties": true
+                }
+              }
+            },
+            "required": [
+              "secret_name",
+              "entity_types"
+            ]
+          },
+          "ui_schema": {
+            "type": "VerticalLayout",
+            "elements": [
+              {
+                "type": "Control",
+                "scope": "#/properties/secret_name"
+              },
+              {
+                "type": "Control",
+                "scope": "#/properties/entity_types"
+              }
+            ]
+          },
+          "category": "Splunk Tasks",
+          "input_ports": [
+            {
+              "label": "",
+              "min_connections": 1,
+              "max_connections": 1,
+              "id": "input_1"
+            }
+          ],
+          "output_ports": [
+            {
+              "label": "",
+              "min_connections": 1,
+              "max_connections": 1,
+              "id": "output_1",
+              "connected_to": [
+                "cfx-eaee461c-cada-44b0-a15a-4768a181af53"
+              ]
+            }
+          ],
+          "formData": {
+            "globalVarMap": {
+              "secret_name": "credential_name"
+            },
+            "entity_types": [
+              {
+                "entity_type_name": "Meraki Access Point",
+                "entity_type_description": "Represents a Meraki managed wireless Access Point",
+                "entity_type_domain": "Network"
+              },
+              {
+                "entity_type_name": "Meraki Security Appliance",
+                "entity_type_description": "Represents a Meraki managed Security Appliance",
+                "entity_type_domain": "Network"
+              },
+              {
+                "entity_type_name": "Meraki Sensor",
+                "entity_type_description": "Represents a Meraki managed Sensor device",
+                "entity_type_domain": "Network"
+              },
+              {
+                "entity_type_name": "Meraki Switches",
+                "entity_type_description": "Represents a Meraki managed wired Network Switch",
+                "entity_type_domain": "Network"
+              }
+            ]
+          }
+        },
+        "label": "Create Splunk Entity Types",
+        "sourcePosition": "right",
+        "targetPosition": "left"
+      },
+      {
+        "id": "cfx-eaee461c-cada-44b0-a15a-4768a181af53",
+        "type": "wtask",
+        "initialized": false,
+        "position": {
+          "x": 525,
+          "y": -120
+        },
+        "data": {
+          "name": "create_import_entities_job",
+          "label": "Create ITSI Import Entities job",
+          "description": "attachment://attachments/user_guide.html",
+          "main": "splunk_tasks.splunk_commands.CreateImportEntitiesJob",
+          "icon": "/assets/img/icons/apiCompanies/pngIcons/splunk.png",
+          "input_document_count": 0,
+          "parameter_model": {
+            "type": "object",
+            "properties": {
+              "secret_name": {
+                "type": "string"
+              },
+              "create_import_entity_job_inputs": {
+                "type": "array",
+                "description": "Inputs to create create import entity job",
+                "items": {
+                  "type": "object",
+                  "required": [
+                    "name",
+                    "search"
+                  ],
+                  "properties": {
+                    "name": {
+                      "type": "string",
+                      "description": "The unique name of the saved search."
+                    },
+                    "search": {
+                      "type": "string",
+                      "description": "The Splunk SPL query that defines what data to import."
+                    },
+                    "is_scheduled": {
+                      "type": "string",
+                      "description": "Flag indicating if the search runs on a schedule (1) or on demand (0)."
+                    },
+                    "cron_schedule": {
+                      "type": "string",
+                      "description": "CRON expression that defines the schedule timing for the search."
+                    },
+                    "description": {
+                      "type": "string",
+                      "description": "A textual description of what the saved search does."
+                    },
+                    "itsi_import_objects": {
+                      "type": "string",
+                      "description": "Flag to enable ITSI import action (set to '1' to enable)."
+                    },
+                    "import_type": {
+                      "type": "string",
+                      "description": "Type of ITSI object to import; usually 'entity' or 'service'."
+                    },
+                    "conflict_action": {
+                      "type": "string",
+                      "description": "Action to take when a conflict is detected, e.g. 'update' to update existing, 'skip' to ignore."
+                    },
+                    "conflict_merge_field": {
+                      "type": "string",
+                      "description": "Field name used to identify and merge conflicting entities or services."
+                    },
+                    "column_map_title": {
+                      "type": "string",
+                      "description": "Field from the search results mapped to the ITSI 'title' field (usually the entity or service name)."
+                    },
+                    "column_map_entity_type": {
+                      "type": "string",
+                      "description": "Field indicating the type of entity, e.g., 'server', 'switch', etc."
+                    },
+                    "column_map_alias": {
+                      "type": "string",
+                      "description": "Comma-separated list of fields to be used as aliases for the entity."
+                    },
+                    "column_map_service_name": {
+                      "type": "string",
+                      "description": "Field mapped as the service name for service imports."
+                    },
+                    "backfill_enabled": {
+                      "type": "string",
+                      "description": "Enable backfill of historic data during import (true/false)."
+                    },
+                    "entity_description_fields": {
+                      "type": "string",
+                      "description": "Fields to use for providing a description of the entity."
+                    },
+                    "entity_field_mapping": {
+                      "type": "string",
+                      "description": "Mapping of fields to entity attributes beyond the default set."
+                    },
+                    "entity_identifier_fields": {
+                      "type": "string",
+                      "description": "Fields used to uniquely identify an entity."
+                    },
+                    "entity_informational_fields": {
+                      "type": "string",
+                      "description": "Additional informational fields to be stored for the entity."
+                    },
+                    "entity_merge_field": {
+                      "type": "string",
+                      "description": "Field used for merging duplicate entity records."
+                    },
+                    "entity_merge_fqdn": {
+                      "type": "string",
+                      "description": "Fully qualified domain name field used in entity merge."
+                    },
+                    "entity_status_tracking": {
+                      "type": "string",
+                      "description": "Field used to track the status of an entity."
+                    },
+                    "entity_title_field": {
+                      "type": "string",
+                      "description": "Field to use as the display title of the entity."
+                    },
+                    "entity_type_field": {
+                      "type": "string",
+                      "description": "Field specifying the type/category of the entity."
+                    },
+                    "field_level_update_type": {
+                      "type": "string",
+                      "description": "Specifies how field-level updates are handled, e.g., 'overwrite' or 'append'."
+                    },
+                    "service_dependents_fields": {
+                      "type": "string",
+                      "description": "Fields that define dependent services for a service entity."
+                    },
+                    "service_description_fields": {
+                      "type": "string",
+                      "description": "Fields used to describe a service."
+                    },
+                    "service_enabled": {
+                      "type": "string",
+                      "description": "Flag indicating if the service is enabled."
+                    },
+                    "service_tags_field": {
+                      "type": "string",
+                      "description": "Field containing tags associated with the service."
+                    },
+                    "service_team": {
+                      "type": "string",
+                      "description": "Field specifying the team responsible for the service."
+                    },
+                    "service_template_field": {
+                      "type": "string",
+                      "description": "Field specifying the service template to use during import."
+                    },
+                    "service_templates_config": {
+                      "type": "string",
+                      "description": "Configuration details for service templates."
+                    },
+                    "service_title_field": {
+                      "type": "string",
+                      "description": "Field to be used as the display title of the service."
+                    },
+                    "update_type": {
+                      "type": "string",
+                      "description": "Defines the update mode, e.g., 'full' or 'incremental'."
+                    }
+                  },
+                  "additionalProperties": true
+                }
+              }
+            }
+          },
+          "required": [
+            "secret_name",
+            "create_import_entity_job_inputs"
+          ],
+          "ui_schema": {
+            "type": "VerticalLayout",
+            "elements": [
+              {
+                "type": "Control",
+                "scope": "#/properties/secret_name"
+              },
+              {
+                "type": "Control",
+                "scope": "#/properties/create_import_entity_job_inputs"
+              }
+            ]
+          },
+          "category": "Splunk Tasks",
+          "input_ports": [
+            {
+              "label": "",
+              "min_connections": 1,
+              "max_connections": 1,
+              "id": "input_1"
+            }
+          ],
+          "output_ports": [
+            {
+              "label": "",
+              "min_connections": 1,
+              "max_connections": 1,
+              "id": "output_1",
+              "connected_to": [
+                "cfx-9015183f-f37d-4a2a-bed7-6d3330c36937"
+              ]
+            }
+          ],
+          "formData": {
+            "globalVarMap": {
+              "secret_name": "credential_name"
+            },
+            "create_import_entity_job_inputs": [
+              {
+                "name": "Meraki Entities Import and Update",
+                "is_scheduled": "1",
+                "cron_schedule": "0 */4 * * *",
+                "search": "index=fabrix_meraki_inventory_collection earliest=-30d latest=now | dedup name | eval entity_name = name | eval entity_type = case(     productTypes_0 == \"appliance\", \"Meraki Security Appliance\",     productTypes_0 == \"switch\", \"Meraki Switches\",     productTypes_0 == \"sensor\", \"Meraki Sensor\",     productTypes_0 == \"wireless\", \"Meraki Access Point\",     true(), \"Unknown Device\" ) | search entity_type != \"Unknown Device\" | table entity_name entity_type name url notes timeZone isVirtual tags_0 tags_1 tags_2",
+                "description": "Import entities from main index fabrix_meraki_inventory_collection",
+                "itsi_import_objects": "1",
+                "import_type": "entity",
+                "conflict_action": "update",
+                "conflict_merge_field": "title",
+                "column_map_title": "entity_name",
+                "column_map_entity_type": "entity_type",
+                "column_map_alias": "name,url"
+              }
+            ]
+          }
+        },
+        "label": "Create ITSI Import Entities job",
+        "sourcePosition": "right",
+        "targetPosition": "left"
+      },
+      {
+        "id": "cfx-9015183f-f37d-4a2a-bed7-6d3330c36937",
+        "type": "wtask",
+        "initialized": false,
+        "position": {
+          "x": 510,
+          "y": 0
+        },
+        "data": {
+          "name": "Create_correlation_search",
+          "label": "Create ITSI Correlation Search",
+          "description": "attachment://attachments/user_guide.html",
+          "main": "splunk_tasks.splunk_commands.CreateCorrelationSearch",
+          "icon": "/assets/img/icons/apiCompanies/pngIcons/splunk.png",
+          "input_document_count": 0,
+          "parameter_model": {
+            "type": "object",
+            "properties": {
+              "secret_name": {
+                "type": "string"
+              },
+              "correlation_serach_inputs": {
+                "type": "array",
+                "description": "Correlation search inputs",
+                "items": {
+                  "type": "object",
+                  "required": [
+                    "name",
+                    "search",
+                    "action_itsi_event_generator_param_title"
+                  ],
+                  "properties": {
+                    "is_scheduled": {
+                      "type": "integer"
+                    },
+                    "disabled": {
+                      "type": "integer"
+                    },
+                    "cron_schedule": {
+                      "type": "string"
+                    },
+                    "dispatch_earliest_time": {
+                      "type": "string"
+                    },
+                    "dispatch_latest_time": {
+                      "type": "string"
+                    },
+                    "description": {
+                      "type": "string"
+                    },
+                    "search": {
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "action_itsi_event_generator_param_title": {
+                      "type": "string"
+                    },
+                    "action_itsi_event_generator_param_description": {
+                      "type": "string"
+                    },
+                    "action_itsi_event_generator_param_status": {
+                      "type": "integer"
+                    },
+                    "action_itsi_event_generator_param_owner": {
+                      "type": "array"
+                    },
+                    "action_itsi_event_generator_param_severity": {
+                      "type": "integer"
+                    },
+                    "action_itsi_event_generator_param_drilldown_search_title": {
+                      "type": "string"
+                    },
+                    "action_itsi_event_generator_param_drilldown_search_search": {
+                      "type": "string"
+                    },
+                    "action_itsi_event_generator_param_drilldown_search_latest_offset": {
+                      "type": "string"
+                    },
+                    "action_itsi_event_generator_param_drilldown_search_earliest_offset": {
+                      "type": "string"
+                    },
+                    "action_itsi_event_generator_param_drilldown_title": {
+                      "type": "string"
+                    },
+                    "action_itsi_event_generator_param_drilldown_uri": {
+                      "type": "string"
+                    },
+                    "action_itsi_event_generator_param_event_identifier_fields": {
+                      "type": "string"
+                    },
+                    "action_itsi_event_generator_param_service_ids": {
+                      "type": "string"
+                    },
+                    "action_itsi_event_generator_param_entity_lookup_field": {
+                      "type": "string"
+                    },
+                    "action_itsi_event_generator_param_search_type": {
+                      "type": "string"
+                    },
+                    "action_itsi_event_generator_param_meta_data": {
+                      "type": "string"
+                    },
+                    "action_itsi_event_generator_param_editor": {
+                      "type": "string"
+                    },
+                    "action_itsi_event_generator": {
+                      "type": "integer"
+                    },
+                    "actions": {
+                      "type": "string"
+                    },
+                    "alert_suppress": {
+                      "type": "integer"
+                    },
+                    "alert_suppress_fields": {
+                      "type": "string"
+                    },
+                    "alert_suppress_period": {
+                      "type": "string"
+                    },
+                    "action_rss": {
+                      "type": "integer"
+                    },
+                    "action_email": {
+                      "type": "integer"
+                    },
+                    "action_email_to": {
+                      "type": "string"
+                    },
+                    "action_email_subject": {
+                      "type": "string"
+                    },
+                    "action_email_sendcsv": {
+                      "type": "integer"
+                    },
+                    "action_email_sendpdf": {
+                      "type": "integer"
+                    },
+                    "action_email_inline": {
+                      "type": "integer"
+                    },
+                    "action_email_format": {
+                      "type": "string"
+                    },
+                    "action_email_sendresults": {
+                      "type": "string"
+                    },
+                    "action_script": {
+                      "type": "integer"
+                    },
+                    "action_script_filename": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "additionalProperties": true
+              }
+            },
+            "required": [
+              "secret_name",
+              "correlation_serach_inputs"
+            ]
+          },
+          "ui_schema": {
+            "type": "VerticalLayout",
+            "elements": [
+              {
+                "type": "Control",
+                "scope": "#/properties/secret_name"
+              },
+              {
+                "type": "Control",
+                "scope": "#/properties/correlation_serach_inputs"
+              }
+            ]
+          },
+          "category": "Splunk Tasks",
+          "input_ports": [
+            {
+              "label": "",
+              "min_connections": 1,
+              "max_connections": 1,
+              "id": "input_1"
+            }
+          ],
+          "output_ports": [
+            {
+              "label": "",
+              "min_connections": 1,
+              "max_connections": 1,
+              "id": "output_1",
+              "connected_to": [
+                "cfx-d2acaa59-c029-440c-a03a-7c3344c13a47"
+              ]
+            }
+          ],
+          "formData": {
+            "globalVarMap": {
+              "secret_name": "credential_name"
+            },
+            "correlation_serach_inputs": [
+              {
+                "is_scheduled": 1,
+                "disabled": 0,
+                "cron_schedule": "*/5 * * * *",
+                "description": "Correlate KPI violations and alerts within Meraki services",
+                "search": "index=fabrix_meraki_inventory_collection productTypes_0=\"switch\" earliest=-120d latest=now | dedup name sortby -_time | eval is_configured=if(isnotnull(lanIp), 1, 0) | stats count as total_samples, sum(is_configured) as configured_samples by name | eval availability_pct = round((configured_samples / total_samples) * 100, 2) | eval entity_title=name, kpi_name=\"Meraki Switch Static LAN IP Config\", service_name=\"Meraki Network\" | where availability_pct < 95  | eval severity=case(     availability_pct < 60, 5,     availability_pct < 75, 4,     availability_pct < 95, 3,     true(), 2 ) | eval title=\"KPI Breach: \" . kpi_name . \" on \" . entity_title | table _time, title, service_name, kpi_name, availability_pct, severity, entity_title | `filter_maintenance_services(\"87088c35-613a-4924-ae3d-c801ff3d1cda,4ccc2e91-bf89-4a74-a970-1980eddd646d\")` | `apply_entity_lookup($result.entity_title$)`",
+                "name": "Meraki  KPI Breach Correlation",
+                "dispatch_earliest_time": "-15m",
+                "dispatch_latest_time": "now",
+                "action_itsi_event_generator_param_title": "title",
+                "action_itsi_event_generator_param_description": "Meraki KPI Breach",
+                "action_itsi_event_generator_param_status": 0,
+                "action_itsi_event_generator_param_severity": 5
+              }
+            ]
+          }
+        },
+        "label": "Create ITSI Correlation Search",
+        "sourcePosition": "right",
+        "targetPosition": "left"
+      },
+      {
+        "id": "cfx-d2acaa59-c029-440c-a03a-7c3344c13a47",
+        "type": "wtask",
+        "initialized": false,
+        "position": {
+          "x": 510,
+          "y": 120
+        },
+        "data": {
+          "name": "Create_notable_event_aggregation_policy",
+          "label": "Create ITSI Notable Event Agg. Policy",
+          "description": "attachment://attachments/user_guide.html",
+          "main": "splunk_tasks.splunk_commands.CreateNotableEventAggregationPolicy",
+          "icon": "/assets/img/icons/apiCompanies/pngIcons/splunk.png",
+          "input_document_count": 0,
+          "parameter_model": {
+            "type": "object",
+            "properties": {
+              "secret_name": {
+                "type": "string"
+              },
+              "notable_event_aggregation_policy_input": {
+                "type": "array",
+                "description": "Notable Event Aggregation Policy inputs",
+                "items": {
+                  "type": "object",
+                  "required": [
+                    "title",
+                    "filter_criteria",
+                    "breaking_criteria",
+                    "group_severity",
+                    "rules"
+                  ],
+                  "properties": {
+                    "disabled": {
+                      "type": "integer"
+                    },
+                    "breaking_criteria": {
+                      "type": "string"
+                    },
+                    "filter_criteria": {
+                      "type": "string"
+                    },
+                    "is_default": {
+                      "type": "integer"
+                    },
+                    "description": {
+                      "type": "string"
+                    },
+                    "group_severity": {
+                      "type": "string"
+                    },
+                    "group_status": {
+                      "type": "string"
+                    },
+                    "group_asignee": {
+                      "type": "string"
+                    },
+                    "group_description": {
+                      "type": "string"
+                    },
+                    "title": {
+                      "type": "string"
+                    },
+                    "rules": {
+                      "type": "string"
+                    },
+                    "split_by_field": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "additionalProperties": true
+              },
+              "keys_list": {
+                "type": "string",
+                "description": "Comma separated list of keys that needs to be converted from string to json"
+              }
+            },
+            "required": [
+              "secret_name",
+              "notable_event_aggregation_policy_input"
+            ]
+          },
+          "ui_schema": {
+            "type": "VerticalLayout",
+            "elements": [
+              {
+                "type": "Control",
+                "scope": "#/properties/secret_name"
+              },
+              {
+                "type": "Control",
+                "scope": "#/properties/notable_event_aggregation_policy_input"
+              },
+              {
+                "type": "Control",
+                "scope": "#/properties/keys_list"
+              }
+            ]
+          },
+          "category": "Splunk Tasks",
+          "input_ports": [
+            {
+              "label": "",
+              "min_connections": 1,
+              "max_connections": 1,
+              "id": "input_1"
+            }
+          ],
+          "output_ports": [
+            {
+              "label": "",
+              "min_connections": 1,
+              "max_connections": 1,
+              "id": "output_1"
+            }
+          ],
+          "formData": {
+            "notable_event_aggregation_policy_input": [
+              {
+                "is_default": 0,
+                "description": "Notable event policy for Meraki",
+                "group_severity": "%severity%",
+                "group_status": "%status%",
+                "group_asignee": "%owner%",
+                "group_description": "%description%",
+                "title": "Meraki Notable Event Agg Policy",
+                "split_by_field": "service_name",
+                "filter_criteria": "{\"condition\":\"OR\",\"items\":[{\"type\":\"clause\",\"config\":{\"items\":[{\"type\":\"notable_event_field\",\"config\":{\"field\":\"severity\",\"operator\":\">=\",\"value\":\"3\"}},{\"type\":\"notable_event_field\",\"config\":{\"field\":\"description\",\"operator\":\"=\",\"value\":\"Test Create Notable Event Aggregation Policy API\"}}],\"condition\":\"AND\"}}]}",
+                "breaking_criteria": "{\"condition\":\"OR\",\"items\":[{\"type\":\"clause\",\"config\":{\"items\":[{\"type\":\"notable_event_field\",\"config\":{\"field\":\"severity\",\"operator\":\"=\",\"value\":\"5\"}}],\"condition\":\"AND\"}}]}",
+                "rules": "[{\"_key\": \"normalized_aggregation_policy_action_1\",\"priority\": 5,\"activation_criteria\": {\"items\": [{\"type\": \"breaking_criteria\"},{\"config\": {\"operator\": \"==\",\"limit\": \"2\"},\"type\": \"notable_event_field\"}],\"condition\": \"AND\"},\"actions\": [{\"items\": [{\"execution_criteria\": {\"execute_on\": \"GROUP\"},\"type\": \"notable_event_field\",\"config\": {\"field\": \"service_name\",\"value\": \"*\"}}],\"condition\": \"AND\"}],\"title\": \"service_name_rule\",\"description\": \"\"},{\"_key\": \"normalized_aggregation_policy_action_2\",\"priority\": 5,\"activation_criteria\": {\"items\": [{\"type\": \"breaking_criteria\"},{\"config\": {\"operator\": \">=\",\"limit\": \"1\"},\"type\": \"notable_event_field\"}],\"condition\": \"AND\"},\"actions\": [{\"items\": [{\"execution_criteria\": {\"execute_on\": \"GROUP\"},\"type\": \"notable_event_field\",\"config\": {\"field\": \"severity\",\"value\": \"3\"}}],\"condition\": \"AND\"}],\"title\": \"severity_rule\",\"description\": \"\"}]"
+              }
+            ],
+            "globalVarMap": {
+              "secret_name": "credential_name",
+              "notable_event_aggregation_policy_input.0.disabled": "disabled"
+            }
+          }
+        },
+        "label": "Create ITSI Notable Event Agg. Policy",
+        "sourcePosition": "right",
+        "targetPosition": "left"
+      }
+    ],
+    "edges": [
+      {
+        "id": "vueflow__edge-startstart-cfx-c3e7ac8f-9f7f-4209-8d3f-d4c960465540input_1",
+        "type": "default",
+        "source": "start",
+        "target": "cfx-c3e7ac8f-9f7f-4209-8d3f-d4c960465540",
+        "sourceHandle": "start",
+        "targetHandle": "input_1",
+        "data": {
+          "sourceLabel": "Start",
+          "targetLabel": "Create Splunk Index"
+        },
+        "label": "",
+        "sourceX": 202.50512680151624,
+        "sourceY": -147.39845695645636,
+        "targetX": 217.99992722779962,
+        "targetY": -122.99479082439584
+      },
+      {
+        "id": "vueflow__edge-cfx-c3e7ac8f-9f7f-4209-8d3f-d4c960465540output_1-cfx-b546f646-f947-46ea-a0a0-edb33ad25c16input_1",
+        "type": "default",
+        "source": "cfx-c3e7ac8f-9f7f-4209-8d3f-d4c960465540",
+        "target": "cfx-b546f646-f947-46ea-a0a0-edb33ad25c16",
+        "sourceHandle": "output_1",
+        "targetHandle": "input_1",
+        "data": {
+          "sourceLabel": "Create Splunk Index",
+          "targetLabel": "Create Splunk Service"
+        },
+        "label": "",
+        "sourceX": 217.99992722779962,
+        "sourceY": -41.03132732046291,
+        "targetX": 217.99992722779962,
+        "targetY": -32.994778190333264
+      },
+      {
+        "id": "vueflow__edge-cfx-b546f646-f947-46ea-a0a0-edb33ad25c16output_1-cfx-f0bea296-19cd-4984-d943-6a17190f1406input_1",
+        "type": "default",
+        "source": "cfx-b546f646-f947-46ea-a0a0-edb33ad25c16",
+        "target": "cfx-f0bea296-19cd-4984-d943-6a17190f1406",
+        "sourceHandle": "output_1",
+        "targetHandle": "input_1",
+        "data": {
+          "sourceLabel": "Create ITSI Services for Meraki",
+          "targetLabel": "Create Splunk Service KPI"
+        },
+        "label": "",
+        "sourceX": 217.99992722779962,
+        "sourceY": 48.96871058172479,
+        "targetX": 217.99992722779962,
+        "targetY": 72.00519654154161
+      },
+      {
+        "id": "vueflow__edge-cfx-f0bea296-19cd-4984-d943-6a17190f1406output_1-cfx-ff73d73d-7916-4351-f4c4-5f9a8b02ab7finput_1",
+        "type": "default",
+        "source": "cfx-f0bea296-19cd-4984-d943-6a17190f1406",
+        "target": "cfx-ff73d73d-7916-4351-f4c4-5f9a8b02ab7f",
+        "sourceHandle": "output_1",
+        "targetHandle": "input_1",
+        "data": {
+          "sourceLabel": "Create ITSI KPIs for Meraki Wireless",
+          "targetLabel": "Create Splunk Service KPI"
+        },
+        "label": "",
+        "sourceX": 217.99992722779962,
+        "sourceY": 153.96868531359968,
+        "targetX": 217.99992722779962,
+        "targetY": 192.00522180966675
+      },
+      {
+        "id": "vueflow__edge-cfx-ff73d73d-7916-4351-f4c4-5f9a8b02ab7foutput_1-cfx-759c3891-46c3-45f3-c619-55241c5bc3a4input_1",
+        "type": "default",
+        "source": "cfx-ff73d73d-7916-4351-f4c4-5f9a8b02ab7f",
+        "target": "cfx-759c3891-46c3-45f3-c619-55241c5bc3a4",
+        "sourceHandle": "output_1",
+        "targetHandle": "input_1",
+        "data": {
+          "sourceLabel": "Create ITSI KPIs for Meraki Switches",
+          "targetLabel": "Create Splunk Service KPI"
+        },
+        "label": "",
+        "sourceX": 217.99992722779962,
+        "sourceY": 273.9686347773494,
+        "targetX": 397.9999777640499,
+        "targetY": -122.99479082439584
+      },
+      {
+        "id": "vueflow__edge-cfx-759c3891-46c3-45f3-c619-55241c5bc3a4output_1-cfx-a1f92af7-249b-45d0-ddd7-cb3b8fa9c048input_1",
+        "type": "default",
+        "source": "cfx-759c3891-46c3-45f3-c619-55241c5bc3a4",
+        "target": "cfx-a1f92af7-249b-45d0-ddd7-cb3b8fa9c048",
+        "sourceHandle": "output_1",
+        "targetHandle": "input_1",
+        "data": {
+          "sourceLabel": "Create ITSI KPIs for Meraki Sensor",
+          "targetLabel": "Create Splunk Service KPI"
+        },
+        "label": "",
+        "sourceX": 397.9999777640499,
+        "sourceY": -41.03132732046291,
+        "targetX": 397.9999777640499,
+        "targetY": -17.994803458458392
+      },
+      {
+        "id": "vueflow__edge-cfx-a1f92af7-249b-45d0-ddd7-cb3b8fa9c048output_1-cfx-8eeb9592-c622-4852-cb92-2929997a6311input_1",
+        "type": "default",
+        "source": "cfx-a1f92af7-249b-45d0-ddd7-cb3b8fa9c048",
+        "target": "cfx-8eeb9592-c622-4852-cb92-2929997a6311",
+        "sourceHandle": "output_1",
+        "targetHandle": "input_1",
+        "data": {
+          "sourceLabel": "Create ITSI KPIs for Meraki Security Appliance",
+          "targetLabel": "Create Splunk Service Dependency"
+        },
+        "label": "",
+        "sourceX": 397.9999777640499,
+        "sourceY": 63.968685313599664,
+        "targetX": 397.9999777640499,
+        "targetY": 102.00517127341648
+      },
+      {
+        "id": "vueflow__edge-cfx-8eeb9592-c622-4852-cb92-2929997a6311output_1-cfx-1108454a-5d61-4149-d9c7-bc3a336cbcf1input_1",
+        "type": "default",
+        "source": "cfx-8eeb9592-c622-4852-cb92-2929997a6311",
+        "target": "cfx-1108454a-5d61-4149-d9c7-bc3a336cbcf1",
+        "sourceHandle": "output_1",
+        "targetHandle": "input_1",
+        "data": {
+          "sourceLabel": "Create ITSI Service Dependency",
+          "targetLabel": "Create Splunk Entity Types"
+        },
+        "label": "",
+        "sourceX": 397.9999777640499,
+        "sourceY": 183.96866004547454,
+        "targetX": 397.9999777640499,
+        "targetY": 207.00517127341647
+      },
+      {
+        "id": "vueflow__edge-cfx-1108454a-5d61-4149-d9c7-bc3a336cbcf1output_1-cfx-eaee461c-cada-44b0-a15a-4768a181af53input_1",
+        "type": "default",
+        "source": "cfx-1108454a-5d61-4149-d9c7-bc3a336cbcf1",
+        "target": "cfx-eaee461c-cada-44b0-a15a-4768a181af53",
+        "sourceHandle": "output_1",
+        "targetHandle": "input_1",
+        "data": {
+          "sourceLabel": "Create Splunk Entity Types",
+          "targetLabel": "Create ITSI Import Entities job"
+        },
+        "label": "",
+        "sourceX": 397.9999777640499,
+        "sourceY": 288.9686853135997,
+        "targetX": 592.9999777640498,
+        "targetY": -122.99479082439584
+      },
+      {
+        "id": "vueflow__edge-cfx-eaee461c-cada-44b0-a15a-4768a181af53output_1-cfx-9015183f-f37d-4a2a-bed7-6d3330c36937input_1",
+        "type": "default",
+        "source": "cfx-eaee461c-cada-44b0-a15a-4768a181af53",
+        "target": "cfx-9015183f-f37d-4a2a-bed7-6d3330c36937",
+        "sourceHandle": "output_1",
+        "targetHandle": "input_1",
+        "data": {
+          "sourceLabel": "Create ITSI Import Entities job",
+          "targetLabel": "Create correlation search"
+        },
+        "label": "",
+        "sourceX": 592.9999777640498,
+        "sourceY": -41.03132732046291,
+        "targetX": 577.9999777640498,
+        "targetY": -2.9948034584583936
+      },
+      {
+        "id": "vueflow__edge-cfx-9015183f-f37d-4a2a-bed7-6d3330c36937output_1-cfx-d2acaa59-c029-440c-a03a-7c3344c13a47input_1",
+        "type": "default",
+        "source": "cfx-9015183f-f37d-4a2a-bed7-6d3330c36937",
+        "target": "cfx-d2acaa59-c029-440c-a03a-7c3344c13a47",
+        "sourceHandle": "output_1",
+        "targetHandle": "input_1",
+        "data": {
+          "sourceLabel": "Create ITSI Correlation Search",
+          "targetLabel": "Create Notable Event Aggregation Policy"
+        },
+        "label": "",
+        "sourceX": 577.9999777640498,
+        "sourceY": 78.96868531359966,
+        "targetX": 577.9999777640498,
+        "targetY": 117.00522180966674
+      }
+    ],
+    "position": [
+      23.94514284964942,
+      248.25840952874532
+    ],
+    "zoom": 1.2077489657955804,
+    "viewport": {
+      "x": 23.94514284964942,
+      "y": 248.25840952874532,
+      "zoom": 1.2077489657955804
+    },
+    "globalVariables": {
+      "variables": [
+        {
+          "name": "disabled",
+          "runtime_input": false,
+          "value_type": "integer",
+          "value": "0"
+        },
+        {
+          "runtime_input": true,
+          "name": "credential_name",
+          "value_type": "dynamic_lov_list",
+          "dynamic_lov_list": "Meraki Splunk Credentials",
+          "value": ""
+        }
+      ]
+    }
+  },
+  "ai_project_name": "",
+  "flow_type": "workflow"
+}

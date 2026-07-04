@@ -1,0 +1,383 @@
+name: Linux and Windows Host OS
+label: Host OS Inventory Collection for Linux and Windows
+scope: system
+# Pack version needs to be conforming to <major>.<minor>.<micro> etc versioning.
+# More detailed spec for versioning: https://packaging.python.org/en/latest/specifications/version-specifiers/
+version: 3.0.3
+folder: /collection/host_os_inventory_collection
+published_date: 2026-06-16
+publisher: Fabrix.ai
+# Description of the package. Supports HTML/markdown/plain text
+# Either can provide description as an inline string in this file
+# or have description.html and description.md and give corresponding file paths instead.
+# If description is provided by multiple ways, the order of precedence is description.md > description.html > description.value
+description: 
+  #value: "Host OS inventory collection for single tenant deployments."
+  md: "./description.md"
+
+# Type could be collection/feature
+type: collection
+
+
+
+# Other packs that this solution requires to be deployed
+requires:
+  - name: Fabrix Inventory Collection Base Pack
+    version: ">=7.2.1"
+
+
+artifacts:
+  
+  pstreams:
+   
+    - name: host-os-system-inventory
+      attributes:
+        retention_days: 5
+        unique_keys: ["unique_id"]
+        search_case_insensitive: true
+        _settings:
+          number_of_shards: 3
+          number_of_replicas: 1
+          refresh_interval: "30s"
+        timestamp: "collection_timestamp"
+        retention_purge_extra_filter: "asset_status = 'Purge'"
+        _mappings:
+          properties:
+            asset_object:
+              type: "keyword"
+            asset_status:
+              type: "keyword"
+            collection_status:
+              type: "keyword"
+            hostname:
+              type: "keyword"
+            host_os_ip:
+              type: "keyword"
+            host_bios_uuid:
+              type: "keyword"
+            unique_id:
+              type: "keyword"
+            host_os_vendor:
+              type: "keyword"
+            host_os_version:
+              type: "keyword"
+            host_os_kernel:
+              type: "keyword"
+            host_machine_type:
+              type: "keyword"
+            host_machine_vendor:
+              type: "keyword"
+            host_machine_model:
+              type: "keyword"
+            host_machine_serial:
+              type: "keyword"
+            host_cpu_vendor:
+              type: "keyword"
+            host_cpu_model:
+              type: "keyword"
+            vm_name:
+              type: "keyword"
+            esxi_host:
+              type: "keyword"
+            esxi_cluster:
+              type: "keyword"
+            vcenter_name:
+              type: "keyword"
+            vcenter_address:
+              type: "keyword"
+            host_os_nic_name:
+              type: "keyword"
+            host_os_nic_ip:
+              type: "keyword"
+            host_os_nic_mac:
+              type: "keyword"
+            host_os_nic_status:
+              type: "keyword"
+            host_os_disk_name:
+              type: "keyword"
+            host_os_disk_vendor:
+              type: "keyword"
+            host_os_disk_model:
+              type: "keyword"
+            host_os_disk_serial:
+              type: "keyword"
+            host_os_disk_state:
+              type: "keyword"
+            host_os_disk_mount:
+              type: "keyword"
+            host_os_fs_type:
+              type: "keyword"
+            host_os_fs_size:
+              type: "keyword"
+            host_os_fs_used:
+              type: "keyword"
+            host_os_fs_available:
+              type: "keyword"
+            host_os_service_name:
+              type: "keyword"
+            host_os_service_description:
+              type: "keyword"
+            host_os_service_state:
+              type: "keyword"
+            host_os_service_mode:
+              type: "keyword"
+            host_os_service_status:
+              type: "keyword"
+            host_os_process_name:
+              type: "keyword"
+            host_os_app_name:
+              type: "keyword"
+            host_os_app_version:
+              type: "keyword"
+            host_os_app_vendor:
+              type: "keyword"
+            host_os_app_arch:
+              type: "keyword"
+            host_os_app_package:
+              type: "keyword"
+            host_os_app_install_date:
+              type: "keyword"
+            host_os_app_group:
+              type: "keyword"
+            client_ip_address:
+              type: "keyword"
+            server_ip_address:
+              type: "keyword"
+            connection_flow:
+              type: "keyword"
+            connection_protocol:
+              type: "keyword"
+            connection_state:
+              type: "keyword"
+            local_ip_address:
+              type: "keyword"
+            host_cpus:
+              type: "double"
+            host_cores_per_socket:
+              type: "double"
+            host_cpu_sockets:
+              type: "double"
+            host_threads_per_core:
+              type: "double"
+            host_memory_gb:
+              type: "double"
+            host_os_nic_mtu:
+              type: "double"
+            host_os_disk_size:
+              type: "double"
+            host_os_disk_size_gb:
+              type: "double"
+            host_os_process_pid:
+              type: "double"
+            host_os_process_ppid:
+              type: "double"
+            host_os_service_pid:
+              type: "double"
+            client_port:
+              type: "double"
+            server_port:
+              type: "double"
+            local_port:
+              type: "double"
+            host_os_fs_used_perc:
+              type: "double"
+            host_os_fs_size_gb:
+              type: "double"
+            host_os_fs_used_gb:
+              type: "double"
+            host_os_fs_available_gb:
+              type: "double"
+            collection_timestamp:
+              type: "date"
+            
+
+    - name: network-endpoints-identity-stream 
+      attributes:
+        unique_keys: ["unique_id"]
+        timestamp: "collection_timestamp"
+        retention_days: 3
+        search_case_insensitive: true
+        _settings:
+          number_of_shards: 3
+          number_of_replicas: 1
+          refresh_interval: "30s"
+        _mappings:
+          properties:
+            collection_timestamp:
+              type: "date"
+
+    
+    - name: host_os_access_verification_status
+      attributes:
+        unique_keys: ["asset_id"]
+
+    - name: linux_windows_on_boarded_hosts
+      attributes:
+        retention_days: 365
+        unique_keys: ["ip_address"] 
+        search_case_insensitive: true
+        _settings: {
+          "number_of_shards": 3,
+          "number_of_replicas": 1,
+          "refresh_interval": "30s"}
+
+   
+  
+  pipelines:
+    
+    - name: linux_inventory_and_topology_using_ssh
+      version: 2024.09.25.1
+      file: ./artifacts/pipelines/linux_inventory_and_topology_using_ssh.txt
+      folder: HostOSInventory
+      creation_policy: overwrite
+    - name: linux_ondemand_inventory_and_topology_using_ssh
+      version: 2024.09.25.1
+      file: ./artifacts/pipelines/linux_ondemand_discovery_topology_using_ssh.txt
+      folder: HostOSInventory
+      creation_policy: overwrite
+    - name: windows_inventory_and_topology_using_winrm
+      version: 2024.09.25.1
+      file: ./artifacts/pipelines/windows_inventory_and_topology_using_winrm.txt
+      folder: HostOSInventory
+      creation_policy: overwrite
+    - name: windows_ondemand_inventory_and_topology_using_winrm
+      version: 2024.09.25.1
+      file: ./artifacts/pipelines/windows_ondemand_inventory_and_topology_using_winrm.txt
+      folder: HostOSInventory     
+      creation_policy: overwrite
+    - name: host_os_import_linux_windows_hosts
+      version: 2024.09.25.1
+      file: ./artifacts/pipelines/host_os_import_linux_windows_hosts.txt
+      folder: HostOSInventory   
+      creation_policy: overwrite
+    - name: host_os_access_verification
+      version: 2024.09.25.1
+      file: ./artifacts/pipelines/host_os_access_verification.txt
+      folder: HostOSInventory      
+      creation_policy: overwrite
+    - name: linux_inner_inventory_and_topology_using_ssh
+      version: 2024.09.25.1
+      file: ./artifacts/pipelines/linux_inner_inventory_and_topology_using_ssh.txt
+      folder: HostOSInventory 
+      creation_policy: overwrite
+    - name: windows_inner_inventory_and_topology_using_winrm
+      version: 2024.09.25.1
+      file: ./artifacts/pipelines/windows_inner_inventory_and_topology_using_winrm.txt
+      folder: HostOSInventory 
+      creation_policy: overwrite    
+  dashboards:
+    - name: host_os_asset_navigator
+      file: ./artifacts/dashboards/host_os_asset_navigator.json     
+      creation_policy: overwrite
+    - name: host_os_details_view_pack
+      file: ./artifacts/dashboards/host_os_details_view_pack.json    
+      creation_policy: overwrite
+    - name: host_os_inventory
+      file: ./artifacts/dashboards/host_os_inventory.json   
+      creation_policy: overwrite
+    - name: host_os_collection_and_access_status
+      file: ./artifacts/dashboards/host_os_collection_and_access_status.json 
+      creation_policy: overwrite
+    - name: host_os_configure_and_manage
+      file: ./artifacts/dashboards/host_os_configure_and_manage.json   
+      creation_policy: overwrite
+    - name: host_os_main_app
+      file: ./artifacts/dashboards/host_os_main_app.json 
+      creation_policy: overwrite
+    - name: host_os_topology
+      file: ./artifacts/dashboards/host_os_topology.json 
+      creation_policy: overwrite
+  stacks:
+    - name: host_os
+      file: ./artifacts/stacks/host_os_stack_pstream.json
+      creation_policy: overwrite
+
+customer_level:
+  launch_locations:
+  - pstream_name: rda_packs_dynamic_groups_and_pages
+    dashboard_group_name: groupStatus
+    dashboard_group_label: Status
+    dashboard_group_icon: "library.svg"
+    dashboard_page_name: host_os_collection_and_access_status
+    dashboard_page_label: Host OS Status
+    dashboard_page_icon: "library.svg"
+  - pstream_name: rda_packs_dynamic_groups_and_pages
+    dashboard_group_name: groupConfigure
+    dashboard_group_label: Configure and Manage
+    dashboard_group_icon: "asset.svg"
+    dashboard_page_name: host_os_configure_and_manage
+    dashboard_page_label: "Host OS Configure and Manage"
+    dashboard_page_icon: "asset.svg"
+  - pstream_name: rda_packs_dynamic_groups_and_pages
+    dashboard_group_name: groupInventory
+    dashboard_group_label: Inventory
+    dashboard_group_icon: ""
+    dashboard_page_name: host_os_inventory
+    dashboard_page_label: Host OS Inventory
+    dashboard_page_icon: "asset.svg"
+  - pstream_name: rda_packs_dynamic_groups_and_pages
+    dashboard_group_name: groupTopo
+    dashboard_group_label: Topology
+    dashboard_group_icon: ""
+    dashboard_page_name: host_os_asset_navigator
+    dashboard_page_label: Host OS Asset Navigator
+    dashboard_page_icon: "asset.svg" 
+  - pstream_name: rda_packs_dynamic_groups_and_pages
+    dashboard_group_name: groupTopo
+    dashboard_group_label: Topology
+    dashboard_group_icon: ""
+    dashboard_page_name: host_os_topology
+    dashboard_page_label: Host OS Topology
+    dashboard_page_icon: "asset.svg"   
+  artifacts:
+    blueprints:
+      - name: host_os_service_blueprint
+        file: ./artifacts/blueprints/host_os_service_blueprint.yaml
+        creation_policy: overwrite
+
+single_tenant:
+
+  launch_dashboard: host_os_main_app
+  
+  launch_locations:
+  - pstream_name: rda_packs_dynamic_groups_and_pages
+    dashboard_group_name: groupStatus
+    dashboard_group_label: Status
+    dashboard_group_icon: "library.svg"
+    dashboard_page_name: host_os_collection_and_access_status
+    dashboard_page_label: Host OS Status
+    dashboard_page_icon: "library.svg"
+  - pstream_name: rda_packs_dynamic_groups_and_pages
+    dashboard_group_name: groupConfigure
+    dashboard_group_label: Configure and Manage
+    dashboard_group_icon: "asset.svg"
+    dashboard_page_name: host_os_configure_and_manage
+    dashboard_page_label: "Host OS Configure and Manage"
+    dashboard_page_icon: "asset.svg"
+  - pstream_name: rda_packs_dynamic_groups_and_pages
+    dashboard_group_name: groupInventory
+    dashboard_group_label: Inventory
+    dashboard_group_icon: ""
+    dashboard_page_name: host_os_inventory
+    dashboard_page_label: Host OS Inventory
+    dashboard_page_icon: "asset.svg"
+  - pstream_name: rda_packs_dynamic_groups_and_pages
+    dashboard_group_name: groupTopo
+    dashboard_group_label: Topology
+    dashboard_group_icon: ""
+    dashboard_page_name: host_os_asset_navigator
+    dashboard_page_label: Host OS Asset Navigator
+    dashboard_page_icon: "asset.svg" 
+  - pstream_name: rda_packs_dynamic_groups_and_pages
+    dashboard_group_name: groupTopo
+    dashboard_group_label: Topology
+    dashboard_group_icon: ""
+    dashboard_page_name: host_os_topology
+    dashboard_page_label: Host OS Topology
+    dashboard_page_icon: "asset.svg"   
+  artifacts:
+    blueprints:
+      - name: host_os_service_blueprint
+        file: ./artifacts/blueprints/host_os_service_blueprint_single_tenant.yaml
+        creation_policy: overwrite
+  

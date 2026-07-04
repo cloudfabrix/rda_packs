@@ -1,0 +1,53 @@
+{
+    "type": "metric",
+    "name": "interface_out_errors_snmp_metric",
+    "enabled": true,
+    "schedule": {
+        "minutes": 15
+    },
+    "data": {
+        "stream": "rda_snmp_metrics",
+        "groupby": [
+            "target_ip",
+            "interface_description",
+            "name"
+        ],
+        "query": "collection = 'interface' and out_errors >= 0 and customer_tag is '$PKG_CONTEXT_CUSTOMER_TAG'"
+    },
+    "actions": [
+        {   
+            "state": "OPEN",
+            "threshold": "700000",
+            "agg_column": "out_errors",
+            "agg_func": "avg",
+            "repeat_count": 1,
+            "attributes": {
+                "severity": "CRITICAL",
+                "metric_name": "out_errors",
+                "metric_value_field": "out_errors_avg"
+            },
+            "notification": [
+                {
+                    "channel": "${PKG_CONTEXT_CUSTOMER_TAG}_telegraf_snmp_metrics"
+                }
+            ]
+        },
+        {
+            "state": "CLEAR",
+            "agg_column": "out_errors",
+            "agg_func": "avg",
+            "threshold": "600000",
+            "attributes": {
+                "severity": "INFO",
+                "metric_name": "out_errors",
+                "metric_value_field": "out_errors_avg"
+            },
+            "notification": [
+                {
+                    "channel": "${PKG_CONTEXT_CUSTOMER_TAG}_telegraf_snmp_metrics"
+                }
+            ]
+        }
+    ],
+    "saved_time": "2025-08-19T06:32:27.314966"
+}

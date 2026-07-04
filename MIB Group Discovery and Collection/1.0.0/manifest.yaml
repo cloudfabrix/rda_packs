@@ -1,0 +1,232 @@
+name: MIB Group Discovery and Collection
+label: MIB Group Discovery and Collection
+version: 1.0.0
+type: collection
+published_date: '2026-06-19'
+publisher: Fabrix.ai
+scope: system
+description:
+  md: ./description.md
+
+fabric_services:
+ - name: worker
+   version: ">=8.2.0.1"
+ - name: api-server
+   version: ">=8.2.0.1"
+
+artifacts:
+  dashboards:
+  - name: mib_collection_group_drilldown
+    file: artifacts/Dashboard/mib_collection_group_drilldown.json
+    tags: []
+    creation_policy: overwrite
+  - name: onboarding_device
+    file: artifacts/Dashboard/onboarding_device.json
+    tags: []
+    creation_policy: overwrite
+  - name: mib_management
+    file: artifacts/Dashboard/mib_management.json
+    tags: []
+    creation_policy: overwrite
+  - name: mib_collection_group
+    file: artifacts/Dashboard/mib_collection_group.json
+    tags: []
+    creation_policy: overwrite
+  - name: SNMPmibs
+    file: artifacts/Dashboard/SNMPmibs.json
+    tags: []
+    creation_policy: overwrite
+  - name: collection_run_total_devices
+    file: artifacts/Dashboard/collection_run_total_devices.json
+    tags: []
+    creation_policy: overwrite
+  - name: collection_run_success
+    file: artifacts/Dashboard/collection_run_success.json
+    tags: []
+    creation_policy: overwrite
+  - name: collection_run_failed
+    file: artifacts/Dashboard/collection_run_failed.json
+    tags: []
+    creation_policy: overwrite
+  - name: collection_groups_success
+    file: artifacts/Dashboard/collection_groups_success.json
+    tags: []
+  - name: collection_run_status
+    file: artifacts/Dashboard/collection_run_status.json
+    tags: []
+    creation_policy: overwrite
+  - name: collection_files_data
+    file: artifacts/Dashboard/collection_files_data.json
+    tags: []
+    creation_policy: overwrite
+  - name: device_access_status
+    file: artifacts/Dashboard/device_access_status.json
+    tags: []
+    creation_policy: overwrite  
+  - name: collection_data_for_device
+    file: artifacts/Dashboard/collection_data_for_device.json
+    tags: []
+    creation_policy: overwrite  
+  
+  pstreams:
+  - name: collection_files_data
+    description: ''
+    attributes:
+    attributes:
+      unique_keys:
+      - asset_ip
+      - groupname
+      - customer_tag
+      search_case_insensitive: true
+    source: OpenSearch
+    creation_policy: overwrite
+  - name: mibs_network_access_verification
+    description: ''
+    attributes:
+      unique_keys:
+      - ip_address
+      - protocol
+      - used_cred
+      - customer_tag
+      search_case_insensitive: true
+    source: OpenSearch
+    creation_policy: overwrite
+  - name: mibs_network_access_verification_final
+    description: ''
+    attributes:
+      unique_keys:
+      - ip_address
+      - customer_tag
+      search_case_insensitive: true
+    source: OpenSearch
+    creation_policy: overwrite
+  - name: mib_collection_groups
+    description: ''
+    attributes:
+      unique_keys:
+      - mib_name
+      - collection_group
+      search_case_insensitive: true
+    source: OpenSearch
+    creation_policy: overwrite
+  - name: mib_management
+    description: ''
+    attributes:
+      unique_keys:
+      - mib_name
+      search_case_insensitive: true
+    source: OpenSearch
+    creation_policy: overwrite
+  - name: snmp_onboarded_devices
+    description: ''
+    attributes:
+      unique_keys:
+      - device
+      search_case_insensitive: true
+    source: OpenSearch
+    creation_policy: overwrite
+  - name: mibs_collection_status_stream
+    description: ''
+    attributes:
+      retention_days: 7
+      search_case_insensitive: true
+    source: OpenSearch  
+    creation_policy: overwrite
+  - name: collection_discovery_status
+    description: 'Status of the collection'
+    attributes:
+      retention_days: 7
+      search_case_insensitive: true
+    source: OpenSearch  
+    creation_policy: overwrite
+  - name: ip_supported_mibs_stream
+    description: ''
+    attributes:
+      unique_keys:
+      - device
+      - supported_mibs
+      - collection_groups
+      search_case_insensitive: true
+    source: OpenSearch
+    creation_policy: overwrite
+  - name: collection_group_discovery
+    description: ''
+    attributes:
+      unique_keys:
+      - device_ip
+      - customer_tag
+      search_case_insensitive: true
+    source: OpenSearch 
+    creation_policy: overwrite
+  
+  pipelines:
+  - name: mibs_onboard_snmp_devices
+    file: artifacts/PublishedPipeline/mibs_onboard_snmp_devices.txt
+    version: 2026.03.17.1
+    folder: MibsCollection
+    skip_validation: false
+    creation_policy: overwrite
+  - name: mibs_collection
+    file: artifacts/PublishedPipeline/mibs_collection.txt
+    version: 2026.03.17.1
+    folder: MibsCollection
+    skip_validation: false
+    creation_policy: overwrite
+  - name: mibs_collection_main
+    file: artifacts/PublishedPipeline/mibs_collection_main.txt
+    version: 2026.03.17.1
+    folder: MibsCollection
+    skip_validation: false
+    creation_policy: overwrite
+  - name: mibs-import-customer-devices
+    file: artifacts/PublishedPipeline/mibs-import-customer-devices.txt
+    version: 2026.04.06.1
+    folder: MibsCollection
+    skip_validation: false  
+    creation_policy: overwrite
+  - name: mibs_access_verification_main_pipeline
+    file: artifacts/PublishedPipeline/mibs_access_verification_main_pipeline.txt
+    version: 2026.04.06.1
+    folder: MibsCollection
+    skip_validation: false   
+    creation_policy: overwrite
+  - name: mibs_network_access_verification_pipeline
+    file: artifacts/PublishedPipeline/mibs_network_access_verification_pipeline.txt
+    version: 2026.04.06.1
+    folder: MibsCollection
+    skip_validation: false    
+    creation_policy: overwrite
+  
+  credentials:
+  - name: asset-discovery
+    type: asset-discovery
+  - name: diagnostictools
+    type: diagnostictools    
+
+single_tenant:
+  launch_dashboard: SNMPmibs
+  artifacts:  
+    datasets: 
+    - name: mibs_access_verification_method
+      data_file: artifacts/Dataset/access_verification_method.csv
+      folder: MibsCollection
+      remove_on_deactivation: true
+    
+    blueprints:
+    - name: Collection Blueprint
+      file: artifacts/Blueprint/collection_blueprint.yaml
+      creation_policy: overwrite
+
+customer_level:
+  launch_dashboard: SNMPmibs
+  artifacts:  
+    datasets: 
+    - name: mibs_access_verification_method
+      data_file: artifacts/Dataset/access_verification_method.csv
+      folder: MibsCollection
+      remove_on_deactivation: true
+    
+    blueprints:
+    - name: Collection Blueprint
+      file: artifacts/Blueprint/customer_collection_blueprint.yaml
+      creation_policy: overwrite

@@ -1,0 +1,84 @@
+{
+    "type": "log",
+    "name": "device_temperature_critical",
+    "description": "Device temperature critical threshold exceeded CFX",
+    "enabled": false,
+    "schedule": {
+        "minutes": 5
+    },
+    "data": {
+        "stream": "syslog_udp_events_stream",
+        "query": "(syslog_code in ['PLATFORM-0-MOD_TEMPMAJALRM','ENVIRONMENT-3-OVERTEMP','ENVIRONMENTAL-1-ALERT'])",
+        "unique_keys": [
+            "rda_gw_client_ip",
+            "component_type",
+            "component_id"
+        ],
+        "groupby": [
+            "rda_gw_client_ip",
+            "device_hostname",
+            "syslog_code"
+        ],
+        "additional_columns": [
+            "raw",
+            "device_hostname",
+            "device_model",
+            "device_vendor",
+            "syslog_code",
+            "module_id",
+            "cpu_id",
+            "current_temp",
+            "threshold_temp"
+        ],
+        "custom_unique_keys": [
+            "component_type",
+            "component_id"
+        ],
+        "data_transformations": [
+            {
+                "type": "eval",
+                "columns": {
+                    "alarm_class": {
+                        "expr": "'Temperature'"
+                    },
+                    "component_type": {
+                        "expr": "'module' if module_id else 'cpu' if cpu_id else 'chassis'"
+                    },
+                    "component_id": {
+                        "expr": "str(module_id) if module_id else str(cpu_id) if cpu_id else 'chassis'"
+                    },
+                    "current_temp_safe": {
+                        "expr": "str(current_temp) if current_temp else 'N/A'"
+                    },
+                    "threshold_temp_safe": {
+                        "expr": "str(threshold_temp) if threshold_temp else 'N/A'"
+                    }
+                }
+            }
+        ],
+        "padding_time_seconds": 60,
+        "limit": 10000
+    },
+    "actions": [
+        {
+            "state": "OPEN",
+            "extra_query": "syslog_code != ''",
+            "attributes": {
+                "severity": "CRITICAL",
+                "alert_message": "Temperature critical on {{device_hostname}} ({{rda_gw_client_ip}}) component={{component_type}} id={{component_id}} current={{current_temp_safe}}C threshold={{threshold_temp_safe}}C",
+                "recommendedaction": "Check cooling and airflow. Verify fan status using 'show environment fan' and temperature using 'show environment temperature'. Reduce load or isolate affected module."
+            },
+            "throttle": {
+                "value": 60,
+                "unit": "MINUTES"
+            },
+            "notification_profile": "snmp_metrics_notification_profile",
+            "notification": [
+                {
+                    "channel": "asm_syslog_webhook"
+                }
+            ]
+        }
+    ],
+    "saved_time": "2026-04-15T09:25:46.876015"
+}

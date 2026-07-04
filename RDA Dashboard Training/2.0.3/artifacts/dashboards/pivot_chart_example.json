@@ -1,0 +1,348 @@
+{
+    "name": "pivot_chart_example",
+    "label": "Pivot Chart",
+    "description": "Pivot Chart example",
+    "version": "04.30.26.1",
+    "enabled": true,
+    "showTitle": true,
+    "dashboard_style": "auto",
+    "live_edit": true,
+    "status_poller": {},
+    "dashboard_type": "dashboard",
+    "dashboard_pages": [],
+    "dashboard_generator": {
+        "attachment": "widget_code_generator"
+    },
+    "dashboard_filters": {
+        "time_filter": true,
+        "default_time_filter_labels": [
+            "All Time"
+        ],
+        "columns_filter": [],
+        "group_filters": []
+    },
+    "dashboard_sections": [
+        {
+            "title": "Pivot Chart",
+            "show_filter": true,
+            "widgets": [
+                {
+                    "title": "Advanced Pivot with default Count Aggregation and default Sort",
+                    "widget_type": "tabular",
+                    "duration_hours": 24000,
+                    "stream": "sample-ecommerce-data",
+                    "extra_filter": "geoip.city_name is not empty",
+                    "min_width": 6,
+                    "height": 6,
+                    "max_width": 6,
+                    "columns": {
+                        "geoip.city_name": {
+                            "title": "Customer City",
+                            "key": true
+                        }
+                    },
+                    "pivot": {
+                        "pivot_type": "advanced",
+                        "group_by": [
+                            "geoip.city_name"
+                        ],
+                        "series": [
+                            {
+                                "column": "geoip.city_name",
+                                "label": "Order Count"
+                            }
+                        ]
+                    },
+                    "widget_id": "915244d9"
+                },
+                {
+                    "title": "Advanced Pivot with Sum Aggregation",
+                    "widget_type": "tabular",
+                    "duration_hours": 24000,
+                    "stream": "sample-ecommerce-data",
+                    "extra_filter": "geoip.city_name is not empty",
+                    "min_width": 6,
+                    "height": 6,
+                    "max_width": 6,
+                    "columns": {
+                        "geoip.city_name": {
+                            "title": "Customer City",
+                            "key": true
+                        }
+                    },
+                    "pivot": {
+                        "pivot_type": "advanced",
+                        "group_by": [
+                            "geoip.city_name"
+                        ],
+                        "series": [
+                            {
+                                "column": "taxless_total_price",
+                                "agg": "sum",
+                                "type": "int",
+                                "label": "Total Sales"
+                            }
+                        ]
+                    },
+                    "widget_id": "b798cf7f"
+                },
+                {
+                    "title": "Advanced Pivot with Multi-Column Group and Multi-Column Sort",
+                    "widget_type": "tabular",
+                    "duration_hours": 24000,
+                    "stream": "sample-ecommerce-data",
+                    "extra_filter": "geoip.city_name is not empty",
+                    "min_width": 6,
+                    "height": 6,
+                    "max_width": 6,
+                    "columns": {
+                        "geoip.city_name": "City",
+                        "day_of_week": "Weekday"
+                    },
+                    "sorting": [
+                        {
+                            "geoip.city_name": "asc"
+                        },
+                        {
+                            "Total Sales": "desc"
+                        }
+                    ],
+                    "pivot": {
+                        "pivot_type": "advanced",
+                        "group_by": [
+                            "geoip.city_name",
+                            "day_of_week"
+                        ],
+                        "series": [
+                            {
+                                "column": "taxless_total_price",
+                                "agg": "sum",
+                                "type": "int",
+                                "label": "Total Sales"
+                            }
+                        ]
+                    },
+                    "widget_id": "0cb9db0e"
+                },
+                {
+                    "widget_type": "tabular",
+                    "title": "Advanced Pivot with Multiple Aggregations and Custom Columns",
+                    "stream": "sample-ecommerce-data",
+                    "duration_hours": 24000,
+                    "max_width": 6,
+                    "min_width": 6,
+                    "ts_column": "timestamp",
+                    "extra_filter": "customer_full_name is not empty",
+                    "columns": {
+                        "customer_full_name": "Customer name"
+                    },
+                    "sorting": [
+                        {
+                            "Total_price": "desc"
+                        }
+                    ],
+                    "pivot": {
+                        "pivot_type": "advanced",
+                        "group_by": [
+                            "customer_full_name"
+                        ],
+                        "series": [
+                            {
+                                "column": "taxless_total_price",
+                                "agg": "sum",
+                                "type": "int",
+                                "label": "Total_Price"
+                            },
+                            {
+                                "column": "total_quantity",
+                                "agg": "sum",
+                                "type": "int",
+                                "label": "Total_Quantity"
+                            }
+                        ]
+                    },
+                    "custom_columns": [
+                        {
+                            "id": "avg_total_cost",
+                            "label": "Avg Total Cost",
+                            "expr": "(Total_Price / Total_Quantity)",
+                            "visible": true,
+                            "default": null
+                        }
+                    ],
+                    "hide_columns": [
+                        "Customer Name"
+                    ],
+                    "widget_id": "fc6b2805"
+                },
+                {
+                    "title": "Advanced Pivot with Group Drilldown",
+                    "widget_type": "tabular",
+                    "duration_hours": 24000,
+                    "stream": "sample-ecommerce-data",
+                    "extra_filter": "geoip.city_name is not empty",
+                    "min_width": 6,
+                    "height": 6,
+                    "max_width": 6,
+                    "columns": {
+                        "customer_full_name": {
+                            "title": "Customer Name",
+                            "key": true
+                        },
+                        "geoip.city_name": {
+                            "title": "Customer City",
+                            "key": true
+                        }
+                    },
+                    "sorting": [
+                        {
+                            "Count": "desc"
+                        },
+                        {
+                            "customer_full_name": "asc"
+                        }
+                    ],
+                    "actions": [
+                        {
+                            "appName": "user-dashboard/training_drilldown_dashboard",
+                            "permission": "aia:page:view",
+                            "drillDownLinkField": "customer_full_name",
+                            "identifier": "dns_name",
+                            "selectionType": "SINGLE",
+                            "stateName": "app.featureapp",
+                            "title": "View Details",
+                            "type": "GO_TO_APP_STATE"
+                        }
+                    ],
+                    "pivot": {
+                        "pivot_type": "advanced",
+                        "group_by": [
+                            "geoip.city_name",
+                            "customer_full_name"
+                        ],
+                        "series": [
+                            {
+                                "column": "geoip.city_name",
+                                "agg": "value_count",
+                                "type": "int",
+                                "label": "Count"
+                            }
+                        ]
+                    },
+                    "widget_id": "915244c9"
+                },
+                {
+                    "title": "Extended Pivot with Weekday type Column Groups and Sum Aggregation",
+                    "widget_type": "tabular",
+                    "duration_hours": 24000,
+                    "stream": "sample-ecommerce-data",
+                    "extra_filter": "geoip.city_name is not empty",
+                    "min_width": 6,
+                    "height": 6,
+                    "max_width": 6,
+                    "columns": {
+                        "geoip.city_name": "City"
+                    },
+                    "pivot": {
+                        "pivot_type": "extended",
+                        "group_by": [
+                            "geoip.city_name",
+                            "day_of_week"
+                        ],
+                        "pivot_col": {
+                            "type": "weekday"
+                        },
+                        "series": [
+                            {
+                                "column": "taxless_total_price",
+                                "agg": "sum",
+                                "type": "int"
+                            }
+                        ]
+                    },
+                    "widget_id": "d178d93e"
+                },
+                {
+                    "title": "Extended Pivot with Multi-Column Row Groups",
+                    "widget_type": "tabular",
+                    "duration_hours": 24000,
+                    "stream": "sample-ecommerce-data",
+                    "extra_filter": "geoip.city_name is not empty",
+                    "min_width": 6,
+                    "height": 6,
+                    "max_width": 6,
+                    "columns": {
+                        "geoip.city_name": "City",
+                        "customer_gender": "Customer Gender"
+                    },
+                    "pivot": {
+                        "pivot_type": "extended",
+                        "group_by": [
+                            "geoip.city_name",
+                            "customer_gender",
+                            "day_of_week"
+                        ],
+                        "pivot_col": {
+                            "type": "weekday"
+                        },
+                        "series": [
+                            {
+                                "column": "taxless_total_price",
+                                "agg": "sum",
+                                "type": "int"
+                            }
+                        ]
+                    },
+                    "widget_id": "d5f66f85"
+                },
+                {
+                    "title": "Extended Pivot with Row and Column Totals",
+                    "widget_type": "tabular",
+                    "duration_hours": 24000,
+                    "stream": "sample-ecommerce-data",
+                    "extra_filter": "geoip.city_name is not empty",
+                    "min_width": 6,
+                    "height": 6,
+                    "max_width": 6,
+                    "columns": {
+                        "geoip.city_name": "City"
+                    },
+                    "totals": {
+                        "column_total": {
+                            "label": "City Total Sales ($)"
+                        },
+                        "row_total": {
+                            "label": "All Cities Total ($)"
+                        }
+                    },
+                    "pivot": {
+                        "pivot_type": "extended",
+                        "group_by": [
+                            "geoip.city_name",
+                            "day_of_week"
+                        ],
+                        "pivot_col": {
+                            "type": "weekday"
+                        },
+                        "series": [
+                            {
+                                "column": "taxless_total_price",
+                                "agg": "sum",
+                                "type": "int",
+                                "label": "Total Sales"
+                            }
+                        ]
+                    },
+                    "widget_id": "eb8e4e67"
+                }
+            ]
+        }
+    ],
+    "saved_time": "2026-04-30T04:47:11.919047",
+    "attachments": [
+        {
+            "name": "widget_code_generator",
+            "value": "{%- set widgets =  dashboard[\"dashboard_sections\"][0][\"widgets\"] -%}\r\n{%- set new_widgets =  [] -%}\r\n{%- set ns =  namespace(count=0) -%}\r\n\r\n{%- for w in widgets -%}\r\n    {%- if w.get(\"widget_type\") -%}\r\n        {%-\r\n            set nw = {\r\n                \"title\": \"JSON\",\r\n                \"widget_group\": \"g\"+str(ns.count),\r\n                \"min_width\": w.get(\"min_width\", 6),\r\n                \"max_width\": w.get(\"max_width\", 6),\r\n                \"height\": w.get(\"height\", 4),\r\n                \"widget_type\": \"codeblock\",\r\n                \"content\": json_dumps_indent(w, 2),\r\n                \"lang\": \"json\",\r\n                \"widget_id\": w.get(\"widget_id\", str(ns.count)) + \"_code\"\r\n            }\r\n        -%}\r\n        {%- set _ = w.update({\"widget_group\":  \"g\"+str(ns.count) }) -%}\r\n        {%- set _ = new_widgets.append(nw) -%}\r\n        {%- set ns.count = ns.count + 1 -%}\r\n    {%- endif -%}\r\n{%- endfor -%}\r\n\r\n{%- set _ = widgets.extend(new_widgets) -%}"
+        }
+    ]
+}

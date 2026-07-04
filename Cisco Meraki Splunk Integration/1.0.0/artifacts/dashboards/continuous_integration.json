@@ -1,0 +1,313 @@
+{
+    "name": "continuous_integration",
+    "label": "Continuous Integration",
+    "description": "Continuous Integration dashboard",
+    "version": "25.10.15.2",
+    "enabled": false,
+    "dashboard_type": "template",
+    "dashboard_folder": "MerakiIntegartionPack",
+    "dashboard_style": "auto",
+    "template_variables": {
+        "CUST_ID": {
+            "contextId": "customerId"
+        },
+        "PROJ_ID": {
+            "contextId": "projectId"
+        },
+        "CUST_TAG": {
+            "contextId": "customerTag"
+        }
+    },
+    "dashboard_filters": {
+        "time_filter": true,
+        "default_time_filter_labels": [
+            "Last 1 month"
+        ]
+    },
+    "live_edit": true,
+    "dashboard_sections": [
+        {
+            "title": "Continuous Integration",
+            "show_filter": false,
+            "widgets": [
+                {
+                    "title": "Continuous Integration",
+                    "widget_type": "tabular",
+                    "stream": "rda_blueprints_meta",
+                    "extra_filter1": "name contains 'Network Device Discovery'",
+                    "extra_filter": "(name contains 'meraki_splunk_continous_ingestion_v1' and name contains '{{CUST_TAG}}') or (name contains 'meraki_splunk_continous_ingestion_v1')",
+                    "duration_hours": 87600,
+                    "ts_column": "timestamp",
+                    "min_width": 12,
+                    "height": 3,
+                    "max_width": 12,
+                    "paginated": true,
+                    "refreshRequired": true,
+                    "timebased": false,
+                    "max_rows": 50,
+                    "remote_searchable": true,
+                    "remote_searchable_cols": [
+                        "id",
+                        "name",
+                        "comment",
+                        "category",
+                        "note",
+                        "url"
+                    ],
+                    "columns": {
+                        "name": {
+                            "title": "Name",
+                            "key": true
+                        },
+                        "id": {
+                            "title": "Id",
+                            "key": true
+                        },
+                        "comment": {
+                            "title": "Description"
+                        },
+                        "category": {
+                            "title": "Category",
+                            "key": true,
+                            "visible": false
+                        },
+                        "auto_deploy": {
+                            "title": "Auto Deploy",
+                            "visible": false
+                        },
+                        "note": {
+                            "title": "Note",
+                            "visible": false
+                        },
+                        "url": {
+                            "title": "URL",
+                            "key": true,
+                            "visible": false
+                        }
+                    },
+                    "custom_columns": [
+                        {
+                            "id": "enabled",
+                            "label": "Enabled",
+                            "expr": "'yes' if enabled else 'no'",
+                            "htmlTemplateForRow": "{%raw%}<span class='badge' style='background-color: {{ row.enableColor }}' > {{ row.enabled }} </span>{%endraw%}"
+                        },
+                        {
+                            "id": "enableColor",
+                            "label": "Enable Color",
+                            "expr": "['#4CAF50'] if enabled == 'yes' else ['#9E9E9E']",
+                            "hidden": true,
+                            "visible": false,
+                            "sortable": false
+                        },
+                        {
+                            "id": "warningColor",
+                            "label": "Warning Color",
+                            "expr": "['#FFA726'] if warnings > 0 else ['#03A9F4']",
+                            "hidden": true,
+                            "visible": false,
+                            "sortable": false
+                        },
+                        {
+                            "id": "errorColor",
+                            "label": "Error Color",
+                            "expr": "['#B71C1C'] if errors > 0  else ['#03A9F4']",
+                            "hidden": true,
+                            "visible": false,
+                            "sortable": false
+                        },
+                        {
+                            "id": "errors",
+                            "label": "Audit Errors",
+                            "htmlTemplateForRow": "{%raw%}<span class='badge' style='background-color: {{ row.errorColor }}' > {{ row.errors }} </span>{%endraw%}"
+                        },
+                        {
+                            "id": "warnings",
+                            "label": "Audit Warnings",
+                            "htmlTemplateForRow": "{%raw%}<span class='badge' style='background-color: {{ row.warningColor }}' > {{ row.warnings }} </span>{%endraw%}"
+                        },
+                        {
+                            "id": "artifact_name",
+                            "label": "Artifact Name",
+                            "expr": "id",
+                            "key": true,
+                            "visible": false,
+                            "sortable": false
+                        },
+                        {
+                            "id": "artifact_type",
+                            "label": "Artifact Type",
+                            "expr": "'blueprint'",
+                            "key": true,
+                            "visible": false,
+                            "sortable": false
+                        }
+                    ],
+                    "actions": [
+                        {
+                            "permission": "rda:deploymentspec:import",
+                            "title": "Dashboard",
+                            "type": "GO_TO_APP_STATE",
+                            "appName": "dynamic-dashboard",
+                            "selectionType": "SINGLE",
+                            "identifier": "saas-service-action:dspecs-view-dashboard",
+                            "drillDownLinkField": "name"
+                        },
+                        {
+                            "permission": "rda:deploymentspec:view",
+                            "title": "View",
+                            "type": "POPUP_FORM",
+                            "selectionType": "SINGLE",
+                            "identifier": "saas-service-action:dspecs-view-spec",
+                            "api-endpoint": {
+                                "service-name": "saas-reports",
+                                "methodName": "getForm",
+                                "stringified-params": false,
+                                "parse-output": false,
+                                "params": [
+                                    {
+                                        "formId": "rda.saas.deploymentspec.view"
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "permission": "rda:deploymentspec:edit",
+                            "title": "Edit",
+                            "type": "POPUP_FORM",
+                            "selectionType": "SINGLE",
+                            "identifier": "saas-service-action:dspecs-edit-spec",
+                            "api-endpoint": {
+                                "service-name": "saas-reports",
+                                "methodName": "getForm",
+                                "stringified-params": false,
+                                "parse-output": false,
+                                "params": [
+                                    {
+                                        "formId": "rda.saas.deploymentspec.edit"
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "widget_id": "70200583"
+                },
+                {
+                    "title": "All Jobs",
+                    "widget_type": "tabular",
+                    "stream": "rda_system_job_tracker",
+                    "extra_filter0": "attributes_deployment_id is 'network_device_discovery'",
+                    "extra_filter": "pipeline_name in ['meraki_data_ingestion_to_splunk_index_v2']",
+                    "refreshOptions": {
+                        "refreshType": "Periodic",
+                        "refreshInterval": 30000
+                    },
+                    "duration_hours": 87600,
+                    "ts_column": "timestamp",
+                    "min_width": 12,
+                    "height": 10,
+                    "max_width": 12,
+                    "paginated": true,
+                    "refreshRequired": true,
+                    "timebased": false,
+                    "max_rows": 10,
+                    "remote_searchable": true,
+                    "columns": {
+                        "jobid": {
+                            "title": "Job ID",
+                            "key": true
+                        },
+                        "pid": {
+                            "title": "PID",
+                            "key": true
+                        },
+                        "pod_id": {
+                            "title": "POD ID"
+                        },
+                        "pipeline_name": {
+                            "title": "Pipeline Name",
+                            "key": true,
+                            "visible": true
+                        },
+                        "attributes_pipeline_version": {
+                            "title": "Pipeline Version",
+                            "visible": false
+                        },
+                        "status": {
+                            "title": "Status",
+                            "visible": true
+                        },
+                        "reason": {
+                            "title": "Reason",
+                            "key": true,
+                            "visible": true
+                        },
+                        "start_time": {
+                            "title": "Job Created",
+                            "type": "DATETIME",
+                            "key": true,
+                            "visible": true
+                        },
+                        "ended_time": {
+                            "title": "Job Ended",
+                            "type": "DATETIME",
+                            "key": true,
+                            "visible": true
+                        },
+                        "age": {
+                            "title": "Duration",
+                            "key": true,
+                            "visible": true
+                        },
+                        "attributes_deployment_run_mode": {
+                            "title": "Run Mode",
+                            "key": true,
+                            "visible": false
+                        }
+                    },
+                    "custom_columns": [],
+                    "actions": [
+                        {
+                            "permission": "rda:jobs:view",
+                            "title": "View Traces",
+                            "type": "POPUP_REPORT",
+                            "selectionType": "SINGLE",
+                            "identifier": "saas-service-action:job-traces",
+                            "api-endpoint": {
+                                "service-name": "saas-reports",
+                                "methodName": "getReport",
+                                "stringified-params": false,
+                                "parse-output": false,
+                                "params": [
+                                    {
+                                        "reportId": "rda.saas.worker.traces"
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "permission": "rda:logs:view",
+                            "title": "View Logs",
+                            "type": "POPUP_REPORT",
+                            "selectionType": "SINGLE",
+                            "identifier": "saas-service-action:job-logs",
+                            "api-endpoint": {
+                                "service-name": "saas-reports",
+                                "methodName": "getReport",
+                                "stringified-params": false,
+                                "parse-output": false,
+                                "params": [
+                                    {
+                                        "reportId": "rda.saas.worker.logs"
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "widget_id": "0c070112"
+                }
+            ]
+        }
+    ],
+    "saved_time": "2026-03-20T09:15:06.226226"
+}

@@ -1,0 +1,1469 @@
+{
+    "name": "host_os_configure_and_manage",
+    "label": "Host OS Configure and Manage",
+    "is_template": false,
+    "description": "Host OS configure and management dashboard",
+    "version": "24.11.27.1",
+    "enabled": false,
+    "dashboard_type": "template",
+    "dashboard_folder": "HostOSInventory",
+    "dashboard_style": "auto",
+    "live_edit": true,
+    "status_poller": {},
+    "template_variables": {
+        "CUST_ID": {
+            "contextId": "customerId"
+        },
+        "PROJ_ID": {
+            "contextId": "projectId"
+        },
+        "CUST_TAG": {
+            "contextId": "customerTag"
+        }
+    },
+    "dashboard_sections": [
+        {
+            "title": "Host OS Credential",
+            "widgets": [
+                {
+                    "title": "Host OS Credential Management",
+                    "widget_type": "tabular",
+                    "stream": "rda_secrets_meta",
+                    "extra_filter": "type in ['windows-inventory','linux-inventory'] and (customerTag is '{{CUST_TAG}}' or customerTag is empty)",
+                    "timebased": false,
+                    "remote_searchable_cols": [
+                        "name",
+                        "type",
+                        "typeDescription"
+                    ],
+                    "ts_column": "saved_time",
+                    "paginated": true,
+                    "height": 10,
+                    "min_wdith": 12,
+                    "columns": {
+                        "name": {
+                            "title": "Name",
+                            "key": true
+                        },
+                        "type": {
+                            "title": "Type",
+                            "key": true
+                        },
+                        "typeDescription": {
+                            "title": "Description"
+                        },
+                        "has_credential_check": {
+                            "title": "Credential Check",
+                            "visible": false
+                        },
+                        "saved_time": {
+                            "title": "Saved Time",
+                            "type": "DATETIME"
+                        },
+                        "timestamp": {
+                            "title": "When",
+                            "type": "HUMANIZE_TIME_DELTA",
+                            "source-column": "saved_time",
+                            "sortable": false
+                        }
+                    },
+                    "custom_columns": [
+                        {
+                            "id": "rowStyleClass",
+                            "hidden": true,
+                            "visiblle": false,
+                            "expr": "'bg-fading-blue' if time_now_as_ms() - isoformat_to_ms(saved_time) <= 120000 else None"
+                        },
+                        {
+                            "id": "artifact_name",
+                            "label": "Artifact Name",
+                            "expr": "name",
+                            "key": true,
+                            "visible": false,
+                            "sortable": false
+                        },
+                        {
+                            "id": "artifact_type",
+                            "label": "Artifact Type",
+                            "expr": "'source'",
+                            "key": true,
+                            "visible": false,
+                            "sortable": false
+                        }
+                    ],
+                    "actions": [
+                        {
+                            "permission": "rda:credential:add",
+                            "title": "Add",
+                            "icon": "mdi mdi-plus",
+                            "type": "POPUP_FORM",
+                            "selectionType": "NONE",
+                            "identifier": "saas-service-action:vault-add",
+                            "api-endpoint": {
+                                "service-name": "saas-reports",
+                                "methodName": "getForm",
+                                "stringified-params": true,
+                                "parse-output": false,
+                                "params": [
+                                    {
+                                        "formId": "rda.saas.vault.add",
+                                        "extension_types": [
+                                            "linux-inventory",
+                                            "windows-inventory"
+                                        ]
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "permission": "rda:credential:edit",
+                            "title": "Edit",
+                            "type": "POPUP_FORM",
+                            "selectionType": "SINGLE",
+                            "identifier": "saas-service-action:vault-edit",
+                            "api-endpoint": {
+                                "service-name": "saas-reports",
+                                "methodName": "getForm",
+                                "stringified-params": true,
+                                "parse-output": false,
+                                "params": [
+                                    {
+                                        "formId": "rda.saas.vault.edit"
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "permission": "rda:credential:view",
+                            "title": "View",
+                            "type": "POPUP_FORM",
+                            "selectionType": "SINGLE",
+                            "displayLabelColumnId": "name",
+                            "drillDownLinkField": "name",
+                            "identifier": "saas-service-action:vault-view",
+                            "api-endpoint": {
+                                "service-name": "saas-reports",
+                                "methodName": "getForm",
+                                "stringified-params": true,
+                                "parse-output": false,
+                                "params": [
+                                    {
+                                        "formId": "rda.saas.vault.view"
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "permission": "rda:credential:verify",
+                            "title": "Verify Credentials",
+                            "type": "POPUP_FORM",
+                            "selectionType": "SINGLE",
+                            "identifier": "saas-service-action:vault-edit",
+                            "actionCondition": {
+                                "actionControl": "HIDE_IF",
+                                "conditionalField": [
+                                    {
+                                        "conditionType": "EQUAL",
+                                        "conditionValue": "false",
+                                        "fieldId": "has_credential_check"
+                                    }
+                                ]
+                            },
+                            "api-endpoint": {
+                                "service-name": "saas-reports",
+                                "methodName": "getForm",
+                                "stringified-params": true,
+                                "parse-output": false,
+                                "params": [
+                                    {
+                                        "formId": "rda.saas.vault.validateConenctivity"
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "permission": "rda:credential:verify",
+                            "title": "Delete",
+                            "type": "POPUP_FORM",
+                            "selectionType": "SINGLE",
+                            "identifier": "saas-service-action:vault-delete",
+                            "api-endpoint": {
+                                "service-name": "saas-reports",
+                                "methodName": "getForm",
+                                "stringified-params": true,
+                                "parse-output": false,
+                                "params": [
+                                    {
+                                        "formId": "rda.saas.vault.delete"
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "widget_id": "01dc3a55"
+                }
+            ]
+        },
+        {
+            "title": "Host Discovery Targets",
+            "widgets": [
+                {
+                    "title": "Linux and Windows Hosts to Discover",
+                    "widget_type": "tabular",
+                    "stream": "linux_windows_on_boarded_hosts",
+                    "extra_filter": "(customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "timebased": false,
+                    "remote_searchable": true,
+                    "remote_searchable_cols": [
+                        "ip_address",
+                        "type",
+                        "port",
+                        "credential",
+                        "discovery_scope"
+                    ],
+                    "ts_column": "timestamp",
+                    "paginated": true,
+                    "height": 6,
+                    "min_wdith": 12,
+                    "max_wdith": 12,
+                    "columns": {
+                        "ip_address": {
+                            "title": "IP Address",
+                            "key": true
+                        },
+                        "type": {
+                            "title": "Host Type",
+                            "key": true
+                        },
+                        "port": {
+                            "title": "Port",
+                            "key": true
+                        },
+                        "credential": {
+                            "title": "Credenatial Name",
+                            "key": true
+                        },
+                        "discovery_scope": {
+                            "title": "Discovery Scope",
+                            "visible": true,
+                            "key": true,
+                            "htmlTemplateForRow": "{%raw%}<span class='badge' style='background-color: {{ row.discovery_status_color }}' > {{ row.discovery_scope }} </span>{%endraw%}"
+                        },
+                        "timestamp": {
+                            "title": "Timestamp",
+                            "type": "DATETIME"
+                        },
+                        "_RDA_Id": {
+                            "title": "RDA ID",
+                            "key": true,
+                            "visible": false
+                        }
+                    },
+                    "custom_columns": [
+                        {
+                            "id": "discovery_status_color",
+                            "label": "Discovery Scope Color",
+                            "key": false,
+                            "visible": false,
+                            "expr": "'#008000' if str(discovery_scope) in [ 'yes', 'True'] else '#FF0000'"
+                        }
+                    ],
+                    "actions": [
+                        {
+                            "permission": "rda:github:view",
+                            "title": "Add Linux Host",
+                            "type": "POPUP_FORM",
+                            "selectionType": "NONE",
+                            "identifier": "saas-service-action:userdashboard-add-yaml",
+                            "api-endpoint": {
+                                "service-name": "saas-reports",
+                                "methodName": "getForm",
+                                "stringified-params": true,
+                                "parse-output": false,
+                                "params": [
+                                    {
+                                        "formId": "rda.saas.dynamic.form",
+                                        "formActionList": {
+                                            "formActions": [
+                                                {
+                                                    "actionLabel": "Add",
+                                                    "identifier": "Submit"
+                                                },
+                                                {
+                                                    "actionLabel": "Cancel",
+                                                    "identifier": "Cancel"
+                                                }
+                                            ]
+                                        },
+                                        "formDefinition": {
+                                            "id": "rda.saas.dynamic.form",
+                                            "refreshRequired": true,
+                                            "formFieldList": [
+                                                {
+                                                    "help": "IP Address of a linux host",
+                                                    "dataType": "string",
+                                                    "controlType": "TEXT_FIELD",
+                                                    "required": true,
+                                                    "editable": true,
+                                                    "label": "IP Address",
+                                                    "hidden": false,
+                                                    "fieldId": "ip_address"
+                                                },
+                                                {
+                                                    "fieldId": "type",
+                                                    "label": "Select the host type",
+                                                    "help": "Select the host type",
+                                                    "dataType": "string",
+                                                    "hidden": false,
+                                                    "editable": false,
+                                                    "required": true,
+                                                    "lovValues": [
+                                                        {
+                                                            "identifier": "linux",
+                                                            "displayName": "Linux"
+                                                        },
+                                                        {
+                                                            "identifier": "windows",
+                                                            "displayName": "Windows"
+                                                        }
+                                                    ],
+                                                    "defaultValue": "linux",
+                                                    "controlType": "RADIO_BUTTON"
+                                                },
+                                                {
+                                                    "help": "SSH Port",
+                                                    "dataType": "INT",
+                                                    "controlType": "INT",
+                                                    "required": true,
+                                                    "editable": true,
+                                                    "label": "SSH Port",
+                                                    "hidden": false,
+                                                    "fieldId": "port",
+                                                    "defaultValue": 22
+                                                },
+                                                {
+                                                    "help": "Credential to use for this IP address for linux host",
+                                                    "dataType": "string",
+                                                    "controlType": "COMBO_BOX",
+                                                    "required": true,
+                                                    "editable": true,
+                                                    "label": "Credential Name",
+                                                    "hidden": false,
+                                                    "fieldId": "credential",
+                                                    "lovSourceType": "pstream",
+                                                    "lovSourceParams": {
+                                                        "name": "rda_secrets_meta",
+                                                        "valueColumn": "name",
+                                                        "query": "type contains 'linux-inventory'"
+                                                    }
+                                                },
+                                                {
+                                                    "fieldId": "discovery_scope",
+                                                    "label": "Add it to discovery?",
+                                                    "help": "Should this linux host be part of discovery?",
+                                                    "dataType": "string",
+                                                    "hidden": false,
+                                                    "editable": true,
+                                                    "required": true,
+                                                    "lovValues": [
+                                                        {
+                                                            "identifier": "yes",
+                                                            "displayName": "Yes"
+                                                        },
+                                                        {
+                                                            "identifier": "no",
+                                                            "displayName": "No"
+                                                        }
+                                                    ],
+                                                    "controlType": "RADIO_BUTTON"
+                                                },
+                                                {
+                                                    "help": "customer_tag",
+                                                    "dataType": "string",
+                                                    "controlType": "TEXT_FIELD",
+                                                    "required": true,
+                                                    "editable": true,
+                                                    "label": "customer_tag",
+                                                    "hidden": true,
+                                                    "defaultValue": "{{CUST_TAG}}",
+                                                    "fieldId": "customer_tag"
+                                                },
+                                                {
+                                                    "help": "customer_id",
+                                                    "dataType": "string",
+                                                    "controlType": "TEXT_FIELD",
+                                                    "required": true,
+                                                    "editable": true,
+                                                    "label": "customer_id",
+                                                    "hidden": true,
+                                                    "defaultValue": "{{CUST_ID}}",
+                                                    "fieldId": "customer_id"
+                                                }
+                                            ]
+                                        },
+                                        "actions": [
+                                            {
+                                                "type": "UPDATE_PSTREAM",
+                                                "operation": "ADD",
+                                                "pstreamName": "linux_windows_on_boarded_hosts"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "permission": "rda:github:view",
+                            "title": "Add Windows Host",
+                            "type": "POPUP_FORM",
+                            "selectionType": "NONE",
+                            "identifier": "saas-service-action:userdashboard-add-yaml",
+                            "api-endpoint": {
+                                "service-name": "saas-reports",
+                                "methodName": "getForm",
+                                "stringified-params": true,
+                                "parse-output": false,
+                                "params": [
+                                    {
+                                        "formId": "rda.saas.dynamic.form",
+                                        "formActionList": {
+                                            "formActions": [
+                                                {
+                                                    "actionLabel": "Add",
+                                                    "identifier": "Submit"
+                                                },
+                                                {
+                                                    "actionLabel": "Cancel",
+                                                    "identifier": "Cancel"
+                                                }
+                                            ]
+                                        },
+                                        "formDefinition": {
+                                            "id": "rda.saas.dynamic.form",
+                                            "refreshRequired": true,
+                                            "formFieldList": [
+                                                {
+                                                    "help": "IP Address of a windows host",
+                                                    "dataType": "string",
+                                                    "controlType": "TEXT_FIELD",
+                                                    "required": true,
+                                                    "editable": true,
+                                                    "label": "IP Address",
+                                                    "hidden": false,
+                                                    "fieldId": "ip_address"
+                                                },
+                                                {
+                                                    "fieldId": "type",
+                                                    "label": "Select the host type",
+                                                    "help": "Select the host type",
+                                                    "dataType": "string",
+                                                    "hidden": false,
+                                                    "editable": false,
+                                                    "required": true,
+                                                    "lovValues": [
+                                                        {
+                                                            "identifier": "linux",
+                                                            "displayName": "Linux"
+                                                        },
+                                                        {
+                                                            "identifier": "windows",
+                                                            "displayName": "Windows"
+                                                        }
+                                                    ],
+                                                    "defaultValue": "windows",
+                                                    "controlType": "RADIO_BUTTON"
+                                                },
+                                                {
+                                                    "help": "SSH Port",
+                                                    "dataType": "INT",
+                                                    "controlType": "INT",
+                                                    "required": true,
+                                                    "editable": true,
+                                                    "label": "SSH Port",
+                                                    "hidden": false,
+                                                    "fieldId": "port",
+                                                    "defaultValue": 5985
+                                                },
+                                                {
+                                                    "help": "Credential to use for this IP address for Windows host",
+                                                    "dataType": "string",
+                                                    "controlType": "COMBO_BOX",
+                                                    "required": true,
+                                                    "editable": true,
+                                                    "label": "Credential Name",
+                                                    "hidden": false,
+                                                    "fieldId": "credential",
+                                                    "lovSourceType": "pstream",
+                                                    "lovSourceParams": {
+                                                        "name": "rda_secrets_meta",
+                                                        "valueColumn": "name",
+                                                        "query": "type contains 'windows-inventory'"
+                                                    }
+                                                },
+                                                {
+                                                    "fieldId": "discovery_scope",
+                                                    "label": "Add it to discovery?",
+                                                    "help": "Should this windows host be part of discovery?",
+                                                    "dataType": "string",
+                                                    "hidden": false,
+                                                    "editable": true,
+                                                    "required": true,
+                                                    "lovValues": [
+                                                        {
+                                                            "identifier": "yes",
+                                                            "displayName": "Yes"
+                                                        },
+                                                        {
+                                                            "identifier": "no",
+                                                            "displayName": "No"
+                                                        }
+                                                    ],
+                                                    "controlType": "RADIO_BUTTON"
+                                                },
+                                                {
+                                                    "help": "customer_tag",
+                                                    "dataType": "string",
+                                                    "controlType": "TEXT_FIELD",
+                                                    "required": true,
+                                                    "editable": true,
+                                                    "label": "customer_tag",
+                                                    "hidden": true,
+                                                    "defaultValue": "{{CUST_TAG}}",
+                                                    "fieldId": "customer_tag"
+                                                },
+                                                {
+                                                    "help": "customer_id",
+                                                    "dataType": "string",
+                                                    "controlType": "TEXT_FIELD",
+                                                    "required": true,
+                                                    "editable": true,
+                                                    "label": "customer_id",
+                                                    "hidden": true,
+                                                    "defaultValue": "{{CUST_ID}}",
+                                                    "fieldId": "customer_id"
+                                                }
+                                            ]
+                                        },
+                                        "actions": [
+                                            {
+                                                "type": "UPDATE_PSTREAM",
+                                                "operation": "ADD",
+                                                "pstreamName": "linux_windows_on_boarded_hosts"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "permission": "rda:github:view",
+                            "title": "Import Hosts",
+                            "type": "POPUP_FORM",
+                            "selectionType": "NONE",
+                            "identifier": "saas-service-action:userdashboard-add-yaml",
+                            "api-endpoint": {
+                                "service-name": "saas-reports",
+                                "methodName": "getForm",
+                                "stringified-params": true,
+                                "parse-output": false,
+                                "params": [
+                                    {
+                                        "formId": "rda.saas.dynamic.form",
+                                        "formDefinition": {
+                                            "id": "rda.saas.dynamic.form",
+                                            "refreshRequired": true,
+                                            "formFieldList": [
+                                                {
+                                                    "help": "CSV file format.The file should contain ip_address, type, port, credential, and discovery_scope columns.",
+                                                    "dataType": "string",
+                                                    "required": true,
+                                                    "editable": true,
+                                                    "label": "Required headers in CSV file: ip_address, type, port, credential, discovery_scope",
+                                                    "controlType": "LABEL",
+                                                    "hidden": false,
+                                                    "fieldId": "csv_format"
+                                                },
+                                                {
+                                                    "help": "CSV file format.The file should contain ip_address, type, port, credential, and discovery_scope columns.",
+                                                    "dataType": "string",
+                                                    "required": true,
+                                                    "editable": true,
+                                                    "label": "  *   ip_address: IP Address of the Host",
+                                                    "controlType": "LABEL",
+                                                    "hidden": false,
+                                                    "fieldId": "csv_format1"
+                                                },
+                                                {
+                                                    "help": "CSV file format.The file should contain ip_address, type, port, credential, and discovery_scope columns.",
+                                                    "dataType": "string",
+                                                    "required": true,
+                                                    "editable": true,
+                                                    "label": "  *   type: Host type. Can take value either linux or windows",
+                                                    "controlType": "LABEL",
+                                                    "hidden": false,
+                                                    "fieldId": "csv_format2"
+                                                },
+                                                {
+                                                    "help": "CSV file format.The file should contain ip_address, type, port, credential, and discovery_scope columns.",
+                                                    "dataType": "string",
+                                                    "required": true,
+                                                    "editable": true,
+                                                    "label": "  *   port: ssh port number.",
+                                                    "controlType": "LABEL",
+                                                    "hidden": false,
+                                                    "fieldId": "csv_format3"
+                                                },
+                                                {
+                                                    "help": "CSV file format.The file should contain ip_address, type, port, credential, and discovery_scope columns.",
+                                                    "dataType": "string",
+                                                    "required": true,
+                                                    "editable": true,
+                                                    "label": "  *   credential: Name of the credential.",
+                                                    "controlType": "LABEL",
+                                                    "hidden": false,
+                                                    "fieldId": "csv_format4"
+                                                },
+                                                {
+                                                    "help": "CSV file format.The file should contain ip_address, type, port, credential, and discovery_scope columns.",
+                                                    "dataType": "string",
+                                                    "required": true,
+                                                    "editable": true,
+                                                    "label": "  *   discovery_scope: To be included in discovery or not. Can take value either yes or no.",
+                                                    "controlType": "LABEL",
+                                                    "hidden": false,
+                                                    "fieldId": "csv_format5"
+                                                },
+                                                {
+                                                    "help": "CSV file format.The file should contain ip_address, type, port, credential, and discovery_scope columns.",
+                                                    "dataType": "string",
+                                                    "required": true,
+                                                    "editable": true,
+                                                    "label": "Example values:",
+                                                    "controlType": "LABEL",
+                                                    "hidden": false,
+                                                    "fieldId": "csv_format6"
+                                                },
+                                                {
+                                                    "help": "CSV file format.The file should contain ip_address, type, port, credential, and discovery_scope columns.",
+                                                    "dataType": "string",
+                                                    "required": true,
+                                                    "editable": true,
+                                                    "label": "10.95.120.130,linux,22,linux_credential_name,yes",
+                                                    "controlType": "LABEL",
+                                                    "hidden": false,
+                                                    "fieldId": "csv_format7"
+                                                },
+                                                {
+                                                    "help": "Choose csv file to upload",
+                                                    "dataType": "string",
+                                                    "required": true,
+                                                    "editable": true,
+                                                    "label": "Choose file to upload",
+                                                    "controlType": "FILE_UPLOAD",
+                                                    "hidden": false,
+                                                    "fieldId": "fileUpload"
+                                                },
+                                                {
+                                                    "help": "Overwrite existing onboarded data",
+                                                    "required": false,
+                                                    "editable": true,
+                                                    "label": "Replace Data",
+                                                    "hidden": false,
+                                                    "fieldId": "replace",
+                                                    "dataType": "boolean",
+                                                    "controlType": "BOOLEAN_FIELD",
+                                                    "defaultValue": false,
+                                                    "controlPropertyList": [
+                                                        {
+                                                            "attribute": "layout-group-id",
+                                                            "value": "Features"
+                                                        },
+                                                        {
+                                                            "attribute": "layout-percent",
+                                                            "value": "25"
+                                                        }
+                                                    ]
+                                                }
+                                            ]
+                                        },
+                                        "actions": [
+                                            {
+                                                "type": "RUN_PIPELINE",
+                                                "pipelineName": "host_os_import_linux_windows_hosts",
+                                                "isSync": true,
+                                                "workerGroup": "{{CUST_TAG}}.*"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "permission": "rda:github:view",
+                            "title": "Edit Host",
+                            "type": "POPUP_FORM",
+                            "selectionType": "SINGLE",
+                            "identifier": "saas-service-action:userdashboard-add-yaml",
+                            "api-endpoint": {
+                                "service-name": "saas-reports",
+                                "methodName": "getForm",
+                                "stringified-params": true,
+                                "parse-output": false,
+                                "params": [
+                                    {
+                                        "formId": "rda.saas.dynamic.form",
+                                        "formActionList": {
+                                            "formActions": [
+                                                {
+                                                    "actionLabel": "Update",
+                                                    "identifier": "Submit"
+                                                },
+                                                {
+                                                    "actionLabel": "Cancel",
+                                                    "identifier": "Cancel"
+                                                }
+                                            ]
+                                        },
+                                        "formDefinition": {
+                                            "id": "rda.saas.dynamic.form",
+                                            "refreshRequired": true,
+                                            "formFieldList": [
+                                                {
+                                                    "help": "IP Address of host",
+                                                    "dataType": "string",
+                                                    "controlType": "TEXT_FIELD",
+                                                    "required": false,
+                                                    "editable": true,
+                                                    "label": "IP Address",
+                                                    "hidden": false,
+                                                    "fieldId": "ip_address"
+                                                },
+                                                {
+                                                    "fieldId": "type",
+                                                    "label": "Select the host type",
+                                                    "help": "Select the host type",
+                                                    "dataType": "string",
+                                                    "hidden": false,
+                                                    "editable": true,
+                                                    "required": true,
+                                                    "lovValues": [
+                                                        {
+                                                            "identifier": "linux",
+                                                            "displayName": "Linux"
+                                                        },
+                                                        {
+                                                            "identifier": "windows",
+                                                            "displayName": "Windows"
+                                                        }
+                                                    ],
+                                                    "controlType": "RADIO_BUTTON"
+                                                },
+                                                {
+                                                    "help": "SSH Port. Defaut SSH port for linux is 22 and windows is 5985",
+                                                    "dataType": "INT",
+                                                    "controlType": "INT",
+                                                    "required": true,
+                                                    "editable": true,
+                                                    "label": "SSH Port",
+                                                    "hidden": false,
+                                                    "fieldId": "port"
+                                                },
+                                                {
+                                                    "help": "Credential to use for this IP address for Linux / Windows host",
+                                                    "dataType": "string",
+                                                    "controlType": "COMBO_BOX",
+                                                    "required": true,
+                                                    "editable": true,
+                                                    "label": "Credential Name",
+                                                    "hidden": false,
+                                                    "fieldId": "credential",
+                                                    "lovSourceType": "pstream",
+                                                    "lovSourceParams": {
+                                                        "name": "rda_secrets_meta",
+                                                        "valueColumn": "name",
+                                                        "query": "type in ['windows-inventory','linux-inventory']"
+                                                    }
+                                                },
+                                                {
+                                                    "fieldId": "discovery_scope",
+                                                    "label": "Add it to discovery?",
+                                                    "help": "Should this  host be part of discovery?",
+                                                    "dataType": "string",
+                                                    "hidden": false,
+                                                    "editable": true,
+                                                    "required": true,
+                                                    "lovValues": [
+                                                        {
+                                                            "identifier": "yes",
+                                                            "displayName": "Yes"
+                                                        },
+                                                        {
+                                                            "identifier": "no",
+                                                            "displayName": "No"
+                                                        }
+                                                    ],
+                                                    "controlType": "RADIO_BUTTON"
+                                                }
+                                            ]
+                                        },
+                                        "actions": [
+                                            {
+                                                "type": "UPDATE_PSTREAM",
+                                                "pstreamName": "linux_windows_on_boarded_hosts",
+                                                "operation": "UPDATE",
+                                                "cfxql_query": "{%- raw -%}ip_address is '{{ip_address}}' and type is '{{type}}'{%-endraw-%}"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "permission": "rda:github:view",
+                            "title": "Delete Host",
+                            "type": "POPUP_FORM",
+                            "selectionType": "SINGLE",
+                            "identifier": "saas-service-action:userdashboard-add-yaml",
+                            "api-endpoint": {
+                                "service-name": "saas-reports",
+                                "methodName": "getForm",
+                                "stringified-params": true,
+                                "parse-output": false,
+                                "params": [
+                                    {
+                                        "formId": "rda.saas.dynamic.form",
+                                        "formActionList": {
+                                            "formActions": [
+                                                {
+                                                    "identifier": "Submit",
+                                                    "actionLabel": "Delete"
+                                                }
+                                            ]
+                                        },
+                                        "formDefinition": {
+                                            "id": "rda.saas.dynamic.form",
+                                            "refreshRequired": true,
+                                            "formFieldList": [
+                                                {
+                                                    "help": "Readonly field. IP Address of host to be deteled.",
+                                                    "dataType": "string",
+                                                    "controlType": "TEXT_FIELD",
+                                                    "required": false,
+                                                    "editable": false,
+                                                    "label": "IP Address",
+                                                    "hidden": false,
+                                                    "fieldId": "ip_address"
+                                                },
+                                                {
+                                                    "help": "Readonly field. Type host to be deteled.",
+                                                    "dataType": "string",
+                                                    "controlType": "TEXT_FIELD",
+                                                    "required": false,
+                                                    "editable": false,
+                                                    "label": "Host Type",
+                                                    "hidden": false,
+                                                    "fieldId": "type"
+                                                }
+                                            ]
+                                        },
+                                        "actions": [
+                                            {
+                                                "type": "UPDATE_PSTREAM",
+                                                "pstreamName": "linux_windows_on_boarded_hosts",
+                                                "operation": "DELETE",
+                                                "cfxql_query": "{%- raw -%}ip_address is '{{ip_address}}' and type is '{{type}}'{%-endraw-%}"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "widget_id": "930c266a"
+                }
+            ]
+        },
+        {
+            "title": "Run Discovery",
+            "show_filter": false,
+            "widgets": [
+                {
+                    "title": "Service Blueprint",
+                    "widget_type": "tabular",
+                    "stream": "rda_blueprints_meta",
+                    "extra_filter": "id contains '{{CUST_TAG}}_host_os_service_blueprint' or id is 'host_os_service_blueprint'",
+                    "duration_hours": 87600,
+                    "ts_column": "timestamp",
+                    "min_width": 12,
+                    "height": 3,
+                    "max_width": 12,
+                    "paginated": true,
+                    "refreshRequired": true,
+                    "timebased": false,
+                    "max_rows": 50,
+                    "remote_searchable": true,
+                    "remote_searchable_cols": [
+                        "id",
+                        "name",
+                        "comment",
+                        "category",
+                        "note",
+                        "url"
+                    ],
+                    "columns": {
+                        "name": {
+                            "title": "Name",
+                            "key": true
+                        },
+                        "id": {
+                            "title": "Id",
+                            "key": true
+                        },
+                        "comment": {
+                            "title": "Description"
+                        },
+                        "category": {
+                            "title": "Category",
+                            "key": true,
+                            "visible": false
+                        },
+                        "auto_deploy": {
+                            "title": "Auto Deploy",
+                            "visible": false
+                        },
+                        "note": {
+                            "title": "Note",
+                            "visible": false
+                        },
+                        "url": {
+                            "title": "URL",
+                            "key": true,
+                            "visible": false
+                        }
+                    },
+                    "custom_columns": [
+                        {
+                            "id": "enabled",
+                            "label": "Enabled",
+                            "expr": "'yes' if enabled else 'no'",
+                            "htmlTemplateForRow": "{%raw%}<span class='badge' style='background-color: {{ row.enableColor }}' > {{ row.enabled }} </span>{%endraw%}"
+                        },
+                        {
+                            "id": "enableColor",
+                            "label": "Enable Color",
+                            "expr": "['#4CAF50'] if enabled == 'yes' else ['#9E9E9E']",
+                            "hidden": true,
+                            "visible": false,
+                            "sortable": false
+                        },
+                        {
+                            "id": "warningColor",
+                            "label": "Warning Color",
+                            "expr": "['#FFA726'] if warnings > 0 else ['#03A9F4']",
+                            "hidden": true,
+                            "visible": false,
+                            "sortable": false
+                        },
+                        {
+                            "id": "errorColor",
+                            "label": "Error Color",
+                            "expr": "['#B71C1C'] if errors > 0  else ['#03A9F4']",
+                            "hidden": true,
+                            "visible": false,
+                            "sortable": false
+                        },
+                        {
+                            "id": "errors",
+                            "label": "Audit Errors",
+                            "htmlTemplateForRow": "{%raw%}<span class='badge' style='background-color: {{ row.errorColor }}' > {{ row.errors }} </span>{%endraw%}"
+                        },
+                        {
+                            "id": "warnings",
+                            "label": "Audit Warnings",
+                            "htmlTemplateForRow": "{%raw%}<span class='badge' style='background-color: {{ row.warningColor }}' > {{ row.warnings }} </span>{%endraw%}"
+                        },
+                        {
+                            "id": "artifact_name",
+                            "label": "Artifact Name",
+                            "expr": "id",
+                            "key": true,
+                            "visible": false,
+                            "sortable": false
+                        },
+                        {
+                            "id": "artifact_type",
+                            "label": "Artifact Type",
+                            "expr": "'blueprint'",
+                            "key": true,
+                            "visible": false,
+                            "sortable": false
+                        },
+                        {
+                            "id": "custom_run_mode",
+                            "label": "Custom Run Mode",
+                            "expr": "{{custom_run_mode}}",
+                            "expr0": "'Not Set'",
+                            "key": false,
+                            "visible": false,
+                            "sortable": false
+                        }
+                    ],
+                    "actions": [
+                        {
+                            "permission": "rda:deploymentspec:import",
+                            "title": "Dashboard",
+                            "type": "GO_TO_APP_STATE",
+                            "appName": "dynamic-dashboard",
+                            "selectionType": "SINGLE",
+                            "identifier": "saas-service-action:dspecs-view-dashboard",
+                            "drillDownLinkField": "name"
+                        },
+                        {
+                            "permission": "rda:deploymentspec:view",
+                            "title": "View",
+                            "type": "POPUP_FORM",
+                            "selectionType": "SINGLE",
+                            "identifier": "saas-service-action:dspecs-view-spec",
+                            "api-endpoint": {
+                                "service-name": "saas-reports",
+                                "methodName": "getForm",
+                                "stringified-params": false,
+                                "parse-output": false,
+                                "params": [
+                                    {
+                                        "formId": "rda.saas.deploymentspec.view"
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "permission": "rda:deploymentspec:edit",
+                            "title": "Edit",
+                            "type": "POPUP_FORM",
+                            "selectionType": "SINGLE",
+                            "identifier": "saas-service-action:dspecs-edit-spec",
+                            "api-endpoint": {
+                                "service-name": "saas-reports",
+                                "methodName": "getForm",
+                                "stringified-params": false,
+                                "parse-output": false,
+                                "params": [
+                                    {
+                                        "formId": "rda.saas.deploymentspec.edit"
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "permission": "rda:github:view",
+                            "title": "Run Access Verification",
+                            "type": "POPUP_FORM",
+                            "selectionType": "NONE",
+                            "identifier": "saas-service-action:userdashboard-add-yaml",
+                            "api-endpoint": {
+                                "service-name": "saas-reports",
+                                "methodName": "getForm",
+                                "stringified-params": true,
+                                "parse-output": false,
+                                "params": [
+                                    {
+                                        "formId": "rda.saas.dynamic.form",
+                                        "formActionList": {
+                                            "formActions": [
+                                                {
+                                                    "identifier": "Submit",
+                                                    "actionLabel": "Run"
+                                                }
+                                            ]
+                                        },
+                                        "formDefinition": {
+                                            "id": "rda.saas.dynamic.form",
+                                            "refreshRequired": true,
+                                            "formFieldList": [
+                                                {
+                                                    "help": "Select  hosts for which you want to run access verfication.",
+                                                    "dataType": "string",
+                                                    "required": true,
+                                                    "editable": true,
+                                                    "label": "Hosts",
+                                                    "hidden": false,
+                                                    "fieldId": "Others",
+                                                    "controlType": "SELECTOR_TABLE",
+                                                    "controlPropertyList": [
+                                                        {
+                                                            "attribute": "column-key",
+                                                            "value": "ip_address"
+                                                        },
+                                                        {
+                                                            "attribute": "selection",
+                                                            "value": "MULTIPLE"
+                                                        }
+                                                    ],
+                                                    "widget": {
+                                                        "title": "Host Details",
+                                                        "timebased": false,
+                                                        "max_width": 12,
+                                                        "height": 8,
+                                                        "min_width": 12,
+                                                        "extra_filter": "(customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                                                        "stream": "linux_windows_on_boarded_hosts",
+                                                        "ts_column": "timestamp",
+                                                        "sorting": [],
+                                                        "columns": {
+                                                            "ip_address": {
+                                                                "title": "IP",
+                                                                "key": true
+                                                            },
+                                                            "type": {
+                                                                "title": "Type",
+                                                                "key": true
+                                                            },
+                                                            "credential": {
+                                                                "title": "Credential",
+                                                                "key": true
+                                                            },
+                                                            "port": {
+                                                                "title": "Port",
+                                                                "key": true,
+                                                                "visible": false
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            ]
+                                        },
+                                        "actions": [
+                                            {
+                                                "type": "RUN_PIPELINE",
+                                                "pipelineName": "host_os_access_verification",
+                                                "isSync": false,
+                                                "workerGroup": "{{CUST_TAG}}.*"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "permission": "rda:github:view",
+                            "title": "Run Linux Discovery",
+                            "type": "POPUP_FORM",
+                            "selectionType": "NONE",
+                            "identifier": "saas-service-action:userdashboard-add-yaml",
+                            "api-endpoint": {
+                                "service-name": "saas-reports",
+                                "methodName": "getForm",
+                                "stringified-params": true,
+                                "parse-output": false,
+                                "params": [
+                                    {
+                                        "formId": "rda.saas.dynamic.form",
+                                        "formActionList": {
+                                            "formActions": [
+                                                {
+                                                    "identifier": "Submit",
+                                                    "actionLabel": "Run"
+                                                }
+                                            ]
+                                        },
+                                        "formDefinition": {
+                                            "id": "rda.saas.dynamic.form",
+                                            "refreshRequired": true,
+                                            "formFieldList": [
+                                                {
+                                                    "help": "Select linux hosts for which you want to run discovery",
+                                                    "dataType": "string",
+                                                    "required": true,
+                                                    "editable": true,
+                                                    "label": "Hosts",
+                                                    "hidden": false,
+                                                    "fieldId": "Others",
+                                                    "controlType": "SELECTOR_TABLE",
+                                                    "controlPropertyList": [
+                                                        {
+                                                            "attribute": "column-key",
+                                                            "value": "ip_address"
+                                                        },
+                                                        {
+                                                            "attribute": "selection",
+                                                            "value": "MULTIPLE"
+                                                        }
+                                                    ],
+                                                    "widget": {
+                                                        "title": "Host Details",
+                                                        "timebased": false,
+                                                        "max_width": 12,
+                                                        "height": 8,
+                                                        "min_width": 12,
+                                                        "extra_filter": "type contains 'linux' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                                                        "stream": "linux_windows_on_boarded_hosts",
+                                                        "ts_column": "timestamp",
+                                                        "sorting": [],
+                                                        "columns": {
+                                                            "ip_address": {
+                                                                "title": "IP",
+                                                                "key": true
+                                                            },
+                                                            "type": {
+                                                                "title": "Type",
+                                                                "key": true
+                                                            },
+                                                            "credential": {
+                                                                "title": "Credential",
+                                                                "key": true
+                                                            },
+                                                            "port": {
+                                                                "title": "Port",
+                                                                "key": true,
+                                                                "visible": false
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            ]
+                                        },
+                                        "actions": [
+                                            {
+                                                "type": "RUN_PIPELINE",
+                                                "pipelineName": "linux_ondemand_inventory_and_topology_using_ssh",
+                                                "isSync": false,
+                                                "workerGroup": "{{CUST_TAG}}.*"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "permission": "rda:github:view",
+                            "title": "Run Windows Discovery",
+                            "type": "POPUP_FORM",
+                            "selectionType": "NONE",
+                            "identifier": "saas-service-action:userdashboard-add-yaml",
+                            "api-endpoint": {
+                                "service-name": "saas-reports",
+                                "methodName": "getForm",
+                                "stringified-params": true,
+                                "parse-output": false,
+                                "params": [
+                                    {
+                                        "formId": "rda.saas.dynamic.form",
+                                        "formActionList": {
+                                            "formActions": [
+                                                {
+                                                    "identifier": "Submit",
+                                                    "actionLabel": "Run"
+                                                }
+                                            ]
+                                        },
+                                        "formDefinition": {
+                                            "id": "rda.saas.dynamic.form",
+                                            "refreshRequired": true,
+                                            "formFieldList": [
+                                                {
+                                                    "help": "Select windows hosts for which you want to run discovery",
+                                                    "dataType": "string",
+                                                    "required": true,
+                                                    "editable": true,
+                                                    "label": "Hosts",
+                                                    "hidden": false,
+                                                    "fieldId": "Others",
+                                                    "controlType": "SELECTOR_TABLE",
+                                                    "controlPropertyList": [
+                                                        {
+                                                            "attribute": "column-key",
+                                                            "value": "ip_address"
+                                                        },
+                                                        {
+                                                            "attribute": "selection",
+                                                            "value": "MULTIPLE"
+                                                        }
+                                                    ],
+                                                    "widget": {
+                                                        "title": "Host Details",
+                                                        "timebased": false,
+                                                        "max_width": 12,
+                                                        "height": 8,
+                                                        "min_width": 12,
+                                                        "extra_filter": "type contains 'windows' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                                                        "stream": "linux_windows_on_boarded_hosts",
+                                                        "ts_column": "timestamp",
+                                                        "sorting": [],
+                                                        "columns": {
+                                                            "ip_address": {
+                                                                "title": "IP",
+                                                                "key": true
+                                                            },
+                                                            "type": {
+                                                                "title": "Type",
+                                                                "key": true
+                                                            },
+                                                            "credential": {
+                                                                "title": "Credential",
+                                                                "key": true
+                                                            },
+                                                            "port": {
+                                                                "title": "Port",
+                                                                "key": true,
+                                                                "visible": false
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            ]
+                                        },
+                                        "actions": [
+                                            {
+                                                "type": "RUN_PIPELINE",
+                                                "pipelineName": "windows_ondemand_inventory_and_topology_using_winrm",
+                                                "isSync": false,
+                                                "workerGroup": "{{CUST_TAG}}.*"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "widget_id": "70200583"
+                },
+                {
+                    "title": "All Jobs",
+                    "widget_type": "tabular",
+                    "stream": "rda_system_job_tracker",
+                    "extra_filter0": "attributes_deployment_id is '{{CUST_TAG}}_host_os_service_blueprint' or attributes_deployment_id is 'host_os_service_blueprint' ",
+                    "extra_filter": "pipeline_name in ['windows_inventory_and_topology_using_winrm','linux_inventory_and_topology_using_ssh','host_os_access_verification','linux_ondemand_inventory_and_topology_using_ssh','windows_ondemand_inventory_and_topology_using_winrm']",
+                    "refreshOptions": {
+                        "refreshType": "Periodic",
+                        "refreshInterval": 30000
+                    },
+                    "duration_hours": 87600,
+                    "ts_column": "timestamp",
+                    "min_width": 12,
+                    "height": 6,
+                    "max_width": 12,
+                    "paginated": true,
+                    "refreshRequired": true,
+                    "timebased": false,
+                    "max_rows": 10,
+                    "remote_searchable": true,
+                    "columns": {
+                        "jobid": {
+                            "title": "Job ID",
+                            "key": true
+                        },
+                        "pid": {
+                            "title": "PID",
+                            "key": true
+                        },
+                        "pod_id": {
+                            "title": "POD ID"
+                        },
+                        "pipeline_name": {
+                            "title": "Pipeline Name",
+                            "key": true,
+                            "visible": true
+                        },
+                        "attributes_pipeline_version": {
+                            "title": "Pipeline Version",
+                            "visible": false
+                        },
+                        "status": {
+                            "title": "Status",
+                            "visible": true
+                        },
+                        "reason": {
+                            "title": "Reason",
+                            "key": true,
+                            "visible": true
+                        },
+                        "start_time": {
+                            "title": "Job Created",
+                            "type": "DATETIME",
+                            "key": true,
+                            "visible": true
+                        },
+                        "ended_time": {
+                            "title": "Job Ended",
+                            "type": "DATETIME",
+                            "key": true,
+                            "visible": true
+                        },
+                        "age": {
+                            "title": "Duration",
+                            "key": true,
+                            "visible": true
+                        },
+                        "attributes_deployment_run_mode": {
+                            "title": "Run Mode",
+                            "key": true,
+                            "visible": false,
+                            "hidden": true
+                        },
+                        "attributes_deployment_name": {
+                            "title": "Service Blueprint Name",
+                            "key": true,
+                            "visible": true,
+                            "hidden": false
+                        }
+                    },
+                    "custom_columns": [
+                        {
+                            "id": "run_mode",
+                            "label": "Run Mode",
+                            "expr6": "if(attributes_deployment_run_mode, attributes_deployment_run_mode, 'manual')",
+                            "expr7": "if(attributes_deployment_run_mode in ['manual','schedule'], attributes_deployment_run_mode, 'manual')",
+                            "expr4": "attributes_deployment_run_mode if attributes_deployment_run_mode in ['manual','schedule'] else 'manual'",
+                            "expr8": "attributes_deployment_run_mode if attributes_deployment_run_mode else 'manual'",
+                            "expr": "attributes_deployment_run_mode if attributes_deployment_name == 'host_os_service_blueprint' else 'manual'",
+                            "expr0": "'manual' if attributes_deployment_run_mode is None else attributes_deployment_run_mode",
+                            "expr2": "'manual' if attributes_deployment_run_mode == '' else attributes_deployment_run_mode",
+                            "visible": true,
+                            "key": true
+                        }
+                    ],
+                    "actions": [
+                        {
+                            "permission": "rda:jobs:view",
+                            "title": "View Traces",
+                            "type": "POPUP_REPORT",
+                            "selectionType": "SINGLE",
+                            "identifier": "saas-service-action:job-traces",
+                            "api-endpoint": {
+                                "service-name": "saas-reports",
+                                "methodName": "getReport",
+                                "stringified-params": false,
+                                "parse-output": false,
+                                "params": [
+                                    {
+                                        "reportId": "rda.saas.worker.traces"
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "permission": "rda:logs:view",
+                            "title": "View Logs",
+                            "type": "POPUP_REPORT",
+                            "selectionType": "SINGLE",
+                            "identifier": "saas-service-action:job-logs",
+                            "api-endpoint": {
+                                "service-name": "saas-reports",
+                                "methodName": "getReport",
+                                "stringified-params": false,
+                                "parse-output": false,
+                                "params": [
+                                    {
+                                        "reportId": "rda.saas.worker.logs"
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "widget_id": "0c070112"
+                }
+            ]
+        }
+    ],
+    "saved_time": "2025-01-31T22:47:11.438045"
+}

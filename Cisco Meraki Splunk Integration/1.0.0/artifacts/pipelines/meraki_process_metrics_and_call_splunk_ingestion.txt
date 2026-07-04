@@ -1,0 +1,60 @@
+%% stream = no and limit = 0
+%%template_type="jinja"
+%% import_src_type = "splunk_v2"
+
+%%start_inline_object name="context_dynamic_form" and type="data" and format="json"
+{
+    "formFieldList": [
+        {
+            "fieldId": "customer_tag",
+            "label": "Tag of the customer",
+            "required": false,
+            "dataType": "string"
+        }
+    ]
+}
+%%end_inline_object
+@dm:empty
+    --> @dm:save name = "temp-customer-context"
+
+{% set row = "" %}
+
+   {% if customer_tag %}
+      {% set customer_id = customer_id %}
+      {% set customer_tag = customer_tag %}
+      {% set customerTag = customer_tag %}
+   {% elif customerTag %}
+      {% set customer_id = customer_id %}
+      {% set customer_tag = customerTag %}
+   {% else %}
+      {% set customer_id = '' %}
+      {% set customer_tag = '' %}
+   {% endif %}
+
+--> @c:new-block
+       --> @dm:empty
+       {% if customer_tag %} 
+         --> #dm:query-persistent-stream type contains 'splunk_v2' and customerTag contains '{{customer_tag}}' with-input name = 'rda_secrets_meta' and limit= 0
+       {% else %}
+         --> #dm:query-persistent-stream type contains 'splunk_v2' and customerTag is empty with-input name = 'rda_secrets_meta' and limit= 0
+       {% endif %}  
+       --> @dm:rename-columns splunk_src_name = 'name'
+       --> @dm:eval key="'key'"
+       --> @dm:save name = 'temp-splunk-sources'
+
+## %% import_source = "splunk_v2"
+## process_metrics_and_call_splunk_ingestion
+## Step1: Upload AppDataBindings.json as a dataset
+## --> gets converted to multiple rows. Each row will have index and stream name
+## Step2: For each given stream-name, query the corresponding pstream and write to corresponding spluk
+## --> use 'splunk_index_columns' dictionary for list of columns to fetch from pstream before writing to splunk
+
+--> @c:new-block
+    --> @dm:recall name="AppBindings_Meraki"
+    --> *dm:filter target_type is 'metric'
+    --> @dm:eval key="'key'"
+    --> @dm:enrich dict	 = "temp-splunk-sources" and src_key_cols	 = "key" and dict_key_cols	="key" and enrich_cols	="splunk_src_name"
+    --> @dm:map to="pipeline_name" & func="fixed" & value="meraki_ingest_metrics_data_to_splunk"
+    --> @exec:run-pipeline-by-row-multi-proc pipeline_col="pipeline_name"
+    --> @dm:save name="temp-1"
+

@@ -1,0 +1,218 @@
+%% stream = no and limit = 0
+
+%% import_src_type = "asset-discovery,diagnostictools"
+
+@c:flex-block
+    --> @dm:empty
+    --> @exec:define-function name = "generate_device_access_summary"
+       --> @dm:add-missing-columns columns = "used_cred,reason,ip_address,protocol"
+       --> @dm:eval used_cred="used_cred if used_cred is not None else '-'"
+       --> @dm:eval reason_v2="'Timeout' if 'no snmp response' in str(reason).lower() else 'Authentication timeout' if  'authentication timeout' in str(reason).lower() else 'Timeout' if 'timeout' in str(reason).lower() else 'Success' if not reason else reason"
+       --> @dm:save name="temp-ip_auth"
+       ## --> @dm:save name="test-ip_auth"
+       ## SSH
+       --> *dm:filter protocol="SSH"
+       --> @dm:save name="temp-ip_auth_ssh"
+       --> @dm:recall name="temp-ip_auth"
+       ## SNMP
+       --> *dm:filter protocol="SNMP"
+       --> @dm:save name="temp-ip_auth_snmp"
+       ## ICMP
+       --> @dm:recall name="temp-ip_auth"
+       --> *dm:filter protocol="ICMP"
+       --> @dm:save name="temp-ip_auth_icmp"
+       --> @dm:recall name="temp-ip_auth"
+       --> @dm:dedup columns="ip_address"
+       --> @dm:save name="temp-ip_auth"
+       --> @dm:selectcolumns include="ip_address|customer_tag|customer_id|discovery_scope"
+       --> @dm:enrich dict = "temp-ip_auth_ssh" &
+               src_key_cols = "ip_address" &
+               dict_key_cols = "ip_address" &
+               enrich_cols = "auth_state,used_cred,reason_v2,reason" &
+               enrich_cols_as = "ssh_status,ssh_cred,ssh_failure_reason,ssh_reason_orig" &
+               return_empty_dict = "yes" &
+               return_empty_cols = "yes"
+       --> @dm:enrich dict = "temp-ip_auth_snmp" &
+               src_key_cols = "ip_address" &
+               dict_key_cols = "ip_address" &
+               enrich_cols = "auth_state,used_cred,reason_v2,reason" &
+               enrich_cols_as = "snmp_status,snmp_cred,snmp_failure_reason,snmp_reason_orig" &
+               return_empty_dict = "yes" &
+               return_empty_cols = "yes"
+       --> @dm:enrich dict = "temp-ip_auth_icmp" &
+               src_key_cols = "ip_address" &
+               dict_key_cols = "ip_address" &
+               enrich_cols = "auth_state,reason_v2,reason" &
+               enrich_cols_as = "icmp_status,icmp_failure_reason,icmp_reason_orig" &
+               return_empty_dict = "yes" &
+               return_empty_cols = "yes"
+       --> @rn:write-stream name="network_access_verification_final"
+    ## --> @dm:save name = "test-data-final"
+    --> @exec:end-function
+    --> @dm:empty
+
+--> @c:new-block
+    --> @dm:empty
+    --> @exec:get-input
+    --> @dm:eval key ="'key'"
+    --> @dm:save name = 'temp-ip'
+
+## --> @dm:save name = 'test-access-ip'
+--> @c:data-loop columns="device_ip,discovery_scope,snmp_cred_name,ssh_cred_name,customer_tag,customer_id" and dataset ="temp-ip" and return_empty = "yes"
+    --> @dm:recall name = 'temp-ip' and return_empty = "yes"
+    --> @dm:skip-block-if-shape row_count = 0
+    --> *exec:if-condition device_ip = "${device_ip}"
+       --> *exec:if-condition SSH = "yes"
+          --> *exec:if-condition customer_tag is empty or customer_tag in ['',' ','None']
+             --> @asset-discovery:access-check ip_column = 'device_ip' & protocol = 'snmp,ssh' and ssh_disable_sha_retry = 'yes'
+             --> @dm:eval discovery_scope ="'$discovery_scope'"
+             --> @dm:eval customer_tag ="'$customer_tag'"
+             --> @dm:eval customer_id ="'$customer_id'"
+             --> @dm:save name="temp-device-access" and append="yes"
+             --> @rn:write-stream name="network_access_verification"
+          --> @exec:end-if
+          --> *exec:if-condition customer_tag notin ['',' ','None']
+             --> @asset-discovery:access-check ip_column = 'device_ip' & protocol = 'snmp,ssh' and snmp_creds_regex = "^$snmp_cred_name$" &    ssh_creds_regex = "^$ssh_cred_name$" and ssh_disable_sha_retry = 'yes'
+             ## --> @dm:save name="test-device-access-result-snmp"
+             --> @dm:eval discovery_scope ="'$discovery_scope'"
+             --> @dm:eval customer_tag ="'$customer_tag'"
+             --> @dm:eval customer_id ="'$customer_id'"
+             --> @dm:save name="temp-device-access" and append="yes"
+             --> @rn:write-stream name="network_access_verification"
+          --> @exec:end-if
+       ## --> @dm:save name="test-device-access-result-snmp"
+       --> @exec:end-if
+       --> *exec:if-condition SSH = "no"
+          --> *exec:if-condition customer_tag is empty or customer_tag in ['',' ','None']
+             --> @asset-discovery:access-check ip_column = 'device_ip' & protocol = 'snmp'
+             --> @dm:eval discovery_scope ="'$discovery_scope'"
+             --> @dm:eval customer_tag ="'$customer_tag'"
+             --> @dm:eval customer_id ="'$customer_id'"
+             --> @dm:save name="temp-device-access" and append="yes"
+             --> @rn:write-stream name="network_access_verification"
+          --> @exec:end-if
+          --> *exec:if-condition customer_tag notin ['',' ','None']
+             --> @asset-discovery:access-check ip_column = 'device_ip' & protocol = 'snmp' and snmp_creds_regex = "^$snmp_cred_name$"
+             --> @dm:eval discovery_scope ="'$discovery_scope'"
+             --> @dm:eval customer_tag ="'$customer_tag'"
+             --> @dm:eval customer_id ="'$customer_id'"
+             --> @dm:save name="temp-device-access" and append="yes"
+             --> @rn:write-stream name="network_access_verification"
+          --> @exec:end-if
+       ## --> @dm:save name="test-device-access-result-ssh"
+       --> @exec:end-if
+    --> @exec:end-if
+
+## ## SNMP and SSH access data processing
+## ## Fetch data from network access pstream
+## --> @c:new-block
+## --> @dm:recall name="temp-device-access" & return_empty = "yes"
+## --> @dm:eval key  ="'key'"
+## --> @dm:implode key_columns is "key" and merge_columns is "ip_address" and merge_sep is ","  & keep_columns is "customer_tag,##customer_id,discovery_scope"
+## ## --> @dm:eval device_ip ='device_ip.split(",")'
+## --> @dm:eval ip_address = 'ip_address.replace(" ", "").split(",")'
+## --> @dm:save name="temp-ip-list-all"
+## --> @dm:save name="test-ip-list-all"
+## --> @dm:sleep seconds="5"
+## and (customer_tag is '{{customer_tag}}')
+## --> @c:data-loop columns="ip_address" and dataset ="temp-ip-list-all" and return_empty = "yes"
+## --> @dm:recall name="temp-ip-list-all" & return_empty = "yes"
+## --> *exec:if-condition customer_tag is empty or customer_tag is 'None'
+## --> @dm:empty
+## --> #dm:query-persistent-stream ip_address in $ip_address
+## with-input name = "network_access_verification" & limit = "0"
+## --> @dm:save name="temp-device-access-data" & append = "yes"
+## --> @dm:save name="test-device-access-result-single"
+## --> @exec:end-if
+## --> *exec:if-condition customer_tag is  "${customer_tag}"
+## --> #dm:query-persistent-stream ip_address in $ip_address and (customer_tag is '{{customer_tag}}')
+## with-input name = "network_access_verification" & limit = "0"
+## --> @dm:save name="temp-device-access-data" & append = "yes"
+## --> @dm:save name="test-device-access-result-multi"
+## --> @exec:end-if
+--> @c:new-block
+    --> @dm:recall name="temp-device-access" and return_empty="yes"
+    --> @dm:selectcolumns include = "ip_address|auth_state|protocol|used_cred|discovery_scope|customer_tag|customer_id|reason"
+    ## --> @dm:save name="test-device-access-result22"
+    --> *dm:filter protocol contains "SNMP"
+    --> @dm:save name="temp-snmp"
+    ## --> @dm:save name="test-snmp"
+    ## Filter success devices
+    --> @dm:recall name="temp-snmp" and return_empty="yes"
+    --> *dm:filter auth_state=="Success"
+    --> @dm:dedup columns="ip_address"
+    --> @dm:eval success_row="'yes'"
+    --> @dm:save name="temp-success"
+    ## --> @dm:save name="test-success-snmp"
+    ## Filter failed devices
+    --> @dm:recall name="temp-snmp" and return_empty="yes"
+    --> *dm:filter auth_state=="Failed"
+    ## --> @dm:save name="test-failed-snmp"
+    --> @dm:enrich dict='temp-success' and src_key_cols="ip_address" and dict_key_cols="ip_address" and enrich_cols="success_row" & return_empty_dict = "yes" & return_empty_cols = "yes"
+    --> @dm:add-missing-columns columns = "success_row"  & value = "no"
+    --> *dm:filter success_row notin ["yes"]
+    --> @dm:save name="temp-failed-all"
+    --> @dm:dedup columns="ip_address"
+    --> @dm:save name="temp-failed-unique"
+
+--> @c:new-block
+    --> @dm:concat names="temp-success|temp-failed-unique" and return_empty="yes"
+    --> @dm:save name="temp-snmp-data"
+
+## --> @dm:save name="test-snmp-data"
+## SSH processing for Success and Failed
+--> @c:new-block
+    --> @dm:recall name="temp-device-access" and return_empty="yes"
+    --> @dm:selectcolumns include = "ip_address|auth_state|protocol|used_cred|discovery_scope|customer_tag|customer_id|reason"
+    ## --> @dm:save name="test-device-access-result-ssh"
+    --> *dm:filter protocol contains "SSH"
+    --> @dm:save name="temp-ssh"
+    ## Filter success devices
+    --> @dm:recall name="temp-ssh" and return_empty="yes"
+    --> *dm:filter auth_state=="Success"
+    --> @dm:dedup columns="ip_address"
+    --> @dm:eval success_row="'yes'"
+    --> @dm:save name="temp-success-ssh"
+    ## Filter failed devices
+    --> @dm:recall name="temp-ssh" and return_empty="yes"
+    --> *dm:filter auth_state=="Failed"
+    --> @dm:enrich dict='temp-success-ssh' and src_key_cols="ip_address" and dict_key_cols="ip_address" and enrich_cols="success_row" & return_empty_dict = "yes" & return_empty_cols = "yes"
+    --> @dm:add-missing-columns columns = "success_row"  & value = "no"
+    --> *dm:filter success_row notin ["yes"]
+    --> @dm:save name="temp-failed-all-ssh"
+    --> @dm:dedup columns="ip_address"
+    --> @dm:save name="temp-failed-unique-ssh"
+
+--> @c:new-block
+    --> @dm:concat names="temp-success-ssh|temp-failed-unique-ssh" and return_empty="yes"
+    --> @dm:save name="temp-ssh-data"
+
+## --> @dm:save name="test-ssh-data"
+--> @c:new-block
+    --> @dm:concat names="temp-snmp-data|temp-ssh-data" and return_empty="yes"
+    --> @dm:save name="temp-ssh-snmp-data"
+    --> @dm:save name="temp-device-access-result" and append="yes"
+
+## --> @dm:save name="test-ssh-snmp-data"
+--> @c:new-block
+    --> @dm:recall name = "temp-ip"
+    --> @dm:rename-columns ip_address = "device_ip"
+    --> *dm:filter ICMP == 'yes'
+    --> @dm:skip-block-if-shape row_count = 0
+    ## --> @dm:save name="test-icmp-flt"
+    --> @diagnostictools:ping-v2 input_column="ip_address" and count = "1"
+    --> @dm:rename-columns auth_state = "collection_status" and ip_address = "source_ip"
+    --> @dm:add-missing-columns columns = 'protocol' & value = 'ICMP'
+    --> @dm:eval key ="'key'"
+    --> @dm:change-time-format columns = 'collection_timestamp' & from_format = 'ms' & to_format = 'datetimestr'
+    --> @dm:enrich dict	 = "temp-ip" and src_key_cols	 = "key" and dict_key_cols	="key" and enrich_cols	="discovery_scope,customer_tag,customer_id"
+    --> @dm:save name="temp-device-access-result" and append="yes"
+    --> @rn:write-stream name="network_access_verification"
+
+## --> @dm:save name="test-icmp-enrich"
+--> @c:new-block
+    --> @dm:recall name="temp-device-access-result" and return_empty="yes"
+    ## --> @dm:save name="test-device-all"
+    --> @dm:skip-block-if-shape row_count = 0
+    --> @exec:call-function name = "generate_device_access_summary"
+

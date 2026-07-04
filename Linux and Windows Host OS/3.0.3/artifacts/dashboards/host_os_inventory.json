@@ -1,0 +1,1615 @@
+{
+    "name": "host_os_inventory",
+    "description": "Host OS System Inventory",
+    "label": "Host OS System Inventory",
+    "enabled": false,
+    "live_edit": false,
+    "dashboard_type": "template",
+    "version": "25.05.19.8",
+    "context_label_id": "host_os_ip",
+    "dashboard_style": "auto",
+    "dashboard_folder": "HostOSInventory",
+    "template_variables": {
+        "CUST_ID": {
+            "contextId": "customerId"
+        },
+        "PROJ_ID": {
+            "contextId": "projectId"
+        },
+        "CUST_TAG": {
+            "contextId": "customerTag"
+        }
+    },
+    "dashboard_filters": {
+        "extra_filter": "(customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+        "time_filter": true,
+        "columns_filter": [
+            {
+                "id": "host_os_ip",
+                "label": "Host IP",
+                "type": "TEXT"
+            },
+            {
+                "id": "hostname",
+                "label": "Hostname",
+                "type": "TEXT"
+            },
+            {
+                "id": "host_os_vendor",
+                "label": "Host OS Vendor",
+                "type": "TEXT"
+            },
+            {
+                "id": "host_os_version",
+                "label": "Host OS Version",
+                "type": "TEXT"
+            },
+            {
+                "id": "host_machine_type",
+                "label": "Host Machine Type",
+                "type": "TEXT"
+            },
+            {
+                "id": "host_machine_vendor",
+                "label": "Host Machine Vendor",
+                "type": "TEXT"
+            },
+            {
+                "id": "vm_name",
+                "label": "VM Name",
+                "type": "TEXT"
+            },
+            {
+                "id": "esxi_host",
+                "label": "ESXi Host",
+                "type": "TEXT"
+            },
+            {
+                "id": "vcenter_name",
+                "label": "vCenter Name",
+                "type": "TEXT"
+            },
+            {
+                "id": "vcenter_address",
+                "label": "vCenter IP",
+                "type": "TEXT"
+            },
+            {
+                "id": "customer",
+                "label": "Customer",
+                "type": "TEXT"
+            }
+        ],
+        "default_time_filter_labels": [
+            "Last 1 month"
+        ],
+        "group_filters": [
+            {
+                "stream": "host-os-system-inventory",
+                "extra_filter": "asset_object = 'System' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                "title": "HostName",
+                "group_by": [
+                    "hostname"
+                ],
+                "ts_column": "collection_timestamp",
+                "agg": "cardinality",
+                "column": "host_os_ip",
+                "type": "int"
+            },
+            {
+                "stream": "host-os-system-inventory",
+                "extra_filter": "asset_object = 'System' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                "title": "Host OS IP",
+                "group_by": [
+                    "host_os_ip"
+                ],
+                "ts_column": "collection_timestamp",
+                "agg": "cardinality",
+                "column": "host_os_ip",
+                "type": "int"
+            },
+            {
+                "stream": "host-os-system-inventory",
+                "extra_filter": "asset_object = 'System' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                "title": "Host Machine Type",
+                "group_by": [
+                    "host_machine_type"
+                ],
+                "ts_column": "collection_timestamp",
+                "agg": "cardinality",
+                "column": "host_os_ip",
+                "type": "int"
+            },
+            {
+                "stream": "host-os-system-inventory",
+                "extra_filter": "asset_object = 'System' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                "title": "Host Machine Vendor",
+                "group_by": [
+                    "host_machine_vendor"
+                ],
+                "ts_column": "collection_timestamp",
+                "agg": "cardinality",
+                "column": "host_os_ip",
+                "type": "int"
+            },
+            {
+                "stream": "host-os-system-inventory",
+                "extra_filter": "asset_object = 'System' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                "title": "Host OS Vendor",
+                "group_by": [
+                    "host_os_vendor"
+                ],
+                "ts_column": "collection_timestamp",
+                "agg": "cardinality",
+                "column": "host_os_ip",
+                "type": "int"
+            },
+            {
+                "stream": "host-os-system-inventory",
+                "extra_filter": "asset_object = 'System' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                "title": "Host CPU Vendor",
+                "group_by": [
+                    "host_cpu_vendor"
+                ],
+                "ts_column": "collection_timestamp",
+                "agg": "cardinality",
+                "column": "host_os_ip",
+                "type": "int"
+            }
+        ]
+    },
+    "dashboard_sections": [
+        {
+            "title": "Host OS",
+            "show_filter": true,
+            "widgets": [
+                {
+                    "widget_type": "counter",
+                    "title": "Total Hosts",
+                    "stream": "host-os-system-inventory",
+                    "ts_column": "collection_timestamp",
+                    "extra_filter": "asset_object = 'System' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "column": "host_os_ip",
+                    "agg": "cardinality",
+                    "type": "int",
+                    "style": {
+                        "color-list": [
+                            "#0288D1"
+                        ]
+                    },
+                    "min_width": 3,
+                    "height": 3,
+                    "max_width": 4,
+                    "widget_id": "kpi_total_hosts",
+                    "include_context_in_query": true,
+                    "include_context_keys": [
+                        "hostname",
+                        "host_os_ip",
+                        "host_os_vendor",
+                        "host_os_version",
+                        "host_machine_type",
+                        "host_machine_vendor",
+                        "host_cpu_vendor",
+                        "vm_name",
+                        "esxi_host",
+                        "vcenter_name",
+                        "vcenter_address",
+                        "customer"
+                    ],
+                    "query": "asset_object = 'System' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)"
+                },
+                {
+                    "widget_type": "counter",
+                    "title": "Unique Hostnames",
+                    "stream": "host-os-system-inventory",
+                    "ts_column": "collection_timestamp",
+                    "extra_filter": "asset_object = 'System' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "column": "hostname",
+                    "agg": "cardinality",
+                    "type": "int",
+                    "style": {
+                        "color-list": [
+                            "#00897B"
+                        ]
+                    },
+                    "min_width": 3,
+                    "height": 3,
+                    "widget_id": "kpi_unique_hostnames",
+                    "include_context_in_query": true,
+                    "include_context_keys": [
+                        "hostname",
+                        "host_os_ip",
+                        "host_os_vendor",
+                        "host_os_version",
+                        "host_machine_type",
+                        "host_machine_vendor",
+                        "host_cpu_vendor",
+                        "vm_name",
+                        "esxi_host",
+                        "vcenter_name",
+                        "vcenter_address",
+                        "customer"
+                    ],
+                    "query": "asset_object = 'System' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)"
+                },
+                {
+                    "widget_type": "counter",
+                    "title": "OS Vendors",
+                    "stream": "host-os-system-inventory",
+                    "ts_column": "collection_timestamp",
+                    "extra_filter": "asset_object = 'System' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "column": "host_os_vendor",
+                    "agg": "cardinality",
+                    "type": "int",
+                    "style": {
+                        "color-list": [
+                            "#7B1FA2"
+                        ]
+                    },
+                    "min_width": 3,
+                    "height": 3,
+                    "widget_id": "kpi_os_vendors",
+                    "include_context_in_query": true,
+                    "include_context_keys": [
+                        "hostname",
+                        "host_os_ip",
+                        "host_os_vendor",
+                        "host_os_version",
+                        "host_machine_type",
+                        "host_machine_vendor",
+                        "host_cpu_vendor",
+                        "vm_name",
+                        "esxi_host",
+                        "vcenter_name",
+                        "vcenter_address",
+                        "customer"
+                    ],
+                    "query": "asset_object = 'System' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)"
+                },
+                {
+                    "widget_type": "pie_chart",
+                    "title": "Hosts by OS Vendor",
+                    "stream": "host-os-system-inventory",
+                    "ts_column": "collection_timestamp",
+                    "extra_filter": "asset_object = 'System' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "column": "host_os_ip",
+                    "agg": "cardinality",
+                    "group_by": [
+                        "host_os_vendor"
+                    ],
+                    "type": "str",
+                    "chartProperties": {
+                        "legendShowValue": true,
+                        "legendShowPercentage": true
+                    },
+                    "include_context_in_query": true,
+                    "include_context_keys": [
+                        "hostname",
+                        "host_os_ip",
+                        "host_os_vendor",
+                        "host_os_version",
+                        "host_machine_type",
+                        "host_machine_vendor",
+                        "host_cpu_vendor",
+                        "vm_name",
+                        "esxi_host",
+                        "vcenter_name",
+                        "vcenter_address",
+                        "customer"
+                    ],
+                    "min_width": 3,
+                    "height": 4,
+                    "widget_id": "pie_os_vendor",
+                    "segment_filter": true,
+                    "query": "asset_object = 'System' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)"
+                },
+                {
+                    "widget_type": "tabular",
+                    "title": "Host OS Details",
+                    "stream": "host-os-system-inventory",
+                    "extra_filter": "hostname != '' and asset_object = 'System' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "ts_column": "collection_timestamp",
+                    "sorting": [],
+                    "resizableColumns": false,
+                    "paginated": true,
+                    "virtual_scrolling": false,
+                    "showRowSummary": true,
+                    "max_rows": 200,
+                    "include_context_in_query": true,
+                    "include_context_keys": [
+                        "hostname",
+                        "host_os_ip",
+                        "host_os_vendor",
+                        "host_os_version",
+                        "host_machine_type",
+                        "host_machine_vendor",
+                        "host_cpu_vendor",
+                        "vm_name",
+                        "esxi_host",
+                        "vcenter_name",
+                        "vcenter_address",
+                        "customer"
+                    ],
+                    "min_width": 12,
+                    "height": 8,
+                    "max_width": 12,
+                    "columns": {
+                        "hostname": {
+                            "title": "Hostname",
+                            "key": true
+                        },
+                        "host_os_ip": {
+                            "title": "Host IP",
+                            "key": true
+                        },
+                        "host_os_version": "Host OS Version",
+                        "host_cpu_vendor": "Host CPU Vendor",
+                        "host_cpu_model": "Host CPU Model",
+                        "host_memory_gb": "Host Memory (GB)",
+                        "host_machine_vendor": "Host Machine Vendor",
+                        "vm_name": "VM Name",
+                        "esxi_host": "ESXi Host",
+                        "vcenter_name": "vCenter Name",
+                        "collection_timestamp": {
+                            "title": "Collection Timestamp",
+                            "type": "DATETIME"
+                        }
+                    },
+                    "widget_id": "60edad5a",
+                    "custom_columns": [],
+                    "actions": [
+                        {
+                            "permission": "rda:user_dashboard:view",
+                            "appName": "user-dashboard/host_os_details_view_pack",
+                            "drillDownLinkField": "host_os_ip",
+                            "identifier": "launch.dashboard.device_view_app",
+                            "selectionType": "SINGLE",
+                            "title": "View Details",
+                            "type": "GO_TO_APP_STATE",
+                            "contextParamList": {
+                                "contextParams": [
+                                    {
+                                        "paramKey": "unique_id",
+                                        "paramId": "node_id"
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "query": "hostname != '' and asset_object = 'System' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)"
+                }
+            ]
+        },
+        {
+            "title": "Networks",
+            "show_filter": true,
+            "widgets": [
+                {
+                    "widget_type": "counter",
+                    "title": "Hosts with NICs",
+                    "stream": "host-os-system-inventory",
+                    "ts_column": "collection_timestamp",
+                    "extra_filter": "host_os_nic_name is not Empty",
+                    "column": "host_os_ip",
+                    "agg": "cardinality",
+                    "type": "int",
+                    "style": {
+                        "color-list": [
+                            "#0288D1"
+                        ]
+                    },
+                    "min_width": 3,
+                    "height": 3,
+                    "widget_id": "kpi_total_nics",
+                    "include_context_in_query": true,
+                    "include_context_keys": [
+                        "hostname",
+                        "host_os_ip",
+                        "host_os_vendor",
+                        "host_os_version",
+                        "host_machine_type",
+                        "host_machine_vendor",
+                        "host_cpu_vendor",
+                        "vm_name",
+                        "esxi_host",
+                        "vcenter_name",
+                        "vcenter_address",
+                        "customer"
+                    ],
+                    "query": "asset_object = 'Network' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)"
+                },
+                {
+                    "widget_type": "counter",
+                    "title": "Unique NIC Names",
+                    "stream": "host-os-system-inventory",
+                    "ts_column": "collection_timestamp",
+                    "extra_filter": "asset_object = 'Network' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "column": "host_os_nic_name",
+                    "agg": "cardinality",
+                    "type": "int",
+                    "style": {
+                        "color-list": [
+                            "#00897B"
+                        ]
+                    },
+                    "min_width": 3,
+                    "height": 3,
+                    "widget_id": "kpi_unique_nics",
+                    "include_context_in_query": true,
+                    "include_context_keys": [
+                        "hostname",
+                        "host_os_ip",
+                        "host_os_vendor",
+                        "host_os_version",
+                        "host_machine_type",
+                        "host_machine_vendor",
+                        "host_cpu_vendor",
+                        "vm_name",
+                        "esxi_host",
+                        "vcenter_name",
+                        "vcenter_address",
+                        "customer"
+                    ],
+                    "query": "asset_object = 'Network' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)"
+                },
+                {
+                    "widget_type": "pie_chart",
+                    "title": "NIC Name Distribution",
+                    "stream": "host-os-system-inventory",
+                    "ts_column": "collection_timestamp",
+                    "extra_filter": "asset_object = 'Network' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "column": "_id",
+                    "agg": "value_count",
+                    "group_by": [
+                        "host_os_nic_name"
+                    ],
+                    "type": "str",
+                    "chartProperties": {
+                        "legendShowValue": true,
+                        "legendShowPercentage": true
+                    },
+                    "include_context_in_query": true,
+                    "include_context_keys": [
+                        "hostname",
+                        "host_os_ip",
+                        "host_os_vendor",
+                        "host_os_version",
+                        "host_machine_type",
+                        "host_machine_vendor",
+                        "host_cpu_vendor",
+                        "vm_name",
+                        "esxi_host",
+                        "vcenter_name",
+                        "vcenter_address",
+                        "customer"
+                    ],
+                    "min_width": 6,
+                    "height": 4,
+                    "widget_id": "net_nic_pie",
+                    "limit": 20,
+                    "segment_filter": true,
+                    "query": "asset_object = 'Network' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)"
+                },
+                {
+                    "widget_type": "tabular",
+                    "title": "Host OS Network Details",
+                    "stream": "host-os-system-inventory",
+                    "extra_filter": "(host_os_nic_ip != '') and asset_object = 'Network' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "ts_column": "collection_timestamp",
+                    "duration_hours": 10000,
+                    "sorting": [],
+                    "resizableColumns": false,
+                    "paginated": true,
+                    "virtual_scrolling": false,
+                    "showRowSummary": true,
+                    "max_rows": 200,
+                    "include_context_in_query": true,
+                    "include_context_keys": [
+                        "hostname",
+                        "host_os_ip",
+                        "host_os_vendor",
+                        "host_os_version",
+                        "host_machine_type",
+                        "host_machine_vendor",
+                        "host_cpu_vendor",
+                        "vm_name",
+                        "esxi_host",
+                        "vcenter_name",
+                        "vcenter_address",
+                        "customer"
+                    ],
+                    "min_width": 12,
+                    "height": 8,
+                    "max_width": 12,
+                    "columns": {
+                        "hostname": {
+                            "title": "Hostname",
+                            "key": true
+                        },
+                        "host_os_ip": {
+                            "title": "Host IP",
+                            "key": true
+                        },
+                        "host_os_nic_name": "NIC Name",
+                        "host_os_nic_ip": "NIC IP",
+                        "host_os_nic_mac": "MAC Address",
+                        "host_os_nic_mtu": "MTU",
+                        "host_machine_vendor": "Machine Vendor",
+                        "host_os_vendor": "OS Vendor",
+                        "collection_timestamp": {
+                            "title": "Collection Timestamp",
+                            "type": "DATETIME"
+                        }
+                    },
+                    "widget_id": "73957361",
+                    "custom_columns": [
+                        {
+                            "id": "node_id_network",
+                            "label": "Node ID",
+                            "expr": "hostname+'_'+host_os_ip+'_'+host_bios_uuid"
+                        }
+                    ],
+                    "actions": [
+                        {
+                            "permission": "rda:user_dashboard:view",
+                            "appName": "user-dashboard/host_os_details_view_pack",
+                            "drillDownLinkField": "host_os_ip",
+                            "identifier": "launch.dashboard.device_view_app",
+                            "selectionType": "SINGLE",
+                            "title": "View Details",
+                            "type": "GO_TO_APP_STATE",
+                            "contextParamList": {
+                                "contextParams": [
+                                    {
+                                        "paramKey": "node_id_network",
+                                        "paramId": "node_id"
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "query": "(host_os_nic_ip != '') and asset_object = 'Network' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)"
+                }
+            ]
+        },
+        {
+            "title": "Disks",
+            "show_filter": true,
+            "widgets": [
+                {
+                    "widget_type": "counter",
+                    "title": "Hosts with Disks",
+                    "stream": "host-os-system-inventory",
+                    "ts_column": "collection_timestamp",
+                    "extra_filter": "asset_object = 'Disk' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "column": "host_os_ip",
+                    "agg": "cardinality",
+                    "type": "int",
+                    "style": {
+                        "color-list": [
+                            "#0288D1"
+                        ]
+                    },
+                    "min_width": 4,
+                    "height": 3,
+                    "widget_id": "kpi_total_disks",
+                    "include_context_in_query": true,
+                    "include_context_keys": [
+                        "hostname",
+                        "host_os_ip",
+                        "host_os_vendor",
+                        "host_os_version",
+                        "host_machine_type",
+                        "host_machine_vendor",
+                        "host_cpu_vendor",
+                        "vm_name",
+                        "esxi_host",
+                        "vcenter_name",
+                        "vcenter_address",
+                        "customer"
+                    ],
+                    "query": "asset_object = 'Disk' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)"
+                },
+                {
+                    "widget_type": "counter",
+                    "title": "Hosts with Filesystems",
+                    "stream": "host-os-system-inventory",
+                    "ts_column": "collection_timestamp",
+                    "extra_filter": "asset_object = 'Filesystem' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "column": "host_os_ip",
+                    "agg": "cardinality",
+                    "type": "int",
+                    "style": {
+                        "color-list": [
+                            "#00897B"
+                        ]
+                    },
+                    "min_width": 4,
+                    "height": 3,
+                    "widget_id": "kpi_total_fs",
+                    "include_context_in_query": true,
+                    "include_context_keys": [
+                        "hostname",
+                        "host_os_ip",
+                        "host_os_vendor",
+                        "host_os_version",
+                        "host_machine_type",
+                        "host_machine_vendor",
+                        "host_cpu_vendor",
+                        "vm_name",
+                        "esxi_host",
+                        "vcenter_name",
+                        "vcenter_address",
+                        "customer"
+                    ],
+                    "query": "asset_object = 'Filesystem' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)"
+                },
+                {
+                    "widget_type": "pie_chart",
+                    "title": "Disk State",
+                    "stream": "host-os-system-inventory",
+                    "ts_column": "collection_timestamp",
+                    "extra_filter": "asset_object = 'Disk' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "column": "_id",
+                    "agg": "value_count",
+                    "group_by": [
+                        "host_os_disk_state"
+                    ],
+                    "type": "str",
+                    "chartProperties": {
+                        "legendShowValue": true,
+                        "legendShowPercentage": true
+                    },
+                    "include_context_in_query": true,
+                    "include_context_keys": [
+                        "hostname",
+                        "host_os_ip",
+                        "host_os_vendor",
+                        "host_os_version",
+                        "host_machine_type",
+                        "host_machine_vendor",
+                        "host_cpu_vendor",
+                        "vm_name",
+                        "esxi_host",
+                        "vcenter_name",
+                        "vcenter_address",
+                        "customer"
+                    ],
+                    "min_width": 4,
+                    "height": 4,
+                    "widget_id": "disk_state_pie",
+                    "segment_filter": true,
+                    "query": "asset_object = 'Disk' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)"
+                },
+                {
+                    "widget_type": "bar_chart",
+                    "title": "Filesystem Usage % Distribution",
+                    "stream": "host-os-system-inventory",
+                    "ts_column": "collection_timestamp",
+                    "extra_filter": "host_os_fs_used_perc is not empty and asset_object = 'Filesystem' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "group_by": [
+                        "host_os_fs_used_perc"
+                    ],
+                    "column": "_id",
+                    "agg": "value_count",
+                    "type": "str",
+                    "chartProperties": {
+                        "yAxisLabel": "Count",
+                        "xAxisLabel": "Used (%)",
+                        "stacked": false,
+                        "legendLocation": "none",
+                        "orientation": "horizontal"
+                    },
+                    "include_context_in_query": true,
+                    "include_context_keys": [
+                        "hostname",
+                        "host_os_ip",
+                        "host_os_vendor",
+                        "host_os_version",
+                        "host_machine_type",
+                        "host_machine_vendor",
+                        "host_cpu_vendor",
+                        "vm_name",
+                        "esxi_host",
+                        "vcenter_name",
+                        "vcenter_address",
+                        "customer"
+                    ],
+                    "min_width": 12,
+                    "height": 5,
+                    "widget_id": "fs_usage_bar",
+                    "query": "host_os_fs_used_perc is not empty and asset_object = 'Filesystem' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)"
+                },
+                {
+                    "widget_type": "tabular",
+                    "title": "Disk Details",
+                    "stream": "host-os-system-inventory",
+                    "extra_filter": "host_os_disk_vendor != '' and asset_object = 'Disk' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "ts_column": "collection_timestamp",
+                    "sorting": [],
+                    "resizableColumns": false,
+                    "paginated": true,
+                    "virtual_scrolling": false,
+                    "showRowSummary": true,
+                    "max_rows": 200,
+                    "include_context_in_query": true,
+                    "include_context_keys": [
+                        "hostname",
+                        "host_os_ip",
+                        "host_os_vendor",
+                        "host_os_version",
+                        "host_machine_type",
+                        "host_machine_vendor",
+                        "host_cpu_vendor",
+                        "vm_name",
+                        "esxi_host",
+                        "vcenter_name",
+                        "vcenter_address",
+                        "customer"
+                    ],
+                    "min_width": 12,
+                    "height": 6,
+                    "max_width": 12,
+                    "columns": {
+                        "hostname": {
+                            "title": "Hostname",
+                            "key": true
+                        },
+                        "host_os_ip": {
+                            "title": "Host IP",
+                            "key": true
+                        },
+                        "host_os_disk_vendor": "Disk Vendor",
+                        "host_os_disk_size_gb": "Disk Size (GB)",
+                        "host_os_disk_model": "Disk Model",
+                        "host_os_disk_serial": "Disk Serial",
+                        "host_os_disk_state": "Disk State",
+                        "collection_timestamp": {
+                            "title": "Collection Timestamp",
+                            "type": "DATETIME"
+                        }
+                    },
+                    "widget_id": "d3bd54c1",
+                    "custom_columns": [
+                        {
+                            "id": "node_id_disk",
+                            "label": "Node ID",
+                            "expr": "hostname+'_'+host_os_ip+'_'+host_bios_uuid"
+                        }
+                    ],
+                    "actions": [
+                        {
+                            "permission": "rda:user_dashboard:view",
+                            "appName": "user-dashboard/host_os_details_view_pack",
+                            "drillDownLinkField": "host_os_ip",
+                            "identifier": "launch.dashboard.device_view_app",
+                            "selectionType": "SINGLE",
+                            "title": "View Details",
+                            "type": "GO_TO_APP_STATE",
+                            "contextParamList": {
+                                "contextParams": [
+                                    {
+                                        "paramKey": "node_id_disk",
+                                        "paramId": "node_id"
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "query": "host_os_disk_vendor != '' and asset_object = 'Disk' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)"
+                },
+                {
+                    "widget_type": "tabular",
+                    "title": "Filesystem Details",
+                    "stream": "host-os-system-inventory",
+                    "extra_filter": "host_os_disk_mount != '' and asset_object = 'Filesystem' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "ts_column": "collection_timestamp",
+                    "sorting": [],
+                    "resizableColumns": false,
+                    "paginated": true,
+                    "virtual_scrolling": false,
+                    "showRowSummary": true,
+                    "max_rows": 200,
+                    "include_context_in_query": true,
+                    "include_context_keys": [
+                        "hostname",
+                        "host_os_ip",
+                        "host_os_vendor",
+                        "host_os_version",
+                        "host_machine_type",
+                        "host_machine_vendor",
+                        "host_cpu_vendor",
+                        "vm_name",
+                        "esxi_host",
+                        "vcenter_name",
+                        "vcenter_address",
+                        "customer"
+                    ],
+                    "min_width": 12,
+                    "height": 8,
+                    "max_width": 12,
+                    "columns": {
+                        "hostname": {
+                            "title": "Hostname",
+                            "key": true
+                        },
+                        "host_os_ip": {
+                            "title": "Host IP",
+                            "key": true
+                        },
+                        "host_os_disk_mount": "Mountpoint",
+                        "host_os_fs_type": "Filesystem Type",
+                        "host_os_fs_size": "Total Size",
+                        "host_os_fs_used": "Used (GB)",
+                        "host_os_fs_available": "Available (GB)",
+                        "host_os_fs_used_perc": "Used (%)",
+                        "collection_timestamp": {
+                            "title": "Collection Timestamp",
+                            "type": "DATETIME"
+                        }
+                    },
+                    "widget_id": "bff0af76",
+                    "custom_columns": [
+                        {
+                            "id": "node_id_fs",
+                            "label": "Node ID",
+                            "expr": "hostname+'_'+host_os_ip+'_'+host_bios_uuid"
+                        }
+                    ],
+                    "actions": [
+                        {
+                            "permission": "rda:user_dashboard:view",
+                            "appName": "user-dashboard/host_os_details_view_pack",
+                            "drillDownLinkField": "host_os_ip",
+                            "identifier": "launch.dashboard.device_view_app",
+                            "selectionType": "SINGLE",
+                            "title": "View Details",
+                            "type": "GO_TO_APP_STATE",
+                            "contextParamList": {
+                                "contextParams": [
+                                    {
+                                        "paramKey": "node_id_fs",
+                                        "paramId": "node_id"
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "query": "host_os_disk_mount != '' and asset_object = 'Filesystem' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)"
+                }
+            ]
+        },
+        {
+            "title": "Services and Process",
+            "show_filter": true,
+            "widgets": [
+                {
+                    "widget_type": "counter",
+                    "title": "Hosts with Services",
+                    "stream": "host-os-system-inventory",
+                    "ts_column": "collection_timestamp",
+                    "extra_filter": "asset_object = 'Service' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "column": "host_os_ip",
+                    "agg": "cardinality",
+                    "type": "int",
+                    "style": {
+                        "color-list": [
+                            "#0288D1"
+                        ]
+                    },
+                    "min_width": 3,
+                    "height": 3,
+                    "widget_id": "kpi_total_services",
+                    "include_context_in_query": true,
+                    "include_context_keys": [
+                        "hostname",
+                        "host_os_ip",
+                        "host_os_vendor",
+                        "host_os_version",
+                        "host_machine_type",
+                        "host_machine_vendor",
+                        "host_cpu_vendor",
+                        "vm_name",
+                        "esxi_host",
+                        "vcenter_name",
+                        "vcenter_address",
+                        "customer"
+                    ],
+                    "query": "asset_object = 'Service' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)"
+                },
+                {
+                    "widget_type": "counter",
+                    "title": "Unique Service Names",
+                    "stream": "host-os-system-inventory",
+                    "ts_column": "collection_timestamp",
+                    "extra_filter": "host_os_service_name != '' and asset_object = 'Service' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "column": "host_os_service_name",
+                    "agg": "cardinality",
+                    "type": "int",
+                    "style": {
+                        "color-list": [
+                            "#7B1FA2"
+                        ]
+                    },
+                    "min_width": 3,
+                    "height": 3,
+                    "widget_id": "kpi_unique_svc_names",
+                    "include_context_in_query": true,
+                    "include_context_keys": [
+                        "hostname",
+                        "host_os_ip",
+                        "host_os_vendor",
+                        "host_os_version",
+                        "host_machine_type",
+                        "host_machine_vendor",
+                        "host_cpu_vendor",
+                        "vm_name",
+                        "esxi_host",
+                        "vcenter_name",
+                        "vcenter_address",
+                        "customer"
+                    ],
+                    "query": "host_os_service_name != '' and asset_object = 'Service' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)"
+                },
+                {
+                    "widget_type": "pie_chart",
+                    "title": "Service Status",
+                    "stream": "host-os-system-inventory",
+                    "ts_column": "collection_timestamp",
+                    "extra_filter": "asset_object = 'Service' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "column": "_id",
+                    "agg": "value_count",
+                    "group_by": [
+                        "host_os_service_status"
+                    ],
+                    "type": "str",
+                    "chartProperties": {
+                        "legendShowValue": true,
+                        "legendShowPercentage": true
+                    },
+                    "include_context_in_query": true,
+                    "include_context_keys": [
+                        "hostname",
+                        "host_os_ip",
+                        "host_os_vendor",
+                        "host_os_version",
+                        "host_machine_type",
+                        "host_machine_vendor",
+                        "host_cpu_vendor",
+                        "vm_name",
+                        "esxi_host",
+                        "vcenter_name",
+                        "vcenter_address",
+                        "customer"
+                    ],
+                    "min_width": 4,
+                    "height": 4,
+                    "max_width": 4,
+                    "widget_id": "svc_status_pie",
+                    "segment_filter": true,
+                    "query": "asset_object = 'Service' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)"
+                },
+                {
+                    "widget_type": "bar_chart",
+                    "title": "Service Startup Mode",
+                    "stream": "host-os-system-inventory",
+                    "ts_column": "collection_timestamp",
+                    "extra_filter": "host_os_service_mode is not empty and asset_object = 'Service' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "group_by": [
+                        "host_os_service_mode"
+                    ],
+                    "column": "_id",
+                    "agg": "value_count",
+                    "type": "str",
+                    "chartProperties": {
+                        "yAxisLabel": "Count",
+                        "xAxisLabel": "Startup Mode",
+                        "stacked": false,
+                        "legendLocation": "none",
+                        "orientation": "vertical"
+                    },
+                    "include_context_in_query": true,
+                    "include_context_keys": [
+                        "hostname",
+                        "host_os_ip",
+                        "host_os_vendor",
+                        "host_os_version",
+                        "host_machine_type",
+                        "host_machine_vendor",
+                        "host_cpu_vendor",
+                        "vm_name",
+                        "esxi_host",
+                        "vcenter_name",
+                        "vcenter_address",
+                        "customer"
+                    ],
+                    "min_width": 8,
+                    "height": 4,
+                    "max_width": 8,
+                    "widget_id": "svc_mode_bar",
+                    "query": "host_os_service_mode is not empty and asset_object = 'Service' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)"
+                },
+                {
+                    "widget_type": "pie_chart",
+                    "title": "Service State",
+                    "stream": "host-os-system-inventory",
+                    "ts_column": "collection_timestamp",
+                    "extra_filter": "asset_object = 'Service' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "column": "_id",
+                    "agg": "value_count",
+                    "group_by": [
+                        "host_os_service_state"
+                    ],
+                    "type": "str",
+                    "chartProperties": {
+                        "legendShowValue": true,
+                        "legendShowPercentage": true
+                    },
+                    "include_context_in_query": true,
+                    "include_context_keys": [
+                        "hostname",
+                        "host_os_ip",
+                        "host_os_vendor",
+                        "host_os_version",
+                        "host_machine_type",
+                        "host_machine_vendor",
+                        "host_cpu_vendor",
+                        "vm_name",
+                        "esxi_host",
+                        "vcenter_name",
+                        "vcenter_address",
+                        "customer"
+                    ],
+                    "min_width": 4,
+                    "height": 4,
+                    "max_width": 4,
+                    "widget_id": "svc_state_pie",
+                    "segment_filter": true,
+                    "query": "asset_object = 'Service' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)"
+                },
+                {
+                    "widget_type": "tabular",
+                    "title": "Service Details",
+                    "stream": "host-os-system-inventory",
+                    "extra_filter": "host_os_service_name != '' and asset_object = 'Service' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "ts_column": "collection_timestamp",
+                    "sorting": [],
+                    "resizableColumns": false,
+                    "paginated": true,
+                    "virtual_scrolling": false,
+                    "showRowSummary": true,
+                    "max_rows": 200,
+                    "include_context_in_query": true,
+                    "include_context_keys": [
+                        "hostname",
+                        "host_os_ip",
+                        "host_os_vendor",
+                        "host_os_version",
+                        "host_machine_type",
+                        "host_machine_vendor",
+                        "host_cpu_vendor",
+                        "vm_name",
+                        "esxi_host",
+                        "vcenter_name",
+                        "vcenter_address",
+                        "customer"
+                    ],
+                    "min_width": 12,
+                    "height": 8,
+                    "max_width": 12,
+                    "columns": {
+                        "hostname": {
+                            "title": "Hostname",
+                            "key": true
+                        },
+                        "host_os_ip": {
+                            "title": "Host IP",
+                            "key": true
+                        },
+                        "host_os_service_name": "Service Name",
+                        "host_os_service_status": "Service Status",
+                        "host_os_service_state": "Service State",
+                        "host_os_service_mode": "Service Mode",
+                        "host_os_service_pid": "Service PID",
+                        "collection_timestamp": {
+                            "title": "Collection Timestamp",
+                            "type": "DATETIME"
+                        }
+                    },
+                    "widget_id": "0b6ff491",
+                    "custom_columns": [
+                        {
+                            "id": "node_id_services",
+                            "label": "Node ID",
+                            "expr": "hostname+'_'+host_os_ip+'_'+host_bios_uuid"
+                        }
+                    ],
+                    "actions": [
+                        {
+                            "permission": "rda:user_dashboard:view",
+                            "appName": "user-dashboard/host_os_details_view_pack",
+                            "drillDownLinkField": "host_os_ip",
+                            "identifier": "launch.dashboard.device_view_app",
+                            "selectionType": "SINGLE",
+                            "title": "View Details",
+                            "type": "GO_TO_APP_STATE",
+                            "contextParamList": {
+                                "contextParams": [
+                                    {
+                                        "paramKey": "node_id_services",
+                                        "paramId": "node_id"
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "query": "host_os_service_name != '' and asset_object = 'Service' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)"
+                }
+            ]
+        },
+        {
+            "title": "Application Connections",
+            "show_filter": true,
+            "widgets": [
+                {
+                    "widget_type": "counter",
+                    "title": "Unique Client IPs",
+                    "stream": "host-os-system-inventory",
+                    "ts_column": "collection_timestamp",
+                    "extra_filter": "client_ip_address is not empty and asset_object = 'NetstatClientServer' and host_bios_uuid is not empty and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "column": "client_ip_address",
+                    "agg": "cardinality",
+                    "type": "int",
+                    "style": {
+                        "color-list": [
+                            "#7B1FA2"
+                        ]
+                    },
+                    "min_width": 4,
+                    "height": 3,
+                    "widget_id": "kpi_client_ips",
+                    "include_context_in_query": true,
+                    "include_context_keys": [
+                        "hostname",
+                        "host_os_ip",
+                        "host_os_vendor",
+                        "host_os_version",
+                        "host_machine_type",
+                        "host_machine_vendor",
+                        "host_cpu_vendor",
+                        "vm_name",
+                        "esxi_host",
+                        "vcenter_name",
+                        "vcenter_address",
+                        "customer"
+                    ],
+                    "query": "client_ip_address is not empty and asset_object = 'NetstatClientServer' and host_bios_uuid is not empty and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)"
+                },
+                {
+                    "widget_type": "counter",
+                    "title": "Unique Server IPs",
+                    "stream": "host-os-system-inventory",
+                    "ts_column": "collection_timestamp",
+                    "extra_filter": "server_ip_address is not empty and asset_object = 'NetstatClientServer' and host_bios_uuid is not empty and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "column": "server_ip_address",
+                    "agg": "cardinality",
+                    "type": "int",
+                    "style": {
+                        "color-list": [
+                            "#F57C00"
+                        ]
+                    },
+                    "min_width": 4,
+                    "height": 3,
+                    "widget_id": "kpi_server_ips",
+                    "include_context_in_query": true,
+                    "include_context_keys": [
+                        "hostname",
+                        "host_os_ip",
+                        "host_os_vendor",
+                        "host_os_version",
+                        "host_machine_type",
+                        "host_machine_vendor",
+                        "host_cpu_vendor",
+                        "vm_name",
+                        "esxi_host",
+                        "vcenter_name",
+                        "vcenter_address",
+                        "customer"
+                    ],
+                    "query": "server_ip_address is not empty and asset_object = 'NetstatClientServer' and host_bios_uuid is not empty and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)"
+                },
+                {
+                    "widget_type": "pie_chart",
+                    "title": "Connection State",
+                    "stream": "host-os-system-inventory",
+                    "ts_column": "collection_timestamp",
+                    "extra_filter": "asset_object = 'NetstatClientServer' and host_bios_uuid is not empty and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "column": "_id",
+                    "agg": "value_count",
+                    "group_by": [
+                        "connection_state"
+                    ],
+                    "type": "str",
+                    "chartProperties": {
+                        "legendShowValue": true,
+                        "legendShowPercentage": true
+                    },
+                    "include_context_in_query": true,
+                    "include_context_keys": [
+                        "hostname",
+                        "host_os_ip",
+                        "host_os_vendor",
+                        "host_os_version",
+                        "host_machine_type",
+                        "host_machine_vendor",
+                        "host_cpu_vendor",
+                        "vm_name",
+                        "esxi_host",
+                        "vcenter_name",
+                        "vcenter_address",
+                        "customer"
+                    ],
+                    "min_width": 4,
+                    "height": 4,
+                    "widget_id": "conn_state_pie",
+                    "segment_filter": true,
+                    "query": "asset_object = 'NetstatClientServer' and host_bios_uuid is not empty and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)"
+                },
+                {
+                    "widget_type": "bar_chart",
+                    "title": "Connection Protocol Distribution",
+                    "stream": "host-os-system-inventory",
+                    "ts_column": "collection_timestamp",
+                    "extra_filter": "connection_protocol is not empty and asset_object = 'NetstatClientServer' and host_bios_uuid is not empty and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "group_by": [
+                        "connection_protocol"
+                    ],
+                    "column": "_id",
+                    "agg": "value_count",
+                    "type": "str",
+                    "chartProperties": {
+                        "yAxisLabel": "Count",
+                        "xAxisLabel": "Protocol",
+                        "stacked": false,
+                        "legendLocation": "none",
+                        "orientation": "vertical"
+                    },
+                    "include_context_in_query": true,
+                    "include_context_keys": [
+                        "hostname",
+                        "host_os_ip",
+                        "host_os_vendor",
+                        "host_os_version",
+                        "host_machine_type",
+                        "host_machine_vendor",
+                        "host_cpu_vendor",
+                        "vm_name",
+                        "esxi_host",
+                        "vcenter_name",
+                        "vcenter_address",
+                        "customer"
+                    ],
+                    "min_width": 12,
+                    "height": 4,
+                    "widget_id": "conn_proto_bar",
+                    "query": "connection_protocol is not empty and asset_object = 'NetstatClientServer' and host_bios_uuid is not empty and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)"
+                },
+                {
+                    "widget_type": "tabular",
+                    "title": "Netstats Details",
+                    "stream": "host-os-system-inventory",
+                    "extra_filter": "asset_object = 'NetstatClientServer' and host_bios_uuid != '' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "ts_column": "collection_timestamp",
+                    "sorting": [],
+                    "resizableColumns": false,
+                    "paginated": true,
+                    "virtual_scrolling": false,
+                    "showRowSummary": true,
+                    "max_rows": 200,
+                    "include_context_in_query": true,
+                    "include_context_keys": [
+                        "hostname",
+                        "host_os_ip",
+                        "host_os_vendor",
+                        "host_os_version",
+                        "host_machine_type",
+                        "host_machine_vendor",
+                        "host_cpu_vendor",
+                        "vm_name",
+                        "esxi_host",
+                        "vcenter_name",
+                        "vcenter_address",
+                        "customer"
+                    ],
+                    "min_width": 12,
+                    "height": 8,
+                    "max_width": 12,
+                    "columns": {
+                        "hostname": {
+                            "title": "Hostname",
+                            "key": true
+                        },
+                        "host_os_ip": {
+                            "title": "Host IP",
+                            "key": true
+                        },
+                        "host_os_process_name": "Process Name",
+                        "server_ip_address": "Server IP",
+                        "server_port": "Server Port",
+                        "client_ip_address": "Client IP",
+                        "client_port": "Client Port",
+                        "connection_protocol": "Connection Protocol",
+                        "connection_state": "Connection State",
+                        "connection_flow": "Connection Flow",
+                        "collection_timestamp": {
+                            "title": "Collection Timestamp",
+                            "type": "DATETIME"
+                        }
+                    },
+                    "widget_id": "4effe047",
+                    "custom_columns": [
+                        {
+                            "id": "node_id_appconnections",
+                            "label": "Node ID",
+                            "expr": "hostname+'_'+host_os_ip+'_'+host_bios_uuid"
+                        }
+                    ],
+                    "actions": [
+                        {
+                            "permission": "rda:user_dashboard:view",
+                            "appName": "user-dashboard/host_os_details_view_pack",
+                            "drillDownLinkField": "host_os_ip",
+                            "identifier": "launch.dashboard.device_view_app",
+                            "selectionType": "SINGLE",
+                            "title": "View Details",
+                            "type": "GO_TO_APP_STATE",
+                            "contextParamList": {
+                                "contextParams": [
+                                    {
+                                        "paramKey": "node_id_appconnections",
+                                        "paramId": "node_id"
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "query": "asset_object = 'NetstatClientServer' and host_bios_uuid != '' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)"
+                }
+            ]
+        },
+        {
+            "title": "Applications",
+            "show_filter": true,
+            "widgets": [
+                {
+                    "widget_type": "counter",
+                    "title": "Hosts with Apps",
+                    "stream": "host-os-system-inventory",
+                    "ts_column": "collection_timestamp",
+                    "extra_filter": "asset_object = 'Software' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "column": "host_os_ip",
+                    "agg": "cardinality",
+                    "type": "int",
+                    "style": {
+                        "color-list": [
+                            "#0288D1"
+                        ]
+                    },
+                    "min_width": 4,
+                    "height": 3,
+                    "max_width": 4,
+                    "widget_id": "kpi_total_apps",
+                    "include_context_in_query": true,
+                    "include_context_keys": [
+                        "hostname",
+                        "host_os_ip",
+                        "host_os_vendor",
+                        "host_os_version",
+                        "host_machine_type",
+                        "host_machine_vendor",
+                        "host_cpu_vendor",
+                        "vm_name",
+                        "esxi_host",
+                        "vcenter_name",
+                        "vcenter_address",
+                        "customer"
+                    ],
+                    "query": "asset_object = 'Software' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)"
+                },
+                {
+                    "widget_type": "counter",
+                    "title": "Unique App Names",
+                    "stream": "host-os-system-inventory",
+                    "ts_column": "collection_timestamp",
+                    "extra_filter": "host_os_app_name != '' and asset_object = 'Software' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "column": "host_os_app_name",
+                    "agg": "cardinality",
+                    "type": "int",
+                    "style": {
+                        "color-list": [
+                            "#00897B"
+                        ]
+                    },
+                    "min_width": 4,
+                    "height": 3,
+                    "max_width": 4,
+                    "widget_id": "kpi_unique_app_names",
+                    "include_context_in_query": true,
+                    "include_context_keys": [
+                        "hostname",
+                        "host_os_ip",
+                        "host_os_vendor",
+                        "host_os_version",
+                        "host_machine_type",
+                        "host_machine_vendor",
+                        "host_cpu_vendor",
+                        "vm_name",
+                        "esxi_host",
+                        "vcenter_name",
+                        "vcenter_address",
+                        "customer"
+                    ],
+                    "query": "host_os_app_name != '' and asset_object = 'Software' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)"
+                },
+                {
+                    "widget_type": "counter",
+                    "title": "App Vendors",
+                    "stream": "host-os-system-inventory",
+                    "ts_column": "collection_timestamp",
+                    "extra_filter": "host_os_app_vendor is not empty and asset_object = 'Software' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "column": "host_os_app_vendor",
+                    "agg": "cardinality",
+                    "type": "int",
+                    "style": {
+                        "color-list": [
+                            "#7B1FA2"
+                        ]
+                    },
+                    "min_width": 4,
+                    "height": 3,
+                    "max_width": 4,
+                    "widget_id": "kpi_app_vendors",
+                    "include_context_in_query": true,
+                    "include_context_keys": [
+                        "hostname",
+                        "host_os_ip",
+                        "host_os_vendor",
+                        "host_os_version",
+                        "host_machine_type",
+                        "host_machine_vendor",
+                        "host_cpu_vendor",
+                        "vm_name",
+                        "esxi_host",
+                        "vcenter_name",
+                        "vcenter_address",
+                        "customer"
+                    ],
+                    "query": "host_os_app_vendor is not empty and asset_object = 'Software' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)"
+                },
+                {
+                    "widget_type": "bar_chart",
+                    "title": "Top 10 Application Vendors",
+                    "stream": "host-os-system-inventory",
+                    "ts_column": "collection_timestamp",
+                    "extra_filter": "host_os_app_vendor is not empty and asset_object = 'Software' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "group_by": [
+                        "host_os_app_vendor"
+                    ],
+                    "column": "_id",
+                    "agg": "value_count",
+                    "type": "str",
+                    "limit": 10,
+                    "chartProperties": {
+                        "yAxisLabel": "Application Count",
+                        "xAxisLabel": "Vendor",
+                        "stacked": false,
+                        "legendLocation": "none",
+                        "orientation": "horizontal"
+                    },
+                    "include_context_in_query": true,
+                    "include_context_keys": [
+                        "hostname",
+                        "host_os_ip",
+                        "host_os_vendor",
+                        "host_os_version",
+                        "host_machine_type",
+                        "host_machine_vendor",
+                        "host_cpu_vendor",
+                        "vm_name",
+                        "esxi_host",
+                        "vcenter_name",
+                        "vcenter_address",
+                        "customer"
+                    ],
+                    "min_width": 12,
+                    "height": 5,
+                    "max_width": 12,
+                    "widget_id": "app_vendor_bar",
+                    "query": "host_os_app_vendor is not empty and asset_object = 'Software' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)"
+                },
+                {
+                    "widget_type": "tabular",
+                    "title": "Application Details",
+                    "stream": "host-os-system-inventory",
+                    "extra_filter": "host_os_app_name != '' and asset_object = 'Software' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "ts_column": "collection_timestamp",
+                    "sorting": [],
+                    "resizableColumns": false,
+                    "paginated": true,
+                    "virtual_scrolling": false,
+                    "showRowSummary": true,
+                    "max_rows": 200,
+                    "include_context_in_query": true,
+                    "include_context_keys": [
+                        "hostname",
+                        "host_os_ip",
+                        "host_os_vendor",
+                        "host_os_version",
+                        "host_machine_type",
+                        "host_machine_vendor",
+                        "host_cpu_vendor",
+                        "vm_name",
+                        "esxi_host",
+                        "vcenter_name",
+                        "vcenter_address",
+                        "customer"
+                    ],
+                    "min_width": 12,
+                    "height": 8,
+                    "max_width": 12,
+                    "columns": {
+                        "hostname": {
+                            "title": "Hostname",
+                            "key": true
+                        },
+                        "host_os_ip": {
+                            "title": "Host IP",
+                            "key": true
+                        },
+                        "host_os_app_name": "Application Name",
+                        "host_os_app_vendor": "Application Vendor",
+                        "host_os_app_version": "Application Version",
+                        "host_os_app_package": "Application Package",
+                        "host_os_app_group": "Application Group",
+                        "host_os_app_install_date": "Install Date",
+                        "collection_timestamp": {
+                            "title": "Collection Timestamp",
+                            "type": "DATETIME"
+                        }
+                    },
+                    "widget_id": "05bf7c0a",
+                    "custom_columns": [
+                        {
+                            "id": "node_id_applications",
+                            "label": "Node ID",
+                            "expr": "hostname+'_'+host_os_ip+'_'+host_bios_uuid"
+                        }
+                    ],
+                    "actions": [
+                        {
+                            "permission": "rda:user_dashboard:view",
+                            "appName": "user-dashboard/host_os_details_view_pack",
+                            "drillDownLinkField": "host_os_ip",
+                            "identifier": "launch.dashboard.device_view_app",
+                            "selectionType": "SINGLE",
+                            "title": "View Details",
+                            "type": "GO_TO_APP_STATE",
+                            "contextParamList": {
+                                "contextParams": [
+                                    {
+                                        "paramKey": "node_id_applications",
+                                        "paramId": "node_id"
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "query": "host_os_app_name != '' and asset_object = 'Software' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)"
+                }
+            ]
+        }
+    ],
+    "saved_time": "2026-06-09T07:10:20.318029",
+    "stream": "host-os-system-inventory"
+}

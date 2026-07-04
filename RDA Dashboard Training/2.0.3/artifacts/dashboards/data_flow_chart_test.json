@@ -1,0 +1,82 @@
+{
+    "name": "data_flow_chart_test",
+    "label": "Data Flow chart ",
+    "description": "Dataflow Chart example",
+    "version": "10.12.24.1",
+    "enabled": true,
+    "showTitle": true,
+    "dashboard_style": "auto",
+    "live_edit": true,
+    "status_poller": {},
+    "dashboard_type": "dashbiard",
+    "dashboard_generator": {
+        "attachment": "widget_code_generator"
+    },
+    "dashboard_pages": [],
+    "dashboard_filters": {
+        "time_filter": true,
+        "default_time_filter_labels": [
+            "All Time"
+        ],
+        "columns_filter": [],
+        "group_filters": []
+    },
+    "dashboard_sections": [
+        {
+            "title": "DataFlow Chart",
+            "show_filter": true,
+            "widgets": [
+                {
+                    "title": "Incident Flow Graph",
+                    "widget_type": "dataflow",
+                    "max_width": 12,
+                    "height": 8,
+                    "duration_hours": 24000,
+                    "min_width": 12,
+                    "chartProperties": {
+                        "layoutDirection": "horizontal",
+                        "userZoomingEnabled": true,
+                        "hasToolbar": false
+                    },
+                    "input": {
+                        "label": "alerts",
+                        "formatter": "DescriptiveCountFormatter",
+                        "stream": "training-alerts-stream",
+                        "extra_filter": "a_source_systemname is not 'Alert Group'",
+                        "ts_column": "timestamp",
+                        "duration_hours": 24000,
+                        "group_by": [
+                            "a_source_systemname"
+                        ],
+                        "column": "count_",
+                        "agg": "sum",
+                        "units": "Alerts",
+                        "type": "int"
+                    },
+                    "output": {
+                        "label": "Incidents",
+                        "formatter": "DescriptiveCountFormatter",
+                        "stream": "training-incidents-stream",
+                        "ts_column": "timestamp",
+                        "duration_hours": 24000,
+                        "group_by": [
+                            "i_priority"
+                        ],
+                        "column": "count_",
+                        "agg": "sum",
+                        "units": "Incidents",
+                        "type": "int"
+                    },
+                    "widget_id": "2d7432a3"
+                }
+            ]
+        }
+    ],
+    "saved_time": "2025-03-14T19:48:41.056904",
+    "attachments": [
+        {
+            "name": "widget_code_generator",
+            "value": "{%- set widgets =  dashboard[\"dashboard_sections\"][0][\"widgets\"] -%}\r\n{%- set new_widgets =  [] -%}\r\n{%- set ns =  namespace(count=0) -%}\r\n\r\n{%- for w in widgets -%}\r\n    {%- if w.get(\"widget_type\") -%}\r\n        {%-\r\n            set nw = {\r\n                \"title\": \"JSON\",\r\n                \"widget_group\": \"g\"+str(ns.count),\r\n                \"min_width\": w.get(\"min_width\", 6),\r\n                \"max_width\": w.get(\"max_width\", 6),\r\n                \"height\": w.get(\"height\", 4),\r\n                \"widget_type\": \"codeblock\",\r\n                \"content\": json_dumps_indent(w, 2),\r\n                \"lang\": \"json\",\r\n                \"widget_id\": w.get(\"widget_id\", str(ns.count)) + \"_code\"\r\n            }\r\n        -%}\r\n        {%- set _ = w.update({\"widget_group\":  \"g\"+str(ns.count) }) -%}\r\n        {%- set _ = new_widgets.append(nw) -%}\r\n        {%- set ns.count = ns.count + 1 -%}\r\n    {%- endif -%}\r\n{%- endfor -%}\r\n\r\n{%- set _ = widgets.extend(new_widgets) -%}"
+        }
+    ]
+}

@@ -1,0 +1,16 @@
+%% stream = no and limit = 0
+
+@dm:empty
+    --> #dm:query-persistent-stream timestamp after -24 hours  with-input name = "meraki_metrics" & limit = "0"
+    --> @dm:skip-block-if-shape row_count = 0
+    ## --> @dm:map to="event" & func="fixed" & value="$target_type"
+    ## --> @dm:eval source="$source_field"
+    ## --> @dm:copy-columns from="value" & to="_value"
+    --> @dm:selectcolumns exclude="_RDA_Id|count_"
+    ## --> @$splunk_src_name:add-to-index index is '$splunk_index' and source_field is '$source_field' and event_field is '$target_type' and sourcetype is '$source_type'
+    ## test_index_metric
+    ## fabrix_meraki_metrics
+    --> @splunkv2:add-to-index-metric index is 'fabrix_meraki_metrics'
+    --> @rn:write-stats-to-stream name="meraki_appbindings_stats_to_stream"
+    --> @dm:save name="temp-splunk_index-out-metrics"
+

@@ -1,0 +1,47 @@
+{
+    "type": "log",
+    "enabled": true,
+    "name": "device_availability_snmp",
+    "schedule": {
+        "minutes": 15
+    },
+    "data": {
+        "stream": "rda_icmp_ping_metrics",
+        "groupby": [
+            "target_ip",
+            "name"
+        ],
+        "query": "(name == 'rda_ping' or name == 'ping')"
+    },
+    "actions": [
+        {
+            "state": "OPEN",
+            "extra_query": "result_code != 0",
+            "attributes": {
+                "severity": "CRITICAL",
+                "metric_name": "device_availability",
+                "metric_value_field": "result_code"
+            },
+            "notification": [
+                {
+                    "channel": "telegraf_snmp_metrics"
+                }
+            ]
+        },
+        {
+            "state": "CLEAR",
+            "extra_query": "result_code == 0",
+            "attributes": {
+                "severity": "INFO",
+                "metric_name": "device_availability",
+                "metric_value_field": "result_code"
+            },
+            "notification": [
+                {
+                    "channel": "telegraf_snmp_metrics"
+                }
+            ]
+        }
+    ],
+    "saved_time": "2025-08-19T12:58:14.216099"
+}

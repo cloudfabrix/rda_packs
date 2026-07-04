@@ -1,0 +1,61 @@
+{
+    "type": "metric",
+    "name": "interface_crc_errors_snmp",
+    "description": "Interface CRC Errors CFX",
+    "enabled": false,
+    "schedule": {
+        "minutes": 5
+    },
+    "data": {
+        "stream": "rda_snmp_metrics",
+        "query": "collection = 'interface_crc_errors' and interface_type = '6' and crc_errors >= 0",
+        "unique_keys": [
+            "target_ip",
+            "interface_description",
+            "name"
+        ],
+        "groupby": [
+            "target_ip",
+            "interface_description",
+            "name"
+        ],
+        "additional_columns": [
+            "device_hostname",
+            "device_model",
+            "device_vendor",
+            "crc_errors_delta",
+            "interface_description",
+            "sys_name"
+        ],
+        "custom_unique_keys": [],
+        "data_transformations": []
+    },
+    "actions": [
+        {
+            "state": "OPEN",
+            "threshold": "100",
+            "agg_column": "crc_errors_delta",
+            "agg_func": "max",
+            "repeat_count": 2,
+            "attributes": {
+                "severity": "CRITICAL",
+                "metric_name": "crc_errors",
+                "alert_message": "High CRC errors on {{sys_name}} ({{target_ip}}) interface {{interface_description}} (total={{crc_errors_delta}})"
+            },
+            "notification_profile": "snmp_metrics_notification_profile"
+        },
+        {
+            "state": "CLEAR",
+            "agg_column": "crc_errors_delta",
+            "agg_func": "max",
+            "threshold": "10",
+            "attributes": {
+                "severity": "INFO",
+                "metric_name": "crc_errors",
+                "alert_message": "CRC errors cleared on {{sys_name}} ({{target_ip}}) interface {{interface_description}} (total={{crc_errors_delta}})"
+            },
+            "notification_profile": "snmp_metrics_notification_profile"
+        }
+    ],
+    "saved_time": "2026-04-15T05:49:52.391129"
+}

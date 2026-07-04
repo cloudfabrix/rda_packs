@@ -1,0 +1,32 @@
+%% stream = no and limit = 0
+
+@exec:get-input
+    ##--> @dm:save name = "test-inp-mib"
+    ## --> @dm:addrow ip is "10.95.158.254" and secret is "Test_Protocol_snmp"
+    --> @dm:explode-json column is "credential" and prefix_parent_key is "yes"
+    ##--> @dm:save name = "test-inp-mib-ip"
+    --> @dm:implode key_columns is "device_ip" and merge_columns is "credential_name"
+    ##--> @rn:write-stream name is "debug-stream"
+    --> *exec:if-shape num_rows > 0
+       --> @dm:rename-columns device = "device_ip" and credential = "credential_name"
+       --> @dm:eval onboarding_status = "'In Progress'" and onboarding_reason = "''"
+       --> @dm:selectcolumns include is "^device$|^credential$|^onboarding_status$|^onboarding_reason$"
+       ##--> @rn:write-stream name is "debug-stream"
+       --> @rn:write-stream name is "snmp_onboarded_devices"
+    --> @exec:end-if
+    --> @dm:onboard-snmp-device ip_column is device_ip and credential_column is credential_name
+    ##--> @rn:write-stream name is "debug-stream"
+    ## --> @dm:save name is "mar-test"
+    --> *exec:if-condition onboarding_status = "Success"
+       --> @dm:selectcolumns include is "device|supported_mibs"
+       --> @dm:explode-json column is "supported_mibs"
+       --> @dm:rename-columns supported_mibs = "mib_name"
+       ##--> @dm:save name = "test-inp-colltn"
+       --> @dm:explode column is "collection_groups"
+       --> @dm:eval selected = "'no'"
+       ##--> @rn:write-stream name is "debug-stream"
+       --> @rn:write-stream name is "ip_supported_mibs_stream"
+    --> @exec:end-if
+    ##--> @rn:write-stream name is "debug-stream"
+    --> @rn:write-stream name is "snmp_onboarded_devices"
+

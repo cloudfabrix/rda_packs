@@ -1,0 +1,96 @@
+{
+    "type": "log",
+    "name": "device_power_supply_failure",
+    "description": "Power supply failure detected CFX",
+    "enabled": false,
+    "schedule": {
+        "minutes": 5
+    },
+    "data": {
+        "stream": "syslog_udp_events_stream",
+        "query": "(syslog_code in ['PLATFORM_ENV-1-PWR','PLATFORM_ENV-1-FRU_PS_OK','NOHMS-2-NOHMS_DIAG_ERR_PS_FAIL','PLATFORM-2-PS_FAIL','CI-3-PSFAIL'])",
+        "unique_keys": [
+            "rda_gw_client_ip",
+            "syslog_code"
+        ],
+        "groupby": [
+            "rda_gw_client_ip",
+            "syslog_code",
+            "device_hostname"
+        ],
+        "additional_columns": [
+            "raw",
+            "device_hostname",
+            "device_model",
+            "device_vendor",
+            "syslog_code",
+            "ps_id",
+            "slot",
+            "status"
+        ],
+        "custom_unique_keys": [
+            "rda_gw_client_ip",
+            "alarm_class"
+        ],
+        "data_transformations": [
+            {
+                "type": "eval",
+                "columns": {
+                    "alarm_class": {
+                        "expr": "'PowerSupply'"
+                    },
+                    "ps_id_safe": {
+                        "expr": "str(ps_id) if ps_id else (raw.split('Power Supply ')[1].split(' ')[0] if 'Power Supply ' in raw else 'unknown')"
+                    },
+                    "slot_safe": {
+                        "expr": "slot if slot else (raw.split('slot ')[1].split(' ')[0] if 'slot ' in raw else 'NA')"
+                    },
+                    "status": {
+                        "expr": "'clear' if syslog_code == 'PLATFORM_ENV-1-FRU_PS_OK' else 'failure'"
+                    },
+                    "failure_type": {
+                        "expr": "'removed_or_failed' if 'removed' in raw.lower() else 'failed'"
+                    }
+                }
+            }
+        ],
+        "padding_time_seconds": 60,
+        "limit": 1000
+    },
+    "actions": [
+        {
+            "state": "OPEN",
+            "extra_query": "syslog_code != 'PLATFORM_ENV-1-FRU_PS_OK'",
+            "attributes": {
+                "severity": "CRITICAL",
+                "alert_message": "Power supply {{ps_id_safe}} failure on {{device_hostname}} ({{rda_gw_client_ip}}) slot={{slot_safe}}",
+                "recommendedaction": "Check PSU status using 'show environment power'. Verify input power, cables, and replace PSU if faulty."
+            },
+            "throttle": {
+                "value": 60,
+                "unit": "MINUTES"
+            },
+            "notification_profile": "snmp_metrics_notification_profile",
+            "notification": [
+                {
+                    "channel": "asm_syslog_webhook"
+                }
+            ]
+        },
+        {
+            "state": "CLEAR",
+            "extra_query": "syslog_code == 'PLATFORM_ENV-1-FRU_PS_OK'",
+            "attributes": {
+                "severity": "INFO",
+                "alert_message": "Power supply {{ps_id_safe}} restored on {{device_hostname}} ({{rda_gw_client_ip}}) slot={{slot_safe}}"
+            },
+            "notification_profile": "snmp_metrics_notification_profile",
+            "notification": [
+                {
+                    "channel": "asm_syslog_webhook"
+                }
+            ]
+        }
+    ],
+    "saved_time": "2026-04-16T03:19:09.414389"
+}

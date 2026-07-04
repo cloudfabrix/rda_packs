@@ -1,0 +1,12 @@
+%% stream = no and limit = 0
+
+## Datacenter Network Device IP List for Inventory
+@dn:read-stream name = 'network_ip_address_stream' & group = 'network_ip_address_consumer_group' & batch_size = '500'& batch_wait = 60 & max_poll_interval_ms = 9600000
+    --> @dm:save name = 'temp-network_devices_for_inventory'
+    --> *exec:if-condition svi_ip_list is not empty
+       --> @asset-discovery:collector jobname = 'network_inventory_data_collection' & seed_addresses_col = 'ip_address' & collection_group_rules is "network"  & extended_inventory = 'yes' & cli_access = 'yes' & return_dataset = 'no' & status_stream = 'network_inventory_collection_status_stream' & stream_type = 'kafka' & kafka_context = 'datanetwork' & icmp_ping = 'yes' & credential_types = "snmp-cred,device-snmpv1v2,device-snmp-v3,device-host-ssh,ssh-cred" & concurrent_discovery = 50
+    --> @exec:end-if
+    --> *exec:if-condition svi_ip_list is empty
+       --> @asset-discovery:collector jobname = 'network_inventory_data_collection' & seed_addresses_col = 'ip_address' &collection_group_rules is "network" & extended_inventory = 'yes' & cli_access = 'yes' & return_dataset = 'no' & status_stream = 'network_inventory_collection_status_stream' & stream_type = 'kafka' & kafka_context = 'datanetwork'   & credential_types = "snmp-cred,device-snmpv1v2,device-snmp-v3,device-host-ssh,ssh-cred" & icmp_ping = 'yes' & concurrent_discovery = 50
+    --> @exec:end-if
+

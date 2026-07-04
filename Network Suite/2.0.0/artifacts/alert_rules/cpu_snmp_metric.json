@@ -1,0 +1,57 @@
+{
+    "type": "metric",
+    "name": "cpu_snmp_metric",
+    "description": "CPU Usage CFX",
+    "enabled": false,
+    "schedule": {
+        "minutes": 5
+    },
+    "data": {
+        "stream": "rda_snmp_metrics",
+        "query": "name == 'cpu'",
+        "unique_keys": [
+            "target_ip",
+            "name"
+        ],
+        "groupby": [
+            "target_ip",
+            "name"
+        ],
+        "additional_columns": [
+            "device_hostname",
+            "device_model",
+            "device_vendor",
+            "cpu_usage",
+            "sys_name"
+        ],
+        "custom_unique_keys": [],
+        "data_transformations": []
+    },
+    "actions": [
+        {
+            "state": "OPEN",
+            "threshold": "85",
+            "agg_column": "cpu_usage",
+            "agg_func": "max",
+            "attributes": {
+                "severity": "CRITICAL",
+                "metric_name": "cpu_usage",
+                "alert_message": "critical cpu usage on {{sys_name}} ({{target_ip}}) (cpu_usage={{cpu_usage}}%)"
+            },
+            "notification_profile": "snmp_metrics_notification_profile"
+        },
+        {
+            "state": "CLEAR",
+            "agg_column": "cpu_usage",
+            "agg_func": "max",
+            "threshold": "60",
+            "attributes": {
+                "severity": "INFO",
+                "metric_name": "cpu_usage",
+                "alert_message": "cpu usage normalized on {{sys_name}} ({{target_ip}}) (cpu_usage={{cpu_usage}}%)"
+            },
+            "notification_profile": "snmp_metrics_notification_profile"
+        }
+    ],
+    "saved_time": "2026-04-15T05:47:21.999744"
+}

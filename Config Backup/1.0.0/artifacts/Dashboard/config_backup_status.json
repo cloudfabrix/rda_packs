@@ -1,0 +1,133 @@
+{
+    "name": "config_backup_status",
+    "label": "Config Backup Status",
+    "description": "Config Backup Status",
+    "dashboard_folder": "ConfigBackupPack",
+    "version": "2026.04.16",
+    "enabled": true,
+    "stream": "syslog-config-backup-stream",
+    "dashboard_type": "template",
+    "live_edit": true,
+    "dashboard_filters": {
+        "time_filter": true,
+        "default_time_filter_labels": [
+            "All Time"
+        ],
+        "group_filters": [
+            {
+                "stream": "syslog-config-backup-stream",
+                "title": "Source IP",
+                "group_by": [
+                    "source_ip"
+                ],
+                "ts_column": "timestamp",
+                "agg": "value_count",
+                "column": "_id",
+                "type": "str"
+            },
+            {
+                "stream": "syslog-config-backup-stream",
+                "title": "Status",
+                "group_by": [
+                    "status"
+                ],
+                "ts_column": "timestamp",
+                "agg": "value_count",
+                "column": "_id",
+                "type": "str"
+            }
+        ]
+    },
+    "template_variables": {
+        "CUST_TAG": {
+            "contextId": "customerTag"
+        }
+    },
+    "dashboard_sections": [
+        {
+            "title": "Config backup status",
+            "show_filter": true,
+            "widgets": [
+                {
+                    "title": "Config Backup Status",
+                    "widget_type": "tabular",
+                    "stream": "syslog-config-backup-stream",
+                    "extra_filter": "(customer_tag is '{{CUST_TAG}}' or customer_tag is empty or customer_tag is 'None')",
+                    "ts_column": "backup_time",
+                    "min_width": 12,
+                    "height": 10,
+                    "max_width": 12,
+                    "paginated": true,
+                    "refreshRequired": true,
+                    "duration_hours": 87600,
+                    "max_rows": 100,
+                    "remote_searchable": true,
+                    "remote_searchable_cols0": [
+                        "source_ip",
+                        "config_id",
+                        "status"
+                    ],
+                    "sorting": [
+                        {
+                            "backup_time": "desc"
+                        }
+                    ],
+                    "columns": {
+                        "source_ip": {
+                            "title": "Source IP",
+                            "key": true,
+                            "visible": true
+                        },
+                        "status": {
+                            "title": "Status",
+                            "key": true,
+                            "visible": true,
+                            "defaultWidth": 150,
+                            "htmlTemplateForRow": "{% raw %}<span class='badge' style='background-color: {{ row.status_color}}' > {{ row.status }} </span>{% endraw %}"
+                        },
+                        "status_color": {
+                            "type": "COLOR-MAP",
+                            "source-column": "status",
+                            "color-map": {
+                                "Success": "#008000",
+                                "Failed": "#FF0000",
+                                "success": "#008000",
+                                "failed": "#FF0000"
+                            }
+                        },
+                        "config_id": {
+                            "title": "Config ID",
+                            "key": true,
+                            "visible": true
+                        },
+                        "reason": {
+                            "title": "Reason",
+                            "key": true,
+                            "visible": true,
+                            "formatter": "truncate"
+                        },
+                        "backup_time": {
+                            "title": "Backup Timestamp",
+                            "type": "DATETIME",
+                            "key": true,
+                            "visible": true
+                        }
+                    },
+                    "widget_id": "c7b91a04",
+                    "actions": [
+                        {
+                            "title": "View Config",
+                            "drillDownLinkField": "config_id",
+                            "permission": "rda:github:view",
+                            "type": "GO_TO_APP_STATE",
+                            "selectionType": "SINGLE",
+                            "stateName": "app.featureapp",
+                            "appName": "user-dashboard/view-config"
+                        }
+                    ]
+                }
+            ]
+        }
+    ],
+    "saved_time": "2026-04-28T05:16:53.600089"
+}

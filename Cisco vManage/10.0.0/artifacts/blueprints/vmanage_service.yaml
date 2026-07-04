@@ -1,0 +1,69 @@
+name: vmanage_service
+id: vmanage_perf_pack 
+version: '2024_12_17'
+category: vManage
+comment: vManage Performance & Inventory Collection
+enabled: true
+type: Service
+auto_deploy: false
+provider: CloudFabrix Software Inc.
+attrs: {
+    customer_id: $PKG_CONTEXT_CUSTOMER_ID,
+    customer_tag: $PKG_CONTEXT_CUSTOMER_TAG
+}
+run_context: {
+    customer_id: $PKG_CONTEXT_CUSTOMER_ID,
+    customer_tag: $PKG_CONTEXT_CUSTOMER_TAG
+}
+scheduled_pipelines:
+    -   name: vmanage_perf_access_verification_status
+        label: vManage Access Verification Status
+        version: '*'
+        site: ${PKG_CONTEXT_CUSTOMER_TAG}-.*
+        cron_expression: 0 4 * * *
+        site_type: regex
+        instances: 1
+        scaling_policy:
+            min_instances: 1
+            max_instances: 1
+
+    -   name: inventory_pipeline
+        label: vManage Inventory Collection
+        version: '*'
+        site: ${PKG_CONTEXT_CUSTOMER_TAG}-.*
+        cron_expression: 0 */6 * * *
+        site_type: regex
+        instances: 1
+        scaling_policy:
+            min_instances: 1
+            max_instances: 1
+    -   name: performance_pipeline
+        label: vManage Performance Metrics
+        version: '*'
+        site: ${PKG_CONTEXT_CUSTOMER_TAG}-.*
+        cron_expression: 15 */6 * * *
+        site_type: regex
+        instances: 1
+        scaling_policy:
+            min_instances: 1
+            max_instances: 1
+    -   name: advanced_visibility_pipeline
+        label: vManage Advanced Visibility
+        version: '*'
+        site: ${PKG_CONTEXT_CUSTOMER_TAG}-.*
+        cron_expression: 30 */6 * * *
+        site_type: regex
+        instances: 1
+        scaling_policy:
+            min_instances: 1
+            max_instances: 1
+    -   name: alerts_pipeline
+        label: vManage Alerts & Events
+        version: '*'
+        site: ${PKG_CONTEXT_CUSTOMER_TAG}-.*
+        cron_expression: 45 */6 * * *
+        site_type: regex
+        instances: 1
+        scaling_policy:
+            min_instances: 1
+            max_instances: 1

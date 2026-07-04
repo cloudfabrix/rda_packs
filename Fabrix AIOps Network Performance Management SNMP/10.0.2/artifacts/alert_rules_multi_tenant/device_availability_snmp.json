@@ -1,0 +1,47 @@
+{
+    "type": "log",
+    "enabled": true,
+    "name": "device_availability_snmp",
+    "schedule": {
+        "minutes": 15
+    },
+    "data": {
+        "stream": "rda_icmp_ping_metrics",
+        "groupby": [
+            "target_ip",
+            "name"
+        ],
+        "query": "(name == 'rda_ping' or name == 'ping') and customer_tag is '$PKG_CONTEXT_CUSTOMER_TAG'"
+    },
+    "actions": [
+        {
+            "state": "OPEN",
+            "extra_query": "result_code != 0",
+            "attributes": {
+                "severity": "CRITICAL",
+                "metric_name": "device_availability",
+                "metric_value_field": "result_code"
+            },
+            "notification": [
+                {
+                    "channel": "${PKG_CONTEXT_CUSTOMER_TAG}_telegraf_snmp_metrics"
+                }
+            ]
+        },
+        {
+            "state": "CLEAR",
+            "extra_query": "result_code == 0",
+            "attributes": {
+                "severity": "INFO",
+                "metric_name": "device_availability",
+                "metric_value_field": "result_code"
+            },
+            "notification": [
+                {
+                    "channel": "${PKG_CONTEXT_CUSTOMER_TAG}_telegraf_snmp_metrics"
+                }
+            ]
+        }
+    ],
+    "saved_time": "2025-08-19T12:58:14.216099"
+}

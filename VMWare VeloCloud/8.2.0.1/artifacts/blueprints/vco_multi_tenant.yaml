@@ -1,0 +1,36 @@
+name: VMWareVeloCloud
+id: velocloud
+version: 20250101
+category: ITSM
+comment: VCO
+enabled: true
+type: Scheduled
+provider: CloudFabrix Software, Inc.
+attrs: {
+    customer_id: $PKG_CONTEXT_CUSTOMER_ID,
+    customer_tag: $PKG_CONTEXT_CUSTOMER_TAG
+}
+run_context: {
+    customer_id: $PKG_CONTEXT_CUSTOMER_ID,
+    customer_tag: $PKG_CONTEXT_CUSTOMER_TAG
+}
+scheduled_pipelines:
+
+    -   name: vco_inv_collection_main
+        label: vco inventory data
+        version: '*'
+        site: ${PKG_CONTEXT_CUSTOMER_TAG}-.*
+        site_type: regex
+        cron_expression: 0 1 * * *
+    
+    -   name: vco_access_verification
+        label: vco Access Verification Status
+        version: '*'
+        site: ${PKG_CONTEXT_CUSTOMER_TAG}-.*
+        cron_expression: 0 4 * * *
+        site_type: regex
+        instances: 1
+        scaling_policy:
+            min_instances: 1
+            max_instances: 1
+saved_time: '2024-03-01T07: 14: 16.390898'

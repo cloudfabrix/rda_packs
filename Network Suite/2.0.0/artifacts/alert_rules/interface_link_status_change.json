@@ -1,0 +1,80 @@
+{
+    "type": "log",
+    "name": "interface_link_status_change",
+    "description": "Interface link status changed CFX",
+    "enabled": false,
+    "schedule": {
+        "minutes": 5
+    },
+    "data": {
+        "stream": "syslog_udp_events_stream",
+        "query": "(syslog_code in ['LINEPROTO-5-UPDOWN','LINK-3-UPDOWN','LINK-5-CHANGED','PKT_INFRA-LINK-3-UPDOWN','PKT_INFRA-LINEPROTO-5-UPDOWN','L2-T1E1-4-UPDOWN'])",
+        "unique_keys": [
+            "rda_gw_client_ip",
+            "interface_name"
+        ],
+        "groupby": [
+            "rda_gw_client_ip",
+            "interface_name"
+        ],
+        "additional_columns": [
+            "raw",
+            "device_hostname",
+            "device_model",
+            "device_vendor"
+        ],
+        "custom_unique_keys": [
+            "alarm_class"
+        ],
+        "data_transformations": [
+            {
+                "type": "eval",
+                "columns": {
+                    "alarm_class": {
+                        "expr": "'Interface'"
+                    },
+                    "state": {
+                        "expr": "case( raw like '%changed state to down%', 'down', raw like '%changed state to up%', 'up', raw like '%administratively down%', 'admin_down', 'unknown')"
+                    }
+                }
+            }
+        ],
+        "padding_time_seconds": 60,
+        "limit": 10000
+    },
+    "actions": [
+        {
+            "state": "OPEN",
+            "extra_query": "((raw.match_phrase contains 'changed state to down') and (interface_name is not Empty))",
+            "attributes": {
+                "severity": "CRITICAL",
+                "alert_message": "Interface {{interface_name}} is {{state}} on on {{device_hostname}} ({{rda_gw_client_ip}})",
+                "recommendedaction": "Check physical cabling, SFP/transceiver, and remote device connectivity. Verify interface status using 'show interface'."
+            },
+            "throttle": {
+                "value": 60,
+                "unit": "MINUTES"
+            },
+            "notification_profile": "snmp_metrics_notification_profile",
+            "notification": [
+                {
+                    "channel": "asm_syslog_webhook"
+                }
+            ]
+        },
+        {
+            "state": "CLEAR",
+            "extra_query": "((raw.match_phrase contains 'changed state to up') or (raw.match_phrase contains 'changed state to admin up') or (raw.match_phrase contains 'ADMIN UP') and (interface_name is not Empty))",
+            "attributes": {
+                "severity": "CRITICAL"
+            },
+            "notification_profile": "snmp_metrics_notification_profile",
+            "notification": [
+                {
+                    "channel": "asm_syslog_webhook"
+                }
+            ]
+        }
+    ],
+    "saved_time": "2026-04-15T05:41:56.926422"
+}

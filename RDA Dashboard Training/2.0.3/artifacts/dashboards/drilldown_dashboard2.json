@@ -1,0 +1,73 @@
+{
+    "name": "drilldown_dashboard2",
+    "label": "Timeseries Chart",
+    "description": "Timeseries Chart example",
+    "version": "10.12.24.1",
+    "enabled": true,
+    "dashboard_style": "auto",
+    "live_edit": true,
+    "status_poller": {},
+    "dashboard_type": "dashboard",
+    "dashboard_pages": [],
+    "dashboard_filters": {
+        "time_filter": true,
+        "default_time_filter_labels": [
+            "Last 12 months"
+        ],
+        "columns_filter": [],
+        "group_filters": []
+    },
+    "dashboard_sections": [
+        {
+            "title": "Timeseries Chart",
+            "show_filter": true,
+            "widgets": [
+                {
+                    "widget_type": "label",
+                    "label": "<div style='text-align:center;width:100%;'><h1><a style='text-decoration:none;color:#0066ff;' target='_blank'> Timeseries Chart between selected time</a></h1></div>",
+                    "min_width": 12,
+                    "height": 1,
+                    "max_width": 1,
+                    "widget_id": "69661818"
+                },
+                {
+                    "title": "Donations Over Time",
+                    "widget_type": "timeseries",
+                    "stream": "main_enhanced",
+                    "ts_column": "time_value",
+                    "extra_filter": "",
+                    "max_width": 12,
+                    "height": 6,
+                    "min_width": 12,
+                    "chartProperties": {
+                        "yAxisLabel": "Donations",
+                        "xAxisLabel": "Date",
+                        "legendLocation": "right"
+                    },
+                    "interval1": "1d",
+                    "duration_hour1s": 108880000,
+                    "group_by": [
+                        "Month"
+                    ],
+                    "series_spec": [
+                        {
+                            "column": "donation",
+                            "label1": "Total Donations",
+                            "agg": "sum",
+                            "type": "float"
+                        }
+                    ],
+                    "widget_id": "donations_time"
+                },
+                {
+                    "widget_type1": "tabular",
+                    "title": "Details",
+                    "duration_hours": 108880000,
+                    "stream": "main_enhanced",
+                    "widget_id": "99d89437"
+                }
+            ]
+        }
+    ],
+    "saved_time": "2025-03-10T18:40:15.108293"
+}

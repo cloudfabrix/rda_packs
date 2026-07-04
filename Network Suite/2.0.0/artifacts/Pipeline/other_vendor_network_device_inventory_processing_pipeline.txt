@@ -1,0 +1,650 @@
+%% stream = no and limit = 0
+
+%% import_source = "cfxaia"
+
+@dm:empty
+    --> @exec:run-pipeline name  = "aia_utility_functions" & import_functions = "yes"
+    ## Other Vendors Network Devices Inventory Data Processing##
+    --> @exec:get-input
+    --> *dm:filter output_data is not null
+    --> @dm:save name = 'temp-other_vendor_network_devices_inventory'
+
+## Creates device and ops view
+--> @c:new-block
+    --> @dm:recall name= "temp-other_vendor_network_devices_inventory" and return_empty = "yes"
+    --> *exec:if-shape num_rows > 0
+       --> @dm:dedup columns = 'asset_ip'
+       --> @asset-discovery:entity-analysis path_column= "minio_location" and output_path = "data/customers/device_data" and device_ops_view = True and device_view = True and poe_summary = True
+    --> @exec:end-if
+
+## Other Vendors Network Devices: Capture Collected Files and Target IP details Pre Processing
+--> @c:new-block
+    --> @dm:recall name = 'temp-other_vendor_network_devices_inventory' & return_empty = 'yes'
+    --> *exec:if-shape num_rows > 0
+       --> *dm:filter * get asset_ip,jobname,jobid,minio_location,collection_timestamp,collection_status,reason
+       --> @dm:copy-columns from="asset_ip" and to="target_ip"
+       --> @dm:add-missing-columns columns = 'data_processing_state' & value = 'Started'
+       --> @dm:dedup
+       --> @rn:write-stream name = 'network_device_data_processing_debug'
+    --> @exec:end-if
+
+## Creates device and ops view
+--> @c:new-block
+    --> @dm:recall name= "temp-other_vendor_network_devices_inventory" and return_empty = "yes"
+    --> *exec:if-shape num_rows > 0
+       --> @dm:dedup columns = 'asset_ip'
+       --> @asset-discovery:entity-analysis path_column= "minio_location" and output_path = "data/customers/other_device_data" and device_ops_view = True and device_view = True and poe_summary = True
+    --> @exec:end-if
+
+## Other Vendors Network Devices: PARENT ROWS - Create Parent Chassis row based on unique Equipment Type(entPhysicalClassEnumeratedLabel) by reading entityPhysical group
+--> @c:new-block
+    --> @dm:recall name="temp-other_vendor_network_devices_inventory"  and return_empty = 'yes'
+    --> *exec:if-condition output_groupname = 'entityPhysical'
+       --> @dm:explode-json column = 'output_data'
+       --> *exec:if-shape num_rows > 0
+          --> @dm:add-missing-columns columns="output_data"
+          --> @dm:copy-columns from="entPhysicalSerialNum,entPhysicalClassEnumeratedLabel,entPhysicalName" and to="entPhysicalSerialNum,entPhysicalClassEnumeratedLabel,entPhysicalName" and func="strip"
+          --> @dm:manipulate-string from="entPhysicalClassEnumeratedLabel" and func="upper" and to = "entPhysicalClassEnumeratedLabel"
+          --> @dm:manipulate-string from="entPhysicalSerialNum" and func="upper" and to="SN"
+          --> *dm:filter SN notin ['BUILTIN','N/A']
+          --> *dm:filter entPhysicalSerialNum is not null
+          --> @dm:copy-columns from="asset_ip" and to="target_ip"
+          --> @dm:save name="temp-other_vendors_network_device_inventory_entityPhysical_info"
+          --> @cfxaia:conditional-statement condition_column="entPhysicalClassEnumeratedLabel" and return_if="entPhysicalClassEnumeratedLabel" and to_column="e_class"
+          --> @cfxaia:conditional-statement condition_column="entPhysicalName" and return_if="entPhysicalName" and to_column="e_class" and replace_if_null="yes"
+          --> *dm:filter e_class in ["Chassis","chassis","CHASSIS"] and entPhysicalSerialNum is not null
+          --> @dm:dedup columns="entPhysicalClassEnumeratedLabel,output_target"
+          --> @dm:copy-columns from="asset_ip" and to="target_ip"
+          --> @dm:copy-columns from="entPhysicalSerialNum,entPhysicalModelName" and to="parent_serial_number,Parent_PID"
+          --> @dm:manipulate-string to="parent_rows" and func="eval" and value="'yes'"
+          --> @dm:fixnull columns ="entPhysicalClassEnumeratedLabel" and value="CHASSIS" & apply_for_empty="yes"
+          --> @dm:add-missing-columns columns = 'asset_object' & value = 'Chassis'
+          --> @dm:add-missing-columns columns = 'asset_status' & value = 'ACTIVE'
+          --> @dm:add-missing-columns columns = 'asset_mode' & value = 'AUTO'
+          --> @dm:add-missing-columns columns = 'asset_type' & value = 'Hardware'
+          --> @dm:save name="temp-other_vendor_network_device_parent_chassis"
+       --> @exec:end-if
+    --> @exec:end-if
+
+## Other Vendors Network Devices: CHILD ROW - Create child rows whose Equipment Type is in ["CHASSIS","MODULE","POWERSUPPLY"] by reading entityPhysical group
+--> @c:new-block
+    --> @dm:recall name="temp-other_vendors_network_device_inventory_entityPhysical_info" and return_empty = 'yes'
+    --> *exec:if-shape num_rows > 0
+       --> *dm:filter entPhysicalClassEnumeratedLabel in ["CHASSIS","MODULE","POWERSUPPLY"] and entPhysicalSerialNum is not null
+       --> @dm:enrich dict="temp-other_vendor_network_device_parent_chassis" and src_key_cols="target_ip" and dict_key_cols="target_ip" and enrich_cols="parent_serial_number,Parent_PID" and return_empty_dict = 'yes' and return_empty_cols = 'yes'
+       --> *dm:filter parent_serial_number is not null
+       --> @dm:add-missing-columns columns = 'asset_status' & value = 'ACTIVE'
+       --> @dm:add-missing-columns columns = 'asset_object' & value = 'MODULE'
+       --> @dm:add-missing-columns columns = 'asset_mode' & value = 'AUTO'
+       --> @dm:add-missing-columns columns = 'asset_type' & value = 'Hardware'
+       --> @dm:save name="temp-other_vendor_network_device_child_chassis"
+    --> @exec:end-if
+
+## Other Vendors Network Devices: Concat both PARENT & CHILD rows
+--> @c:new-block
+    --> @dm:concat names="temp-other_vendor_network_device_parent_chassis|temp-other_vendor_network_device_child_chassis" and return_empty = 'yes'
+    --> *exec:if-shape num_rows > 0
+       --> @dm:dedup columns="parent_serial_number,entPhysicalSerialNum,output_target"
+       --> @dm:copy-columns from="asset_ip" and to="target_ip"
+       --> @dm:save name="temp-other_vendors_with_parent_child_chassis_rows"
+    --> @exec:end-if
+
+## Other Vendors Network Devices: process base group
+--> @c:new-block
+    --> @dm:recall name="temp-other_vendor_network_devices_inventory"  and return_empty = 'yes'
+    --> *exec:if-condition output_groupname = 'base'
+       --> @dm:explode-json column = 'output_data'
+       --> *exec:if-shape num_rows > 0
+          --> @dm:add-missing-columns columns="sysDescr,systemVendorID,systemVendorName,VendorProductNameMibName,systemVendorOS,sysObjectID,systemVendorSubID"
+          --> @dm:copy-columns from="asset_ip" and to="target_ip"
+          --> @dm:save name="temp-other_vendors_network_device_inventory_base_info"
+       --> @exec:end-if
+    --> @exec:end-if
+
+## Other Vendors Network Devices: Enrich entityPhysical with base group and get sysDesc, systemVendorID etc
+--> @c:new-block
+    --> @dm:recall name="temp-other_vendors_with_parent_child_chassis_rows" and return_empty = 'yes'
+    --> *exec:if-shape num_rows > 0
+       --> @dm:enrich dict="temp-other_vendors_network_device_inventory_base_info" and src_key_cols="target_ip" and dict_key_cols="target_ip" and enrich_cols="sysDescr,systemVendorID,systemVendorName,systemVendorOS,VendorProductNameMibName,sysObjectID,systemVendorSubID" and return_empty_dict = 'yes' and return_empty_cols = 'yes'
+       --> @dm:save name="temp-other_vendors_network_device_inventory_entityphysical_base_info"
+    --> @exec:end-if
+
+## Other Vendors Network Devices: process wlc_accesspointdata group
+--> @c:new-block
+    --> @dm:recall name="temp-other_vendor_network_devices_inventory" and return_empty = 'yes'
+    --> *exec:if-condition output_groupname = 'wlcaccesspointdata'
+       --> @dm:explode-json column = 'output_data'
+       --> *exec:if-shape num_rows > 0
+          --> @dm:rename-columns entPhysicalSerialNum = "bsnAPSerialNumber" &
+                  entPhysicalModelName = "bsnAPModel" &
+                  wlc_hostname = "bsnAPPrimaryMwarNam" &
+                  wlc_ver = "bsnAPIOSVersion"
+          --> @dm:manipulate-string to = "systemVendorName" and func = "eval" and value = '"Hewlett Packard Enterprise"'
+          --> @dm:manipulate-string to = "entPhysicalClassEnumeratedLabel" and func = "eval" and value = '"CHASSIS"'
+          --> *dm:filter entPhysicalSerialNum is not None
+          --> @dm:copy-columns from="entPhysicalSerialNum" and to="wlc_Parent_SN"
+          --> @dm:copy-columns from="asset_ip" and to="target_ip"
+          --> @dm:save name = "temp-other_vendors_network_device_inventory_wlcaccesspointdata_info"
+       --> @exec:end-if
+    --> @exec:end-if
+
+## Other Vendors Network Devices: get parent_serial_number from entityPhysical group
+--> @c:new-block
+    --> @dm:recall name = "temp- _wlcaccesspointdata_info" and return_empty = 'yes'
+    --> *exec:if-shape num_rows > 0
+       --> @dm:enrich dict="temp-other_vendor_network_device_parent_chassis" and src_key_cols="target_ip" and  dict_key_cols="target_ip" and enrich_cols="parent_serial_number" and return_empty_dict = 'yes' and return_empty_cols = 'yes' and how_type="outer"
+       --> @dm:save name = "temp-other_vendors_with_entityphysical_serial_num_info"
+    --> @exec:end-if
+
+## Other Vendors Network Devices: Enrich other vendors devices with parent_serial_number, wlc_Parent_SN
+--> @c:new-block
+    --> @dm:recall name = "temp-other_vendors_network_device_inventory_entityphysical_base_info" and return_empty = 'yes'
+    --> *exec:if-shape num_rows > 0
+       --> @dm:enrich dict="temp-other_vendors_with_entityphysical_serial_num_info" and src_key_cols="entPhysicalSerialNum,target_ip" and  dict_key_cols="entPhysicalSerialNum,target_ip" and enrich_cols="entPhysicalModelName,systemVendorName,entPhysicalClassEnumeratedLabel,parent_serial_number,wlc_Parent_SN" & how_type="outer" & dedup_dict="yes" & replace_values="yes" and return_empty_dict = 'yes' and return_empty_cols = 'yes'
+       --> @cfxaia:conditional-statement condition_column="parent_serial_number" and return_if="parent_serial_number" and return_else="wlc_Parent_SN"
+       --> @dm:selectcolumns exclude="^wlc_Parent_SN"
+       --> @dm:save name = "temp-other_vendors_with_wlc_parent_serial_num"
+    --> @exec:end-if
+
+## Other Vendors Network Devices: process system group
+--> @c:new-block
+    --> @dm:recall name="temp-other_vendor_network_devices_inventory"  and return_empty = 'yes'
+    --> *exec:if-condition output_groupname = 'system'
+       --> @dm:explode-json column = 'output_data'
+       --> *exec:if-shape num_rows > 0
+          --> @dm:copy-columns from="asset_ip" and to="target_ip"
+          --> @dm:save name="temp-other_vendors_network_device_inventory_system_info"
+       --> @exec:end-if
+    --> @exec:end-if
+
+## Other Vendors Network Devices: Enrich other vendors devices with system group and get sysUptime, sysContact etc
+--> @c:new-block
+    --> @dm:recall name="temp-other_vendors_with_wlc_parent_serial_num" and return_empty = 'yes'
+    --> *exec:if-shape num_rows > 0
+       --> @dm:enrich dict="temp-other_vendors_network_device_inventory_system_info" and src_key_cols="target_ip" and dict_key_cols="target_ip" and enrich_cols="sysUpTime,sysContact,sysName,sysLocation" and return_empty_dict = 'yes' and return_empty_cols = 'yes'
+       --> @dm:save name="temp-other_vendors_with_wlc_parent_serial_num"
+    --> @exec:end-if
+
+## Other Vendors Network Devices: Filter parent devices based on parent_rows status
+--> @c:new-block
+    --> @dm:recall name="temp-other_vendors_with_wlc_parent_serial_num" and return_empty = 'yes'
+    --> *exec:if-shape num_rows > 0
+       --> *dm:filter parent_rows is 'yes'
+       --> @dm:save name="temp-other_vendor_network_device_parent_chassis"
+    --> @exec:end-if
+
+## Other Vendors Network Devices: Filter child devices based on parent_rows status
+--> @c:new-block
+    --> @dm:recall name="temp-other_vendors_with_wlc_parent_serial_num" and return_empty = 'yes'
+    --> *exec:if-shape num_rows > 0
+       --> *dm:filter parent_rows is empty
+       --> @dm:save name="temp-other_vendor_network_device_child_chassis"
+    --> @exec:end-if
+
+## Other Vendors Network Devices: Concat CHILD & PARENT devices datasets after removing the duplicates from the data
+--> @c:new-block
+    --> @dm:concat names="temp-other_vendor_network_device_parent_chassis|temp-other_vendor_network_device_child_chassis" and return_empty = 'yes'
+    --> @dm:save name="temp-other_vendors_with_parent_child_chassis_data"
+
+## ******** PORT COUNTs CALCULATION ********
+## total,up,down & admin_down: Below Blocks includes Calculation of Ports counts for PARENT Devices
+## Read 'interfaces' group & Create dataset that wil have ["6","62"] ifType only
+--> @c:new-block
+    --> @dm:recall name="temp-other_vendor_network_devices_inventory"  and return_empty = 'yes'
+    --> *exec:if-condition output_groupname = 'interfaces'
+       --> @dm:explode-json column = 'output_data'
+       --> *exec:if-shape num_rows > 0
+          --> @dm:to-type columns="ifType" and type="int"
+          --> @dm:to-type columns="ifType" and type="str"
+          --> *dm:filter ifType in ["6","62","62.0","6.0"]
+          --> @dm:copy-columns from="asset_ip" and to="target_ip"
+          --> @dm:save name="temp-other_vendors_network_device_inventory_interfaces_info"
+       --> @exec:end-if
+    --> @exec:end-if
+
+## Other Vendors Network Devices: Compute the count of 'total', 'up', 'down', and 'admin_down' ports by creating a comma-separated list of attributes (ifType, ifOperStatus, down, ifName) based on output_target. Merge the 'PARENT Chassis' rows with the interfaces dataset and populate the corresponding port counts.
+--> @c:new-block
+    --> @dm:recall name="temp-other_vendors_network_device_inventory_interfaces_info" and return_empty = 'yes'
+    --> *exec:if-shape num_rows > 0
+       --> @dm:to-type columns="ifOperStatus,ifAdminStatus" and type="int"
+       --> @dm:to-type columns="ifOperStatus,ifAdminStatus" and type="str"
+       --> @cfxaia:conditional-statement condition_column="ifOperStatus,ifAdminStatusEnumeratedLabel" and check_value="yes" and operator="=" and value="2,up" and return_if="eth_down" and return_else="eth_up" and to_column="down"
+       --> @cfxaia:conditional-statement condition_column="ifAdminStatus" and check_value="yes" and operator="=" and value="2" and return_if="admin_down" and return_else="admin_up" and to_column="admin_status"
+       --> @dm:copy-columns from="asset_ip" and to="target_ip"
+       --> @dm:implode key_columns="target_ip" and merge_columns="ifType,ifOperStatus,down,admin_status,ifName" and dedup_merge_values="no"
+       --> @dm:save name="temp-other_vendors_with_interface_admin_status"
+       --> @dm:copy-columns from="ifType" and to="total_eth_count" and func="split"
+       --> @dm:manipulate-string from="total_eth_count" and func="length" and to = "total_eth_count"
+       --> @dm:manipulate-string from="ifOperStatus" and func="count_value" and value="1" and to="up_eth_count"
+       --> @dm:manipulate-string to="down_eth_count" and value="total_eth_count-up_eth_count" and func="eval"
+       --> @dm:manipulate-string from="admin_status" and func="count_value" and value="admin_down" and to="admin_down_count"
+       --> @dm:selectcolumns include="total_eth_count|up_eth_count|down_eth_count|admin_down_count|target_ip"
+       --> @dm:save name="temp-other_vendors_with_interfaces_count"
+       --> @dm:recall name="temp-other_vendors_with_parent_child_chassis_data" and return_empty = 'yes'
+       --> *dm:filter parent_rows is not None
+       --> @dm:enrich dict="temp-other_vendors_with_interfaces_count" and src_key_cols="target_ip" and dict_key_cols="target_ip" and enrich_cols="total_eth_count,up_eth_count,down_eth_count,admin_down_count" and enrich_cols_as="total_eth_ports,total_up_ports,total_down_ports,total_admin_down_ports" and return_empty_dict = 'yes' and return_empty_cols = 'yes'
+       ## Apply fixnul
+       ## --> @dm:fixnull-regex columns="total_up_ports" and value="0" and apply_for_empty="yes"
+       ## --> @dm:fixnull-regex columns="total_down_ports" and value="0" and apply_for_empty="yes"
+       ## --> @dm:fixnull-regex columns="total_admin_down_ports" and value="0" and apply_for_empty="yes"
+       ## --> @dm:fixnull-regex columns="total_eth_ports" and value="0" and apply_for_empty="yes"
+       --> @dm:save name="temp-other_vendors_with_interface_port_counts_for_parent_chassis"
+    --> @exec:end-if
+
+## Other Vendors Network Devices: total,up,down & admin_down: Below Blocks includes Calculation of Ports counts for CHILD Devices. Create 'port-index' & 'Serial_Number' mapping columns by the use of build-hierarchy
+--> @c:new-block
+    --> @dm:recall name="temp-other_vendors_network_device_inventory_entityPhysical_info" and return_empty = 'yes'
+    --> *exec:if-shape num_rows > 0
+       --> *dm:filter entPhysicalClassEnumeratedLabel in ["chassis","Chassis","CHASSIS"]
+       --> @dm:rename-columns chassis_phyindex="entPhysicalIndex" & chassis_containedin="entPhysicalContainedIn"
+       --> @dm:selectcolumns include="chassis_phyindex|entPhysicalClassEnumeratedLabel|entPhysicalSerialNum"
+       --> @dm:to-type columns="chassis_phyindex" and type="int"
+       --> @dm:save name="temp-chassis"
+       --> @dm:recall name="temp-other_vendors_network_device_inventory_entityPhysical_info" and return_empty = 'yes'
+       --> @dm:skip-block-if-shape row_count='0'
+       --> @dm:skip-block-if-shape column_count=1
+       --> @dm:build-hierarchy entity_key_column = "entPhysicalIndex" and relation_key_column = "entPhysicalContainedIn" and hierarchy_end_key_column="entPhysicalClassEnumeratedLabel" and hierarchy_end_value="Chassis" and include_column_to_primary_key="target_ip"
+       --> @dm:copy-columns from="hierarchy" and to="chassis_phyindex" and func="split" and value="-"
+       --> @dm:eval chassis_phyindex="chassis_phyindex[-1] if hierarchy else None"
+       --> *dm:filter entPhysicalClassEnumeratedLabel in ["Port","PORT","port"]
+       --> @dm:rename-columns port_phyindex="entPhysicalIndex"
+       --> @dm:to-type columns="chassis_phyindex" and type="int"
+       --> @dm:selectcolumns include="port_phyindex|chassis_phyindex"
+       --> @dm:enrich dict="temp-chassis" and src_key_cols="chassis_phyindex" and dict_key_cols="chassis_phyindex" and enrich_cols="entPhysicalSerialNum" and return_empty_dict = 'yes' and return_empty_cols = 'yes'
+       --> @dm:selectcolumns include="port_phyindex|entPhysicalSerialNum|entPhysicalClassEnumeratedLabel"
+       --> @dm:save name="temp-other_vendors_with_port_chassis_sr"
+    --> @exec:end-if
+
+## Other Vendors Network Devices: process entAliasMappingTable group
+--> @c:new-block
+    --> @dm:recall name="temp-other_vendor_network_devices_inventory"  and return_empty = 'yes'
+    --> *exec:if-condition output_groupname = 'entAliasMappingTable'
+       --> @dm:explode-json column = 'output_data'
+       --> *exec:if-shape num_rows > 0
+          --> @dm:copy-columns from="asset_ip" and to="target_ip"
+          --> @dm:save name="temp-other_vendors_network_device_inventory_entAliasMappingTable_info"
+       --> @exec:end-if
+    --> @exec:end-if
+
+## Other Vendors Network Devices: Create 'ifIndex' & 'entPhysicalIndex' mapping columns by reading entAliasMappingTable group
+--> @c:new-block
+    --> @dm:recall name="temp-other_vendors_network_device_inventory_entAliasMappingTable_info" and return_empty = 'yes'
+    --> *exec:if-shape num_rows > 0
+       --> @dm:add-missing-columns columns="if_index,entPhysicalIndex,entAliasMappingIdentifier"
+       --> @dm:eval if_index=" entAliasMappingIdentifier[entAliasMappingIdentifier.rfind('.') + 1: len(entAliasMappingIdentifier)] if entAliasMappingIdentifier else None"
+       --> *dm:filter if_index is not None
+       --> @dm:selectcolumns include="if_index|entPhysicalIndex"
+       --> @dm:to-type columns="entPhysicalIndex" and type="int"
+       --> @dm:save name="temp-other_vendor_ifindex_entPhysicalIndex"
+    --> @exec:end-if
+
+## Other Vendors Network Devices: Merge 'other_vendors_with_port_chassis_sr' & 'other_vendor_ifindex_entPhysicalIndex' DATASETS on physical_index to get 'ifindex' & 'entPhysicalSerialNum' mapping
+--> @c:new-block
+    --> @dm:recall name="temp-other_vendors_with_port_chassis_sr" and return_empty = 'yes'
+    --> *exec:if-shape num_rows > 0
+       --> @dm:to-type columns="port_phyindex" and type="int"
+       --> @dm:enrich dict="temp-other_vendor_ifindex_entPhysicalIndex" and src_key_cols="port_phyindex" and dict_key_cols="entPhysicalIndex" and enrich_cols="if_index" and return_empty_dict = 'yes' and return_empty_cols = 'yes'
+       --> *dm:filter if_index is not null and entPhysicalSerialNum is not null
+       --> @dm:to-type columns="entPhysicalSerialNum,if_index" and type="str"
+       --> @dm:save name="temp-other_vendor_serialnumber_ifindex"
+    --> @exec:end-if
+
+## Other Vendors Network Devices: Merge CHILD rows with other_vendor_serialnumber_ifindex DATASET to populate 'total,up,down & admin_down' port counts
+--> @c:new-block
+    --> @dm:recall name="temp-other_vendors_network_device_inventory_interfaces_info" and return_empty = 'yes'
+    --> *exec:if-shape num_rows > 0
+       --> @dm:to-type columns="ifIndex" and type="str"
+       --> @dm:enrich dict="temp-other_vendor_serialnumber_ifindex" and src_key_cols="ifIndex" and dict_key_cols="if_index" and enrich_cols="entPhysicalSerialNum" and return_empty_dict = 'yes' and return_empty_cols = 'yes'
+       --> *dm:filter entPhysicalSerialNum is not null
+       --> @dm:to-type columns="ifOperStatus,ifAdminStatus" and type="int"
+       --> @dm:to-type columns="ifOperStatus,ifAdminStatus" and type="str"
+       --> @cfxaia:conditional-statement condition_column="ifOperStatus,ifAdminStatusEnumeratedLabel" and check_value="yes" and operator="=" and value="2,up" and return_if="eth_down" and return_else="eth_up" and to_column="down"
+       --> @cfxaia:conditional-statement condition_column="ifAdminStatus" and check_value="yes" and operator="=" and value="2" and return_if="admin_down" and return_else="admin_up" and to_column="admin_status"
+       --> @dm:to-type columns="ifType,ifOperStatus,ifAdminStatusEnumeratedLabel,down,admin_status" and type="str"
+       --> @dm:copy-columns from="asset_ip" and to="target_ip"
+       --> @dm:implode key_columns="target_ip,entPhysicalSerialNum" and
+               merge_columns="ifType,ifOperStatus,down,admin_status" and dedup_merge_values="no"
+       --> @dm:copy-columns from="ifType" and to="total_eth_count" and func="split"
+       --> @dm:manipulate-string from="total_eth_count" and func="length" and to = "total_eth_count"
+       --> @dm:manipulate-string from="ifOperStatus" and func="count_value" and value="1" and to="up_eth_count"
+       --> @dm:manipulate-string to="down_eth_count" and value="total_eth_count-up_eth_count" and func="eval"
+       --> @dm:manipulate-string from="admin_status" and func="count_value" and value="admin_down" and to="admin_down_count"
+       --> @dm:selectcolumns include="total_eth_count|up_eth_count|down_eth_count|admin_down_count|target_ip|entPhysicalSerialNum"
+       --> @dm:save name="temp-other_vendor_child_sr_data"
+       --> @dm:recall name="temp-other_vendors_with_parent_child_chassis_data" and return_empty = 'yes'
+       --> *dm:filter parent_rows is None
+       --> @dm:enrich dict="temp-other_vendor_child_sr_data" and src_key_cols="target_ip,entPhysicalSerialNum" and dict_key_cols="target_ip,entPhysicalSerialNum" and enrich_cols="total_eth_count,up_eth_count,down_eth_count,admin_down_count" and enrich_cols_as="total_eth_ports,total_up_ports,total_down_ports,total_admin_down_ports" and return_empty_dict = 'yes' and return_empty_cols = 'yes'
+       ## --> @dm:fixnull-regex columns="total_up_ports" and value="0" and apply_for_empty="yes"
+       ## --> @dm:fixnull-regex columns="total_down_ports" and value="0" and apply_for_empty="yes"
+       ## --> @dm:fixnull-regex columns="total_admin_down_ports" and value="0" and apply_for_empty="yes"
+       ## --> @dm:fixnull-regex columns="total_eth_ports" and value="0" and apply_for_empty="yes"
+       --> @dm:copy-columns from="asset_ip" and to="target_ip"
+       --> @dm:save name="temp-other_vendor_port_count_for_child_rows"
+    --> @exec:end-if
+
+## Other Vendors Network Devices: Concat PARENT & CHILD rows after calculating port counts & save it as temp-df
+--> @c:new-block
+    --> @dm:concat names="temp-other_vendor_port_count_for_child_rows|temp-other_vendors_with_interface_port_counts_for_parent_chassis" and return_empty = 'yes'
+    --> @dm:save name="temp-other_vendor_port_count"
+
+## Other Vendors Network Devices: process system-details group
+--> @c:new-block
+    --> @dm:recall name="temp-other_vendor_network_devices_inventory"  and return_empty = 'yes'
+    --> *exec:if-condition output_groupname = 'system-details'
+       --> @dm:explode-json column = 'output_data'
+       --> *exec:if-shape num_rows > 0
+          --> @dm:copy-columns from="asset_ip" and to="target_ip"
+          --> @dm:save name="temp-other_vendors_network_device_inventory_system_details_info"
+       --> @exec:end-if
+    --> @exec:end-if
+
+## HOSTNAME: Merge other_vendor_port_count with 'system-details' dataset to fetch the Hostname
+--> @c:new-block
+    --> @dm:recall name="temp-other_vendor_port_count" and return_empty = 'yes'
+    --> *exec:if-shape num_rows > 0
+       --> @dm:enrich dict="temp-other_vendors_network_device_inventory_system_details_info" and src_key_cols="target_ip" and dict_key_cols="target_ip" and enrich_cols="hostname" and enrich_cols_as="hostname1" and return_empty_dict = 'yes' and return_empty_cols = 'yes'
+       --> @dm:save name="temp-other_vendor_with_system_details"
+    --> @exec:end-if
+
+## Other Vendors Network Devices: process cdpGlobal group
+--> @c:new-block
+    --> @dm:recall name="temp-other_vendor_network_devices_inventory"  and return_empty = 'yes'
+    --> *exec:if-condition output_groupname = 'cdpGlobal'
+       --> @dm:explode-json column = 'output_data'
+       --> *exec:if-shape num_rows > 0
+          --> @dm:save name="temp-other_vendors_network_device_inventory_cdpGlobal_info"
+       --> @exec:end-if
+    --> @exec:end-if
+
+## Other Vendors Network Devices: process cdpGlobal group
+--> @c:new-block
+    --> @dm:recall name="temp-other_vendor_with_system_details" and return_empty = 'yes'
+    --> *exec:if-shape num_rows > 0
+       --> @dm:enrich dict="temp-other_vendors_network_device_inventory_cdpGlobal_info" and src_key_cols="target_ip" and dict_key_cols="target_ip" and enrich_cols="cdpGlobalDeviceId" and return_empty_dict = 'yes' and return_empty_cols = 'yes'
+       --> @dm:save name="temp-other_vendor_with_cdpglobaldeviceid"
+    --> @exec:end-if
+
+## HOSTNAME: Merge other_vendor_with_cdpglobaldeviceid with 'wlcaccesspointdata' dataset to fetch the wlc_hostname
+--> @c:new-block
+    --> @dm:recall name = "temp-other_vendor_with_cdpglobaldeviceid" and return_empty = 'yes'
+    --> *exec:if-shape num_rows > 0
+       --> @dm:enrich dict="temp-other_vendors_network_device_inventory_wlcaccesspointdata_info" and src_key_cols="target_ip" and dict_key_cols="target_ip" and enrich_cols="wlc_hostname" and return_empty_dict = 'yes' and return_empty_cols = 'yes'
+       --> @dm:add-missing-columns columns="hostname,hostname1,hostname2,hostname3,cdpGlobalDeviceId,sysName,wlc_hostname"
+       --> @dm:eval hostname="hostname1 if hostname1 else hostname2 if hostname2 else hostname3 if hostname3 else sysName if sysName else cdpGlobalDeviceId if cdpGlobalDeviceId else wlc_hostname if wlc_hostname else hostname "
+       --> @dm:selectcolumns exclude="^wlc_hostname$"
+       --> @dm:save name="temp-other_vendor_with_hostname"
+    --> @exec:end-if
+
+## Other Vendors Network Devices: process snmpEngineDetails group
+--> @c:new-block
+    --> @dm:recall name="temp-other_vendor_network_devices_inventory"  and return_empty = 'yes'
+    --> *exec:if-condition output_groupname = 'snmpEngineDetails'
+       --> @dm:explode-json column = 'output_data'
+       --> *exec:if-shape num_rows > 0
+          --> @dm:save name="temp-other_vendors_network_device_inventory_snmpEngineDetails_info"
+       --> @exec:end-if
+    --> @exec:end-if
+
+## Other Vendors Network Devices: Enrich snmpEngineDetails Group to get the snmpEngineTime
+--> @c:new-block
+    --> @dm:recall name="temp-other_vendor_with_hostname" and return_empty = 'yes'
+    --> *exec:if-shape num_rows > 0
+       --> @dm:enrich dict="temp-other_vendors_network_device_inventory_snmpEngineDetails_info"  and src_key_cols="target_ip" and dict_key_cols="target_ip" and enrich_cols="snmpEngineTime" and return_empty_dict = 'yes' and return_empty_cols = 'yes'
+       --> @dm:save name="temp-other_vendor_with_snmpenginetime"
+    --> @exec:end-if
+
+## Other Vendors Network Devices: Convert sys_uptime (in milliseconds) and snmpEngineTime (in seconds) to number of days to calculate uptime and uptime_since values
+--> @c:new-block
+    --> @dm:recall name="temp-other_vendor_with_snmpenginetime" and return_empty = 'yes'
+    --> *exec:if-shape num_rows > 0
+       --> @dm:add-missing-columns columns="sysUpTime,uptime,snmpEngineTime" and value=0
+       --> @dm:fixnull columns="sysUpTime,uptime,snmpEngineTime" and value=0
+       --> @dm:eval sysUpTime="int(str(sysUpTime).replace('','0')) if sysUpTime=='' else sysUpTime"
+       --> @dm:eval snmpEngineTime="int(str(snmpEngineTime).replace('','0')) if snmpEngineTime=='' else snmpEngineTime"
+       --> @dm:to-type columns="sysUpTime,snmpEngineTime" and type="int"
+       --> @dm:eval sysUpTime = "round(sysUpTime/8640000,1) if sysUpTime>0 else sysUpTime"
+       --> @dm:eval sysUpTime = "str(round(sysUpTime,1)) if sysUpTime<1 else int(sysUpTime)"
+       --> @dm:eval snmpEngineTime = "round(snmpEngineTime/86400,1) if snmpEngineTime and snmpEngineTime>0 else snmpEngineTime"
+       --> @dm:eval sysUpTime = "int(snmpEngineTime) if snmpEngineTime>0 else int(float(sysUpTime))"
+       --> @dm:eval uptime = "str(int(snmpEngineTime)) if snmpEngineTime>0 else str(sysUpTime)"
+       --> @dm:eval uptime_since = "int(time_now_as_ms())-(24*60*60*1000 * int(float(sysUpTime))) if int(sysUpTime)>0 else None"
+       --> @dm:rename-columns sys_uptime="sysUpTime"
+       --> @dm:eval sys_uptime_days=" '>180' if sys_uptime> 180 else '<150' if sys_uptime <150 else '150-180'"
+       --> @dm:save name="temp-other_vendor_with_uptime_datetime"
+    --> @exec:end-if
+
+## Other Vendors Network Devices: process ipAddrTable group
+--> @c:new-block
+    --> @dm:recall name="temp-other_vendor_network_devices_inventory"  and return_empty = 'yes'
+    --> *exec:if-condition output_groupname = 'ipAddrTable'
+       --> @dm:explode-json column = 'output_data'
+       --> *exec:if-shape num_rows > 0
+          --> @dm:fixnull columns="ipAdEntAddr" and value=''
+          --> @dm:implode key_columns = "target_ip" and merge_columns="ipAdEntAddr"
+          --> @dm:save name="temp-other_vendors_network_device_inventory_ipAddrTable_info"
+       --> @exec:end-if
+    --> @exec:end-if
+
+## Other Vendors Network Devices: Enrich ipAddrTable group to get the additional_ips
+--> @c:new-block
+    --> @dm:recall name="temp-other_vendor_with_uptime_datetime" and return_empty = 'yes'
+    --> *exec:if-shape num_rows > 0
+       --> @dm:enrich dict="temp-other_vendors_network_device_inventory_ipAddrTable_info" and src_key_cols="target_ip" and dict_key_cols="target_ip" and enrich_cols="ipAdEntAddr" and enrich_cols_as="additional_ips" and return_empty_dict = 'yes' and return_empty_cols = 'yes'
+       --> @dm:copy-columns from="asset_ip" and to="target_ip"
+       --> @dm:save name="temp-other_vendor_with_device_additional_ips"
+    --> @exec:end-if
+
+## Other Vendors Network Device: process base_start_time collection group
+--> @c:new-block
+    --> @dm:recall name="temp-other_vendor_network_devices_inventory" and return_empty = 'yes'
+    --> *exec:if-condition output_groupname = 'base'
+       --> @dm:explode-json column = 'output_data'
+       --> *exec:if-shape num_rows > 0
+          --> @dm:copy-columns from="asset_ip" and to="target_ip"
+          --> @dm:selectcolumns include="^target_ip$|^output_start_time$"
+          --> @dm:save name="temp-other_vendors_network_device_inventory_base_start_time_info"
+       --> @exec:end-if
+    --> @exec:end-if
+
+## Other Vendors Network Device: Enrich base_start_time to get the inv_collection_time
+--> @c:new-block
+    --> @dm:recall name="temp-other_vendor_with_device_additional_ips" and return_empty = 'yes'
+    --> *exec:if-shape num_rows > 0
+       --> @dm:copy-columns from="asset_ip" and to="target_ip"
+       --> @dm:enrich dict="temp-other_vendors_network_device_inventory_base_start_time_info" and src_key_cols="target_ip" and dict_key_cols="target_ip" and enrich_cols="output_start_time" and enrich_cols_as="inv_collection_time" and return_empty_dict = 'yes' and return_empty_cols = 'yes'
+       --> @dm:to-type columns = "inv_collection_time" and type = "str"
+       --> @dm:change-time-format columns="inv_collection_time" and from_format="ms" and to_format="datetimestr"
+       --> @dm:save name="temp-other_vendor_with_first_seen"
+    --> @exec:end-if
+
+## Other Vendors Network Device: Rename & Map the columns
+--> @c:new-block
+    --> @dm:recall name="temp-other_vendor_with_first_seen" and return_empty = 'yes'
+    --> *exec:if-shape num_rows > 0
+       --> @dm:dedup columns="parent_serial_number,entPhysicalSerialNum"
+       --> @dm:rename-columns equipment_type ="entPhysicalClassEnumeratedLabel" &
+               vendor ="systemVendorName" &
+               serial_number ="entPhysicalSerialNum" &
+               equipment_name ="entPhysicalName" &
+               product_id = "entPhysicalModelName" &
+               parent_serial_number ="parent_serial_number" &
+               parent_pid="Parent_PID" &
+               sys_contact="sysContact" &
+               cdp_global_deviceId="cdpGlobalDeviceId" &
+               sys_object_id="sysObjectID" &
+               system_vendor_sub_id="systemVendorSubID" &
+               sw_type = "systemVendorOS" &
+               sys_descr = "sysDescr"
+       --> @dm:copy-columns from="asset_ip" and to="target_ip"
+       --> @dm:copy-columns from = "sw_type" and to = "system_vendor_os"
+       --> @dm:copy-columns from = "product_id" and to = "product_id" and func = "strip"
+       --> @dm:copy-columns from = "product_id" and to = "original_pid"
+       --> @dm:copy-columns from = "sysName" and to = "SNMP_SysName"
+       --> @dm:copy-columns from = "sysLocation" and to = "sys_location"
+       --> @dm:copy-columns from = "sys_contact" and to = "SNMP_SysContact"
+       --> @dm:rename-columns Alt_Part_Number = "entPhysicalVendorTypeMibName"
+       --> @dm:copy-columns from = "serial_number" and to = "serial_number" and func = "strip"
+       --> @dm:copy-columns from = "equipment_type" and to = "equipment_type" and func = "upper"
+       --> @cfxaia:conditional-statement condition_column = "equipment_type" and return_if = "Hardware" and return_else = "Missing Asset Type" and to_column = "asset_type"
+       --> @dm:save name="temp-other_vendor_with_renamed_column_names"
+    --> @exec:end-if
+
+## Other Vendors Network Device: Parse sw_type if 'ACI' & 'APIC' found in sys_descr
+--> @c:new-block
+    --> @dm:recall name="temp-other_vendor_with_renamed_column_names" and return_empty = 'yes'
+    --> *exec:if-shape num_rows > 0
+       --> @dm:eval sw_type="sw_type + ' ACI' if sw_type and sys_descr and 'aci' in sys_descr.lower() else 'Cisco APIC' if sw_type and sys_descr and 'apic' in sys_descr.lower() else sw_type"
+       --> @dm:manipulate-string from = "sys_descr" and to = "interim_sw_version" and value = "(?<=Interim version )[^,[,\\s]+(?=.*)" and func = "match"
+       --> @cfxaia:conditional-statement condition_column = "interim_sw_version" and return_if = "interim_sw_version" and return_else = "sw_version" and to_column = "sw_version"
+       --> @dm:save name="temp-other_vendor_sw_version"
+    --> @exec:end-if
+
+## Other Vendors Network Device: process management_target collection group
+--> @c:new-block
+    --> @dm:recall name="temp-other_vendor_network_devices_inventory" and return_empty = 'yes'
+    --> *exec:if-shape num_rows > 0
+       --> @dm:copy-columns from="asset_ip" and to="target_ip"
+       --> @dm:selectcolumns include="management_target|target_ip"
+       --> @dm:sort columns="management_target,target_ip"
+       --> @dm:implode key_columns="target_ip" and merge_columns="management_target"
+       --> @dm:save name="temp-other_vendors_network_device_inventory_mgmt_list_info"
+    --> @exec:end-if
+
+## Other Vendors Network Device: Enrich other vendors devices with management IP from management target group
+--> @c:new-block
+    --> @dm:recall name="temp-other_vendor_sw_version" and return_empty = 'yes'
+    --> *exec:if-shape num_rows > 0
+       --> @dm:enrich dict="temp-other_vendors_network_device_inventory_mgmt_list_info" and src_key_cols="target_ip" and dict_key_cols="target_ip" and enrich_cols="management_target" and enrich_cols_as="management_ip" and return_empty_dict = 'yes' and return_empty_cols = 'yes'
+       --> @dm:selectcolumns exclude="^output_data$"
+       --> @dm:map from="management_ip" and to ="ip_address"
+       --> @dm:eval asset_status="'ACTIVE'"
+       --> @dm:eval asset_object="'Chassis' if equipment_type == 'CHASSIS' else 'MODULE' if equipment_type == 'MODULE' else 'POWERSUPPLY' if equipment_type == 'POWERSUPPLY' else 'SOFTWARE'"
+       --> @dm:map from = 'serial_number,asset_object' and to = 'unique_id' and func = 'join' and sep = '_'
+       --> @dm:copy-columns from="asset_ip" and to="target_ip"
+       --> @dm:save name="temp-other_vendor_with_mgmt_ip"
+    --> @exec:end-if
+
+## ## Other Vendors Network Device: other vendors Chassis Dictionary from Pstream for computing First Seen and Last Seen timestamps
+--> @c:new-block
+    --> @dm:recall name="temp-other_vendor_with_mgmt_ip" and return_empty = 'yes'
+    --> @exec:call-function name="get_parent_chassis_from_pstream"
+    --> @dm:save name = 'temp-other_vendor_chassis_inventory_collection_timestamp_dict'
+    --> @exec:call-function name = "exclude_assets_by_state"
+    --> @dm:save name="temp-ignored-assets"
+
+## Other Vandor Network Device: Process and Normalize Network Device Chassis Inventory data
+--> @c:new-block
+    --> @dm:recall name = 'temp-other_vendor_with_mgmt_ip' & return_empty = 'yes'
+    --> *exec:if-shape num_rows > 0
+       ## --> @dm:fixnull-regex value = "Not Available" & apply_for_empty = "yes"
+       --> @dm:rename-columns equipment_index="chassis_containedin" and
+               equipment_parent_index="entPhysicalParentRelPos" and
+               source_filename="minio_location" and
+               collection_reason="reason"
+       --> @dm:copy-columns from="sw_type" and to="system_vendor_os"
+       --> @dm:copy-columns from="product_id" and to="device_model"
+       --> @dm:copy-columns from="entPhysicalSoftwareRev" and to="sw_version"
+       --> @dm:eval parent_chassis = "'Yes' if equipment_parent_index == 0 or equipment_parent_index == 1 or equipment_parent_index == -1 else 'No'"
+       --> @dm:map from = 'device_model' & to = 'product_id'
+       --> @dm:map attr = 'equipment_type' & func = 'upper'
+       --> @dm:grok column = 'hw_ldos' & pattern = "%{YEAR:hw_expiring_year}"
+       --> @dm:fixnull columns="equipment_name" and value="Missing Equipment Name" and apply_for_empty="yes"
+       --> @dm:copy-columns from="hostname" and to="dns_name"
+       --> @dm:manipulate-string from="sys_descr" and func = "split" and value="Version" and to ="version"
+       --> @dm:eval version= "None if len(version) < 2 else version[1].split(',')[0].split('[')[0].split()[0] if sys_descr else None"
+       --> @dm:manipulate-string from = "sys_descr" and to = "full_ver" and value = "(Version(.+?)(?:\r\n|Copyright))" and func = "match"
+       --> @dm:eval detailsIndex = "full_ver.index(version) + len(version) if version and full_ver else None"
+       --> @dm:eval details = "full_ver[int(detailsIndex):].strip() if full_ver and detailsIndex else None"
+       --> @dm:eval details="details[1:].strip() if details and details[0] == ',' else details"
+       --> @dm:eval c_index = "details.index('Copyright') if details and 'Copyright' in details else None"
+       --> @dm:eval sw_version_details= "details[:int(c_index)].strip() if details and c_index else details"
+       ## Fixing poe columns
+       --> @dm:add-missing-columns columns="is_poe_capable"
+       --> @dm:fixnull columns="is_poe_capable" and value="No" and apply_for_empty="yes"
+       --> @dm:save name = 'temp-other_vendor_device_parent_chassis_dict_for_software'
+    --> @exec:end-if
+
+--> @c:new-block
+    --> @dm:recall name="temp-other_vendor_device_parent_chassis_dict_for_software" and return_empty='yes'
+    --> *dm:filter asset_object =='Chassis'
+    --> *exec:if-shape num_rows > 0
+       --> @exec:run-pipeline name="product_type_enrichment_pipeline" & ignore_failures = "no"
+       --> @dm:save name="temp-chassis_enriched_data"
+    --> @exec:end-if
+    ## Child Devices Logic - Calculate child_devices count for CHASSIS devices only
+    --> @dm:recall name="temp-chassis_enriched_data" and return_empty="yes"
+    --> *exec:if-shape num_rows > 0
+       --> @dm:implode key_columns="ip_address" and merge_columns="equipment_type" and dedup_merge_values="no"
+       --> @dm:manipulate-string from="equipment_type" and func="count_value" and value="CHASSIS" and to="chassis_count"
+       --> @dm:manipulate-string value="chassis_count-1" and func="eval" and to="count"
+       --> @dm:to-type columns="chassis_count" and type="str"
+       --> @cfxaia:conditional-statement condition_column="chassis_count" and operator="!=" and check_value="yes" and value="0" and return_if="count" and return_else="0" and to_column="child_devices"
+       --> @dm:selectcolumns exclude="chassis_count|^count$"
+       --> @dm:save name="temp-child_chassis_devices_count"
+    --> @exec:end-if
+    ## Child Devices Logic - Apply calculated count to parent chassis, "Not Available" to others
+    --> @dm:recall name="temp-chassis_enriched_data" and return_empty="yes"
+    --> *exec:if-shape num_rows > 0
+       --> @dm:enrich dict="temp-child_chassis_devices_count" and replace_values="yes" and dict_key_cols="ip_address" and src_key_cols="ip_address" and enrich_cols="child_devices"
+       --> @dm:eval is_parent_chassis="'yes' if parent_serial_number == serial_number and equipment_type == 'CHASSIS' else 'no'"
+       --> @dm:eval child_devices="child_devices if is_parent_chassis == 'yes' else 'Not Available'"
+       --> @dm:selectcolumns exclude="is_parent_chassis"
+       --> @dm:save name="temp-chassis_enriched_data"
+    --> @exec:end-if
+
+--> @c:new-block
+    --> @dm:recall name="temp-other_vendor_device_parent_chassis_dict_for_software" and return_empty='yes'
+    --> *dm:filter asset_object not in ["Chassis","Software"]
+    --> *exec:if-shape num_rows = 0
+       --> @dm:save name="temp-module_enriched_data"
+    --> @exec:end-if
+    --> *exec:if-shape num_rows > 0
+       --> @dm:enrich dict="temp-chassis_enriched_data" and src_key_cols="ip_address" and dict_key_cols="ip_address" and enrich_cols="sys_descr,vendor,sys_object_id,hostname,hostname_new,management_ip,parent_serial_number,sw_type,sw_version_details,sys_location,sys_contact,switch_unique_id,system_vendor_os,system_vendor_sub_id,cdp_global_device_id,sys_uptime,sys_uptime_days,uptime_since,uptime,uptime_in_seconds,parent_pid" and return_empty_dict='yes' and return_empty_cols='yes' and replace_values='yes'
+       --> @dm:add-missing-columns columns="child_devices" and value="Not Available"
+       --> @exec:run-pipeline name = "product_type_enrichment_pipeline"
+       --> @dm:save name="temp-module_enriched_data"
+    --> @exec:end-if
+
+--> @c:new-block
+    --> @dm:concat names="temp-chassis_enriched_data|temp-module_enriched_data"
+    --> @dm:copy-columns from="unique_id" and to="switch_unique_id"
+    --> @dm:save name = 'temp-other_vendor_device_parent_chassis_dict'
+    --> @dm:add-missing-columns columns="first_seen,last_seen,created_time"
+    --> @dm:copy-columns from="product_id" and to="device_model"
+    --> @dm:eval node_id = "ip_address+'_'+asset_object"
+    --> @exec:call-function name = "port_count_categorization"
+    --> @dm:save name="temp-other_vendor_device_parent_chassis_dict_fixed"
+    --> @exec:call-function name="generate_common_columns_and_write_parent_device_to_stream"
+
+## SOFTWARE ASSETS: Create Software assets by getting the unique sw_version & sw_type
+--> @c:new-block
+    --> @dm:recall name="temp-other_vendor_device_parent_chassis_dict_for_software" and return_empty="yes"
+    --> *dm:filter sw_version is not empty and sw_version != 'Not Available' and sw_type is not null and sw_type !='Not Available'
+    --> *exec:if-shape num_rows > 0
+       --> @dm:manipulate-string to = "asset_object" and value = "'Software'" and func = "eval"
+       --> @dm:manipulate-string to = "asset_status" and value = "'ACTIVE'" and func = "eval"
+       --> @dm:manipulate-string to = "equipment_type" and value = "'Software'" and func = "eval"
+       --> @dm:copy-columns from="equipment_type" and to="equipment_type" and func="upper"
+       --> @dm:map from = 'sw_type,sw_version,asset_object' and to = 'unique_id' and func = 'join' and sep = '_'
+       --> @dm:dedup columns="unique_id"
+       --> @dm:save name="temp-other_vendors_network_device_software_version_data"
+       --> @dm:eval ip_address = "management_ip if management_ip and management_ip != 'Not Available' else ip_address"
+       --> @dm:copy-columns from="asset_ip" and to="target_ip"
+       --> @dm:copy-columns from="product_id" and to="device_model"
+       --> @dm:save name="temp-other_vendor_network_device_software_data_fixed"
+       --> @exec:call-function name = "write_to_pstream"
+    --> @exec:end-if
+
+## Other Vendors Network Devices: Caputre Collected Files and Target IP details Post Processing
+--> @c:new-block
+    --> @dm:recall name = 'temp-other_vendor_network_devices_inventory' & return_empty = 'yes'
+    --> *exec:if-shape num_rows > 0
+       --> *dm:filter * get asset_ip,jobname,jobid,minio_location,collection_timestamp,collection_status,reason
+       --> @dm:eval data_processing_state = "'Completed'"
+       --> @dm:dedup
+       --> @rn:write-stream name = 'network_device_data_processing_debug'
+    --> @exec:end-if
+
+--> @c:new-block
+    --> @dm:recall name = 'temp-other_vendor_network_devices_inventory' & return_empty = 'yes'
+

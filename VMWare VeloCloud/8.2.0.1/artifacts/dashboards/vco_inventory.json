@@ -1,0 +1,265 @@
+{
+    "name": "vco_inventory",
+    "description": "VCO Inventory",
+    "label": "VCO Inventory",
+    "enabled": false,
+    "dashboard_type": "template",
+    "dashboard_folder": "MSP",
+    "template_variables": {
+        "CUST_ID": {
+            "contextId": "customerId"
+        },
+        "EDGE_IP": {
+            "contextId": "edge_ip"
+        },
+        "EDGE_ID": {
+            "contextId": "edge_id"
+        },
+        "CUST_TAG": {
+            "contextId": "customerTag"
+        },
+        "DEVICE_SERIAL_NUMBER": {
+            "contextId": "serialNumber"
+        }
+    },
+    "version": "24.1.25.1",
+    "dashboard_filters": {
+        "time_filter": true,
+        "default_time_filter_labels": [
+            "Last 1 month"
+        ],
+        "extra_filter0": "(customerId is '7bbfee537fc1439bb39d771ed17fd723') and (projectId is '{{PROJ_ID_SINGLE}}') and (customerTag is '{{CUST_TAG}}') "
+    },
+    "dashboard_sections": [
+        {
+            "title": "Edge Details",
+            "show_filter": true,
+            "widgets": [
+                {
+                    "widget_type": "label",
+                    "max_width": 12,
+                    "height": 0.5,
+                    "min_width": 12,
+                    "label": "<div style='text-align:center;width:100%;'><h1><a style='text-decoration:none;color:#0066ff;' target='_blank'>Edge Details</a></h1></div>",
+                    "widget_id": "33317e49"
+                },
+                {
+                    "title": "Edge Summary",
+                    "widget_type": "summary",
+                    "stream": "vco_1",
+                    "duration_hours": 1080,
+                    "min_width": 4,
+                    "showRowSummary": true,
+                    "height": 10,
+                    "max_width": 4,
+                    "extra_filter": "(customer_tag is '{{CUST_TAG}}' or customer_tag is empty) and source is 'edge' and (edge_ip is '{{EDGE_IP}}' or edge_id is '{{EDGE_ID}}') ",
+                    "remote_searchable": true,
+                    "remote_searchable_cols": [
+                        "deviceId",
+                        "name",
+                        "description",
+                        "deviceFamily",
+                        "edgeState"
+                    ],
+                    "paginated": true,
+                    "max_rows": 50,
+                    "columns": {
+                        "deviceId": {
+                            "title": "Device ID",
+                            "type": "TEXT",
+                            "hidden": true
+                        },
+                        "name": {
+                            "title": "Name",
+                            "key": true
+                        },
+                        "edge_ip": {
+                            "title": "Edge IP",
+                            "key": true
+                        },
+                        "edge_id": "Edge ID",
+                        "deviceFamily": {
+                            "title": "Device Family",
+                            "type": "TEXT",
+                            "key": true
+                        },
+                        "modelNumber": {
+                            "title": "Device Model",
+                            "key": false
+                        },
+                        "activationState_color": {
+                            "type": "COLOR-MAP",
+                            "visible": true,
+                            "source-column": "activationState",
+                            "color-map": {
+                                "ACTIVATED": "#4CAF50",
+                                "REACTIVATION_PENDING": " #FF9800"
+                            }
+                        },
+                        "activationState": {
+                            "title": "Activation State",
+                            "type": "TEXT",
+                            "key": true,
+                            "htmlTemplateForRow": "{%raw%}<span class='badge' style='background-color: {{ row.activationState_color }}' > {{ row.activationState}} </span>{%endraw%}"
+                        },
+                        "activationKey": "Activation Key",
+                        "collection_status": "Collection Status",
+                        "edgeState_color": {
+                            "type": "COLOR-MAP",
+                            "visible": true,
+                            "source-column": "edgeState",
+                            "color-map": {
+                                "CONNECTED": "#4CAF50",
+                                "NEVER_ACTIVATED": " #FF9800",
+                                "OFFLINE": " #F44336"
+                            }
+                        },
+                        "edgeState": {
+                            "title": "Edge State",
+                            "type": "TEXT",
+                            "key": true,
+                            "htmlTemplateForRow": "{%raw%}<span class='badge' style='background-color: {{ row.edgeState_color }}' > {{ row.edgeState}} </span>{%endraw%}"
+                        },
+                        "serialNumber": "Serial Number",
+                        "softwareVersion": " Software Version",
+                        "factorySoftwareVersion": "Factory Software Version",
+                        "source_ip": {
+                            "title": "SourceIP",
+                            "type": "TEXT",
+                            "hidden": true
+                        },
+                        "description": {
+                            "title": "Device Description",
+                            "type": "TEXT",
+                            "key": true
+                        }
+                    },
+                    "widget_id": "4c2cfdd7"
+                },
+                {
+                    "title": "Additional Details",
+                    "widget_type": "summary",
+                    "max_width": 4,
+                    "height": 10,
+                    "min_width": 4,
+                    "stream": "vco_1",
+                    "duration_hours": 1080,
+                    "ts_column": "timestamp",
+                    "extra_filter": "(customer_tag is '{{CUST_TAG}}' or customer_tag is empty) and source is 'edge' and (edge_ip is '{{EDGE_IP}}' or edge_id is '{{EDGE_ID}}') ",
+                    "columns": {
+                        "gateway_id": "Gateway ID",
+                        "gateway_name": "Gateway Name",
+                        "gateway_ip": "Gateway IP",
+                        "gateway_state": {
+                            "title": "Gateway State",
+                            "htmlTemplateForRow": "{%raw%}<span class='badge' style='background-color: {{ row.activationState_color }}' > {{ row.gateway_state}} </span>{%endraw%}"
+                        },
+                        "activationState_color": {
+                            "type": "COLOR-MAP",
+                            "visible": true,
+                            "source-column": "gateway_state",
+                            "color-map": {
+                                "CONNECTED": "#4CAF50",
+                                "NEVER_ACTIVATED": " #FF9800",
+                                "OFFLINE": " #F44336"
+                            }
+                        },
+                        "gateway_softwareVersion": "Gateway Software Version",
+                        "siteId": "Site ID",
+                        "isHub": "IsHub",
+                        "haState": "HA State",
+                        "serviceState": "Service State",
+                        "alertsEnabled": "Alerts Enabled",
+                        "operatorAlertsEnabled": "Operator Alerts Enabled",
+                        "systemUpSince_days": "System Up Since (days)",
+                        "serviceUpSince_days": "Service Up Since (days)",
+                        "customInfo": {
+                            "title": "Address",
+                            "visible": true
+                        }
+                    },
+                    "widget_id": "7gsoG2q9"
+                },
+                {
+                    "title": "Recent Links Summary",
+                    "widget_type": "summary",
+                    "max_width": 4,
+                    "height": 10,
+                    "min_width": 4,
+                    "stream": "vco_1",
+                    "extra_filter": "(customer_tag is '{{CUST_TAG}}' or customer_tag is empty) and source is 'edge' and (edge_ip is '{{EDGE_IP}}' or edge_id is '{{EDGE_ID}}') ",
+                    "duration_hours": 1080,
+                    "ts_column": "timestamp",
+                    "columns": {
+                        "recentLinks_alertsEnabled": {
+                            "title": "Alerts Enabled",
+                            "visible": true
+                        },
+                        "recentLinks_backupState": {
+                            "title": "Backup State",
+                            "visible": true
+                        },
+                        "recentLinks_displayName": {
+                            "title": "Display Name",
+                            "visible": true
+                        },
+                        "recentLinks_edgeId": {
+                            "title": "Edge ID",
+                            "visible": true
+                        },
+                        "recentLinks_effectiveState": {
+                            "title": "Effective State",
+                            "visible": true
+                        },
+                        "recentLinks_interface": {
+                            "title": "Interface",
+                            "visible": true
+                        },
+                        "recentLinks_isp": {
+                            "title": "ISP",
+                            "visible": true
+                        },
+                        "recentLinks_lastEventState": {
+                            "title": "Last Event State",
+                            "visible": true
+                        },
+                        "recentLinks_lon": {
+                            "title": "Longitude",
+                            "visible": true
+                        },
+                        "recentLinks_lat": {
+                            "title": "Latitude",
+                            "visible": true
+                        },
+                        "recentLinks_linkMode": {
+                            "title": "Link Mode",
+                            "visible": true
+                        },
+                        "recentLinks_networkSide": {
+                            "title": "Network Side",
+                            "visible": true
+                        },
+                        "recentLinks_networkType": {
+                            "title": "Network Type",
+                            "visible": true
+                        },
+                        "recentLinks_org": {
+                            "title": "Organisation",
+                            "visible": true
+                        },
+                        "recentLinks_overlayType": {
+                            "title": "Overlay Type",
+                            "visible": "true"
+                        },
+                        "recentLinks_vpnState": {
+                            "title": "VPN State",
+                            "visible": "true"
+                        }
+                    },
+                    "widget_id": "KkUGbVwe"
+                }
+            ]
+        }
+    ],
+    "saved_time": "2025-03-27T12:56:28.291996"
+}

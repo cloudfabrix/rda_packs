@@ -1,0 +1,248 @@
+name: Config Backup
+label: Config Backup
+version: 1.0.0
+type: feature
+published_date: 2026-06-29
+publisher: Fabrix.ai
+scope: system
+description:
+  md: ./description.md
+
+requires:
+  - name: Network Device Discovery
+    version: ">=9.0.1"
+    auto_install_requires: true
+  ##- name: Fabrix AIOPs syslogs
+  ##  version: ">=9.0.1"
+  ##  auto_install_requires: true
+
+fabric_services:
+ - name: worker
+   version: ">=8.1.0.3"
+ - name: api-server
+   version: ">=8.1.0.3"
+
+artifacts:
+  dashboards:
+  - name: view-config
+    file: artifacts/Dashboard/view-config.json
+    folder: ConfigBackupPack
+    tags: []
+    creation_policy: overwrite
+  - name: Config_dashboard
+    file: artifacts/Dashboard/Config_dashboard.json
+    folder: ConfigBackupPack
+    tags: []
+    creation_policy: overwrite
+  - name: syslog-config
+    file: artifacts/Dashboard/syslog-config.json
+    folder: ConfigBackupPack
+    tags: []
+    creation_policy: overwrite
+  - name: config_diff_check_widget_v2
+    file: artifacts/Dashboard/config_diff_check_widget_v2.json
+    folder: ConfigBackupPack
+    tags: []
+    creation_policy: overwrite
+  - name: config-backup-jobs
+    file: artifacts/Dashboard/config-backup-jobs.json
+    folder: ConfigBackupPack
+    tags: []
+    creation_policy: overwrite
+  - name: config_backup_status
+    file: artifacts/Dashboard/config_backup_status.json
+    folder: ConfigBackupPack
+    tags: []
+    creation_policy: overwrite
+  ##- name: config_backup_summary
+  ##  file: artifacts/Dashboard/config_backup_summary.json
+  ##  folder: ConfigBackupPack
+  ##  tags: []
+  
+  
+
+  pstreams:
+  - name: syslog-config-backup-stream
+    attributes:
+      unique_keys: ["config_id"]
+      _mappings: {
+          "properties": {
+            "backup_time": {
+              "type": "date"
+            },
+            "config_change_time": {
+              "type": "date"
+            },
+            "config_size": {
+              "type": "long"
+            },
+            "device_fw_type": {
+              "type": "text",
+              "fields": {
+                "keyword": {
+                  "type": "keyword"
+                }
+              }
+            },
+            "device_user": {
+              "type": "text",
+              "fields": {
+                "keyword": {
+                  "type": "keyword"
+                }
+              }
+            }
+          }
+        }
+    source: OpenSearch
+    ##creation_policy: overwrite
+
+
+  textfsms:
+    ##- name: cisco_show_running_config
+    ##  version: 2026.03.04
+    ##  folder: Cisco_IOS
+    ##  description: Template for showing configuration for cisco devices
+    ##  template_file: ./artifacts/textfsms/cisco_show_running_config.textfsm 
+    ##  remove_on_deactivation: true 
+    ##- name: cisco_xr_show_running_config
+    ##  version: 2026.04.16
+    ##  folder: Cisco_IOS_XR
+    ##  description: Template for show running-config on Cisco IOS XR (skips XR clock banner line)
+    ##  template_file: ./artifacts/textfsms/cisco_xr_show_running_config.textfsm
+    ##  remove_on_deactivation: true
+    - name: cisco_show_running_config_unified
+      version: 2026.04.16
+      folder: Cisco_Unified
+      description: Single show running-config template for IOS, IOS XR, NX-OS, and similar CLI output
+      template_file: ./artifacts/textfsms/cisco_show_running_config_unified.textfsm
+      remove_on_deactivation: true
+
+
+  pipelines:
+  - name: syslog-backup-standalone-ip
+    file: artifacts/PublishedPipeline/syslog-backup-standalone-ip.txt
+    version: 2026.02.16.1
+    folder: ConfigBackupPack
+    skip_validation: false
+    creation_policy: overwrite
+  - name: syslog-golden-config-pipeline
+    file: artifacts/PublishedPipeline/syslog-golden-config-pipeline.txt
+    version: 2026.02.16.1
+    folder: ConfigBackupPack
+    skip_validation: false
+    creation_policy: overwrite
+  - name: syslog-backup-all-pipeline
+    file: artifacts/PublishedPipeline/syslog-backup-all-pipeline.txt
+    version: 2026.02.16.1
+    folder: ConfigBackupPack
+    skip_validation: false
+    creation_policy: overwrite
+  - name: syslog_rda_gw_client_ip_data
+    file: artifacts/PublishedPipeline/syslog_rda_gw_client_ip_data.txt
+    version: 2026.02.16.1
+    folder: ConfigBackupPack
+    skip_validation: false
+    creation_policy: overwrite
+  - name: syslog-config-child-pipeline
+    file: artifacts/PublishedPipeline/syslog-config-child-pipeline.txt
+    version: 2026.04.22.1
+    folder: ConfigBackupPack
+    skip_validation: false
+    creation_policy: overwrite
+
+
+    
+  ##credentials:
+  ##- name: sshv2
+  ##  type: ssh_v2
+
+
+customer_level:
+  launch_locations:
+  - pstream_name: rda_packs_dynamic_groups_and_pages
+    dashboard_group_name: groupSyslogconfig
+    dashboard_group_label: Config Management
+    dashboard_group_icon: "datasource.svg"
+    dashboard_page_name: config-backup-jobs
+    dashboard_page_label: "Config Backup Jobs"
+    dashboard_page_icon: "datasource.svg" 
+    dashboard_app_name: "NetworkMain"
+  - pstream_name: rda_packs_dynamic_groups_and_pages
+    dashboard_group_name: groupSyslogconfig
+    dashboard_group_label: Config Management
+    dashboard_group_icon: "datasource.svg"
+    dashboard_page_name: config_backup_status
+    dashboard_page_label: "Config Backup Status"
+    dashboard_page_icon: "datasource.svg" 
+    dashboard_app_name: "NetworkMain"
+  ##- pstream_name: rda_packs_dynamic_groups_and_pages
+  ##  dashboard_group_name: groupSyslogconfig
+  ##  dashboard_group_label: Config Management
+  ##  dashboard_group_icon: "datasource.svg"
+  ##  dashboard_page_name: config_backup_summary
+  ##  dashboard_page_label: "Config Backup Summary"
+  ##  dashboard_page_icon: "datasource.svg" 
+  ##  dashboard_app_name: "NetworkMain" 
+  - pstream_name: rda_packs_dynamic_groups_and_pages
+    dashboard_group_name: groupSyslogconfig
+    dashboard_group_label: Config Management
+    dashboard_group_icon: "datasource.svg"
+    dashboard_page_name: syslog-config
+    dashboard_page_label: "Config Backups"
+    dashboard_page_icon: "datasource.svg" 
+    dashboard_app_name: "NetworkMain"
+  
+
+  artifacts:
+    blueprints:
+    - name: config_backup
+      file: ./artifacts/blueprints/config_management.yaml
+      creation_policy: overwrite
+
+
+single_tenant:
+  launch_dashboard: network_discovery_main_app  
+  launch_locations:
+    - pstream_name: rda_packs_dynamic_groups_and_pages
+      dashboard_group_name: groupSyslogconfig
+      dashboard_group_label: Config Management
+      dashboard_group_icon: "datasource.svg"
+      dashboard_page_name: config-backup-jobs
+      dashboard_page_label: "Config Backup Jobs"
+      dashboard_page_icon: "datasource.svg" 
+      dashboard_app_name: "NetworkMain"
+    - pstream_name: rda_packs_dynamic_groups_and_pages
+      dashboard_group_name: groupSyslogconfig
+      dashboard_group_label: Config Management
+      dashboard_group_icon: "datasource.svg"
+      dashboard_page_name: config_backup_status
+      dashboard_page_label: "Config Backup Status"
+      dashboard_page_icon: "datasource.svg"  
+      dashboard_app_name: "NetworkMain"
+    ##- pstream_name: rda_packs_dynamic_groups_and_pages
+    ##  dashboard_group_name: groupSyslogconfig
+    ##  dashboard_group_label: Config Management
+    ##  dashboard_group_icon: "datasource.svg"
+    ##  dashboard_page_name: config_backup_summary
+    ##  dashboard_page_label: "Config Backup Summary"
+    ##  dashboard_page_icon: "datasource.svg"  
+    ##  dashboard_app_name: "NetworkMain"  
+    - pstream_name: rda_packs_dynamic_groups_and_pages
+      dashboard_group_name: groupSyslogconfig
+      dashboard_group_label: Config Management
+      dashboard_group_icon: "datasource.svg"
+      dashboard_page_name: syslog-config
+      dashboard_page_label: "Config Backups"
+      dashboard_page_icon: "datasource.svg"  
+      dashboard_app_name: "NetworkMain"             
+  
+
+  artifacts:
+    blueprints:
+    - name: Config Backup
+      file: ./artifacts/blueprints/config_management_single_tenant.yaml
+      creation_policy: overwrite
+
+
+  

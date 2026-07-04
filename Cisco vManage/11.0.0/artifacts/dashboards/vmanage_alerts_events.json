@@ -1,0 +1,569 @@
+{
+    "name": "vmanage_alerts_events",
+    "label": "Alerts, Events, and Audit",
+    "description": "NOC alarms with live vs snapshot KPIs, event log, and audit trail grouped by module and feature.",
+    "dashboard_folder": "VmanagePerformance",
+    "version": "26.06.19.1",
+    "live_edit": true,
+    "enabled": true,
+    "template_variables": {
+        "CUST_TAG": {
+            "contextId": "customerTag"
+        },
+        "PROJ_ID": {
+            "contextId": "projectId"
+        }
+    },
+    "stream": "vmanage_alerts_events",
+    "dashboard_type": "template",
+    "dashboard_filters": {
+        "time_filter": true,
+        "extra_filter": "(customer_tag is '{{CUST_TAG}}' or customer_tag is empty or customer_tag is '' or customer_tag is 'None')",
+        "default_time_filter_labels": [
+            "Last 1 month"
+        ],
+        "columns_filter": [
+            {
+                "id": "severity",
+                "label": "Severity",
+                "type": "TEXT"
+            },
+            {
+                "id": "eventname",
+                "label": "Event",
+                "type": "TEXT"
+            },
+            {
+                "id": "component",
+                "label": "Component",
+                "type": "TEXT"
+            },
+            {
+                "id": "active",
+                "label": "Active",
+                "type": "TEXT"
+            },
+            {
+                "id": "acknowledged",
+                "label": "Acknowledged",
+                "type": "TEXT"
+            },
+            {
+                "id": "severity_level",
+                "label": "Severity Level",
+                "type": "TEXT"
+            },
+            {
+                "id": "source_endpoint",
+                "label": "Source",
+                "type": "TEXT"
+            }
+        ]
+    },
+    "dashboard_sections": [
+        {
+            "title": "Active Alarms",
+            "show_filter": true,
+            "widgets": [
+                {
+                    "title": "Unacknowledged active alarms",
+                    "widget_type": "custom_counter",
+                    "stream": "vmanage_alerts_events",
+                    "ts_column": "entry_time",
+                    "column": "uuid",
+                    "agg": "value_count",
+                    "type": "int",
+                    "min_width": 3,
+                    "max_width": 3,
+                    "height": 4,
+                    "widget_id": "al_unack",
+                    "extra_filter": "source_endpoint is '/alarms' and (acknowledged is false or acknowledged is 'false' or acknowledged is empty)",
+                    "style": {
+                        "color-list": [
+                            "#F59E0B"
+                        ]
+                    }
+                },
+                {
+                    "title": "Active alarms (live)",
+                    "widget_type": "custom_counter",
+                    "stream": "vmanage_alerts_events",
+                    "ts_column": "entry_time",
+                    "column": "uuid",
+                    "agg": "value_count",
+                    "type": "int",
+                    "min_width": 3,
+                    "max_width": 3,
+                    "height": 4,
+                    "widget_id": "al_active_cnt",
+                    "extra_filter": "source_endpoint is '/alarms'",
+                    "style": {
+                        "color-list": [
+                            "#EF4444"
+                        ]
+                    }
+                },
+                {
+                    "title": "Critical active alarms",
+                    "widget_type": "custom_counter",
+                    "stream": "vmanage_alerts_events",
+                    "ts_column": "entry_time",
+                    "column": "uuid",
+                    "agg": "value_count",
+                    "type": "int",
+                    "min_width": 3,
+                    "max_width": 3,
+                    "height": 4,
+                    "widget_id": "al_critical_cnt",
+                    "extra_filter": "source_endpoint is '/alarms' and severity is 'Critical'",
+                    "style": {
+                        "color-list": [
+                            "#EF4444"
+                        ]
+                    }
+                },
+                {
+                    "title": "Cumulative alarm count (vManage snapshot)",
+                    "widget_type": "custom_counter",
+                    "stream": "vmanage_metrics_snapshot",
+                    "ts_column": "collection_timestamp",
+                    "column": "count",
+                    "agg": "sum",
+                    "type": "int",
+                    "min_width": 3,
+                    "max_width": 3,
+                    "height": 4,
+                    "widget_id": "al_snap_cnt",
+                    "style": {
+                        "color-list": [
+                            "#64748B"
+                        ]
+                    },
+                    "extra_filter": "source_endpoint is '/alarms/count'",
+                    "empty_data_message": "No alarm snapshot from vManage \u2014 may differ from live alarm query above"
+                },
+                {
+                    "title": "Alarm volume over time by severity",
+                    "widget_type": "timeseries",
+                    "stream": "vmanage_alerts_events",
+                    "ts_column": "entry_time",
+                    "duration_hours": 168,
+                    "interval": "1h",
+                    "gap_interval": "join",
+                    "min_width": 12,
+                    "max_width": 12,
+                    "height": 5,
+                    "group_by": [
+                        "severity"
+                    ],
+                    "series_spec": [
+                        {
+                            "column": "uuid",
+                            "agg": "value_count",
+                            "type": "int"
+                        }
+                    ],
+                    "chartProperties": {
+                        "legendLocation": "top",
+                        "xAxisLabel": null,
+                        "yAxisLabel": "Alarms per hour"
+                    },
+                    "style": {
+                        "color-map": {
+                            "Critical": "#DC2626",
+                            "critical": "#DC2626",
+                            "Major": "#EF4444",
+                            "major": "#EF4444",
+                            "Minor": "#F59E0B",
+                            "minor": "#F59E0B",
+                            "Warning": "#EAB308",
+                            "warning": "#EAB308",
+                            "Medium": "#EAB308",
+                            "medium": "#EAB308",
+                            "Info": "#3B82F6",
+                            "info": "#3B82F6"
+                        }
+                    },
+                    "widget_id": "al_trend",
+                    "extra_filter": "source_endpoint is '/alarms'",
+                    "empty_data_message": "No alarm trend data in the selected time range"
+                },
+                {
+                    "title": "Top alarm types (top 5)",
+                    "widget_type": "bar_chart",
+                    "stream": "vmanage_alerts_events",
+                    "ts_column": "entry_time",
+                    "extra_filter": "source_endpoint is '/alarms'",
+                    "min_width": 6,
+                    "max_width": 6,
+                    "height": 5,
+                    "chartProperties": {
+                        "orientation": "horizontal",
+                        "xAxisLabel": "Count",
+                        "yAxisLabel": "Alarm type"
+                    },
+                    "group_by": [
+                        "eventname"
+                    ],
+                    "column": "uuid",
+                    "agg": "value_count",
+                    "limit": 5,
+                    "style": {
+                        "color-list": [
+                            "#3B82F6",
+                            "#60A5FA",
+                            "#2563EB",
+                            "#1D4ED8",
+                            "#93C5FD"
+                        ]
+                    },
+                    "widget_id": "al_evt_bar",
+                    "empty_data_message": "No alarm types in the selected time range"
+                },
+                {
+                    "title": "Active alarms by severity",
+                    "widget_type": "bar_chart",
+                    "stream": "vmanage_alerts_events",
+                    "ts_column": "entry_time",
+                    "extra_filter": "source_endpoint is '/alarms'",
+                    "min_width": 6,
+                    "max_width": 6,
+                    "height": 5,
+                    "chartProperties": {
+                        "orientation": "horizontal",
+                        "xAxisLabel": "Count",
+                        "yAxisLabel": "Severity"
+                    },
+                    "group_by": [
+                        "severity"
+                    ],
+                    "column": "uuid",
+                    "agg": "value_count",
+                    "style": {
+                        "color-map": {
+                            "Critical": "#DC2626",
+                            "critical": "#DC2626",
+                            "Major": "#EF4444",
+                            "major": "#EF4444",
+                            "Minor": "#F59E0B",
+                            "minor": "#F59E0B",
+                            "Warning": "#EAB308",
+                            "warning": "#EAB308",
+                            "Medium": "#EAB308",
+                            "medium": "#EAB308",
+                            "Info": "#3B82F6",
+                            "info": "#3B82F6"
+                        }
+                    },
+                    "widget_id": "al_sev_bar",
+                    "empty_data_message": "No alarms in the selected time range"
+                },
+                {
+                    "title": "All active alarms",
+                    "widget_type": "tabular",
+                    "stream": "vmanage_alerts_events",
+                    "ts_column": "entry_time",
+                    "extra_filter": "source_endpoint is '/alarms'",
+                    "min_width": 12,
+                    "max_width": 12,
+                    "height": 6,
+                    "sorting": [
+                        {
+                            "entry_time": "desc"
+                        }
+                    ],
+                    "columns": {
+                        "entry_time": {
+                            "title": "Time (UTC)",
+                            "type": "DATETIME",
+                            "visible": true
+                        },
+                        "severity": {
+                            "title": "Severity",
+                            "type": "TEXT",
+                            "visible": true,
+                            "htmlTemplateForRow": "{%raw%}<span class='badge' style='background-color: {{ row.severity_color }}; color: #ffffff; padding: 2px 8px; border-radius: 4px;'>{{ row.severity }}</span>{%endraw%}"
+                        },
+                        "eventname": {
+                            "title": "Event",
+                            "type": "TEXT",
+                            "visible": true
+                        },
+                        "component": {
+                            "title": "Component",
+                            "type": "TEXT",
+                            "visible": true
+                        },
+                        "system_ip": {
+                            "title": "System IP",
+                            "type": "TEXT",
+                            "visible": true
+                        },
+                        "acknowledged": {
+                            "title": "Acknowledged",
+                            "type": "TEXT",
+                            "visible": true
+                        },
+                        "message": {
+                            "title": "Message",
+                            "type": "TEXT",
+                            "visible": false
+                        }
+                    },
+                    "custom_columns": [
+                        {
+                            "id": "severity_color",
+                            "label": "Severity Color",
+                            "key": false,
+                            "visible": false,
+                            "expr": "('#DC2626' if str(severity or '').lower() == 'critical' else '#EF4444' if str(severity or '').lower() == 'major' else '#F59E0B' if str(severity or '').lower() == 'minor' else '#EAB308' if str(severity or '').lower() in ['warning', 'medium'] else '#3B82F6' if str(severity or '').lower() == 'info' else '#6B7280')"
+                        }
+                    ],
+                    "widget_id": "al_tbl",
+                    "empty_data_message": "No active alarms"
+                }
+            ]
+        },
+        {
+            "title": "Events",
+            "show_filter": true,
+            "widgets": [
+                {
+                    "title": "Events by component (/event)",
+                    "widget_type": "bar_chart",
+                    "stream": "vmanage_alerts_events",
+                    "ts_column": "entry_time",
+                    "min_width": 6,
+                    "max_width": 6,
+                    "height": 5,
+                    "chartProperties": {
+                        "orientation": "vertical",
+                        "yAxisLabel": "Event count",
+                        "xAxisLabel": "Component"
+                    },
+                    "group_by": [
+                        "component"
+                    ],
+                    "column": "event_unique_key",
+                    "agg": "value_count",
+                    "style": {
+                        "color-list": [
+                            "#3B82F6",
+                            "#60A5FA",
+                            "#2563EB",
+                            "#1D4ED8",
+                            "#93C5FD"
+                        ]
+                    },
+                    "widget_id": "al_ev_comp",
+                    "extra_filter": "source_endpoint is '/event'",
+                    "empty_data_message": "No events in the selected time range"
+                },
+                {
+                    "title": "Top devices by event volume (/event)",
+                    "widget_type": "bar_chart",
+                    "stream": "vmanage_alerts_events",
+                    "ts_column": "entry_time",
+                    "min_width": 6,
+                    "max_width": 6,
+                    "height": 5,
+                    "chartProperties": {
+                        "orientation": "horizontal",
+                        "xAxisLabel": "Event count",
+                        "yAxisLabel": "Host name"
+                    },
+                    "group_by": [
+                        "host_name"
+                    ],
+                    "column": "event_unique_key",
+                    "agg": "value_count",
+                    "limit": 10,
+                    "style": {
+                        "color-list": [
+                            "#3B82F6",
+                            "#60A5FA",
+                            "#2563EB",
+                            "#1D4ED8",
+                            "#93C5FD"
+                        ]
+                    },
+                    "widget_id": "al_ev_host",
+                    "extra_filter": "source_endpoint is '/event'",
+                    "empty_data_message": "No events in the selected time range"
+                },
+                {
+                    "title": "Event log (/event)",
+                    "widget_type": "tabular",
+                    "stream": "vmanage_alerts_events",
+                    "ts_column": "entry_time",
+                    "min_width": 12,
+                    "max_width": 12,
+                    "height": 6,
+                    "sorting": [
+                        {
+                            "entry_time": "desc"
+                        }
+                    ],
+                    "columns": {
+                        "entry_time": {
+                            "title": "Time (UTC)",
+                            "type": "DATETIME",
+                            "visible": true
+                        },
+                        "severity_level": {
+                            "title": "Severity",
+                            "type": "TEXT",
+                            "visible": true,
+                            "htmlTemplateForRow": "{%raw%}<span class='badge' style='background-color: {{ row.severity_color }}; color: #ffffff; padding: 2px 8px; border-radius: 4px;'>{{ row.severity_level }}</span>{%endraw%}"
+                        },
+                        "component": {
+                            "title": "Component",
+                            "type": "TEXT",
+                            "visible": true
+                        },
+                        "eventname": {
+                            "title": "Event",
+                            "type": "TEXT",
+                            "visible": true
+                        },
+                        "host_name": {
+                            "title": "Host",
+                            "type": "TEXT",
+                            "visible": true
+                        },
+                        "system_ip": {
+                            "title": "System IP",
+                            "type": "TEXT",
+                            "visible": true
+                        },
+                        "details": {
+                            "title": "Details",
+                            "type": "TEXT",
+                            "visible": true
+                        }
+                    },
+                    "custom_columns": [
+                        {
+                            "id": "severity_color",
+                            "label": "Severity Color",
+                            "key": false,
+                            "visible": false,
+                            "expr": "('#DC2626' if str(severity_level or '').lower() == 'critical' else '#EF4444' if str(severity_level or '').lower() == 'major' else '#F59E0B' if str(severity_level or '').lower() == 'minor' else '#EAB308' if str(severity_level or '').lower() in ['warning', 'medium'] else '#3B82F6' if str(severity_level or '').lower() == 'info' else '#6B7280')"
+                        }
+                    ],
+                    "widget_id": "al_ev_tbl",
+                    "empty_data_message": "No device events in selected time range",
+                    "extra_filter": "source_endpoint is '/event'"
+                }
+            ]
+        },
+        {
+            "title": "Audit",
+            "show_filter": true,
+            "widgets": [
+                {
+                    "title": "Total audit actions",
+                    "widget_type": "custom_counter",
+                    "stream": "vmanage_alerts_events",
+                    "ts_column": "entry_time",
+                    "column": "event_unique_key",
+                    "agg": "value_count",
+                    "type": "int",
+                    "min_width": 3,
+                    "max_width": 3,
+                    "height": 4,
+                    "widget_id": "al_au_total",
+                    "extra_filter": "source_endpoint is '/auditlog'",
+                    "style": {
+                        "color-list": [
+                            "#3B82F6"
+                        ]
+                    },
+                    "empty_data_message": "No audit log data \u2014 run alerts_pipeline after /auditlog is enabled"
+                },
+                {
+                    "title": "Audit actions by user",
+                    "widget_type": "bar_chart",
+                    "stream": "vmanage_alerts_events",
+                    "ts_column": "entry_time",
+                    "extra_filter": "source_endpoint is '/auditlog'",
+                    "min_width": 9,
+                    "max_width": 9,
+                    "height": 4,
+                    "chartProperties": {
+                        "orientation": "horizontal",
+                        "xAxisLabel": "Action count",
+                        "yAxisLabel": "User"
+                    },
+                    "group_by": [
+                        "loguser"
+                    ],
+                    "column": "event_unique_key",
+                    "agg": "value_count",
+                    "limit": 12,
+                    "style": {
+                        "color-list": [
+                            "#3B82F6",
+                            "#60A5FA",
+                            "#2563EB",
+                            "#1D4ED8",
+                            "#93C5FD"
+                        ]
+                    },
+                    "widget_id": "al_au_user",
+                    "empty_data_message": "No audit log data \u2014 run alerts_pipeline after /auditlog is enabled"
+                },
+                {
+                    "title": "Audit log (/auditlog)",
+                    "widget_type": "tabular",
+                    "stream": "vmanage_alerts_events",
+                    "ts_column": "entry_time",
+                    "extra_filter": "source_endpoint is '/auditlog'",
+                    "min_width": 12,
+                    "max_width": 12,
+                    "height": 6,
+                    "sorting": [
+                        {
+                            "entry_time": "desc"
+                        }
+                    ],
+                    "columns": {
+                        "entry_time": {
+                            "title": "Time (UTC)",
+                            "type": "DATETIME",
+                            "visible": true
+                        },
+                        "loguser": {
+                            "title": "User",
+                            "type": "TEXT",
+                            "visible": true
+                        },
+                        "logmodule": {
+                            "title": "Module",
+                            "type": "TEXT",
+                            "visible": true
+                        },
+                        "logfeature": {
+                            "title": "Feature",
+                            "type": "TEXT",
+                            "visible": true
+                        },
+                        "logmessage": {
+                            "title": "Message",
+                            "type": "TEXT",
+                            "visible": true
+                        },
+                        "logusersrcip": {
+                            "title": "Source IP",
+                            "type": "TEXT",
+                            "visible": false
+                        }
+                    },
+                    "widget_id": "al_au_tbl",
+                    "empty_data_message": "No audit log data \u2014 run alerts_pipeline after /auditlog is enabled"
+                }
+            ]
+        }
+    ],
+    "saved_time": "2026-06-23T09:26:08.527225"
+}

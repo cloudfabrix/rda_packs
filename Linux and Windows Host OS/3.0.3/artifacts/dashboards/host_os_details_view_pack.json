@@ -1,0 +1,592 @@
+{
+    "name": "host_os_details_view_pack",
+    "label": "Host OS Details View",
+    "description": "Host OS Details view",
+    "version": "24.03.08.3",
+    "context_label_id0": "host_os_ip",
+    "dashboard_folder": "Linux_Windows",
+    "enabled": false,
+    "dashboard_style": "tabbed",
+    "dashboard_type": "template",
+    "custom_context": {
+        "rda-dashboard-live-edit": true
+    },
+    "template_variables": {
+        "NODE_ID": {
+            "contextId": "unique_id"
+        },
+        "HOST_OS_IP": {
+            "contextId": "host_os_ip"
+        },
+        "HOST_NAME": {
+            "contextId": "hostname"
+        },
+        "CUST_ID": {
+            "contextId": "customerId"
+        },
+        "PROJ_ID": {
+            "contextId": "projectId"
+        },
+        "CUST_TAG": {
+            "contextId": "customerTag"
+        }
+    },
+    "dashboard_filters": {
+        "time_filter": true,
+        "default_time_filter_labels": [
+            "Last 1 week"
+        ],
+        "columns_filter": [
+            {
+                "id": "rda_gw_timestamp",
+                "label": "Timestamp",
+                "type": "DATETIME"
+            },
+            {
+                "id": "service_name",
+                "label": "Service Name",
+                "type": "TEXT"
+            },
+            {
+                "id": "host_os_ip",
+                "label": "Host IP",
+                "type": "TEXT"
+            },
+            {
+                "id": "log_severity_label",
+                "label": "Log Severity",
+                "type": "TEXT"
+            },
+            {
+                "id": "raw.text",
+                "label": "Log Message",
+                "type": "SIMPLE_TEXT"
+            },
+            {
+                "id": "process_name",
+                "label": "Process Name",
+                "type": "TEXT"
+            },
+            {
+                "id": "process_id",
+                "label": "Process ID",
+                "type": "TEXT"
+            }
+        ]
+    },
+    "dashboard_sections": [
+        {
+            "title": "Inventory",
+            "show_filter": false,
+            "widgets": [
+                {
+                    "widget_type": "label",
+                    "max_width": 12,
+                    "height": 0.1,
+                    "min_width": 12,
+                    "label": "<div style='text-align:center;width:100%;'><h1>{{HOST_NAME}}:{{HOST_OS_IP}}</h1></div>",
+                    "widget_id": "a2e0ffb4"
+                },
+                {
+                    "title": "Server Details",
+                    "widget_type": "summary",
+                    "stream": "host-os-system-inventory",
+                    "query": "asset_object is 'System' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "min_width": 6,
+                    "height": 4,
+                    "max_width": 6,
+                    "paginated": true,
+                    "max_rows": 100,
+                    "include_context_in_query": true,
+                    "include_context_keys": [
+                        "host_os_ip",
+                        "hostname"
+                    ],
+                    "columns": {
+                        "host_os_ip": {
+                            "title": "Host OS IP",
+                            "key": true
+                        },
+                        "hostname": "Host Name",
+                        "host_machine_vendor": "Host/Hypervisor Vendor",
+                        "host_machine_type": "Host Type",
+                        "host_os_version": "Host OS Version",
+                        "unique_id": {
+                            "title": "Unique ID",
+                            "key": true,
+                            "visible": false
+                        },
+                        "asset_status": {
+                            "title": "Status",
+                            "htmlTemplateForRow": "<span class='badge' style='background-color: {{'{{ row.status_colour}}'}}' > {{'{{ row.asset_status}}'}} </span>"
+                        },
+                        "status_color": {
+                            "title": "Color",
+                            "type": "COLOR-MAP",
+                            "source-column": "host_os_nic_status",
+                            "color-map": {
+                                "DOWN": "#B71C1C",
+                                "UP": "#4CAF50"
+                            }
+                        },
+                        "id": {
+                            "title": "ID",
+                            "value": "user-dashboard-server_drilldown",
+                            "key": true,
+                            "type": "FIXED_VALUE",
+                            "hidden": true,
+                            "visible": false
+                        }
+                    },
+                    "custom_columns": [
+                        {
+                            "id": "color",
+                            "expr": "'#B71C1C' if int(host_os_fs_used_perc) >= 80 else '#4CAF50'",
+                            "visible": false
+                        },
+                        {
+                            "id": "status_colour",
+                            "expr": "'#4CAF50' if asset_status == 'Active' else '#B71C1C'",
+                            "visible": false
+                        }
+                    ],
+                    "widget_id": "1051a855"
+                },
+                {
+                    "title": "Memory (GB)",
+                    "widget_type": "custom_counter",
+                    "min_width": 3,
+                    "max_width": 3,
+                    "height": 4,
+                    "ts_column": "timestamp",
+                    "column": "host_memory_gb",
+                    "paginated": true,
+                    "agg": "sum",
+                    "type": "str",
+                    "include_context_in_query": true,
+                    "include_context_keys": [
+                        "host_os_ip",
+                        "hostname"
+                    ],
+                    "style": {
+                        "color-list": [
+                            "#334FFF"
+                        ]
+                    },
+                    "group_by": [
+                        "host_os_ip",
+                        "hostname"
+                    ],
+                    "stream": "host-os-system-inventory",
+                    "widget_id": "ec6e986a"
+                },
+                {
+                    "title": "Total CPU's",
+                    "widget_type": "custom_counter",
+                    "min_width": 3,
+                    "max_width": 3,
+                    "height": 4,
+                    "ts_column": "timestamp",
+                    "column": "host_cpus",
+                    "paginated": true,
+                    "agg": "sum",
+                    "type": "str",
+                    "include_context_in_query": true,
+                    "include_context_keys": [
+                        "host_os_ip",
+                        "hostname"
+                    ],
+                    "style": {
+                        "color-list": [
+                            "#334FFF"
+                        ]
+                    },
+                    "group_by": [
+                        "host_os_ip",
+                        "hostname"
+                    ],
+                    "stream": "host-os-system-inventory",
+                    "widget_id": "23b1aa6b"
+                },
+                {
+                    "title": "Filesystem Details",
+                    "widget_type": "tabular",
+                    "stream": "host-os-system-inventory",
+                    "query": "asset_object is 'Filesystem' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "min_width": 6,
+                    "height": 5,
+                    "max_width": 6,
+                    "paginated": true,
+                    "max_rows": 100,
+                    "include_context_in_query": true,
+                    "include_context_keys": [
+                        "host_os_ip",
+                        "hostname"
+                    ],
+                    "columns": {
+                        "host_os_disk_mount": "Disk Mount",
+                        "host_os_fs_size": "FS size",
+                        "host_os_fs_type": "FS Type",
+                        "host_os_fs_used": "FS Used",
+                        "host_os_fs_available": "FS available",
+                        "host_os_fs_used_perc": {
+                            "title": "FS Used (%)",
+                            "htmlTemplateForRow": "<span class='badge' style='background-color: {{'{{ row.color }}'}}' > {{'{{ row.host_os_fs_used_perc }}'}} </span>"
+                        }
+                    },
+                    "custom_columns": [
+                        {
+                            "id": "color",
+                            "expr": "'#B71C1C' if int(host_os_fs_used_perc) >= 80 else '#4CAF50'",
+                            "visible": false
+                        }
+                    ],
+                    "widget_id": "e4f414ea"
+                },
+                {
+                    "title": "Disks Details",
+                    "widget_type": "tabular",
+                    "stream": "host-os-system-inventory",
+                    "query": "asset_object is 'Disk' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "min_width": 4,
+                    "height": 5,
+                    "max_width": 6,
+                    "paginated": true,
+                    "max_rows": 100,
+                    "include_context_in_query": true,
+                    "include_context_keys": [
+                        "host_os_ip",
+                        "hostname"
+                    ],
+                    "columns": {
+                        "host_os_disk_model": "Disk Model",
+                        "host_os_disk_name": "Disk Name",
+                        "host_os_disk_state": {
+                            "title": "Disk State",
+                            "htmlTemplateForRow": "{%raw%}<span class='badge' style='background-color: {{ row.host_os_disk_state_color }}' > {{ row.host_os_disk_state }} </span>{%endraw%}"
+                        },
+                        "host_os_disk_state_color": {
+                            "type": "COLOR-MAP",
+                            "source-column": "host_os_disk_state",
+                            "color-map": {
+                                "OK": "#00BB00",
+                                "running": "#00BB00",
+                                "Failed": "#BB0000"
+                            }
+                        },
+                        "host_os_disk_vendor": "Disk Vendor",
+                        "host_os_disk_size_gb": "Disk Size (GB)",
+                        "asset_status": {
+                            "title": "Status",
+                            "htmlTemplateForRow": "<span class='badge' style='background-color: {{'{{ row.status_colour }}'}}' > {{'{{ row.asset_status }}'}} </span>"
+                        }
+                    },
+                    "custom_columns": [
+                        {
+                            "id": "status_colour",
+                            "expr": "'#4CAF50' if asset_status == 'Active' else '#B71C1C'",
+                            "visible": false
+                        },
+                        {
+                            "id": "state_colour",
+                            "expr": "'#4CAF50' if host_os_disk_state == 'running' else '#B71C1C'",
+                            "visible": false
+                        }
+                    ],
+                    "widget_id": "d4afe2f9"
+                },
+                {
+                    "title": "Interface Details",
+                    "widget_type": "tabular",
+                    "stream": "host-os-system-inventory",
+                    "query": "asset_object is 'Network' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "context_filter": "populated_stream contains 'linux'",
+                    "min_width": 4,
+                    "height": 5,
+                    "max_width": 6,
+                    "paginated": true,
+                    "max_rows": 100,
+                    "include_context_in_query": true,
+                    "include_context_keys": [
+                        "host_os_ip",
+                        "hostname"
+                    ],
+                    "columns": {
+                        "host_os_nic_name": "Name",
+                        "host_os_nic_ip": {
+                            "title": "IP address",
+                            "key": true
+                        },
+                        "host_os_nic_mac": "MAC",
+                        "host_os_nic_mtu": "MTU Size",
+                        "host_os_nic_status": {
+                            "title": "Status",
+                            "htmlTemplateForRow": "{%raw%}<span class='badge' style='background-color: {{ row.host_os_nic_status_color }}' > {{ row.host_os_nic_status }} </span>{%endraw%}"
+                        },
+                        "host_os_nic_status_color": {
+                            "title": "Color",
+                            "type": "COLOR-MAP",
+                            "source-column": "host_os_nic_status",
+                            "color-map": {
+                                "DOWN": "#B71C1C",
+                                "UP": "#4CAF50",
+                                "UNKNOWN": "#4CAF50"
+                            }
+                        }
+                    },
+                    "widget_id": "173a0d51"
+                },
+                {
+                    "title": "Interface Details",
+                    "widget_type": "tabular",
+                    "stream": "host-os-system-inventory",
+                    "query": "asset_object is 'Network' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty) ",
+                    "context_filter": "populated_stream contains 'windows'",
+                    "min_width": 4,
+                    "height": 5,
+                    "max_width": 6,
+                    "paginated": true,
+                    "max_rows": 100,
+                    "include_context_in_query": true,
+                    "include_context_keys": [
+                        "host_os_ip",
+                        "hostname"
+                    ],
+                    "columns": {
+                        "host_os_nic_name": "Name",
+                        "host_os_nic_ip": {
+                            "title": "IP address",
+                            "key": true
+                        },
+                        "host_os_nic_mac": "MAC"
+                    },
+                    "host_os_nic_status": {
+                        "title": "Status",
+                        "htmlTemplateForRow0": "{%raw%}<span class='badge' style='background-color: {{ row.host_os_nic_status_color }}' > {{ row.host_os_nic_status }} </span>{%endraw%}"
+                    },
+                    "host_os_nic_status_color0": {
+                        "visible": true,
+                        "title": "Color",
+                        "type": "COLOR-MAP",
+                        "source-column": "test",
+                        "color-map": {
+                            "connected": "#B71C1C",
+                            "disconnected": "#4CAF50"
+                        }
+                    },
+                    "custom_columns": [
+                        {
+                            "id": "test",
+                            "title": "Status",
+                            "expr": "'connected' if host_os_nic_status == 2 else 'disconnected'",
+                            "htmlTemplateForRow": "{%raw%}<span class='badge' style='background-color: {{ row.test_color }}' > {{ row.test }} </span>{%endraw%}",
+                            "visible": true
+                        },
+                        {
+                            "id": "test_color",
+                            "title": "Status_color",
+                            "expr": "'#4CAF50' if host_os_nic_status == 2 else '#B71C1C'",
+                            "htmlTemplateForRow": "{%raw%}<span class='badge' style='background-color: {{ row.host_os_nic_status_color }}' > {{ row.test }} </span>{%endraw%}",
+                            "visible": false
+                        }
+                    ],
+                    "widget_id": "5d128cca"
+                },
+                {
+                    "title": "Service Details",
+                    "widget_type": "tabular",
+                    "stream": "host-os-system-inventory",
+                    "query": "asset_object = 'Service' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "min_width": 6,
+                    "height": 8,
+                    "max_width": 6,
+                    "paginated": true,
+                    "max_rows": 100,
+                    "include_context_in_query": true,
+                    "include_context_keys": [
+                        "host_os_ip",
+                        "hostname"
+                    ],
+                    "columns": {
+                        "host_os_service_name": "Service Name",
+                        "host_os_service_id": "Service PID",
+                        "host_os_service_status": {
+                            "title": "Service Status",
+                            "htmlTemplateForRow": "{%raw%}<span class='badge' style='background-color: {{ row.host_os_service_status_color }}' > {{ row.host_os_service_status }} </span>{%endraw%}"
+                        },
+                        "host_os_service_status_color": {
+                            "type": "COLOR-MAP",
+                            "source-column": "host_os_service_status",
+                            "color-map": {
+                                "OK": "#00BB00",
+                                "running": "#00BB00",
+                                "Failed": "#BB0000"
+                            }
+                        },
+                        "host_os_service_pid": "Host OS Service PID"
+                    },
+                    "custom_columns": [
+                        {
+                            "id": "color",
+                            "expr": "'#4CAF50' if host_os_service_status == 'running' else '#B71C1C'",
+                            "visible": false
+                        }
+                    ],
+                    "widget_id": "b219ee94"
+                },
+                {
+                    "title": "Netstat Details",
+                    "widget_type": "tabular",
+                    "stream": "host-os-system-inventory",
+                    "query": "asset_object = 'NetstatClientServer' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "min_width": 6,
+                    "height": 8,
+                    "max_width": 6,
+                    "paginated": true,
+                    "max_rows": 100,
+                    "include_context_in_query": true,
+                    "include_context_keys": [
+                        "host_os_ip",
+                        "hostname"
+                    ],
+                    "columns": {
+                        "client_port": "Client Port",
+                        "connection_protocol": "Connection Protocol",
+                        "connection_state": {
+                            "title": "State",
+                            "htmlTemplateForRow": "<span class='badge' style='background-color: {{'{{ row.color }}'}}' > {{'{{ row.connection_state }}'}} </span>"
+                        },
+                        "host_os_process_name": "Process name",
+                        "host_os_process_pid": "Process PID",
+                        "server_ip_address": "Server IP address",
+                        "server_port": "Server Port",
+                        "connection_flow": "Connection Flow"
+                    },
+                    "custom_columns": [
+                        {
+                            "id": "color",
+                            "expr": "'#4CAF50' if connection_state == 'ESTABLISHED' else '#B71C1C'",
+                            "visible": false
+                        }
+                    ],
+                    "widget_id": "3f33951f"
+                },
+                {
+                    "title": "Installed Software Details",
+                    "widget_type": "tabular",
+                    "stream": "host-os-system-inventory",
+                    "query": "asset_object = 'Software' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "min_width": 6,
+                    "height": 8,
+                    "max_width": 6,
+                    "paginated": true,
+                    "max_rows": 100,
+                    "include_context_in_query": true,
+                    "include_context_keys": [
+                        "host_os_ip",
+                        "hostname"
+                    ],
+                    "columns": {
+                        "host_os_app_name": "Application Name",
+                        "host_os_app_version": "Version",
+                        "host_os_app_vendor": "Vendor",
+                        "host_os_app_arch": "Architecture",
+                        "host_os_app_license": "License",
+                        "host_os_app_install_date": "Installed Date"
+                    },
+                    "widget_id": "f75dcb50"
+                }
+            ]
+        },
+        {
+            "title": "Topology",
+            "show_filter": false,
+            "widgets": [
+                {
+                    "widget_type": "label",
+                    "max_width": 12,
+                    "height": 0.1,
+                    "min_width": 12,
+                    "label": "<div style='text-align:center;width:100%;'><h1> {{HOST_NAME}}:{{HOST_OS_IP}}</h1></div>",
+                    "widget_id": "10c42966"
+                },
+                {
+                    "widget_type": "topology",
+                    "title": "Topology",
+                    "chartProperties": {
+                        "hasToolbar": true,
+                        "shortToolbar": true,
+                        "userZoomingEnabled": true
+                    },
+                    "limit_to_node_types": [
+                        "OS_Service",
+                        "Host_OS"
+                    ],
+                    "stack": "cfx_rdaf_topology",
+                    "query": "count >= 1 and stack_name = 'cfx_rdaf_topology' and asset_id is {{HOST_OS_IP}}",
+                    "with_graphdb": true,
+                    "has_more_data_flag": true,
+                    "expand_neighbors": true,
+                    "max_width": 12,
+                    "min_width": 6,
+                    "height": 12,
+                    "widget_id": "9db5a36f"
+                }
+            ]
+        },
+        {
+            "title": "Discovery Status",
+            "show_filter": true,
+            "widgets": [
+                {
+                    "widget_type": "label",
+                    "max_width": 12,
+                    "height": 0.1,
+                    "min_width": 12,
+                    "label": "<div style='text-align:center;width:100%;'><h1> {{HOST_NAME}}:{{HOST_OS_IP}}</h1></div>",
+                    "widget_id": "786489b6"
+                },
+                {
+                    "title": "Sucess/Failed Bots",
+                    "widget_type": "tabular",
+                    "stream": "asset_inventory_collection_status_stream",
+                    "extra_filter": "asset_id is '{{HOST_OS_IP}}'",
+                    "duration_hours": 1080000,
+                    "min_width": 12,
+                    "height": 10,
+                    "max_width": 12,
+                    "paginated": true,
+                    "remote_searchable": true,
+                    "max_rows": 100,
+                    "sorting": [
+                        {
+                            "timestamp": "desc"
+                        }
+                    ],
+                    "columns": {
+                        "asset_id": "Device IP",
+                        "collection_status": {
+                            "title": "Collection Status",
+                            "htmlTemplateForRow": "{%raw%}<span class='badge' style='background-color: {{ row.collection_status_color }}' > {{ row.collection_status }} </span>{%endraw%}"
+                        },
+                        "collection_status_color": {
+                            "type": "COLOR-MAP",
+                            "source-column": "collection_status",
+                            "color-map": {
+                                "Success": "#00BB00",
+                                "Failed": "#BB0000"
+                            }
+                        },
+                        "bot_name": "Bot Name",
+                        "bot_source_type": "Bot Source Type",
+                        "bot_source_name": "Bot Source Name",
+                        "reason": "Error Message",
+                        "collection_timestamp": "Collection Timestamp"
+                    },
+                    "widget_id": "94a3fc11"
+                }
+            ]
+        }
+    ],
+    "saved_time": "2025-12-30T07:27:39.239342"
+}

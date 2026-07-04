@@ -1,0 +1,54 @@
+{
+    "type": "log",
+    "name": "ntp_status_snmp",
+    "description": "NTP Synchronization Status CFX",
+    "enabled": false,
+    "schedule": {
+        "minutes": 5
+    },
+    "data": {
+        "stream": "rda_snmp_metrics",
+        "query": "name == 'ntp'",
+        "unique_keys": [
+            "target_ip",
+            "name"
+        ],
+        "groupby": [
+            "target_ip",
+            "name"
+        ],
+        "additional_columns": [
+            "device_hostname",
+            "device_model",
+            "device_vendor",
+            "ntp_status",
+            "ntp_status_label",
+            "sys_name"
+        ],
+        "custom_unique_keys": [],
+        "data_transformations": []
+    },
+    "actions": [
+        {
+            "state": "OPEN",
+            "extra_query": "ntp_status in [1,2,3]",
+            "attributes": {
+                "severity": "CRITICAL",
+                "metric_name": "ntp_status",
+                "alert_message": "NTP failure or not configured on {{sys_name}} ({{target_ip}}) status={{ntp_status_label}}"
+            },
+            "notification_profile": "snmp_metrics_notification_profile"
+        },
+        {
+            "state": "CLEAR",
+            "extra_query": "ntp_status == 6",
+            "attributes": {
+                "severity": "INFO",
+                "metric_name": "ntp_status",
+                "alert_message": "NTP synchronized on {{sys_name}} ({{target_ip}}) with remote server"
+            },
+            "notification_profile": "snmp_metrics_notification_profile"
+        }
+    ],
+    "saved_time": "2026-04-16T09:12:09.497594"
+}

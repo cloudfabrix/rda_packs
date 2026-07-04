@@ -1,0 +1,360 @@
+name: Cisco vManage
+version: 11.0.0
+folder: /collection/performance/fabrix_aiops_vmanage_pack
+published_date: 2026-06-26
+publisher: Fabrix.ai
+label: Cisco vManage Inventory and Performance Collection
+scope: system
+description:
+  md: "./description.md"
+type: collection
+
+# Other packs that this solution requires to be deployed
+requires:
+  - name: Fabrix Inventory Collection Base Pack
+    version: ">=6.0.0"
+fabric_services:
+  - name: api-server
+    version: ">=8.2.1"
+
+artifacts:
+  pstreams:
+    # ── Collection status ──────────────────────────────────────────────────────
+    - name: asset_inventory_collection_status_stream
+      attributes:
+        retention_days: 7
+        unique_keys: ["asset_id", "bot_name", "collection_timestamp"]
+      autocreate: true
+
+
+    # ── Inventory (vmanage_inventory_pipeline) ─────────────────────────────────
+    # Devices, Interfaces, Hardware, Controllers, and vEdge inventory write to one stream;
+    # asset_object distinguishes the type ('Device' / 'Interface' / 'Hardware' / 'Controller' / 'vEdge').
+    - name: vmanage_inventory
+      attributes:
+        retention_days: 7
+        unique_keys: ["unique_id"]
+      autocreate: true
+  
+
+    # ── Topology (vmanage_inventory_pipeline — BFD topology section) ───────────
+    # cfx_rdaf_* names are the platform-standard topology stream names.
+    - name: cfx_rdaf_topology_nodes
+      attributes:
+        retention_days: 7
+        unique_keys: ["node_id"]
+      autocreate: true
+      
+    - name: cfx_rdaf_topology_edges
+      attributes:
+        retention_days: 7
+        unique_keys: ["edge_unique_key"]
+      autocreate: true
+     
+
+    # ── Performance metrics (vmanage_performance_pipeline) ─────────────────────
+    # Realtime/high-frequency metric streams use 3-day retention (dashboards
+    # default to Last 24h–7d).  Longer retention is kept for health history,
+    # alerts, audit, and inventory.
+    # vmanage_metrics_timeseries also receives advanced-visibility per-device
+    # session metrics (control connections, OMP peers, BFD, tunnels, TLOC util
+    # summary/detail, orchestrator stats, device system stats).  metric_category
+    # distinguishes rows.
+    - name: vmanage_metrics_timeseries
+      attributes:
+        retention_days: 3
+        unique_keys: ["timeseries_row_key"]
+      autocreate: true
+
+    - name: vmanage_device_health
+      attributes:
+        retention_days: 7
+        unique_keys: ["health_unique_key"]
+      autocreate: true
+
+    - name: vmanage_site_health
+      attributes:
+        retention_days: 30
+        unique_keys: ["site_id", "collection_timestamp"]
+      autocreate: true
+
+    - name: vmanage_site_health_latest
+      attributes:
+        retention_days: 30
+        unique_keys: ["site_id"]
+      autocreate: true
+
+    # vmanage_metrics_snapshot holds snapshot and raw timeseries rows; metric_category
+    # distinguishes: system_aggregation, qos (raw /statistics/qos),
+    # network_status, connectionssummary, hardware_health_latest, alarm_count.
+    # Interface and QoS avg/sum/max aggregation is done in dashboards from raw rows.
+    # AppRoute SLA metrics use vmanage_approute_sla_metrics (raw /statistics/approute).
+    - name: vmanage_metrics_snapshot
+      attributes:
+        retention_days: 3
+        unique_keys: ["snapshot_unique_key"]
+      autocreate: true
+
+    - name: vmanage_system_statistics
+      attributes:
+        retention_days: 3
+        unique_keys: ["system_ip", "entry_time"]
+      autocreate: true
+
+    - name: vmanage_interface_statistics
+      attributes:
+        retention_days: 3
+        unique_keys: ["system_ip", "interface", "entry_time"]
+      autocreate: true
+
+    - name: vmanage_approute_sla_metrics
+      attributes:
+        retention_days: 3
+        unique_keys: ["entry_time", "vdevice_name", "src_ip", "dst_ip"]
+      autocreate: true
+
+    - name: vmanage_approute_sla_metrics_filtered
+      attributes:
+        retention_days: 3
+        unique_keys: ["entry_time", "vdevice_name", "src_ip", "dst_ip"]
+      autocreate: true
+
+    - name: vmanage_devicehealth_latest
+      attributes:
+        retention_days: 30
+        unique_keys: ["system-ip"]
+      autocreate: true
+
+    - name: vmanage_devicehealth_history
+      attributes:
+        retention_days: 90
+        unique_keys: ["system-ip", "collection_timestamp"]
+      autocreate: true
+
+
+    # ── Alerts & Events (vmanage_alerts_pipeline) ──────────────────────────────
+    # /alarms and /event both write here; severity_level is normalised to
+    # severity before write so both types share a common column.
+    - name: vmanage_alerts_events
+      attributes:
+        retention_days: 30
+        unique_keys: ["entry_time", "eventname", "source_ip"]
+      autocreate: true
+    
+    - name: vmanage_audit_events
+      attributes:
+        retention_days: 90
+        unique_keys: ["entry_time", "loguser", "logmessage"]
+      autocreate: true
+
+
+    # ── Advanced Visibility (vmanage_advanced_visibility_pipeline) ─────────────
+    - name: vmanage_dpi_aggregation
+      attributes:
+        retention_days: 3
+        unique_keys: ["dpi_agg_key"]
+      autocreate: true
+     
+
+    # ── Operational / import helpers ───────────────────────────────────────────
+    - name: vmanage_access_verification_status_stream
+      attributes:
+        retention_days: 7
+        unique_keys: ["asset_ip"]
+      autocreate: true
+  
+    - name: vmanage_perf_on_boarded_devices
+      attributes:
+        retention_days: 365
+        unique_keys: ["name"]
+      autocreate: true
+    
+  pipelines:
+    - name: inventory_pipeline
+      version: 2026.06.19.01
+      file: ./artifacts/pipelines/vmanage_inventory_pipeline.txt
+      folder: VmanagePerformance
+      creation_policy: overwrite
+    - name: performance_pipeline
+      version: 2026.06.19.01
+      file: ./artifacts/pipelines/vmanage_performance_pipeline.txt
+      folder: VmanagePerformance
+      creation_policy: overwrite
+    - name: advanced_visibility_pipeline
+      version: 2026.06.19.01
+      file: ./artifacts/pipelines/vmanage_advanced_visibility_pipeline.txt
+      folder: VmanagePerformance
+      creation_policy: overwrite
+    - name: alerts_pipeline
+      version: 2026.06.19.01
+      file: ./artifacts/pipelines/vmanage_alerts_pipeline.txt
+      folder: VmanagePerformance
+      creation_policy: overwrite
+    - name: vmanage_perf_access_verification_status
+      version: 2026.06.19.01
+      file: ./artifacts/pipelines/vmanage_access_verification_status.txt
+      folder: VmanagePerformance
+      creation_policy: overwrite
+    - name: vmanage_perf_import_devices
+      version: 2026.06.19.01
+      file: ./artifacts/pipelines/vmanage_import_devices.txt
+      folder: VmanagePerformance
+      creation_policy: overwrite
+
+  dashboards:
+    - name: vmanage_main_app
+      file: ./artifacts/dashboards/vmanage_main_app.json
+      folder: VmanagePerformance
+      creation_policy: overwrite
+    - name: vmanage_collection_and_access_status
+      file: ./artifacts/dashboards/vmanage_collection_and_access_status.json
+      folder: VmanagePerformance
+      creation_policy: overwrite
+    - name: vmanage_configure_and_manage
+      file: ./artifacts/dashboards/vmanage_configure_and_manage.json
+      folder: VmanagePerformance
+      creation_policy: overwrite
+    - name: vmanage_network_overview
+      file: ./artifacts/dashboards/vmanage_network_overview.json
+      folder: VmanagePerformance
+      creation_policy: overwrite
+    - name: vmanage_device_inventory
+      file: ./artifacts/dashboards/vmanage_device_inventory.json
+      folder: VmanagePerformance
+      creation_policy: overwrite
+    - name: vmanage_performance_sla
+      file: ./artifacts/dashboards/vmanage_performance_sla.json
+      folder: VmanagePerformance
+      creation_policy: overwrite
+    - name: vmanage_alerts_events
+      file: ./artifacts/dashboards/vmanage_alerts_events.json
+      folder: VmanagePerformance
+      creation_policy: overwrite
+    - name: vmanage_topology
+      file: ./artifacts/dashboards/vmanage_topology.json
+      folder: VmanagePerformance
+      creation_policy: overwrite
+    - name: vmanage_topology_drilldown
+      file: ./artifacts/dashboards/vmanage_topology_drilldown.json
+      folder: VmanagePerformance
+      creation_policy: overwrite
+  stacks:
+    - name: vmanage
+      file: ./artifacts/stacks/vmanage.json
+      creation_policy: overwrite
+
+customer_level:
+  launch_dashboard: vmanage_main_app
+  launch_locations:
+    - pstream_name: rda_packs_dynamic_groups_and_pages
+      dashboard_group_name: groupConfigure
+      dashboard_group_label: Configure and Manage
+      dashboard_group_icon: "asset.svg"
+      dashboard_page_name: vmanage_configure_and_manage
+      dashboard_page_label: "vManage Configure and Manage"
+      dashboard_page_icon: "settings.svg"
+    - pstream_name: rda_packs_dynamic_groups_and_pages
+      dashboard_group_name: groupStatus
+      dashboard_group_label: Status
+      dashboard_group_icon: "asset.svg"
+      dashboard_page_name: vmanage_collection_and_access_status
+      dashboard_page_label: vManage Status
+      dashboard_page_icon: "settings.svg"
+    - pstream_name: rda_packs_dynamic_groups_and_pages
+      dashboard_group_name: groupHealth
+      dashboard_group_label: Health
+      dashboard_group_icon: "library.svg"
+      dashboard_page_name: vmanage_network_overview
+      dashboard_page_label: Network Overview
+      dashboard_page_icon: "library.svg"
+    - pstream_name: rda_packs_dynamic_groups_and_pages
+      dashboard_group_name: groupHealth
+      dashboard_group_label: Health
+      dashboard_group_icon: "library.svg"
+      dashboard_page_name: vmanage_alerts_events
+      dashboard_page_label: Alerts and Events
+      dashboard_page_icon: "alert.svg"
+    - pstream_name: rda_packs_dynamic_groups_and_pages
+      dashboard_group_name: groupAssets
+      dashboard_group_label: Assets
+      dashboard_group_icon: "asset.svg"
+      dashboard_page_name: vmanage_device_inventory
+      dashboard_page_label: Device Inventory
+      dashboard_page_icon: "asset.svg"
+    - pstream_name: rda_packs_dynamic_groups_and_pages
+      dashboard_group_name: groupPerformance
+      dashboard_group_label: Performance
+      dashboard_group_icon: "insights.svg"
+      dashboard_page_name: vmanage_performance_sla
+      dashboard_page_label: Performance and SLA
+      dashboard_page_icon: "insights.svg"
+    - pstream_name: rda_packs_dynamic_groups_and_pages
+      dashboard_group_name: groupTopo
+      dashboard_group_label: Topology
+      dashboard_group_icon: ""
+      dashboard_page_name: vmanage_topology
+      dashboard_page_label: SD-WAN Topology
+      dashboard_page_icon: "insights.svg"
+
+  artifacts:
+    blueprints:
+      - name: VManage Service
+        file: ./artifacts/blueprints/vmanage_service.yaml
+        creation_policy: overwrite
+single_tenant:
+  launch_dashboard: vmanage_main_app
+  launch_locations:
+    - pstream_name: rda_packs_dynamic_groups_and_pages
+      dashboard_group_name: groupConfigure
+      dashboard_group_label: Configure and Manage
+      dashboard_group_icon: "asset.svg"
+      dashboard_page_name: vmanage_configure_and_manage
+      dashboard_page_label: "vManage Configure and Manage"
+      dashboard_page_icon: "settings.svg"
+    - pstream_name: rda_packs_dynamic_groups_and_pages
+      dashboard_group_name: groupStatus
+      dashboard_group_label: Status
+      dashboard_group_icon: "asset.svg"
+      dashboard_page_name: vmanage_collection_and_access_status
+      dashboard_page_label: vManage Status
+      dashboard_page_icon: "settings.svg"
+    - pstream_name: rda_packs_dynamic_groups_and_pages
+      dashboard_group_name: groupHealth
+      dashboard_group_label: Health
+      dashboard_group_icon: "library.svg"
+      dashboard_page_name: vmanage_network_overview
+      dashboard_page_label: Network Overview
+      dashboard_page_icon: "library.svg"
+    - pstream_name: rda_packs_dynamic_groups_and_pages
+      dashboard_group_name: groupHealth
+      dashboard_group_label: Health
+      dashboard_group_icon: "library.svg"
+      dashboard_page_name: vmanage_alerts_events
+      dashboard_page_label: Alerts and Events
+      dashboard_page_icon: "alert.svg"
+    - pstream_name: rda_packs_dynamic_groups_and_pages
+      dashboard_group_name: groupAssets
+      dashboard_group_label: Assets
+      dashboard_group_icon: "asset.svg"
+      dashboard_page_name: vmanage_device_inventory
+      dashboard_page_label: Device Inventory
+      dashboard_page_icon: "asset.svg"
+    - pstream_name: rda_packs_dynamic_groups_and_pages
+      dashboard_group_name: groupPerformance
+      dashboard_group_label: Performance
+      dashboard_group_icon: "insights.svg"
+      dashboard_page_name: vmanage_performance_sla
+      dashboard_page_label: Performance and SLA
+      dashboard_page_icon: "insights.svg"
+    - pstream_name: rda_packs_dynamic_groups_and_pages
+      dashboard_group_name: groupTopo
+      dashboard_group_label: Topology
+      dashboard_group_icon: ""
+      dashboard_page_name: vmanage_topology
+      dashboard_page_label: SD-WAN Topology
+      dashboard_page_icon: "insights.svg"
+  artifacts:
+    blueprints:
+      - name: VManage Service Single Tenant
+        file: ./artifacts/blueprints/vmanage_service_single_tenant.yaml
+        creation_policy: overwrite

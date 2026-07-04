@@ -1,0 +1,141 @@
+%% stream = no and limit = 0
+%% template_type="jinja"
+%% import_src_type = "network_device"
+%%start_inline_object name="context_dynamic_form" and type="data" and format="json"
+{
+    "formFieldList": [
+        {
+            "fieldId": "customer_tag",
+            "label": "Tag of the customer",
+            "required": false,
+            "dataType": "string"
+        }
+    ]
+}
+%%end_inline_object
+
+{% if customer_tag %} 
+   {% set customer_id = customer_id %}
+   {% set customer_tag = customer_tag %}
+   {% set customerTag = customer_tag %}
+{% elif customerTag %} 
+   {% set customer_id = customer_id %}
+   {% set customer_tag = customerTag %}
+{% else %}
+   {% set customer_id = '' %}
+   {% set customer_tag = '' %}
+{% endif %}  
+
+
+  
+
+--> @c:new-block
+       --> @dm:empty
+      {% if customer_tag %}
+         --> #dm:query-persistent-stream type in ['network_device'] and customerTag contains '{{customer_tag}}'  with-input name = 'rda_secrets_meta' and limit= 0
+      {% else %}
+         --> #dm:query-persistent-stream type in ['network_device'] and customerTag is empty with-input name = 'rda_secrets_meta' and limit= 0
+      {% endif %}   
+      --> @dm:rename-columns network_bot_name = 'name'
+      --> @dm:eval customer_id =  "'{{ customer_id }}'"
+    --> @dm:eval customer_tag =  "'{{ customer_tag }}'"
+    --> @dm:eval key="'key'"
+    --> @dm:save name = 'temp-network-sources'
+
+--> @exec:get-input
+    --> @dm:save name="temp-save-single-ip-data-input"
+    ##--> @dm:save name="test-save-single-ip-data-input"
+
+## Load inventory before run-commands (device metadata for enrichment / credentials).
+--> @c:data-loop dataset="temp-save-single-ip-data-input" and columns="source_ip"
+    --> @dm:empty
+    {% if customer_tag %}  
+        --> #dm:query-persistent-stream  device_ip is '$source_ip' and (customer_tag is '{{customer_tag}}') with-input name = "network_device_inventory" & limit = "0"
+    {% else %}
+        --> #dm:query-persistent-stream device_ip is '$source_ip' with-input name = "network_device_inventory" & limit = "0"
+    {% endif %}
+    --> @dm:dedup columns = 'device_ip'
+    --> @dm:copy-columns from="device_ip" and to="source_ip"
+    --> @dm:save name="temp-backup-ip"
+
+
+## create the profile_data for config backup (one TextFSM for IOS / IOS XR / NX-OS / similar)
+--> @c:new-block
+    --> @dm:empty
+    --> @dm:addrow profile_name = 'show_run_config' and
+            command = 'show running-config' and
+            textfsm_content = 'objectstore/cisco_show_running_config_unified.textfsm' and device_type="cisco_ios"
+    --> @dm:save name="temp-common_profile_dataset"
+
+
+--> @c:new-block
+    --> @dm:recall name="temp-common_profile_dataset" and return_empty = "yes"
+    --> @dm:eval key="'key'"
+    --> @dm:implode key_columns="key" and merge_columns = "profile_name"
+    --> @dm:save name="temp-common_profile_names"
+    ##--> @dm:save name="test-common_profile_names"
+
+
+--> @c:new-block
+    --> @dm:recall name="temp-backup-ip" and return_empty = "yes"
+    --> @dm:eval key="'key'"
+    --> @dm:enrich dict='temp-network-sources' and dict_key_cols='key' and src_key_cols='key' and enrich_cols="network_bot_name" and replace_values="yes" & return_empty_dict = "yes" & return_empty_cols = "yes" &  dedup_dict = "no"
+    --> @dm:enrich dict='temp-common_profile_names' and dict_key_cols='key' and src_key_cols='key' and enrich_cols="profile_name" and enrich_cols_as = "profiles" & return_empty_dict = "yes" & return_empty_cols = "yes"
+    --> @dm:eval credentials_regex="network_bot_name + '.*'"
+    --> @dm:save name="temp-common-discovery"
+    ##--> @dm:save name="test-common-discovery"
+
+
+--> @c:new-block
+    --> @dm:empty
+    --> @c:data-loop name = "network-bot-loop" & dataset = "temp-network-sources" & columns = "network_bot_name"
+        --> @dm:recall name="temp-common-discovery" and return_empty= "yes"
+    --> @dm:skip-block-if-shape row_count = 0
+        --> @$network_bot_name:run-commands ip_column_name = 'device_ip' and
+                profile_dataset_name = 'temp-common_profile_dataset' and
+                profile_column_name = 'profiles' and
+                credentials_regex_column = 'credentials_regex' and
+                devices_details_dataset = 'temp-backup-ip' and
+                return_type = "dataset" and
+                return_raw="yes"
+    ##--> @dm:save name="test-ssh-run-cmd-data"
+    --> @dm:eval config_id="uuid()"
+    --> @dm:eval backup_time="now()"
+    --> @dm:eval golden_config="'No'"
+    --> @dm:eval backup_mode="'Manual'"
+    --> @dm:change-time-format columns='backup_time' and from_format='datetimestr' and to_format='%Y-%m-%dT%H:%M:%S'
+    ##--> @dm:save name="test-data11"
+    ##--> @dm:to-type columns = "condition_matched" & type = "str"
+    ##--> *dm:filter condition_matched in ['True','true','TRUE']
+    --> @dm:save name="temp-data" & append = "yes"
+     
+ 
+--> @c:new-block
+    --> @dm:recall name="temp-data" and return_empty = "yes"
+    ##--> @dm:save name = 'test-data-all'
+    --> @dm:add-missing-columns columns = 'raw_output' & value = ""
+    --> @dm:to-type columns = "raw_output" & type = "str"
+    --> @dm:eval status = "'Failed' if (raw_output in ['None','','nan']) else 'Success'"
+    ##--> @dm:eval status = "'Failed' if (raw_output is 'None' or raw_output is '' or raw_output is 'nan') else 'Success'" 
+    --> @dm:dedup columns = 'source_ip,status'
+    --> @dm:save name="temp-status"
+    -->*dm:filter status is 'Success'
+    --> @dm:save name="temp-data-status"
+    --> *exec:if-shape num_rows = 0
+        --> @dm:recall name="temp-status"
+        -->*dm:filter status is 'Failed'
+        --> @dm:save name="temp-data-status"
+    --> @exec:end-if 
+    --> @dm:recall name="temp-data-status"
+    ##--> @dm:save name="test-data-status"
+    --> @dm:add-missing-columns columns = 'config_change_time,device_user,config_size' & value = ""
+    ##--> @dm:add-missing-columns columns = 'config_size' & value = "Not Available"
+    --> @dm:extract columns = 'raw_output' & expr = "(?is).*?Last\s+configuration\s+change\s+at\s+(?P<config_change_time>[^\r\n]+?)\s+by\s+(?P<device_user>\S+)"
+    --> @dm:extract columns = 'raw_output' & expr = "(?is).*?Current\s+configuration\s*:\s*(?P<config_size>\d+)\s*bytes"
+    --> @dm:to-type columns = "config_size" & type = "int"
+    --> @dm:eval config_size = "config_size if config_size else len(raw_output)"
+    --> @dm:change-time-format columns='config_change_time' and from_format='datetimestr' and to_format='%Y-%m-%dT%H:%M:%S'
+    --> @dm:enrich dict	 = "temp-backup-ip" and src_key_cols = "source_ip" and dict_key_cols	="device_ip" and enrich_cols	="device_hostname_short,customer_id,customer_tag,device_fw_type" & enrich_cols_as = "hostname,customer_id,customer_tag,device_fw_type" & return_empty_dict = "yes" & return_empty_cols = "yes"
+    --> @rn:write-stream name="syslog-config-backup-stream"
+   
+

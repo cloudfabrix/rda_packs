@@ -1,0 +1,118 @@
+{
+    "name": "device_metric_collection_health_drilldown",
+    "description": "Device_Metric_Collection_Health",
+    "label": "Device_Metric_Collection_Health",
+    "enabled": false,
+    "dashboard_type": "template",
+    "dashboard_style": "auto",
+    "dashboard_folder": "Nework Device",
+    "context_label_id": "target_ip",
+    "live_edit": true,
+    "template_variables": {
+        "DEVICE_IP": {
+            "contextId": "target_ip"
+        },
+        "DEVICE_VENDOR": {
+            "contextId": "device_vendor"
+        },
+        "DEVICE_NAME": {
+            "contextId": "sys_name"
+        }
+    },
+    "dashboard_filters": {
+        "time_filter": true,
+        "extra_filter": "target_ip is '{{DEVICE_IP}}'",
+        "default_time_filter_labels": [
+            "Last 24 hours"
+        ],
+        "columns_filter": [],
+        "group_filters": []
+    },
+    "dashboard_sections": [
+        {
+            "title": "Collection Health",
+            "show_filter": true,
+            "widgets": [
+                {
+                    "title": "Device Info",
+                    "widget_type": "label",
+                    "min_width": 12,
+                    "max_width": 12,
+                    "height": 1,
+                    "label": "<h4 style='margin:0;padding:10px;background:#f5f5f5;color:#0066ff;border-radius:4px;text-align:center'>Device Name: {{DEVICE_NAME}} | IP Address: {{DEVICE_IP}} | Vendor: {{DEVICE_VENDOR}}</h4>",
+                    "widget_id": "2bb12570"
+                },
+                {
+                    "title": "Device Metric Collection Health",
+                    "widget_type": "tabular",
+                    "stream": "rda_snmp_metrics",
+                    "ts_column": "timestamp",
+                    "columns": {
+                        "target_ip": "Device IP",
+                        "collection": "Metric Name",
+                        "Last_Collection": "Last Collection"
+                    },
+                    "sorting": [
+                        {
+                            "column": "collection_delay",
+                            "order": "desc"
+                        }
+                    ],
+                    "pivot": {
+                        "pivot_type": "advanced",
+                        "group_by": [
+                            "target_ip",
+                            "sys_name",
+                            "collection"
+                        ],
+                        "series": [
+                            {
+                                "column": "timestamp",
+                                "agg": "max",
+                                "type": "date",
+                                "label": "Last_Collection"
+                            }
+                        ]
+                    },
+                    "custom_columns": [
+                        {
+                            "id": "last_collection_time",
+                            "label": "Last Collection",
+                            "expr": "Last_Collection",
+                            "type": "DYNAMIC_HTML",
+                            "htmlTemplate": "{%raw%}{{ new Date(Number(rowData.last_collection_time)).toLocaleString() }}{%endraw%}",
+                            "visible": true
+                        },
+                        {
+                            "id": "current_time",
+                            "label": "Current Time",
+                            "expr": "now()",
+                            "type": "DYNAMIC_HTML",
+                            "htmlTemplate": "{%raw%}{{ new Date().toLocaleString() }}{%endraw%}",
+                            "visible": true
+                        },
+                        {
+                            "id": "collection_delay",
+                            "label": "Delay (Minutes)",
+                            "type": "DYNAMIC_HTML",
+                            "htmlTemplate": "{%raw%}{{ Math.floor((Date.now() - Number(rowData.last_collection_time)) / 60000) }}{%endraw%}",
+                            "visible": true
+                        },
+                        {
+                            "id": "collection_status",
+                            "label": "Collection Status",
+                            "type": "DYNAMIC_HTML",
+                            "htmlTemplate": "{%raw%}<span :style=\"{padding:'4px 10px',borderRadius:'12px',color:'#fff',fontSize:'11px',fontWeight:'500',backgroundColor:(Math.floor((Date.now() - Number(rowData.last_collection_time)) / 60000)<=5?'#2ecc71':Math.floor((Date.now() - Number(rowData.last_collection_time)) / 60000)<=20?'#f39c12':'#e74c3c')} \">{{Math.floor((Date.now() - Number(rowData.last_collection_time)) / 60000)<=10?'Healthy':Math.floor((Date.now() - Number(rowData.last_collection_time)) / 60000)<=10?'Delayed':'Missing'}}</span>{%endraw%}",
+                            "visible": true
+                        }
+                    ],
+                    "hide_columns": [
+                        "Last_Collection"
+                    ],
+                    "widget_id": "02b42bb5"
+                }
+            ]
+        }
+    ],
+    "saved_time": "2026-03-06T09:36:15.441458"
+}

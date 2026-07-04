@@ -1,0 +1,187 @@
+name: Cisco Meraki Splunk Integration
+label: Cisco Meraki Splunk Integration
+scope: system
+version: 1.0.0
+folder: /collection/cisco_meraki_splunk_integration_pack
+published_date: 2026-06-18
+publisher: Fabrix.ai
+description: 
+   md: "./description.md"
+type: collection
+
+requires:
+  - name: Fabrix Inventory Collection Base Pack
+    version: ">=7.0.2"
+  - name: Workflow Base
+    version: ">=1.0.0"
+  - name: Cisco Meraki
+    version: ">=10.0.2"
+  
+fabric_services:
+ - name: worker
+   version: ">=8.2.1"
+ - name: api-server
+   version: ">=8.2.1"
+
+artifacts:
+  
+  dashboards:
+
+    - name: meraki_integration_main_app
+      file: ./artifacts/dashboards/meraki_integration_main_app.json
+      folder: MerakiIntegrationPack
+      creation_policy: overwrite
+
+    - name: meraki_integration_management
+      file: ./artifacts/dashboards/meraki_integration_management.json
+      folder: MerakiIntegrationPack
+      creation_policy: overwrite
+
+    - name: meraki_workflow_page
+      file: ./artifacts/dashboards/meraki_workflow_page.json
+      folder: MerakiIntegrationPack
+      creation_policy: overwrite
+
+    - name: continuous_integration
+      file: ./artifacts/dashboards/continuous_integration.json
+      folder: MerakiIntegrationPack
+      creation_policy: overwrite
+
+
+  pstreams:
+
+    - name: meraki_appbindings_stats_to_stream
+      autocreate: true
+
+
+ 
+  pipelines:
+    - name: meraki_data_ingestion_to_splunk_index_v2
+      version: 2026.01.21.1
+      file: ./artifacts/pipelines/meraki_data_ingestion_to_splunk_index_v2.txt
+      folder: MerakiIntegrationPack
+      skip_validation: true
+      creation_policy: overwrite
+    
+    - name: meraki_data_ingestion_to_splunk_index_query_v2
+      version: 2026.01.21.1
+      file: ./artifacts/pipelines/meraki_data_ingestion_to_splunk_index_query_v2.txt
+      folder: MerakiIntegrationPack
+      skip_validation: true
+      creation_policy: overwrite
+
+    - name: meraki_data_ingestion_to_splunk_index_bkmrk2
+      version: 2026.01.21.1
+      file: ./artifacts/pipelines/meraki_data_ingestion_to_splunk_index_bkmrk2.txt
+      folder: MerakiIntegrationPack
+      skip_validation: true
+      creation_policy: overwrite
+
+    ##- name: meraki_ingest_events_data_to_splunk
+    ##  version: 2026.01.21.1
+    ##  file: ./artifacts/pipelines/meraki_ingest_events_data_to_splunk.txt
+    ##  folder: MerakiIntegrationPack
+    ##  skip_validation: true
+    ##- name: meraki_ingest_metrics_data_to_splunk
+    ##  version: 2026.01.21.1
+    ##  file: ./artifacts/pipelines/meraki_ingest_metrics_data_to_splunk.txt
+    ##  folder: MerakiIntegrationPack
+    ##  skip_validation: true
+    ##- name: meraki_process_events_and_call_splunk_ingestion
+    ##  version: 2026.01.21.1
+    ##  file: ./artifacts/pipelines/meraki_process_events_and_call_splunk_ingestion.txt
+    ##  folder: MerakiIntegrationPack
+    ##  skip_validation: true
+    ##- name: meraki_process_metrics_and_call_splunk_ingestion
+    ##  version: 2026.01.21.1
+    ##  file: ./artifacts/pipelines/meraki_process_metrics_and_call_splunk_ingestion.txt
+    ##  folder: MerakiIntegrationPack
+    ##  skip_validation: true
+    
+  datasets: 
+    - name: reference_list_v2
+      data_file: ./data/reference_list_v2.csv
+      folder: MerakiIntegrationPack
+      remove_on_deactivation: true
+    
+
+  workflows:
+    - name: meraki-workflow
+      file: ./artifacts/workflows/meraki-workflow.json
+  
+  dynamic_lovs:
+  - name: Meraki Splunk Credentials
+    file: ./artifacts/DynamicLov/Meraki Splunk Credentials.json
+  
+  
+
+customer_level:
+
+  launch_locations:
+    
+    - pstream_name: rda_packs_dynamic_groups_and_pages
+      dashboard_group_name: groupDiscovery
+      dashboard_group_label: Onboarding
+      dashboard_group_icon: "library.svg"
+      dashboard_page_name: meraki_workflow_page
+      dashboard_page_label: Meraki workflow
+      dashboard_page_icon: "library.svg"
+    - pstream_name: rda_packs_dynamic_groups_and_pages
+      dashboard_group_name: groupDiscovery
+      dashboard_group_label: Onboarding
+      dashboard_group_icon: "library.svg"
+      dashboard_page_name: continuous_integration
+      dashboard_page_label: Continuous Integration
+      dashboard_page_icon: "library.svg"
+    - pstream_name: rda_packs_dynamic_groups_and_pages
+      dashboard_group_name: groupDiscovery
+      dashboard_group_label: Onboarding
+      dashboard_group_icon: "library.svg"
+      dashboard_page_name: meraki_integration_management
+      dashboard_page_label: Meraki Integration Management
+      dashboard_page_icon: "library.svg"
+    
+    
+  
+  artifacts:
+    blueprints:
+      - name: meraki_splunk_continous_ingestion_v1
+        file: ./artifacts/blueprints/meraki_splunk_continous_ingestion_v1.yaml
+        creation_policy: overwrite
+
+single_tenant:
+
+  launch_dashboard: meraki_integration_main_app
+  launch_locations:
+    - pstream_name: rda_packs_dynamic_groups_and_pages
+      dashboard_group_name: groupConfigure
+      dashboard_group_label: Configure and Manage
+      dashboard_group_icon: "library.svg"
+      dashboard_page_name: meraki_workflow_page
+      dashboard_page_label: Meraki workflow
+      dashboard_page_icon: "library.svg"
+    - pstream_name: rda_packs_dynamic_groups_and_pages
+      dashboard_group_name: groupConfigure
+      dashboard_group_label: Configure and Manage
+      dashboard_group_icon: "library.svg"
+      dashboard_page_name: continuous_integration
+      dashboard_page_label: Continuous Integration
+      dashboard_page_icon: "library.svg"
+    - pstream_name: rda_packs_dynamic_groups_and_pages
+      dashboard_group_name: groupStatus
+      dashboard_group_label: Status
+      dashboard_group_icon: "library.svg"
+      dashboard_page_name: meraki_integration_management
+      dashboard_page_label: Meraki Integration Management
+      dashboard_page_icon: "library.svg"
+    
+    
+  artifacts:
+    
+    blueprints:
+      - name: meraki_splunk_continous_ingestion_v1
+        file: ./artifacts/blueprints/meraki_splunk_continous_ingestion_v1_single_tenant.yaml
+        creation_policy: overwrite
+  
+
+

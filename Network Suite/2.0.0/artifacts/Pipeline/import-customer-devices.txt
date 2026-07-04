@@ -1,0 +1,86 @@
+%% stream = no and limit = 0
+
+@exec:get-input
+    --> @dm:save name ="temp-input-dataset"
+    --> @dm:save name="network-import-devices"
+
+--> @c:new-block
+    --> @dm:recall name="network-import-devices" and return_empty = "yes"
+    --> @dm:replace-data columns="fileUpload" and expr="'" and replace='"'
+    --> @dm:eval replace = "'True' if str(replace).lower() in ['true', '1', 'yes'] else 'False'"
+    --> @dm:explode-json column="fileUpload"
+    --> @dm:save name ="temp-input-dataset"
+
+--> @c:data-loop dataset="temp-input-dataset" and columns="bucketName,objectName" and return_empty = "yes"
+    --> @dm:recall name="temp-input-dataset" and return_empty = "yes"
+    --> @dm:skip-block-if-shape row_count=0
+    --> @dm:get-from-location path="$bucketName/$objectName"
+    --> @dm:save name="temp-uploaded-file-data"
+    --> @dm:check-columns must_contain="type" and action="fail"
+    --> *exec:if-condition type = 'discovery'
+       --> @dm:check-columns must_contain="device_ip,discovery_scope" and action="fail"
+    --> @exec:end-if
+    --> *exec:if-condition type = 'snmp_metrics'
+       --> @dm:check-columns must_contain="device_ip" and action="fail"
+    --> @exec:end-if
+    --> *exec:if-condition type = 'icmp_metrics'
+       --> @dm:check-columns must_contain="device_ip" and action="fail"
+    --> @exec:end-if
+    --> *exec:if-condition type = 'ssl_metrics'
+       --> @dm:check-columns must_contain="url_field" and action="fail"
+    --> @exec:end-if
+    --> *exec:if-condition type = 'port_metrics'
+       --> @dm:check-columns must_contain="url_field,protocol" and action="fail"
+    --> @exec:end-if
+    --> @dm:recall name="temp-input-dataset" and return_empty = "yes"
+    --> *exec:if-condition replace is "True"
+       --> @dm:recall name="temp-uploaded-file-data" and return_empty = "yes"
+       --> *exec:if-condition type = 'discovery' or type = 'snmp_metrics' or type = 'icmp_metrics' or type = 'ssl_metrics' or type = 'port_metrics'
+          --> @dm:empty
+          --> #dm:pstream-delete-data-by-query type is not null with-input name = "discovery" & limit = 0
+       --> @exec:end-if
+    --> @exec:end-if
+    --> @dm:recall name="temp-uploaded-file-data"
+    --> *exec:if-condition type = 'discovery'
+       --> @dm:explode column="device_ip"
+       --> @dm:eval unique_id = "str(device_ip) + '_' + str(type)"
+       --> @dm:eval collection_scope="'yes'"
+       --> @dm:add-missing-columns columns = 'cdp_field,lldp_field,ospf_field,bgp_field,isis_field' & value = 'yes'
+       --> @dm:selectcolumns include = "^(device_ip|discovery_scope|cdp_field|lldp_field|ospf_field|bgp_field|isis_field|unique_id|type|collection_scope)$"
+       --> @dm:fixnull columns="cdp_field,lldp_field,ospf_field,bgp_field,isis_field" and value="yes" and apply_for_empty="yes"
+       --> *dm:filter device_ip is not null
+       --> @rn:write-stream name="discovery"
+    --> @exec:end-if
+    --> *exec:if-condition type = 'snmp_metrics'
+       --> @dm:explode column="device_ip"
+       --> @dm:eval unique_id = "str(device_ip) + '_' + str(type)"
+       --> @dm:eval collection_scope="'yes'"
+       --> @dm:selectcolumns include = "^(device_ip|type|unique_id|collection_scope)$"
+       --> *dm:filter device_ip is not null
+       --> @rn:write-stream name="discovery"
+    --> @exec:end-if
+    --> *exec:if-condition type = 'icmp_metrics'
+       --> @dm:explode column="device_ip"
+       --> @dm:eval unique_id = "str(device_ip) + '_' + str(type)"
+       --> @dm:eval collection_scope="'yes'"
+       --> @dm:selectcolumns include = "^(device_ip|type|unique_id|collection_scope)$"
+       --> *dm:filter device_ip is not null
+       --> @rn:write-stream name="discovery"
+    --> @exec:end-if
+    --> *exec:if-condition type = 'ssl_metrics'
+       --> @dm:explode column="url_field"
+       --> @dm:eval unique_id = "str(url_field) + '_' + str(type)"
+       --> @dm:eval collection_scope="'yes'"
+       --> @dm:selectcolumns include = "^(url_field|type|unique_id|collection_scope)$"
+       --> *dm:filter url_field is not null
+       --> @rn:write-stream name="discovery"
+    --> @exec:end-if
+    --> *exec:if-condition type = 'port_metrics'
+       --> @dm:explode column="url_field"
+       --> @dm:eval unique_id = "str(url_field) + '_' + str(type) + '_' + str(protocol)"
+       --> @dm:eval collection_scope="'yes'"
+       --> @dm:selectcolumns include = "^(url_field|type|protocol|unique_id|collection_scope)$"
+       --> *dm:filter url_field is not null and protocol is not null
+       --> @rn:write-stream name="discovery"
+    --> @exec:end-if
+

@@ -1,0 +1,49 @@
+{
+    "type": "log",
+    "enabled": true,
+    "name": "interface_oper_status_snmp_metric",
+    "schedule": {
+        "minutes": 15
+    },
+    "data": {
+        "stream": "rda_snmp_metrics",
+        "groupby": [
+            "target_ip",
+            "interface_description",
+            "oper_status_label",
+            "name"
+        ],
+        "query": "collection = 'interface' and oper_status_label is not empty and customer_tag is '$PKG_CONTEXT_CUSTOMER_TAG'"
+    },
+    "actions": [
+        {
+            "state": "OPEN",
+            "extra_query": "oper_status_label = 'Down'",
+            "attributes": {
+                "severity": "CRITICAL",
+                "metric_name": "oper_status",
+                "metric_value_field": "oper_status_label"
+            },
+            "notification": [
+                {
+                    "channel": "${PKG_CONTEXT_CUSTOMER_TAG}_telegraf_snmp_metrics"
+                }
+            ]
+        },
+        {
+            "state": "CLEAR",
+            "extra_query": "oper_status_label = 'Up'",
+            "attributes": {
+                "severity": "INFO",
+                "metric_name": "oper_status",
+                "metric_value_field": "oper_status_label"
+            },
+            "notification": [
+                {
+                    "channel": "${PKG_CONTEXT_CUSTOMER_TAG}_telegraf_snmp_metrics"
+                }
+            ]
+        }
+    ],
+    "saved_time": "2026-03-10T02:46:05.261920"
+}

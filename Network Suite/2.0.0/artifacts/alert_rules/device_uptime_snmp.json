@@ -1,0 +1,53 @@
+{
+    "type": "log",
+    "name": "device_uptime_snmp",
+    "description": "Device Uptime Monitoring CFX",
+    "enabled": false,
+    "schedule": {
+        "minutes": 5
+    },
+    "data": {
+        "stream": "rda_snmp_metrics",
+        "query": "name == 'uptime'",
+        "unique_keys": [
+            "target_ip",
+            "name"
+        ],
+        "groupby": [
+            "target_ip",
+            "name"
+        ],
+        "additional_columns": [
+            "device_hostname",
+            "device_model",
+            "device_vendor",
+            "uptime_seconds",
+            "sys_name"
+        ],
+        "custom_unique_keys": [],
+        "data_transformations": []
+    },
+    "actions": [
+        {
+            "state": "OPEN",
+            "extra_query": "uptime_seconds < 7200",
+            "attributes": {
+                "severity": "CRITICAL",
+                "metric_name": "uptime",
+                "alert_message": "Device uptime detected on {{sys_name}} ({{target_ip}}), less than uptime={{uptime_seconds}} seconds"
+            },
+            "notification_profile": "snmp_metrics_notification_profile"
+        },
+        {
+            "state": "CLEAR",
+            "extra_query": "uptime_seconds >= 7200",
+            "attributes": {
+                "severity": "INFO",
+                "metric_name": "uptime",
+                "alert_message": "Device uptime detected on {{sys_name}} ({{target_ip}}), greater than uptime={{uptime_seconds}} seconds"
+            },
+            "notification_profile": "snmp_metrics_notification_profile"
+        }
+    ],
+    "saved_time": "2026-04-16T09:10:16.685691"
+}

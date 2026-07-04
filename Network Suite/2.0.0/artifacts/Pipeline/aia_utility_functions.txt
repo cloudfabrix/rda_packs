@@ -1,0 +1,251 @@
+%% stream = no and limit = 0
+
+## Generate Bucket IDs for Unique IDs
+## parent_asset_id : Generate hash Id based on Parent_SN to populate parent_asset_id
+@c:flex-block
+    --> @dm:empty
+    --> @exec:define-function name= "get_parent_chassis_from_pstream"
+       --> @dm:empty
+       --> #dm:query-persistent-stream asset_object = 'Chassis' and is_parent = 'Yes'
+               GET created_time,last_updated_time,__state_updated_time,first_seen,serial_number,parent_serial_number,management_ip,unique_id,asset_status,asset_mode
+               with-input name = 'network-devices-inventory' &
+               max_rows = 10000 &
+               limit = 0 &
+               skip_error = 'yes'
+    --> @exec:end-function
+
+--> @c:flex-block
+    --> @dm:empty
+    --> @exec:define-function name= "generate_buckets"
+       --> @dm:save name="temp-input_ds_to_generate_bucket_id"
+       --> @dm:selectcolumns include="parent_serial_number"
+       --> @dm:copy-columns from = "parent_serial_number" and to = "parent_identifier" and func = "strip"
+       --> @dm:add-checksum checksum_type="rows-only" and row_checksum_column="parent_identifier" and key="yes"
+       ## Example: hash="abc123def456..." -> hexa_tail="f456"
+       ## If hash is shorter than 4 chars, default to '0000'
+       --> @dm:eval hexa_tail = "parent_identifier[-4:] if len(parent_identifier) >= 4 else '0000'"
+       ## Example: hexa_tail="f456" -> hexa_int=62550
+       --> @dm:eval hexa_int = "int(hexa_tail, 16)"
+       ## Result is always between 0 and 15
+       ## Example: hexa_int=62550 -> bucket_id=62550%16=6
+       --> @dm:eval bucket_id = "hexa_int % int(16)"
+       ## Save the bucket ID mapping (parent_serial_number -> bucket_id, parent_identifier)
+       --> @dm:save name="temp-unique_id_with_bucket_id"
+       --> @dm:recall name="temp-input_ds_to_generate_bucket_id"
+       ## Enrich the original dataset with bucket_id and parent_identifier columns
+       ## Match on parent_serial_number to add bucket_id and parent_identifier to each row
+       --> @dm:enrich dict="temp-unique_id_with_bucket_id" and
+               src_key_cols="parent_serial_number" and
+               dict_key_cols="parent_serial_number" and
+               enrich_cols="bucket_id,parent_identifier"
+    --> @exec:end-function
+
+## Function: ignore_assets_in_states
+## Purpose: Define a list of asset states that should be excluded from processing
+## This function creates a configuration table of asset states with their exclusion rules
+## Returns only the states that have enabled='true' (i.e., states that should be ignored)
+## 
+## Configuration:
+## - OFFLINE in MANUAL mode: Enabled (ignore these assets)
+## - MAINTENANCE in MANUAL mode: Enabled (ignore these assets)
+## - DECOMMISSION in MANUAL mode: Enabled (ignore these assets)
+## - DECOMMISSION in AUTO mode: Disabled (do NOT ignore these assets)
+--> @c:flex-block
+    --> @dm:empty
+    --> @exec:define-function name= "ignore_assets_in_states"
+       --> @dm:empty
+       ## Add rule: OFFLINE state in MANUAL mode should be ignored
+       --> @dm:addrow asset_status='OFFLINE' and enabled='true' and asset_mode='MANUAL'
+       ## Add rule: MAINTENANCE state in MANUAL mode should be ignored
+       --> @dm:addrow asset_status='MAINTENANCE' and enabled='true' and asset_mode='MANUAL'
+       ## Add rule: DECOMMISSION state in MANUAL mode should be ignored
+       --> @dm:addrow asset_status='DECOMMISSION' and enabled='true' and asset_mode='MANUAL'
+       ## Add rule: DECOMMISSION state in AUTO mode should NOT be ignored (enabled='false')
+       ## This allows AUTO-decommissioned assets to be processed
+       --> @dm:addrow asset_status='DECOMMISSION' and enabled='false' and asset_mode='AUTO'
+    --> @exec:end-function
+
+## Function: exclude_assets_by_state
+## Purpose: Filter out assets that should be excluded based on their state and mode
+## This function processes incoming assets, identifies which ones should be ignored based on
+## state exclusion rules, and writes only the valid assets to the persistent stream
+## 
+## Flow:
+## 1. Validate input is not empty
+## 2. Separate stream assets (existing in database) from new assets to process
+## 3. Get exclusion rules for asset states
+## 4. Match existing stream assets against exclusion rules to identify ignored assets
+## 5. Remove ignored assets from the new asset dataset
+## 6. Write remaining assets to the persistent stream
+--> @c:flex-block
+    --> @dm:empty
+    --> @exec:define-function name= "exclude_assets_by_state"
+       --> @dm:save name="temp-func_input"
+       --> *exec:if-shape num_rows = 0
+          --> @exec:return-function
+       --> @exec:end-if
+       ## STEP 1: Separate Stream Assets from New Assets
+       ## Get the parent assets data that was fetched from stream and passed to this block
+       ## These are existing assets already in the persistent stream (marked with is_stream_asset='yes')
+       ## This data is used to check which existing assets should be ignored
+       --> @dm:save name="temp-db_assets_data"
+       ## STEP 2: Get Asset State Exclusion Rules
+       ## Invoke the ignore_assets_in_states function to get the list of states/modes to ignore
+       --> @exec:call-function name = "ignore_assets_in_states"
+       ## Filter to return only enabled exclusion rules
+       ## This returns the list of state/mode combinations that should trigger asset exclusion
+       --> *dm:filter enabled is 'true'
+       --> @dm:save name="temp-ignore_asset_states"
+       ## STEP 3: Identify Assets to Ignore
+       ## Match existing stream assets against exclusion rules to find which ones should be ignored
+       ## Load the exclusion rules (only enabled rules)
+       ## Enrich stream assets with unique_id if they match exclusion rules
+       ## Match on asset_status and asset_mode to identify ignored assets
+       ## This will add unique_id column only for assets that match exclusion criteria
+       --> @dm:enrich dict="temp-db_assets_data" and
+               src_key_cols="asset_status,asset_mode" and
+               dict_key_cols="asset_status,asset_mode" and
+               enrich_cols="unique_id,parent_serial_number" and
+               dedup_dict="no"
+       ## Filter to get only assets that matched exclusion rules (have unique_id populated)
+       --> *dm:filter unique_id is not null
+       ## Mark these assets as matched (will be ignored)
+       --> @dm:eval matched='"yes"'
+       ## Select only unique_id and matched columns to create ignored assets list
+       --> @dm:selectcolumns include='unique_id|parent_serial_number|matched'
+       --> @dm:save name="temp-ignored_assets"
+    --> @exec:end-function
+
+## down_ports_categorization and up_ports_categorization computation
+--> @c:flex-block
+    --> @dm:empty
+    --> @exec:define-function name= "port_count_categorization"
+       --> @dm:save name="temp-chassis_ports_data"
+       --> @dm:add-missing-columns columns="down_ports_categorization,up_ports_categorization"
+       --> @dm:to-type columns="total_down_ports,total_up_ports" and type="int"
+       --> @dm:fixnull columns="down_ports_categorization,up_ports_categorization" and value="0" and apply_for_empty="yes"
+       --> @cfxaia:conditional-statement condition_column="total_down_ports" and operator=">=" and check_value="yes" and value="0" and return_if="yes" and return_else="no" and to_column="flag0"
+       --> @cfxaia:conditional-statement condition_column="total_down_ports" and operator="<=" and check_value="yes" and value="3" and return_if="yes" and to_column="flag3" and return_else="no"
+       --> @cfxaia:conditional-statement condition_column="total_down_ports" and operator=">=" and check_value="yes" and value="9" and return_if="yes" and to_column="flag9" and return_else="no"
+       --> @cfxaia:conditional-statement condition_column="total_down_ports" and operator=">=" and check_value="yes" and value="4" and return_if="yes" and to_column="flag4" and return_else="no"
+       --> @cfxaia:conditional-statement condition_column="total_down_ports" and operator="<=" and check_value="yes" and value="8" and return_if="yes" and to_column="flag8" and return_else="no"
+       --> @cfxaia:conditional-statement condition_column="flag0,flag3" and operator="=" and check_value="yes" and value="yes,yes" and return_if="0-3" and to_column="down_ports_categorization" and return_else="down_ports_categorization"
+       --> @cfxaia:conditional-statement condition_column="flag9" and operator="=" and check_value="yes" and value="yes" and return_if="9+" and to_column="down_ports_categorization" and return_else="down_ports_categorization"
+       --> @cfxaia:conditional-statement condition_column="flag4,flag8" and operator="=" and check_value="yes" and value="yes,yes" and return_if="4-8" and to_column="down_ports_categorization" and return_else="down_ports_categorization"
+       --> @dm:selectcolumns exclude="flag"
+       ## up_ports_categorization computation
+       --> @cfxaia:conditional-statement condition_column="total_up_ports" and operator="=" and check_value="yes" and value="0" and return_if="total_up_ports" and to_column="up_ports_categorization" and return_else="up_ports_categorization"
+       --> @cfxaia:conditional-statement condition_column="total_up_ports" and operator=">=" and check_value="yes" and value="6" and return_if="6+" and to_column="up_ports_categorization" and return_else="up_ports_categorization"
+       --> @cfxaia:conditional-statement condition_column="total_up_ports" and operator=">=" and check_value="yes" and value="1" and return_if="yes" and to_column="flag1" and return_else="no"
+       --> @cfxaia:conditional-statement condition_column="total_up_ports" and operator="<=" and check_value="yes" and value="5" and return_if="yes" and to_column="flag5" and return_else="no"
+       --> @cfxaia:conditional-statement condition_column="flag1,flag5" and operator="=" and check_value="yes" and value="yes,yes" and return_if="1-5" and to_column="up_ports_categorization" and return_else="up_ports_categorization"
+       --> @dm:selectcolumns exclude="flag"
+    --> @exec:end-function
+
+## generate common columns and write chassis data to the stream
+--> @c:flex-block
+    --> @dm:empty
+    --> @exec:define-function name= "generate_common_columns_and_write_parent_device_to_stream"
+       ## Parent Chassis Date columns
+       --> @dm:eval first_seen = "first_seen if first_seen else collection_timestamp"
+       --> @dm:eval last_seen = "collection_timestamp"
+       --> @dm:eval created_time = "created_time if created_time else int(time_now_as_ms())"
+       --> @dm:eval last_updated_time="int(time_now_as_ms())"
+       --> @dm:eval __state_updated_time="int(time_now_as_ms())"
+       --> @dm:change-time-format columns="last_updated_time,__state_updated_time" and from_format="ms" and to_format="datetimestr"
+       --> @dm:copy-columns from="unique_id" and to="switch_unique_id"
+       --> @dm:map to="asset_status" & func="fixed" & value="ACTIVE"
+       --> @dm:map to="asset_mode" & func="fixed" & value="AUTO"
+       --> @dm:selectcolumns exclude="^hostname_new$"
+       ## Generate Bucket ID
+       --> @dm:add-missing-columns columns = 'unique_id,parent_serial_number'
+       --> *dm:filter unique_id is not empty and parent_serial_number is not empty
+       --> @exec:call-function name = "generate_buckets"
+       --> @dm:save name="temp-parent_device"
+       --> @dm:recall name="temp-ignored_assets"
+       --> *exec:if-condition *
+          --> @dm:recall name="temp-parent_device"
+          ## Enrich new assets with matched flag to identify which ones should be excluded
+          ## Match on unique_id to find assets that should be ignored
+          --> @dm:enrich dict="temp-ignored_assets" and
+                  src_key_cols="parent_serial_number" and
+                  dict_key_cols="parent_serial_number" and
+                  enrich_cols="matched" and
+                  dedup_dict="no"
+          ## Filter out assets that were marked as matched (i.e., keep only assets that are NOT ignored)
+          ## matched is null means the asset did NOT match any exclusion rule, so it should be kept
+          --> *dm:filter matched is null
+          ## Remove the matched column as it's no longer needed
+          --> @dm:selectcolumns exclude='matched'
+          ## Save the filtered dataset (only valid assets remain)
+          --> @dm:save name="temp-parent_device"
+       --> @exec:end-if
+       --> @dm:recall name="temp-parent_device"
+       --> @dm:skip-pipeline-if-shape row_count=0
+       ## ##################Save CHASSIS######################
+       --> @dm:apply-data-model model="network_assets_model" and type	="dataset" and dataset_name="all_models" and  removeUnmapped="yes" and apply_for_empty="yes"
+       --> @rn:write-stream name = 'network-devices-inventory'
+       ## ####################################################
+       --> @dm:recall name="temp-parent_device"
+       --> @dm:selectcolumns include="first_seen|last_seen|created_time|target_ip|last_updated_time|switch_unique_id|asset_status|asset_mode|__state_updated_time|serial_number|parent_serial_number|bucket_id|parent_identifier|vendor"
+       --> @dm:save name="temp-i_am_parent"
+    --> @exec:end-function
+
+## Append common columns to all inventory objects
+--> @c:flex-block
+    --> @dm:empty
+    --> @exec:define-function name= "append_common_columns"
+       --> @dm:enrich dict="temp-juniper_chassis_data" and
+               src_key_cols="target_ip" and
+               dict_key_cols="target_ip" and
+               enrich_cols="parent_serial_number,created_time,last_updated_time,__state_updated_time,first_seen,last_seen,bucket_id,parent_identifier,vendor" and
+               return_empty_dict = 'yes' &
+               return_empty_cols = 'yes' &
+               replace_values="yes"
+    --> @exec:end-function
+    ## Write to Pstream
+    --> @dm:empty
+    --> @exec:define-function name= "write_to_pstream"
+       ## Append common columns to all inventory objects
+       --> @dm:enrich dict="temp-i_am_parent" and
+               src_key_cols="target_ip" and
+               dict_key_cols="target_ip" and
+               enrich_cols="parent_serial_number,created_time,last_updated_time,first_seen,last_seen,switch_unique_id,asset_status,asset_mode,__state_updated_time,bucket_id,parent_identifier,vendor" and
+               return_empty_dict = 'yes' &
+               return_empty_cols = 'yes' &
+               replace_values="yes"
+       --> @dm:selectcolumns exclude="^hostname_new$"
+       --> *dm:filter bucket_id is not empty and parent_identifier is not empty and unique_id is not empty and parent_serial_number is not empty and target_ip is not empty
+       --> @dm:skip-block-if-shape row_count=0
+       --> @dm:selectcolumns exclude = "^output_"
+       --> @dm:selectcolumns exclude = "^bot_"
+       --> @dm:save name="temp-model_applied"
+       ## # Apply data models
+       --> *exec:if-condition asset_object in ['Chassis','MODULE', 'POWERSUPPLY', 'Software','FAN','CONTAINER','BACKPLANE','PORT']
+          --> @dm:apply-data-model model="network_assets_model" and type="dataset" and dataset_name="all_models" and removeUnmapped="yes" and apply_for_empty="yes"
+          --> @dm:save name="temp-model_applied"
+       --> @exec:end-if
+       --> *exec:if-condition asset_object in ['CDP','LLDP']
+          --> @dm:apply-data-model model="cdp_model" and type	="dataset" and dataset_name="all_models" and removeUnmapped="yes" and apply_for_empty="yes"
+          --> @dm:save name="temp-model_applied"
+       --> @exec:end-if
+       --> *exec:if-condition asset_object in ["Interface"]
+          --> @dm:apply-data-model model="interface_model" and type	="dataset" and dataset_name="all_models" and removeUnmapped="yes" and apply_for_empty="yes"
+          --> @dm:save name="temp-model_applied"
+       --> @exec:end-if
+       --> *exec:if-condition asset_object in ["ArpIP"]
+          --> @dm:selectcolumns include="^unique_id$|^endpoint_mac$|^arp_ip_address$|^age$|^interface_name$|^source_filename$|^collection_timestamp$|^ip_address$|^last_updated_time$|^target_ip$|^asset_object$|^host_dns$|^dns_extracted_value$|^switch_unique_id$"
+          --> @dm:save name="temp-model_applied"
+       --> @exec:end-if
+       --> *exec:if-condition asset_object in ["EndpointMAC"]
+          --> @dm:selectcolumns include="^endpoint_mac$|^mac_vendor_name$|^vlan_id$|^interface_shortname$|^vlan_name$|^ip_address$|^bucket_id$|^switch_unique_id$|^mac_oui_id$|^oui$|^collection_timestamp$|^last_updated_time$|^target_ip$|^unique_id$|^asset_object$"
+          --> @dm:save name="temp-model_applied"
+       --> @exec:end-if
+       --> *exec:if-condition asset_object in ["PortChannel"]
+          --> @dm:selectcolumns include="^member_interface$|^interface_pc_name$|^interface_pc_protocol$|^pc_group$|^pc_name$|^interface_shortname$|^interface_name$|^interface_type_index$|^interface_description$|^interface_index$|^interface_alias$|^interface_oper_status$|^interface_admin_status$|^interface_admin_status_label$|^interface_status$|^interface_status_name$|^interface_duplex$|^interface_status_type$|^interface_vlan$|^interface_speed$|^interface_port$|^rc_interface_vlan$|^rc_config_speed$|^rc_port_type$|^rc_other_configs$|^rc_config_duplex$|^rc_interface$|^rc_channel_group$|^rc_config_vlan$|^uplink_port$|^source_filename$|^last_updated_time$|^ip_address$|^target_ip$|^asset_object$|^unique_id$|^switch_unique_id$|^pc_type$|^interface_oper_st$|^interface_admin_st$|^bucket_id$|^st_port$|^collection_timestamp$|^last_updated_time$"
+          --> @dm:save name="temp-model_applied"
+       --> @exec:end-if
+       --> @dm:recall name="temp-model_applied"
+       --> @rn:write-stream name = 'network-devices-inventory'
+    --> @exec:end-function
+

@@ -1,0 +1,437 @@
+{%- set stream_name = "collection_files_data" -%}
+{%- set _raw_cust = (CUST_TAG | default(customer_tag | default(''))) | string | trim -%}
+{%- set _cust = _raw_cust if _raw_cust and (_raw_cust | lower) != 'none' else '' -%}
+{%- set ct_clause = (" and customer_tag is '" ~ (_cust | replace("'", "''")) ~ "'") if _cust else "" -%}
+{%- set _ing = (ingestion_id | default(ingestion_ip | default(INGESTION_ID | default('')))) | string | trim -%}
+{%- set _asset = (asset_ip | default(DEVICE_IP | default(''))) | string | trim -%}
+{%- set _group = (groupname | default(GROUPNAME | default(''))) | string | trim -%}
+{%- set cfxql_query = "asset_ip is '" ~ (_asset | replace("'", "''")) ~ "' and ingestion_id is '" ~ (_ing | replace("'", "''")) ~ "' and groupname is '" ~ (_group | replace("'", "''")) ~ "'" ~ ct_clause -%}
+{%- set rows = engine.query_stream_data(stream=stream_name, cfxql_query=cfxql_query) -%}
+{%- set row_list = rows | list -%}
+{%- set has_row = (row_list | length) > 0 -%}
+{%- set hit = (row_list | first) if has_row else none -%}
+{%- set data_cell = (hit.data | default(none)) if has_row and hit else none -%}
+{%- set _cust_suffix = " and customer tag" if _cust else "" -%}
+
+<!DOCTYPE html>
+<html lang="en" class="cfx-json-viewer-root">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Collection file data</title>
+  <style>
+
+    html.cfx-json-viewer-root {
+      --json-font: Avenir, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      --json-radius: 4px;
+    }
+    html[data-json-viewer-scheme="light"],
+    html.light-mode {
+      color-scheme: light;
+      --json-bg: rgb(var(--v-theme-cfxbackground, var(--v-theme-background, 245 245 245)));
+      --json-panel: rgb(var(--v-theme-cfxcard, var(--v-theme-surface, 255 255 255)));
+      --json-text: rgb(var(--v-theme-cfxtext, var(--v-theme-on-background, 33 33 33)));
+      --json-text-muted: rgb(var(--v-theme-cfxtabtext, var(--v-theme-on-surface-variant, 97 97 97)));
+      --json-accent: rgb(var(--v-theme-cfxreportheader, var(--v-theme-primary, 25 118 210)));
+      --json-border: rgba(0, 0, 0, 0.12);
+      --json-chip-bg: rgba(0, 0, 0, 0.06);
+      --json-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    }
+    html[data-json-viewer-scheme="dark"],
+    html.dark-mode {
+      color-scheme: dark;
+      --json-bg: rgb(var(--v-theme-cfxbackground, var(--v-theme-background, 22 27 34)));
+      --json-panel: rgb(var(--v-theme-cfxcard, var(--v-theme-surface, 40 46 58)));
+      --json-text: rgb(var(--v-theme-cfxtext, var(--v-theme-on-background, 250 250 250)));
+      --json-text-muted: rgb(var(--v-theme-cfxtabtext, var(--v-theme-on-surface-variant, 189 189 189)));
+      --json-accent: rgb(var(--v-theme-cfxreportheader, var(--v-theme-primary, 100 181 246)));
+      --json-border: rgba(255, 255, 255, 0.12);
+      --json-chip-bg: rgba(255, 255, 255, 0.08);
+      --json-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
+    }
+    @media (prefers-color-scheme: dark) {
+      html:not([data-json-viewer-scheme]):not(.light-mode):not(.dark-mode) {
+        color-scheme: dark;
+        --json-bg: rgb(var(--v-theme-cfxbackground, 22 27 34));
+        --json-panel: rgb(var(--v-theme-cfxcard, 40 46 58));
+        --json-text: rgb(var(--v-theme-cfxtext, 250 250 250));
+        --json-text-muted: rgb(var(--v-theme-cfxtabtext, 189 189 189));
+        --json-accent: rgb(var(--v-theme-cfxreportheader, 100 181 246));
+        --json-border: rgba(255, 255, 255, 0.12);
+        --json-chip-bg: rgba(255, 255, 255, 0.08);
+        --json-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
+      }
+    }
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      width: 100%;
+      box-sizing: border-box;
+      font-family: var(--json-font);
+      font-size: 12px;
+      background: var(--json-bg);
+      color: var(--json-text);
+    }
+    *, *::before, *::after { box-sizing: inherit; }
+    .view-shell {
+      min-height: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+    #heading {
+      flex: 0 0 auto;
+      padding: 12px 16px;
+      background: var(--json-panel);
+      color: var(--json-text);
+      font-size: 14px;
+      font-weight: 500;
+      letter-spacing: 0.01em;
+      border-bottom: 1px solid var(--json-border);
+      box-shadow: var(--json-shadow);
+    }
+    #heading code {
+      font-weight: 400;
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: var(--json-radius);
+      background: var(--json-chip-bg);
+      color: var(--json-text-muted);
+      border: 1px solid var(--json-border);
+    }
+    #editor-wrap {
+      flex: 1 1 auto;
+      min-height: 200px;
+      width: 100%;
+      padding: 8px 16px 16px;
+      background: var(--json-bg);
+    }
+    .info-panel {
+      padding: 16px 24px;
+      max-width: 720px;
+      margin: 16px auto;
+      line-height: 1.55;
+      font-size: 12px;
+      background: var(--json-panel);
+      color: var(--json-text);
+      border-radius: var(--json-radius);
+      border: 1px solid var(--json-border);
+      box-shadow: var(--json-shadow);
+    }
+    .info-panel h3 {
+      margin-top: 0;
+      color: var(--json-accent);
+      font-size: 14px;
+      font-weight: 600;
+    }
+    .info-panel code { font-size: 11px; }
+  </style>
+  <script>
+  (function () {
+    "use strict";
+    
+    function copyParentCssVariablesToIframe() {
+      try {
+        if (!window.parent || window.parent === window) return;
+        var pel = window.parent.document.documentElement;
+        var parentStyles = window.parent.getComputedStyle(pel);
+        var iframeRoot = document.documentElement;
+        var i;
+        var varName;
+        var value;
+        for (i = 0; i < parentStyles.length; i++) {
+          varName = parentStyles.item(i);
+          if (varName && varName.indexOf("--") === 0) {
+            value = parentStyles.getPropertyValue(varName);
+            if (value) iframeRoot.style.setProperty(varName, value.trim());
+          }
+        }
+      } catch (ignored) {}
+    }
+    function inferFabrixVueMode(el) {
+      if (!el || !el.classList) return null;
+      if (el.classList.contains("dark-mode")) return true;
+      if (el.classList.contains("light-mode")) return false;
+      if (el.classList.contains("v-theme--dark")) return true;
+      if (el.classList.contains("v-theme--light")) return false;
+      return null;
+    }
+    function inferDarkFromSchemeAttributes(el) {
+      if (!el || !el.getAttribute) return null;
+      var dt = (el.getAttribute("data-theme") || "").toLowerCase();
+      if (dt === "dark" || dt === "darktheme") return true;
+      if (dt === "light" || dt === "lighttheme") return false;
+      var mui = (el.getAttribute("data-mui-color-scheme") || "").toLowerCase();
+      if (mui === "dark") return true;
+      if (mui === "light") return false;
+      return null;
+    }
+    function inferDarkFromElement(el) {
+      var v = inferDarkFromSchemeAttributes(el);
+      if (v !== null) return v;
+      v = inferFabrixVueMode(el);
+      if (v !== null) return v;
+      if (el.classList) {
+        if (el.classList.contains("dark-theme") || el.classList.contains("theme-dark")) return true;
+        if (el.classList.contains("dark")) return true;
+        if (el.classList.contains("light")) return false;
+      }
+      return null;
+    }
+    function inferFromVuetifyApplication(doc) {
+      var app = doc.querySelector(".v-application");
+      if (app) {
+        var v = inferFabrixVueMode(app);
+        if (v !== null) return v;
+      }
+      return null;
+    }
+    function inferFromDocument(doc) {
+      if (!doc || !doc.documentElement) return null;
+      var v = inferDarkFromElement(doc.documentElement);
+      if (v !== null) return v;
+      if (doc.body) {
+        v = inferDarkFromElement(doc.body);
+        if (v !== null) return v;
+      }
+      v = inferFromVuetifyApplication(doc);
+      if (v !== null) return v;
+      var nodes = doc.querySelectorAll("[data-mui-color-scheme]");
+      var i;
+      if (nodes.length) {
+        for (i = nodes.length - 1; i >= 0; i--) {
+          v = inferDarkFromSchemeAttributes(nodes[i]);
+          if (v !== null) return v;
+        }
+      }
+      nodes = doc.querySelectorAll("[data-theme]");
+      if (nodes.length) {
+        for (i = nodes.length - 1; i >= 0; i--) {
+          v = inferDarkFromSchemeAttributes(nodes[i]);
+          if (v !== null) return v;
+        }
+      }
+      return null;
+    }
+    function schemeFromParentChain(start) {
+      var cur = start;
+      var guard = 0;
+      try {
+        while (cur && cur.parent && cur.parent !== cur && guard < 8) {
+          guard++;
+          try {
+            var inferred = inferFromDocument(cur.parent.document);
+            if (inferred !== null) return inferred ? "dark" : "light";
+          } catch (ignored) {}
+          cur = cur.parent;
+        }
+      } catch (e) {}
+      return null;
+    }
+    function schemeFromParentOrOs() {
+      var fromChain = schemeFromParentChain(window);
+      if (fromChain !== null) return fromChain;
+      if (
+        typeof window.matchMedia !== "undefined" &&
+        window.matchMedia("(prefers-color-scheme: dark)").matches
+      )
+        return "dark";
+      return "light";
+    }
+    function applyViewerScheme() {
+      copyParentCssVariablesToIframe();
+      var s = schemeFromParentOrOs();
+      var root = document.documentElement;
+      root.setAttribute("data-json-viewer-scheme", s);
+      root.classList.remove("light-mode", "dark-mode");
+      if (s === "dark") root.classList.add("dark-mode");
+      else root.classList.add("light-mode");
+      if (typeof window.monaco !== "undefined" && window.monaco.editor && window.monaco.editor.setTheme) {
+        window.monaco.editor.setTheme(s === "dark" ? "vs-dark" : "vs");
+      }
+    }
+    applyViewerScheme();
+    try {
+      if (window.parent && window.parent !== window) {
+        var pdoc = window.parent.document;
+        var debounceTimer = null;
+        function scheduleApplyViewerScheme() {
+          if (debounceTimer !== null) clearTimeout(debounceTimer);
+          debounceTimer = setTimeout(function () {
+            debounceTimer = null;
+            applyViewerScheme();
+          }, 32);
+        }
+        var mo = new MutationObserver(scheduleApplyViewerScheme);
+        mo.observe(pdoc.documentElement, {
+          subtree: true,
+          attributes: true,
+          attributeFilter: ["data-theme", "data-mui-color-scheme", "class"]
+        });
+      }
+    } catch (ignoredMo) {}
+    if (typeof window.matchMedia !== "undefined") {
+      var mql = window.matchMedia("(prefers-color-scheme: dark)");
+      function onOsSchemeChange() {
+        applyViewerScheme();
+      }
+      try {
+        mql.addEventListener("change", onOsSchemeChange);
+      } catch (ignoredLegacy) {
+        mql.addListener(onOsSchemeChange);
+      }
+    }
+  })();
+  </script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js"></script>
+</head>
+<body>
+  <div class="view-shell">
+  <div id="heading">
+    Device IP <code>{{ _asset }}</code>,
+    Group Name <code>{{ _group }}</code>
+    {%- if _cust %} — customer_tag <code>{{ _cust }}</code>{% endif %}
+  </div>
+
+  <script type="application/json" id="collection-viewer-config">{{ {"hasRow": has_row, "rawCell": data_cell, "custSuffix": _cust_suffix} | tojson }}</script>
+
+  <div id="editor-wrap"></div>
+
+  <script>
+    
+(function (global) {
+  "use strict";
+
+  function formatCollectionDataCell(raw) {
+    if (raw === null || raw === undefined) {
+      return { text: "", language: "json", isEmpty: true };
+    }
+    if (typeof raw === "object") {
+      try {
+        return {
+          text: JSON.stringify(raw, null, 2),
+          language: "json",
+          isEmpty: false
+        };
+      } catch (e) {
+        return { text: String(raw), language: "plaintext", isEmpty: false };
+      }
+    }
+    var s = String(raw).trim();
+    if (!s) {
+      return { text: "", language: "json", isEmpty: true };
+    }
+    try {
+      return {
+        text: JSON.stringify(JSON.parse(s), null, 2),
+        language: "json",
+        isEmpty: false
+      };
+    } catch (ignoreJson) {}
+
+    var pyFixed = s
+      .replace(/\bNone\b/g, "null")
+      .replace(/\bTrue\b/g, "true")
+      .replace(/\bFalse\b/g, "false");
+    try {
+      var parsed = new Function('"use strict"; return (' + pyFixed + ");")();
+      return {
+        text: JSON.stringify(parsed, null, 2),
+        language: "json",
+        isEmpty: false
+      };
+    } catch (ignorePy) {
+      return { text: s, language: "plaintext", isEmpty: false };
+    }
+  }
+
+  function monacoLanguageFor(lang) {
+    return lang === "json" ? "json" : "plaintext";
+  }
+
+  function runBoot() {
+    var cfgEl = document.getElementById("collection-viewer-config");
+    if (!cfgEl) return;
+    var cfg = JSON.parse(cfgEl.textContent);
+    var wrap = document.getElementById("editor-wrap");
+    var out = formatCollectionDataCell(cfg.rawCell);
+
+    if (!cfg.hasRow) {
+      wrap.innerHTML =
+        "<div class='info-panel'><h3>No row found</h3>" +
+        "<p>No document matched the query for this asset, ingestion id, group name" +
+        cfg.custSuffix +
+        ".</p></div>";
+      return;
+    }
+
+    if (out.isEmpty || !out.text) {
+      wrap.innerHTML =
+        "<div class='info-panel'><h3>Empty data</h3>" +
+        "<p>The row exists but the <code>data</code> field is empty.</p></div>";
+      return;
+    }
+
+    window.require.config({
+      paths: { vs: "https://cdn.jsdelivr.net/npm/monaco-editor@0.45.0/min/vs" }
+    });
+
+    window.require(["vs/editor/editor.main"], function () {
+      function detectMonacoTheme() {
+        var root = document.documentElement;
+        var sch = root.getAttribute("data-json-viewer-scheme");
+        if (sch === "dark") return "vs-dark";
+        if (sch === "light") return "vs";
+        if (root.classList.contains("dark-mode")) return "vs-dark";
+        if (root.classList.contains("light-mode")) return "vs";
+        try {
+          var el = document.documentElement;
+          var dt = (el.getAttribute("data-theme") || "").toLowerCase();
+          if (dt === "dark" || dt === "darktheme") return "vs-dark";
+          if (el.classList && (el.classList.contains("theme-dark") || el.classList.contains("dark-theme")))
+            return "vs-dark";
+          if (window.parent && window.parent !== window) {
+            try {
+              var pel = window.parent.document.documentElement;
+              var pdt = (pel.getAttribute("data-theme") || "").toLowerCase();
+              if (pdt === "dark" || pdt === "darktheme") return "vs-dark";
+              var pmui = (pel.getAttribute("data-mui-color-scheme") || "").toLowerCase();
+              if (pmui === "dark") return "vs-dark";
+              if (pmui === "light") return "vs";
+            } catch (ignored) {}
+          }
+        } catch (e2) {}
+        if (
+          typeof window !== "undefined" &&
+          window.matchMedia &&
+          window.matchMedia("(prefers-color-scheme: dark)").matches
+        )
+          return "vs-dark";
+        return "vs";
+      }
+      var theme = detectMonacoTheme();
+      monaco.editor.create(wrap, {
+        value: out.text,
+        language: monacoLanguageFor(out.language),
+        readOnly: true,
+        automaticLayout: true,
+        minimap: { enabled: true },
+        scrollBeyondLastLine: false,
+        wordWrap: "on",
+        theme: theme
+      });
+    });
+  }
+
+  global.CollectionFilesDataViewer = {
+    formatCollectionDataCell: formatCollectionDataCell,
+    monacoLanguageFor: monacoLanguageFor,
+    runBoot: runBoot
+  };
+})(typeof window !== "undefined" ? window : this);
+CollectionFilesDataViewer.runBoot();
+
+  </script>
+  </div>
+</body>
+</html>

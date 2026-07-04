@@ -1,0 +1,368 @@
+{
+    "name": "Config_dashboard_v2",
+    "label": "Config Details of {{SOURCE_IP}}",
+    "description": "Config details of the DEVICE IP",
+    "dashboard_folder": "ConfigBackupPack",
+    "enabled": true,
+    "debug": true,
+    "live_edit": true,
+    "dashboard_type": "template",
+    "context_enrichment": {
+        "stream": "syslog-config-backup-stream",
+        "query_template": "source_ip is $source_ip",
+        "enrich_columns0": [
+            "static_upper_threshold"
+        ],
+        "defaultValues": {}
+    },
+    "template_variables": {
+        "SOURCE_IP": {
+            "contextId": "source_ip"
+        },
+        "CUST_TAG": {
+            "contextId": "customerTag"
+        }
+    },
+    "dashboard_filters": {
+        "time_filter": true,
+        "default_time_filter_labels": [
+            "All Time"
+        ]
+    },
+    "stream_query_mapping0": {
+        "oia-metrics-data": {
+            "timestamp": "metric_timestamp"
+        }
+    },
+    "dashboard_sections": [
+        {
+            "title": "Summary",
+            "show_filter": true,
+            "widgets": [
+                {
+                    "title": "Config History for {{SOURCE_IP}}",
+                    "widget_type": "tabular",
+                    "stream": "syslog-config-backup-stream",
+                    "extra_filter1": "source_ip is '{{SOURCE_IP}}' and config_id is not NULL",
+                    "extra_filter": "source_ip is '{{SOURCE_IP}}' and config_id is not NULL and status is 'Success' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty or customer_tag is 'None')",
+                    "min_width": 12,
+                    "height": 8,
+                    "max_width": 12,
+                    "paginated": true,
+                    "remote_searchable": true,
+                    "remote_searchable_cols0": [
+                        "source_ip",
+                        "config_id"
+                    ],
+                    "max_rows": 50,
+                    "sorting": [
+                        {
+                            "timestamp": "desc"
+                        }
+                    ],
+                    "columns": {
+                        "output": {
+                            "title": "Config",
+                            "formatter": "truncate",
+                            "visible": false,
+                            "key": false
+                        },
+                        "config_id": {
+                            "title": "Config ID",
+                            "key": true
+                        },
+                        "golden_color": {
+                            "type": "COLOR-MAP",
+                            "source-column": "golden_config",
+                            "color-map": {
+                                "Yes": "#B8860B",
+                                "No": "#003366"
+                            }
+                        },
+                        "golden_config": {
+                            "title": "Is Golden Config",
+                            "htmlTemplateForRow": "<span class='badge' style='background-color: {{'{{ row.golden_color }}'}}; color: white;'>{{'{{ row.golden_config }}'}}</span>"
+                        },
+                        "hostname": {
+                            "title": "Hostname",
+                            "key": true
+                        },
+                        "backup_mode": {
+                            "title": "Backup Mode",
+                            "key": true
+                        },
+                        "source_ip": {
+                            "title": "SOURCE IP",
+                            "key": true,
+                            "visible": false
+                        },
+                        "timestamp": {
+                            "title": "Backed Up At",
+                            "key": true,
+                            "visible": true
+                        },
+                        "customer_tag": {
+                            "title": "Customer Tag",
+                            "type": "TEXT",
+                            "key": true,
+                            "hidden": true
+                        },
+                        "customer_id": {
+                            "title": "Customer Id",
+                            "type": "TEXT",
+                            "key": true,
+                            "hidden": true
+                        },
+                        "cfg_diff_show_prev": {
+                            "title": "Cfg Diff Prev",
+                            "type": "TEXT",
+                            "key": false,
+                            "hidden": true,
+                            "visible": false
+                        },
+                        "cfg_diff_show_next": {
+                            "title": "Cfg Diff Next",
+                            "type": "TEXT",
+                            "key": false,
+                            "hidden": true,
+                            "visible": false
+                        },
+                        "cfg_diff_show_latest": {
+                            "title": "Cfg Diff Latest",
+                            "type": "TEXT",
+                            "key": false,
+                            "hidden": true,
+                            "visible": false
+                        }
+                    },
+                    "custom_columns": [
+                        {
+                            "id": "rowStyle",
+                            "label": "Row Style",
+                            "expr": "\"{'background-color':'#ffcc80'}\" if golden_config == \"Yes\" else \"{'background-color':'#9e9e9e'}\"",
+                            "hidden": true,
+                            "visible": false,
+                            "default": null
+                        }
+                    ],
+                    "widget_id": "94a3fc11",
+                    "actions": [
+                        {
+                            "permission1": "rda:github:view",
+                            "title": "Show difference",
+                            "type": "GO_TO_APP_STATE",
+                            "selectionType": "NONE",
+                            "identifier": "saas-service-action:userdashboard-add-yaml",
+                            "api-endpoint": {
+                                "service-name": "saas-reports",
+                                "methodName": "getForm",
+                                "stringified-params": true,
+                                "parse-output": false,
+                                "params": [
+                                    {
+                                        "formId": "rda.saas.dynamic.form",
+                                        "formActionList": {
+                                            "formActions": [
+                                                {
+                                                    "identifier": "Submit",
+                                                    "actionLabel": "Backup"
+                                                }
+                                            ]
+                                        },
+                                        "formDefinition": {
+                                            "id": "rda.saas.dynamic.form",
+                                            "refreshRequired": true,
+                                            "formFieldList": []
+                                        },
+                                        "actions": [
+                                            {}
+                                        ]
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "title": "View Config",
+                            "drillDownLinkField": "config_id",
+                            "permission": "rda:github:view",
+                            "type": "GO_TO_APP_STATE",
+                            "selectionType": "SINGLE",
+                            "stateName": "app.featureapp",
+                            "appName": "user-dashboard/view-config"
+                        },
+                        {
+                            "title": "View Previous Difference",
+                            "permission": "rda:github:view",
+                            "type": "GO_TO_APP_STATE",
+                            "selectionType": "SINGLE",
+                            "stateName": "app.featureapp",
+                            "appName": "user-dashboard/config_diff_check_widget_v2?attachment=v5",
+                            "actionCondition": {
+                                "actionControl": "SHOW_IF",
+                                "conditionalField": [
+                                    {
+                                        "conditionType": "EQUAL_IGNORE_CASE",
+                                        "conditionValue": "yes",
+                                        "fieldId": "cfg_diff_show_prev"
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "title": "View Golden Difference",
+                            "permission": "rda:github:view",
+                            "type": "GO_TO_APP_STATE",
+                            "selectionType": "SINGLE",
+                            "stateName": "app.featureapp",
+                            "appName": "user-dashboard/config_diff_check_widget_v2?attachment=v6",
+                            "actionCondition": {
+                                "actionControl": "SHOW_IF",
+                                "conditionalField": [
+                                    {
+                                        "conditionType": "NOT_EQUAL",
+                                        "conditionValue": "Yes",
+                                        "fieldId": "golden_config"
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "title": "View Next Difference",
+                            "permission": "rda:github:view",
+                            "type": "GO_TO_APP_STATE",
+                            "selectionType": "SINGLE",
+                            "stateName": "app.featureapp",
+                            "appName": "user-dashboard/config_diff_check_widget_v2?attachment=v7",
+                            "actionCondition": {
+                                "actionControl": "SHOW_IF",
+                                "conditionalField": [
+                                    {
+                                        "conditionType": "EQUAL_IGNORE_CASE",
+                                        "conditionValue": "yes",
+                                        "fieldId": "cfg_diff_show_next"
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "title": "View Latest Difference",
+                            "permission": "rda:github:view",
+                            "type": "GO_TO_APP_STATE",
+                            "selectionType": "SINGLE",
+                            "stateName": "app.featureapp",
+                            "appName": "user-dashboard/config_diff_check_widget_v2?attachment=v8",
+                            "actionCondition": {
+                                "actionControl": "SHOW_IF",
+                                "conditionalField": [
+                                    {
+                                        "conditionType": "EQUAL_IGNORE_CASE",
+                                        "conditionValue": "yes",
+                                        "fieldId": "cfg_diff_show_latest"
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "permission": "rda:github:view",
+                            "title": "Mark as golden config",
+                            "type": "POPUP_FORM",
+                            "selectionType": "SINGLE",
+                            "identifier": "saas-service-action:userdashboard-add-yaml",
+                            "api-endpoint": {
+                                "service-name": "saas-reports",
+                                "methodName": "getForm",
+                                "stringified-params": true,
+                                "parse-output": false,
+                                "params": [
+                                    {
+                                        "formId": "rda.saas.dynamic.form",
+                                        "formDefinition": {
+                                            "formFieldList": [
+                                                {
+                                                    "help": "Are you sure you want to add this config as Golden Config?",
+                                                    "dataType": "string",
+                                                    "controlType": "LABEL",
+                                                    "required": false,
+                                                    "editable": false,
+                                                    "label": "Are you sure you want to add this as golden config?",
+                                                    "hidden": false,
+                                                    "fieldId": "name"
+                                                }
+                                            ]
+                                        },
+                                        "actions": [
+                                            {
+                                                "type": "RUN_PIPELINE",
+                                                "pipelineName": "syslog-golden-config-pipeline",
+                                                "isSync": false,
+                                                "workerGroup": "{{CUST_TAG}}.*"
+                                            }
+                                        ],
+                                        "formActionList": {
+                                            "formActions": [
+                                                {
+                                                    "actionLabel": "ADD",
+                                                    "identifier": "Submit"
+                                                }
+                                            ]
+                                        }
+                                    }
+                                ]
+                            },
+                            "widget_id": "229ca0a4"
+                        },
+                        {
+                            "permission0": "rda:github:view",
+                            "title0": "Restore Backup",
+                            "type": "POPUP_FORM",
+                            "selectionType": "SINGLE",
+                            "identifier": "saas-service-action:userdashboard-add-yaml",
+                            "api-endpoint": {
+                                "service-name": "saas-reports",
+                                "methodName": "getForm",
+                                "stringified-params": true,
+                                "parse-output": false,
+                                "params": [
+                                    {
+                                        "formId": "rda.saas.dynamic.form",
+                                        "formDefinition": {
+                                            "formFieldList": [
+                                                {
+                                                    "help": "Are you sure you want to Restore this backup?",
+                                                    "dataType": "string",
+                                                    "controlType": "LABEL",
+                                                    "required": false,
+                                                    "editable": false,
+                                                    "label": "Are you sure you want to restore this backup?",
+                                                    "hidden": false,
+                                                    "fieldId": "name"
+                                                }
+                                            ]
+                                        },
+                                        "actions": [
+                                            {
+                                                "type": "RUN_PIPELINE",
+                                                "pipelineName": "",
+                                                "isSync": false
+                                            }
+                                        ],
+                                        "formActionList": {
+                                            "formActions": [
+                                                {
+                                                    "actionLabel": "Restore",
+                                                    "identifier": "Submit"
+                                                }
+                                            ]
+                                        }
+                                    }
+                                ]
+                            },
+                            "widget_id": "229ca0a4"
+                        }
+                    ]
+                }
+            ]
+        }
+    ],
+    "saved_time": "2026-04-27T04:56:00.151957"
+}

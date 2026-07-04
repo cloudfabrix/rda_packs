@@ -1,0 +1,79 @@
+{
+    "type": "log",
+    "name": "ospf_neighbor_state_change",
+    "description": "OSPF neighbor state changed CFX",
+    "enabled": false,
+    "schedule": {
+        "minutes": 5
+    },
+    "data": {
+        "stream": "syslog_udp_events_stream",
+        "query": "((syslog_code in ['ROUTING-OSPF-5-ADJCHG','OSPF-5-ADJCHG', 'OSPF-5-ADJCHANGE']) AND interface_name is not empty)",
+        "unique_keys": [
+            "rda_gw_client_ip",
+            "interface_name"
+        ],
+        "additional_columns": [
+            "raw",
+            "device_hostname",
+            "rda_gw_client_ip",
+            "device_model",
+            "device_vendor"
+        ],
+        "custom_unique_keys": [
+            "alarm_class",
+            "neighbor_ip"
+        ],
+        "data_transformations": [
+            {
+                "type": "eval",
+                "columns": {
+                    "alarm_class": {
+                        "expr": "'OSPF'"
+                    },
+                    "neighbor_ip": {
+                        "expr": "raw.split('Nbr ')[1].split(' ')[0] if 'Nbr ' in raw else 'unknown'"
+                    }
+                }
+            }
+        ],
+        "padding_time_seconds": 60,
+        "limit": 10000
+    },
+    "actions": [
+        {
+            "state": "OPEN",
+            "extra_query": "((raw.match_phrase contains 'from FULL to DOWN') and (interface_name is not Empty))",
+            "attributes": {
+                "severity": "CRITICAL",
+                "alert_message": "OSPF neighbor {{neighbor_ip}} down on {{device_hostname}} {{rda_gw_client_ip}} interface {{interface_name}} from FULL to DOWN",
+                "recommendedaction": "Check interface status and connectivity. Verify MTU, OSPF timers, and area configuration using 'show ip ospf neighbor' and 'show interface'."
+            },
+            "throttle": {
+                "value": 60,
+                "unit": "MINUTES"
+            },
+            "notification_profile": "snmp_metrics_notification_profile",
+            "notification": [
+                {
+                    "channel": "asm_syslog_webhook"
+                }
+            ]
+        },
+        {
+            "state": "CLEAR",
+            "extra_query": "(raw.match_phrase contains 'from LOADING to FULL')",
+            "attributes": {
+                "severity": "INFO",
+                "alert_message": "OSPF neighbor {{neighbor_ip}} restored on {{device_hostname}} ({{rda_gw_client_ip}}) interface {{interface_name}} state FULL"
+            },
+            "notification_profile": "snmp_metrics_notification_profile",
+            "notification": [
+                {
+                    "channel": "asm_syslog_webhook"
+                }
+            ]
+        }
+    ],
+    "saved_time": "2026-04-15T05:41:51.864607"
+}

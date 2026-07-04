@@ -1,0 +1,70 @@
+%% stream = no and limit = 0
+%% template_type="jinja"
+
+%%start_inline_object name="context_dynamic_form" and type="data" and format="json"
+{
+    "formFieldList": [
+        {
+            "fieldId": "customer_tag",
+            "label": "Tag of the customer",
+            "required": false,
+            "dataType": "string"
+        }
+    ]
+}
+%%end_inline_object
+
+{% if customer_tag %} 
+   {% set customer_id = customer_id %}
+   {% set customer_tag = customer_tag %}
+   {% set customerTag = customer_tag %}
+{% elif customerTag %} 
+   {% set customer_id = customer_id %}
+   {% set customer_tag = customerTag %}
+{% else %}
+   {% set customer_id = 'None' %}
+   {% set customer_tag = 'None' %}
+{% endif %}  
+
+@c:new-block
+    --> @exec:get-input
+    --> @dm:save name="temp-user-input"
+
+--> @c:new-block
+    --> @dm:recall name="temp-user-input" and return_empty = "yes"
+    --> @dm:skip-block-if-shape row_count = 0
+    --> @dm:selectcolumns include = "Others"
+    
+    --> @dm:explode-json column="Others"
+    -->@dm:save name = "temp-device-discovery-scope"
+    --> @dm:implode key_columns is "used_cred" and merge_columns is "ip_address"
+    --> @dm:eval customer_tag="'{{ customer_tag }}'" and customer_id="'{{ customer_id }}'"
+    --> @dm:save name="temp-devices-for-mibs-discovery"
+    --> @dm:recall name="temp-device-discovery-scope" 
+    --> @dm:eval customer_tag="'{{ customer_tag }}'" and customer_id="'{{ customer_id }}'"
+    -->@dm:save name = "temp-device-discovery-scope"
+    
+--> @c:new-block
+    --> @dm:recall name="temp-devices-for-mibs-discovery" and return_empty = "yes"
+    --> *exec:if-shape num_rows > 0
+       --> @dm:rename-columns device = "ip_address" and credential = "used_cred"
+       --> @dm:eval onboarding_status = "'In Progress'" and onboarding_reason = "''"
+       --> @dm:selectcolumns include is "^device$|^credential$|^onboarding_status$|^onboarding_reason$|^customer_id$|^customer_tag$"
+       ## --> @rn:write-stream name is "debug-stream"
+       -->@dm:save name="inprogress_entry"
+       --> @rn:write-stream name is "snmp_onboarded_devices"
+    --> @exec:end-if
+    --> @dm:onboard-snmp-device ip_column is ip_address and credential_column is used_cred
+    ## --> @rn:write-stream name is "debug-stream"
+    --> *exec:if-condition onboarding_status = "Success"
+       --> @dm:selectcolumns include is "device|supported_mibs"
+       --> @dm:explode-json column is "supported_mibs"
+       --> @dm:rename-columns supported_mibs = "mib_name"
+       --> @dm:explode column is "collection_groups"
+       --> @dm:eval selected = "'no'"
+       ## --> @rn:write-stream name is "debug-stream"
+       --> @rn:write-stream name is "ip_supported_mibs_stream"
+    --> @exec:end-if
+    ## --> @rn:write-stream name is "debug-stream"
+    -->@dm:enrich dict="temp-device-discovery-scope" and dict_key_cols="ip_address" and src_key_cols = "device" and enrich_cols="discovery_scope,customer_tag"
+    --> @rn:write-stream name is "snmp_onboarded_devices"

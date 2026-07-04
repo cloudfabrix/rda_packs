@@ -1,0 +1,215 @@
+{
+  "name": "mib_collection_group_drilldown",
+  "label": "SNMP Collection Group Management",
+  "description": "mib_management: Insights",
+  "dashboard_folder": "MibsCollection",
+  "version": "24.11.29",
+  "enabled": true,
+  "stream": "mib_collection_groups",
+  "dashboard_type": "template",
+  "template_variables": {
+    "MIB_NAME": {
+      "contextId": "mib_name"
+    }
+  },
+  "live_edit": true,
+  "dashboard_filters": {
+    "time_filter": true,
+    "extra_filter": "mib_name is '{{MIB_NAME}}'",
+    "default_time_filter_labels": [
+      "All Time"
+    ],
+    "columns_filter": [
+      {
+        "id": "timestamp",
+        "label": "Timestamp",
+        "type": "DATETIME"
+      },
+      {
+        "id": "enterpriseId",
+        "label": "Enterprise Id",
+        "type": "TEXT"
+      },
+      {
+        "id": "enterpriseSpecific",
+        "label": "Enterprise Specific",
+        "type": "TEXT"
+      },
+      {
+        "id": "mib_name",
+        "label": "Mib Name",
+        "type": "TEXT"
+      },
+      {
+        "id": "vendorName",
+        "label": "Vendor",
+        "type": "TEXT"
+      }
+    ],
+    "group_filters": [
+      {
+        "stream": "mib_collection_groups",
+        "title": "Vendor",
+        "duration_hours": 1080,
+        "limit": 200,
+        "extra_filter": null,
+        "group_by": [
+          "vendorName"
+        ],
+        "ts_column": "timestamp",
+        "agg": "sum",
+        "column": "count_",
+        "type": "int"
+      }
+    ]
+  },
+  "dashboard_sections": [
+    {
+      "title": "Collection Groups",
+      "show_filter": true,
+      "widgets": [
+        {
+          "widget_type": "pie_chart",
+          "title": "Vendor",
+          "duration_hours": 1080,
+          "stream": "mib_collection_groups",
+          "ts_column": "timestamp",
+          "column": "count_",
+          "agg": "sum",
+          "group_by": [
+            "vendorName"
+          ],
+          "type": "int",
+          "min_width": 3,
+          "height": 3,
+          "max_width": 6,
+          "widget_id": "d0e78ea2"
+        },
+        {
+          "widget_type": "pie_chart",
+          "title": "Collection Type",
+          "duration_hours": 1080,
+          "stream": "mib_collection_groups",
+          "ts_column": "timestamp",
+          "column": "count_",
+          "agg": "sum",
+          "group_by": [
+            "type"
+          ],
+          "type": "int",
+          "min_width": 3,
+          "height": 3,
+          "max_width": 6,
+          "widget_id": "619a3b0f"
+        },
+        {
+          "title": "Collection Groups",
+          "widget_type": "tabular",
+          "duration_hours": 1080,
+          "max_width": 12,
+          "height": 10,
+          "min_width": 12,
+          "virtual_scrolling": true,
+          "stream": "mib_collection_groups",
+          "ts_column": "timestamp",
+          "sorting": [
+            {
+              "mib_name": "asc"
+            },
+            {
+              "collection_group": "asc"
+            }
+          ],
+          "columns": {
+            "collection_group": {
+              "title": "Collection Group",
+              "type": "TEXT",
+              "hidden": false,
+              "key": true
+            },
+            "mib_name": {
+              "title": "Mib Name",
+              "type": "TEXT",
+              "hidden": false,
+              "key": true
+            },
+            "vendorName": {
+              "title": "Vendor",
+              "type": "TEXT",
+              "hidden": false
+            },
+            "type": {
+              "title": "Collection Type",
+              "type": "TEXT",
+              "hidden": false
+            },
+            "variable_count": {
+              "title": "Variable Count",
+              "type": "DOUBLE",
+              "hidden": false
+            },
+            "index_count": {
+              "title": "Index Variables",
+              "type": "DOUBLE",
+              "hidden": false
+            },
+            "auto_generated": {
+              "title": "Auto Generated",
+              "type": "TEXT",
+              "hidden": false
+            },
+            "enterpriseId": {
+              "title": "Enterpriseid",
+              "type": "TEXT",
+              "hidden": true
+            },
+            "timestamp": {
+              "title": "Timestamp",
+              "type": "DATETIME",
+              "hidden": false
+            }
+          },
+          "widget_id": "ac3058c1",
+          "actions": [
+            {
+              "permission": "rda:user_dashboard:view",
+              "title": "Add",
+              "type": "POPUP_FORM",
+              "selectionType": "NONE",
+              "identifier": "saas-service-action:rda.saas.collectiongroup.add",
+              "api-endpoint": {
+                "service-name": "saas-reports",
+                "methodName": "getForm",
+                "stringified-params": true,
+                "parse-output": false,
+                "params": [
+                  {
+                    "formId": "rda.saas.collectiongroup.add"
+                  }
+                ]
+              }
+            },
+            {
+              "permission": "rda:user_dashboard:view",
+              "title": "View",
+              "type": "POPUP_FORM",
+              "selectionType": "SINGLE",
+              "identifier": "saas-service-action:rda.saas.collectiongroup.view",
+              "api-endpoint": {
+                "service-name": "saas-reports",
+                "methodName": "getForm",
+                "stringified-params": true,
+                "parse-output": false,
+                "params": [
+                  {
+                    "formId": "rda.saas.collectiongroup.view"
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

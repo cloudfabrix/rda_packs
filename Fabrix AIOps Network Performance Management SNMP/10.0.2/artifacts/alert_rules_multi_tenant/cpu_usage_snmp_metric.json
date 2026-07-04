@@ -1,0 +1,54 @@
+{
+    "type": "metric",
+    "name": "cpu_usage_snmp_metric",
+    "enabled": true,
+    "schedule": {
+        "minutes": 15
+    },
+    "data": {
+        "stream": "rda_snmp_metrics",
+        "groupby": [
+            "target_ip",
+            "name"
+        ],
+        "query": "name == 'cpu' and customer_tag is '$PKG_CONTEXT_CUSTOMER_TAG'"
+    },
+    "actions": [
+        {
+            "state": "OPEN",
+            "timestamp": "timestamp",
+            "threshold": "30",
+            "agg_column": "cpu_usage",
+            "agg_func": "avg",
+            "repeat_count": 1,
+            "attributes": {
+                "severity": "CRITICAL",
+                "metric_name": "cpu_usage",
+                "metric_value_field": "cpu_usage_avg"
+            },
+            "notification": [
+                {
+                    "channel": "${PKG_CONTEXT_CUSTOMER_TAG}_telegraf_snmp_metrics"
+                }
+            ]
+        },
+        {
+            "state": "CLEAR",
+            "timestamp": "timestamp",
+            "agg_column": "cpu_usage",
+            "agg_func": "avg",
+            "threshold": "28",
+            "attributes": {
+                "severity": "INFO",
+                "metric_name": "cpu_usage",
+                "metric_value_field": "cpu_usage_avg"
+            },
+            "notification": [
+                {
+                    "channel": "${PKG_CONTEXT_CUSTOMER_TAG}_telegraf_snmp_metrics"
+                }
+            ]
+        }
+    ],
+    "saved_time": "2026-03-10T02:37:43.571395"
+}

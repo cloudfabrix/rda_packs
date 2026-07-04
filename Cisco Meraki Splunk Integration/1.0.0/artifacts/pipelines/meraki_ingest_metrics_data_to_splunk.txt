@@ -1,0 +1,41 @@
+%% stream = no and limit = 0
+
+%% import_src_type = "splunk_v2"
+
+## ingest_metrics_data_to_splunk
+@c:new-block
+    --> @exec:get-input
+    --> @dm:save name="temp-input"
+    --> @dm:save name="test-input-metrics"
+    ## Dictionary: Get the list of columns to be fetched
+    --> @dm:enrich dict="splunk_index_columns_meraki" & src_key_cols="splunk_index" & dict_key_cols="index_name" & enrich_cols="column_names"
+    ## set defaults
+    --> @dm:fixnull columns="column_names" & value="*"
+    --> @dm:fixnull columns="extra_filter" & value="*"
+    --> @dm:fixnull columns = 'target_type'  & value = 'event'
+    ## --> @dm:eval column_names="'*'"
+    --> @dm:save name="temp-input-metrics"
+
+## For Metrics Only
+--> @c:new-block
+    --> @dm:recall name="temp-input-metrics"
+    --> *dm:filter target_type is 'metric'
+    --> @dm:skip-block-if-shape row_count = 0
+    --> @dm:save name="temp-metrics"
+
+## Metrics: read from pstream and write to splunk
+--> @c:data-loop dataset="temp-metrics" & columns="enabled,extra_filter,limit,sorting,splunk_index,stream,source_type,target_type,stream_type,source_field,splunk_src_name"
+    --> @dm:query-persistent-stream-from-bookmark name="$stream" and bookmark="qpwts-0916-bkmrk_appbind_$splunk_index" and offset="latest" and query="$extra_filter"
+    --> @dm:skip-block-if-shape row_count = 0
+    --> @dm:map to="event" & func="fixed" & value="$target_type"
+    --> @dm:eval source="$source_field"
+    --> @dm:copy-columns from="value" & to="_value"
+    --> @dm:selectcolumns exclude="_RDA_Id|count_"
+    --> *exec:if-condition column_names is not '*'
+       --> @dm:selectcolumns include="$column_names"
+    --> @exec:end-if
+    --> @$splunk_src_name:add-to-index index is '$splunk_index' and source_field is source and event_field is event and sourcetype is '$source_type'
+    --> @rn:write-stats-to-stream name="meraki_appbindings_stats_to_stream"
+    --> @dm:save name="temp-$splunk_index-out"
+
+ 

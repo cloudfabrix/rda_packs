@@ -1,0 +1,30 @@
+%% stream = no and limit = 0
+
+@c:new-block
+    --> @exec:get-input
+    --> @dm:save name="temp-query-loop"
+    ##--> @dm:save name="test-query-loop-splunk"
+
+--> @c:data-loop dataset = "temp-query-loop" and columns = "stream,splunk_index,extra_filter,bookmark,index_type,splunk_src_name"
+    --> @dm:recall name = "temp-query-loop"
+    --> *exec:if-condition index_type = 'event'
+       --> @dm:empty
+       --> @dm:addrow name = "$stream" & max_rows="1000" & limit="0"
+       --> #dm:query-persistent-stream timestamp is after '${bookmark}'
+       --> @dm:skip-block-if-shape row_count = 0 and column_count=0
+       --> @$splunk_src_name:add-to-index index = "$splunk_index" and create="True"
+       --> @dm:add-missing-columns columns = 'timestamp' & value = ''
+       --> @dm:eval timestamp="timestamp if timestamp != '' else time_now_as_ms()"
+       --> @dm:save_bookmark name = 'meraki_data_ingestion_to_splunk_index_bkmrk2' & value_column = 'timestamp' & value_type = 'timestamp' & value_func = 'max'
+    --> @exec:end-if
+    --> *exec:if-condition index_type = 'metric'
+       --> @dm:empty
+       --> @dm:addrow name = "$stream" & max_rows="1000" & limit="0"
+       --> #dm:query-persistent-stream timestamp is after '${bookmark}'
+       --> @dm:skip-block-if-shape row_count = 0 and column_count=0
+       --> @$splunk_src_name:add-to-index-metric index = "$splunk_index" and create="True"
+       --> @dm:add-missing-columns columns = 'timestamp' & value = ''
+       --> @dm:eval timestamp="timestamp if timestamp != '' else time_now_as_ms()"
+       --> @dm:save_bookmark name = 'meraki_data_ingestion_to_splunk_index_bkmrk2' & value_column = 'timestamp' & value_type = 'timestamp' & value_func = 'max'
+    --> @exec:end-if
+
