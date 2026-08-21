@@ -1,0 +1,50 @@
+{
+    "name": "tracking-incident-details-app",
+    "label": "Incident Details",
+    "description": "Incident Event Tracking Details",
+    "version": "26.5.12.1",
+    "enabled": true,
+    "exportable": false,
+    "status_poller": {},
+    "dashboard_type": "app",
+    "dashboard_folder": "Default",
+    "template_variables": {},
+    "context_enrichment": {
+        "stream": "oia-incidents-stream",
+        "enrich_columns": [
+            "i_created_ts",
+            "attrs_stack_name",
+            "attrs_node_id",
+            "attrs_metric_asset_id",
+            "i_cluster"
+        ],
+        "query_template": "incident_id = '$processedeventid' or incident_id = '$incident_id'",
+        "defaultValues": {}
+    },
+    "dashboard_filters": {
+        "time_filter": false
+    },
+    "dashboard_sections": [
+        {
+            "title": "Dashboard",
+            "widgets": [
+                {
+                    "title": "Incident Summary",
+                    "min_width": 12,
+                    "height": 2,
+                    "widget_type": "header_section",
+                    "widget_template": "cfx-oia/incident-summary",
+                    "widget_id": "6e64b2f1"
+                }
+            ]
+        }
+    ],
+    "dashboard_pages": [
+        {
+            "name": "incident-tracking-details-tabular",
+            "label": "Incident Tracking Details",
+            "icon": "incident.svg"
+        }
+    ],
+    "saved_time": "2026-05-12T08:15:28.655107"
+}

@@ -1,0 +1,275 @@
+{
+    "name": "incident-tracking-details",
+    "label": "Incident Tracking Details",
+    "description": "OIA Incident Event Tracking Details",
+    "version": "26.4.30.1",
+    "enabled": true,
+    "exportable": false,
+    "dashboard_style": "auto",
+    "dashboard_type": "template",
+    "template_variables": {
+        "PROJECT_ID": {
+            "default": null,
+            "contextId": "USER_PROJECTS"
+        },
+        "INCIDENT_ID": {
+            "default": null,
+            "contextId": "processedeventid"
+        },
+        "SOURCE_KEY": {
+            "default": null,
+            "contextId": "sourceeventid"
+        },
+        "SELECTED_PHASE_TRAIL_ID": {
+            "default": null,
+            "contextId": "et_id"
+        }
+    },
+    "navigation_dashboards": {
+        "showNodeIcon": false,
+        "showSearchBox": true,
+        "autoCollapse": false,
+        "collapsedByDefault": false,
+        "tree_data": {
+            "pstream_name": "oia-event-trail-stream",
+            "cfxql_query": "et_processedeventid is '{{INCIDENT_ID}}'",
+            "column_name": "et_id",
+            "display_column": "et_eventstate",
+            "sort_by_column_name": "et_createdat",
+            "sort_order": "desc",
+            "include_icon_url": false,
+            "show_counts": false
+        }
+    },
+    "custom_context": {
+        "trackingDatasetId": "incidents-tracking"
+    },
+    "dashboard_filters": {
+        "time_filter": false,
+        "default_time_filter_non_removable": false,
+        "show_default_time_filter": false
+    },
+    "dashboard_sections": [
+        {
+            "title": "Incident Event",
+            "show_filter": false,
+            "widgets": [
+                {
+                    "title": "Incident event",
+                    "widget_type": "tabular",
+                    "stream": "oia-event-trail-stream",
+                    "ts_column": "et_createdat",
+                    "extra_filter": "et_id is '{{SELECTED_PHASE_TRAIL_ID}}'",
+                    "min_width": 12,
+                    "height": 10,
+                    "max_width": 12,
+                    "paginated": true,
+                    "resizableColumns": false,
+                    "remote_searchable": false,
+                    "refreshRequired": true,
+                    "timebased": false,
+                    "max_rows": 5,
+                    "sorting": [
+                        {
+                            "et_createdat": "desc"
+                        }
+                    ],
+                    "actions": [],
+                    "columns": {
+                        "et_triggeredevent": {
+                            "title": "Operation",
+                            "visible": true,
+                            "defaultWidth": 120
+                        },
+                        "et_eventstate": {
+                            "title": "Phase",
+                            "visible": true,
+                            "defaultWidth": 140
+                        },
+                        "et_status": {
+                            "title": "Status",
+                            "visible": true,
+                            "defaultWidth": 120
+                        },
+                        "et_message": {
+                            "title": "Message",
+                            "visible": true,
+                            "type": "HTML",
+                            "htmlTemplate": "<pre style=\"white-space:pre-wrap;font-family:monospace;font-size:12px;max-height:320px;overflow:auto;margin:0;line-height:1.35\">{{ '{{x.y}}' }}</pre>",
+                            "defaultWidth": 420
+                        },
+                        "et_createdat": {
+                            "title": "Event Created At",
+                            "type": "DATETIME",
+                            "visible": true,
+                            "defaultWidth": 180
+                        }
+                    },
+                    "widget_id": "phaseSel01"
+                }
+            ]
+        },
+        {
+            "title": "Payload",
+            "show_filter": false,
+            "widgets": [
+                {
+                    "title": "Payload",
+                    "widget_type": "summary",
+                    "min_width": 12,
+                    "height": 10,
+                    "refreshRequired": true,
+                    "timebased": false,
+                    "actions": [],
+                    "api-endpoint": {
+                        "service-name": "ingestion-tracker",
+                        "namespace": "io.cfx.dimensions.app",
+                        "version": "*",
+                        "methodName": "invokeAppApi:viewTrackedEventPayload",
+                        "stringified-params": true,
+                        "useReportContext": true,
+                        "parse-output": false,
+                        "params": [
+                            {
+                                "trackingDatasetId": "incidents-tracking",
+                                "et_id": "{{SELECTED_PHASE_TRAIL_ID}}"
+                            }
+                        ]
+                    },
+                    "widget_id": "c9d0e1f2"
+                }
+            ]
+        },
+        {
+            "title": "Incident Event History",
+            "show_filter": false,
+            "widgets": [
+                {
+                    "title": "All Events for this Incident",
+                    "widget_type": "tabular",
+                    "stream": "oia-event-trail-stream",
+                    "ts_column": "et_createdat",
+                    "extra_filter": "et_processedeventid is '{{INCIDENT_ID}}'",
+                    "min_width": 12,
+                    "height": 8,
+                    "max_width": 12,
+                    "paginated": true,
+                    "resizableColumns": false,
+                    "remote_searchable": true,
+                    "remote_searchable_cols": [
+                        "et_eventstate",
+                        "et_status",
+                        "et_message",
+                        "et_triggeredevent"
+                    ],
+                    "refreshRequired": true,
+                    "timebased": false,
+                    "max_rows": 50,
+                    "sorting": [
+                        {
+                            "et_createdat": "desc"
+                        }
+                    ],
+                    "actions": [
+                        {
+                            "permission": "oia:incident:view",
+                            "title": "View Full Details",
+                            "type": "POPUP_FORM",
+                            "selectionType": "SINGLE",
+                            "identifier": "oia:incident.event.view.full.details",
+                            "contextParamList": {
+                                "contextParams": [
+                                    {
+                                        "paramKey": "et_message",
+                                        "paramId": "details"
+                                    }
+                                ]
+                            },
+                            "api-endpoint": {
+                                "service-name": "saas-reports",
+                                "methodName": "getForm",
+                                "stringified-params": true,
+                                "parse-output": false,
+                                "params": [
+                                    {
+                                        "formId": "rda.saas.dynamic.form",
+                                        "formDefinition": {
+                                            "id": "rda.saas.dynamic.form",
+                                            "refreshRequired": false,
+                                            "submitRequired": false,
+                                            "formFieldList": [
+                                                {
+                                                    "fieldId": "details",
+                                                    "label": "Details",
+                                                    "help": "Details",
+                                                    "dataType": "string",
+                                                    "controlType": "HTML_FIELD",
+                                                    "controlPropertyList": [
+                                                        {
+                                                            "attribute": "preserve-ws",
+                                                            "value": true
+                                                        }
+                                                    ],
+                                                    "hidden": false,
+                                                    "editable": false,
+                                                    "required": false
+                                                }
+                                            ]
+                                        },
+                                        "formActionList": {
+                                            "formActions": [
+                                                {
+                                                    "actionLabel": "OK",
+                                                    "type": "CANCEL",
+                                                    "identifier": "OK"
+                                                }
+                                            ]
+                                        }
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "columns": {
+                        "et_eventid": {
+                            "title": "Event Id",
+                            "visible": false,
+                            "key": true,
+                            "defaultWidth": 200
+                        },
+                        "et_triggeredevent": {
+                            "title": "Operation",
+                            "visible": true,
+                            "defaultWidth": 120
+                        },
+                        "et_eventstate": {
+                            "title": "Phase",
+                            "visible": true,
+                            "defaultWidth": 120
+                        },
+                        "et_status": {
+                            "title": "Status",
+                            "visible": true,
+                            "defaultWidth": 120
+                        },
+                        "et_message": {
+                            "title": "Details",
+                            "visible": true,
+                            "formatter": "truncate",
+                            "defaultWidth": 280
+                        },
+                        "et_createdat": {
+                            "title": "Event Created At",
+                            "type": "DATETIME",
+                            "visible": true,
+                            "defaultWidth": 180
+                        }
+                    },
+                    "widget_id": "e5f6a7b8"
+                }
+            ]
+        }
+    ],
+    "saved_time": "2026-04-30T17:21:50.411715"
+}
+

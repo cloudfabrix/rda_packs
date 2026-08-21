@@ -1,0 +1,10 @@
+%% stream = no and limit = 0
+
+@dm:empty
+    --> @dm:addrow name='oia-incidents-stream'
+    --> #dm:query-persistent-stream
+    --> @dm:eval i_starred = "i_starred if (i_starred != '') else 'Not Starred'"
+    --> @dm:eval i_alert_sources = "i_alert_sources if (i_alert_sources != '') else 'Not Available'"
+    --> @dm:eval i_assigned_to = "i_assigned_to if (i_assigned_to != '') else 'Not Assigned'"
+    --> @dm:fixnull-regex columns = '.*' and value='Not Available' and apply_for_empty='yes'
+

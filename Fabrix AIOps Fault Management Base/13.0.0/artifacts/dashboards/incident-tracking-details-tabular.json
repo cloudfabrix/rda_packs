@@ -1,0 +1,205 @@
+{
+    "name": "incident-tracking-details-tabular",
+    "label": "Incident Tracking Details",
+    "description": "OIA Incident Event Tracking Details",
+    "version": "26.5.18.1",
+    "enabled": true,
+    "exportable": false,
+    "dashboard_style": "auto",
+    "dashboard_type": "template",
+    "template_variables": {
+        "INCIDENT_ID": {
+            "default": null,
+            "contextId": "processedeventid"
+        }
+    },
+    "custom_context": {
+        "trackingDatasetId": "incidents-tracking"
+    },
+    "dashboard_filters": {
+        "time_filter": false,
+        "default_time_filter_non_removable": false,
+        "show_default_time_filter": false
+    },
+    "dashboard_sections": [
+        {
+            "title": "Incident Events",
+            "show_filter": false,
+            "widgets": [
+                {
+                    "title": "Incident events",
+                    "widget_type": "tabular",
+                    "stream": "oia-event-trail-stream",
+                    "ts_column": "et_createdat",
+                    "extra_filter": "et_processedeventid is '{{INCIDENT_ID}}'",
+                    "min_width": 12,
+                    "height": 10,
+                    "max_width": 12,
+                    "paginated": true,
+                    "resizableColumns": false,
+                    "remote_searchable": false,
+                    "refreshRequired": true,
+                    "timebased": false,
+                    "sorting": [
+                        {
+                            "et_createdat": "desc"
+                        }
+                    ],
+                    "actions": [
+                        {
+                            "permission": "oia:incident:view",
+                            "title": "View Payload",
+                            "type": "POPUP_FORM",
+                            "selectionType": "SINGLE",
+                            "identifier": "oia:incident.view.latest.message",
+                            "api-endpoint": {
+                                "service-name": "saas-reports",
+                                "methodName": "getForm",
+                                "stringified-params": true,
+                                "parse-output": false,
+                                "params": [
+                                    {
+                                        "formId": "rda.saas.dynamic.form",
+                                        "formDefinition": {
+                                            "id": "rda.saas.dynamic.form",
+                                            "refreshRequired": false,
+                                            "submitRequired": false,
+                                            "formFieldList": [
+                                                {
+                                                    "fieldId": "payload",
+                                                    "label": "Payload",
+                                                    "help": "Payload",
+                                                    "dataType": "string",
+                                                    "controlType": "PYTHON_EDITOR",
+                                                    "required": false,
+                                                    "hidden": false,
+                                                    "sourceType": "pstream",
+                                                    "sourceParams": {
+                                                        "name": "oia-events-payload",
+                                                        "query": "e_id is '$et_eventid'",
+                                                        "valueColumn": "e_sourcepayload",
+                                                        "valueType": "json"
+                                                    },
+                                                    "controlPropertyList": [
+                                                        {
+                                                            "attribute": "mode",
+                                                            "value": "text/json"
+                                                        },
+                                                        {
+                                                            "attribute": "readOnly",
+                                                            "value": true
+                                                        }
+                                                    ],
+                                                    "editable": false
+                                                }
+                                            ]
+                                        },
+                                        "formActionList": {
+                                            "formActions": [
+                                                {
+                                                    "actionLabel": "OK",
+                                                    "type": "CANCEL",
+                                                    "identifier": "OK"
+                                                }
+                                            ]
+                                        }
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "permission": "rda:dataset:view",
+                            "title": "View Message",
+                            "type": "POPUP_REPORT",
+                            "selectionType": "SINGLE",
+                            "identifier": "saas-service-action:dataset-manage-data",
+                            "paginated": false,
+                            "export": false,
+                            "api-endpoint": {
+                                "service-name": "saas-reports",
+                                "methodName": "getReport",
+                                "stringified-params": false,
+                                "parse-output": false,
+                                "params": [
+                                    {
+                                        "reportId": "dynamic_popup_widget",
+                                        "trackingDatasetId": "incidents-tracking",
+                                        "widget": {
+                                            "title": "Event Message",
+                                            "widget_type": "summary",
+                                            "stream": "oia-event-trail-stream",
+                                            "ts_column": "et_createdat",
+                                            "extra_filter": "et_id is '$et_id'",
+                                            "paginated": false,
+                                            "resizableColumns": false,
+                                            "remote_searchable": true,
+                                            "refreshRequired": true,
+                                            "timebased": false,
+                                            "max_rows": 1,
+                                            "sorting": [
+                                                {
+                                                    "et_createdat": "desc"
+                                                }
+                                            ],
+                                            "columns": {
+                                                "et_message": {
+                                                    "title": "Details",
+                                                    "visible": true,
+                                                    "type": "HTML",
+                                                    "htmlTemplate": "<pre style=\"white-space:pre-wrap;font-family:monospace;font-size:12px;overflow:auto;margin:0;line-height:1.35\">{{ '{{x.y}}' }}</pre>"
+                                                }
+                                            }
+                                        }
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "columns": {
+                        "et_triggeredevent": {
+                            "title": "Operation",
+                            "visible": true,
+                            "defaultWidth": 120
+                        },
+                        "et_eventstate": {
+                            "title": "Phase",
+                            "visible": true,
+                            "defaultWidth": 140
+                        },
+                        "et_status": {
+                            "title": "Status",
+                            "visible": true,
+                            "defaultWidth": 120
+                        },
+                        "et_message": {
+                            "title": "Message",
+                            "visible": true,
+                            "htmlTemplate": "<div title='{{ '{{x.y}}' }}' style=\"display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;white-space:normal;word-break:break-word;\">{{ '{{x.y}}' }}</div>",
+                            "defaultWidth": 400
+                        },
+                        "et_createdat": {
+                            "title": "Created At",
+                            "type": "DATETIME",
+                            "visible": true,
+                            "defaultWidth": 180
+                        },
+                        "et_eventid": {
+                            "title": "Event Trail ID",
+                            "visible": false,
+                            "defaultWidth": 180,
+                            "key": true
+                        },
+                        "et_id": {
+                            "title": "Event ID",
+                            "visible": false,
+                            "defaultWidth": 180,
+                            "key": true
+                        }
+                    },
+                    "widget_id": "19864ab9"
+                }
+            ]
+        }
+    ],
+    "saved_time": "2026-05-18T09:08:52.628007"
+}

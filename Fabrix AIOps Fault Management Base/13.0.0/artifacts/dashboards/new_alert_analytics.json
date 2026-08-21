@@ -1,0 +1,661 @@
+{
+    "name": "new_alert_analytics",
+    "label": "Alert Analytics",
+    "description": "Correlation based Analytics",
+    "version": "23.8.30",
+    "enabled": true,
+    "stream": "oia-alerts-stream",
+    "debug": true,
+    "dashboard_style": "auto",
+    "dashboard_type": "template",
+    "template_variables": {
+        "PROJECT_ID": {
+            "default": [
+                "61ed50a5-8634-4464-a17e-adf6b40225b2"
+            ],
+            "contextId": "projectId"
+        }
+    },
+    "status_poller": {
+        "stream": "oia-alerts-stream",
+        "frequency": 15,
+        "columns": [
+            "timestamp"
+        ],
+        "sorting": [
+            {
+                "timestamp": "desc"
+            }
+        ],
+        "query": "timestamp is after '$timestamp'",
+        "defaults": {
+            "timestamp": "$UTCNOW"
+        },
+        "action": "refresh"
+    },
+    "dashboard_filters": {
+        "time_filter": true,
+        "default_time_filter_non_removable": true,
+        "show_default_time_filter": false,
+        "additional_datetime_column_filters": [
+            {
+                "id": "a_created_ts",
+                "label": "Created At"
+            },
+            {
+                "id": "a_updated_ts",
+                "label": "Updated At"
+            }
+        ],
+        "columns_filter": [
+            {
+                "id": "a_incident_id",
+                "label": "Incident",
+                "type": "TEXT"
+            },
+            {
+                "id": "a_id",
+                "label": "Alert Id",
+                "type": "TEXT"
+            },
+            {
+                "id": "a_event_id",
+                "label": "Event Id",
+                "type": "TEXT"
+            },
+            {
+                "id": "a_source_event_id",
+                "label": "Source Event Id",
+                "type": "TEXT"
+            },
+            {
+                "id": "a_en_incidentAnalytics_alerts",
+                "label": "Alerts",
+                "type": "DOUBLE"
+            },
+            {
+                "id": "project_id",
+                "label": "Organizations",
+                "type": "TEXT"
+            },
+            {
+                "id": "a_component_name",
+                "label": "Component Name",
+                "type": "TEXT"
+            },
+            {
+                "id": "a_cluster_label",
+                "label": "Cluster",
+                "type": "TEXT"
+            },
+            {
+                "id": "a_correlation_status",
+                "label": "Correlation Status",
+                "type": "TEXT"
+            },
+            {
+                "id": "a_rule_type",
+                "label": "Policy Type",
+                "type": "TEXT"
+            },
+            {
+                "id": "a_rule_name",
+                "label": "Policy Name",
+                "type": "TEXT"
+            },
+            {
+                "id": "a_source_systemname",
+                "label": "Source",
+                "type": "TEXT"
+            },
+            {
+                "id": "a_created_ts",
+                "label": "Created At",
+                "type": "DATETIME"
+            },
+            {
+                "id": "a_updated_ts",
+                "label": "Updated At",
+                "type": "DATETIME"
+            },
+            {
+                "id": "a_correlation_parent",
+                "label": "Correlation Parent",
+                "type": "TEXT"
+            },
+            {
+                "id": "a_severity",
+                "label": "Severity",
+                "type": "TEXT"
+            },
+            {
+                "id": "a_status",
+                "label": "Monitoring Status",
+                "type": "TEXT"
+            },
+            {
+                "id": "a_alert_category",
+                "label": "Alert Category",
+                "type": "TEXT"
+            },
+            {
+                "id": "a_alert_type",
+                "label": "Alert Type",
+                "type": "TEXT"
+            },
+            {
+                "id": "a_asset_ip_address",
+                "label": "IP Address",
+                "type": "TEXT"
+            },
+            {
+                "id": "a_asset_name",
+                "label": "Asset Name",
+                "type": "TEXT"
+            },
+            {
+                "id": "a_asset_type",
+                "label": "Asset Type",
+                "type": "TEXT"
+            },
+            {
+                "id": "a_source_mechanism",
+                "label": "Source Mechanism",
+                "type": "TEXT"
+            },
+            {
+                "id": "a_source_event_id",
+                "label": "Source Event Id",
+                "type": "TEXT"
+            },
+            {
+                "id": "a_message",
+                "label": "Message",
+                "type": "TEXT"
+            },
+            {
+                "id": "a_en_stack_name",
+                "label": "Stack Name",
+                "type": "TEXT"
+            },
+            {
+                "id": "customer_id",
+                "label": "Customer ID",
+                "type": "TEXT"
+            },
+            {
+                "id": "a_en_node_id",
+                "label": "Node ID",
+                "type": "TEXT"
+            },
+            {
+                "id": "a_raised_ts",
+                "label": "Raised At",
+                "type": "DATETIME"
+            },
+            {
+                "id": "a_en_fqdn",
+                "label": "Fully Qualified Domain Name",
+                "type": "TEXT"
+            },
+            {
+                "id": "a_repeat_count",
+                "label": "Repeat Count",
+                "type": "DOUBLE"
+            },
+            {
+                "id": "a_cluster_score",
+                "label": "Cluster Score",
+                "type": "DOUBLE"
+            },
+            {
+                "id": "a_cleared_ts",
+                "label": "Cleared At",
+                "type": "DATETIME"
+            },
+            {
+                "id": "a_sourceeventreceivedat_ts",
+                "label": "Cleared At",
+                "type": "DATETIME"
+            },
+            {
+                "id": "a_raisedreceivedat_ts",
+                "label": "Cleared At",
+                "type": "DATETIME"
+            },
+            {
+                "id": "a_clearreceivedat_ts",
+                "label": "Cleared At",
+                "type": "DATETIME"
+            },
+            {
+                "id": "a_cleared_by",
+                "label": "Cleared By",
+                "type": "TEXT"
+            },
+            {
+                "id": "a_clearcode",
+                "label": "Clear Code",
+                "type": "TEXT"
+            },
+            {
+                "id": "a_clear_message",
+                "label": "Clear Message",
+                "type": "TEXT"
+            }
+        ],
+        "default_time_filter_labels": [
+            "Last 24 hours"
+        ],
+        "extra_filter": "project_id in {{PROJECT_ID}} and a_source_systemname is not-in 'Alert Group' and a_correlation_status not-in 'AGGREGATE' ",
+        "group_filters": [
+            {
+                "stream": "oia-alerts-stream",
+                "title": "Source",
+                "group_by": [
+                    "a_source_systemname"
+                ],
+                "ts_column": "a_updated_ts",
+                "agg": "value_count",
+                "column": "a_id",
+                "type": "str"
+            },
+            {
+                "stream": "oia-alerts-stream",
+                "title": "Monitoring Status",
+                "group_by": [
+                    "a_status"
+                ],
+                "ts_column": "a_updated_ts",
+                "agg": "value_count",
+                "column": "a_id",
+                "type": "str"
+            },
+            {
+                "stream": "oia-alerts-stream",
+                "title": "Correlation Status",
+                "group_by": [
+                    "a_correlation_status"
+                ],
+                "ts_column": "a_updated_ts",
+                "agg": "value_count",
+                "column": "a_id",
+                "type": "str"
+            },
+            {
+                "stream": "oia-alerts-stream",
+                "title": "Severity",
+                "group_by": [
+                    "a_severity"
+                ],
+                "ts_column": "a_updated_ts",
+                "agg": "value_count",
+                "column": "a_id",
+                "type": "str"
+            },
+            {
+                "stream": "oia-alerts-stream",
+                "title": "Policy",
+                "group_by": [
+                    "a_rule_name"
+                ],
+                "ts_column": "a_updated_ts",
+                "agg": "value_count",
+                "column": "a_id",
+                "type": "str"
+            },
+            {
+                "stream": "oia-alerts-stream",
+                "title": "Cluster",
+                "group_by": [
+                    "a_cluster_label"
+                ],
+                "ts_column": "a_updated_ts",
+                "agg": "value_count",
+                "column": "a_id",
+                "type": "str"
+            },
+            {
+                "stream": "oia-alerts-stream",
+                "title": "Organizations",
+                "group_by": [
+                    "project_id"
+                ],
+                "ts_column": "a_updated_ts",
+                "agg": "value_count",
+                "column": "project_id",
+                "type": "str"
+            }
+        ]
+    },
+    "dashboard_sections": [
+        {
+            "title": "alerts Analytics",
+            "show_filter": true,
+            "widgets": [
+                {
+                    "title": "SDWAN Alerts",
+                    "widget_type": "counter",
+                    "stream": "oia-alerts-stream",
+                    "extra_filter": "a_source_mechanism is 'SDWAN-Normalized'",
+                    "ts_column": "a_updated_ts",
+                    "column": "count_",
+                    "agg": "sum",
+                    "min_width": 4,
+                    "height": 2.5,
+                    "max_width": 4,
+                    "type": "str",
+                    "style": {
+                        "color-map": {
+                            "CLEARED": "#4CAF50",
+                            "ACTIVE": "#FFA726"
+                        }
+                    },
+                    "group_by": [
+                        "a_status"
+                    ],
+                    "widget_id": "e25816e5"
+                },
+                {
+                    "title": "Application",
+                    "widget_type": "counter",
+                    "stream": "oia-alerts-stream",
+                    "extra_filter": "a_source_mechanism is 'AppDynamicsEUMApplication'",
+                    "ts_column": "a_updated_ts",
+                    "column": "count_",
+                    "agg": "sum",
+                    "min_width": 4,
+                    "height": 2.5,
+                    "max_width": 4,
+                    "type": "str",
+                    "style": {
+                        "color-map": {
+                            "CLEARED": "#4CAF50",
+                            "ACTIVE": "#FFA726"
+                        }
+                    },
+                    "group_by": [
+                        "a_status"
+                    ],
+                    "widget_id": "f731370a"
+                },
+                {
+                    "title": "Edge",
+                    "widget_type": "counter",
+                    "stream": "oia-alerts-stream",
+                    "extra_filter": "a_source_mechanism is 'ThousandEyesEndpointNetE2E'",
+                    "ts_column": "a_updated_ts",
+                    "column": "count_",
+                    "agg": "sum",
+                    "min_width": 4,
+                    "height": 2.5,
+                    "max_width": 4,
+                    "type": "str",
+                    "style": {
+                        "color-map": {
+                            "CLEARED": "#4CAF50",
+                            "ACTIVE": "#FFA726"
+                        }
+                    },
+                    "group_by": [
+                        "a_status"
+                    ],
+                    "widget_id": "3ad1ed19"
+                },
+                {
+                    "title": "Device Performance Alerts",
+                    "widget_type": "counter",
+                    "stream": "oia-alerts-stream",
+                    "extra_filter": "a_source_systemname is 'Performance Metrics' ",
+                    "ts_column": "a_updated_ts",
+                    "column": "count_",
+                    "agg": "sum",
+                    "min_width": 6,
+                    "height": 2.5,
+                    "max_width": 6,
+                    "style": {
+                        "color-map": {
+                            "CLEARED": "#4CAF50",
+                            "ACTIVE": "#FFA726"
+                        }
+                    },
+                    "group_by": [
+                        "a_status"
+                    ],
+                    "type": "str",
+                    "widget_id": "3b2d6cb4"
+                },
+                {
+                    "title": "Network Logs",
+                    "widget_type": "counter",
+                    "stream": "oia-alerts-stream",
+                    "extra_filter": "a_source_systemname is 'Syslog Event Stream' ",
+                    "ts_column": "a_updated_ts",
+                    "column": "count_",
+                    "agg": "sum",
+                    "min_width": 6,
+                    "height": 2.5,
+                    "max_width": 6,
+                    "style": {
+                        "color-map": {
+                            "CLEARED": "#4CAF50",
+                            "ACTIVE": "#FFA726"
+                        }
+                    },
+                    "group_by": [
+                        "a_status"
+                    ],
+                    "widget_id": "f4112adb"
+                },
+                {
+                    "title": "Assets",
+                    "widget_type": "tabular",
+                    "stream": "oia-alerts-stream",
+                    "ts_column": "a_updated_ts",
+                    "extra_filter": "a_asset_name is not empty",
+                    "columns": {
+                        "a_asset_name": "Asset",
+                        "value": "Count"
+                    },
+                    "pivot": {
+                        "group_by": [
+                            "a_asset_name"
+                        ],
+                        "column": "count_",
+                        "agg": "sum"
+                    },
+                    "min_width": 4,
+                    "height": 5,
+                    "max_width": 4,
+                    "widget_id": "e6f19026"
+                },
+                {
+                    "title": "Impacted Sites",
+                    "widget_type": "tabular",
+                    "stream": "oia-alerts-stream",
+                    "ts_column": "a_updated_ts",
+                    "extra_filter": "a_en_site is not empty",
+                    "columns": {
+                        "a_asset_name": "Site",
+                        "value": "Count"
+                    },
+                    "pivot": {
+                        "group_by": [
+                            "a_en_site"
+                        ],
+                        "column": "count_",
+                        "agg": "sum"
+                    },
+                    "min_width": 4,
+                    "height": 5,
+                    "max_width": 4,
+                    "widget_id": "e6f19026"
+                },
+                {
+                    "title": "User Experience",
+                    "widget_type": "tabular",
+                    "stream": "oia-alerts-stream",
+                    "ts_column": "a_updated_ts",
+                    "extra_filter": "a_en_site is not empty",
+                    "columns": {
+                        "a_asset_name": "Site",
+                        "metric": "Metric",
+                        "value": "Value"
+                    },
+                    "pivot": {
+                        "group_by": [
+                            "a_en_site",
+                            "a_en_metric"
+                        ],
+                        "column": "metric_value",
+                        "agg": "max"
+                    },
+                    "min_width": 4,
+                    "height": 5,
+                    "max_width": 4,
+                    "widget_id": "e6f19026"
+                },
+                {
+                    "title": "Alerts",
+                    "widget_type": "tabular",
+                    "stream": "oia-alerts-stream",
+                    "ts_column": "a_updated_ts",
+                    "min_width": 12,
+                    "height": 10,
+                    "max_width": 12,
+                    "paginated": true,
+                    "refreshRequired": true,
+                    "timebased": false,
+                    "max_rows": 50,
+                    "columns": {
+                        "a_id": {
+                            "title": "Alert Id",
+                            "visible": false,
+                            "key": true
+                        },
+                        "a_message": {
+                            "title": "Message",
+                            "formatter": "truncate"
+                        },
+                        "a_event_id": {
+                            "title": "Event Id",
+                            "description": "Id of the ingestion-tracker event",
+                            "visible": false,
+                            "key": true
+                        },
+                        "a_source_event_id": {
+                            "title": "Source Event ID",
+                            "visible": false
+                        },
+                        "a_severity_color": {
+                            "title": "Sev_2",
+                            "type": "COLOR-MAP",
+                            "source-column": "a_severity",
+                            "color-map": {
+                                "SEVERE": "#B71C1C",
+                                "CRITICAL": "#E53935",
+                                "MAJOR": "#F57C00",
+                                "MINOR": "#FFA726",
+                                "WARNING": "#FFD54F",
+                                "NOTIFICATION": "#4DD0E1",
+                                "INFORMATION": "#03A9F4"
+                            }
+                        },
+                        "a_severity": {
+                            "title": "Severity",
+                            "htmlTemplateForRow": "<span class='badge' style='background-color: {{'{{ row.a_severity_color }}'}}' > {{'{{ row.a_severity }}'}} </span>"
+                        },
+                        "a_state_color": {
+                            "type": "COLOR-MAP",
+                            "source-column": "a_status",
+                            "color-map": {
+                                "CLEARED": "#4CAF50",
+                                "ACTIVE": "#FFA726"
+                            }
+                        },
+                        "a_status": {
+                            "title": "Monitoring Status",
+                            "htmlTemplateForRow": "<span class='badge' style='background-color: {{'{{ row.a_state_color }}'}}' > {{'{{ row.a_status }}'}} </span>"
+                        },
+                        "a_raised_ts": {
+                            "title": "Raised At",
+                            "type": "DATETIME",
+                            "visible": false
+                        },
+                        "a_cleared_ts": {
+                            "title": "Cleared At",
+                            "type": "DATETIME"
+                        },
+                        "a_created_ts": {
+                            "title": "Created At",
+                            "type": "DATETIME"
+                        },
+                        "a_updated_ts": {
+                            "title": "Updated At",
+                            "type": "DATETIME"
+                        },
+                        "a_incident_id": {
+                            "title": "Incident",
+                            "key": true
+                        },
+                        "a_en_fqdn": "Fully Qualified Domain Name",
+                        "a_source_systemname": "Source",
+                        "a_repeat_count": {
+                            "title": "Repeat Count",
+                            "type": "DOUBLE",
+                            "visible": false
+                        },
+                        "a_en_stack_name": {
+                            "title": "Stack Name",
+                            "visible": false
+                        },
+                        "a_en_node_id": {
+                            "title": "Node ID",
+                            "visible": false,
+                            "hidden": true
+                        },
+                        "a_cleared_by": {
+                            "title": "Cleared By",
+                            "visible": false
+                        },
+                        "a_clearcode": {
+                            "title": "Clear Code",
+                            "visible": false
+                        },
+                        "a_clear_message": {
+                            "title": "Clear Message",
+                            "visible": false
+                        },
+                        "a_cause_notes": {
+                            "title": "Cause Notes",
+                            "visible": false
+                        },
+                        "customer_id": {
+                            "title": "Customer Id",
+                            "visible": false,
+                            "hidden": false,
+                            "key": true
+                        },
+                        "project_id": {
+                            "title": "Project Id",
+                            "visible": false,
+                            "hidden": false,
+                            "key": true
+                        },
+                        "alert-context": {
+                            "title": "alert-context",
+                            "value": true,
+                            "key": true,
+                            "type": "FIXED_VALUE",
+                            "hidden": true,
+                            "visible": false
+                        }
+                    },
+                    "widget_id": "b773c517"
+                }
+            ]
+        }
+    ],
+    "saved_time": "2023-08-31T01:50:23.394920"
+}
+

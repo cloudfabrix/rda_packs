@@ -1,0 +1,22 @@
+@c:new-block  
+-->  @dm:empty    
+-->  @dm:addrow     metric_filter="metric_label contains '(CPU|Response|Memory|Utilization)'" and metric_source="me-apm"
+-->  @dm:addrow     metric_filter="metric_label contains '(cpu|memory|Memory|disk)'" and metric_source="me-apm"
+-->  @dm:addrow     metric_filter="help contains '(CPU|Response|Memory|Utilization)'" and metric_source="prometheus"
+-->  @dm:addrow     metric_filter="help contains '(cpu|memory|disk)'" and metric_source="prometheus"
+-->  @dm:addrow     metric_filter="(key matches '((mem|cpu|net)\|usage_average)' or key is 'diskspace|used')" and metric_source="vRops"
+-->  @dm:addrow     metric_filter='metric_id contains "cpu.usage" and asset_id in ["APPLICATION-2545E1F11A7AC0E7","SERVICE-57A595D1763DEC45","SERVICE-93BB4975DCF98498","SERVICE_INSTANCE-5CFC3F048290FE3D","PROCESS_GROUP-64DFA3218797AA9F","SERVICE-AF32863CF72CC2E0","SERVICE_INSTANCE-0A1653FFCA658088","SERVICE_INSTANCE-239DF04C1C565882","PROCESS_GROUP-BEB356CD80314588","HOST-D52EF0382CF8F572","HOST-2ED93C66FD46DAC5","us-east-1a"]' and metric_source="dynatrace"
+-->  @dm:addrow     metric_filter='metric_id contains "mem.usage" and asset_id in ["APPLICATION-2545E1F11A7AC0E7","SERVICE-57A595D1763DEC45","SERVICE-93BB4975DCF98498","SERVICE_INSTANCE-5CFC3F048290FE3D","PROCESS_GROUP-64DFA3218797AA9F","SERVICE-AF32863CF72CC2E0","SERVICE_INSTANCE-0A1653FFCA658088","SERVICE_INSTANCE-239DF04C1C565882","PROCESS_GROUP-BEB356CD80314588","HOST-D52EF0382CF8F572","HOST-2ED93C66FD46DAC5","us-east-1a"]' and metric_source="dynatrace"
+-->  @dm:addrow     metric_filter='metric_id contains "disk.free" and asset_id in ["APPLICATION-2545E1F11A7AC0E7","SERVICE-57A595D1763DEC45","SERVICE-93BB4975DCF98498","SERVICE_INSTANCE-5CFC3F048290FE3D","PROCESS_GROUP-64DFA3218797AA9F","SERVICE-AF32863CF72CC2E0","SERVICE_INSTANCE-0A1653FFCA658088","SERVICE_INSTANCE-239DF04C1C565882","PROCESS_GROUP-BEB356CD80314588","HOST-D52EF0382CF8F572","HOST-2ED93C66FD46DAC5","us-east-1a"]' and metric_source="dynatrace"
+-->  @dm:addrow     metric_filter='metric_id contains "builtin:cloud.cloudfoundry.http.latency" and asset_id in ["APPLICATION-2545E1F11A7AC0E7"]' and metric_source="dynatrace"
+-->  @dm:addrow     metric_filter='metric_id contains "builtin:tech.generic.network.responsiveness" and asset_id in ["APPLICATION-2545E1F11A7AC0E7"]' and metric_source="dynatrace"
+-->  @dm:addrow     metric_filter='metric_id contains "builtin:host.net.nic.packets.droppedRx" and asset_id in ["SERVICE-57A595D1763DEC45"]' and metric_source="dynatrace"
+-->  @dm:addrow     metric_filter='metric_id contains "builtin:cloud.vmware.hypervisor.nic.packetsTxDropped" and asset_id in ["SERVICE-57A595D1763DEC45"]' and metric_source="dynatrace"
+-->  @dm:addrow     metric_filter='metric_id contains "builtin:tech.generic.network.sessions.timeoutLocal" and asset_id in ["SERVICE-57A595D1763DEC45"]' and metric_source="dynatrace"
+-->  @dm:addrow     metric_filter='metric_id contains "builtin:service.keyRequest.ioTime" and asset_id in ["SERVICE-57A595D1763DEC45"]' and metric_source="dynatrace"
+-->  @dm:addrow     metric_filter='metric_id contains "builtin:apps.web.activeSessions" and asset_id in ["APPLICATION-2545E1F11A7AC0E7"]' and metric_source="dynatrace"
+-->  @dm:addrow     metric_filter='metric_id contains "builtin:apps.web.conversionRate" and asset_id in ["APPLICATION-2545E1F11A7AC0E7"]' and metric_source="dynatrace"
+-->  @dm:addrow     metric_filter='metric_id contains "builtin:service.totalProcessingTime" and asset_id in ["SERVICE-57A595D1763DEC45"]' and metric_source="dynatrace"
+-->  @dm:addrow     metric_filter='metric_id contains "builtin:service.response.time" and asset_id in ["SERVICE-57A595D1763DEC45"]' and metric_source="dynatrace"
+-->  @dm:addrow     metric_filter='metric_id contains "builtin:service.ioTime" and asset_id in ["SERVICE-57A595D1763DEC45"]' and metric_source="dynatrace"
+-->  @dm:save     name='oia-metric_selection_rules'
