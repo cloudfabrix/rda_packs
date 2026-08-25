@@ -1,0 +1,69 @@
+name: vmanage_service_single_tenant
+id: vmanage_perf_pack 
+version: '2024_12_17'
+category: vManage
+comment: vManage Performance & Inventory Collection
+enabled: true
+type: Service
+auto_deploy: false
+provider: CloudFabrix Software Inc.
+attrs: {
+
+}
+run_context: {
+
+}
+scheduled_pipelines:
+
+    -   name: vmanage_perf_access_verification_status
+        label: vManage Access Verification Status
+        version: '*'
+        site: .*
+        cron_expression: 0 4 * * *
+        site_type: regex
+        instances: 1
+        scaling_policy:
+            min_instances: 1
+            max_instances: 1
+
+    -   name: inventory_pipeline
+        label: vManage Inventory Collection
+        version: '*'
+        site: .*
+        cron_expression: 0 */6 * * *
+        site_type: regex
+        instances: 1
+        scaling_policy:
+            min_instances: 1
+            max_instances: 1
+    -   name: performance_pipeline
+        label: vManage Performance Metrics
+        version: '*'
+        site: .*
+        cron_expression: 15 */6 * * *
+        site_type: regex
+        instances: 1
+        scaling_policy:
+            min_instances: 1
+            max_instances: 1
+    -   name: advanced_visibility_pipeline
+        label: vManage Advanced Visibility
+        version: '*'
+        site: .*
+        cron_expression: 30 */6 * * *
+        site_type: regex
+        instances: 1
+        scaling_policy:
+            min_instances: 1
+            max_instances: 1
+    -   name: alerts_pipeline
+        label: vManage Alerts & Events
+        version: '*'
+        site: .*
+        cron_expression: 45 */6 * * *
+        site_type: regex
+        instances: 1
+        scaling_policy:
+            min_instances: 1
+            max_instances: 1
+

@@ -1,0 +1,11 @@
+Value INTERFACE (\S+)
+Value IP_ADDRESS (\S+)
+Value STATUS (up|down|Up|Down|administratively down|Shutdown)
+Value PROTO (up|down|Up|Down)
+
+Start
+  ^${INTERFACE}\s+${IP_ADDRESS}\s+${STATUS}\s+${PROTO}\s+\S+ -> Record
+  # Capture time-stamp if vty line has command time-stamping turned on
+  ^Load\s+for\s+
+  ^Time\s+source\s+is
+  ^\w+\s+\w+\s+\d+\s+\d+:\d+:\d+\.\d+\s+\w+

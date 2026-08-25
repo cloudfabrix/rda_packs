@@ -1,0 +1,137 @@
+name: Topology Training
+label: Topology Training Collection
+scope: system
+# Pack version needs to be conforming to <major>.<minor>.<micro> etc versioning.
+# More detailed spec for versioning: https://packaging.python.org/en/latest/specifications/version-specifiers/
+version: 1.0.0
+folder: /collection/topology_training_collection
+published_date: 2026-08-19
+publisher: Fabrix.ai
+# Description of the package. Supports HTML/markdown/plain text
+# Either can provide description as an inline string in this file
+# or have description.html and description.md and give corresponding file paths instead.
+# If description is provided by multiple ways, the order of precedence is description.md > description.html > description.value
+description: 
+  #value: "Host OS inventory collection for single tenant deployments."
+  md: "./description.md"
+
+# Type could be collection/feature
+type: collection
+
+
+
+# Other packs that this solution requires to be deployed
+requires:
+  - name: Fabrix Inventory Collection Base Pack
+    version: ">=7.2.1"
+
+fabric_services:
+ - name: worker
+   version: ">=8.2.1"
+ - name: api-server
+   version: ">=8.2.1"
+
+launch_dashboard: topology_training_app
+
+run_on_activation:
+   run_parallel: false
+   pipelines:
+     - name: pushing_data_to_nodes
+       version: 2026.08.19.1
+       timeout: 40
+     - name: pushing_data_to_edges
+       version: 2026.08.19.1
+       timeout: 40
+
+artifacts:
+  
+  pstreams:
+    - name: topology_training_nodes
+      autocreate: true
+      remove_on_deactivation: true
+    - name: topology_training_edges
+      autocreate: true
+      remove_on_deactivation: true
+   
+  pipelines:
+    - name: pushing_data_to_nodes
+      version: 2026.08.19.1
+      file: ./artifacts/pipelines/pushing_data_to_nodes.txt
+      folder: TopologyTraining
+    
+    - name: pushing_data_to_edges
+      version: 2026.08.19.1
+      file: ./artifacts/pipelines/pushing_data_to_edges.txt
+      folder: TopologyTraining   
+  
+  dashboards:
+    - name: asset_navigator_topology_training_with_graphdb
+      file: ./artifacts/dashboards/asset_navigator_topology_training_with_graphdb.json     
+    
+    - name: customer_topology_docs
+      file: ./artifacts/dashboards/customer_topology_docs.json 
+
+    - name: customer_topology_with_graphdb
+      file: ./artifacts/dashboards/customer_topology_with_graphdb.json
+    
+    - name: topology_view
+      file: ./artifacts/dashboards/topology_view.json
+
+    - name: topology_views_doc
+      file: ./artifacts/dashboards/topology_views_doc.json
+
+    - name: navigation_dashboard_variations_docs
+      file: ./artifacts/dashboards/navigation_dashboard_variations_docs.json
+    
+    - name: topology-training-graphdb1
+      file: ./artifacts/dashboards/topology-training-graphdb1.json
+    
+    - name: topology_training_app
+      file: ./artifacts/dashboards/topology_training_app.json
+
+    - name: training_topology_workbench
+      file: ./artifacts/dashboards/training_topology_workbench.json
+    
+    - name: preview_topology_training_dashboard
+      file: ./artifacts/dashboards/preview_topology_training_dashboard.json
+    
+    - name: topology_drill_down_for_incidents
+      file: ./artifacts/dashboards/topology_drill_down_for_incidents.json
+    
+    - name: topology_node_details_app
+      file: ./artifacts/dashboards/topology_node_details_app.json
+    
+    - name: topology_drill_down_for_alerts
+      file: ./artifacts/dashboards/topology_drill_down_for_alerts.json
+    
+  stacks:
+    - name: pet-clininc-with-graph
+      file: ./artifacts/stacks/pet-clininc-with-graph.json
+      remove_on_deactivation: true
+    - name: rdaf_topology_alert_badging
+      file: ./artifacts/stacks/rdaf_topology_alert_badging.json
+      remove_on_deactivation: true
+   
+
+  
+  datasets:
+    - name: cfx_rdaf_topology_edges_documents
+      data_file: ./data/cfx_rdaf_topology_edges_documents.csv
+      remove_on_deactivation: true
+      folder: Topology Training
+    - name: cfx_rdaf_topology_nodes_documents
+      data_file: ./data/cfx_rdaf_topology_nodes_documents.csv
+      remove_on_deactivation: true
+      folder: Topology Training
+
+
+
+  graphdbs:
+    - name: topology_training
+      delete_collection: true
+      delete_database: true
+      remove_on_deactivation: true
+
+
+
+  

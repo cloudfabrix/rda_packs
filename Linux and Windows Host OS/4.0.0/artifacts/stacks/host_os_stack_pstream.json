@@ -1,0 +1,23 @@
+{
+    "name": "host_os",
+    "description": " ",
+    "saved_time": "2026-06-09T07:10:20.843395",
+    "is_dynamic": true,
+    "hierarchical": true,
+    "dynamic_nodes": {
+        "column_name": "node_type",
+        "db_name": "cfx_rdaf_topology",
+        "nodes_collection": "cfx_rdaf_topology_nodes",
+        "stream": "graphdb://cfx_rdaf_topology/cfx_rdaf_topology_nodes",
+        "query": "node_type in ['Host_OS','OS_Service'] and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty or customer_tag is '' or customer_tag is 'None')"
+    },
+    "dynamic_relationships": {
+        "db_name": "cfx_rdaf_topology",
+        "edges_collection": "cfx_rdaf_topology_edges",
+        "stream": "graphdb://cfx_rdaf_topology/cfx_rdaf_topology_edges",
+        "graph_name": "cfx_rdaf_topology_graph",
+        "relation_map": "rdaf_topology_relationships",
+        "query": "left_node_type in ['Host_OS'] and right_node_type in ['OS_Service'] and inventory_source in ['linux_services_info','windows_os_services_inventory'] and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty or customer_tag is '' or customer_tag is 'None')"
+    },
+    "display_options": null
+}

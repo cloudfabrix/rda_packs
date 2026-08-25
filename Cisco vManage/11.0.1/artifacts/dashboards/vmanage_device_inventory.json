@@ -1,0 +1,930 @@
+{
+    "name": "vmanage_device_inventory",
+    "label": "Device Inventory and Assets",
+    "description": "Fleet overview, controllers, vedge provisioning, and interface inventory with operational KPIs.",
+    "dashboard_folder": "VmanagePerformance",
+    "version": "26.06.19.1",
+    "live_edit": true,
+    "enabled": true,
+    "template_variables": {
+        "CUST_TAG": {
+            "contextId": "customerTag"
+        },
+        "PROJ_ID": {
+            "contextId": "projectId"
+        }
+    },
+    "stream": "vmanage_inventory",
+    "dashboard_type": "template",
+    "dashboard_filters": {
+        "time_filter": true,
+        "extra_filter": "(customer_tag is '{{CUST_TAG}}' or customer_tag is empty or customer_tag is '' or customer_tag is 'None')",
+        "default_time_filter_labels": [
+            "Last 1 month"
+        ],
+        "columns_filter": [
+            {
+                "id": "reachability",
+                "label": "Reachability",
+                "type": "TEXT"
+            },
+            {
+                "id": "status",
+                "label": "Status",
+                "type": "TEXT"
+            },
+            {
+                "id": "personality",
+                "label": "Personality",
+                "type": "TEXT"
+            },
+            {
+                "id": "device-type",
+                "label": "Device Type",
+                "type": "TEXT"
+            },
+            {
+                "id": "asset_object",
+                "label": "Asset Type",
+                "type": "TEXT"
+            },
+            {
+                "id": "entity_type",
+                "label": "Entity Type",
+                "type": "TEXT"
+            }
+        ]
+    },
+    "dashboard_sections": [
+        {
+            "title": "Fleet overview",
+            "show_filter": true,
+            "widgets": [
+                {
+                    "title": "Total devices",
+                    "widget_type": "custom_counter",
+                    "stream": "vmanage_inventory",
+                    "ts_column": "collection_timestamp",
+                    "column": "deviceId",
+                    "agg": "value_count",
+                    "type": "int",
+                    "min_width": 3,
+                    "max_width": 3,
+                    "height": 4,
+                    "widget_id": "di_dev_cnt",
+                    "style": {
+                        "color-list": [
+                            "#3B82F6"
+                        ]
+                    },
+                    "extra_filter": "asset_object is 'Device'"
+                },
+                {
+                    "title": "Total interfaces",
+                    "widget_type": "custom_counter",
+                    "stream": "vmanage_inventory",
+                    "ts_column": "collection_timestamp",
+                    "column": "unique_id",
+                    "agg": "value_count",
+                    "type": "int",
+                    "min_width": 3,
+                    "max_width": 3,
+                    "height": 4,
+                    "widget_id": "di_if_cnt",
+                    "style": {
+                        "color-list": [
+                            "#3B82F6"
+                        ]
+                    },
+                    "extra_filter": "asset_object is 'Interface'"
+                },
+                {
+                    "title": "Distinct software versions",
+                    "widget_type": "custom_counter",
+                    "stream": "vmanage_inventory",
+                    "ts_column": "collection_timestamp",
+                    "column": "version_x",
+                    "agg": "cardinality",
+                    "type": "int",
+                    "min_width": 3,
+                    "max_width": 3,
+                    "height": 4,
+                    "widget_id": "di_ver_card",
+                    "style": {
+                        "color-list": [
+                            "#3B82F6"
+                        ]
+                    },
+                    "extra_filter": "asset_object is 'Device'"
+                },
+                {
+                    "title": "Devices by personality",
+                    "widget_type": "pie_chart",
+                    "stream": "vmanage_inventory",
+                    "ts_column": "collection_timestamp",
+                    "duration_hours": 720,
+                    "min_width": 3,
+                    "max_width": 3,
+                    "height": 5,
+                    "group_by": [
+                        "personality"
+                    ],
+                    "column": "deviceId",
+                    "agg": "value_count",
+                    "chartProperties": {
+                        "legendLocation": "right"
+                    },
+                    "widget_id": "di_pie_pers",
+                    "extra_filter": "asset_object is 'Device'",
+                    "style": {
+                        "color-list": [
+                            "#2563EB",
+                            "#7C3AED",
+                            "#0891B2",
+                            "#059669",
+                            "#D97706",
+                            "#DC2626",
+                            "#DB2777",
+                            "#4F46E5",
+                            "#0D9488",
+                            "#CA8A04",
+                            "#9333EA",
+                            "#0284C7",
+                            "#16A34A",
+                            "#EA580C",
+                            "#64748B"
+                        ]
+                    }
+                },
+                {
+                    "title": "Devices by platform",
+                    "widget_type": "counter",
+                    "stream": "vmanage_inventory",
+                    "ts_column": "collection_timestamp",
+                    "duration_hours": 720,
+                    "min_width": 4,
+                    "max_width": 4,
+                    "height": 4,
+                    "group_by": [
+                        "platform"
+                    ],
+                    "column": "deviceId",
+                    "agg": "value_count",
+                    "widget_id": "di_plat_ctr",
+                    "extra_filter": "asset_object is 'Device'",
+                    "style": {
+                        "color-map": {
+                            "x86_64": "#3B82F6",
+                            "c8000v": "#8B5CF6"
+                        }
+                    }
+                },
+                {
+                    "title": "Device state",
+                    "widget_type": "counter",
+                    "stream": "vmanage_inventory",
+                    "ts_column": "collection_timestamp",
+                    "duration_hours": 720,
+                    "min_width": 4,
+                    "max_width": 4,
+                    "height": 4,
+                    "group_by": [
+                        "state_description_x"
+                    ],
+                    "column": "deviceId",
+                    "agg": "value_count",
+                    "widget_id": "di_state_ctr",
+                    "style": {
+                        "color-map": {
+                            "All daemons up": "#22C55E",
+                            "green": "#22C55E",
+                            "Green": "#22C55E",
+                            "yellow": "#F59E0B",
+                            "Yellow": "#F59E0B",
+                            "red": "#EF4444",
+                            "Red": "#EF4444"
+                        }
+                    },
+                    "extra_filter": "asset_object is 'Device'"
+                },
+                {
+                    "title": "Device type",
+                    "widget_type": "counter",
+                    "stream": "vmanage_inventory",
+                    "ts_column": "collection_timestamp",
+                    "duration_hours": 720,
+                    "min_width": 4,
+                    "max_width": 4,
+                    "height": 4,
+                    "group_by": [
+                        "device-type"
+                    ],
+                    "column": "deviceId",
+                    "agg": "value_count",
+                    "style": {
+                        "color-map": {
+                            "vedge": "#3B82F6",
+                            "vsmart": "#8B5CF6",
+                            "vbond": "#06B6D4",
+                            "vmanage": "#9CA3AF"
+                        }
+                    },
+                    "widget_id": "di_type_ctr",
+                    "extra_filter": "asset_object is 'Device'"
+                },
+                {
+                    "title": "Devices by software version",
+                    "widget_type": "bar_chart",
+                    "stream": "vmanage_inventory",
+                    "ts_column": "collection_timestamp",
+                    "duration_hours": 720,
+                    "min_width": 6,
+                    "max_width": 6,
+                    "height": 5,
+                    "chartProperties": {
+                        "yAxisLabel": "Device count",
+                        "xAxisLabel": "Version",
+                        "orientation": "vertical"
+                    },
+                    "group_by": [
+                        "version_x"
+                    ],
+                    "column": "deviceId",
+                    "agg": "value_count",
+                    "style": {
+                        "color-list": [
+                            "#2563EB",
+                            "#7C3AED",
+                            "#0891B2",
+                            "#059669",
+                            "#D97706",
+                            "#DC2626",
+                            "#DB2777",
+                            "#4F46E5",
+                            "#0D9488",
+                            "#CA8A04",
+                            "#9333EA",
+                            "#0284C7",
+                            "#16A34A",
+                            "#EA580C",
+                            "#64748B"
+                        ]
+                    },
+                    "widget_id": "di_bar_ver",
+                    "extra_filter": "asset_object is 'Device'"
+                },
+                {
+                    "title": "Devices by status",
+                    "widget_type": "pie_chart",
+                    "stream": "vmanage_inventory",
+                    "ts_column": "collection_timestamp",
+                    "duration_hours": 720,
+                    "min_width": 6,
+                    "max_width": 6,
+                    "height": 5,
+                    "group_by": [
+                        "status"
+                    ],
+                    "column": "deviceId",
+                    "agg": "value_count",
+                    "chartProperties": {
+                        "legendLocation": "right"
+                    },
+                    "style": {
+                        "color-map": {
+                            "normal": "#22C55E",
+                            "Normal": "#22C55E",
+                            "warning": "#F59E0B",
+                            "Warning": "#F59E0B",
+                            "critical": "#EF4444",
+                            "Critical": "#EF4444",
+                            "error": "#EF4444",
+                            "Error": "#EF4444"
+                        }
+                    },
+                    "widget_id": "di_pie_status",
+                    "extra_filter": "asset_object is 'Device'"
+                },
+                {
+                    "title": "Devices by model",
+                    "widget_type": "bar_chart",
+                    "stream": "vmanage_inventory",
+                    "ts_column": "collection_timestamp",
+                    "duration_hours": 720,
+                    "min_width": 12,
+                    "max_width": 12,
+                    "height": 5,
+                    "chartProperties": {
+                        "yAxisLabel": "Model",
+                        "xAxisLabel": "Device count",
+                        "orientation": "horizontal",
+                        "legendLocation": "top"
+                    },
+                    "group_by": [
+                        "model"
+                    ],
+                    "column": "deviceId",
+                    "agg": "value_count",
+                    "style": {
+                        "color-list": [
+                            "#2563EB",
+                            "#7C3AED",
+                            "#0891B2",
+                            "#059669",
+                            "#D97706",
+                            "#DC2626",
+                            "#DB2777",
+                            "#4F46E5",
+                            "#0D9488",
+                            "#CA8A04",
+                            "#9333EA",
+                            "#0284C7",
+                            "#16A34A",
+                            "#EA580C",
+                            "#64748B"
+                        ]
+                    },
+                    "widget_id": "di_model_bar",
+                    "extra_filter": "asset_object is 'Device'"
+                },
+                {
+                    "title": "Device inventory (enriched)",
+                    "widget_type": "tabular",
+                    "stream": "vmanage_inventory",
+                    "ts_column": "collection_timestamp",
+                    "duration_hours": 720,
+                    "min_width": 12,
+                    "max_width": 12,
+                    "height": 8,
+                    "columns": {
+                        "host-name": {
+                            "title": "Host",
+                            "type": "TEXT",
+                            "visible": true
+                        },
+                        "system-ip": {
+                            "title": "System IP",
+                            "type": "TEXT",
+                            "visible": true
+                        },
+                        "personality": {
+                            "title": "Personality",
+                            "type": "TEXT",
+                            "visible": true
+                        },
+                        "platform": {
+                            "title": "Platform",
+                            "type": "TEXT",
+                            "visible": true
+                        },
+                        "version_x": {
+                            "title": "Software version",
+                            "type": "TEXT",
+                            "visible": true
+                        },
+                        "site-id": {
+                            "title": "Site ID",
+                            "type": "TEXT",
+                            "visible": true
+                        },
+                        "reachability": {
+                            "title": "Reachability",
+                            "type": "TEXT",
+                            "visible": true
+                        },
+                        "status": {
+                            "title": "Status",
+                            "type": "TEXT",
+                            "visible": true
+                        },
+                        "state_description_x": {
+                            "title": "State",
+                            "type": "TEXT",
+                            "visible": true
+                        },
+                        "device-type": {
+                            "title": "Device type",
+                            "type": "TEXT",
+                            "visible": true
+                        },
+                        "uptime": {
+                            "title": "Uptime",
+                            "type": "TEXT",
+                            "visible": true
+                        },
+                        "model": {
+                            "title": "Model",
+                            "type": "TEXT",
+                            "visible": true
+                        },
+                        "cpu_user": {
+                            "title": "CPU user (%)",
+                            "type": "DOUBLE",
+                            "visible": true
+                        },
+                        "mem_used": {
+                            "title": "Memory used (MB)",
+                            "type": "DOUBLE",
+                            "visible": true
+                        },
+                        "customer_tag": {
+                            "title": "Customer",
+                            "type": "TEXT",
+                            "visible": true
+                        }
+                    },
+                    "widget_id": "di_dev_tbl",
+                    "extra_filter": "asset_object is 'Device' and entity_type is 'device'"
+                }
+            ]
+        },
+        {
+            "title": "SD-WAN controllers",
+            "show_filter": true,
+            "widgets": [
+                {
+                    "title": "Total controllers",
+                    "widget_type": "custom_counter",
+                    "stream": "vmanage_inventory",
+                    "ts_column": "collection_timestamp",
+                    "column": "unique_id",
+                    "agg": "value_count",
+                    "type": "int",
+                    "min_width": 3,
+                    "max_width": 3,
+                    "height": 4,
+                    "widget_id": "di_ctrl_cnt",
+                    "style": {
+                        "color-list": [
+                            "#8B5CF6"
+                        ]
+                    },
+                    "extra_filter": "asset_object is 'Controller'"
+                },
+                {
+                    "title": "Controllers out of sync",
+                    "widget_type": "custom_counter",
+                    "stream": "vmanage_inventory",
+                    "ts_column": "collection_timestamp",
+                    "column": "unique_id",
+                    "agg": "value_count",
+                    "type": "int",
+                    "min_width": 3,
+                    "max_width": 3,
+                    "height": 4,
+                    "widget_id": "di_ctrl_sync",
+                    "extra_filter": "asset_object is 'Controller' and configStatusMessage is not 'In Sync'",
+                    "style": {
+                        "color-list": [
+                            "#EF4444"
+                        ]
+                    },
+                    "empty_data_message": "All controllers in sync"
+                },
+                {
+                    "title": "Controllers by type",
+                    "widget_type": "pie_chart",
+                    "stream": "vmanage_inventory",
+                    "ts_column": "collection_timestamp",
+                    "duration_hours": 720,
+                    "min_width": 3,
+                    "max_width": 3,
+                    "height": 5,
+                    "group_by": [
+                        "device-type"
+                    ],
+                    "column": "unique_id",
+                    "agg": "value_count",
+                    "chartProperties": {
+                        "legendLocation": "right"
+                    },
+                    "style": {
+                        "color-list": [
+                            "#2563EB",
+                            "#7C3AED",
+                            "#0891B2",
+                            "#059669",
+                            "#D97706",
+                            "#DC2626",
+                            "#DB2777",
+                            "#4F46E5",
+                            "#0D9488",
+                            "#CA8A04",
+                            "#9333EA",
+                            "#0284C7",
+                            "#16A34A",
+                            "#EA580C",
+                            "#64748B"
+                        ]
+                    },
+                    "widget_id": "di_ctrl_type",
+                    "extra_filter": "asset_object is 'Controller'"
+                },
+                {
+                    "title": "Controllers by reachability",
+                    "widget_type": "counter",
+                    "stream": "vmanage_inventory",
+                    "ts_column": "collection_timestamp",
+                    "duration_hours": 720,
+                    "min_width": 3,
+                    "max_width": 3,
+                    "height": 5,
+                    "group_by": [
+                        "reachability"
+                    ],
+                    "column": "unique_id",
+                    "agg": "value_count",
+                    "widget_id": "di_ctrl_reach",
+                    "extra_filter": "asset_object is 'Controller'"
+                },
+                {
+                    "title": "Controller inventory",
+                    "widget_type": "tabular",
+                    "stream": "vmanage_inventory",
+                    "ts_column": "collection_timestamp",
+                    "duration_hours": 720,
+                    "min_width": 12,
+                    "max_width": 12,
+                    "height": 8,
+                    "columns": {
+                        "host-name": {
+                            "title": "Host",
+                            "type": "TEXT",
+                            "visible": true
+                        },
+                        "ncsDeviceName": {
+                            "title": "Device name",
+                            "type": "TEXT",
+                            "visible": true
+                        },
+                        "system-ip": {
+                            "title": "System IP",
+                            "type": "TEXT",
+                            "visible": true
+                        },
+                        "device-type": {
+                            "title": "Controller type",
+                            "type": "TEXT",
+                            "visible": true
+                        },
+                        "personality": {
+                            "title": "Personality",
+                            "type": "TEXT",
+                            "visible": true
+                        },
+                        "platform": {
+                            "title": "Platform",
+                            "type": "TEXT",
+                            "visible": true
+                        },
+                        "version_x": {
+                            "title": "Version",
+                            "type": "TEXT",
+                            "visible": true
+                        },
+                        "reachability": {
+                            "title": "Reachability",
+                            "type": "TEXT",
+                            "visible": true
+                        },
+                        "state_description_x": {
+                            "title": "State",
+                            "type": "TEXT",
+                            "visible": true
+                        },
+                        "configStatusMessage": {
+                            "title": "Config status",
+                            "type": "TEXT",
+                            "visible": true
+                        },
+                        "vmanageConnectionState": {
+                            "title": "vManage connection",
+                            "type": "TEXT",
+                            "visible": true
+                        },
+                        "uuid": {
+                            "title": "UUID",
+                            "type": "TEXT",
+                            "visible": false
+                        }
+                    },
+                    "widget_id": "di_ctrl_tbl",
+                    "extra_filter": "asset_object is 'Controller'"
+                }
+            ]
+        },
+        {
+            "title": "vedge inventory",
+            "show_filter": true,
+            "widgets": [
+                {
+                    "title": "Total vedge records",
+                    "widget_type": "custom_counter",
+                    "stream": "vmanage_inventory",
+                    "ts_column": "collection_timestamp",
+                    "column": "unique_id",
+                    "agg": "value_count",
+                    "type": "int",
+                    "min_width": 3,
+                    "max_width": 3,
+                    "height": 4,
+                    "widget_id": "di_vedge_cnt",
+                    "style": {
+                        "color-list": [
+                            "#3B82F6"
+                        ]
+                    },
+                    "extra_filter": "asset_object is 'vEdge'"
+                },
+                {
+                    "title": "Onboarded vedge devices",
+                    "widget_type": "custom_counter",
+                    "stream": "vmanage_inventory",
+                    "ts_column": "collection_timestamp",
+                    "column": "unique_id",
+                    "agg": "value_count",
+                    "type": "int",
+                    "min_width": 3,
+                    "max_width": 3,
+                    "height": 4,
+                    "widget_id": "di_vedge_onboarded",
+                    "extra_filter": "asset_object is 'vEdge' and serialNumber is not 'Not Available'",
+                    "style": {
+                        "color-list": [
+                            "#22C55E"
+                        ]
+                    },
+                    "empty_data_message": "No onboarded vedge devices"
+                },
+                {
+                    "title": "Pre-provisioned vedge (pending)",
+                    "widget_type": "custom_counter",
+                    "stream": "vmanage_inventory",
+                    "ts_column": "collection_timestamp",
+                    "column": "unique_id",
+                    "agg": "value_count",
+                    "type": "int",
+                    "min_width": 3,
+                    "max_width": 3,
+                    "height": 4,
+                    "widget_id": "di_vedge_pending",
+                    "extra_filter": "asset_object is 'vEdge' and serialNumber is 'Not Available'",
+                    "style": {
+                        "color-list": [
+                            "#F59E0B"
+                        ]
+                    },
+                    "empty_data_message": "No pre-provisioned vedge pending onboarding"
+                },
+                {
+                    "title": "vedge count by upload source",
+                    "widget_type": "counter",
+                    "stream": "vmanage_inventory",
+                    "ts_column": "collection_timestamp",
+                    "duration_hours": 720,
+                    "min_width": 3,
+                    "max_width": 3,
+                    "height": 5,
+                    "group_by": [
+                        "uploadSource"
+                    ],
+                    "column": "unique_id",
+                    "agg": "value_count",
+                    "widget_id": "di_vedge_upload",
+                    "extra_filter": "asset_object is 'vEdge'"
+                },
+                {
+                    "title": "vedge by certificate state",
+                    "widget_type": "pie_chart",
+                    "stream": "vmanage_inventory",
+                    "ts_column": "collection_timestamp",
+                    "duration_hours": 720,
+                    "min_width": 12,
+                    "max_width": 12,
+                    "height": 5,
+                    "group_by": [
+                        "vedgeCertificateState"
+                    ],
+                    "column": "unique_id",
+                    "agg": "value_count",
+                    "chartProperties": {
+                        "legendLocation": "right"
+                    },
+                    "widget_id": "di_vedge_cert",
+                    "extra_filter": "asset_object is 'vEdge'",
+                    "style": {
+                        "color-list": [
+                            "#2563EB",
+                            "#7C3AED",
+                            "#0891B2",
+                            "#059669",
+                            "#D97706",
+                            "#DC2626",
+                            "#DB2777",
+                            "#4F46E5",
+                            "#0D9488",
+                            "#CA8A04",
+                            "#9333EA",
+                            "#0284C7",
+                            "#16A34A",
+                            "#EA580C",
+                            "#64748B"
+                        ]
+                    }
+                },
+                {
+                    "title": "vedge device inventory",
+                    "widget_type": "tabular",
+                    "stream": "vmanage_inventory",
+                    "ts_column": "collection_timestamp",
+                    "duration_hours": 720,
+                    "min_width": 12,
+                    "max_width": 12,
+                    "height": 8,
+                    "columns": {
+                        "host-name": {
+                            "title": "Host",
+                            "type": "TEXT",
+                            "visible": true
+                        },
+                        "system-ip": {
+                            "title": "System IP",
+                            "type": "TEXT",
+                            "visible": true
+                        },
+                        "serialNumber": {
+                            "title": "Serial",
+                            "type": "TEXT",
+                            "visible": true
+                        },
+                        "chasisNumber": {
+                            "title": "Chassis",
+                            "type": "TEXT",
+                            "visible": true
+                        },
+                        "deviceModel": {
+                            "title": "Model",
+                            "type": "TEXT",
+                            "visible": true
+                        },
+                        "deviceState": {
+                            "title": "Device state",
+                            "type": "TEXT",
+                            "visible": true
+                        },
+                        "vedgeCertificateState": {
+                            "title": "Certificate state",
+                            "type": "TEXT",
+                            "visible": true
+                        },
+                        "uploadSource": {
+                            "title": "Upload source",
+                            "type": "TEXT",
+                            "visible": true
+                        },
+                        "managed-by": {
+                            "title": "Managed by",
+                            "type": "TEXT",
+                            "visible": true
+                        },
+                        "configStatusMessage": {
+                            "title": "Config status",
+                            "type": "TEXT",
+                            "visible": true
+                        },
+                        "reachability": {
+                            "title": "Reachability",
+                            "type": "TEXT",
+                            "visible": true
+                        },
+                        "site-id": {
+                            "title": "Site ID",
+                            "type": "TEXT",
+                            "visible": true
+                        },
+                        "uuid": {
+                            "title": "UUID",
+                            "type": "TEXT",
+                            "visible": false
+                        }
+                    },
+                    "widget_id": "di_vedge_tbl",
+                    "extra_filter": "asset_object is 'vEdge'",
+                    "empty_data_message": "Not Available host/IP rows are pre-provisioned vedge pending onboarding \u2014 use filters to show onboarded only"
+                }
+            ]
+        },
+        {
+            "title": "Device and interface inventory",
+            "show_filter": true,
+            "widgets": [
+                {
+                    "title": "Interfaces by admin status",
+                    "widget_type": "pie_chart",
+                    "stream": "vmanage_inventory",
+                    "ts_column": "collection_timestamp",
+                    "duration_hours": 720,
+                    "min_width": 6,
+                    "max_width": 6,
+                    "height": 5,
+                    "group_by": [
+                        "if-admin-status"
+                    ],
+                    "column": "unique_id",
+                    "agg": "value_count",
+                    "style": {
+                        "color-map": {
+                            "if-state-up": "#16A34A",
+                            "IF-STATE-UP": "#16A34A",
+                            "If-State-Up": "#16A34A",
+                            "if-state-down": "#DC2626",
+                            "IF-STATE-DOWN": "#DC2626",
+                            "If-State-Down": "#DC2626",
+                            "up": "#2563EB",
+                            "Up": "#2563EB",
+                            "UP": "#2563EB",
+                            "down": "#EA580C",
+                            "Down": "#EA580C",
+                            "DOWN": "#EA580C"
+                        }
+                    },
+                    "widget_id": "di_if_admin",
+                    "extra_filter": "asset_object is 'Interface'"
+                },
+                {
+                    "title": "Interfaces by oper status",
+                    "widget_type": "pie_chart",
+                    "stream": "vmanage_inventory",
+                    "ts_column": "collection_timestamp",
+                    "duration_hours": 720,
+                    "min_width": 6,
+                    "max_width": 6,
+                    "height": 5,
+                    "group_by": [
+                        "if-oper-status"
+                    ],
+                    "column": "unique_id",
+                    "agg": "value_count",
+                    "style": {
+                        "color-map": {
+                            "if-state-up": "#16A34A",
+                            "IF-STATE-UP": "#16A34A",
+                            "If-State-Up": "#16A34A",
+                            "if-state-down": "#DC2626",
+                            "IF-STATE-DOWN": "#DC2626",
+                            "If-State-Down": "#DC2626",
+                            "up": "#2563EB",
+                            "Up": "#2563EB",
+                            "UP": "#2563EB",
+                            "down": "#EA580C",
+                            "Down": "#EA580C",
+                            "DOWN": "#EA580C"
+                        }
+                    },
+                    "widget_id": "di_if_oper",
+                    "extra_filter": "asset_object is 'Interface'"
+                },
+                {
+                    "title": "Interface inventory",
+                    "widget_type": "tabular",
+                    "stream": "vmanage_inventory",
+                    "ts_column": "collection_timestamp",
+                    "duration_hours": 720,
+                    "min_width": 12,
+                    "max_width": 12,
+                    "height": 8,
+                    "columns": {
+                        "vdevice-host-name": {
+                            "title": "Host",
+                            "type": "TEXT",
+                            "visible": true
+                        },
+                        "ifname": {
+                            "title": "Interface",
+                            "type": "TEXT",
+                            "visible": true
+                        },
+                        "ip-address": {
+                            "title": "IP address",
+                            "type": "TEXT",
+                            "visible": true
+                        },
+                        "vpn-id": {
+                            "title": "VPN ID",
+                            "type": "TEXT",
+                            "visible": true
+                        },
+                        "speed-mbps": {
+                            "title": "Speed (Mbps)",
+                            "type": "DOUBLE",
+                            "visible": true
+                        }
+                    },
+                    "widget_id": "di_if_tbl",
+                    "extra_filter": "asset_object is 'Interface'"
+                }
+            ]
+        }
+    ],
+    "saved_time": "2026-06-23T09:26:43.995761"
+}

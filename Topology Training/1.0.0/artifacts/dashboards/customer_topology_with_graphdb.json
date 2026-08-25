@@ -1,0 +1,395 @@
+{
+    "name": "customer_topology_with_graphdb",
+    "label": "Topology",
+    "showTitle": false,
+    "description": "Topology",
+    "enabled": true,
+    "debug": true,
+    "dashboard_style": "auto",
+    "dashboard_type": "template",
+    "live_edit": true,
+    "dashboard_folder": "MSP",
+    "version": "24.5.27",
+    "dashboard_generator": {
+        "attachment": "widget_code_generator"
+    },
+    "dashboard_filters0": {
+        "time_filter": true,
+        "default_time_filter_labels": [
+            "Last 24 hours"
+        ]
+    },
+    "template_variables": {
+        "NODE_ID": {
+            "contextId": [
+                "navigatorSelectionContexts",
+                "secondaryListSelection",
+                "node_id"
+            ]
+        },
+        "PROJ_ID_SINGLE": {
+            "contextId": "project_id"
+        },
+        "PROJ_ID": {
+            "contextId": "project_id"
+        },
+        "IN_UI_VIEW_NODES": {
+            "contextId": "inViewNodes"
+        }
+    },
+    "dashboard_sections": [
+        {
+            "title": "Node Details",
+            "widgets": [
+                {
+                    "inMultiviewContainer": true,
+                    "title": "Topology View",
+                    "widget_type": "topology",
+                    "register_search_endpoints": true,
+                    "empty_stack_start": false,
+                    "reportId": "rda.saas.stack.view.topo",
+                    "stack_type": "dynamic",
+                    "stack_definition": {
+                        "name": "Dynatrace_Topology_using_Graph",
+                        "description": "",
+                        "saved_time": "2023-09-12T21:08:31.418255",
+                        "is_dynamic": true,
+                        "hierarchical": true,
+                        "dynamic_nodes": {
+                            "column_name": "node_type",
+                            "db_name": "topology_training",
+                            "nodes_collection": "topology_training_nodes",
+                            "stream": "graphdb://topology_training/topology_training_nodes",
+                            "query": "application_name=='PETCLINIC'"
+                        },
+                        "dynamic_relationships": {
+                            "db_name": "topology_training",
+                            "edges_collection": "topology_training_edges",
+                            "graph_name": "topology_training_graph",
+                            "relation_map": "rdaf_topology_relationships",
+                            "stream": "graphdb://topology_training/topology_training_edges"
+                        }
+                    },
+                    "nodes_report": {
+                        "reportMetaData": {
+                            "sorting": true,
+                            "filtering": true,
+                            "title": "Nodes",
+                            "remote_searchable": false,
+                            "remote_searchable_cols": [
+                                "name",
+                                "node_label",
+                                "node_id",
+                                "node_type"
+                            ],
+                            "actions": [
+                                {
+                                    "permission": "rda:user_dashboard:view",
+                                    "appName": "user-dashboard/training_topology_workbench",
+                                    "drillDownLinkField": "node_label",
+                                    "identifier": "launch.dashboard.training_topology_workbench",
+                                    "selectionType": "SINGLE",
+                                    "title": "Path Visualization",
+                                    "contextParamList": {
+                                        "contextParams": [
+                                            {
+                                                "paramKey": "projectId",
+                                                "paramId": "projectId"
+                                            },
+                                            {
+                                                "paramKey": "project_id",
+                                                "paramId": "project_id"
+                                            },
+                                            {
+                                                "paramKey": "node_type",
+                                                "paramId": "node_type"
+                                            },
+                                            {
+                                                "paramKey": "serialNumber",
+                                                "paramId": "serialNumber"
+                                            },
+                                            {
+                                                "paramKey": "device_ip",
+                                                "paramId": "device_ip"
+                                            },
+                                            {
+                                                "paramKey": "parent_sn",
+                                                "paramId": "parent_sn"
+                                            },
+                                            {
+                                                "paramKey": "node_label",
+                                                "paramId": "node_label"
+                                            },
+                                            {
+                                                "paramKey": "node_id",
+                                                "paramId": "node_id"
+                                            }
+                                        ]
+                                    },
+                                    "type": "GO_TO_APP_STATE"
+                                }
+                            ],
+                            "reportColumnDefinitionList": [
+                                {
+                                    "identifier": "node_label",
+                                    "title": "Name",
+                                    "key": false
+                                },
+                                {
+                                    "identifier": "layer",
+                                    "key": false,
+                                    "title": "Layer"
+                                },
+                                {
+                                    "identifier": "node_type",
+                                    "key": false,
+                                    "title": "node_type"
+                                },
+                                {
+                                    "identifier": "name",
+                                    "hidden": true,
+                                    "key": false
+                                },
+                                {
+                                    "identifier": "node_id",
+                                    "key": true,
+                                    "hidden": true
+                                }
+                            ]
+                        }
+                    },
+                    "nodes_asset_report": {
+                        "dashboardId": "Node Details",
+                        "reportId": "dynamic_v2_tabular_report_0_1",
+                        "ignore_context_filter": true
+                    },
+                    "edges_report": {
+                        "reportId": "rda.saas.topology.edges.report",
+                        "reportMetaData": {
+                            "sorting": true,
+                            "filtering": true,
+                            "title": "Edges",
+                            "reportColumnDefinitionList": [
+                                {
+                                    "hidden": false,
+                                    "id": "left_id",
+                                    "identifier": "left_id",
+                                    "key": true,
+                                    "title": "Left Id",
+                                    "type": "TEXT",
+                                    "visible": false
+                                },
+                                {
+                                    "hidden": false,
+                                    "id": "left_label",
+                                    "identifier": "left_label",
+                                    "key": false,
+                                    "title": "Source",
+                                    "type": "TEXT",
+                                    "visible": true
+                                },
+                                {
+                                    "hidden": false,
+                                    "id": "right_id",
+                                    "identifier": "right_id",
+                                    "key": true,
+                                    "title": "Right Id",
+                                    "type": "TEXT",
+                                    "visible": false
+                                },
+                                {
+                                    "hidden": false,
+                                    "id": "right_label",
+                                    "identifier": "right_label",
+                                    "key": false,
+                                    "title": "Destination",
+                                    "type": "TEXT",
+                                    "visible": true
+                                },
+                                {
+                                    "hidden": false,
+                                    "id": "relation_type",
+                                    "identifier": "relation_type",
+                                    "key": false,
+                                    "title": "Relation",
+                                    "type": "TEXT",
+                                    "visible": true
+                                }
+                            ],
+                            "actions": []
+                        }
+                    },
+                    "alert_source": {
+                        "alerts_stream": "oia-alerts-stream",
+                        "group_by": [
+                            "a_en_node_id",
+                            "a_severity"
+                        ],
+                        "duration_hours": 2000,
+                        "extra_filter": "a_source_systemname is not 'Alert Group'",
+                        "ts_column": "a_created_ts",
+                        "agg": "value_count",
+                        "column": "count_",
+                        "type": "int"
+                    },
+                    "height": 12,
+                    "min_wdith": 12,
+                    "widget_id": "4039687e"
+                },
+                {
+                    "inMultiviewContainer": true,
+                    "title": "Asset Details",
+                    "widget_type": "tabular",
+                    "stream": "graphdb://topology_training/topology_training_nodes",
+                    "query": "application_name=='PETCLINIC'",
+                    "stream0": "dynatrace_topology_nodes",
+                    "height": 10,
+                    "min_wdith": 12,
+                    "paginated": true,
+                    "duration_hours": 100000,
+                    "max_rows": 100,
+                    "ts_column": "collection_timestamp",
+                    "remote_searchable": true,
+                    "virtual_scrolling": true,
+                    "visibility_on_error": false,
+                    "context_filter0": "customerRole is 'admin'",
+                    "showRowSummary": true,
+                    "remote_searchable_cols": [
+                        "name",
+                        "node_label",
+                        "node_id"
+                    ],
+                    "custom_columns": [
+                        {
+                            "id": "isInUIView",
+                            "label": "In UI View",
+                            "expr": "str(_row.node_id) in {{IN_UI_VIEW_NODES}}",
+                            "hidden": true,
+                            "key": false,
+                            "visible": false,
+                            "sortable": false,
+                            "filterable": false
+                        }
+                    ],
+                    "columns0": {
+                        "isInUIView": {
+                            "title": "In UI View",
+                            "key": false,
+                            "filterable": false,
+                            "type": "DYNAMIC_HTML",
+                            "htmlTemplate": "<div v-if='rowData.isInUIView'><v-icon icon>mdi-check</v-icon></div><div v-else> </div>"
+                        },
+                        "node_label": {
+                            "title": "Name",
+                            "key": true
+                        },
+                        "name": {
+                            "hidden": true,
+                            "title": "Name",
+                            "key": true
+                        },
+                        "vcenter_name": {
+                            "hidden": false,
+                            "title": "vCenter Name",
+                            "key": true
+                        },
+                        "datacenter": {
+                            "title": "Datacenter"
+                        },
+                        "serialNumber": {
+                            "key": true,
+                            "title": "Serial Number"
+                        },
+                        "esxi_cluster": {
+                            "key": false,
+                            "title": "ESXI Cluster"
+                        },
+                        "vcenter_address": {
+                            "key": false,
+                            "title": "vCenter Address"
+                        },
+                        "layer": {
+                            "key": false,
+                            "title": "Layer"
+                        },
+                        "node_type": {
+                            "key": false,
+                            "title": "Node Type"
+                        },
+                        "vcenter_object": {
+                            "key": false,
+                            "title": "vCenter Object"
+                        },
+                        "vcenter_os_type": {
+                            "key": false,
+                            "title": "vCenter OS type"
+                        },
+                        "phy_switch_name": {
+                            "key": false,
+                            "title": "Physical Switch Name"
+                        },
+                        "node_id": {
+                            "key": true,
+                            "hidden": true
+                        }
+                    },
+                    "actions0": [
+                        {
+                            "permission": "rda:user_dashboard:view",
+                            "appName1": "user-dashboard",
+                            "drillDownLinkField1": "node_label",
+                            "identifier": "launch.dashboard.node_details_app",
+                            "selectionType": "SINGLE",
+                            "title": "Device Details",
+                            "contextParamList": {
+                                "contextParams": [
+                                    {
+                                        "paramKey": "projectId",
+                                        "paramId": "projectId"
+                                    },
+                                    {
+                                        "paramKey": "project_id",
+                                        "paramId": "project_id"
+                                    },
+                                    {
+                                        "paramKey": "node_type",
+                                        "paramId": "node_type"
+                                    },
+                                    {
+                                        "paramKey": "serialNumber",
+                                        "paramId": "serialNumber"
+                                    },
+                                    {
+                                        "paramKey": "device_ip",
+                                        "paramId": "device_ip"
+                                    },
+                                    {
+                                        "paramKey": "parent_sn",
+                                        "paramId": "parent_sn"
+                                    },
+                                    {
+                                        "paramKey": "node_label",
+                                        "paramId": "node_label"
+                                    }
+                                ]
+                            },
+                            "type": "GO_TO_APP_STATE"
+                        }
+                    ],
+                    "widget_id": "e92217ad"
+                }
+            ]
+        }
+    ],
+    "saved_time": "2026-08-11T12:44:45.205271",
+    "attachments": [
+        {
+            "name": "widget_code_generator",
+            "value": "{%- set ns = namespace(count=0) -%}\r\n{%- for section in dashboard[\"dashboard_sections\"] -%}\r\n    {%- set widgets = section[\"widgets\"] -%}\r\n    {%- set new_widgets = [] -%}\r\n    {%- for w in widgets -%}\r\n        {%- if w.get(\"widget_type\") and w.get(\"title\") != \"Asset Details\" -%}\r\n            {%-\r\n                set nw = {\r\n                    \"title\": \"JSON Dashboard Def.\",\r\n                    \"widget_group\": \"g\"+str(ns.count),\r\n                    \"min_width\": w.get(\"min_width\", 6),\r\n                    \"max_width\": w.get(\"max_width\", 6),\r\n                    \"height\": w.get(\"height\", 4),\r\n                    \"widget_type\": \"codeblock\",\r\n                    \"content\": json_dumps_indent(w, 2),\r\n                    \"lang\": \"json\",\r\n                    \"widget_id\": w.get(\"widget_id\", str(ns.count)) + \"_code\"\r\n                }\r\n            -%}\r\n            {%- set _ = w.update({\"widget_group\": \"g\"+str(ns.count) }) -%}\r\n            {%- set _ = new_widgets.append(nw) -%}\r\n            {%- set ns.count = ns.count + 1 -%}\r\n        {%- endif -%}\r\n    {%- endfor -%}\r\n    {%- set _ = widgets.extend(new_widgets) -%}\r\n{%- endfor -%}",
+            "additionalFields": {
+                "valueType": "",
+                "description": ""
+            }
+        }
+    ]
+}

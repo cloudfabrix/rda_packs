@@ -1,0 +1,11 @@
+Value REMOTE_DEVICE_NAME (\S+)
+Value LOCAL_INTERFACE (\S+)
+Value REMOTE_INTERFACE (\S+)
+Value PLATFORM ([^,]+)
+Value CAPABILITIES (.+)
+
+Start
+  ^Device ID:\s+${REMOTE_DEVICE_NAME}
+  ^Platform:\s+${PLATFORM},\s+Capabilities:\s+${CAPABILITIES}
+  ^Interface:\s+${LOCAL_INTERFACE},\s+Port ID \(outgoing port\):\s+${REMOTE_INTERFACE}
+  ^-+ -> Record

@@ -1,0 +1,319 @@
+## This pipeline needs customer_id or customerTag in context to run
+%% stream = no and limit = 0
+%% template_type="jinja"
+%% import_src_type = "cisco_vmanage"
+%%start_inline_object name="context_dynamic_form" and type="data" and format="json"
+{
+  "formFieldList": [
+    {
+      "fieldId": "customer_tag",
+      "label": "Tag of the customer",
+      "required": false,
+      "dataType": "string"
+    }
+  ]
+}
+%%end_inline_object
+
+########################################
+## INIT
+########################################
+--> @dm:empty
+    --> @dm:save name="temp-customer-context"
+   {% if customer_tag %}
+      {% set customer_id = customer_id | default('') %}
+      {% set customer_tag = customer_tag %}
+      {% set customerTag = customer_tag %}
+   {% elif customerTag %}
+      {% set customer_id = customer_id | default('') %}
+      {% set customer_tag = customerTag %}
+   {% else %}
+      {% set customer_id = '' %}
+      {% set customer_tag = '' %}
+      {% set customerTag = '' %}
+   {% endif %}
+
+--> @dm:empty
+--> @dm:save name="temp-variable-dataset"
+--> @dm:save name="temp-variable-dataset-interim"
+--> @dm:save name="temp-vmanage-sources"
+--> @dm:save name="temp-variable-dataset-vmanage"
+
+########################################
+## INPUT FROM UI (OPTIONAL)
+########################################
+--> @c:new-block name="read_ui_input"
+--> @exec:get-input
+--> *exec:if-shape num_rows > 0
+    --> @dm:selectcolumns include="Others"
+    --> *exec:if-shape num_rows > 0
+        --> @dm:explode-json column="Others"
+    --> @exec:end-if
+    --> @dm:add-missing-columns columns="name"
+    --> @dm:save name="temp-variable-dataset"
+    --> @dm:save name="temp-variable-dataset-vmanage"
+--> @exec:end-if
+
+########################################
+## DISCOVER SOURCES (SECRETS)
+########################################
+--> @c:new-block name="discover_vmanage_sources"
+--> @dm:recall name="temp-variable-dataset" & return_empty="yes"
+--> *exec:if-shape num_rows = 0
+    --> @dm:empty
+--> @exec:end-if
+    {% if customerTag %}
+    --> #dm:query-persistent-stream type contains 'vmanage' and customerTag contains '{{ customerTag }}'
+        with-input name='rda_secrets_meta' and limit=0
+    {% else %}
+    --> #dm:query-persistent-stream type contains 'vmanage' and customerTag is empty
+        with-input name='rda_secrets_meta' and limit=0
+    {% endif %}
+    --> @dm:skip-block-if-shape row_count="0"
+    --> @dm:save name="temp-vmanage-sources"
+    --> @dm:save name="temp-variable-dataset-interim" & append="yes" & return_appended_dataset="yes"
+    --> @dm:save name="temp-vmanage-sources-all"
+
+########################################
+## FINALIZE CREDENTIAL DATASET
+########################################
+--> @c:new-block name="finalize_sources"
+--> @dm:recall name="temp-variable-dataset-interim" & return_empty="yes"
+--> *exec:if-shape num_rows > 0
+    --> @dm:add-missing-columns columns="name"
+    --> @dm:save name="temp-variable-dataset"
+    --> @dm:save name="temp-variable-dataset-vmanage"
+--> @exec:end-if
+--> @dm:recall name="temp-variable-dataset" & return_empty="yes"
+--> @dm:skip-block-if-shape row_count="0"
+--> @dm:add-missing-columns columns="customer_id,customer_tag,name"
+--> @dm:eval customer_id = "'{{ customer_id }}'"
+--> @dm:eval customer_tag = "'{{ customer_tag }}'"
+--> @dm:save name="temp-vmanage-main-cust-variable-dataset"
+
+########################################
+## BUILD vManage host source_ip map (device API - same as access verification)
+########################################
+--> @c:new-block name="build_vmanage_source_ip_map"
+--> @dm:recall name="temp-vmanage-main-cust-variable-dataset" & return_empty="yes"
+--> @dm:skip-block-if-shape row_count="0"
+--> @c:data-loop dataset="temp-vmanage-main-cust-variable-dataset" and columns="name,customer_id,customer_tag"
+    --> @$name:query-api path="device" and continue_on_failure="yes" and retry_count="3"
+    --> @dm:add-missing-columns columns="source_ip,collection_status"
+    --> @dm:eval name = "'$name'"
+    --> @dm:dedup columns="name"
+    --> @dm:copy-columns from="source_ip" and to="host_source_ip"
+    --> @dm:selectcolumns include="name|host_source_ip|customer_id|customer_tag"
+    --> @dm:save name="temp-vmanage-host-$loop_index"
+
+--> @c:new-block name="build_vmanage_source_ip_map_save"
+    --> @dm:concat names="temp-vmanage-host-.*"
+    --> @dm:save name="temp-vmanage-source-ip-map"
+
+########################################
+## vManage sources for API loops
+########################################
+--> @c:new-block name="alerts_prep"
+--> @dm:recall name="temp-vmanage-main-cust-variable-dataset" & return_empty="yes"
+--> @dm:skip-block-if-shape row_count="0"
+--> @dm:save name="temp-vmanages"
+
+########################################
+## /alarms -> vmanage_alerts_events (source_endpoint='/alarms')
+########################################
+--> @c:new-block name="alerts_alarms"
+--> @dm:recall name="temp-vmanages" & return_empty="yes"
+--> @dm:skip-block-if-shape row_count="0"
+--> @c:data-loop dataset="temp-vmanages" and columns="name,customer_id,customer_tag"
+  --> @$name:query-api path="alarms" and query='{"query":{"condition":"AND","rules":[{"field":"entry_time","operator":"last_n_hours","type":"date","value":["10"]}]},"size":100}'
+    --> @dm:add-missing-columns columns="collection_status,reason,customer_id,customer_tag,source_ip,collection_timestamp"
+    --> @dm:map to="collection_timestamp" & func="time_now"
+    --> @dm:eval customer_id = "'$customer_id'"
+    --> @dm:eval customer_tag = "'$customer_tag'"
+    --> @dm:eval name = "'$name'"
+    --> @dm:enrich dict="temp-vmanage-source-ip-map" and src_key_cols="name" and dict_key_cols="name" and enrich_cols="host_source_ip"
+    --> @dm:eval source_ip = "str(host_source_ip or source_ip or '')"
+    --> *exec:if-condition collection_status != 'Success'
+        --> @dm:dedup columns="source_ip"
+        --> *dm:safe-filter * get source_ip as 'asset_id',collection_status,collection_timestamp,reason,customer_id,customer_tag
+        --> @dm:map to="collection_timestamp" & func="time_now"
+        --> @dm:eval bot_source_name = "'$name'"
+        --> @dm:eval bot_source_type = "'cisco-vmanage'"
+        --> @dm:eval bot_name = "'query-api alarms'"
+        --> @dm:save name="temp-packs_asset_inventory_collection_status" & append="yes"
+        --> @rn:write-stream name="asset_inventory_collection_status_stream"
+    --> @exec:end-if
+    --> *exec:if-condition collection_status = 'Success'
+        --> @dm:save name="temp-alerts-alarms-$loop_index"
+        --> @dm:dedup columns="source_ip"
+        --> *dm:safe-filter * get source_ip as 'asset_id',collection_status,collection_timestamp,reason,customer_id,customer_tag
+        --> @dm:map to="collection_timestamp" & func="time_now"
+        --> @dm:eval bot_source_name = "'$name'"
+        --> @dm:eval bot_source_type = "'cisco-vmanage'"
+        --> @dm:eval bot_name = "'query-api alarms'"
+        --> @dm:save name="temp-packs_asset_inventory_collection_status" & append="yes"
+        --> @rn:write-stream name="asset_inventory_collection_status_stream"
+    --> @exec:end-if
+
+--> @c:new-block name="alerts_alarms_write"
+--> @dm:concat names="temp-alerts-alarms-.*"
+--> @dm:save name="alerts_raw"
+--> @dm:skip-block-if-shape row_count="0"
+--> @dm:selectcolumns include="entry_time|eventname|severity|message|component|active|acknowledged|system_ip|uuid|name|source_ip|customer_id|customer_tag|collection_timestamp"
+--> @dm:eval source_endpoint = "'/alarms'"
+--> @dm:add-missing-columns columns="collection_timestamp,entry_time,eventname,message,uuid,active,acknowledged"
+--> @dm:copy-columns from="entry_time" and to="metric_timestamp"
+--> @dm:map attr="metric_timestamp" & func="ts_to_datetimestr" & unit="ms"
+--> @dm:eval alert_unique_key = "str(entry_time or '') + '|' + str(eventname or '') + '|' + str(message or '')"
+--> @dm:dedup columns="alert_unique_key"
+--> @dm:save name="alarm"
+--> @rn:write-stream name="vmanage_alerts_events"
+
+########################################
+## /alarms/count -> vmanage_metrics_snapshot (source_endpoint='/alarms/count')
+########################################
+--> @c:new-block name="alerts_alarm_count"
+--> @dm:recall name="temp-vmanages" & return_empty="yes"
+--> @dm:skip-block-if-shape row_count="0"
+--> @c:data-loop dataset="temp-vmanages" and columns="name,customer_id,customer_tag"
+    --> @$name:query-api path="alarms/count" and continue_on_failure="yes" and retry_count="5"
+    --> @dm:add-missing-columns columns="collection_status,reason,customer_id,customer_tag,source_ip,collection_timestamp"
+    --> @dm:map to="collection_timestamp" & func="time_now"
+    --> @dm:eval customer_id = "'$customer_id'"
+    --> @dm:eval customer_tag = "'$customer_tag'"
+    --> @dm:eval name = "'$name'"
+    --> @dm:enrich dict="temp-vmanage-source-ip-map" and src_key_cols="name" and dict_key_cols="name" and enrich_cols="host_source_ip"
+    --> @dm:eval source_ip = "str(host_source_ip or source_ip or '')"
+    --> *exec:if-condition collection_status != 'Success'
+        --> @dm:dedup columns="source_ip"
+        --> *dm:safe-filter * get source_ip as 'asset_id',collection_status,collection_timestamp,reason,customer_id,customer_tag
+        --> @dm:map to="collection_timestamp" & func="time_now"
+        --> @dm:eval bot_source_name = "'$name'"
+        --> @dm:eval bot_source_type = "'cisco-vmanage'"
+        --> @dm:eval bot_name = "'query-api alarms/count'"
+        --> @dm:save name="temp-packs_asset_inventory_collection_status" & append="yes"
+        --> @rn:write-stream name="asset_inventory_collection_status_stream"
+    --> @exec:end-if
+    --> *exec:if-condition collection_status = 'Success'
+        --> @dm:save name="temp-alerts-alarm-count-$loop_index"
+        --> @dm:dedup columns="source_ip"
+        --> *dm:safe-filter * get source_ip as 'asset_id',collection_status,collection_timestamp,reason,customer_id,customer_tag
+        --> @dm:map to="collection_timestamp" & func="time_now"
+        --> @dm:eval bot_source_name = "'$name'"
+        --> @dm:eval bot_source_type = "'cisco-vmanage'"
+        --> @dm:eval bot_name = "'query-api alarms/count'"
+        --> @dm:save name="temp-packs_asset_inventory_collection_status" & append="yes"
+        --> @rn:write-stream name="asset_inventory_collection_status_stream"
+    --> @exec:end-if
+
+--> @c:new-block name="alerts_alarm_count_write"
+--> @dm:concat names="temp-alerts-alarm-count-.*"
+--> @dm:skip-block-if-shape row_count="0"
+--> @dm:selectcolumns include="count|cleared_count|name|source_ip|customer_id|customer_tag|collection_timestamp"
+--> @dm:eval source_endpoint = "'/alarms/count'"
+--> @dm:add-missing-columns columns="collection_timestamp,customer_id,name"
+--> @dm:copy-columns from="collection_timestamp" and to="metric_timestamp"
+--> @dm:eval snapshot_unique_key = "str(customer_id or '') + '|' + str(name or '') + '|alarm_count'"
+--> @dm:dedup columns="snapshot_unique_key"
+--> @dm:save name="alarm_count"
+--> @rn:write-stream name="vmanage_metrics_snapshot"
+
+########################################
+## /event -> vmanage_alerts_events (source_endpoint='/event')
+########################################
+--> @c:new-block name="alerts_event"
+--> @dm:recall name="temp-vmanages" & return_empty="yes"
+--> @dm:skip-block-if-shape row_count="0"
+--> @c:data-loop dataset="temp-vmanages" and columns="name,customer_id,customer_tag"
+    --> @$name:query-api path="event" and continue_on_failure="yes" and retry_count="5"
+    --> @dm:add-missing-columns columns="collection_status,reason,customer_id,customer_tag,source_ip,collection_timestamp"
+    --> @dm:map to="collection_timestamp" & func="time_now"
+    --> @dm:eval customer_id = "'$customer_id'"
+    --> @dm:eval customer_tag = "'$customer_tag'"
+    --> @dm:eval name = "'$name'"
+    --> @dm:enrich dict="temp-vmanage-source-ip-map" and src_key_cols="name" and dict_key_cols="name" and enrich_cols="host_source_ip"
+    --> @dm:eval source_ip = "str(host_source_ip or source_ip or '')"
+    --> *exec:if-condition collection_status != 'Success'
+        --> @dm:dedup columns="source_ip"
+        --> *dm:safe-filter * get source_ip as 'asset_id',collection_status,collection_timestamp,reason,customer_id,customer_tag
+        --> @dm:map to="collection_timestamp" & func="time_now"
+        --> @dm:eval bot_source_name = "'$name'"
+        --> @dm:eval bot_source_type = "'cisco-vmanage'"
+        --> @dm:eval bot_name = "'query-api event'"
+        --> @dm:save name="temp-packs_asset_inventory_collection_status" & append="yes"
+        --> @rn:write-stream name="asset_inventory_collection_status_stream"
+    --> @exec:end-if
+    --> *exec:if-condition collection_status = 'Success'
+        --> @dm:save name="temp-alerts-event-$loop_index"
+        --> @dm:dedup columns="source_ip"
+        --> *dm:safe-filter * get source_ip as 'asset_id',collection_status,collection_timestamp,reason,customer_id,customer_tag
+        --> @dm:map to="collection_timestamp" & func="time_now"
+        --> @dm:eval bot_source_name = "'$name'"
+        --> @dm:eval bot_source_type = "'cisco-vmanage'"
+        --> @dm:eval bot_name = "'query-api event'"
+        --> @dm:save name="temp-packs_asset_inventory_collection_status" & append="yes"
+        --> @rn:write-stream name="asset_inventory_collection_status_stream"
+    --> @exec:end-if
+
+--> @c:new-block name="alerts_event_write"
+--> @dm:concat names="temp-alerts-event-.*"
+--> @dm:skip-block-if-shape row_count="0"
+--> @dm:selectcolumns include="entry_time|eventname|severity_level|component|details|system_ip|host_name|name|source_ip|customer_id|customer_tag|collection_timestamp"
+--> @dm:eval source_endpoint = "'/event'"
+--> @dm:add-missing-columns columns="collection_timestamp,entry_time,eventname,name"
+--> @dm:copy-columns from="entry_time" and to="metric_timestamp"
+--> @dm:map attr="metric_timestamp" & func="ts_to_datetimestr" & unit="ms"
+--> @dm:eval event_unique_key = "str(entry_time or '') + '|' + str(eventname or '') + '|' + str(name or '')"
+--> @dm:dedup columns="event_unique_key"
+--> @rn:write-stream name="vmanage_alerts_events"
+
+########################################
+## /auditlog -> vmanage_audit_events (separate stream; schema differs from alarms/events)
+########################################
+--> @c:new-block name="alerts_auditlog"
+--> @dm:recall name="temp-vmanages" & return_empty="yes"
+--> @dm:skip-block-if-shape row_count="0"
+--> @c:data-loop dataset="temp-vmanages" and columns="name,customer_id,customer_tag"
+  -->@$name:query-api path="auditlog" and query='{"query":{"condition":"AND","rules":[{"field":"entry_time","operator":"last_n_hours","type":"date","value":["3"]}]},"size":100,"fields":["entry_time","logid","logmodule","logfeature","loguser","logmessage","logdeviceid","logdetails","logprocessid"]}' and retry_count="5" and continue_on_failure="yes"
+    --> @dm:add-missing-columns columns="collection_status,reason,customer_id,customer_tag,source_ip,collection_timestamp"
+    --> @dm:map to="collection_timestamp" & func="time_now"
+    --> @dm:eval customer_id = "'$customer_id'"
+    --> @dm:eval customer_tag = "'$customer_tag'"
+    --> @dm:eval name = "'$name'"
+    --> @dm:enrich dict="temp-vmanage-source-ip-map" and src_key_cols="name" and dict_key_cols="name" and enrich_cols="host_source_ip"
+    --> @dm:eval source_ip = "str(host_source_ip or source_ip or '')"
+    --> *exec:if-condition collection_status != 'Success'
+        --> @dm:dedup columns="source_ip"
+        --> *dm:safe-filter * get source_ip as 'asset_id',collection_status,collection_timestamp,reason,customer_id,customer_tag
+        --> @dm:map to="collection_timestamp" & func="time_now"
+        --> @dm:eval bot_source_name = "'$name'"
+        --> @dm:eval bot_source_type = "'cisco-vmanage'"
+        --> @dm:eval bot_name = "'query-api auditlog'"
+        --> @dm:save name="temp-packs_asset_inventory_collection_status" & append="yes"
+        --> @rn:write-stream name="asset_inventory_collection_status_stream"
+    --> @exec:end-if
+    --> *exec:if-condition collection_status = 'Success'
+        --> @dm:save name="temp-alerts-auditlog-$loop_index"
+        --> @dm:dedup columns="source_ip"
+        --> *dm:safe-filter * get source_ip as 'asset_id',collection_status,collection_timestamp,reason,customer_id,customer_tag
+        --> @dm:map to="collection_timestamp" & func="time_now"
+        --> @dm:eval bot_source_name = "'$name'"
+        --> @dm:eval bot_source_type = "'cisco-vmanage'"
+        --> @dm:eval bot_name = "'query-api auditlog'"
+        --> @dm:save name="temp-packs_asset_inventory_collection_status" & append="yes"
+        --> @rn:write-stream name="asset_inventory_collection_status_stream"
+    --> @exec:end-if
+
+--> @c:new-block name="alerts_auditlog_write"
+--> @dm:concat names="temp-alerts-auditlog-.*"
+--> @dm:skip-block-if-shape row_count="0"
+--> @dm:selectcolumns include="entry_time|loguser|logmessage|logmodule|logfeature|logusersrcip|name|source_ip|customer_id|customer_tag|collection_timestamp"
+--> @dm:eval source_endpoint = "'/auditlog'"
+--> @dm:add-missing-columns columns="collection_timestamp,entry_time,logmessage,loguser"
+--> @dm:copy-columns from="entry_time" and to="metric_timestamp"
+--> @dm:map attr="metric_timestamp" & func="ts_to_datetimestr" & unit="ms"
+--> @dm:eval event_unique_key = "str(entry_time or '') + '|' + str(loguser or '') + '|' + str(logmessage or '')"
+--> @dm:dedup columns="event_unique_key"
+--> @rn:write-stream name="vmanage_alerts_events"
+--> @rn:write-stream name="vmanage_audit_events"
+

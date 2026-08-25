@@ -1,0 +1,11 @@
+%% stream = no and limit = 0
+
+@c:new-block
+    --> @dm:recall name='cfx_rdaf_topology_edges_documents'
+    --> @dm:eval unique_id="(str(left_id)+'__'+str(right_id)) if left_id is not None and right_id is not None else None"
+    --> @dm:selectcolumns exclude="_from|_id|_key|_to"
+    --> @dm:dedup columns="left_id,right_id"
+    --> @dm:dedup columns="unique_id"
+    --> @rn:write-stream name = 'topology_training_edges'
+    --> @graph:insert-edges dbname = 'topology_training' & nodes_collection = 'topology_training_nodes' & edges_collection = 'topology_training_edges' & left_id = 'left_id' & right_id = 'right_id'   & sort_on_key = True & edge_key_attrs="unique_id"
+

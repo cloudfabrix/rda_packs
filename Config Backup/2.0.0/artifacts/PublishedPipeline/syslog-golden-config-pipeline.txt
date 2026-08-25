@@ -1,0 +1,20 @@
+%% stream = no and limit = 0
+
+@exec:get-input
+    --> @dm:save name="temp-data"
+
+--> @c:data-loop dataset="temp-data" and columns="source_ip,customer_tag"
+    --> @dm:empty
+    --> @dm:addrow name="syslog-config-backup-stream"
+    --> #dm:query-persistent-stream source_ip is '$source_ip' and customer_tag is '$customer_tag' and limit = "0"
+    --> @dm:eval golden_config="'No'"
+    --> @dm:save name="temp-output-data"
+    --> @rn:write-stream name="syslog-config-backup-stream"
+
+--> @c:data-loop dataset="temp-data" and columns="config_id,customer_tag"
+    --> @dm:empty
+    --> @dm:addrow name="syslog-config-backup-stream"
+    --> #dm:query-persistent-stream config_id is '$config_id' and customer_tag is '$customer_tag' and limit = "0"
+    --> @dm:eval golden_config="'Yes'"
+    --> @rn:write-stream name="syslog-config-backup-stream"
+

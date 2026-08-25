@@ -1,0 +1,248 @@
+{
+    "name": "asset_navigator_topology_training_with_graphdb",
+    "label": "Asset Navigator",
+    "description": "Asset Navigator Topology with GraphDB",
+    "dashboard_folder": "Default",
+    "version": "26.2.4.1",
+    "dashboard_generator": {
+        "attachment": "widget_code_generator"
+    },
+    "live_edit": true,
+    "enabled": false,
+    "short_label": "Stack",
+    "context_label_id": "stack_name",
+    "dashboard_type": "navigation-dashboard",
+    "dashboard_style": "tabbed",
+    "dashboard_filters": {
+        "time_filter": true,
+        "default_time_filter_labels": [
+            "Last 24 hours"
+        ]
+    },
+    "template_variables": {
+        "NODE_ID": {
+            "contextId": [
+                "navigatorSelectionContexts",
+                "secondaryListSelection",
+                "node_id"
+            ]
+        }
+    },
+    "navigation_dashboards": {
+        "tree_data": {
+            "column_name": "node_type",
+            "pstream_name": "graphdb://topology_training/topology_training_nodes",
+            "pstream_name0": "topology_training_nodes"
+        },
+        "tree_detail": {
+            "pstream_name": "graphdb://topology_training/topology_training_nodes",
+            "display_column": "node_label",
+            "selected_columns": {
+                "node_id": "Node Id",
+                "node_label": "Node Name"
+            }
+        },
+        "showNodeIcon": true,
+        "showSearchBox": true
+    },
+    "dashboard_sections": [
+        {
+            "title": "Topology",
+            "widgets": [
+                {
+                    "title": "Topology",
+                    "widget_type": "topology",
+                    "register_search_endpoints": true,
+                    "reportId": "rda.saas.stack.view.topo",
+                    "nodeSelectionPreview": {
+                        "trigger": "CLICK",
+                        "position": "CONTROL_PANEL",
+                        "contentType": "DASHBOARD",
+                        "contentInfo": {
+                            "dashboardId": "user-dashboard-oia-topology-node-details"
+                        }
+                    },
+                    "edgeSelectionPreview": {
+                        "trigger": "CLICK",
+                        "position": "CONTROL_PANEL",
+                        "contentType": "DASHBOARD",
+                        "contentInfo": {
+                            "dashboardId": "user-dashboard-oia-topology-edge-details"
+                        }
+                    },
+                    "nodes_report": {
+                        "reportMetaData": {
+                            "sorting": true,
+                            "filtering": true,
+                            "title": "Nodes",
+                            "remote_searchable": false,
+                            "remote_searchable_cols": [
+                                "name",
+                                "node_label",
+                                "node_id",
+                                "node_type"
+                            ],
+                            "actions": [],
+                            "reportColumnDefinitionList": [
+                                {
+                                    "identifier": "node_label",
+                                    "title": "Name",
+                                    "key": false
+                                },
+                                {
+                                    "identifier": "layer",
+                                    "key": false,
+                                    "title": "Layer"
+                                },
+                                {
+                                    "identifier": "node_type",
+                                    "key": false,
+                                    "title": "node_type"
+                                },
+                                {
+                                    "identifier": "name",
+                                    "hidden": true,
+                                    "key": false
+                                }
+                            ]
+                        }
+                    },
+                    "edges_report": {
+                        "reportId": "rda.saas.topology.edges.report",
+                        "reportMetaData": {
+                            "sorting": true,
+                            "filtering": true,
+                            "title": "Edges",
+                            "reportColumnDefinitionList": [
+                                {
+                                    "hidden": false,
+                                    "id": "left_id",
+                                    "identifier": "left_id",
+                                    "key": true,
+                                    "title": "Left Id",
+                                    "type": "TEXT",
+                                    "visible": false
+                                },
+                                {
+                                    "hidden": false,
+                                    "id": "left_label",
+                                    "identifier": "left_label",
+                                    "key": false,
+                                    "title": "Source",
+                                    "type": "TEXT",
+                                    "visible": true
+                                },
+                                {
+                                    "hidden": false,
+                                    "id": "right_id",
+                                    "identifier": "right_id",
+                                    "key": true,
+                                    "title": "Right Id",
+                                    "type": "TEXT",
+                                    "visible": false
+                                },
+                                {
+                                    "hidden": false,
+                                    "id": "right_label",
+                                    "identifier": "right_label",
+                                    "key": false,
+                                    "title": "Destination",
+                                    "type": "TEXT",
+                                    "visible": true
+                                },
+                                {
+                                    "hidden": false,
+                                    "id": "relation_type",
+                                    "identifier": "relation_type",
+                                    "key": false,
+                                    "title": "Relation",
+                                    "type": "TEXT",
+                                    "visible": true
+                                }
+                            ],
+                            "actions": []
+                        }
+                    },
+                    "stack_type": "dynamic",
+                    "stack_definition": {
+                        "name": "Telco Stack",
+                        "description": "",
+                        "saved_time": "2023-09-12T21:08:31.418255",
+                        "is_dynamic": true,
+                        "hierarchical": true,
+                        "dynamic_nodes": {
+                            "db_name": "topology_training",
+                            "stream": "graphdb://topology_training/topology_training_nodes"
+                        },
+                        "dynamic_relationships": {
+                            "stream": "graphdb://topology_training/topology_training_edges",
+                            "graph_name": "topology_training_graph",
+                            "relation_map": "rdaf_topology_relationships"
+                        }
+                    },
+                    "oia_details": {
+                        "alert_source": {
+                            "stream": "oia-alerts-stream",
+                            "group_by": [
+                                "a_en_node_id",
+                                "a_severity"
+                            ],
+                            "extra_filter": "a_source_systemname is not 'Alert Group' ",
+                            "ts_column": "a_created_ts",
+                            "duration_hours": 9000,
+                            "agg": "value_count",
+                            "column": "count_",
+                            "type": "int"
+                        }
+                    },
+                    "height": 14,
+                    "min_wdith": 14,
+                    "widget_id": "c58fbdb5"
+                }
+            ]
+        },
+        {
+            "title": "Node Details",
+            "widgets": [
+                {
+                    "title": "Summary",
+                    "widget_type": "portal_summary",
+                    "reportId": "rda.saas.topology.node_details.report",
+                    "max_width": 4,
+                    "height": 12,
+                    "min_width": 4,
+                    "widget_id": "4b666d57"
+                }
+            ]
+        },
+        {
+            "title": "Relations",
+            "show_filter": false,
+            "widgets": [
+                {
+                    "widget_type": "graphdb",
+                    "title": "Relations",
+                    "stack_name": "rdaf_topology_alert_badging",
+                    "db_name": "topology_training",
+                    "nodes_collection": "topology_training_nodes",
+                    "edges_collection": "topology_training_edges",
+                    "graph_name": "topology_training_graph",
+                    "relation_map": "rdaf_topology_relationships",
+                    "widget_id": "353ed532"
+                }
+            ],
+            "widget_id": "b8cef671"
+        }
+    ],
+    "saved_time": "2026-08-12T10:12:52.448352",
+    "attachments": [
+        {
+            "name": "widget_code_generator",
+            "value": "{%- set ns = namespace(count=0) -%}\r\n{%- for section in dashboard[\"dashboard_sections\"] -%}\r\n    {%- set widgets = section[\"widgets\"] -%}\r\n    {%- set new_widgets = [] -%}\r\n    {%- for w in widgets -%}\r\n        {%- if w.get(\"widget_type\") -%}\r\n            {%-\r\n                set nw = {\r\n                    \"title\": \"JSON Dashboard Def.\",\r\n                    \"widget_group\": \"g\"+str(ns.count),\r\n                    \"min_width\": w.get(\"min_width\", 6),\r\n                    \"max_width\": w.get(\"max_width\", 6),\r\n                    \"height\": w.get(\"height\", 4),\r\n                    \"widget_type\": \"codeblock\",\r\n                    \"content\": json_dumps_indent(w, 2),\r\n                    \"lang\": \"json\",\r\n                    \"widget_id\": w.get(\"widget_id\", str(ns.count)) + \"_code\"\r\n                }\r\n            -%}\r\n            {%- set _ = w.update({\"widget_group\": \"g\"+str(ns.count) }) -%}\r\n            {%- set _ = new_widgets.append(nw) -%}\r\n            {%- set ns.count = ns.count + 1 -%}\r\n        {%- endif -%}\r\n    {%- endfor -%}\r\n    {%- set _ = widgets.extend(new_widgets) -%}\r\n{%- endfor -%}",
+            "additionalFields": {
+                "valueType": "",
+                "description": ""
+            }
+        }
+    ]
+}

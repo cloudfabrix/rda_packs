@@ -1,0 +1,520 @@
+{
+    "name": "kubernetes_inventory",
+    "label": "Kubernetes Clusters Inventory",
+    "description": "Kubernetes Clusters Inventory Dashboard",
+    "version": "24.04.19.02",
+    "enabled": true,
+    "live_edit": true,
+    "dashboard_folder": "Kubernetes",
+    "custom_context": {
+        "rda-dashboard-live-edit": true
+    },
+    "template_variables": {
+        "CUST_ID": {
+            "contextId": "customerId"
+        },
+        "PROJ_ID": {
+            "contextId": "projectId"
+        },
+        "CUST_TAG": {
+            "contextId": "customerTag"
+        }
+    },
+    "dashboard_style": "tabbed",
+    "dashboard_type": "template",
+    "dashboard_filters": {
+        "time_filter": true,
+        "extra_filter0": "customer_tag is '{{CUST_TAG}}' or customer_tag is empty",
+        "default_time_filter_labels": [
+            "Last 1 week"
+        ],
+        "columns_filter": [
+            {
+                "id": "kube_controller_ip",
+                "label": "K8s Cluster IP",
+                "type": "TEXT"
+            },
+            {
+                "id": "kube_node_hostname",
+                "label": "K8s Nodename",
+                "type": "TEXT"
+            },
+            {
+                "id": "kube_node_ip",
+                "label": "K8s Node IP",
+                "type": "TEXT"
+            },
+            {
+                "id": "kube_pod_name",
+                "label": "K8s Pod Name",
+                "type": "TEXT"
+            },
+            {
+                "id": "kube_pod_container_id_full",
+                "label": "K8s Container ID",
+                "type": "TEXT"
+            },
+            {
+                "id": "kube_namespace",
+                "label": "K8s Namespace",
+                "type": "TEXT"
+            },
+            {
+                "id": "kube_service_name",
+                "label": "K8s Service Name",
+                "type": "TEXT"
+            },
+            {
+                "id": "kube_endpoint_name",
+                "label": "K8s Endpoint Name",
+                "type": "TEXT"
+            },
+            {
+                "id": "kube_endpoint_ip",
+                "label": "K8s Endpoint IP",
+                "type": "TEXT"
+            }
+        ],
+        "group_filters": [
+            {
+                "stream": "kubernetes-cluster-inventory",
+                "extra_filter": "asset_object = 'Node' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty or customer_tag is 'None')",
+                "title": "Clusters",
+                "group_by": [
+                    "kube_controller_ip"
+                ],
+                "limit": 200,
+                "ts_column": "collection_timestamp",
+                "agg": "cardinality",
+                "column": "_id",
+                "type": "int"
+            }
+        ]
+    },
+    "dashboard_sections": [
+        {
+            "title": "Nodes",
+            "show_filter": true,
+            "widgets": [
+                {
+                    "widget_type": "pie_chart",
+                    "title": "K8S Controller IP",
+                    "stream": "kubernetes-cluster-inventory",
+                    "ts_column": "collection_timestamp",
+                    "extra_filter": "asset_object = 'Node' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty or customer_tag is 'None' )",
+                    "column": "count_",
+                    "agg": "cardinality",
+                    "group_by": [
+                        "kube_controller_ip"
+                    ],
+                    "type": "str",
+                    "min_width": 3,
+                    "height": 4,
+                    "max_width": 3,
+                    "widget_id": "4063716e"
+                },
+                {
+                    "widget_type": "pie_chart",
+                    "title": "K8S Cluster version",
+                    "stream": "kubernetes-cluster-inventory",
+                    "ts_column": "collection_timestamp",
+                    "extra_filter": "asset_object = 'Node' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty or customer_tag is 'None' )",
+                    "column": "_id",
+                    "agg": "value_count",
+                    "group_by": [
+                        "kube_cluster_version"
+                    ],
+                    "type": "str",
+                    "min_width": 3,
+                    "height": 4,
+                    "max_width": 3,
+                    "widget_id": "65cb710f"
+                },
+                {
+                    "widget_type": "pie_chart",
+                    "title": "K8S OS Name",
+                    "stream": "kubernetes-cluster-inventory",
+                    "ts_column": "collection_timestamp",
+                    "extra_filter": "asset_object = 'Node' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty or customer_tag is 'None')",
+                    "column": "_id",
+                    "agg": "value_count",
+                    "group_by": [
+                        "kube_node_os_name"
+                    ],
+                    "type": "str",
+                    "min_width": 3,
+                    "height": 4,
+                    "max_width": 3,
+                    "widget_id": "29abbb1c"
+                },
+                {
+                    "widget_type": "pie_chart",
+                    "title": "K8S Node Type",
+                    "stream": "kubernetes-cluster-inventory",
+                    "ts_column": "collection_timestamp",
+                    "extra_filter": "asset_object = 'Node' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty or customer_tag is 'None')",
+                    "column": "_id",
+                    "agg": "value_count",
+                    "group_by": [
+                        "kube_node_type"
+                    ],
+                    "type": "str",
+                    "min_width": 3,
+                    "height": 4,
+                    "max_width": 3,
+                    "widget_id": "49632c27"
+                },
+                {
+                    "widget_type": "tabular",
+                    "title": "K8S Node Details",
+                    "stream": "kubernetes-cluster-inventory",
+                    "extra_filter": "asset_object = 'Node' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty or customer_tag is 'None')",
+                    "ts_column": "collection_timestamp",
+                    "sorting": [],
+                    "resizableColumns": false,
+                    "paginated": true,
+                    "virtual_scrolling": false,
+                    "showRowSummary": true,
+                    "max_rows": 200,
+                    "columns": {
+                        "kube_node_hostname": "Host Name",
+                        "kube_node_ip": {
+                            "title": "Host IP",
+                            "key": true
+                        },
+                        "kube_cluster_name": {
+                            "title": "K8S Cluster Name",
+                            "key": true
+                        },
+                        "kube_node_type": "K8S Node Type",
+                        "kube_node_os_kernel_version": "Kernel Version",
+                        "kube_node_os_name": "OS Name",
+                        "kube_node_os_type": "OS Type",
+                        "asset_object": "Asset Object",
+                        "collection_timestamp": {
+                            "title": "Collection Timestamp",
+                            "type": "DATETIME"
+                        }
+                    },
+                    "actions": [
+                        {
+                            "permission": "rda:user_dashboard:view",
+                            "appName": "user-dashboard/kubernetes_cluster_detailed_view",
+                            "drillDownLinkField": "kube_cluster_name",
+                            "identifier": "launch.dashboard.device_view_app",
+                            "selectionType": "SINGLE",
+                            "title": "Cluster Details",
+                            "type": "GO_TO_APP_STATE",
+                            "contextParamList": {
+                                "contextParams": [
+                                    {
+                                        "paramKey": "kube_cluster_name",
+                                        "paramId": "node_id"
+                                    },
+                                    {
+                                        "paramKey": "kube_node_hostname",
+                                        "paramId": "kube_node_hostname"
+                                    },
+                                    {
+                                        "paramKey": "kube_node_ip",
+                                        "paramId": "kube_node_ip"
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "permission": "rda:user_dashboard:view",
+                            "appName": "user-dashboard/kubernetes_cluster_detailed_view",
+                            "drillDownLinkField": "kube_node_ip",
+                            "identifier": "launch.dashboard.device_view_app",
+                            "selectionType": "SINGLE",
+                            "title": "Worker Details",
+                            "type": "GO_TO_APP_STATE",
+                            "contextParamList": {
+                                "contextParams": [
+                                    {
+                                        "paramKey": "kube_node_ip",
+                                        "paramId": "node_id"
+                                    },
+                                    {
+                                        "paramKey": "kube_node_hostname",
+                                        "paramId": "kube_node_hostname"
+                                    },
+                                    {
+                                        "paramKey": "kube_node_ip",
+                                        "paramId": "kube_node_ip"
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "widget_id": "60edad5a"
+                }
+            ]
+        },
+        {
+            "title": "PODs",
+            "show_filter": true,
+            "widgets": [
+                {
+                    "widget_type": "pie_chart",
+                    "title": "POD Status",
+                    "stream": "kubernetes-cluster-inventory",
+                    "ts_column": "collection_timestamp",
+                    "extra_filter": "asset_object = 'POD' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty or customer_tag is 'None')",
+                    "column": "_id",
+                    "agg": "value_count",
+                    "group_by": [
+                        "kube_pod_status"
+                    ],
+                    "type": "str",
+                    "min_width": 4,
+                    "height": 4,
+                    "max_width": 4,
+                    "widget_id": "11470a73"
+                },
+                {
+                    "widget_type": "tabular",
+                    "title": "POD Details",
+                    "stream": "kubernetes-cluster-inventory",
+                    "extra_filter": "asset_object = 'POD' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty or customer_tag is 'None')",
+                    "ts_column": "collection_timestamp",
+                    "sorting": [],
+                    "resizableColumns": false,
+                    "paginated": true,
+                    "virtual_scrolling": false,
+                    "showRowSummary": true,
+                    "max_rows": 200,
+                    "columns": {
+                        "kube_node_hostname": "Host Name",
+                        "kube_pod_name": {
+                            "title": "K8S POD NAME",
+                            "key": true
+                        },
+                        "kube_pod_container_id_full": "K8S POD Container ID Full Path",
+                        "kube_pod_uuid": {
+                            "title": "K8S POD UID",
+                            "key": true
+                        },
+                        "kube_controller_ip": "K8S Controller IP",
+                        "kube_pod_container_id": "K8S Container Id",
+                        "kube_namespace": "K8S Name Space",
+                        "kube_pod_ip": "K8S POD IP Address",
+                        "kube_pod_status": "K8S POD Status",
+                        "kube_cluster_name": {
+                            "title": "K8S Cluster Name",
+                            "key": true
+                        },
+                        "asset_object": "Asset Object",
+                        "collection_timestamp": {
+                            "title": "Collection Timestamp",
+                            "type": "DATETIME"
+                        }
+                    },
+                    "actions": [
+                        {
+                            "permission": "rda:user_dashboard:view",
+                            "appName": "user-dashboard/kubernetes_cluster_detailed_view",
+                            "drillDownLinkField": "kube_pod_name",
+                            "identifier": "launch.dashboard.device_view_app",
+                            "selectionType": "SINGLE",
+                            "title": "POD Details",
+                            "type": "GO_TO_APP_STATE",
+                            "contextParamList": {
+                                "contextParams": [
+                                    {
+                                        "paramKey": "kube_pod_uuid",
+                                        "paramId": "node_id"
+                                    },
+                                    {
+                                        "paramKey": "kube_node_hostname",
+                                        "paramId": "kube_node_hostname"
+                                    },
+                                    {
+                                        "paramKey": "kube_controller_ip",
+                                        "paramId": "kube_node_ip"
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "widget_id": "f157322d"
+                }
+            ]
+        },
+        {
+            "title": "Images",
+            "show_filter": true,
+            "widgets": [
+                {
+                    "widget_type": "tabular",
+                    "title": "Image Details",
+                    "stream": "kubernetes-cluster-inventory",
+                    "extra_filter": "asset_object = 'Image' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty or customer_tag is 'None')",
+                    "ts_column": "collection_timestamp",
+                    "sorting": [],
+                    "resizableColumns": false,
+                    "paginated": true,
+                    "virtual_scrolling": false,
+                    "showRowSummary": true,
+                    "max_rows": 200,
+                    "columns": {
+                        "kube_cluster_name": "K8S Cluster Name",
+                        "kube_controller_ip": "K8S Controller IP",
+                        "kube_node_os_kernel_version": "K8S OS Kernerl Version",
+                        "kube_node_type": "K8S Node Type",
+                        "kube_node_os_name": "K8S OS Version",
+                        "kube_node_image_name": "K8S Node Image Name",
+                        "kube_node_image_id": "K8S Node Image ID",
+                        "asset_object": "Asset Object",
+                        "collection_timestamp": {
+                            "title": "Collection Timestamp",
+                            "type": "DATETIME"
+                        }
+                    },
+                    "widget_id": "38b5c823"
+                }
+            ]
+        },
+        {
+            "title": "Serivces",
+            "show_filter": true,
+            "widgets": [
+                {
+                    "widget_type": "pie_chart",
+                    "title": "Service NameSpace",
+                    "stream": "kubernetes-cluster-inventory",
+                    "ts_column": "collection_timestamp",
+                    "extra_filter": "asset_object = 'Service' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty or customer_tag is 'None')",
+                    "column": "_id",
+                    "limit": 50,
+                    "agg": "value_count",
+                    "group_by": [
+                        "kube_namespace"
+                    ],
+                    "type": "str",
+                    "min_width": 4,
+                    "height": 4,
+                    "max_width": 4,
+                    "widget_id": "4061716e"
+                },
+                {
+                    "widget_type": "tabular",
+                    "title": "Service Details",
+                    "stream": "kubernetes-cluster-inventory",
+                    "extra_filter": "asset_object = 'Service' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty or customer_tag is 'None')",
+                    "ts_column": "collection_timestamp",
+                    "sorting": [],
+                    "resizableColumns": false,
+                    "paginated": true,
+                    "virtual_scrolling": false,
+                    "showRowSummary": true,
+                    "max_rows": 200,
+                    "columns": {
+                        "kube_cluster_name": "K8S Cluster Name",
+                        "kube_controller_ip": "K8S Controller IP",
+                        "kube_namespace": "K8S Name Space",
+                        "kube_service_name": "K8S Service Name",
+                        "kube_service_port": "K8S Service Port",
+                        "kube_service_port_name": "K8S Service Port Name",
+                        "kube_service_target_port": "K8S Service Target Port",
+                        "kube_service_node_port": "K8S Service Node Port Name",
+                        "unique_id": "Service Unique ID",
+                        "asset_object": "Asset Object",
+                        "collection_timestamp": {
+                            "title": "Collection Timestamp",
+                            "type": "DATETIME"
+                        }
+                    },
+                    "widget_id": "727cb802"
+                }
+            ]
+        },
+        {
+            "title": "Endpoints",
+            "show_filter": true,
+            "widgets": [
+                {
+                    "widget_type": "pie_chart",
+                    "title": "Endpoint Name",
+                    "stream": "kubernetes-cluster-inventory",
+                    "ts_column": "collection_timestamp",
+                    "extra_filter": "asset_object = 'ServiceEndpoint' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty or customer_tag is 'None')",
+                    "column": "_id",
+                    "agg": "value_count",
+                    "group_by": [
+                        "kube_endpoint_name"
+                    ],
+                    "type": "str",
+                    "min_width": 4,
+                    "height": 4,
+                    "max_width": 4,
+                    "widget_id": "f0d0925c"
+                },
+                {
+                    "widget_type": "pie_chart",
+                    "title": "Endpoint IP",
+                    "stream": "kubernetes-cluster-inventory",
+                    "ts_column": "collection_timestamp",
+                    "extra_filter": "asset_object = 'ServiceEndpoint' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty or customer_tag is 'None')",
+                    "column": "_id",
+                    "agg": "value_count",
+                    "group_by": [
+                        "kube_endpoint_ip"
+                    ],
+                    "type": "str",
+                    "min_width": 4,
+                    "height": 4,
+                    "max_width": 4,
+                    "widget_id": "1276d24c"
+                },
+                {
+                    "widget_type": "pie_chart",
+                    "title": "Endpoint NameSpace",
+                    "stream": "kubernetes-cluster-inventory",
+                    "ts_column": "collection_timestamp",
+                    "extra_filter": "asset_object = 'ServiceEndpoint' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty or customer_tag is 'None')",
+                    "column": "_id",
+                    "agg": "value_count",
+                    "group_by": [
+                        "kube_endpoint_namespace"
+                    ],
+                    "type": "str",
+                    "min_width": 4,
+                    "height": 4,
+                    "max_width": 4,
+                    "widget_id": "7699bfa9"
+                },
+                {
+                    "widget_type": "tabular",
+                    "title": "ServiceEndpoint Details",
+                    "stream": "kubernetes-cluster-inventory",
+                    "extra_filter": "asset_object = 'ServiceEndpoint' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty or customer_tag is 'None')",
+                    "ts_column": "collection_timestamp",
+                    "sorting": [],
+                    "resizableColumns": false,
+                    "paginated": true,
+                    "virtual_scrolling": false,
+                    "showRowSummary": true,
+                    "max_rows": 200,
+                    "columns": {
+                        "kube_cluster_name": "K8S Cluster Name",
+                        "kube_controller_ip": "K8S Controller IP",
+                        "kube_namespace": "K8S Name Space",
+                        "kube_endpoint_type": "K8S Endpoint Type",
+                        "kube_endpoint_name": "K8S Endpoint Name",
+                        "kube_endpoint_ip": "K8S Endpoint IP",
+                        "kube_endpoint_namespace": "K8S Endpoint NameSpace",
+                        "asset_object": "Asset Object",
+                        "collection_timestamp": {
+                            "title": "Collection Timestamp",
+                            "type": "DATETIME"
+                        }
+                    },
+                    "widget_id": "6ccdf1be"
+                }
+            ]
+        }
+    ],
+    "saved_time": "2025-08-07T06:28:19.153035"
+}

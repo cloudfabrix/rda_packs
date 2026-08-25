@@ -1,0 +1,21 @@
+Value Required CONFIG (.*)
+
+Start
+  ^[A-Za-z]{3}\s+[A-Za-z]{3}\s+\d{1,2}\s+\d{1,2}:\d{2}:\d{2}(\.\d+)?\s+\S+\s*$$ -> Next
+  ^\d{4}-\d{2}-\d{2}[T ]\d{2}:\d{2}:\d{2}(\.\d+)?(\s*(Z|[+-]\d{2}:?\d{2}))?\s*$$ -> Next
+  ^Building configuration.* -> Next
+  ^Current configuration.* -> Next
+  ^Startup configuration.* -> Next
+  ^!\s*Command:.* -> Next
+  ^!\s*No configuration change.* -> Next
+  ^!\s*Time:.* -> Next
+  ^!\s*Running configuration.* -> Next
+  ^!\s*Timestamp:.* -> Next
+  ^!\s*Startup config.* -> Next
+  ^RP/.* -> Next
+  ^\s*show running-config.* -> Next
+  ^\s*show run.* -> Next
+  ^\s*!(?!!).* -> Next
+  ^\s*$$ -> Next
+  ^${CONFIG}$$ -> Record
+

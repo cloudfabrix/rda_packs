@@ -1,0 +1,1603 @@
+{
+    "name": "vmanage_performance_sla",
+    "label": "Performance and SLA",
+    "description": "Health-first performance dashboard: headline KPIs, SLA trends, traffic and interface utilization, capacity (TLOC, QoS, system resources), and control-plane drill-down.",
+    "dashboard_folder": "VmanagePerformance",
+    "version": "26.06.19.1",
+    "live_edit": true,
+    "enabled": true,
+    "template_variables": {
+        "CUST_TAG": {
+            "contextId": "customerTag"
+        },
+        "PROJ_ID": {
+            "contextId": "projectId"
+        }
+    },
+    "stream": "vmanage_approute_sla_metrics",
+    "dashboard_type": "template",
+    "dashboard_filters": {
+        "time_filter": true,
+        "extra_filter": "(customer_tag is '{{CUST_TAG}}' or customer_tag is empty or customer_tag is '' or customer_tag is 'None')",
+        "default_time_filter_labels": [
+            "Last 1 month"
+        ],
+        "columns_filter": [
+            {
+                "id": "host_name",
+                "label": "Host",
+                "type": "TEXT"
+            },
+            {
+                "id": "local_color",
+                "label": "Local color",
+                "type": "TEXT"
+            },
+            {
+                "id": "remote_color",
+                "label": "Remote color",
+                "type": "TEXT"
+            },
+            {
+                "id": "siteid",
+                "label": "Site",
+                "type": "TEXT"
+            },
+            {
+                "id": "metric_category",
+                "label": "Metric category",
+                "type": "TEXT"
+            }
+        ]
+    },
+    "dashboard_sections": [
+        {
+            "title": "Health Overview",
+            "show_filter": true,
+            "widgets": [
+                {
+                    "title": "Avg latency (ms)",
+                    "widget_type": "custom_counter",
+                    "stream": "vmanage_approute_sla_metrics",
+                    "ts_column": "entry_time",
+                    "column": "latency",
+                    "agg": "avg",
+                    "type": "double",
+                    "min_width": 3,
+                    "max_width": 3,
+                    "height": 4,
+                    "widget_id": "pf_lat",
+                    "style": {
+                        "color-list": [
+                            "#F59E0B"
+                        ]
+                    }
+                },
+                {
+                    "title": "Avg packet loss (%)",
+                    "widget_type": "custom_counter",
+                    "stream": "vmanage_approute_sla_metrics_filtered",
+                    "ts_column": "entry_time",
+                    "column": "loss_percentage",
+                    "agg": "avg",
+                    "type": "double",
+                    "min_width": 3,
+                    "max_width": 3,
+                    "height": 4,
+                    "widget_id": "pf_loss",
+                    "style": {
+                        "color-list": [
+                            "#EF4444"
+                        ]
+                    }
+                },
+                {
+                    "title": "Avg jitter (ms)",
+                    "widget_type": "custom_counter",
+                    "stream": "vmanage_approute_sla_metrics",
+                    "ts_column": "entry_time",
+                    "column": "jitter",
+                    "agg": "avg",
+                    "type": "double",
+                    "min_width": 3,
+                    "max_width": 3,
+                    "height": 4,
+                    "widget_id": "pf_jit",
+                    "style": {
+                        "color-list": [
+                            "#EAB308"
+                        ]
+                    }
+                },
+                {
+                    "title": "Avg vQoE score",
+                    "widget_type": "custom_counter",
+                    "stream": "vmanage_approute_sla_metrics",
+                    "ts_column": "entry_time",
+                    "column": "vqoe_score",
+                    "agg": "avg",
+                    "type": "double",
+                    "min_width": 3,
+                    "max_width": 3,
+                    "height": 4,
+                    "widget_id": "pf_vqoe_kpi",
+                    "style": {
+                        "color-list": [
+                            "#22C55E"
+                        ]
+                    }
+                },
+                {
+                    "title": "BFD sessions",
+                    "widget_type": "custom_counter",
+                    "stream": "vmanage_metrics_timeseries",
+                    "ts_column": "collection_timestamp",
+                    "extra_filter": "(state is 'up') and (metric_category is 'bfd_sessions')",
+                    "duration_hours": 24,
+                    "column": "dst_ip",
+                    "agg": "value_count",
+                    "type": "int",
+                    "min_width": 4,
+                    "max_width": 4,
+                    "height": 4,
+                    "widget_id": "pf_cp_bfd_up",
+                    "style": {
+                        "color-list": [
+                            "#22C55E"
+                        ]
+                    }
+                },
+                {
+                    "title": "OMP peers",
+                    "widget_type": "custom_counter",
+                    "stream": "vmanage_metrics_timeseries",
+                    "ts_column": "collection_timestamp",
+                    "extra_filter": "(state is 'up') and (metric_category is 'omp_peers')",
+                    "duration_hours": 24,
+                    "column": "peer",
+                    "agg": "value_count",
+                    "type": "int",
+                    "min_width": 4,
+                    "max_width": 4,
+                    "height": 4,
+                    "widget_id": "pf_cp_omp_up",
+                    "style": {
+                        "color-list": [
+                            "#22C55E"
+                        ]
+                    }
+                },
+                {
+                    "title": "Control connections down",
+                    "widget_type": "custom_counter",
+                    "stream": "vmanage_metrics_timeseries",
+                    "ts_column": "collection_timestamp",
+                    "extra_filter": "(state is 'down') and (metric_category is 'control_connections')",
+                    "duration_hours": 24,
+                    "column": "system_ip",
+                    "agg": "value_count",
+                    "type": "int",
+                    "min_width": 4,
+                    "max_width": 4,
+                    "height": 4,
+                    "widget_id": "pf_ctrl",
+                    "style": {
+                        "color-list": [
+                            "#EF4444"
+                        ]
+                    }
+                },
+                {
+                    "title": "Control connections detail",
+                    "widget_type": "tabular",
+                    "stream": "vmanage_metrics_timeseries",
+                    "ts_column": "collection_timestamp",
+                    "extra_filter": "metric_category is 'control_connections'",
+                    "duration_hours": 24,
+                    "min_width": 12,
+                    "max_width": 12,
+                    "height": 6,
+                    "columns": {
+                        "system_ip": {
+                            "title": "Local system IP",
+                            "type": "TEXT",
+                            "visible": true
+                        },
+                        "vdevice_name": {
+                            "title": "Peer system IP",
+                            "type": "TEXT",
+                            "visible": true
+                        },
+                        "protocol": {
+                            "title": "Protocol",
+                            "type": "TEXT",
+                            "visible": true
+                        },
+                        "state": {
+                            "title": "State",
+                            "type": "TEXT",
+                            "visible": true
+                        },
+                        "uptime": {
+                            "title": "Uptime",
+                            "type": "TEXT",
+                            "visible": true
+                        }
+                    },
+                    "widget_id": "pf_cp_status",
+                    "empty_data_message": "No control connection data available."
+                },
+                {
+                    "title": "BFD sessions detail",
+                    "widget_type": "tabular",
+                    "stream": "vmanage_metrics_timeseries",
+                    "ts_column": "collection_timestamp",
+                    "duration_hours": 72,
+                    "min_width": 12,
+                    "max_width": 12,
+                    "height": 6,
+                    "columns": {
+                        "vdevice_name": {
+                            "title": "Reporting device IP",
+                            "type": "TEXT",
+                            "visible": true
+                        },
+                        "system_ip": {
+                            "title": "Local system IP",
+                            "type": "TEXT",
+                            "visible": true
+                        },
+                        "src_ip": {
+                            "title": "Tunnel source IP",
+                            "type": "TEXT",
+                            "visible": true
+                        },
+                        "dst_ip": {
+                            "title": "Tunnel destination IP",
+                            "type": "TEXT",
+                            "visible": true
+                        },
+                        "local-color": {
+                            "title": "Local transport color",
+                            "type": "TEXT",
+                            "visible": true
+                        },
+                        "state": {
+                            "title": "State",
+                            "type": "TEXT",
+                            "visible": true
+                        },
+                        "proto": {
+                            "title": "Protocol",
+                            "type": "TEXT",
+                            "visible": true
+                        }
+                    },
+                    "widget_id": "pf_bfd_tbl",
+                    "empty_data_message": "No BFD session data",
+                    "extra_filter": "metric_category is 'bfd_sessions'"
+                },
+                {
+                    "title": "OMP peers detail",
+                    "widget_type": "tabular",
+                    "stream": "vmanage_metrics_timeseries",
+                    "ts_column": "collection_timestamp",
+                    "duration_hours": 72,
+                    "min_width": 12,
+                    "max_width": 12,
+                    "height": 6,
+                    "columns": {
+                        "vdevice_name": {
+                            "title": "Edge system IP",
+                            "type": "TEXT",
+                            "visible": true
+                        },
+                        "peer": {
+                            "title": "Controller OMP peer IP",
+                            "type": "TEXT",
+                            "visible": true
+                        },
+                        "type": {
+                            "title": "Peer role",
+                            "type": "TEXT",
+                            "visible": true
+                        },
+                        "state": {
+                            "title": "State",
+                            "type": "TEXT",
+                            "visible": true
+                        },
+                        "site-id": {
+                            "title": "Site ID",
+                            "type": "TEXT",
+                            "visible": true
+                        }
+                    },
+                    "widget_id": "pf_omp_tbl",
+                    "empty_data_message": "No OMP peer data",
+                    "extra_filter": "metric_category is 'omp_peers'"
+                }
+            ]
+        },
+        {
+            "title": "SLA & Tunnels",
+            "show_filter": true,
+            "widgets": [
+                {
+                    "title": "Latency (ms) over time by transport color",
+                    "widget_type": "timeseries",
+                    "stream": "vmanage_approute_sla_metrics",
+                    "ts_column": "entry_time",
+                    "duration_hours": 72,
+                    "min_width": 6,
+                    "max_width": 6,
+                    "height": 5,
+                    "group_by": [
+                        "local_color"
+                    ],
+                    "chartProperties": {
+                        "legendLocation": "top",
+                        "xAxisLabel": "Time",
+                        "yAxisLabel": "Latency in (ms)"
+                    },
+                    "style": {
+                        "color-list": [
+                            "#F59E0B",
+                            "#FBBF24",
+                            "#D97706"
+                        ]
+                    },
+                    "widget_id": "pf_lat_ts",
+                    "interval": "1h",
+                    "gap_interval": "join",
+                    "series_spec": [
+                        {
+                            "column": "latency",
+                            "agg": "avg",
+                            "type": "double"
+                        }
+                    ],
+                    "empty_data_message": "No SLA trend data in the selected time range"
+                },
+                {
+                    "title": "Packet loss (%) over time by transport color",
+                    "widget_type": "timeseries",
+                    "stream": "vmanage_approute_sla_metrics",
+                    "ts_column": "entry_time",
+                    "duration_hours": 72,
+                    "min_width": 6,
+                    "max_width": 6,
+                    "height": 5,
+                    "group_by": [
+                        "local_color"
+                    ],
+                    "chartProperties": {
+                        "legendLocation": "top",
+                        "xAxisLabel": "Time",
+                        "yAxisLabel": "Loss in (%)"
+                    },
+                    "style": {
+                        "color-list": [
+                            "#EF4444",
+                            "#F87171",
+                            "#DC2626"
+                        ]
+                    },
+                    "widget_id": "pf_loss_ts",
+                    "interval": "1h",
+                    "gap_interval": "join",
+                    "series_spec": [
+                        {
+                            "column": "loss_percentage",
+                            "agg": "avg",
+                            "type": "double"
+                        }
+                    ],
+                    "empty_data_message": "No SLA trend data in the selected time range"
+                },
+                {
+                    "title": "Jitter (ms) over time by transport color",
+                    "widget_type": "timeseries",
+                    "stream": "vmanage_approute_sla_metrics",
+                    "ts_column": "entry_time",
+                    "duration_hours": 72,
+                    "min_width": 6,
+                    "max_width": 6,
+                    "height": 5,
+                    "group_by": [
+                        "local_color"
+                    ],
+                    "chartProperties": {
+                        "legendLocation": "top",
+                        "xAxisLabel": "Time",
+                        "yAxisLabel": "Jitter in (ms)"
+                    },
+                    "style": {
+                        "color-list": [
+                            "#EAB308",
+                            "#FDE047",
+                            "#CA8A04"
+                        ]
+                    },
+                    "widget_id": "pf_jit_ts",
+                    "interval": "1h",
+                    "gap_interval": "join",
+                    "series_spec": [
+                        {
+                            "column": "jitter",
+                            "agg": "avg",
+                            "type": "double"
+                        }
+                    ],
+                    "empty_data_message": "No SLA trend data in the selected time range"
+                },
+                {
+                    "title": "vQoE score over time by transport color",
+                    "widget_type": "timeseries",
+                    "stream": "vmanage_approute_sla_metrics",
+                    "ts_column": "entry_time",
+                    "duration_hours": 72,
+                    "min_width": 6,
+                    "max_width": 6,
+                    "height": 5,
+                    "group_by": [
+                        "local_color"
+                    ],
+                    "chartProperties": {
+                        "legendLocation": "top",
+                        "xAxisLabel": "Time",
+                        "yAxisLabel": "vQoE score"
+                    },
+                    "style": {
+                        "color-list": [
+                            "#22C55E",
+                            "#4ADE80",
+                            "#16A34A"
+                        ]
+                    },
+                    "widget_id": "pf_vqoe_ts",
+                    "interval": "1h",
+                    "gap_interval": "join",
+                    "series_spec": [
+                        {
+                            "column": "vqoe_score",
+                            "agg": "avg",
+                            "type": "double"
+                        }
+                    ],
+                    "empty_data_message": "No SLA trend data in the selected time range"
+                },
+                {
+                    "title": "Tunnel statistics detail",
+                    "widget_type": "tabular",
+                    "stream": "vmanage_approute_sla_metrics",
+                    "ts_column": "entry_time",
+                    "duration_hours": 72,
+                    "min_width": 12,
+                    "max_width": 12,
+                    "height": 6,
+                    "columns": {
+                        "vdevice_name": {
+                            "title": "Device",
+                            "type": "TEXT",
+                            "visible": true
+                        },
+                        "host_name": {
+                            "title": "Host",
+                            "type": "TEXT",
+                            "visible": true
+                        },
+                        "local_system_ip": {
+                            "title": "Local system IP",
+                            "type": "TEXT",
+                            "visible": true
+                        },
+                        "local_color": {
+                            "title": "Local color",
+                            "type": "TEXT",
+                            "visible": true
+                        },
+                        "remote_color": {
+                            "title": "Remote color",
+                            "type": "TEXT",
+                            "visible": true
+                        },
+                        "src_ip": {
+                            "title": "Source IP",
+                            "type": "TEXT",
+                            "visible": true
+                        },
+                        "dst_ip": {
+                            "title": "Destination IP",
+                            "type": "TEXT",
+                            "visible": true
+                        },
+                        "rx_octets": {
+                            "title": "RX octets",
+                            "type": "DOUBLE",
+                            "visible": true
+                        },
+                        "tx_octets": {
+                            "title": "TX octets",
+                            "type": "DOUBLE",
+                            "visible": true
+                        },
+                        "rx_pkts": {
+                            "title": "RX packets",
+                            "type": "DOUBLE",
+                            "visible": true
+                        },
+                        "tx_pkts": {
+                            "title": "TX packets",
+                            "type": "DOUBLE",
+                            "visible": true
+                        },
+                        "state": {
+                            "title": "State",
+                            "type": "TEXT",
+                            "visible": true
+                        },
+                        "proto": {
+                            "title": "Protocol",
+                            "type": "TEXT",
+                            "visible": true
+                        }
+                    },
+                    "widget_id": "pf_tunnel_tbl",
+                    "empty_data_message": "No tunnel traffic data \u2014 run performance_pipeline"
+                }
+            ]
+        },
+        {
+            "title": "Traffic & Interfaces",
+            "show_filter": true,
+            "widgets": [
+                {
+                    "title": "Tunnel RX octets (avg) by local color",
+                    "widget_type": "bar_chart",
+                    "stream": "vmanage_approute_sla_metrics",
+                    "ts_column": "entry_time",
+                    "duration_hours": 72,
+                    "min_width": 6,
+                    "max_width": 6,
+                    "height": 5,
+                    "chartProperties": {
+                        "orientation": "horizontal",
+                        "xAxisLabel": "RX octets (avg)",
+                        "yAxisLabel": "Local color"
+                    },
+                    "group_by": [
+                        "local_color"
+                    ],
+                    "column": "rx_octets",
+                    "agg": "avg",
+                    "limit": 12,
+                    "style": {
+                        "color-list": [
+                            "#3B82F6",
+                            "#10B981",
+                            "#F59E0B",
+                            "#EF4444",
+                            "#8B5CF6",
+                            "#06B6D4",
+                            "#F97316",
+                            "#EC4899",
+                            "#84CC16",
+                            "#6366F1",
+                            "#14B8A6",
+                            "#F43F5E",
+                            "#A855F7",
+                            "#EAB308",
+                            "#22C55E",
+                            "#0EA5E9",
+                            "#FB923C",
+                            "#E879F9",
+                            "#4ADE80",
+                            "#38BDF8",
+                            "#FCD34D",
+                            "#C084FC",
+                            "#34D399",
+                            "#F472B6",
+                            "#FBBF24",
+                            "#60A5FA",
+                            "#2DD4BF",
+                            "#E11D48",
+                            "#7C3AED",
+                            "#0891B2"
+                        ]
+                    },
+                    "widget_id": "pf_if_rx",
+                    "empty_data_message": "No tunnel traffic data \u2014 run performance_pipeline"
+                },
+                {
+                    "title": "Tunnel TX octets (avg) by local color",
+                    "widget_type": "bar_chart",
+                    "stream": "vmanage_approute_sla_metrics",
+                    "ts_column": "entry_time",
+                    "duration_hours": 72,
+                    "min_width": 6,
+                    "max_width": 6,
+                    "height": 5,
+                    "chartProperties": {
+                        "orientation": "horizontal",
+                        "xAxisLabel": "TX octets (avg)",
+                        "yAxisLabel": "Local color"
+                    },
+                    "group_by": [
+                        "local_color"
+                    ],
+                    "column": "tx_octets",
+                    "agg": "avg",
+                    "limit": 12,
+                    "style": {
+                        "color-list": [
+                            "#3B82F6",
+                            "#10B981",
+                            "#F59E0B",
+                            "#EF4444",
+                            "#8B5CF6",
+                            "#06B6D4",
+                            "#F97316",
+                            "#EC4899",
+                            "#84CC16",
+                            "#6366F1",
+                            "#14B8A6",
+                            "#F43F5E",
+                            "#A855F7",
+                            "#EAB308",
+                            "#22C55E",
+                            "#0EA5E9",
+                            "#FB923C",
+                            "#E879F9",
+                            "#4ADE80",
+                            "#38BDF8",
+                            "#FCD34D",
+                            "#C084FC",
+                            "#34D399",
+                            "#F472B6",
+                            "#FBBF24",
+                            "#60A5FA",
+                            "#2DD4BF",
+                            "#E11D48",
+                            "#7C3AED",
+                            "#0891B2"
+                        ]
+                    },
+                    "widget_id": "pf_if_tx",
+                    "empty_data_message": "No tunnel traffic data \u2014 run performance_pipeline"
+                },
+                {
+                    "title": "Tunnel RX octets (sum) by local color",
+                    "widget_type": "bar_chart",
+                    "stream": "vmanage_approute_sla_metrics",
+                    "ts_column": "entry_time",
+                    "duration_hours": 72,
+                    "min_width": 6,
+                    "max_width": 6,
+                    "height": 5,
+                    "chartProperties": {
+                        "orientation": "horizontal",
+                        "xAxisLabel": "RX octets (sum)",
+                        "yAxisLabel": "Local color"
+                    },
+                    "group_by": [
+                        "local_color"
+                    ],
+                    "column": "rx_octets",
+                    "agg": "sum",
+                    "limit": 15,
+                    "style": {
+                        "color-list": [
+                            "#3B82F6",
+                            "#10B981",
+                            "#F59E0B",
+                            "#EF4444",
+                            "#8B5CF6",
+                            "#06B6D4",
+                            "#F97316",
+                            "#EC4899",
+                            "#84CC16",
+                            "#6366F1",
+                            "#14B8A6",
+                            "#F43F5E",
+                            "#A855F7",
+                            "#EAB308",
+                            "#22C55E",
+                            "#0EA5E9",
+                            "#FB923C",
+                            "#E879F9",
+                            "#4ADE80",
+                            "#38BDF8",
+                            "#FCD34D",
+                            "#C084FC",
+                            "#34D399",
+                            "#F472B6",
+                            "#FBBF24",
+                            "#60A5FA",
+                            "#2DD4BF",
+                            "#E11D48",
+                            "#7C3AED",
+                            "#0891B2"
+                        ]
+                    },
+                    "widget_id": "pf_tunnel_rx_sum",
+                    "empty_data_message": "No tunnel traffic data \u2014 run performance_pipeline"
+                },
+                {
+                    "title": "Interface RX octets (sum) by interface",
+                    "widget_type": "bar_chart",
+                    "stream": "vmanage_interface_statistics",
+                    "ts_column": "entry_time",
+                    "duration_hours": 72,
+                    "min_width": 6,
+                    "max_width": 6,
+                    "height": 5,
+                    "chartProperties": {
+                        "orientation": "horizontal",
+                        "xAxisLabel": "RX octets (sum)",
+                        "yAxisLabel": "Interface"
+                    },
+                    "group_by": [
+                        "interface"
+                    ],
+                    "column": "rx_octets",
+                    "agg": "sum",
+                    "limit": 12,
+                    "style": {
+                        "color-list": [
+                            "#3B82F6",
+                            "#10B981",
+                            "#F59E0B",
+                            "#EF4444",
+                            "#8B5CF6",
+                            "#06B6D4",
+                            "#F97316",
+                            "#EC4899",
+                            "#84CC16",
+                            "#6366F1",
+                            "#14B8A6",
+                            "#F43F5E",
+                            "#A855F7",
+                            "#EAB308",
+                            "#22C55E",
+                            "#0EA5E9",
+                            "#FB923C",
+                            "#E879F9",
+                            "#4ADE80",
+                            "#38BDF8",
+                            "#FCD34D",
+                            "#C084FC",
+                            "#34D399",
+                            "#F472B6",
+                            "#FBBF24",
+                            "#60A5FA",
+                            "#2DD4BF",
+                            "#E11D48",
+                            "#7C3AED",
+                            "#0891B2"
+                        ]
+                    },
+                    "widget_id": "pf_iface_rx",
+                    "empty_data_message": "No interface statistics \u2014 run performance_pipeline"
+                },
+                {
+                    "title": "Interface TX octets (sum) by interface",
+                    "widget_type": "bar_chart",
+                    "stream": "vmanage_interface_statistics",
+                    "ts_column": "entry_time",
+                    "duration_hours": 72,
+                    "min_width": 6,
+                    "max_width": 6,
+                    "height": 5,
+                    "chartProperties": {
+                        "orientation": "horizontal",
+                        "xAxisLabel": "TX octets (sum)",
+                        "yAxisLabel": "Interface"
+                    },
+                    "group_by": [
+                        "interface"
+                    ],
+                    "column": "tx_octets",
+                    "agg": "sum",
+                    "limit": 12,
+                    "style": {
+                        "color-list": [
+                            "#3B82F6",
+                            "#10B981",
+                            "#F59E0B",
+                            "#EF4444",
+                            "#8B5CF6",
+                            "#06B6D4",
+                            "#F97316",
+                            "#EC4899",
+                            "#84CC16",
+                            "#6366F1",
+                            "#14B8A6",
+                            "#F43F5E",
+                            "#A855F7",
+                            "#EAB308",
+                            "#22C55E",
+                            "#0EA5E9",
+                            "#FB923C",
+                            "#E879F9",
+                            "#4ADE80",
+                            "#38BDF8",
+                            "#FCD34D",
+                            "#C084FC",
+                            "#34D399",
+                            "#F472B6",
+                            "#FBBF24",
+                            "#60A5FA",
+                            "#2DD4BF",
+                            "#E11D48",
+                            "#7C3AED",
+                            "#0891B2"
+                        ]
+                    },
+                    "widget_id": "pf_iface_tx",
+                    "empty_data_message": "No interface statistics \u2014 run performance_pipeline"
+                },
+                {
+                    "title": "Interface RX packets (sum) by interface",
+                    "widget_type": "bar_chart",
+                    "stream": "vmanage_interface_statistics",
+                    "ts_column": "entry_time",
+                    "duration_hours": 72,
+                    "min_width": 6,
+                    "max_width": 6,
+                    "height": 5,
+                    "chartProperties": {
+                        "orientation": "horizontal",
+                        "xAxisLabel": "RX packets (sum)",
+                        "yAxisLabel": "Interface"
+                    },
+                    "group_by": [
+                        "interface"
+                    ],
+                    "column": "rx_pkts",
+                    "agg": "sum",
+                    "limit": 12,
+                    "style": {
+                        "color-list": [
+                            "#3B82F6",
+                            "#10B981",
+                            "#F59E0B",
+                            "#EF4444",
+                            "#8B5CF6",
+                            "#06B6D4",
+                            "#F97316",
+                            "#EC4899",
+                            "#84CC16",
+                            "#6366F1",
+                            "#14B8A6",
+                            "#F43F5E",
+                            "#A855F7",
+                            "#EAB308",
+                            "#22C55E",
+                            "#0EA5E9",
+                            "#FB923C",
+                            "#E879F9",
+                            "#4ADE80",
+                            "#38BDF8",
+                            "#FCD34D",
+                            "#C084FC",
+                            "#34D399",
+                            "#F472B6",
+                            "#FBBF24",
+                            "#60A5FA",
+                            "#2DD4BF",
+                            "#E11D48",
+                            "#7C3AED",
+                            "#0891B2"
+                        ]
+                    },
+                    "widget_id": "pf_iface_rx_pkts",
+                    "empty_data_message": "No interface statistics \u2014 run performance_pipeline"
+                },
+                {
+                    "title": "Interface TX packets (sum) by interface",
+                    "widget_type": "bar_chart",
+                    "stream": "vmanage_interface_statistics",
+                    "ts_column": "entry_time",
+                    "duration_hours": 72,
+                    "min_width": 6,
+                    "max_width": 6,
+                    "height": 5,
+                    "chartProperties": {
+                        "orientation": "horizontal",
+                        "xAxisLabel": "TX packets (sum)",
+                        "yAxisLabel": "Interface"
+                    },
+                    "group_by": [
+                        "interface"
+                    ],
+                    "column": "tx_pkts",
+                    "agg": "sum",
+                    "limit": 12,
+                    "style": {
+                        "color-list": [
+                            "#3B82F6",
+                            "#10B981",
+                            "#F59E0B",
+                            "#EF4444",
+                            "#8B5CF6",
+                            "#06B6D4",
+                            "#F97316",
+                            "#EC4899",
+                            "#84CC16",
+                            "#6366F1",
+                            "#14B8A6",
+                            "#F43F5E",
+                            "#A855F7",
+                            "#EAB308",
+                            "#22C55E",
+                            "#0EA5E9",
+                            "#FB923C",
+                            "#E879F9",
+                            "#4ADE80",
+                            "#38BDF8",
+                            "#FCD34D",
+                            "#C084FC",
+                            "#34D399",
+                            "#F472B6",
+                            "#FBBF24",
+                            "#60A5FA",
+                            "#2DD4BF",
+                            "#E11D48",
+                            "#7C3AED",
+                            "#0891B2"
+                        ]
+                    },
+                    "widget_id": "pf_iface_tx_pkts",
+                    "empty_data_message": "No interface statistics \u2014 run performance_pipeline"
+                },
+                {
+                    "title": "Interface utilization (%) by interface",
+                    "widget_type": "bar_chart",
+                    "stream": "vmanage_interface_statistics",
+                    "ts_column": "entry_time",
+                    "duration_hours": 72,
+                    "min_width": 6,
+                    "max_width": 6,
+                    "height": 5,
+                    "chartProperties": {
+                        "orientation": "horizontal",
+                        "xAxisLabel": "Utilization (%)",
+                        "yAxisLabel": "Interface"
+                    },
+                    "group_by": [
+                        "interface"
+                    ],
+                    "column": "up_capacity_percentage",
+                    "agg": "avg",
+                    "limit": 12,
+                    "style": {
+                        "color-list": [
+                            "#3B82F6",
+                            "#10B981",
+                            "#F59E0B",
+                            "#EF4444",
+                            "#8B5CF6",
+                            "#06B6D4",
+                            "#F97316",
+                            "#EC4899",
+                            "#84CC16",
+                            "#6366F1",
+                            "#14B8A6",
+                            "#F43F5E",
+                            "#A855F7",
+                            "#EAB308",
+                            "#22C55E",
+                            "#0EA5E9",
+                            "#FB923C",
+                            "#E879F9",
+                            "#4ADE80",
+                            "#38BDF8",
+                            "#FCD34D",
+                            "#C084FC",
+                            "#34D399",
+                            "#F472B6",
+                            "#FBBF24",
+                            "#60A5FA",
+                            "#2DD4BF",
+                            "#E11D48",
+                            "#7C3AED",
+                            "#0891B2"
+                        ]
+                    },
+                    "widget_id": "pf_iface_util",
+                    "empty_data_message": "No interface utilization data \u2014 run performance_pipeline"
+                },
+                {
+                    "title": "Interface errors (sum) by interface",
+                    "widget_type": "bar_chart",
+                    "stream": "vmanage_interface_statistics",
+                    "ts_column": "entry_time",
+                    "duration_hours": 72,
+                    "min_width": 6,
+                    "max_width": 6,
+                    "height": 5,
+                    "chartProperties": {
+                        "orientation": "horizontal",
+                        "xAxisLabel": "RX errors (sum)",
+                        "yAxisLabel": "Interface"
+                    },
+                    "group_by": [
+                        "interface"
+                    ],
+                    "column": "rx_errors",
+                    "agg": "sum",
+                    "limit": 12,
+                    "style": {
+                        "color-list": [
+                            "#3B82F6",
+                            "#10B981",
+                            "#F59E0B",
+                            "#EF4444",
+                            "#8B5CF6",
+                            "#06B6D4",
+                            "#F97316",
+                            "#EC4899",
+                            "#84CC16",
+                            "#6366F1",
+                            "#14B8A6",
+                            "#F43F5E",
+                            "#A855F7",
+                            "#EAB308",
+                            "#22C55E",
+                            "#0EA5E9",
+                            "#FB923C",
+                            "#E879F9",
+                            "#4ADE80",
+                            "#38BDF8",
+                            "#FCD34D",
+                            "#C084FC",
+                            "#34D399",
+                            "#F472B6",
+                            "#FBBF24",
+                            "#60A5FA",
+                            "#2DD4BF",
+                            "#E11D48",
+                            "#7C3AED",
+                            "#0891B2"
+                        ]
+                    },
+                    "widget_id": "pf_iface_errors",
+                    "empty_data_message": "No interface errors in the selected time range"
+                },
+                {
+                    "title": "Interface drops (sum) by interface",
+                    "widget_type": "bar_chart",
+                    "stream": "vmanage_interface_statistics",
+                    "ts_column": "entry_time",
+                    "duration_hours": 72,
+                    "min_width": 6,
+                    "max_width": 6,
+                    "height": 5,
+                    "chartProperties": {
+                        "orientation": "horizontal",
+                        "xAxisLabel": "RX drops (sum)",
+                        "yAxisLabel": "Interface"
+                    },
+                    "group_by": [
+                        "interface"
+                    ],
+                    "column": "rx_drops",
+                    "agg": "sum",
+                    "limit": 12,
+                    "style": {
+                        "color-list": [
+                            "#3B82F6",
+                            "#10B981",
+                            "#F59E0B",
+                            "#EF4444",
+                            "#8B5CF6",
+                            "#06B6D4",
+                            "#F97316",
+                            "#EC4899",
+                            "#84CC16",
+                            "#6366F1",
+                            "#14B8A6",
+                            "#F43F5E",
+                            "#A855F7",
+                            "#EAB308",
+                            "#22C55E",
+                            "#0EA5E9",
+                            "#FB923C",
+                            "#E879F9",
+                            "#4ADE80",
+                            "#38BDF8",
+                            "#FCD34D",
+                            "#C084FC",
+                            "#34D399",
+                            "#F472B6",
+                            "#FBBF24",
+                            "#60A5FA",
+                            "#2DD4BF",
+                            "#E11D48",
+                            "#7C3AED",
+                            "#0891B2"
+                        ]
+                    },
+                    "widget_id": "pf_iface_drops",
+                    "empty_data_message": "No interface drops in the selected time range"
+                }
+            ]
+        },
+        {
+            "title": "Capacity",
+            "show_filter": true,
+            "widgets": [
+                {
+                    "title": "Total TLOCs",
+                    "widget_type": "custom_counter",
+                    "stream": "vmanage_metrics_timeseries",
+                    "ts_column": "collection_timestamp",
+                    "column": "value",
+                    "agg": "sum",
+                    "type": "int",
+                    "duration_hours": 24,
+                    "extra_filter": "metric_category is 'tloc_utilization_summary'",
+                    "min_width": 2,
+                    "max_width": 2,
+                    "height": 4,
+                    "widget_id": "pf_tloc_total",
+                    "empty_data_message": "No TLOC summary data \u2014 run advanced visibility pipeline",
+                    "style": {
+                        "color-list": [
+                            "#3B82F6"
+                        ]
+                    }
+                },
+                {
+                    "title": "TLOCs under 10 Mbps",
+                    "widget_type": "custom_counter",
+                    "stream": "vmanage_metrics_timeseries",
+                    "ts_column": "collection_timestamp",
+                    "column": "value",
+                    "agg": "sum",
+                    "type": "int",
+                    "duration_hours": 24,
+                    "extra_filter": "metric_category is 'tloc_utilization_summary' and bucket_name is 'less_than_10_mbps'",
+                    "min_width": 2,
+                    "max_width": 2,
+                    "height": 4,
+                    "widget_id": "pf_tloc_lt10",
+                    "empty_data_message": "No TLOC summary data \u2014 run advanced visibility pipeline",
+                    "style": {
+                        "color-list": [
+                            "#F59E0B"
+                        ]
+                    }
+                },
+                {
+                    "title": "TLOCs 10\u2013100 Mbps",
+                    "widget_type": "custom_counter",
+                    "stream": "vmanage_metrics_timeseries",
+                    "ts_column": "collection_timestamp",
+                    "column": "value",
+                    "agg": "sum",
+                    "type": "int",
+                    "duration_hours": 24,
+                    "extra_filter": "metric_category is 'tloc_utilization_summary' and bucket_name is '10_mbps_100_mbps'",
+                    "min_width": 2,
+                    "max_width": 2,
+                    "height": 4,
+                    "widget_id": "pf_tloc_10_100",
+                    "empty_data_message": "No TLOC summary data \u2014 run advanced visibility pipeline",
+                    "style": {
+                        "color-list": [
+                            "#22C55E"
+                        ]
+                    }
+                },
+                {
+                    "title": "TLOCs over 500 Mbps",
+                    "widget_type": "custom_counter",
+                    "stream": "vmanage_metrics_timeseries",
+                    "ts_column": "collection_timestamp",
+                    "column": "value",
+                    "agg": "sum",
+                    "type": "int",
+                    "duration_hours": 24,
+                    "extra_filter": "metric_category is 'tloc_utilization_summary' and bucket_name is 'greater_than_500_mbps'",
+                    "min_width": 2,
+                    "max_width": 2,
+                    "height": 4,
+                    "widget_id": "pf_tloc_gt500",
+                    "empty_data_message": "No TLOC summary data \u2014 run advanced visibility pipeline",
+                    "style": {
+                        "color-list": [
+                            "#8B5CF6"
+                        ]
+                    }
+                },
+                {
+                    "title": "TLOC distribution by bandwidth bucket",
+                    "widget_type": "pie_chart",
+                    "stream": "vmanage_metrics_timeseries",
+                    "ts_column": "collection_timestamp",
+                    "duration_hours": 24,
+                    "extra_filter": "metric_category is 'tloc_utilization_summary' and value > 0",
+                    "column": "value",
+                    "agg": "sum",
+                    "group_by": [
+                        "percentageDistribution"
+                    ],
+                    "type": "int",
+                    "min_width": 4,
+                    "max_width": 4,
+                    "height": 5,
+                    "widget_id": "pf_tloc_pie",
+                    "empty_data_message": "No TLOC utilization buckets with traffic",
+                    "style": {
+                        "color-list": [
+                            "#3B82F6",
+                            "#F59E0B",
+                            "#22C55E",
+                            "#8B5CF6",
+                            "#64748B"
+                        ]
+                    }
+                },
+                {
+                    "title": "TLOC utilization summary",
+                    "widget_type": "tabular",
+                    "stream": "vmanage_metrics_timeseries",
+                    "ts_column": "collection_timestamp",
+                    "duration_hours": 24,
+                    "extra_filter": "metric_category is 'tloc_utilization_summary'",
+                    "min_width": 12,
+                    "max_width": 12,
+                    "height": 5,
+                    "sorting": [
+                        {
+                            "value": "desc"
+                        }
+                    ],
+                    "columns": {
+                        "percentageDistribution": {
+                            "title": "Bandwidth bucket",
+                            "type": "TEXT",
+                            "visible": true
+                        },
+                        "bucket_name": {
+                            "title": "Bucket ID",
+                            "type": "TEXT",
+                            "visible": true
+                        },
+                        "value": {
+                            "title": "TLOC count",
+                            "type": "INT",
+                            "visible": true
+                        },
+                        "detailsURL": {
+                            "title": "Detail endpoint",
+                            "type": "TEXT",
+                            "visible": false
+                        },
+                        "collection_status": {
+                            "title": "Collection status",
+                            "type": "TEXT",
+                            "visible": false
+                        },
+                        "collection_timestamp": {
+                            "title": "Collected at",
+                            "type": "DATETIME",
+                            "visible": true
+                        },
+                        "source_name": {
+                            "title": "vManage source",
+                            "type": "TEXT",
+                            "visible": true
+                        }
+                    },
+                    "widget_id": "pf_tloc_summary_tbl",
+                    "empty_data_message": "No TLOC summary data \u2014 run advanced visibility pipeline"
+                },
+                {
+                    "title": "TLOC utilization detail (drill-down)",
+                    "widget_type": "tabular",
+                    "stream": "vmanage_metrics_timeseries",
+                    "ts_column": "collection_timestamp",
+                    "duration_hours": 24,
+                    "extra_filter": "metric_category is 'tloc_utilization_detail'",
+                    "min_width": 12,
+                    "max_width": 12,
+                    "height": 6,
+                    "sorting": [
+                        {
+                            "bucket_name": "asc"
+                        },
+                        {
+                            "system_ip": "asc"
+                        }
+                    ],
+                    "columns": {
+                        "bucket_name": {
+                            "title": "Bandwidth bucket",
+                            "type": "TEXT",
+                            "visible": true
+                        },
+                        "system_ip": {
+                            "title": "System IP",
+                            "type": "TEXT",
+                            "visible": true
+                        },
+                        "interface": {
+                            "title": "Interface",
+                            "type": "TEXT",
+                            "visible": true
+                        },
+                        "average": {
+                            "title": "Average utilization",
+                            "type": "DOUBLE",
+                            "visible": true
+                        },
+                        "collection_timestamp": {
+                            "title": "Collected at",
+                            "type": "DATETIME",
+                            "visible": true
+                        },
+                        "source_name": {
+                            "title": "vManage source",
+                            "type": "TEXT",
+                            "visible": true
+                        }
+                    },
+                    "widget_id": "pf_tloc_detail_tbl",
+                    "empty_data_message": "No TLOC detail data \u2014 select a bucket filter or run advanced visibility pipeline"
+                },
+                {
+                    "title": "QoS TX bandwidth by queue (kbps avg)",
+                    "widget_type": "bar_chart",
+                    "stream": "vmanage_metrics_snapshot",
+                    "ts_column": "entry_time",
+                    "duration_hours": 72,
+                    "min_width": 6,
+                    "max_width": 6,
+                    "height": 5,
+                    "group_by": [
+                        "queue_name"
+                    ],
+                    "column": "tx_bytes_in_kbps",
+                    "agg": "avg",
+                    "limit": 15,
+                    "chartProperties": {
+                        "orientation": "horizontal",
+                        "xAxisLabel": "TX kbps (avg)",
+                        "yAxisLabel": "Queue"
+                    },
+                    "style": {
+                        "color-list": [
+                            "#3B82F6"
+                        ]
+                    },
+                    "widget_id": "pf_qos_tx",
+                    "empty_data_message": "No QoS rows in vmanage_metrics_snapshot (metric_category=qos). Run performance_pipeline \u2014 requires /statistics/qos data from vManage.",
+                    "extra_filter": "metric_category is 'qos'"
+                },
+                {
+                    "title": "QoS drops by queue (sum kbps)",
+                    "widget_type": "bar_chart",
+                    "stream": "vmanage_metrics_snapshot",
+                    "ts_column": "entry_time",
+                    "duration_hours": 72,
+                    "min_width": 6,
+                    "max_width": 6,
+                    "height": 5,
+                    "group_by": [
+                        "queue_name"
+                    ],
+                    "column": "drop_in_kbps",
+                    "agg": "sum",
+                    "limit": 15,
+                    "chartProperties": {
+                        "orientation": "horizontal",
+                        "xAxisLabel": "Drops (sum kbps)",
+                        "yAxisLabel": "Queue"
+                    },
+                    "style": {
+                        "color-list": [
+                            "#EF4444",
+                            "#F87171",
+                            "#DC2626",
+                            "#FCA5A5"
+                        ]
+                    },
+                    "widget_id": "pf_qos_drop",
+                    "empty_data_message": "No QoS rows in vmanage_metrics_snapshot (metric_category=qos). Run performance_pipeline \u2014 requires /statistics/qos data from vManage.",
+                    "extra_filter": "metric_category is 'qos'"
+                },
+                {
+                    "title": "QoS queue detail",
+                    "widget_type": "tabular",
+                    "stream": "vmanage_metrics_snapshot",
+                    "ts_column": "entry_time",
+                    "duration_hours": 72,
+                    "min_width": 12,
+                    "max_width": 12,
+                    "height": 6,
+                    "columns": {
+                        "vdevice_name": {
+                            "title": "Device",
+                            "type": "TEXT",
+                            "visible": true
+                        },
+                        "host_name": {
+                            "title": "Host",
+                            "type": "TEXT",
+                            "visible": true
+                        },
+                        "interface": {
+                            "title": "Interface",
+                            "type": "TEXT",
+                            "visible": true
+                        },
+                        "queue_name": {
+                            "title": "Queue",
+                            "type": "TEXT",
+                            "visible": true
+                        },
+                        "tx_bytes_in_kbps": {
+                            "title": "TX kbps",
+                            "type": "DOUBLE",
+                            "visible": true
+                        },
+                        "drop_in_pkts": {
+                            "title": "Drop packets",
+                            "type": "DOUBLE",
+                            "visible": true
+                        },
+                        "drop_in_kbps": {
+                            "title": "Drop kbps",
+                            "type": "DOUBLE",
+                            "visible": true
+                        },
+                        "queued_pkts": {
+                            "title": "Queued packets",
+                            "type": "DOUBLE",
+                            "visible": true
+                        },
+                        "red_drop_pkts": {
+                            "title": "RED drop packets",
+                            "type": "DOUBLE",
+                            "visible": true
+                        },
+                        "tail_drop_pkts": {
+                            "title": "Tail drop packets",
+                            "type": "DOUBLE",
+                            "visible": true
+                        },
+                        "entry_time": {
+                            "title": "Entry time",
+                            "type": "DATETIME",
+                            "visible": true
+                        }
+                    },
+                    "widget_id": "pf_qos_tbl",
+                    "empty_data_message": "No QoS rows in vmanage_metrics_snapshot (metric_category=qos). Run performance_pipeline \u2014 requires /statistics/qos data from vManage.",
+                    "extra_filter": "metric_category is 'qos'"
+                },
+                {
+                    "title": "CPU usage (%) over time",
+                    "widget_type": "timeseries",
+                    "stream": "vmanage_metrics_timeseries",
+                    "ts_column": "entry_time",
+                    "duration_hours": 72,
+                    "min_width": 6,
+                    "max_width": 6,
+                    "height": 5,
+                    "group_by": [
+                        "system_ip"
+                    ],
+                    "chartProperties": {
+                        "legendLocation": "top",
+                        "xAxisLabel": "Time",
+                        "yAxisLabel": "CPU usage (%)"
+                    },
+                    "style": {
+                        "color-list": [
+                            "#6366F1",
+                            "#818CF8",
+                            "#4F46E5",
+                            "#A5B4FC",
+                            "#4338CA"
+                        ]
+                    },
+                    "widget_id": "pf_cpu_ts",
+                    "extra_filter": "metric_category is 'system'",
+                    "empty_data_message": "No CPU statistics \u2014 run performance_pipeline",
+                    "interval": "1h",
+                    "gap_interval": "join",
+                    "series_spec": [
+                        {
+                            "column": "cpu_user",
+                            "agg": "avg",
+                            "type": "double"
+                        }
+                    ]
+                },
+                {
+                    "title": "Memory used (MB) over time",
+                    "widget_type": "timeseries",
+                    "stream": "vmanage_metrics_timeseries",
+                    "ts_column": "entry_time",
+                    "duration_hours": 72,
+                    "min_width": 6,
+                    "max_width": 6,
+                    "height": 5,
+                    "group_by": [
+                        "system_ip"
+                    ],
+                    "chartProperties": {
+                        "legendLocation": "top",
+                        "xAxisLabel": "Time",
+                        "yAxisLabel": "Memory used (MB)"
+                    },
+                    "style": {
+                        "color-list": [
+                            "#6366F1",
+                            "#818CF8",
+                            "#4F46E5",
+                            "#A5B4FC",
+                            "#4338CA"
+                        ]
+                    },
+                    "widget_id": "pf_mem_ts",
+                    "extra_filter": "metric_category is 'system'",
+                    "empty_data_message": "No memory statistics \u2014 run performance_pipeline",
+                    "interval": "1h",
+                    "gap_interval": "join",
+                    "series_spec": [
+                        {
+                            "column": "mem_used_mb",
+                            "agg": "avg",
+                            "type": "double"
+                        }
+                    ]
+                },
+                {
+                    "title": "Disk used (MB) over time",
+                    "widget_type": "timeseries",
+                    "stream": "vmanage_system_statistics",
+                    "ts_column": "entry_time",
+                    "duration_hours": 72,
+                    "min_width": 6,
+                    "max_width": 6,
+                    "height": 5,
+                    "group_by": [
+                        "system_ip"
+                    ],
+                    "chartProperties": {
+                        "legendLocation": "top",
+                        "xAxisLabel": "Time",
+                        "yAxisLabel": "Disk used (MB)"
+                    },
+                    "style": {
+                        "color-list": [
+                            "#6366F1",
+                            "#818CF8",
+                            "#4F46E5",
+                            "#A5B4FC",
+                            "#4338CA"
+                        ]
+                    },
+                    "widget_id": "pf_disk_ts",
+                    "extra_filter": "metric_category is 'system'",
+                    "empty_data_message": "No disk statistics \u2014 run performance_pipeline",
+                    "interval": "1h",
+                    "gap_interval": "join",
+                    "series_spec": [
+                        {
+                            "column": "disk_used_mb",
+                            "agg": "avg",
+                            "type": "double"
+                        }
+                    ]
+                }
+            ]
+        }
+    ],
+    "saved_time": "2026-06-23T09:26:30.583330"
+}

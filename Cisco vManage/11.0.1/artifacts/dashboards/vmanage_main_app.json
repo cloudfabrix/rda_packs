@@ -1,0 +1,70 @@
+{
+    "name": "vmanage_main_app",
+    "label": "vManage SD-WAN",
+    "description": "Cisco vManage SD-WAN: operations dashboards with 12-column layout discipline, health-first navigation, and preserved topology and administration pages.",
+    "dashboard_folder": "VmanagePerformance",
+    "version": "26.06.19.1",
+    "enabled": true,
+    "dashboard_type": "app",
+    "enable_storyboard": false,
+    "live_edit": true,
+    "custom_context": {
+        "rda-dashboard-live-edit": true
+    },
+    "dashboard_filters": {
+        "time_filter": true,
+        "default_time_filter_labels": [
+            "Last 24 hours",
+            "Last 7 days",
+            "Last 30 days"
+        ],
+        "extra_filter": "(customer_tag is '{{CUST_TAG}}' or customer_tag is empty or customer_tag is '' or customer_tag is 'None')"
+    },
+    "dashboard_groups": {},
+    "dashboard_pages": [
+        {
+            "name": "vmanage_configure_and_manage",
+            "label": "Configure and Manage",
+            "icon": "settings.svg"
+        },
+        {
+            "name": "vmanage_collection_and_access_status",
+            "label": "Collection and Access Status",
+            "icon": "eye.svg"
+        },
+        {
+            "name": "vmanage_network_overview",
+            "label": "Network Overview",
+            "icon": "library.svg"
+        },
+        {
+            "name": "vmanage_device_inventory",
+            "label": "Device Inventory",
+            "icon": "asset.svg"
+        },
+        {
+            "name": "vmanage_performance_sla",
+            "label": "Performance and SLA",
+            "icon": "insights.svg"
+        },
+        {
+            "name": "vmanage_alerts_events",
+            "label": "Alerts and Events",
+            "icon": "alert.svg"
+        },
+        {
+            "name": "vmanage_topology",
+            "label": "SD-WAN Topology",
+            "icon": "topology.svg"
+        }
+    ],
+    "saved_time": "2026-06-23T09:34:04.429879",
+    "template_variables": {
+        "CUST_TAG": {
+            "contextId": "customerTag"
+        },
+        "PROJ_ID": {
+            "contextId": "projectId"
+        }
+    }
+}

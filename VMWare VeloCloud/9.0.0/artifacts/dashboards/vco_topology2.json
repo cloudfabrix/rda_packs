@@ -1,0 +1,488 @@
+{
+    "name": "vco_topology2",
+    "label": "VCO Asset Navigator",
+    "description": "VCO Asset Navigator",
+    "dashboard_folder": "VMWare",
+    "version": "23.4.14.1",
+    "enabled": true,
+    "live_edit": true,
+    "short_label": "Stack",
+    "context_label_id": "stack_name",
+    "dashboard_type": "template",
+    "dashboard_style": "tabbed",
+    "dashboard_filters": {
+        "time_filter": true,
+        "default_time_filter_labels": []
+    },
+    "dashboard_generator0": {
+        "attachment": "generator_jinja"
+    },
+    "dashboard_generator1": {
+        "attachment": "widget_code_generator"
+    },
+    "computedContext": {
+        "stack_type": {
+            "defaultValue": "dynamic"
+        },
+        "stack_definition": {
+            "defaultValue": {
+                "name": "vco",
+                "is_dynamic": true,
+                "dynamic_nodes": {
+                    "column_name": "node_type",
+                    "db_name": "cfx_rdaf_topology",
+                    "nodes_collection": "cfx_rdaf_topology_nodes",
+                    "query": "node_type in ['Gateway','Edge'] and source in ['gateway','edge'] and (customerTag is '{{CUST_TAG}}' or customerTag is empty or customerTag is '' or customerTag is 'None')",
+                    "stream": "graphdb://cfx_rdaf_topology/cfx_rdaf_topology_nodes"
+                },
+                "dynamic_relationships": {
+                    "db_name": "cfx_rdaf_topology",
+                    "edges_collection": "cfx_rdaf_topology_edges",
+                    "query": "left_node_type in ['Gateway'] and source in ['gateway','edge'] and customerTag is '{{CUST_TAG}}' or customerTag is empty or customerTag is '' or customerTag is 'None'",
+                    "graph_name": "cfx_rdaf_topology_graph",
+                    "relation_map": "rdaf_topology_relationships",
+                    "stream": "graphdb://cfx_rdaf_topology/cfx_rdaf_topology_edges"
+                }
+            }
+        },
+        "alert_source": {
+            "defaultValue": {
+                "alerts_stream": "oia-alerts-stream",
+                "limit": 1000,
+                "group_by": [
+                    "a_en_node_id",
+                    "a_severity",
+                    "a_status"
+                ],
+                "duration_hours": 3000,
+                "extra_filter": "a_source_systemname is not 'Alert Group'",
+                "ts_column": "timestamp",
+                "agg": "value_count",
+                "column": "count_",
+                "type": "int",
+                "alerts_chunk_size": 200
+            }
+        }
+    },
+    "template_variables": {
+        "NODE_ID": {
+            "contextId": [
+                "navigatorSelectionContexts",
+                "secondaryListSelection",
+                "node_id"
+            ]
+        },
+        "CUST_ID": {
+            "contextId": "customerId"
+        },
+        "PROJ_ID": {
+            "contextId": "projectId"
+        },
+        "CUST_TAG": {
+            "contextId": "tag1"
+        }
+    },
+    "navigation_dashboards": {
+        "tree_data": {
+            "column_name": "node_type",
+            "display_column1": "node_type",
+            "pstream_name": "graphdb://cfx_rdaf_topology/cfx_rdaf_topology_nodes",
+            "cfxql_query": "node_type in ['Gateway','Edge'] and source in ['gateway','edge'] and (customerTag is '{{CUST_TAG}}' or customerTag is empty or customerTag is '' or customerTag is 'None')",
+            "cfxql_query0": "timestamp is after -90d"
+        },
+        "tree_detail": {
+            "display_column": "node_label",
+            "selected_columns": {
+                "node_id": "Node Id",
+                "node_label": "Node Name"
+            },
+            "pstream_name": "graphdb://cfx_rdaf_topology/cfx_rdaf_topology_nodes",
+            "cfxql_query": "node_type in ['Gateway','Edge'] and source in ['gateway','edge'] and (customerTag is '{{CUST_TAG}}' or customerTag is empty or customerTag is '' or customerTag is 'None')",
+            "cfxql_query0": "timestamp is after -90d"
+        },
+        "showNodeIcon": true,
+        "showSearchBox": false,
+        "autoSelectFirstItem": true
+    },
+    "dashboard_sections": [
+        {
+            "title": "Full Stack",
+            "widgets": [
+                {
+                    "title": "Full Stack",
+                    "widget_type": "topology_stack_view",
+                    "widget_template": "asv/application-stack-view",
+                    "chunk_size": 200,
+                    "layer_order": [
+                        "Virtualization",
+                        "Compute",
+                        "Storage",
+                        "Wireless",
+                        "Network"
+                    ],
+                    "stack_type": "dynamic",
+                    "stack_definition": {
+                        "name": "vco",
+                        "is_dynamic": true,
+                        "dynamic_nodes": {
+                            "column_name": "node_type",
+                            "db_name": "cfx_rdaf_topology",
+                            "nodes_collection": "cfx_rdaf_topology_nodes",
+                            "stream": "graphdb://cfx_rdaf_topology/cfx_rdaf_topology_nodes"
+                        },
+                        "dynamic_relationships": {
+                            "db_name": "cfx_rdaf_topology",
+                            "edges_collection": "cfx_rdaf_topology_edges",
+                            "graph_name": "cfx_rdaf_topology_graph",
+                            "relation_map": "rdaf_topology_relationships",
+                            "stream": "graphdb://cfx_rdaf_topology/cfx_rdaf_topology_edges"
+                        }
+                    },
+                    "alert_source": {
+                        "alerts_stream": "oia-alerts-stream",
+                        "group_by": [
+                            "a_en_node_id",
+                            "a_severity",
+                            "a_status"
+                        ],
+                        "duration_hours": 3000,
+                        "extra_filter": "a_source_systemname is not 'Alert Group'",
+                        "ts_column": "timestamp",
+                        "agg": "value_count",
+                        "column": "count_",
+                        "type": "int",
+                        "alerts_chunk_size": 200
+                    },
+                    "alert_detail_columns": {
+                        "a_message": {
+                            "title": "Message",
+                            "type": "GROUPED",
+                            "formatter": "truncate",
+                            "group": {
+                                "a_source_systemname": "Source",
+                                "a_asset_ip_address": "Asset IP Address",
+                                "a_status": "Status",
+                                "a_asset_name": "Asset Name"
+                            },
+                            "color-column": "severity_color"
+                        },
+                        "severity_color": {
+                            "type": "COLOR-MAP",
+                            "source-column": "a_severity",
+                            "color-map": {
+                                "CRITICAL": "#e53935",
+                                "HIGH": "#f57c00",
+                                "LOW": "#ffd54f",
+                                "MAJOR": "#f57c00",
+                                "MINOR": "#ffa726",
+                                "MODERATE": "#ffa726",
+                                "PLANNING": "#35e535",
+                                "WARNING": "#ffd54f"
+                            }
+                        },
+                        "a_raised_ts": {
+                            "title": "Raised At",
+                            "type": "DATETIME"
+                        },
+                        "a_severity": {
+                            "title": "Severity",
+                            "htmlTemplateForRow": "{% raw %}<span class='badge' style='background-color: {{row.severity_color}}' > {{row.a_severity}} </span>{% endraw %}"
+                        }
+                    },
+                    "edge_detail_columns": {
+                        "left_id": {
+                            "key": true,
+                            "title": "Left ID"
+                        },
+                        "left_label": {
+                            "key": false,
+                            "title": "Source"
+                        },
+                        "right_id": {
+                            "key": true,
+                            "title": "Right ID"
+                        },
+                        "right_label": {
+                            "key": false,
+                            "title": "Destination"
+                        },
+                        "relation_type": {
+                            "key": false,
+                            "title": "Relation"
+                        }
+                    },
+                    "node_context_actions": [
+                        {
+                            "id": "view_summary",
+                            "icon": "mdi-eye",
+                            "title": "View Details",
+                            "selectionType": "SINGLE"
+                        },
+                        {
+                            "title": "Asset Stack View",
+                            "icon": "mdi-open-in-new",
+                            "type": "GO_TO_APP_STATE",
+                            "appName": "user-dashboard/vco_topology_drilldown_app",
+                            "selectionType": "SINGLE",
+                            "identifier": "launch-action:view-dashboard"
+                        }
+                    ],
+                    "height": 12,
+                    "min_width": 12,
+                    "max_width": 12,
+                    "widget_id": "fullstack_1"
+                }
+            ]
+        },
+        {
+            "title": "Asset Map",
+            "show_filter": false,
+            "widgets": [
+                {
+                    "widget_type": "topology",
+                    "title": "Asset Map",
+                    "chartProperties": {
+                        "hasToolbar": true,
+                        "shortToolbar": false,
+                        "enableControlPanel": false,
+                        "userZoomingEnabled": true
+                    },
+                    "stack1": "cfx_rdaf_topology",
+                    "stack_type": "dynamic",
+                    "chunk_size": 200,
+                    "auto_group0": true,
+                    "stack_definition": {
+                        "name": "vco",
+                        "is_dynamic": true,
+                        "dynamic_nodes": {
+                            "column_name": "node_type",
+                            "db_name": "cfx_rdaf_topology",
+                            "nodes_collection": "cfx_rdaf_topology_nodes",
+                            "stream": "graphdb://cfx_rdaf_topology/cfx_rdaf_topology_nodes"
+                        },
+                        "dynamic_relationships": {
+                            "db_name": "cfx_rdaf_topology",
+                            "edges_collection": "cfx_rdaf_topology_edges",
+                            "graph_name": "cfx_rdaf_topology_graph",
+                            "relation_map": "rdaf_topology_relationships",
+                            "stream": "graphdb://cfx_rdaf_topology/cfx_rdaf_topology_edges"
+                        }
+                    },
+                    "show_alert_details0": true,
+                    "has_more_data_flag0": true,
+                    "alert_source": {
+                        "alerts_stream": "oia-alerts-stream",
+                        "group_by": [
+                            "a_en_node_id",
+                            "a_severity",
+                            "a_status"
+                        ],
+                        "duration_hours": 3000,
+                        "extra_filter": "a_source_systemname is not 'Alert Group'",
+                        "ts_column": "timestamp",
+                        "agg": "value_count",
+                        "column": "count_",
+                        "type": "int",
+                        "limit": 1000,
+                        "alerts_chunk_size": 200
+                    },
+                    "nodes_report": {
+                        "reportMetaData": {
+                            "sorting": true,
+                            "filtering": true,
+                            "title": "Nodes",
+                            "remote_searchable": false,
+                            "remote_searchable_cols": [
+                                "name",
+                                "node_label",
+                                "node_id",
+                                "node_type"
+                            ],
+                            "reportColumnDefinitionList": [
+                                {
+                                    "identifier": "node_label",
+                                    "title": "Name",
+                                    "key": true
+                                },
+                                {
+                                    "identifier": "layer",
+                                    "key": false,
+                                    "title": "Layer"
+                                },
+                                {
+                                    "identifier": "node_type",
+                                    "key": false,
+                                    "title": "Node Type"
+                                },
+                                {
+                                    "identifier": "name",
+                                    "hidden": true,
+                                    "key": false
+                                },
+                                {
+                                    "identifier": "vcenter_name",
+                                    "title": "vCenter Name",
+                                    "key": false
+                                },
+                                {
+                                    "identifier": "datacenter",
+                                    "key": false,
+                                    "title": "Data Center"
+                                },
+                                {
+                                    "identifier": "esxi_cluster",
+                                    "key": false,
+                                    "title": "ESXI Cluster"
+                                },
+                                {
+                                    "identifier": "vcenter_address",
+                                    "key": false,
+                                    "title": "vCenter Address"
+                                },
+                                {
+                                    "identifier": "vcenter_object",
+                                    "key": false,
+                                    "title": "vCenter Object"
+                                },
+                                {
+                                    "identifier": "vcenter_os_type",
+                                    "key": false,
+                                    "title": "vCenter OS type"
+                                },
+                                {
+                                    "identifier": "phy_switch_name",
+                                    "key": false,
+                                    "title": "Physical Switch Name"
+                                },
+                                {
+                                    "identifier": "node_id",
+                                    "key": true,
+                                    "hidden": true
+                                }
+                            ],
+                            "actions": [
+                                {
+                                    "title": "Asset Stack View",
+                                    "icon": "mdi-open-in-new",
+                                    "type": "GO_TO_APP_STATE",
+                                    "appName": "user-dashboard/vco_topology_drilldown_app",
+                                    "selectionType": "SINGLE",
+                                    "identifier": "launch-action:view-dashboard"
+                                }
+                            ]
+                        }
+                    },
+                    "edges_report": {
+                        "reportId": "rda.saas.topology.edges.report",
+                        "reportMetaData": {
+                            "sorting": true,
+                            "filtering": true,
+                            "title": "Edges",
+                            "reportColumnDefinitionList": [
+                                {
+                                    "hidden": false,
+                                    "id": "left_id",
+                                    "identifier": "left_id",
+                                    "key": true,
+                                    "title": "Left ID",
+                                    "type": "TEXT",
+                                    "visible": false
+                                },
+                                {
+                                    "hidden": false,
+                                    "id": "left_label",
+                                    "identifier": "left_label",
+                                    "key": false,
+                                    "title": "Source",
+                                    "type": "TEXT",
+                                    "visible": true
+                                },
+                                {
+                                    "hidden": false,
+                                    "id": "right_id",
+                                    "identifier": "right_id",
+                                    "key": true,
+                                    "title": "Right ID",
+                                    "type": "TEXT",
+                                    "visible": false
+                                },
+                                {
+                                    "hidden": false,
+                                    "id": "right_label",
+                                    "identifier": "right_label",
+                                    "key": false,
+                                    "title": "Destination",
+                                    "type": "TEXT",
+                                    "visible": true
+                                },
+                                {
+                                    "hidden": false,
+                                    "id": "relation_type",
+                                    "identifier": "relation_type",
+                                    "key": false,
+                                    "title": "Relation",
+                                    "type": "TEXT",
+                                    "visible": true
+                                }
+                            ],
+                            "actions": []
+                        }
+                    },
+                    "max_width": 12,
+                    "min_width": 6,
+                    "height": 12,
+                    "widget_id": "9db5a36f"
+                }
+            ]
+        },
+        {
+            "title": "Relationships",
+            "show_filter": false,
+            "widgets": [
+                {
+                    "widget_type": "graphdb",
+                    "title": "Relationships",
+                    "stack_name": "vco",
+                    "nodes_collection1": "cfx_rdaf_topology_nodes",
+                    "edges_collection1": "cfx_rdaf_topology_edges",
+                    "graph_name1": "cfx_rdaf_topology_graph",
+                    "relation_map1": "rdaf_topology_relationships",
+                    "graph_report_extra_node_fields0": [
+                        "model",
+                        "hostname"
+                    ],
+                    "node_context_actions": [
+                        {
+                            "title": "Asset Stack View",
+                            "icon": "mdi-open-in-new",
+                            "type": "GO_TO_APP_STATE",
+                            "appName": "user-dashboard/vco_topology_drilldown_app",
+                            "selectionType": "SINGLE",
+                            "identifier": "launch-action:view-dashboard"
+                        }
+                    ],
+                    "widget_id": "9abca36f"
+                }
+            ]
+        }
+    ],
+    "saved_time": "2026-07-17T07:02:56.055941",
+    "attachments": [
+        {
+            "name": "index.html",
+            "value": "{# Jinja code start #}\n{#\nget_topology_data usage (given by Purvi):\nget_topology_data(stack_name=None, node_list=None, query=None, relation_map=None, graph_name=None, db_name=None, nodes_collection=None, edges_collection=None).\n#}\n\n{# Get all variables from fixed variables #}\n{% set context = all_variables.context %}\n{% set stack_name = all_variables.fixed_variables.stack_name %}\n{% set nodes_collection = all_variables.fixed_variables.nodes_collection %}\n{% set edges_collection = all_variables.fixed_variables.edges_collection %}\n{% set graph_name = all_variables.fixed_variables.graph_name %}\n{% set relation_map = all_variables.fixed_variables.relation_map %}\n{% set node_id = context.node_id %}\n\n{% set all_variables_json = all_variables | tojson %}\n\n\n{# Get the topology data using the reporting engine #}\n{% set topology_data = engine.get_topology_data(stack_name=stack_name, node_list=[node_id], nodes_collection=nodes_collection, edges_collection=edges_collection, graph_name=graph_name, relation_map=relation_map) %}\n\n{# Convert topology data to JSON #}\n{% set topology_data_json = topology_data | tojson %}\n\n{# Jinja code end #}\n<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n    <meta charset=\"UTF-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n    <title>Relations View</title>\n    <style>\n        /*\n         * Embedded in an iframe inside a widget: `vh` / sticky use the iframe viewport.\n         * Only `body` scrolls \u2014 `html` is fixed to the iframe height so the root element\n         * does not get its own scrollbar (avoids `html` vs `body` double-scroll behavior).\n         */\n        * {\n            margin: 0;\n            padding: 0;\n            box-sizing: border-box;\n        }\n\n        html {\n            height: 100%;\n            width: 100%;\n            overflow: hidden;\n        }\n\n        body {\n            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;\n            background-color: #f5f5f5;\n            height: 100%;\n            width: 100%;\n            margin: 0;\n            overflow-x: hidden;\n            overflow-y: auto;\n            overscroll-behavior: contain;\n            -webkit-overflow-scrolling: touch;\n        }\n\n        .container {\n            width: 100%;\n            max-width: 100%;\n            min-height: 100%;\n            display: flex;\n            justify-content: center;\n            align-items: flex-start;\n            padding: 20px;\n            box-sizing: border-box;\n        }\n\n        .graph-container {\n            width: 100%;\n            max-width: 100%;\n            height: auto;\n            background-color: white;\n            border: 1px solid #ddd;\n            border-radius: 8px;\n            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);\n            display: flex;\n            align-items: stretch;\n            justify-content: flex-start;\n            padding: 20px;\n            box-sizing: border-box;\n            overflow-x: visible;\n            overflow-y: visible;\n        }\n\n        /* Only the connections column: wrapping hub-focal here would break `position: sticky`\n           (overflow on an ancestor between sticky el and scrolling body). */\n        .hub-graph-inner {\n            flex: 1;\n            min-width: 0;\n            max-width: 100%;\n            overflow-x: auto;\n            overscroll-behavior-x: contain;\n        }\n\n        .hub-layout {\n            display: flex;\n            flex-direction: row;\n            align-items: stretch;\n            width: 100%;\n            min-height: 180px;\n            flex: 1;\n        }\n\n        /* One peer: vertically center focal with the right node. No sticky / `top` \u2014 those\n           use the iframe viewport and fight flex centering. */\n        .hub-layout.hub-layout--single-peer {\n            align-items: center;\n        }\n\n        .hub-layout.hub-layout--single-peer .hub-focal {\n            align-self: center;\n            position: static;\n        }\n\n        .hub-focal {\n            display: flex;\n            align-items: center;\n            justify-content: center;\n            flex-shrink: 0;\n            padding-right: 16px;\n            align-self: flex-start;\n            position: sticky;\n            /* iframe viewport: vh = iframe height; keeps focal near vertical center while scrolling */\n            top: max(24px, calc(50vh - 80px));\n            z-index: 2;\n        }\n\n        .hub-connections {\n            display: flex;\n            flex-direction: row;\n            align-items: stretch;\n            flex: 1;\n            min-width: 0;\n        }\n\n        .hub-parallel-left {\n            flex-shrink: 0;\n            margin-right: 10px;\n        }\n\n        .hub-rows {\n            flex: 1;\n            display: flex;\n            flex-direction: column;\n            justify-content: flex-start;\n            align-items: stretch;\n            gap: 40px;\n            min-width: 0;\n            padding: 8px 0 16px;\n        }\n\n        .hub-peer-row {\n            display: flex;\n            flex-direction: row;\n            align-items: center;\n            width: 100%;\n            min-width: 0;\n            padding-block: 8px;\n        }\n\n        .hub-peer-row .edges-container {\n            margin: 0 16px 0 0;\n        }\n\n        .empty-message {\n            padding: 24px;\n            color: #333;\n            font-size: 14px;\n            align-self: center;\n            margin: auto;\n        }\n\n        .node {\n            height: 100px;\n            display: flex;\n            flex-direction: column;\n            align-items: center;\n            justify-content: center;\n            transition: all 0.2s ease;\n            flex-shrink: 0;\n            min-width: 80px;\n        }\n\n        .node-circle {\n            width: 60px;\n            height: 60px;\n            background-color: #e3f2fd;\n            border: 2px solid #1976d2;\n            border-radius: 50%;\n            display: flex;\n            align-items: center;\n            justify-content: center;\n            transition: all 0.2s ease;\n            padding: 10px;\n        }\n\n        .node-circle img {\n            height: 100%;\n            width: 100%;\n        }\n\n        .node-label {\n            font-size: 14px;\n            font-weight: bold;\n            color: #333;\n            margin-top: 8px;\n            text-align: center;\n            width: 150px;\n            height: 40px;\n            word-break: break-word;\n        }\n\n        .edges-container {\n            display: flex;\n            align-items: stretch;\n            flex: 1;\n            min-width: 300px;\n        }\n\n        .parallel-line {\n            width: 4px;\n            background-color: #1976d2;\n            border-radius: 2px;\n            flex-shrink: 0;\n        }\n\n        .edges {\n            display: flex;\n            flex-direction: column;\n            justify-content: space-around;\n            flex: 1;\n            margin: 0 10px;\n            min-width: 0;\n        }\n\n        .edge {\n            display: flex;\n            align-items: center;\n            position: relative;\n            height: 40px;\n            margin: 5px 0;\n        }\n\n        .edge-line {\n            flex: 1;\n            height: 2px;\n            background-color: #666;\n            position: relative;\n            margin-right: 8px;\n            min-width: 0;\n        }\n\n        .edge.dotted .edge-line {\n            background: repeating-linear-gradient(\n                to right,\n                #666 0px,\n                #666 8px,\n                transparent 8px,\n                transparent 16px\n            );\n        }\n\n        .arrow {\n            width: 0;\n            height: 0;\n            position: absolute;\n            top: 50%;\n            transform: translateY(-50%);\n        }\n\n        .arrow.right {\n            border-left: 8px solid #666;\n            border-top: 6px solid transparent;\n            border-bottom: 6px solid transparent;\n            right: -2px;\n        }\n\n        .arrow.left {\n            border-right: 8px solid #666;\n            border-top: 6px solid transparent;\n            border-bottom: 6px solid transparent;\n            left: -2px;\n        }\n\n        .edge-label {\n            position: absolute;\n            top: -2px;\n            left: 50%;\n            transform: translateX(-50%);\n            font-size: 12px;\n            color: #333;\n            white-space: nowrap;\n        }\n\n        .interface-label {\n            position: absolute;\n            padding: 2px 6px;\n            border-radius: 4px;\n            font-size: 10px;\n            color: #1976d2;\n            border: 1px solid currentColor;\n            background-color: color-mix(in srgb, currentColor 10%, transparent);\n            max-width: 120px;\n            text-overflow: ellipsis;\n            overflow: hidden;\n            white-space: nowrap;\n            font-weight: 500;\n        }\n\n        .interface-label.left {\n            left: 10px;\n            top: -4px;\n        }\n\n        .interface-label.right {\n            right: 20px;\n            top: -4px;\n        }\n    </style>\n</head>\n<body>\n    <div class=\"container\" id=\"relations-view\">\n        <div class=\"graph-container\" id=\"graph-container\"></div>\n    </div>\n    <script>\n        const contextNodeId = {{ node_id | tojson }};\n        const topologyData = {{ topology_data_json | safe }};\n        const allVariables = {{ all_variables_json | safe }};\n\n        const iconMap = window.parent?.cfxIconMap || {};\n\n        function resolveIconSrc(node, map) {\n            const iconURL = node?.iconURL;\n            const nodeType = node?.node_type;\n            if (iconURL && (iconURL.startsWith('http://') || iconURL.startsWith('https://'))) {\n                return iconURL;\n            }\n            if (nodeType && map[nodeType]) {\n                return '/' + map[nodeType];\n            }\n            return '/assets/img/blueprints/canvas/empty_icon.png';\n        }\n\n        function createNodeEl(node, idSuffix) {\n            const div = document.createElement('div');\n            div.className = 'node';\n            const safeId = String(idSuffix).replace(/[^a-zA-Z0-9_-]/g, '_');\n            div.id = 'node-' + safeId;\n            const label = node.node_label || node.hostname || node.node_id || '';\n            const iconSrc = resolveIconSrc(node, iconMap);\n            div.innerHTML =\n                '<div class=\"node-circle\"><img src=\"\" alt=\"\" /></div><div class=\"node-label\"></div>';\n            div.querySelector('img').src = iconSrc;\n            div.querySelector('.node-label').textContent = label;\n            return div;\n        }\n\n        function buildPseudoFocal(focusId, rels) {\n            const r = rels.find((x) => x.left_id === focusId);\n            if (r) {\n                return {\n                    node_id: focusId,\n                    node_label: r.left_label,\n                    hostname: r.left_label,\n                    node_type: r.left_node_type,\n                    iconURL: 'Not Available'\n                };\n            }\n            const r2 = rels.find((x) => x.right_id === focusId);\n            return {\n                node_id: focusId,\n                node_label: r2.right_label,\n                hostname: r2.right_label,\n                node_type: r2.right_node_type,\n                iconURL: 'Not Available'\n            };\n        }\n\n        function pseudoNodeForPeer(peerId, rels) {\n            const r = rels[0];\n            if (r.left_id === peerId) {\n                return {\n                    node_id: peerId,\n                    node_label: r.left_label,\n                    hostname: r.left_label,\n                    node_type: r.left_node_type,\n                    iconURL: 'Not Available'\n                };\n            }\n            return {\n                node_id: peerId,\n                node_label: r.right_label,\n                hostname: r.right_label,\n                node_type: r.right_node_type,\n                iconURL: 'Not Available'\n            };\n        }\n\n        function createEdgesInto(edgesContainer, relationships, focusId) {\n            relationships.forEach((relationship) => {\n                const edgeDiv = document.createElement('div');\n                edgeDiv.className = 'edge';\n                if (relationship.dotted) {\n                    edgeDiv.classList.add('dotted');\n                }\n\n                const edgeColor = relationship.edge_color || '#666';\n                const edgeLine = document.createElement('div');\n                edgeLine.className = 'edge-line';\n\n                if (relationship.dotted) {\n                    edgeLine.style.background = `repeating-linear-gradient(\n                        to right,\n                        ${edgeColor} 0px,\n                        ${edgeColor} 8px,\n                        transparent 8px,\n                        transparent 16px\n                    )`;\n                } else {\n                    edgeLine.style.backgroundColor = edgeColor;\n                }\n\n                const isRightToLeft =\n                    relationship.left_id !== focusId && relationship.right_id === focusId;\n                const isDirectionless = relationship.direction === 'NO_DIRECTION';\n\n                const arrow = document.createElement('div');\n                arrow.className = 'arrow ' + (isRightToLeft ? 'left' : 'right');\n                if (isRightToLeft) {\n                    arrow.style.borderRightColor = edgeColor;\n                } else {\n                    arrow.style.borderLeftColor = edgeColor;\n                }\n\n                const edgeLabel = document.createElement('div');\n                edgeLabel.className = 'edge-label';\n                edgeLabel.textContent =\n                    relationship.link_type || relationship.relation_type || '';\n\n                const sourceInterfaceValue =\n                    focusId === relationship.left_id\n                        ? String(relationship.local_port || '')\n                        : String(relationship.remote_port || '');\n                const destInterfaceValue =\n                    focusId === relationship.left_id\n                        ? String(relationship.remote_port || '')\n                        : String(relationship.local_port || '');\n\n                const sourceLabelColor = relationship.source_label_outline_color || '#1976d2';\n                const destLabelColor = relationship.dest_label_outline_color || '#1976d2';\n\n                let sourceInterfaceLabel;\n                if (sourceInterfaceValue) {\n                    sourceInterfaceLabel = document.createElement('p');\n                    sourceInterfaceLabel.title = sourceInterfaceValue;\n                    sourceInterfaceLabel.className =\n                        'interface-label ' + (isRightToLeft ? 'right' : 'left');\n                    sourceInterfaceLabel.textContent = sourceInterfaceValue;\n                    sourceInterfaceLabel.style.color = sourceLabelColor;\n                }\n\n                let destInterfaceLabel;\n                if (destInterfaceValue) {\n                    destInterfaceLabel = document.createElement('p');\n                    destInterfaceLabel.title = destInterfaceValue;\n                    destInterfaceLabel.className =\n                        'interface-label ' + (isRightToLeft ? 'left' : 'right');\n                    destInterfaceLabel.textContent = destInterfaceValue;\n                    destInterfaceLabel.style.color = destLabelColor;\n                }\n\n                if (!isDirectionless) {\n                    edgeLine.appendChild(arrow);\n                }\n                edgeDiv.appendChild(edgeLine);\n                edgeDiv.appendChild(edgeLabel);\n                if (sourceInterfaceLabel) {\n                    edgeDiv.appendChild(sourceInterfaceLabel);\n                }\n                if (destInterfaceLabel) {\n                    edgeDiv.appendChild(destInterfaceLabel);\n                }\n                edgesContainer.appendChild(edgeDiv);\n            });\n        }\n\n        function initGraph() {\n            const graphContainer = document.getElementById('graph-container');\n            graphContainer.innerHTML = '';\n\n            const nodes = topologyData?.stack?.nodes || [];\n            const relationships = topologyData?.stack?.relationships || [];\n            const nodeMap = new Map(nodes.map((n) => [n.node_id, n]));\n\n            if (!contextNodeId) {\n                const msg = document.createElement('div');\n                msg.className = 'empty-message';\n                msg.textContent = 'No context node selected.';\n                graphContainer.appendChild(msg);\n                return;\n            }\n\n            const filtered = relationships.filter(\n                (r) => r.left_id === contextNodeId || r.right_id === contextNodeId\n            );\n\n            if (!filtered.length) {\n                const msg = document.createElement('div');\n                msg.className = 'empty-message';\n                msg.textContent = 'No relationships to display.';\n                graphContainer.appendChild(msg);\n                return;\n            }\n\n            let focalNode = nodeMap.get(contextNodeId);\n            if (!focalNode) {\n                focalNode = buildPseudoFocal(contextNodeId, filtered);\n            }\n\n            const hubLayout = document.createElement('div');\n            hubLayout.className = 'hub-layout';\n\n            const focalCol = document.createElement('div');\n            focalCol.className = 'hub-focal';\n            focalCol.appendChild(createNodeEl(focalNode, 'focal'));\n\n            const hubConnections = document.createElement('div');\n            hubConnections.className = 'hub-connections';\n\n            const leftParallel = document.createElement('div');\n            leftParallel.className = 'parallel-line hub-parallel-left';\n\n            const rowsCol = document.createElement('div');\n            rowsCol.className = 'hub-rows';\n\n            const byPeer = new Map();\n            for (const r of filtered) {\n                const peer = r.left_id === contextNodeId ? r.right_id : r.left_id;\n                if (!byPeer.has(peer)) {\n                    byPeer.set(peer, []);\n                }\n                byPeer.get(peer).push(r);\n            }\n\n            const sortedPeers = [...byPeer.keys()].sort((a, b) =>\n                String(a).localeCompare(String(b))\n            );\n\n            if (sortedPeers.length === 1) {\n                hubLayout.classList.add('hub-layout--single-peer');\n            }\n\n            for (const peerId of sortedPeers) {\n                const rels = byPeer.get(peerId);\n                const row = document.createElement('div');\n                row.className = 'hub-peer-row';\n\n                const edgesWrap = document.createElement('div');\n                edgesWrap.className = 'edges-container';\n\n                const edgesInner = document.createElement('div');\n                edgesInner.className = 'edges';\n                const rightLine = document.createElement('div');\n                rightLine.className = 'parallel-line';\n\n                createEdgesInto(edgesInner, rels, contextNodeId);\n\n                edgesWrap.appendChild(edgesInner);\n                edgesWrap.appendChild(rightLine);\n\n                const peerNode = nodeMap.get(peerId) || pseudoNodeForPeer(peerId, rels);\n                const peerEl = createNodeEl(peerNode, peerId);\n\n                row.appendChild(edgesWrap);\n                row.appendChild(peerEl);\n                rowsCol.appendChild(row);\n            }\n\n            hubConnections.appendChild(leftParallel);\n            hubConnections.appendChild(rowsCol);\n\n            const scrollInner = document.createElement('div');\n            scrollInner.className = 'hub-graph-inner';\n            scrollInner.appendChild(hubConnections);\n\n            hubLayout.appendChild(focalCol);\n            hubLayout.appendChild(scrollInner);\n            graphContainer.appendChild(hubLayout);\n\n            console.log('topology_relations_view widget: topologyData', topologyData);\n            console.log('topology_relations_view widget: allVariables', allVariables);\n        }\n\n        initGraph();\n    </script>\n</body>\n</html>",
+            "additionalFields": {
+                "valueType": "html",
+                "description": "Relations View custom widget"
+            }
+        },
+        {
+            "name": "widget_code_generator",
+            "value": "{%- set ns = namespace(count=0) -%}\r\n{%- for section in dashboard[\"dashboard_sections\"] -%}\r\n    {%- set widgets = section[\"widgets\"] -%}\r\n    {%- set new_widgets = [] -%}\r\n    {%- for w in widgets -%}\r\n        {%- if w.get(\"widget_type\") -%}\r\n            {%-\r\n                set nw = {\r\n                    \"title\": \"JSON Dashboard Def.\",\r\n                    \"widget_group\": \"g\"+str(ns.count),\r\n                    \"min_width\": w.get(\"min_width\", 6),\r\n                    \"max_width\": w.get(\"max_width\", 6),\r\n                    \"height\": w.get(\"height\", 4),\r\n                    \"widget_type\": \"codeblock\",\r\n                    \"content\": json_dumps_indent(w, 2),\r\n                    \"lang\": \"json\",\r\n                    \"widget_id\": w.get(\"widget_id\", str(ns.count)) + \"_code\"\r\n                }\r\n            -%}\r\n            {%- set _ = w.update({\"widget_group\": \"g\"+str(ns.count) }) -%}\r\n            {%- set _ = new_widgets.append(nw) -%}\r\n            {%- set ns.count = ns.count + 1 -%}\r\n        {%- endif -%}\r\n    {%- endfor -%}\r\n    {%- set _ = widgets.extend(new_widgets) -%}\r\n{%- endfor -%}",
+            "additionalFields": {
+                "valueType": "",
+                "description": ""
+            }
+        }
+    ]
+}

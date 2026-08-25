@@ -1,0 +1,10 @@
+Value LOCAL_INTERFACE (\S+)
+Value REMOTE_HOSTNAME (\S+)
+Value REMOTE_INTERFACE (\S+)
+Value REMOTE_IP (\d+\.\d+\.\d+\.\d+)
+
+Start
+  ^Local\s+Intf:\s+${LOCAL_INTERFACE}
+  ^Port\s+id:\s+${REMOTE_INTERFACE}
+  ^System\s+Name:\s+${REMOTE_HOSTNAME}
+  ^\s+IP:\s+${REMOTE_IP} -> Record

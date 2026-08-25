@@ -1,0 +1,553 @@
+{
+    "name": "meraki_inventory",
+    "label": "Meraki Device Inventory",
+    "description": "meraki_inventory_collection: Insights",
+    "dashboard_folder": "Meraki",
+    "version": "1.0.0",
+    "enabled": false,
+    "stream": "meraki_inventory_collection",
+    "extra_filter": "collection_status not in ['Failed']",
+    "dashboard_type": "template",
+    "template_variables": {
+        "CUST_ID": {
+            "contextId": "customerId"
+        },
+        "PROJ_ID": {
+            "contextId": "projectId"
+        },
+        "CUST_TAG": {
+            "contextId": "customerTag"
+        }
+    },
+    "live_edit": true,
+    "dashboard_filters": {
+        "time_filter": true,
+        "extra_filter": "(customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+        "columns_filter": [
+            {
+                "id": "timestamp",
+                "label": "Timestamp",
+                "type": "DATETIME"
+            },
+            {
+                "id": "address",
+                "label": "Address",
+                "type": "TEXT"
+            },
+            {
+                "id": "beaconIdParams",
+                "label": "Beaconidparams",
+                "type": "TEXT"
+            },
+            {
+                "id": "collection_status",
+                "label": "Collection Status",
+                "type": "TEXT"
+            },
+            {
+                "id": "customer_id",
+                "label": "Customer Id",
+                "type": "TEXT"
+            },
+            {
+                "id": "customer_tag",
+                "label": "Customer Tag",
+                "type": "TEXT"
+            },
+            {
+                "id": "device_object",
+                "label": "Device Object",
+                "type": "TEXT"
+            },
+            {
+                "id": "enrollmentString",
+                "label": "Enrollmentstring",
+                "type": "TEXT"
+            },
+            {
+                "id": "firmware",
+                "label": "Firmware",
+                "type": "TEXT"
+            },
+            {
+                "id": "floorPlanId",
+                "label": "Floorplanid",
+                "type": "TEXT"
+            },
+            {
+                "id": "id",
+                "label": "Id",
+                "type": "TEXT"
+            },
+            {
+                "id": "ip_addr",
+                "label": "Ip Addr",
+                "type": "TEXT"
+            },
+            {
+                "id": "isBoundToConfigTemplate",
+                "label": "Isboundtoconfigtemplate",
+                "type": "TEXT"
+            },
+            {
+                "id": "isVirtual",
+                "label": "Isvirtual",
+                "type": "TEXT"
+            },
+            {
+                "id": "lanIp",
+                "label": "Lanip",
+                "type": "TEXT"
+            },
+            {
+                "id": "mac",
+                "label": "Mac",
+                "type": "TEXT"
+            },
+            {
+                "id": "model",
+                "label": "Model",
+                "type": "TEXT"
+            },
+            {
+                "id": "name",
+                "label": "Name",
+                "type": "TEXT"
+            },
+            {
+                "id": "networkId",
+                "label": "Networkid",
+                "type": "TEXT"
+            },
+            {
+                "id": "networkName",
+                "label": "Networkname",
+                "type": "TEXT"
+            },
+            {
+                "id": "notes",
+                "label": "Notes",
+                "type": "TEXT"
+            },
+            {
+                "id": "orgId",
+                "label": "Orgid",
+                "type": "TEXT"
+            },
+            {
+                "id": "orgName",
+                "label": "Orgname",
+                "type": "TEXT"
+            },
+            {
+                "id": "organizationId",
+                "label": "Organizationid",
+                "type": "TEXT"
+            },
+            {
+                "id": "productTypes_0",
+                "label": "Producttypes 0",
+                "type": "TEXT"
+            },
+            {
+                "id": "productTypes_1",
+                "label": "Producttypes 1",
+                "type": "TEXT"
+            },
+            {
+                "id": "productTypes_2",
+                "label": "Producttypes 2",
+                "type": "TEXT"
+            },
+            {
+                "id": "productTypes_3",
+                "label": "Producttypes 3",
+                "type": "TEXT"
+            },
+            {
+                "id": "productTypes_4",
+                "label": "Producttypes 4",
+                "type": "TEXT"
+            },
+            {
+                "id": "productTypes_5",
+                "label": "Producttypes 5",
+                "type": "TEXT"
+            },
+            {
+                "id": "reason",
+                "label": "Reason",
+                "type": "TEXT"
+            },
+            {
+                "id": "serial",
+                "label": "Serial",
+                "type": "TEXT"
+            },
+            {
+                "id": "switchProfileId",
+                "label": "Switchprofileid",
+                "type": "TEXT"
+            },
+            {
+                "id": "tags_0",
+                "label": "Tags 0",
+                "type": "TEXT"
+            },
+            {
+                "id": "tags_1",
+                "label": "Tags 1",
+                "type": "TEXT"
+            },
+            {
+                "id": "tags_2",
+                "label": "Tags 2",
+                "type": "TEXT"
+            },
+            {
+                "id": "timeZone",
+                "label": "Timezone",
+                "type": "TEXT"
+            },
+            {
+                "id": "unique_id",
+                "label": "Unique Id",
+                "type": "TEXT"
+            },
+            {
+                "id": "url",
+                "label": "Url",
+                "type": "TEXT"
+            },
+            {
+                "id": "wan1Ip",
+                "label": "Wan1Ip",
+                "type": "TEXT"
+            },
+            {
+                "id": "wan2Ip",
+                "label": "Wan2Ip",
+                "type": "TEXT"
+            },
+            {
+                "id": "wirelessMac",
+                "label": "Wirelessmac",
+                "type": "TEXT"
+            },
+            {
+                "id": "beaconIdParams_major",
+                "label": "Beaconidparams Major",
+                "type": "DOUBLE"
+            },
+            {
+                "id": "beaconIdParams_minor",
+                "label": "Beaconidparams Minor",
+                "type": "DOUBLE"
+            },
+            {
+                "id": "collection_duration",
+                "label": "Collection Duration",
+                "type": "DOUBLE"
+            },
+            {
+                "id": "collection_timestamp",
+                "label": "Collection Timestamp",
+                "type": "DOUBLE"
+            },
+            {
+                "id": "lat",
+                "label": "Lat",
+                "type": "DOUBLE"
+            },
+            {
+                "id": "lng",
+                "label": "Lng",
+                "type": "DOUBLE"
+            }
+        ],
+        "group_filters": [
+            {
+                "stream": "meraki_inventory_collection",
+                "title": "Device Object",
+                "duration_hours": 1080,
+                "limit": 200,
+                "extra_filter": "collection_status not in ['Failed'] and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                "group_by": [
+                    "device_object"
+                ],
+                "ts_column": "timestamp",
+                "agg": "sum",
+                "column": "count_",
+                "type": "int"
+            },
+            {
+                "stream": "meraki_inventory_collection",
+                "title": "Floor Plan ID",
+                "duration_hours": 1080,
+                "limit": 200,
+                "extra_filter": "collection_status not in ['Failed'] and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                "group_by": [
+                    "floorPlanId"
+                ],
+                "ts_column": "timestamp",
+                "agg": "sum",
+                "column": "count_",
+                "type": "int"
+            },
+            {
+                "stream": "meraki_inventory_collection",
+                "title": "Notes",
+                "duration_hours": 1080,
+                "limit": 200,
+                "extra_filter": "collection_status not in ['Failed'] and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                "group_by": [
+                    "notes"
+                ],
+                "ts_column": "timestamp",
+                "agg": "sum",
+                "column": "count_",
+                "type": "int"
+            },
+            {
+                "stream": "meraki_inventory_collection",
+                "title": "Producttypes 0",
+                "duration_hours": 1080,
+                "limit": 200,
+                "extra_filter": "collection_status not in ['Failed'] and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                "group_by": [
+                    "productTypes_0"
+                ],
+                "ts_column": "timestamp",
+                "agg": "sum",
+                "column": "count_",
+                "type": "int"
+            },
+            {
+                "stream": "meraki_inventory_collection",
+                "title": "Producttypes 1",
+                "duration_hours": 1080,
+                "limit": 200,
+                "extra_filter": "collection_status not in ['Failed'] and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                "group_by": [
+                    "productTypes_1"
+                ],
+                "ts_column": "timestamp",
+                "agg": "sum",
+                "column": "count_",
+                "type": "int"
+            },
+            {
+                "stream": "meraki_inventory_collection",
+                "title": "Reason",
+                "duration_hours": 1080,
+                "limit": 200,
+                "extra_filter": "collection_status not in ['Failed'] and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                "group_by": [
+                    "reason"
+                ],
+                "ts_column": "timestamp",
+                "agg": "sum",
+                "column": "count_",
+                "type": "int"
+            },
+            {
+                "stream": "meraki_inventory_collection",
+                "title": "Tags 1",
+                "duration_hours": 1080,
+                "limit": 200,
+                "extra_filter": "collection_status not in ['Failed'] and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                "group_by": [
+                    "tags_1"
+                ],
+                "ts_column": "timestamp",
+                "agg": "sum",
+                "column": "count_",
+                "type": "int"
+            }
+        ]
+    },
+    "dashboard_sections": [
+        {
+            "title": "Meraki Device Inventory",
+            "show_filter": true,
+            "widgets": [
+                {
+                    "widget_type": "pie_chart",
+                    "title": "Collection Status",
+                    "duration_hours": 1080,
+                    "stream": "meraki_inventory_collection",
+                    "extra_filter": "collection_status not in ['Failed'] and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "ts_column": "timestamp",
+                    "column": "count_",
+                    "agg": "sum",
+                    "group_by": [
+                        "collection_status"
+                    ],
+                    "type": "int",
+                    "min_width": 3,
+                    "height": 3,
+                    "max_width": 6,
+                    "widget_id": "da6d8c84"
+                },
+                {
+                    "widget_type": "pie_chart",
+                    "title": "Device Object",
+                    "duration_hours": 1080,
+                    "stream": "meraki_inventory_collection",
+                    "ts_column": "timestamp",
+                    "extra_filter": "collection_status not in ['Failed'] and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "column": "count_",
+                    "agg": "sum",
+                    "group_by": [
+                        "device_object"
+                    ],
+                    "type": "int",
+                    "min_width": 3,
+                    "height": 3,
+                    "max_width": 6,
+                    "widget_id": "57d6c6b5"
+                },
+                {
+                    "widget_type": "pie_chart",
+                    "title": "Notes",
+                    "duration_hours": 1080,
+                    "stream": "meraki_inventory_collection",
+                    "ts_column": "timestamp",
+                    "extra_filter": "collection_status not in ['Failed'] and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "column": "count_",
+                    "agg": "sum",
+                    "group_by": [
+                        "notes"
+                    ],
+                    "type": "int",
+                    "min_width": 3,
+                    "height": 3,
+                    "max_width": 6,
+                    "widget_id": "2a0b4057"
+                },
+                {
+                    "widget_type": "pie_chart",
+                    "title": "Product Types",
+                    "duration_hours": 1080,
+                    "stream": "meraki_inventory_collection",
+                    "ts_column": "timestamp",
+                    "extra_filter": "collection_status not in ['Failed'] and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "column": "count_",
+                    "agg": "sum",
+                    "group_by": [
+                        "productTypes_0"
+                    ],
+                    "type": "int",
+                    "min_width": 3,
+                    "height": 3,
+                    "max_width": 6,
+                    "widget_id": "8a34e3a6"
+                },
+                {
+                    "title": "Networks",
+                    "widget_type": "tabular",
+                    "duration_hours": 1080,
+                    "max_width": 4,
+                    "height": 8,
+                    "min_width": 4,
+                    "stream": "meraki_inventory_collection",
+                    "ts_column": "timestamp",
+                    "extra_filter": "collection_status not in ['Failed'] AND device_object in ['Networks'] and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "columns": {
+                        "name": {
+                            "title": "Name",
+                            "type": "TEXT",
+                            "hidden": false
+                        },
+                        "productTypes_0": {
+                            "title": "Type",
+                            "type": "TEXT",
+                            "hidden": false
+                        },
+                        "tags_0": {
+                            "title": "Tags",
+                            "type": "TEXT",
+                            "hidden": false
+                        }
+                    },
+                    "widget_id": "6ac96803"
+                },
+                {
+                    "title": "Devices",
+                    "widget_type": "tabular",
+                    "duration_hours": 1080,
+                    "max_width": 8,
+                    "height": 8,
+                    "min_width": 8,
+                    "stream": "meraki_inventory_collection",
+                    "ts_column": "timestamp",
+                    "extra_filter": "collection_status not in ['Failed'] AND device_object not in ['Networks'] and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "columns": {
+                        "name": {
+                            "title": "Name",
+                            "type": "TEXT",
+                            "hidden": false
+                        },
+                        "device_object": {
+                            "title": "Device Type",
+                            "type": "TEXT",
+                            "hidden": false
+                        },
+                        "unique_id": {
+                            "title": "Unique Id",
+                            "type": "TEXT",
+                            "hidden": false
+                        },
+                        "serial": {
+                            "title": "Serial",
+                            "type": "TEXT",
+                            "hidden": false
+                        },
+                        "ip_addr": {
+                            "title": "Ip Addr",
+                            "type": "TEXT",
+                            "hidden": false
+                        },
+                        "model": {
+                            "title": "Model",
+                            "type": "TEXT",
+                            "hidden": false
+                        },
+                        "networkName": {
+                            "title": "Networkname",
+                            "type": "TEXT",
+                            "hidden": false
+                        },
+                        "networkId": {
+                            "title": "Networkid",
+                            "type": "TEXT",
+                            "hidden": false
+                        },
+                        "address": {
+                            "title": "Address",
+                            "type": "TEXT",
+                            "hidden": false
+                        },
+                        "firmware": {
+                            "title": "Firmware",
+                            "type": "TEXT",
+                            "hidden": false
+                        },
+                        "orgName": {
+                            "title": "Orgname",
+                            "type": "TEXT",
+                            "hidden": false
+                        },
+                        "timestamp": {
+                            "title": "Timestamp",
+                            "type": "DATETIME",
+                            "hidden": false
+                        }
+                    },
+                    "widget_id": "6ac96802"
+                }
+            ]
+        }
+    ],
+    "saved_time": "2025-06-09T15:26:42.491101"
+}

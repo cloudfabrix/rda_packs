@@ -1,0 +1,20 @@
+Value SYSTEM_ID (\S+)
+Value TYPE (L1|L2|L1/L2)
+Value INTERFACE (\S+)
+Value IP_ADDRESS (\S+)
+Value STATE (\S+)
+Value HOLDTIME (\d+)
+Value CIRCUIT_ID (\S+)
+Value AREA_ADDRESS (\S+)
+Value SNPA (\S+)
+Value INTERFACE_FULL_NAME (.+)
+
+Start
+  # Match the main neighbor line
+  ^${SYSTEM_ID}\s+${TYPE}\s+${INTERFACE}\s+${IP_ADDRESS}\s+${STATE}\s+${HOLDTIME}\s+${CIRCUIT_ID}\s*
+  # Optional: Area Address
+  ^\s+Area Address\(es\):\s+${AREA_ADDRESS}\s*
+  # Optional: SNPA
+  ^\s+SNPA:\s+${SNPA}\s*
+  # Optional: Interface full name
+  ^\s+Interface name:\s+${INTERFACE_FULL_NAME}\s* -> Record Start

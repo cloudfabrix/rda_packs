@@ -1,0 +1,478 @@
+{
+    "name": "vmware_esxi_hosts_detailed_view",
+    "label": "ESXi Host Detailed View",
+    "description": "ESXi host details with connected devices, Full Stack, Asset Map and Relationships",
+    "version": "26.07.24.7",
+    "enabled": true,
+    "dashboard_folder": "vCenterInventory",
+    "dashboard_type": "template",
+    "dashboard_style": "auto",
+    "live_edit": true,
+    "showTitle": true,
+    "short_label": "ESXi Host",
+    "context_label_id": "esxi_host",
+    "template_variables": {
+        "ESXI_HOST": {
+            "contextId": "esxi_host"
+        },
+        "VCENTER_ADDRESS": {
+            "contextId": "vcenter_address"
+        },
+        "NODE_ID": {
+            "contextId": "node_id"
+        },
+        "NODE_TYPE": {
+            "contextId": "node_type"
+        },
+        "CUST_TAG": {
+            "contextId": "customerTag"
+        },
+        "CUST_ID": {
+            "contextId": "customerId"
+        },
+        "PROJ_ID": {
+            "contextId": "projectId"
+        }
+    },
+    "dashboard_filters": {
+        "time_filter": false
+    },
+    "navigation_dashboards": {
+        "tree_data": {
+            "column_name": "esxi_host",
+            "display_column1": "esxi_host",
+            "pstream_name": "graphdb://cfx_rdaf_topology/cfx_rdaf_topology_nodes",
+            "include_icon_url": false,
+            "cfxql_query": "node_id is '{{NODE_ID}}' and esxi_host is '{{ESXI_HOST}}' and node_type is 'Hypervisor' and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty or customer_tag is '' or customer_tag is 'None')"
+        },
+        "tree_detail": {
+            "display_column": "node_label",
+            "selected_columns": {
+                "node_id": "Node ID",
+                "node_label": "Name",
+                "node_type": "Type"
+            },
+            "pstream_name": "graphdb://cfx_rdaf_topology/cfx_rdaf_topology_nodes",
+            "include_icon_url": false,
+            "cfxql_query": "esxi_host is '{{ESXI_HOST}}' and node_type in ['VM','Datastore','vSwitch','vPortgroup'] and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty or customer_tag is '' or customer_tag is 'None')"
+        },
+        "showNodeIcon": true,
+        "showSearchBox": true,
+        "autoSelectFirstItem": true
+    },
+    "dashboard_sections": [
+        {
+            "title": "Full Stack",
+            "show_filter": false,
+            "widgets": [
+                {
+                    "title": "Full Stack",
+                    "widget_type": "topology_stack_view",
+                    "widget_template": "asv/application-stack-view",
+                    "reportId": "rda.saas.stack.view.topo.new",
+                    "chunk_size": 200,
+                    "layer_order": [
+                        "Virtualization",
+                        "Compute",
+                        "Storage",
+                        "Wireless",
+                        "Network"
+                    ],
+                    "stack_type": "dynamic",
+                    "stack_definition": {
+                        "is_dynamic": true,
+                        "dynamic_nodes": {
+                            "column_name": "node_type",
+                            "db_name": "cfx_rdaf_topology",
+                            "nodes_collection": "cfx_rdaf_topology_nodes",
+                            "stream": "graphdb://cfx_rdaf_topology/cfx_rdaf_topology_nodes",
+                            "query": "node_type in ['vCenter','vSphere_Cluster','Hypervisor','VM','Datastore','vSwitch','vPortgroup','Switch'] and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty or customer_tag is '' or customer_tag is 'None')"
+                        },
+                        "dynamic_relationships": {
+                            "db_name": "cfx_rdaf_topology",
+                            "edges_collection": "cfx_rdaf_topology_edges",
+                            "graph_name": "cfx_rdaf_topology_graph",
+                            "relation_map": "rdaf_topology_relationships",
+                            "stream": "graphdb://cfx_rdaf_topology/cfx_rdaf_topology_edges",
+                            "query": "left_node_type in ['vCenter','vSphere_Cluster','Hypervisor','VM','Datastore','vSwitch','vPortgroup','Switch'] and right_node_type in ['vCenter','vSphere_Cluster','Hypervisor','VM','Datastore','vSwitch','vPortgroup','Switch'] and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty or customer_tag is '' or customer_tag is 'None')"
+                        },
+                        "display_options": {
+                            "stack_type": "dynamic",
+                            "auto_group": false,
+                            "expand_all": false,
+                            "limit_initially": false,
+                            "register_search_endpoints": false,
+                            "node_list": [
+                                {
+                                    "node_id": "{{NODE_ID}}"
+                                }
+                            ]
+                        }
+                    },
+                    "alert_source": {
+                        "alerts_stream": "oia-alerts-stream",
+                        "group_by": [
+                            "a_en_node_id",
+                            "a_severity",
+                            "a_status"
+                        ],
+                        "duration_hours": 3000,
+                        "extra_filter": "a_source_systemname is not 'Alert Group'",
+                        "ts_column": "timestamp",
+                        "agg": "value_count",
+                        "column": "count_",
+                        "type": "int",
+                        "alerts_chunk_size": 200
+                    },
+                    "alert_detail_columns": {
+                        "a_message": {
+                            "title": "Message",
+                            "type": "GROUPED",
+                            "formatter": "truncate",
+                            "group": {
+                                "a_source_systemname": "Source",
+                                "a_asset_ip_address": "Asset IP Address",
+                                "a_status": "Status",
+                                "a_asset_name": "Asset Name"
+                            },
+                            "color-column": "severity_color"
+                        },
+                        "severity_color": {
+                            "type": "COLOR-MAP",
+                            "source-column": "a_severity",
+                            "color-map": {
+                                "CRITICAL": "#e53935",
+                                "HIGH": "#f57c00",
+                                "LOW": "#ffd54f",
+                                "MAJOR": "#f57c00",
+                                "MINOR": "#ffa726",
+                                "MODERATE": "#ffa726",
+                                "PLANNING": "#35e535",
+                                "WARNING": "#ffd54f"
+                            }
+                        },
+                        "a_raised_ts": {
+                            "title": "Raised At",
+                            "type": "DATETIME"
+                        },
+                        "a_severity": {
+                            "title": "Severity",
+                            "htmlTemplateForRow": "{% raw %}<span class='badge' style='background-color: {{row.severity_color}}' > {{row.a_severity}} </span>{% endraw %}"
+                        }
+                    },
+                    "edge_detail_columns": {
+                        "left_id": {
+                            "key": true,
+                            "title": "Left ID"
+                        },
+                        "left_label": {
+                            "key": false,
+                            "title": "Source"
+                        },
+                        "right_id": {
+                            "key": true,
+                            "title": "Right ID"
+                        },
+                        "right_label": {
+                            "key": false,
+                            "title": "Destination"
+                        },
+                        "relation_type": {
+                            "key": false,
+                            "title": "Relation"
+                        }
+                    },
+                    "node_context_actions": [
+                        {
+                            "id": "view_summary",
+                            "icon": "mdi-eye",
+                            "title": "View Details",
+                            "selectionType": "SINGLE"
+                        }
+                    ],
+                    "height": 12,
+                    "min_width": 12,
+                    "max_width": 12,
+                    "widget_id": "esxi_host_fullstack_1"
+                }
+            ]
+        },
+        {
+            "title": "Asset Map",
+            "show_filter": false,
+            "widgets": [
+                {
+                    "widget_type": "topology",
+                    "title": "Asset Map",
+                    "reportId": "rda.saas.stack.view.topo",
+                    "chartProperties": {
+                        "hasToolbar": true,
+                        "shortToolbar": false,
+                        "enableControlPanel": false,
+                        "userZoomingEnabled": true
+                    },
+                    "stack_type": "dynamic",
+                    "chunk_size": 200,
+                    "auto_group": true,
+                    "stack_definition": {
+                        "is_dynamic": true,
+                        "dynamic_nodes": {
+                            "column_name": "node_type",
+                            "db_name": "cfx_rdaf_topology",
+                            "nodes_collection": "cfx_rdaf_topology_nodes",
+                            "stream": "graphdb://cfx_rdaf_topology/cfx_rdaf_topology_nodes",
+                            "query": "node_type in ['vCenter','vSphere_Cluster','Hypervisor','VM','Datastore','vSwitch','vPortgroup','Switch'] and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty or customer_tag is '' or customer_tag is 'None')"
+                        },
+                        "dynamic_relationships": {
+                            "db_name": "cfx_rdaf_topology",
+                            "edges_collection": "cfx_rdaf_topology_edges",
+                            "graph_name": "cfx_rdaf_topology_graph",
+                            "relation_map": "rdaf_topology_relationships",
+                            "stream": "graphdb://cfx_rdaf_topology/cfx_rdaf_topology_edges",
+                            "query": "left_node_type in ['vCenter','vSphere_Cluster','Hypervisor','VM','Datastore','vSwitch','vPortgroup','Switch'] and right_node_type in ['vCenter','vSphere_Cluster','Hypervisor','VM','Datastore','vSwitch','vPortgroup','Switch'] and (customer_tag is '{{CUST_TAG}}' or customer_tag is empty or customer_tag is '' or customer_tag is 'None')"
+                        }
+                    },
+                    "show_alert_details": true,
+                    "has_more_data_flag": true,
+                    "alert_source": {
+                        "alerts_stream": "oia-alerts-stream",
+                        "limit": 1000,
+                        "group_by": [
+                            "a_en_node_id",
+                            "a_severity",
+                            "a_status"
+                        ],
+                        "duration_hours": 3000,
+                        "extra_filter": "a_source_systemname is not 'Alert Group'",
+                        "ts_column": "timestamp",
+                        "agg": "value_count",
+                        "column": "count_",
+                        "type": "int",
+                        "alerts_chunk_size": 200
+                    },
+                    "alert_detail_columns": {
+                        "a_message": {
+                            "title": "Message",
+                            "type": "GROUPED",
+                            "formatter": "truncate",
+                            "group": {
+                                "a_source_systemname": "Source",
+                                "a_asset_ip_address": "Asset IP Address",
+                                "a_status": "Status",
+                                "a_asset_name": "Asset Name"
+                            },
+                            "color-column": "severity_color"
+                        },
+                        "severity_color": {
+                            "type": "COLOR-MAP",
+                            "source-column": "a_severity",
+                            "color-map": {
+                                "CRITICAL": "#e53935",
+                                "HIGH": "#f57c00",
+                                "LOW": "#ffd54f",
+                                "MAJOR": "#f57c00",
+                                "MINOR": "#ffa726",
+                                "MODERATE": "#ffa726",
+                                "PLANNING": "#35e535",
+                                "WARNING": "#ffd54f"
+                            }
+                        },
+                        "a_raised_ts": {
+                            "title": "Raised At",
+                            "type": "DATETIME"
+                        },
+                        "a_severity": {
+                            "title": "Severity",
+                            "htmlTemplateForRow": "{% raw %}<span class='badge' style='background-color: {{row.severity_color}}' > {{row.a_severity}} </span>{% endraw %}"
+                        }
+                    },
+                    "nodes_report": {
+                        "reportMetaData": {
+                            "sorting": true,
+                            "filtering": true,
+                            "title": "Nodes",
+                            "remote_searchable": false,
+                            "remote_searchable_cols": [
+                                "name",
+                                "node_label",
+                                "node_id",
+                                "node_type"
+                            ],
+                            "reportColumnDefinitionList": [
+                                {
+                                    "identifier": "node_label",
+                                    "title": "Name",
+                                    "key": true
+                                },
+                                {
+                                    "identifier": "layer",
+                                    "key": false,
+                                    "title": "Layer"
+                                },
+                                {
+                                    "identifier": "node_type",
+                                    "key": false,
+                                    "title": "Node Type"
+                                },
+                                {
+                                    "identifier": "esxi_host",
+                                    "key": false,
+                                    "title": "ESXi Host"
+                                },
+                                {
+                                    "identifier": "vcenter_name",
+                                    "title": "vCenter Name",
+                                    "key": false
+                                },
+                                {
+                                    "identifier": "datacenter",
+                                    "key": false,
+                                    "title": "Data Center"
+                                },
+                                {
+                                    "identifier": "esxi_cluster",
+                                    "key": false,
+                                    "title": "ESXI Cluster"
+                                },
+                                {
+                                    "identifier": "vcenter_address",
+                                    "key": false,
+                                    "title": "vCenter Address"
+                                },
+                                {
+                                    "identifier": "node_id",
+                                    "key": true,
+                                    "hidden": true
+                                }
+                            ],
+                            "actions": []
+                        }
+                    },
+                    "edges_report": {
+                        "reportId": "rda.saas.topology.edges.report",
+                        "reportMetaData": {
+                            "sorting": true,
+                            "filtering": true,
+                            "title": "Edges",
+                            "reportColumnDefinitionList": [
+                                {
+                                    "hidden": false,
+                                    "id": "left_id",
+                                    "identifier": "left_id",
+                                    "key": true,
+                                    "title": "Left ID",
+                                    "type": "TEXT",
+                                    "visible": false
+                                },
+                                {
+                                    "hidden": false,
+                                    "id": "left_label",
+                                    "identifier": "left_label",
+                                    "key": false,
+                                    "title": "Source",
+                                    "type": "TEXT",
+                                    "visible": true
+                                },
+                                {
+                                    "hidden": false,
+                                    "id": "right_id",
+                                    "identifier": "right_id",
+                                    "key": true,
+                                    "title": "Right ID",
+                                    "type": "TEXT",
+                                    "visible": false
+                                },
+                                {
+                                    "hidden": false,
+                                    "id": "right_label",
+                                    "identifier": "right_label",
+                                    "key": false,
+                                    "title": "Destination",
+                                    "type": "TEXT",
+                                    "visible": true
+                                },
+                                {
+                                    "hidden": false,
+                                    "id": "relation_type",
+                                    "identifier": "relation_type",
+                                    "key": false,
+                                    "title": "Relation",
+                                    "type": "TEXT",
+                                    "visible": true
+                                }
+                            ],
+                            "actions": []
+                        }
+                    },
+                    "max_width": 12,
+                    "min_width": 6,
+                    "height": 12,
+                    "widget_id": "esxi_host_assetmap_1"
+                }
+            ]
+        },
+        {
+            "title": "Relationships",
+            "show_filter": false,
+            "widgets": [
+                {
+                    "widget_type": "graphdb",
+                    "title": "Relationships",
+                    "reportId": "rda.saas.stack.view.topo.graph",
+                    "stack_name": "cfx_rdaf_topology",
+                    "nodes_collection1": "cfx_rdaf_topology_nodes",
+                    "edges_collection1": "cfx_rdaf_topology_edges",
+                    "graph_name1": "cfx_rdaf_topology_graph",
+                    "relation_map1": "rdaf_topology_relationships",
+                    "graph_report_extra_node_fields": [
+                        "node_type",
+                        "vcenter_name",
+                        "vcenter_address",
+                        "datacenter",
+                        "esxi_cluster",
+                        "esxi_host"
+                    ],
+                    "node_context_actions": [
+                        {
+                            "title": "Asset Stack View",
+                            "icon": "mdi-open-in-new",
+                            "type": "GO_TO_APP_STATE",
+                            "appName": "user-dashboard/vmware_esxi_host_topology_detailed_view",
+                            "selectionType": "SINGLE",
+                            "identifier": "launch-action:view-dashboard",
+                            "contextParamList": {
+                                "contextParams": [
+                                    {
+                                        "paramKey": "node_id",
+                                        "paramId": "node_id"
+                                    },
+                                    {
+                                        "paramKey": "node_label",
+                                        "paramId": "node_label"
+                                    },
+                                    {
+                                        "paramKey": "node_type",
+                                        "paramId": "node_type"
+                                    },
+                                    {
+                                        "paramKey": "customerTag",
+                                        "paramId": "customerTag"
+                                    },
+                                    {
+                                        "paramKey": "customer_tag",
+                                        "paramId": "customerTag"
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "height": 12,
+                    "min_width": 12,
+                    "max_width": 12,
+                    "widget_id": "esxi_host_relationships_1"
+                }
+            ]
+        }
+    ],
+    "saved_time": "2026-07-17T04:30:00.000000"
+}

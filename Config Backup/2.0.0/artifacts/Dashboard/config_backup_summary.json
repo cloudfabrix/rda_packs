@@ -1,0 +1,424 @@
+{
+    "name": "config_backup_summary",
+    "label": "Config Backup Summary",
+    "description": "Overall summary of config backup results (stream-native widgets)",
+    "dashboard_folder": "ConfigBackupPack",
+    "version": "2026.05.09",
+    "enabled": true,
+    "stream": "syslog-config-backup-stream",
+    "dashboard_type": "template",
+    "live_edit": true,
+    "template_variables": {
+        "CUST_TAG": {
+            "contextId": "customerTag"
+        }
+    },
+    "dashboard_filters": {
+        "time_filter": true,
+        "default_time_filter_labels": [
+            "All Time"
+        ]
+    },
+    "dashboard_sections": [
+        {
+            "title": "Config Backup Summary",
+            "show_filter": true,
+            "widgets": [
+                {
+                    "title": "Devices backed up (last 30 days)",
+                    "widget_type": "custom_counter",
+                    "stream": "syslog-config-backup-stream",
+                    "ts_column": "backup_time",
+                    "duration_hours": 720,
+                    "extra_filter": "(customer_tag is '{{CUST_TAG}}' or customer_tag is empty or customer_tag is 'None') and status is 'Success' and backup_time is not NULL and backup_time is after -30 days",
+                    "column": "source_ip",
+                    "agg": "cardinality",
+                    "type": "str",
+                    "min_width": 4,
+                    "height": 3,
+                    "max_width": 4,
+                    "widget_id": "cb01a100"
+                },
+                {
+                    "title": "Devices not backed up (last 30 days)",
+                    "widget_type": "custom_counter",
+                    "stream": "syslog-config-backup-stream",
+                    "ts_column": "backup_time",
+                    "duration_hours": 720,
+                    "extra_filter": "(customer_tag is '{{CUST_TAG}}' or customer_tag is empty or customer_tag is 'None') and status is 'Failed' and backup_time is not NULL and backup_time is after -30 days",
+                    "column": "source_ip",
+                    "agg": "cardinality",
+                    "type": "str",
+                    "min_width": 4,
+                    "height": 3,
+                    "max_width": 4,
+                    "widget_id": "cb02a100"
+                },
+                {
+                    "title": "Config changes for devices (last 30 days)",
+                    "widget_type": "custom_counter",
+                    "stream": "syslog-config-backup-stream",
+                    "ts_column": "config_change_time",
+                    "duration_hours": 720,
+                    "extra_filter": "(customer_tag is '{{CUST_TAG}}' or customer_tag is empty or customer_tag is 'None') and backup_mode is 'Event Driven' and config_change_time is not NULL and config_change_time is after -30 days",
+                    "column": "config_id",
+                    "agg": "value_count",
+                    "type": "str",
+                    "min_width": 4,
+                    "height": 3,
+                    "max_width": 4,
+                    "widget_id": "cb05a100"
+                },
+                {
+                    "title": "Devices backed up (last 30 days)",
+                    "widget_type": "tabular",
+                    "stream": "syslog-config-backup-stream",
+                    "extra_filter": "(customer_tag is '{{CUST_TAG}}' or customer_tag is empty or customer_tag is 'None') and status is 'Success' and backup_time is not NULL and backup_time is after -30 days",
+                    "ts_column": "backup_time",
+                    "duration_hours": 720,
+                    "min_width": 12,
+                    "height": 8,
+                    "max_width": 12,
+                    "paginated": true,
+                    "refreshRequired": true,
+                    "max_rows": 100,
+                    "remote_searchable": true,
+                    "remote_searchable_cols0": [
+                        "source_ip",
+                        "hostname",
+                        "config_id",
+                        "status"
+                    ],
+                    "sorting": [
+                        {
+                            "config_change_time": "desc"
+                        }
+                    ],
+                    "columns": {
+                        "id": {
+                            "title": "ID",
+                            "type": "FIXED_VALUE",
+                            "value": "user-dashboard-Config_dashboard",
+                            "key": true,
+                            "hidden": true
+                        },
+                        "source_ip": {
+                            "title": "Source IP",
+                            "key": true,
+                            "visible": true
+                        },
+                        "hostname": {
+                            "title": "Hostname",
+                            "key": true,
+                            "visible": true
+                        },
+                        "status": {
+                            "title": "Status",
+                            "key": true,
+                            "visible": true
+                        },
+                        "config_change_time": {
+                            "title": "Config Change Time",
+                            "type": "DATETIME",
+                            "key": true,
+                            "visible": true
+                        },
+                        "device_user": {
+                            "title": "User",
+                            "key": true,
+                            "visible": true
+                        },
+                        "config_id": {
+                            "title": "Config ID",
+                            "key": true,
+                            "visible": true
+                        },
+                        "backup_mode": {
+                            "title": "Backup Mode",
+                            "key": true,
+                            "visible": true
+                        },
+                        "backup_time": {
+                            "title": "Backup Time",
+                            "type": "DATETIME",
+                            "key": true,
+                            "visible": true
+                        },
+                        "reason": {
+                            "title": "Reason",
+                            "key": true,
+                            "visible": false,
+                            "formatter": "truncate"
+                        },
+                        "customer_tag": {
+                            "title": "Customer Tag",
+                            "key": true,
+                            "hidden": true,
+                            "visible": false
+                        }
+                    },
+                    "actions": [
+                        {
+                            "appName": "user-dashboard",
+                            "permission": "ml:ml-jobs:viewSampledata",
+                            "identifier": "source_ip",
+                            "selectionType": "SINGLE",
+                            "stateName": "app.featureapp",
+                            "drillDownContext": "id",
+                            "drillDownLinkField": "source_ip",
+                            "title": "Config History",
+                            "type": "GO_TO_APP_STATE",
+                            "context": {
+                                "pstreamDataCfxql": "source_ip is '{{source_ip}}' and status is 'Success'"
+                            },
+                            "contextParamList": {
+                                "contextParams": [
+                                    {
+                                        "paramKey": "source_ip",
+                                        "paramId": "source_ip"
+                                    },
+                                    {
+                                        "paramKey": "customerTag",
+                                        "paramId": "customer_tag"
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "widget_id": "cb03a100"
+                },
+                {
+                    "title": "Devices not backed up (last 30 days)",
+                    "widget_type": "tabular",
+                    "stream": "syslog-config-backup-stream",
+                    "extra_filter": "(customer_tag is '{{CUST_TAG}}' or customer_tag is empty or customer_tag is 'None') and status is 'Failed' and backup_time is not NULL and backup_time is after -30 days",
+                    "ts_column": "backup_time",
+                    "duration_hours": 720,
+                    "min_width": 12,
+                    "height": 8,
+                    "max_width": 12,
+                    "paginated": true,
+                    "refreshRequired": true,
+                    "max_rows": 100,
+                    "remote_searchable": true,
+                    "remote_searchable_cols0": [
+                        "source_ip",
+                        "hostname",
+                        "config_id",
+                        "status"
+                    ],
+                    "sorting": [
+                        {
+                            "config_change_time": "desc"
+                        }
+                    ],
+                    "columns": {
+                        "id": {
+                            "title": "ID",
+                            "type": "FIXED_VALUE",
+                            "value": "user-dashboard-Config_dashboard",
+                            "key": true,
+                            "hidden": true
+                        },
+                        "source_ip": {
+                            "title": "Source IP",
+                            "key": true,
+                            "visible": true
+                        },
+                        "hostname": {
+                            "title": "Hostname",
+                            "key": true,
+                            "visible": true
+                        },
+                        "status": {
+                            "title": "Status",
+                            "key": true,
+                            "visible": true
+                        },
+                        "config_change_time": {
+                            "title": "Config Change Time",
+                            "type": "DATETIME",
+                            "key": true,
+                            "visible": true
+                        },
+                        "device_user": {
+                            "title": "User",
+                            "key": true,
+                            "visible": true
+                        },
+                        "config_id": {
+                            "title": "Config ID",
+                            "key": true,
+                            "visible": true
+                        },
+                        "backup_mode": {
+                            "title": "Backup Mode",
+                            "key": true,
+                            "visible": true
+                        },
+                        "backup_time": {
+                            "title": "Backup Time",
+                            "type": "DATETIME",
+                            "key": true,
+                            "visible": true
+                        },
+                        "reason": {
+                            "title": "Reason",
+                            "key": true,
+                            "visible": false,
+                            "formatter": "truncate"
+                        },
+                        "customer_tag": {
+                            "title": "Customer Tag",
+                            "key": true,
+                            "hidden": true,
+                            "visible": false
+                        }
+                    },
+                    "actions": [
+                        {
+                            "appName": "user-dashboard",
+                            "permission": "ml:ml-jobs:viewSampledata",
+                            "identifier": "source_ip",
+                            "selectionType": "SINGLE",
+                            "stateName": "app.featureapp",
+                            "drillDownContext": "id",
+                            "drillDownLinkField": "source_ip",
+                            "title": "Config History",
+                            "type": "GO_TO_APP_STATE",
+                            "context": {
+                                "pstreamDataCfxql": "source_ip is '{{source_ip}}' and status is 'Success'"
+                            },
+                            "contextParamList": {
+                                "contextParams": [
+                                    {
+                                        "paramKey": "source_ip",
+                                        "paramId": "source_ip"
+                                    },
+                                    {
+                                        "paramKey": "customerTag",
+                                        "paramId": "customer_tag"
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "widget_id": "cb04a100"
+                },
+                {
+                    "title": "Config changes for devices (last 30 days)",
+                    "widget_type": "tabular",
+                    "stream": "syslog-config-backup-stream",
+                    "extra_filter": "(customer_tag is '{{CUST_TAG}}' or customer_tag is empty or customer_tag is 'None') and backup_mode is 'Event Driven' and config_change_time is not NULL and config_change_time is after -30 days",
+                    "ts_column": "config_change_time",
+                    "duration_hours": 720,
+                    "min_width": 12,
+                    "height": 8,
+                    "max_width": 12,
+                    "paginated": true,
+                    "refreshRequired": true,
+                    "max_rows": 100,
+                    "remote_searchable": true,
+                    "remote_searchable_cols0": [
+                        "source_ip",
+                        "hostname",
+                        "config_id",
+                        "backup_mode"
+                    ],
+                    "sorting": [
+                        {
+                            "config_change_time": "desc"
+                        }
+                    ],
+                    "columns": {
+                        "id": {
+                            "title": "ID",
+                            "type": "FIXED_VALUE",
+                            "value": "user-dashboard-Config_dashboard",
+                            "key": true,
+                            "hidden": true
+                        },
+                        "source_ip": {
+                            "title": "Source IP",
+                            "key": true,
+                            "visible": true
+                        },
+                        "hostname": {
+                            "title": "Hostname",
+                            "key": true,
+                            "visible": true
+                        },
+                        "backup_mode": {
+                            "title": "Backup Mode",
+                            "key": true,
+                            "visible": true
+                        },
+                        "config_change_time": {
+                            "title": "Config Change Time",
+                            "type": "DATETIME",
+                            "key": true,
+                            "visible": true
+                        },
+                        "device_user": {
+                            "title": "User",
+                            "key": true,
+                            "visible": true
+                        },
+                        "config_id": {
+                            "title": "Config ID",
+                            "key": true,
+                            "visible": true
+                        },
+                        "status": {
+                            "title": "Status",
+                            "key": true,
+                            "visible": true
+                        },
+                        "backup_time": {
+                            "title": "Backup Time",
+                            "type": "DATETIME",
+                            "key": true,
+                            "visible": true
+                        },
+                        "customer_tag": {
+                            "title": "Customer Tag",
+                            "key": true,
+                            "hidden": true,
+                            "visible": false
+                        }
+                    },
+                    "actions": [
+                        {
+                            "appName": "user-dashboard",
+                            "permission": "ml:ml-jobs:viewSampledata",
+                            "identifier": "source_ip",
+                            "selectionType": "SINGLE",
+                            "stateName": "app.featureapp",
+                            "drillDownContext": "id",
+                            "drillDownLinkField": "source_ip",
+                            "title": "Config History",
+                            "type": "GO_TO_APP_STATE",
+                            "context": {
+                                "pstreamDataCfxql": "source_ip is '{{source_ip}}' and status is 'Success'"
+                            },
+                            "contextParamList": {
+                                "contextParams": [
+                                    {
+                                        "paramKey": "source_ip",
+                                        "paramId": "source_ip"
+                                    },
+                                    {
+                                        "paramKey": "customerTag",
+                                        "paramId": "customer_tag"
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "widget_id": "cb06a100"
+                }
+            ]
+        }
+    ],
+    "saved_time": "2026-05-12T19:47:00.707534"
+}

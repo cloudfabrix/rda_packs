@@ -1,0 +1,317 @@
+{
+    "name": "vco_topology_drill_down2",
+    "label": "Asset Stack View",
+    "description": "Asset Stack View",
+    "enabled": true,
+    "live-edit": true,
+    "dashboard_style": "auto",
+    "dashboard_type": "template",
+    "is_template1": false,
+    "context_label_id": "node_label",
+    "version": "26.5.19.1",
+    "short_label": "Asset Stack",
+    "live_edit": true,
+    "showTitle": true,
+    "dashboard_filters": {
+        "time_filter": true
+    },
+    "template_variables": {
+        "NODE_ID": {
+            "contextId": "node_id"
+        },
+        "LAYER": {
+            "contextId": "layer"
+        },
+        "NODE_TYPE": {
+            "contextId": "node_type"
+        }
+    },
+    "dashboard_sections": [
+        {
+            "title": "Full Stack",
+            "show_filter": false,
+            "widgets": [
+                {
+                    "title": "Full Stack",
+                    "widget_type": "topology_stack_view",
+                    "widget_template": "asv/application-stack-view",
+                    "reportId": "rda.saas.stack.view.topo.new",
+                    "layer_order": [
+                        "Virtualization",
+                        "Compute",
+                        "Storage",
+                        "Wireless",
+                        "Network"
+                    ],
+                    "alert_detail_columns": {
+                        "a_message": {
+                            "title": "Message",
+                            "type": "GROUPED",
+                            "formatter": "truncate",
+                            "group": {
+                                "a_source_systemname": "Source",
+                                "a_asset_ip_address": "Asset IP Address",
+                                "a_status": "Status",
+                                "a_asset_name": "Asset Name"
+                            },
+                            "color-column": "severity_color"
+                        },
+                        "severity_color": {
+                            "type": "COLOR-MAP",
+                            "source-column": "a_severity",
+                            "color-map": {
+                                "CRITICAL": "#e53935",
+                                "HIGH": "#f57c00",
+                                "LOW": "#ffd54f",
+                                "MAJOR": "#f57c00",
+                                "MINOR": "#ffa726",
+                                "MODERATE": "#ffa726",
+                                "PLANNING": "#35e535",
+                                "WARNING": "#ffd54f"
+                            }
+                        },
+                        "a_raised_ts": {
+                            "title": "Raised At",
+                            "type": "DATETIME"
+                        },
+                        "a_severity": {
+                            "title": "Severity",
+                            "htmlTemplateForRow": "{% raw %}<span class='badge' style='background-color: {{row.severity_color}}' > {{row.a_severity}} </span>{% endraw %}"
+                        }
+                    },
+                    "edge_detail_columns": {
+                        "left_id": {
+                            "key": true,
+                            "title": "Left ID"
+                        },
+                        "left_label": {
+                            "key": false,
+                            "title": "Source"
+                        },
+                        "right_id": {
+                            "key": true,
+                            "title": "Right ID"
+                        },
+                        "right_label": {
+                            "key": false,
+                            "title": "Destination"
+                        },
+                        "relation_type": {
+                            "key": false,
+                            "title": "Relation"
+                        }
+                    },
+                    "node_context_actions": [
+                        {
+                            "id": "view_summary",
+                            "icon": "mdi-eye",
+                            "title": "View Details",
+                            "selectionType": "SINGLE"
+                        },
+                        {
+                            "title": "Asset Stack View",
+                            "icon": "mdi-open-in-new",
+                            "type": "GO_TO_APP_STATE",
+                            "appName": "user-dashboard/vco_topology_drilldown_app",
+                            "selectionType": "SINGLE",
+                            "identifier": "launch-action:view-dashboard"
+                        }
+                    ],
+                    "height": 12,
+                    "min_width": 12,
+                    "max_width": 12,
+                    "widget_id": "fullstack_1"
+                }
+            ]
+        },
+        {
+            "title": "Asset Map",
+            "show_filter": false,
+            "widgets": [
+                {
+                    "widget_type": "topology",
+                    "title": "Asset Map",
+                    "reportId": "rda.saas.stack.view.topo",
+                    "chartProperties": {
+                        "hasToolbar": true,
+                        "shortToolbar": false,
+                        "enableControlPanel": false,
+                        "userZoomingEnabled": true
+                    },
+                    "nodes_report": {
+                        "reportMetaData": {
+                            "sorting": true,
+                            "filtering": true,
+                            "title": "Nodes",
+                            "remote_searchable": false,
+                            "remote_searchable_cols": [
+                                "name",
+                                "node_label",
+                                "node_id",
+                                "node_type"
+                            ],
+                            "reportColumnDefinitionList": [
+                                {
+                                    "identifier": "node_label",
+                                    "title": "Name",
+                                    "key": true
+                                },
+                                {
+                                    "identifier": "layer",
+                                    "key": false,
+                                    "title": "Layer"
+                                },
+                                {
+                                    "identifier": "node_type",
+                                    "key": false,
+                                    "title": "Node Type"
+                                },
+                                {
+                                    "identifier": "name",
+                                    "hidden": true,
+                                    "key": false
+                                },
+                                {
+                                    "identifier": "vcenter_name",
+                                    "title": "vCenter Name",
+                                    "key": false
+                                },
+                                {
+                                    "identifier": "datacenter",
+                                    "key": false,
+                                    "title": "Data Center"
+                                },
+                                {
+                                    "identifier": "esxi_cluster",
+                                    "key": false,
+                                    "title": "ESXI Cluster"
+                                },
+                                {
+                                    "identifier": "vcenter_address",
+                                    "key": false,
+                                    "title": "vCenter Address"
+                                },
+                                {
+                                    "identifier": "vcenter_object",
+                                    "key": false,
+                                    "title": "vCenter Object"
+                                },
+                                {
+                                    "identifier": "vcenter_os_type",
+                                    "key": false,
+                                    "title": "vCenter OS type"
+                                },
+                                {
+                                    "identifier": "phy_switch_name",
+                                    "key": false,
+                                    "title": "Physical Switch Name"
+                                },
+                                {
+                                    "identifier": "node_id",
+                                    "key": true,
+                                    "hidden": true
+                                }
+                            ],
+                            "actions": [
+                                {
+                                    "title": "Asset Stack View",
+                                    "icon": "mdi-open-in-new",
+                                    "type": "GO_TO_APP_STATE",
+                                    "appName": "user-dashboard/vco_topology_drilldown_app",
+                                    "selectionType": "SINGLE",
+                                    "identifier": "launch-action:view-dashboard"
+                                }
+                            ]
+                        }
+                    },
+                    "edges_report": {
+                        "reportId": "rda.saas.topology.edges.report",
+                        "reportMetaData": {
+                            "sorting": true,
+                            "filtering": true,
+                            "title": "Edges",
+                            "reportColumnDefinitionList": [
+                                {
+                                    "hidden": false,
+                                    "id": "left_id",
+                                    "identifier": "left_id",
+                                    "key": true,
+                                    "title": "Left ID",
+                                    "type": "TEXT",
+                                    "visible": false
+                                },
+                                {
+                                    "hidden": false,
+                                    "id": "left_label",
+                                    "identifier": "left_label",
+                                    "key": false,
+                                    "title": "Source",
+                                    "type": "TEXT",
+                                    "visible": true
+                                },
+                                {
+                                    "hidden": false,
+                                    "id": "right_id",
+                                    "identifier": "right_id",
+                                    "key": true,
+                                    "title": "Right ID",
+                                    "type": "TEXT",
+                                    "visible": false
+                                },
+                                {
+                                    "hidden": false,
+                                    "id": "right_label",
+                                    "identifier": "right_label",
+                                    "key": false,
+                                    "title": "Destination",
+                                    "type": "TEXT",
+                                    "visible": true
+                                },
+                                {
+                                    "hidden": false,
+                                    "id": "relation_type",
+                                    "identifier": "relation_type",
+                                    "key": false,
+                                    "title": "Relation",
+                                    "type": "TEXT",
+                                    "visible": true
+                                }
+                            ],
+                            "actions": []
+                        }
+                    },
+                    "max_width": 12,
+                    "min_width": 6,
+                    "height": 12,
+                    "widget_id": "9db5a36f"
+                }
+            ]
+        },
+        {
+            "title": "Relationships",
+            "show_filter": false,
+            "widgets": [
+                {
+                    "widget_type": "graphdb",
+                    "title": "Relationships",
+                    "reportId": "rda.saas.stack.view.topo.graph",
+                    "node_context_actions": [
+                        {
+                            "title": "Asset Stack View",
+                            "icon": "mdi-open-in-new",
+                            "type": "GO_TO_APP_STATE",
+                            "appName": "user-dashboard/vco_topology_drilldown_app",
+                            "selectionType": "SINGLE",
+                            "identifier": "launch-action:view-dashboard"
+                        }
+                    ],
+                    "widget_id": "9abca36f"
+                }
+            ]
+        }
+    ],
+    "saved_time": "2026-07-21T12:47:58.839959",
+    "menu_folder_path": [
+        "Top Level"
+    ]
+}

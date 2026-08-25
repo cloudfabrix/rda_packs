@@ -1,0 +1,697 @@
+## This pipeline needs customer_id or customerTag in context to run
+%% stream = no and limit = 0
+%% template_type="jinja"
+%% import_src_type = "cisco_vmanage"
+%%start_inline_object name="context_dynamic_form" and type="data" and format="json"
+{
+  "formFieldList": [
+    {
+      "fieldId": "customer_tag",
+      "label": "Tag of the customer",
+      "required": false,
+      "dataType": "string"
+    }
+  ]
+}
+%%end_inline_object
+
+########################################
+## INIT
+########################################
+--> @dm:empty
+    --> @dm:save name="temp-customer-context"
+   {% if customer_tag %}
+      {% set customer_id = customer_id | default('') %}
+      {% set customer_tag = customer_tag %}
+      {% set customerTag = customer_tag %}
+   {% elif customerTag %}
+      {% set customer_id = customer_id | default('') %}
+      {% set customer_tag = customerTag %}
+   {% else %}
+      {% set customer_id = '' %}
+      {% set customer_tag = '' %}
+      {% set customerTag = '' %}
+   {% endif %}
+
+{% macro ensure_collection_status_row(bot_name_val='') %}
+--> *exec:if-shape num_rows = 0
+    --> @dm:empty
+    --> @dm:addrow key="dummy"
+    --> @dm:add-missing-columns columns="collection_status,reason,customer_id,customer_tag,source_ip,collection_timestamp,name,bot_name"
+    --> @dm:eval name = "'$name'"
+    --> @dm:eval customer_id = "'$customer_id'"
+    --> @dm:eval customer_tag = "'$customer_tag'"
+    --> @dm:eval bot_name = "'{{ bot_name_val }}'"
+    --> @dm:eval collection_status = "'Success'"
+    --> @dm:map to="collection_timestamp" & func="time_now"
+    --> @dm:save name="temp-collection-status-dummy-row"
+--> @exec:end-if
+--> *exec:if-shape num_rows > 0
+    --> @dm:empty
+    --> @dm:save name="temp-collection-status-dummy-row"
+--> @exec:end-if
+--> @dm:recall name="temp-collection-status-dummy-row" & return_empty="yes"
+{% endmacro %}
+
+{% macro ensure_collection_status_row_source_name(bot_name_val='') %}
+--> *exec:if-shape num_rows = 0
+    --> @dm:empty
+    --> @dm:addrow key="dummy"
+    --> @dm:add-missing-columns columns="collection_status,reason,customer_id,customer_tag,source_ip,collection_timestamp,bot_name"
+    --> @dm:eval customer_id = "'$customer_id'"
+    --> @dm:eval customer_tag = "'$customer_tag'"
+    --> @dm:eval source_ip = "'$source_ip'"
+    --> @dm:eval bot_name = "'{{ bot_name_val }}'"
+    --> @dm:eval collection_status = "'Success'"
+    --> @dm:map to="collection_timestamp" & func="time_now"
+    --> @dm:save name="temp-collection-status-dummy-row-src"
+--> @exec:end-if
+--> *exec:if-shape num_rows > 0
+    --> @dm:empty
+    --> @dm:save name="temp-collection-status-dummy-row-src"
+--> @exec:end-if
+--> @dm:recall name="temp-collection-status-dummy-row-src" & return_empty="yes"
+{% endmacro %}
+
+{% macro write_collection_status() %}
+--> *exec:if-condition collection_status != 'Success'
+    --> @dm:eval name = "'$name'"
+    --> @dm:enrich dict="temp-vmanage-source-ip-map" and src_key_cols="name" and dict_key_cols="name" and enrich_cols="host_source_ip"
+    --> @dm:eval source_ip = "str(host_source_ip or source_ip or '')"
+    --> *dm:safe-filter * get source_ip as 'asset_id',collection_status,collection_timestamp,reason,customer_id,customer_tag,bot_name
+    --> @dm:map to="collection_timestamp" & func="time_now"
+    --> @dm:eval bot_source_name = "'$name'"
+    --> @dm:eval bot_source_type = "'cisco-vmanage'"
+    --> @rn:write-stream name="asset_inventory_collection_status_stream"
+--> @exec:end-if
+--> *exec:if-condition collection_status = 'Success'
+    --> @dm:eval name = "'$name'"
+    --> @dm:enrich dict="temp-vmanage-source-ip-map" and src_key_cols="name" and dict_key_cols="name" and enrich_cols="host_source_ip"
+    --> @dm:eval source_ip = "str(host_source_ip or source_ip or '')"
+    --> @dm:dedup columns="source_ip"
+    --> *dm:safe-filter * get source_ip as 'asset_id',collection_status,collection_timestamp,reason,customer_id,customer_tag,bot_name
+    --> @dm:map to="collection_timestamp" & func="time_now"
+    --> @dm:eval bot_source_name = "'$name'"
+    --> @dm:eval bot_source_type = "'cisco-vmanage'"
+    --> @dm:save name="temp-packs_asset_inventory_collection_status" & append="yes"
+    --> @rn:write-stream name="asset_inventory_collection_status_stream"
+--> @exec:end-if
+{% endmacro %}
+
+{% macro write_collection_status_source_name() %}
+--> *exec:if-condition collection_status != 'Success'
+    --> *dm:safe-filter * get source_ip as 'asset_id',collection_status,collection_timestamp,reason,customer_id,customer_tag,bot_name
+    --> @dm:map to="collection_timestamp" & func="time_now"
+    --> @dm:eval bot_source_name = "'$source_name'"
+    --> @dm:eval bot_source_type = "'cisco-vmanage'"
+    --> @rn:write-stream name="asset_inventory_collection_status_stream"
+--> @exec:end-if
+--> *exec:if-condition collection_status = 'Success'
+    --> @dm:dedup columns="source_ip"
+    --> *dm:safe-filter * get source_ip as 'asset_id',collection_status,collection_timestamp,reason,customer_id,customer_tag,bot_name
+    --> @dm:map to="collection_timestamp" & func="time_now"
+    --> @dm:eval bot_source_name = "'$source_name'"
+    --> @dm:eval bot_source_type = "'cisco-vmanage'"
+    --> @dm:save name="temp-packs_asset_inventory_collection_status" & append="yes"
+    --> @rn:write-stream name="asset_inventory_collection_status_stream"
+--> @exec:end-if
+{% endmacro %}
+
+--> @dm:empty
+--> @dm:save name="temp-variable-dataset"
+--> @dm:save name="temp-variable-dataset-interim"
+--> @dm:save name="temp-vmanage-sources"
+--> @dm:save name="temp-variable-dataset-vmanage"
+
+########################################
+## INPUT FROM UI (OPTIONAL)
+########################################
+--> @c:new-block name="read_ui_input"
+--> @exec:get-input
+--> *exec:if-shape num_rows > 0
+    --> @dm:selectcolumns include="Others"
+    --> *exec:if-shape num_rows > 0
+        --> @dm:explode-json column="Others"
+    --> @exec:end-if
+    --> @dm:add-missing-columns columns="name"
+    --> @dm:save name="temp-variable-dataset"
+    --> @dm:save name="temp-variable-dataset-vmanage"
+--> @exec:end-if
+
+########################################
+## FALLBACK TO SECRETS IF NO INPUT
+########################################
+--> @c:new-block name="discover_vmanage_sources"
+--> @dm:recall name="temp-variable-dataset" & return_empty="yes"
+--> *exec:if-shape num_rows = 0
+    --> @dm:empty
+--> @exec:end-if
+    {% if customerTag %}
+    --> #dm:query-persistent-stream type contains 'vmanage' and customerTag contains '{{ customerTag }}'
+        with-input name='rda_secrets_meta' and limit=0
+    {% else %}
+    --> #dm:query-persistent-stream type contains 'vmanage' and customerTag is empty
+        with-input name='rda_secrets_meta' and limit=0
+    {% endif %}
+    --> @dm:skip-block-if-shape row_count="0"
+    --> @dm:save name="temp-vmanage-sources"
+    --> @dm:save name="temp-variable-dataset-interim" & append="yes" & return_appended_dataset="yes"
+    --> @dm:save name="temp-vmanage-sources-all"
+
+########################################
+## FINALIZE CREDENTIAL DATASET
+########################################
+--> @c:new-block name="finalize_sources"
+--> @dm:recall name="temp-variable-dataset-interim" & return_empty="yes"
+--> *exec:if-shape num_rows > 0
+    --> @dm:add-missing-columns columns="name"
+    --> @dm:save name="temp-variable-dataset"
+    --> @dm:save name="temp-variable-dataset-vmanage"
+--> @exec:end-if
+--> @dm:recall name="temp-variable-dataset" & return_empty="yes"
+--> @dm:skip-block-if-shape row_count="0"
+--> @dm:add-missing-columns columns="customer_id,customer_tag,name"
+--> @dm:eval customer_id = "'{{ customer_id }}'"
+--> @dm:eval customer_tag = "'{{ customer_tag }}'"
+--> @dm:save name="temp-vmanage-main-cust-variable-dataset"
+
+########################################
+## BUILD vManage host source_ip map (device API - same as access verification)
+########################################
+--> @c:new-block name="build_vmanage_source_ip_map"
+--> @dm:recall name="temp-vmanage-main-cust-variable-dataset" & return_empty="yes"
+--> @dm:skip-block-if-shape row_count="0"
+--> @c:data-loop dataset="temp-vmanage-main-cust-variable-dataset" and columns="name,customer_id,customer_tag"
+    --> @$name:query-api path="device" and continue_on_failure="yes" and retry_count="3"
+    --> @dm:add-missing-columns columns="source_ip,collection_status"
+    --> @dm:eval name = "'$name'"
+    --> @dm:dedup columns="name"
+    --> @dm:copy-columns from="source_ip" and to="host_source_ip"
+    --> @dm:selectcolumns include="name|host_source_ip|customer_id|customer_tag"
+    --> @dm:save name="temp-vmanage-host-$loop_index"
+
+--> @c:new-block name="build_vmanage_source_ip_map_save"
+    --> @dm:concat names="temp-vmanage-host-.*"
+    --> @dm:save name="temp-vmanage-source-ip-map"
+
+########################################
+## BUILD /device LIST -> temp-vmanage_devices_expanded
+########################################
+--> @c:new-block name="adv_vis_init_devices"
+--> @dm:empty
+--> @dm:save name="temp-vmanage_devices_expanded"
+
+--> @c:new-block name="adv_vis_build_devices"
+--> @dm:recall name="temp-variable-dataset-vmanage" & return_empty="yes"
+--> @dm:skip-block-if-shape row_count="0"
+--> @dm:add-missing-columns columns="customer_id,customer_tag,name"
+--> @dm:eval customer_id = "'{{ customer_id }}'"
+--> @dm:eval customer_tag = "'{{ customer_tag }}'"
+--> *dm:filter name != '' and name is not None
+--> @dm:skip-block-if-shape row_count="0"
+--> @dm:save name="temp-variable-dataset-vmanage"
+--> @c:data-loop dataset="temp-variable-dataset-vmanage" and columns="name,customer_id,customer_tag"
+--> @$name:query-api path="device" and continue_on_failure="yes" and retry_count="5"
+--> @dm:add-missing-columns columns="collection_status,customer_id,customer_tag,reason,source_ip,collection_timestamp"
+--> @dm:eval name="'$name'"
+--> @dm:eval customer_tag="'$customer_tag'"
+--> @dm:eval customer_id="'$customer_id'"
+--> @dm:map to="collection_timestamp" & func="time_now"
+--> @dm:save name="temp-vmanage_devices-$loop_index"
+--> *exec:if-condition collection_status != 'Success'
+    --> @dm:eval name = "'$name'"
+    --> @dm:enrich dict="temp-vmanage-source-ip-map" and src_key_cols="name" and dict_key_cols="name" and enrich_cols="host_source_ip"
+    --> @dm:eval source_ip = "str(host_source_ip or source_ip or '')"
+    --> *dm:safe-filter * get source_ip as 'asset_id',collection_status,collection_timestamp,reason,customer_id,customer_tag
+    --> @dm:map to="collection_timestamp" & func="time_now"
+    --> @dm:eval bot_source_name = "'$name'"
+    --> @dm:eval bot_source_type = "'cisco-vmanage'"
+    --> @dm:eval bot_name = "'query-api device'"
+    --> @rn:write-stream name="asset_inventory_collection_status_stream"
+--> @exec:end-if
+--> *exec:if-condition collection_status = 'Success'
+    --> @dm:eval name = "'$name'"
+    --> @dm:enrich dict="temp-vmanage-source-ip-map" and src_key_cols="name" and dict_key_cols="name" and enrich_cols="host_source_ip"
+    --> @dm:eval source_ip = "str(host_source_ip or source_ip or '')"
+    --> @dm:dedup columns="source_ip"
+    --> *dm:safe-filter * get source_ip as 'asset_id',collection_status,collection_timestamp,reason,customer_id,customer_tag
+    --> @dm:map to="collection_timestamp" & func="time_now"
+    --> @dm:eval bot_source_name = "'$name'"
+    --> @dm:eval bot_source_type = "'cisco-vmanage'"
+    --> @dm:eval bot_name = "'query-api device'"
+    --> @dm:save name="temp-packs_asset_inventory_collection_status" & append="yes"
+    --> @rn:write-stream name="asset_inventory_collection_status_stream"
+--> @exec:end-if
+
+--> @c:new-block name="adv_vis_save_devices"
+--> @dm:concat names="temp-vmanage_devices-.*"
+--> *dm:filter collection_status="Success"
+--> @dm:add-missing-columns columns="customer_id,customer_tag"
+--> @dm:eval customer_id="customer_id if customer_id != '' and customer_id is not None else ''"
+--> @dm:eval customer_tag="customer_tag if customer_tag != '' and customer_tag is not None else '{{ customer_tag }}'"
+--> @dm:add-missing-columns columns="deviceId,system-ip,system_ip,uuid,site-id,site_id,host-name,host_name"
+--> @dm:copy-columns from="system-ip" and to="system_ip"
+--> @dm:copy-columns from="site-id" and to="site_id"
+--> @dm:copy-columns from="host-name" and to="host_name"
+--> @dm:eval deviceId = "str(system_ip or deviceId or uuid or '') if (deviceId == '' or deviceId is None or deviceId == 'Not Available') else str(deviceId)"
+--> @dm:eval system_ip = "str(system_ip or deviceId or '') if (system_ip == '' or system_ip is None or system_ip == 'Not Available') else str(system_ip)"
+--> @dm:copy-columns from="system_ip" and to="system-ip"
+--> @dm:dedup columns="deviceId"
+--> @dm:save name="temp-vmanage_devices_expanded"
+
+########################################
+## device/control/connections -> vmanage_metrics_timeseries
+########################################
+--> @c:new-block name="adv_vis_control_connections"
+--> @dm:recall name="temp-vmanage_devices_expanded" & return_empty="yes"
+--> @dm:skip-block-if-shape row_count="0"
+--> @c:data-loop dataset="temp-vmanage_devices_expanded" and columns="name,deviceId,system_ip,customer_id,customer_tag"
+--> @$name:query-api path="device/control/connections" and deviceId="$deviceId" and continue_on_failure="yes" and retry_count="5"
+--> @dm:add-missing-columns columns="collection_status,reason,customer_id,customer_tag,source_ip,collection_timestamp"
+--> @dm:map to="collection_timestamp" & func="time_now"
+--> @dm:eval customer_id = "'$customer_id'"
+--> @dm:eval customer_tag = "'$customer_tag'"
+--> *exec:if-condition collection_status != 'Success'
+    --> @dm:eval name = "'$name'"
+    --> @dm:enrich dict="temp-vmanage-source-ip-map" and src_key_cols="name" and dict_key_cols="name" and enrich_cols="host_source_ip"
+    --> @dm:eval source_ip = "str(host_source_ip or source_ip or '')"
+    --> *dm:safe-filter * get source_ip as 'asset_id',collection_status,collection_timestamp,reason,customer_id,customer_tag
+    --> @dm:map to="collection_timestamp" & func="time_now"
+    --> @dm:eval bot_source_name = "'$name'"
+    --> @dm:eval bot_source_type = "'cisco-vmanage'"
+    --> @dm:eval bot_name = "'query-api device/control/connections ' + str('$system_ip' or '$deviceId' or '')"
+    --> @rn:write-stream name="asset_inventory_collection_status_stream"
+--> @exec:end-if
+--> *exec:if-condition collection_status = 'Success'
+    --> @dm:eval name = "'$name'"
+    --> @dm:enrich dict="temp-vmanage-source-ip-map" and src_key_cols="name" and dict_key_cols="name" and enrich_cols="host_source_ip"
+    --> @dm:eval source_ip = "str(host_source_ip or source_ip or '')"
+    --> @dm:dedup columns="source_ip"
+    --> *dm:safe-filter * get source_ip as 'asset_id',collection_status,collection_timestamp,reason,customer_id,customer_tag
+    --> @dm:map to="collection_timestamp" & func="time_now"
+    --> @dm:eval bot_source_name = "'$name'"
+    --> @dm:eval bot_source_type = "'cisco-vmanage'"
+    --> @dm:eval bot_name = "'query-api device/control/connections ' + str('$system_ip' or '$deviceId' or '')"
+    --> @dm:save name="temp-packs_asset_inventory_collection_status" & append="yes"
+    --> @rn:write-stream name="asset_inventory_collection_status_stream"
+--> @exec:end-if
+--> @dm:skip-block-if-shape row_count="0"
+--> *dm:filter collection_status="Success"
+--> @dm:eval deviceId = "'$deviceId'"
+--> @dm:selectcolumns include="system-ip|vdevice-name|host-name|peer-type|peer-system-ip|peer_vmanage_system_ip|state|uptime|private_ip|public_ip|local_color|protocol|deviceId|customer_id|customer_tag|source_ip|collection_timestamp"
+--> @dm:add-missing-columns columns="deviceId,peer_system_ip,system_ip,vdevice_name"
+--> *exec:if-shape columns contains "system-ip"
+    --> @dm:copy-columns from="system-ip" and to="system_ip"
+--> @exec:end-if
+--> *exec:if-shape columns contains "vdevice-name"
+    --> @dm:copy-columns from="vdevice-name" and to="vdevice_name"
+--> @exec:end-if
+--> *exec:if-shape columns contains "peer-system-ip"
+    --> @dm:copy-columns from="peer-system-ip" and to="peer_system_ip"
+--> @exec:end-if
+--> @dm:eval source_endpoint = "'/device/control/connections'"
+--> @dm:copy-columns from="collection_timestamp" and to="metric_timestamp"
+--> @dm:eval metric_category = "'control_connections'"
+--> @dm:eval timeseries_row_key = "str(system_ip or vdevice_name or deviceId or '') + '|' + str(peer_system_ip or '') + '|ctrl_conn'"
+--> @dm:dedup columns="timeseries_row_key"
+--> @rn:write-stream name="vmanage_metrics_timeseries"
+
+########################################
+## device/omp/peers -> vmanage_metrics_timeseries
+########################################
+--> @c:new-block name="adv_vis_omp_peers"
+--> @dm:recall name="temp-vmanage_devices_expanded" & return_empty="yes"
+--> @dm:skip-block-if-shape row_count="0"
+--> @c:data-loop dataset="temp-vmanage_devices_expanded" and columns="name,deviceId,system_ip,customer_id,customer_tag"
+--> @$name:query-api path="device/omp/peers" and deviceId="$deviceId" and continue_on_failure="yes" and retry_count="5"
+--> @dm:add-missing-columns columns="collection_status,reason,customer_id,customer_tag,source_ip,collection_timestamp"
+--> @dm:map to="collection_timestamp" & func="time_now"
+--> @dm:eval customer_id = "'$customer_id'"
+--> @dm:eval customer_tag = "'$customer_tag'"
+--> *exec:if-condition collection_status != 'Success'
+    --> @dm:eval name = "'$name'"
+    --> @dm:enrich dict="temp-vmanage-source-ip-map" and src_key_cols="name" and dict_key_cols="name" and enrich_cols="host_source_ip"
+    --> @dm:eval source_ip = "str(host_source_ip or source_ip or '')"
+    --> *dm:safe-filter * get source_ip as 'asset_id',collection_status,collection_timestamp,reason,customer_id,customer_tag
+    --> @dm:map to="collection_timestamp" & func="time_now"
+    --> @dm:eval bot_source_name = "'$name'"
+    --> @dm:eval bot_source_type = "'cisco-vmanage'"
+    --> @dm:eval bot_name = "'query-api device/omp/peers ' + str('$system_ip' or '$deviceId' or '')"
+    --> @rn:write-stream name="asset_inventory_collection_status_stream"
+--> @exec:end-if
+--> *exec:if-condition collection_status = 'Success'
+    --> @dm:eval name = "'$name'"
+    --> @dm:enrich dict="temp-vmanage-source-ip-map" and src_key_cols="name" and dict_key_cols="name" and enrich_cols="host_source_ip"
+    --> @dm:eval source_ip = "str(host_source_ip or source_ip or '')"
+    --> @dm:dedup columns="source_ip"
+    --> *dm:safe-filter * get source_ip as 'asset_id',collection_status,collection_timestamp,reason,customer_id,customer_tag
+    --> @dm:map to="collection_timestamp" & func="time_now"
+    --> @dm:eval bot_source_name = "'$name'"
+    --> @dm:eval bot_source_type = "'cisco-vmanage'"
+    --> @dm:eval bot_name = "'query-api device/omp/peers ' + str('$system_ip' or '$deviceId' or '')"
+    --> @dm:save name="temp-packs_asset_inventory_collection_status" & append="yes"
+    --> @rn:write-stream name="asset_inventory_collection_status_stream"
+--> @exec:end-if
+--> @dm:skip-block-if-shape row_count="0"
+--> *dm:filter collection_status="Success"
+--> @dm:eval deviceId = "'$deviceId'"
+--> @dm:selectcolumns include="system-ip|vdevice-name|host-name|peer|type|state|site-id|domain_id|deviceId|customer_id|customer_tag|source_ip|collection_timestamp"
+--> @dm:add-missing-columns columns="deviceId,system_ip,vdevice_name,peer"
+--> *exec:if-shape columns contains "system-ip"
+    --> @dm:copy-columns from="system-ip" and to="system_ip"
+--> @exec:end-if
+--> *exec:if-shape columns contains "vdevice-name"
+    --> @dm:copy-columns from="vdevice-name" and to="vdevice_name"
+--> @exec:end-if
+--> @dm:eval source_endpoint = "'/device/omp/peers'"
+--> @dm:copy-columns from="collection_timestamp" and to="metric_timestamp"
+--> @dm:eval metric_category = "'omp_peers'"
+--> @dm:eval timeseries_row_key = "str(system_ip or vdevice_name or deviceId or '') + '|' + str(peer or '') + '|omp'"
+--> @dm:dedup columns="timeseries_row_key"
+--> @rn:write-stream name="vmanage_metrics_timeseries"
+
+########################################
+## device/bfd/sessions -> vmanage_metrics_timeseries
+########################################
+--> @c:new-block name="adv_vis_bfd_sessions"
+--> @dm:recall name="temp-vmanage_devices_expanded" & return_empty="yes"
+--> @dm:skip-block-if-shape row_count="0"
+--> @c:data-loop dataset="temp-vmanage_devices_expanded" and columns="name,deviceId,system_ip,customer_id,customer_tag"
+--> @$name:query-api path="device/bfd/sessions" and deviceId="$deviceId" and continue_on_failure="yes" and retry_count="5"
+--> @dm:add-missing-columns columns="collection_status,reason,customer_id,customer_tag,source_ip,collection_timestamp"
+--> @dm:map to="collection_timestamp" & func="time_now"
+--> @dm:eval customer_id = "'$customer_id'"
+--> @dm:eval customer_tag = "'$customer_tag'"
+--> *exec:if-condition collection_status != 'Success'
+    --> @dm:eval name = "'$name'"
+    --> @dm:enrich dict="temp-vmanage-source-ip-map" and src_key_cols="name" and dict_key_cols="name" and enrich_cols="host_source_ip"
+    --> @dm:eval source_ip = "str(host_source_ip or source_ip or '')"
+    --> *dm:safe-filter * get source_ip as 'asset_id',collection_status,collection_timestamp,reason,customer_id,customer_tag
+    --> @dm:map to="collection_timestamp" & func="time_now"
+    --> @dm:eval bot_source_name = "'$name'"
+    --> @dm:eval bot_source_type = "'cisco-vmanage'"
+    --> @dm:eval bot_name = "'query-api device/bfd/sessions ' + str('$system_ip' or '$deviceId' or '')"
+    --> @rn:write-stream name="asset_inventory_collection_status_stream"
+--> @exec:end-if
+--> *exec:if-condition collection_status = 'Success'
+    --> @dm:eval name = "'$name'"
+    --> @dm:enrich dict="temp-vmanage-source-ip-map" and src_key_cols="name" and dict_key_cols="name" and enrich_cols="host_source_ip"
+    --> @dm:eval source_ip = "str(host_source_ip or source_ip or '')"
+    --> @dm:dedup columns="source_ip"
+    --> *dm:safe-filter * get source_ip as 'asset_id',collection_status,collection_timestamp,reason,customer_id,customer_tag
+    --> @dm:map to="collection_timestamp" & func="time_now"
+    --> @dm:eval bot_source_name = "'$name'"
+    --> @dm:eval bot_source_type = "'cisco-vmanage'"
+    --> @dm:eval bot_name = "'query-api device/bfd/sessions ' + str('$system_ip' or '$deviceId' or '')"
+    --> @dm:save name="temp-packs_asset_inventory_collection_status" & append="yes"
+    --> @rn:write-stream name="asset_inventory_collection_status_stream"
+--> @exec:end-if
+--> @dm:skip-block-if-shape row_count="0"
+--> *dm:filter collection_status="Success"
+--> @dm:eval deviceId = "'$deviceId'"
+--> @dm:selectcolumns include="system-ip|vdevice-name|host-name|src-ip|dst-ip|proto|state|tx-pkts|rx-pkts|tx-errors|rx-errors|local-color|remote-color|deviceId|customer_id|customer_tag|source_ip|collection_timestamp"
+--> @dm:add-missing-columns columns="deviceId,src_ip,dst_ip,system_ip,vdevice_name"
+--> *exec:if-shape columns contains "system-ip"
+    --> @dm:copy-columns from="system-ip" and to="system_ip"
+--> @exec:end-if
+--> *exec:if-shape columns contains "vdevice-name"
+    --> @dm:copy-columns from="vdevice-name" and to="vdevice_name"
+--> @exec:end-if
+--> *exec:if-shape columns contains "src-ip"
+    --> @dm:copy-columns from="src-ip" and to="src_ip"
+--> @exec:end-if
+--> *exec:if-shape columns contains "dst-ip"
+    --> @dm:copy-columns from="dst-ip" and to="dst_ip"
+--> @exec:end-if
+--> @dm:eval source_endpoint = "'/device/bfd/sessions'"
+--> @dm:copy-columns from="collection_timestamp" and to="metric_timestamp"
+--> @dm:eval metric_category = "'bfd_sessions'"
+--> @dm:eval timeseries_row_key = "str(system_ip or vdevice_name or deviceId or '') + '|' + str(src_ip or '') + '|' + str(dst_ip or '') + '|bfd'"
+--> @dm:dedup columns="timeseries_row_key"
+--> @rn:write-stream name="vmanage_metrics_timeseries"
+
+########################################
+## device/tunnel/statistics -> vmanage_metrics_timeseries
+########################################
+--> @c:new-block name="adv_vis_tunnel_statistics"
+--> @dm:recall name="temp-vmanage_devices_expanded" & return_empty="yes"
+--> @dm:skip-block-if-shape row_count="0"
+--> @c:data-loop dataset="temp-vmanage_devices_expanded" and columns="name,deviceId,system_ip,customer_id,customer_tag"
+--> @$name:query-api path="device/tunnel/statistics" and deviceId="$deviceId" and continue_on_failure="yes" and retry_count="5"
+--> @dm:add-missing-columns columns="collection_status,reason,customer_id,customer_tag,source_ip,collection_timestamp"
+--> @dm:map to="collection_timestamp" & func="time_now"
+--> @dm:eval customer_id = "'$customer_id'"
+--> @dm:eval customer_tag = "'$customer_tag'"
+--> *exec:if-condition collection_status != 'Success'
+    --> @dm:eval name = "'$name'"
+    --> @dm:enrich dict="temp-vmanage-source-ip-map" and src_key_cols="name" and dict_key_cols="name" and enrich_cols="host_source_ip"
+    --> @dm:eval source_ip = "str(host_source_ip or source_ip or '')"
+    --> *dm:safe-filter * get source_ip as 'asset_id',collection_status,collection_timestamp,reason,customer_id,customer_tag
+    --> @dm:map to="collection_timestamp" & func="time_now"
+    --> @dm:eval bot_source_name = "'$name'"
+    --> @dm:eval bot_source_type = "'cisco-vmanage'"
+    --> @dm:eval bot_name = "'query-api device/tunnel/statistics ' + str('$system_ip' or '$deviceId' or '')"
+    --> @rn:write-stream name="asset_inventory_collection_status_stream"
+--> @exec:end-if
+--> *exec:if-condition collection_status = 'Success'
+    --> @dm:eval name = "'$name'"
+    --> @dm:enrich dict="temp-vmanage-source-ip-map" and src_key_cols="name" and dict_key_cols="name" and enrich_cols="host_source_ip"
+    --> @dm:eval source_ip = "str(host_source_ip or source_ip or '')"
+    --> @dm:dedup columns="source_ip"
+    --> *dm:safe-filter * get source_ip as 'asset_id',collection_status,collection_timestamp,reason,customer_id,customer_tag
+    --> @dm:map to="collection_timestamp" & func="time_now"
+    --> @dm:eval bot_source_name = "'$name'"
+    --> @dm:eval bot_source_type = "'cisco-vmanage'"
+    --> @dm:eval bot_name = "'query-api device/tunnel/statistics ' + str('$system_ip' or '$deviceId' or '')"
+    --> @dm:save name="temp-packs_asset_inventory_collection_status" & append="yes"
+    --> @rn:write-stream name="asset_inventory_collection_status_stream"
+--> @exec:end-if
+--> @dm:skip-block-if-shape row_count="0"
+--> *dm:filter collection_status="Success"
+--> @dm:eval deviceId = "'$deviceId'"
+--> @dm:selectcolumns include="system-ip|vdevice-name|host-name|local-color|remote-color|tx-octets|rx-octets|tx-pkts|rx-pkts|dest-ip|source-ip|state|proto|deviceId|customer_id|customer_tag|source_ip|collection_timestamp"
+--> @dm:add-missing-columns columns="deviceId,local_color,remote_color,system_ip,vdevice_name"
+--> *exec:if-shape columns contains "system-ip"
+    --> @dm:copy-columns from="system-ip" and to="system_ip"
+--> @exec:end-if
+--> *exec:if-shape columns contains "vdevice-name"
+    --> @dm:copy-columns from="vdevice-name" and to="vdevice_name"
+--> @exec:end-if
+--> *exec:if-shape columns contains "local-color"
+    --> @dm:copy-columns from="local-color" and to="local_color"
+--> @exec:end-if
+--> *exec:if-shape columns contains "remote-color"
+    --> @dm:copy-columns from="remote-color" and to="remote_color"
+--> @exec:end-if
+--> @dm:eval source_endpoint = "'/device/tunnel/statistics'"
+--> @dm:copy-columns from="collection_timestamp" and to="metric_timestamp"
+--> @dm:eval metric_category = "'tunnel_statistics'"
+--> @dm:eval timeseries_row_key = "str(system_ip or vdevice_name or deviceId or '') + '|' + str(local_color or '') + '|' + str(remote_color or '') + '|tunnel'"
+--> @dm:dedup columns="timeseries_row_key"
+--> @rn:write-stream name="vmanage_metrics_timeseries"
+
+########################################
+## device/orchestrator/statistics -> vmanage_metrics_timeseries
+########################################
+--> @c:new-block name="adv_vis_orchestrator_statistics"
+--> @dm:recall name="temp-vmanage_devices_expanded" & return_empty="yes"
+--> @dm:skip-block-if-shape row_count="0"
+--> @c:data-loop dataset="temp-vmanage_devices_expanded" and columns="name,deviceId,system_ip,customer_id,customer_tag"
+--> @$name:query-api path="device/orchestrator/statistics" and deviceId="$deviceId" and continue_on_failure="yes" and retry_count="5"
+--> @dm:add-missing-columns columns="collection_status,reason,customer_id,customer_tag,source_ip,collection_timestamp"
+--> @dm:map to="collection_timestamp" & func="time_now"
+--> @dm:eval customer_id = "'$customer_id'"
+--> @dm:eval customer_tag = "'$customer_tag'"
+--> *exec:if-condition collection_status != 'Success'
+    --> @dm:eval name = "'$name'"
+    --> @dm:enrich dict="temp-vmanage-source-ip-map" and src_key_cols="name" and dict_key_cols="name" and enrich_cols="host_source_ip"
+    --> @dm:eval source_ip = "str(host_source_ip or source_ip or '')"
+    --> *dm:safe-filter * get source_ip as 'asset_id',collection_status,collection_timestamp,reason,customer_id,customer_tag
+    --> @dm:map to="collection_timestamp" & func="time_now"
+    --> @dm:eval bot_source_name = "'$name'"
+    --> @dm:eval bot_source_type = "'cisco-vmanage'"
+    --> @dm:eval bot_name = "'query-api device/orchestrator/statistics ' + str('$system_ip' or '$deviceId' or '')"
+    --> @rn:write-stream name="asset_inventory_collection_status_stream"
+--> @exec:end-if
+--> *exec:if-condition collection_status = 'Success'
+    --> @dm:eval name = "'$name'"
+    --> @dm:enrich dict="temp-vmanage-source-ip-map" and src_key_cols="name" and dict_key_cols="name" and enrich_cols="host_source_ip"
+    --> @dm:eval source_ip = "str(host_source_ip or source_ip or '')"
+    --> @dm:dedup columns="source_ip"
+    --> *dm:safe-filter * get source_ip as 'asset_id',collection_status,collection_timestamp,reason,customer_id,customer_tag
+    --> @dm:map to="collection_timestamp" & func="time_now"
+    --> @dm:eval bot_source_name = "'$name'"
+    --> @dm:eval bot_source_type = "'cisco-vmanage'"
+    --> @dm:eval bot_name = "'query-api device/orchestrator/statistics ' + str('$system_ip' or '$deviceId' or '')"
+    --> @dm:save name="temp-packs_asset_inventory_collection_status" & append="yes"
+    --> @rn:write-stream name="asset_inventory_collection_status_stream"
+--> @exec:end-if
+--> @dm:skip-block-if-shape row_count="0"
+--> *dm:filter collection_status="Success"
+--> @dm:eval deviceId = "'$deviceId'"
+--> @dm:selectcolumns include="system_ip|vdevice_name|host_name|state|peer_vmanage_system_ip|protocol|deviceId|customer_id|customer_tag|source_ip|collection_timestamp"
+--> @dm:eval source_endpoint = "'/device/orchestrator/statistics'"
+--> @dm:copy-columns from="collection_timestamp" and to="metric_timestamp"
+--> @dm:eval metric_category = "'orchestrator_statistics'"
+--> @dm:eval timeseries_row_key = "str(deviceId or '') + '|orch_stat'"
+--> @dm:dedup columns="timeseries_row_key"
+--> @rn:write-stream name="vmanage_metrics_timeseries"
+
+########################################
+## device/tlocutil -> vmanage_metrics_timeseries (tloc_utilization_summary / tloc_utilization_detail)
+########################################
+--> @c:new-block name="adv_vis_tlocutil_summary_collect"
+--> @dm:recall name="temp-vmanage-main-cust-variable-dataset" & return_empty="yes"
+--> @dm:skip-block-if-shape row_count="0"
+--> @c:data-loop dataset="temp-vmanage-main-cust-variable-dataset" and columns="name,customer_id,customer_tag"
+--> @$name:query-api path="device/tlocutil" and continue_on_failure="yes" and retry_count="5"
+--> @dm:add-missing-columns columns="collection_status,reason,customer_id,customer_tag,source_ip,collection_timestamp,bucket_name"
+--> @dm:fixcolumns
+--> *exec:if-shape columns contains "name"
+    --> @dm:copy-columns from="name" and to="bucket_name"
+--> @exec:end-if
+--> @dm:eval util_slug = "str(detailsURL).split('util=')[-1] if detailsURL else ''"
+--> @dm:eval bucket_name = "str(bucket_name or '') if str(bucket_name or '') not in ['', 'None', 'Not Available'] else ({'lessthan10mbps': 'less_than_10_mbps', '10mbps100mbps': '10_mbps_100_mbps', '100mbps500mbps': '100_mbps_500_mbps', 'greaterthan500mbps': 'greater_than_500_mbps'}.get(str(util_slug or ''), str(util_slug or '')))"
+--> @dm:map to="collection_timestamp" & func="time_now"
+--> @dm:eval customer_id = "'$customer_id'"
+--> @dm:eval customer_tag = "'$customer_tag'"
+--> *exec:if-condition collection_status != 'Success'
+    --> @dm:eval source_name = "'$name'"
+    --> @dm:enrich dict="temp-vmanage-source-ip-map" and src_key_cols="source_name" and dict_key_cols="name" and enrich_cols="host_source_ip"
+    --> @dm:eval source_ip = "str(host_source_ip or source_ip or '')"
+    --> *dm:safe-filter * get source_ip as 'asset_id',collection_status,collection_timestamp,reason,customer_id,customer_tag
+    --> @dm:map to="collection_timestamp" & func="time_now"
+    --> @dm:eval bot_source_name = "'$name'"
+    --> @dm:eval bot_source_type = "'cisco-vmanage'"
+    --> @dm:eval bot_name = "'query-api device/tlocutil'"
+    --> @rn:write-stream name="asset_inventory_collection_status_stream"
+--> @exec:end-if
+--> *exec:if-condition collection_status = 'Success'
+    --> @dm:eval source_name = "'$name'"
+    --> @dm:enrich dict="temp-vmanage-source-ip-map" and src_key_cols="source_name" and dict_key_cols="name" and enrich_cols="host_source_ip"
+    --> @dm:eval source_ip = "str(host_source_ip or source_ip or '')"
+    --> @dm:save name="temp-tlocutil-summary-$loop_index"
+    --> @dm:dedup columns="source_ip"
+    --> *dm:safe-filter * get source_ip as 'asset_id',collection_status,collection_timestamp,reason,customer_id,customer_tag
+    --> @dm:map to="collection_timestamp" & func="time_now"
+    --> @dm:eval bot_source_name = "'$name'"
+    --> @dm:eval bot_source_type = "'cisco-vmanage'"
+    --> @dm:eval bot_name = "'query-api device/tlocutil'"
+    --> @dm:save name="temp-packs_asset_inventory_collection_status" & append="yes"
+    --> @rn:write-stream name="asset_inventory_collection_status_stream"
+--> @exec:end-if
+
+--> @c:new-block name="adv_vis_tlocutil_summary_write"
+--> @dm:concat names="temp-tlocutil-summary-.*"
+--> @dm:skip-block-if-shape row_count="0"
+--> *dm:filter collection_status="Success"
+--> @dm:selectcolumns include="bucket_name|percentageDistribution|detailsURL|value|collection_status|collection_timestamp|source_name|customer_id|customer_tag|source_ip"
+--> @dm:eval source_endpoint = "'/device/tlocutil'"
+--> @dm:copy-columns from="collection_timestamp" and to="metric_timestamp"
+--> @dm:eval metric_category = "'tloc_utilization_summary'"
+--> @dm:eval timeseries_row_key = "str(source_name or '') + '|' + str(bucket_name or '') + '|tloc_summary'"
+--> @dm:dedup columns="timeseries_row_key"
+--> @rn:write-stream name="vmanage_metrics_timeseries"
+
+--> @c:new-block name="adv_vis_tlocutil_detail_collect_init"
+--> @dm:empty
+--> @dm:save name="temp-collection-status-dummy-row-src"
+
+--> @c:new-block name="adv_vis_tlocutil_detail_collect"
+--> @dm:concat names="temp-tlocutil-summary-.*"
+--> @dm:skip-block-if-shape row_count="0"
+--> *dm:filter collection_status="Success" and detailsURL != '' and detailsURL is not None
+--> @dm:eval util_param = "str(detailsURL).split('util=')[-1] if detailsURL else ''"
+--> *dm:filter util_param != '' and util_param is not None
+--> @dm:add-missing-columns columns="bucket_name"
+--> @dm:save name="temp-tlocutil-summary-drilldown"
+--> @c:data-loop dataset="temp-tlocutil-summary-drilldown" and columns="source_name,bucket_name,util_param,customer_id,customer_tag,source_ip,collection_timestamp"
+--> @$source_name:query-api path="device/tlocutil/detail" and util="$util_param" and continue_on_failure="yes" and retry_count="5"
+--> @dm:add-missing-columns columns="collection_status,reason,collection_timestamp"
+--> @dm:map to="collection_timestamp" & func="time_now"
+--> @dm:eval customer_id = "'$customer_id'"
+--> @dm:eval customer_tag = "'$customer_tag'"
+--> @dm:eval bucket_name = "'$bucket_name'"
+--> @dm:eval source_name = "'$source_name'"
+--> @dm:eval source_ip = "'$source_ip'"
+--> @dm:eval bot_name = "'query-api device/tlocutil/detail ' + str('$util_param' or '')"
+--> *exec:if-condition collection_status = 'Success'
+    --> *exec:if-shape num_rows > 0
+        --> @dm:save name="temp-tlocutil-detail-$loop_index"
+    --> @exec:end-if
+--> @exec:end-if
+{{ ensure_collection_status_row_source_name("query-api device/tlocutil/detail") }}
+{{ write_collection_status_source_name() }}
+
+--> @c:new-block name="adv_vis_tlocutil_detail_write"
+--> @dm:concat names="temp-tlocutil-detail-.*"
+--> @dm:skip-block-if-shape row_count="0"
+--> *dm:filter collection_status="Success"
+--> *exec:if-shape columns contains "system-ip"
+    --> @dm:copy-columns from="system-ip" and to="system_ip"
+--> @exec:end-if
+--> @dm:selectcolumns include="bucket_name|system-ip|system_ip|interface|average|collection_status|collection_timestamp|source_name|customer_id|customer_tag|source_ip"
+--> @dm:eval source_endpoint = "'/device/tlocutil/detail'"
+--> @dm:copy-columns from="collection_timestamp" and to="metric_timestamp"
+--> @dm:eval metric_category = "'tloc_utilization_detail'"
+--> @dm:eval timeseries_row_key = "str(source_name or '') + '|' + str(bucket_name or '') + '|' + str(system_ip or '') + '|' + str(interface or '') + '|tloc_detail'"
+--> @dm:dedup columns="timeseries_row_key"
+--> @rn:write-stream name="vmanage_metrics_timeseries"
+
+########################################
+## device/system/statistics -> vmanage_metrics_timeseries
+########################################
+--> @c:new-block name="adv_vis_device_system_statistics"
+--> @dm:empty
+--> @dm:save name="temp-collection-status-dummy-row"
+--> @dm:recall name="temp-vmanage_devices_expanded" & return_empty="yes"
+--> @dm:skip-block-if-shape row_count="0"
+--> @c:data-loop dataset="temp-vmanage_devices_expanded" and columns="name,deviceId,system_ip,customer_id,customer_tag"
+--> @$name:query-api path="device/system/statistics" and deviceId="$deviceId" and continue_on_failure="yes" and retry_count="5"
+--> @dm:add-missing-columns columns="collection_status,reason,customer_id,customer_tag,source_ip,collection_timestamp"
+--> @dm:map to="collection_timestamp" & func="time_now"
+--> @dm:eval customer_id = "'$customer_id'"
+--> @dm:eval customer_tag = "'$customer_tag'"
+--> @dm:eval bot_name = "'query-api device/system/statistics ' 'deviceId'"
+{{ ensure_collection_status_row("query-api device/system/statistics $deviceId") }}
+{{ write_collection_status() }}
+--> @dm:skip-block-if-shape row_count="0"
+--> *dm:filter collection_status="Success" and (key is None or key != 'dummy')
+--> @dm:eval deviceId = "'$deviceId'"
+--> @dm:selectcolumns include="system_ip|vdevice_name|host_name|min1_avg|min5_avg|min15_avg|mem_used|mem_free|mem_total|cpu_user|cpu_system|cpu_idle|disk_used|disk_avail|uptime|deviceId|customer_id|customer_tag|source_ip|collection_timestamp"
+--> @dm:eval source_endpoint = "'/device/system/statistics'"
+--> @dm:copy-columns from="collection_timestamp" and to="metric_timestamp"
+--> @dm:eval metric_category = "'device_system_statistics'"
+--> @dm:eval timeseries_row_key = "str(deviceId or '') + '|dev_sys_stat'"
+--> @dm:dedup columns="timeseries_row_key"
+--> @rn:write-stream name="vmanage_metrics_timeseries"
+
+########################################
+## statistics/dpi/aggregation -> vmanage_dpi_aggregation (24-hour aggregation)
+########################################
+--> @c:new-block name="adv_vis_dpi_aggregation"
+--> @dm:empty
+--> @dm:save name="temp-collection-status-dummy-row"
+--> @dm:recall name="temp-vmanage-main-cust-variable-dataset" & return_empty="yes"
+--> @dm:skip-block-if-shape row_count="0"
+--> @c:data-loop dataset="temp-vmanage-main-cust-variable-dataset" and columns="name,customer_id,customer_tag"
+--> @$name:query-api path="statistics/dpi/aggregation" and query='{"query":{"condition":"AND","rules":[{"value":["24"],"field":"entry_time","type":"date","operator":"last_n_hours"}]},"aggregation":{"field":[{"property":"family","size":200,"sequence":1}],"metrics":[{"property":"octets","type":"sum","order":"desc"}]}}' and continue_on_failure="yes" and retry_count="5"
+--> @dm:add-missing-columns columns="collection_status,reason,customer_id,customer_tag,source_ip,collection_timestamp"
+--> @dm:map to="collection_timestamp" & func="time_now"
+--> @dm:eval customer_id = "'$customer_id'"
+--> @dm:eval customer_tag = "'$customer_tag'"
+--> @dm:eval bot_name = "'query-api statistics/dpi/aggregation'"
+{{ ensure_collection_status_row("query-api statistics/dpi/aggregation") }}
+{{ write_collection_status() }}
+--> @dm:skip-block-if-shape row_count="0"
+--> *dm:filter collection_status="Success" and (key is None or key != 'dummy')
+--> @dm:eval name = "'$name'"
+--> @dm:selectcolumns include="family|octets|count|entry_time|name|source_ip|customer_id|customer_tag|collection_timestamp"
+--> @dm:eval source_endpoint = "'/statistics/dpi/aggregation'"
+--> @dm:copy-columns from="collection_timestamp" and to="metric_timestamp"
+--> @dm:eval metric_category = "'dpi_aggregation'"
+--> @dm:eval dpi_agg_key = "str(customer_id or '') + '|' + str(name or '') + '|dpi_agg|' + str(collection_timestamp or '')"
+--> @dm:dedup columns="dpi_agg_key"
+--> @rn:write-stream name="vmanage_dpi_aggregation"
+--> @rn:write-stream name="vmanage_metrics_snapshot"
+

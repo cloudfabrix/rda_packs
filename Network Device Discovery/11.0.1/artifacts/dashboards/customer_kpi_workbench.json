@@ -1,0 +1,55 @@
+{
+  "name": "customer_kpi_workbench",
+  "label": "KPI Workbench",
+  "description": "Workbench for KPIs",
+  "enabled": true,
+  "version": "24.1.1.1",
+  "dashboard_type": "template",
+  "template_variables": {
+    "CUST_ID": {
+      "contextId": "customer_id"
+    },
+    "PROJ_ID": {
+      "contextId": "project_id"
+    },
+    "PROJ_ID_SINGLE": {
+      "contextId": "project_id"
+    },
+    "CUST_TAG": {
+      "contextId": "customer_tag"
+    }
+  },
+  "dashboard_folder": "NetworkDevicePack",
+  "custom_context": {
+    "formEndpoint": "dynamic_form.preview_kpi_dashboard",
+    "previewEndpoint": "preview_kpi_dashboard"
+  },
+  "dashboard_filters": {
+    "time_filter": false
+  },
+  "dashboard_sections": [
+    {
+      "title": "KPI Workbench",
+      "show_filter": false,
+      "widgets": [
+        {
+          "widget_type": "label",
+          "max_width": 12,
+          "height": 0.5,
+          "min_width": 12,
+          "label": "<div style='text-align:center;width:100%;'><h1><a style='text-decoration:none;color:#0066ff;' target='_blank'>Customer Metrics(Workbench)</a></h1></div>",
+          "widget_id": "33317e49"
+        },
+        {
+          "title": "KPI Workbench",
+          "widget_type": "portal_html",
+          "widget_template": "app-rda/kpi-workbench",
+          "reportId": "benchmark.actions.list.tabular",
+          "height": 12,
+          "min_wdith": 12,
+          "widget_id": "d767314b"
+        }
+      ]
+    }
+  ]
+}

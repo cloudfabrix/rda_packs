@@ -1,0 +1,166 @@
+{
+    "name": "network_device_discovery_pack",
+    "label": "Network Device Inventory",
+    "description": "Network Device Inventory",
+    "version": "24.08.01.4",
+    "enabled": true,
+    "custom_context": {
+        "rda-dashboard-live-edit": true
+    },
+    "dashboard_sections": [
+        {
+            "title": "Network Device Inventory"
+        }
+    ],
+    "dashboard_type": "app",
+    "context_enrichment": [
+        {
+            "stream": "rda_packs_meta",
+            "enrich_columns": [
+                "publisher",
+                "id",
+                "customer",
+                "status"
+            ],
+            "query_template": "(id is 'Fault_Management_single_tenant') & status is 'ACTIVATED'",
+            "query_template1": "(id contains 'fault' or id contains 'performance') & status is 'ACTIVATED' and customer is '$customer_tag'"
+        },
+        {
+            "stream": "rda_packs_meta",
+            "enrich_columns": [
+                "name",
+                "publisher",
+                "customer",
+                "status"
+            ],
+            "query_template": "(name is 'performance_management_customer') & status is 'ACTIVATED'",
+            "query_template1": "(id contains 'fault' or id contains 'performance') & status is 'ACTIVATED' and customer is '$customer_tag'"
+        }
+    ],
+    "dashboard_groups": {
+        "groupConfigure": {
+            "icon": "settings.svg",
+            "label": "Configure and Manage"
+        },
+        "groupViewData": {
+            "icon": "asset.svg",
+            "label": "Network Device Inventory"
+        },
+        "group2": {
+            "icon": "overall.svg",
+            "label": "Data Collection"
+        },
+        "groupTopo": {
+            "icon": "topology.svg",
+            "label": "Topology"
+        },
+        "group3": {
+            "icon": "activities.svg",
+            "label": "Discovery Run Status"
+        },
+        "groupMetrics": {
+            "icon": "insights.svg",
+            "label": "Metrics Workbench"
+        },
+        "groupAlerts": {
+            "icon": "alert.svg",
+            "label": "Alerts"
+        }
+    },
+    "dashboard_pages": [
+        {
+            "name": "network_discovery_credential_management",
+            "label": "Discovery Credentials",
+            "icon": "credentials.svg",
+            "group": "groupConfigure"
+        },
+        {
+            "name": "network_discovery_onboard_devices",
+            "label": "Onboard Devices",
+            "icon": "datasource.svg",
+            "group": "groupConfigure"
+        },
+        {
+            "name": "network_discovery_services",
+            "label": "Run Discovery",
+            "icon": "schedule.svg",
+            "group": "groupConfigure"
+        },
+        {
+            "name": "network_device",
+            "label": "Network Devices",
+            "icon": "hardware.svg",
+            "group": "groupViewData"
+        },
+        {
+            "name": "network_assets_inventory",
+            "label": "Network Assets",
+            "icon": "hardware.svg",
+            "group": "groupViewData"
+        },
+        {
+            "name": "cdp_neighbours",
+            "label": "CDP Neighbours",
+            "icon": "hardware.svg",
+            "group": "groupViewData",
+            "context_filter0": "id contains 'Performance'"
+        },
+        {
+            "name": "customer_oia_alerts_fault",
+            "label": "All Alerts",
+            "icon": "alert.svg",
+            "group": "groupAlerts",
+            "context_filter": "id contains 'Fault'"
+        },
+        {
+            "name": "customer_syslogs",
+            "label": "Syslogs",
+            "icon": "trace.svg",
+            "group": "group2",
+            "context_filter": "id contains 'Fault'"
+        },
+        {
+            "name": "customer_SNMP_Traps",
+            "label": "SNMP Traps",
+            "icon": "trace.svg",
+            "group": "group2",
+            "context_filter": "id contains 'Fault'"
+        },
+        {
+            "name": "customer_topology",
+            "label": "Topology",
+            "icon": "stack.svg",
+            "group": "groupTopo"
+        },
+        {
+            "name": "customer_asset_navigator",
+            "label": "Asset navigator",
+            "icon": "stack.svg",
+            "group": "groupTopo"
+        },
+        {
+            "name": "customer_access_status",
+            "label": "Access Verification Status",
+            "icon": "hardware.svg",
+            "group": "groupConfigure"
+        },
+        {
+            "name": "customer_discovery_runs",
+            "label": "Discovery Runs",
+            "group": "group3"
+        },
+        {
+            "name": "kpi-workbench",
+            "label": "Metrics Workbench",
+            "custom_context": {
+                "formEndpoint": "dynamic_form.preview_kpi_dashboard",
+                "previewEndpoint": "preview_kpi_dashboard"
+            },
+            "icon": "insights.svg",
+            "context_filter": "name contains 'performance'",
+            "group": "groupMetrics"
+        }
+    ],
+    "dashboard_folder": "NetworkDevicePack",
+    "saved_time": "2024-10-21T19:14:38.588811"
+}

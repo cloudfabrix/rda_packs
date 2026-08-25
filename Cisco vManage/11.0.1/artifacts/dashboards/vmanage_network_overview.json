@@ -1,0 +1,624 @@
+{
+    "name": "vmanage_network_overview",
+    "label": "Network Overview",
+    "description": "NOC overview: alarm severity, fabric connectivity, site and device health.",
+    "dashboard_folder": "VmanagePerformance",
+    "version": "26.06.19.1",
+    "live_edit": true,
+    "enabled": true,
+    "template_variables": {
+        "CUST_TAG": {
+            "contextId": "customerTag"
+        },
+        "PROJ_ID": {
+            "contextId": "projectId"
+        }
+    },
+    "stream": "vmanage_site_health_latest",
+    "dashboard_type": "template",
+    "dashboard_filters": {
+        "time_filter": true,
+        "default_time_filter_labels": [
+            "Last 1 month"
+        ],
+        "extra_filter": "(customer_tag is '{{CUST_TAG}}' or customer_tag is empty or customer_tag is '' or customer_tag is 'None')",
+        "columns_filter": [
+            {
+                "id": "site_health",
+                "label": "Site Health",
+                "type": "TEXT"
+            },
+            {
+                "id": "site_id",
+                "label": "Site ID",
+                "type": "TEXT"
+            }
+        ]
+    },
+    "dashboard_sections": [
+        {
+            "title": "Alarm summary",
+            "show_filter": false,
+            "widgets": [
+                {
+                    "title": "Critical alarms",
+                    "widget_type": "custom_counter",
+                    "stream": "vmanage_alerts_events",
+                    "ts_column": "entry_time",
+                    "extra_filter": "source_endpoint is '/alarms' and (severity is 'Critical' or severity_level is 'critical')",
+                    "column": "uuid",
+                    "agg": "value_count",
+                    "type": "int",
+                    "notation": "compact",
+                    "min_width": 3,
+                    "max_width": 3,
+                    "height": 3,
+                    "widget_id": "nw_alm_crit",
+                    "style": {
+                        "color-list": [
+                            "#DC2626"
+                        ]
+                    },
+                    "description": "Curated alarms from /alarms \u2014 not raw /event noise"
+                },
+                {
+                    "title": "Major alarms",
+                    "widget_type": "custom_counter",
+                    "stream": "vmanage_alerts_events",
+                    "ts_column": "entry_time",
+                    "extra_filter": "source_endpoint is '/alarms' and (severity is 'Major' or severity_level is 'major')",
+                    "column": "uuid",
+                    "agg": "value_count",
+                    "type": "int",
+                    "notation": "compact",
+                    "min_width": 3,
+                    "max_width": 3,
+                    "height": 3,
+                    "widget_id": "nw_alm_major",
+                    "style": {
+                        "color-list": [
+                            "#EF4444"
+                        ]
+                    },
+                    "description": "Curated alarms from /alarms"
+                },
+                {
+                    "title": "Minor alarms",
+                    "widget_type": "custom_counter",
+                    "stream": "vmanage_alerts_events",
+                    "ts_column": "entry_time",
+                    "extra_filter": "source_endpoint is '/alarms' and (severity is 'Minor' or severity_level is 'minor')",
+                    "column": "uuid",
+                    "agg": "value_count",
+                    "type": "int",
+                    "notation": "compact",
+                    "min_width": 3,
+                    "max_width": 3,
+                    "height": 3,
+                    "widget_id": "nw_alm_minor",
+                    "style": {
+                        "color-list": [
+                            "#F59E0B"
+                        ]
+                    },
+                    "description": "Excludes login/event noise from /event stream"
+                },
+                {
+                    "title": "Cleared (24h)",
+                    "widget_type": "custom_counter",
+                    "stream": "vmanage_metrics_snapshot",
+                    "ts_column": "collection_timestamp",
+                    "duration_hours": 24,
+                    "extra_filter": "source_endpoint is '/alarms/count'",
+                    "column": "cleared_count",
+                    "agg": "sum",
+                    "type": "int",
+                    "notation": "compact",
+                    "min_width": 3,
+                    "max_width": 3,
+                    "height": 3,
+                    "widget_id": "nw_alarm_cleared",
+                    "description": "Alarms resolved in last 24h",
+                    "style": {
+                        "color-list": [
+                            "#22C55E"
+                        ]
+                    }
+                },
+                {
+                    "title": "Alarm volume by severity",
+                    "widget_type": "timeseries",
+                    "stream": "vmanage_alerts_events",
+                    "ts_column": "entry_time",
+                    "gap_interval": "join",
+                    "extra_filter": "source_endpoint is '/alarms'",
+                    "group_by": [
+                        "severity"
+                    ],
+                    "series_spec": [
+                        {
+                            "column": "uuid",
+                            "agg": "value_count",
+                            "type": "int"
+                        }
+                    ],
+                    "min_width": 12,
+                    "max_width": 12,
+                    "height": 4,
+                    "chartProperties": {
+                        "xAxisLabel": null,
+                        "yAxisLabel": "Alarms per day",
+                        "legendLocation": "top"
+                    },
+                    "style": {
+                        "color-map": {
+                            "Critical": "#DC2626",
+                            "critical": "#DC2626",
+                            "Major": "#EF4444",
+                            "major": "#EF4444",
+                            "Minor": "#F59E0B",
+                            "minor": "#F59E0B",
+                            "Warning": "#EAB308",
+                            "warning": "#EAB308"
+                        }
+                    },
+                    "widget_id": "nw_alarm_trend",
+                    "description": "Follows dashboard time filter \u2014 curated /alarms only",
+                    "empty_data_message": "No alarms in the selected time range"
+                }
+            ]
+        },
+        {
+            "title": "Network fabric",
+            "show_filter": true,
+            "widgets": [
+                {
+                    "title": "Network component counts",
+                    "widget_type": "tabular",
+                    "stream": "vmanage_metrics_snapshot",
+                    "ts_column": "collection_timestamp",
+                    "duration_hours": 24,
+                    "extra_filter": "metric_category is 'network_status'",
+                    "paginated": false,
+                    "min_width": 7,
+                    "max_width": 7,
+                    "height": 4,
+                    "sorting": [
+                        {
+                            "name": "asc"
+                        }
+                    ],
+                    "columns": {
+                        "name": {
+                            "title": "Component",
+                            "type": "TEXT",
+                            "visible": true
+                        },
+                        "count": {
+                            "title": "Active sessions / peers",
+                            "type": "INT",
+                            "visible": true
+                        },
+                        "type": {
+                            "title": "Type",
+                            "type": "TEXT",
+                            "visible": false
+                        },
+                        "status": {
+                            "title": "Status",
+                            "type": "TEXT",
+                            "visible": false
+                        },
+                        "detailsURL": {
+                            "title": "URL",
+                            "type": "TEXT",
+                            "visible": false
+                        }
+                    },
+                    "widget_id": "nw_net_status_tbl",
+                    "empty_data_message": "No network status data"
+                },
+                {
+                    "title": "Active devices by role",
+                    "widget_type": "pie_chart",
+                    "stream": "vmanage_metrics_snapshot",
+                    "ts_column": "collection_timestamp",
+                    "duration_hours": 24,
+                    "extra_filter": "metric_category is 'network_status' and count > 0 and name in ['vEdge','vSmart','vbond']",
+                    "column": "count",
+                    "agg": "sum",
+                    "group_by": [
+                        "name"
+                    ],
+                    "type": "int",
+                    "min_width": 5,
+                    "max_width": 5,
+                    "height": 4,
+                    "widget_id": "nw_net_status_pie",
+                    "description": "Device counts by role from /network/status",
+                    "empty_data_message": "No active device roles to chart",
+                    "style": {
+                        "color-list": [
+                            "#2563EB",
+                            "#7C3AED",
+                            "#0891B2",
+                            "#059669",
+                            "#D97706",
+                            "#DC2626",
+                            "#DB2777",
+                            "#4F46E5",
+                            "#0D9488",
+                            "#CA8A04",
+                            "#9333EA",
+                            "#0284C7",
+                            "#16A34A",
+                            "#EA580C",
+                            "#64748B"
+                        ]
+                    }
+                },
+                {
+                    "title": "vBond devices",
+                    "widget_type": "custom_counter",
+                    "stream": "vmanage_metrics_snapshot",
+                    "ts_column": "collection_timestamp",
+                    "duration_hours": 24,
+                    "extra_filter": "metric_category is 'network_status' and name is 'vbond'",
+                    "column": "count",
+                    "agg": "sum",
+                    "type": "int",
+                    "min_width": 2,
+                    "max_width": 2,
+                    "height": 3,
+                    "widget_id": "nw_cp_vbond",
+                    "style": {
+                        "color-list": [
+                            "#3B82F6"
+                        ]
+                    },
+                    "empty_data_message": "No vBond data"
+                },
+                {
+                    "title": "vSmart devices",
+                    "widget_type": "custom_counter",
+                    "stream": "vmanage_metrics_snapshot",
+                    "ts_column": "collection_timestamp",
+                    "duration_hours": 24,
+                    "extra_filter": "metric_category is 'network_status' and name is 'vSmart'",
+                    "column": "count",
+                    "agg": "sum",
+                    "type": "int",
+                    "min_width": 2,
+                    "max_width": 2,
+                    "height": 3,
+                    "widget_id": "nw_cp_vsmart",
+                    "style": {
+                        "color-list": [
+                            "#8B5CF6"
+                        ]
+                    },
+                    "empty_data_message": "No vSmart data"
+                },
+                {
+                    "title": "WAN Edge devices",
+                    "widget_type": "custom_counter",
+                    "stream": "vmanage_metrics_snapshot",
+                    "ts_column": "collection_timestamp",
+                    "duration_hours": 24,
+                    "extra_filter": "metric_category is 'network_status' and name is 'vEdge'",
+                    "column": "count",
+                    "agg": "sum",
+                    "type": "int",
+                    "min_width": 2,
+                    "max_width": 2,
+                    "height": 3,
+                    "widget_id": "nw_cp_vedge",
+                    "style": {
+                        "color-list": [
+                            "#22C55E"
+                        ]
+                    },
+                    "empty_data_message": "No WAN Edge data"
+                },
+                {
+                    "title": "Fleet reachability",
+                    "widget_type": "pie_chart",
+                    "stream": "vmanage_inventory",
+                    "ts_column": "collection_timestamp",
+                    "duration_hours": 720,
+                    "extra_filter": "asset_object is 'Device'",
+                    "column": "deviceId",
+                    "agg": "value_count",
+                    "group_by": [
+                        "reachability"
+                    ],
+                    "type": "str",
+                    "min_width": 6,
+                    "max_width": 6,
+                    "height": 3,
+                    "style": {
+                        "color-list": [
+                            "#2563EB",
+                            "#7C3AED",
+                            "#0891B2",
+                            "#059669",
+                            "#D97706",
+                            "#DC2626",
+                            "#DB2777",
+                            "#4F46E5",
+                            "#0D9488",
+                            "#CA8A04",
+                            "#9333EA",
+                            "#0284C7",
+                            "#16A34A",
+                            "#EA580C",
+                            "#64748B"
+                        ]
+                    },
+                    "widget_id": "nw_reach_pie",
+                    "empty_data_message": "No device reachability data"
+                },
+                {
+                    "title": "BFD sessions",
+                    "widget_type": "custom_counter",
+                    "stream": "vmanage_metrics_timeseries",
+                    "ts_column": "collection_timestamp",
+                    "duration_hours": 24,
+                    "extra_filter": "(state is 'up') and (metric_category is 'bfd_sessions')",
+                    "column": "dst_ip",
+                    "agg": "value_count",
+                    "type": "int",
+                    "min_width": 4,
+                    "max_width": 4,
+                    "height": 3,
+                    "widget_id": "nw_cp_bfd",
+                    "style": {
+                        "color-list": [
+                            "#22C55E"
+                        ]
+                    },
+                    "description": "Up BFD sessions from per-device /device/bfd/sessions collection",
+                    "empty_data_message": "No BFD session data \u2014 run Performance or Advanced Visibility collection"
+                },
+                {
+                    "title": "Control sessions",
+                    "widget_type": "custom_counter",
+                    "stream": "vmanage_metrics_timeseries",
+                    "ts_column": "collection_timestamp",
+                    "duration_hours": 24,
+                    "extra_filter": "(state is 'up') and (metric_category is 'control_connections')",
+                    "column": "system_ip",
+                    "agg": "value_count",
+                    "type": "int",
+                    "min_width": 4,
+                    "max_width": 4,
+                    "height": 3,
+                    "widget_id": "nw_cp_control",
+                    "style": {
+                        "color-list": [
+                            "#22C55E"
+                        ]
+                    },
+                    "description": "Up control connections from per-device /device/control/connections collection",
+                    "empty_data_message": "No control connection data \u2014 run Performance or Advanced Visibility collection"
+                },
+                {
+                    "title": "OMP sessions",
+                    "widget_type": "custom_counter",
+                    "stream": "vmanage_metrics_timeseries",
+                    "ts_column": "collection_timestamp",
+                    "duration_hours": 24,
+                    "extra_filter": "(state is 'up') and (metric_category is 'omp_peers')",
+                    "column": "peer",
+                    "agg": "value_count",
+                    "type": "int",
+                    "min_width": 4,
+                    "max_width": 4,
+                    "height": 3,
+                    "widget_id": "nw_cp_omp",
+                    "style": {
+                        "color-list": [
+                            "#22C55E"
+                        ]
+                    },
+                    "description": "Up OMP peers from per-device /device/omp/peers collection",
+                    "empty_data_message": "No OMP peer data \u2014 run Performance or Advanced Visibility collection"
+                }
+            ]
+        },
+        {
+            "title": "Site & device health",
+            "show_filter": true,
+            "widgets": [
+                {
+                    "title": "Site health",
+                    "widget_type": "tabular",
+                    "stream": "vmanage_site_health_latest",
+                    "ts_column": "collection_timestamp",
+                    "duration_hours": 24,
+                    "paginated": true,
+                    "max_rows": 20,
+                    "showRowSummary": false,
+                    "sorting": [
+                        {
+                            "site_health": "asc"
+                        }
+                    ],
+                    "min_width": 8,
+                    "max_width": 8,
+                    "height": 6,
+                    "columns": {
+                        "site_id": {
+                            "title": "Site ID",
+                            "type": "TEXT",
+                            "visible": true
+                        },
+                        "site_type_display": {
+                            "title": "Site type",
+                            "type": "TEXT",
+                            "visible": true
+                        },
+                        "site_health": {
+                            "title": "Health",
+                            "type": "TEXT",
+                            "visible": true
+                        },
+                        "tunnels_health_display": {
+                            "title": "Tunnels",
+                            "type": "TEXT",
+                            "visible": true
+                        },
+                        "tunnels_health_score_display": {
+                            "title": "Tunnel score",
+                            "type": "TEXT",
+                            "visible": true
+                        },
+                        "devices_health": {
+                            "title": "Devices",
+                            "type": "TEXT",
+                            "visible": true
+                        },
+                        "devices_health_score_display": {
+                            "title": "Device score",
+                            "type": "TEXT",
+                            "visible": true
+                        },
+                        "apps_health": {
+                            "title": "Apps",
+                            "type": "TEXT",
+                            "visible": false
+                        },
+                        "apps_health_score_display": {
+                            "title": "Apps score",
+                            "type": "TEXT",
+                            "visible": false
+                        }
+                    },
+                    "widget_id": "nw_site_tbl",
+                    "empty_data_message": "No site health data",
+                    "custom_columns": [
+                        {
+                            "id": "site_type_display",
+                            "label": "Site type",
+                            "visible": false,
+                            "expr": "('Controller' if str(site_id or '') == '100' else 'WAN edge')"
+                        },
+                        {
+                            "id": "tunnels_health_display",
+                            "label": "Tunnels",
+                            "visible": false,
+                            "expr": "('N/A (controller)' if str(site_id or '') == '100' and str(tunnels_health or '') == 'no_data' else str(tunnels_health or ''))"
+                        }
+                    ]
+                },
+                {
+                    "title": "Sites by health",
+                    "widget_type": "counter",
+                    "stream": "vmanage_site_health_latest",
+                    "ts_column": "collection_timestamp",
+                    "duration_hours": 24,
+                    "group_by": [
+                        "site_health"
+                    ],
+                    "column": "site_id",
+                    "agg": "value_count",
+                    "min_width": 4,
+                    "height": 3,
+                    "style": {
+                        "color-map": {
+                            "good": "#22C55E",
+                            "fair": "#F59E0B",
+                            "poor": "#EF4444",
+                            "no_data": "#9CA3AF",
+                            "reachable": "#22C55E",
+                            "unreachable": "#EF4444",
+                            "partial": "#F59E0B"
+                        }
+                    },
+                    "widget_id": "nw_sitehealth_ctr",
+                    "empty_data_message": "No site health buckets"
+                },
+                {
+                    "title": "Device health",
+                    "widget_type": "tabular",
+                    "stream": "vmanage_devicehealth_latest",
+                    "ts_column": "collection_timestamp",
+                    "duration_hours": 24,
+                    "paginated": true,
+                    "max_rows": 20,
+                    "showRowSummary": true,
+                    "sorting": [
+                        {
+                            "health_score": "asc"
+                        }
+                    ],
+                    "min_width": 12,
+                    "max_width": 12,
+                    "height": 5,
+                    "columns": {
+                        "host_name": {
+                            "title": "Host",
+                            "type": "TEXT",
+                            "visible": true
+                        },
+                        "site_id": {
+                            "title": "Site ID",
+                            "type": "TEXT",
+                            "visible": true
+                        },
+                        "health": {
+                            "title": "Health",
+                            "type": "TEXT",
+                            "visible": true
+                        },
+                        "health_score": {
+                            "title": "Score",
+                            "type": "DOUBLE",
+                            "visible": true
+                        },
+                        "qoe": {
+                            "title": "QoE",
+                            "type": "DOUBLE",
+                            "visible": true
+                        },
+                        "cpu_load": {
+                            "title": "CPU (%)",
+                            "type": "DOUBLE",
+                            "visible": true
+                        },
+                        "memory_utilization": {
+                            "title": "Memory (%)",
+                            "type": "DOUBLE",
+                            "visible": true
+                        },
+                        "reachability": {
+                            "title": "Reachability",
+                            "type": "TEXT",
+                            "visible": true
+                        }
+                    },
+                    "widget_id": "nw_dh_tbl",
+                    "empty_data_message": "Device health is populated by the health pipeline \u2014 run health_pipeline to collect all devices. Only the controller may appear until then."
+                }
+            ]
+        }
+    ],
+    "status_poller": {
+        "stream": "vmanage_alerts_events",
+        "frequency": 60,
+        "columns": [
+            "metric_timestamp"
+        ],
+        "sorting": [
+            {
+                "metric_timestamp": "desc"
+            }
+        ],
+        "query": "metric_timestamp is after '${metric_timestamp}'",
+        "defaults": {
+            "metric_timestamp": "$UTCNOW"
+        },
+        "action": "refresh"
+    },
+    "saved_time": "2026-06-23T10:35:00.545691"
+}

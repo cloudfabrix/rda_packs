@@ -1,0 +1,44 @@
+{
+    "name": "rdaf_topology_alert_badging",
+    "description": " ",
+    "saved_time": "2026-06-11T10:03:41.991040",
+    "is_dynamic": true,
+    "hierarchical": true,
+    "dynamic_nodes": {
+        "column_name": "node_type",
+        "db_name": "topology_training",
+        "nodes_collection": "topology_training_nodes",
+        "stream": "graphdb://topology_training/topology_training_nodes"
+    },
+    "dynamic_relationships": {
+        "db_name": "topology_training",
+        "edges_collection": "topology_training_edges",
+        "graph_name": "topology_training_graph",
+        "relation_map": "rdaf_topology_relationships",
+        "stream": "graphdb://topology_training/topology_training_edges"
+    },
+    "display_options": {
+        "stack_type": "OIA",
+        "auto_group": true,
+        "expand_all": false,
+        "chunked_mode": true,
+        "chunk_size": 200,
+        "empty_stack_start": false,
+        "oia_details": {
+            "alert_source": {
+                "stream": "alerts_for_topology_training",
+                "limit": 30,
+                "group_by": [
+                    "a_en_node_id",
+                    "a_severity"
+                ],
+                "extra_filter": "a_source_systemname is not 'Alert Group'",
+                "ts_column": "a_created_ts",
+                "duration_hours": 9000,
+                "agg": "value_count",
+                "column": "count_",
+                "type": "int"
+            }
+        }
+    }
+}

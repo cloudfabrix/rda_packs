@@ -1,0 +1,515 @@
+{
+    "name": "topology_drill_down_for_incidents",
+    "label": "Incidents",
+    "description": "Device Incidents",
+    "version": "24.1.14.2",
+    "enabled": false,
+    "dashboard_style": "auto",
+    "dashboard_type": "template",
+    "dashboard_folder": "AlertIncidentPack",
+    "template_variables": {
+        "CUST_ID": {
+            "contextId": "customerId"
+        },
+        "PROJ_ID": {
+            "contextId": "projectId"
+        },
+        "NODE_ID": {
+            "contextId": "node_id"
+        }
+    },
+    "dashboard_filters": {
+        "time_filter": true,
+        "extra_filter": "node_id is '{{NODE_ID}}'",
+        "default_time_filter_labels": [
+            "Last 3 months"
+        ],
+        "group_filters": [
+            {
+                "stream": "oia-incidents-stream",
+                "title": "Source",
+                "group_by": [
+                    "i_source"
+                ],
+                "ts_column": "timestamp",
+                "agg": "sum",
+                "column": "count_",
+                "type": "str"
+            },
+            {
+                "stream": "oia-incidents-stream",
+                "title": "State",
+                "group_by": [
+                    "i_state"
+                ],
+                "ts_column": "timestamp",
+                "agg": "sum",
+                "column": "count_",
+                "type": "str"
+            },
+            {
+                "stream": "oia-incidents-stream",
+                "title": "Priority",
+                "group_by": [
+                    "i_priority_label"
+                ],
+                "ts_column": "timestamp",
+                "agg": "sum",
+                "column": "count_",
+                "type": "str"
+            },
+            {
+                "stream": "oia-incidents-stream",
+                "title": "Incident Type",
+                "group_by": [
+                    "i_cfx_incident_type"
+                ],
+                "ts_column": "timestamp",
+                "agg": "sum",
+                "column": "count_",
+                "type": "str"
+            }
+        ],
+        "columns_filter": [
+            {
+                "id": "incident_id",
+                "label": "Incident ID",
+                "type": "TEXT"
+            },
+            {
+                "id": "i_itsm_ticket_number",
+                "label": "ITSM Ticket",
+                "type": "TEXT"
+            },
+            {
+                "id": "_RDA_Id",
+                "label": "Record ID",
+                "type": "TEXT"
+            },
+            {
+                "id": "i_source_key",
+                "label": "Source Key",
+                "type": "TEXT"
+            },
+            {
+                "id": "i_alert_count",
+                "label": "Alert Count",
+                "type": "DOUBLE"
+            },
+            {
+                "id": "project_id",
+                "label": "Organizations",
+                "type": "TEXT"
+            },
+            {
+                "id": "i_config_items",
+                "label": "Config Items",
+                "type": "TEXT"
+            },
+            {
+                "id": "i_correlation_id",
+                "label": "Correlation ID",
+                "type": "TEXT"
+            },
+            {
+                "id": "i_cfx_incident_type",
+                "label": "Incident Type",
+                "type": "TEXT"
+            },
+            {
+                "id": "i_source",
+                "label": "Source",
+                "type": "TEXT"
+            },
+            {
+                "id": "i_created_ts",
+                "label": "Created At",
+                "type": "DATETIME"
+            },
+            {
+                "id": "timestamp",
+                "label": "Updated At",
+                "type": "DATETIME"
+            },
+            {
+                "id": "i_priority_label",
+                "label": "Priority",
+                "type": "TEXT"
+            },
+            {
+                "id": "i_priority",
+                "label": "Priority Score",
+                "type": "DOUBLE"
+            },
+            {
+                "id": "i_state",
+                "label": "State",
+                "type": "TEXT"
+            },
+            {
+                "id": "node_id",
+                "label": "Node ID",
+                "type": "TEXT"
+            },
+            {
+                "id": "node_type",
+                "label": "Node Type",
+                "type": "TEXT"
+            },
+            {
+                "id": "i_summary",
+                "label": "Summary",
+                "type": "TEXT"
+            },
+            {
+                "id": "customer_id",
+                "label": "Customer ID",
+                "type": "TEXT"
+            },
+            {
+                "id": "i_cfx_incident_occurred",
+                "label": "Occurred At",
+                "type": "DATETIME"
+            },
+            {
+                "id": "i_resolved_at_ts",
+                "label": "Resolved At",
+                "type": "DATETIME"
+            },
+            {
+                "id": "i_resolved_by",
+                "label": "Resolved By",
+                "type": "TEXT"
+            },
+            {
+                "id": "i_resolution_code",
+                "label": "Resolution Code",
+                "type": "TEXT"
+            },
+            {
+                "id": "i_comments",
+                "label": "Comments",
+                "type": "TEXT"
+            }
+        ]
+    },
+    "dashboard_sections": [
+        {
+            "title": "Incidents",
+            "show_filter": true,
+            "widgets": [
+                {
+                    "title": "Active Incidents",
+                    "widget_type": "custom_counter",
+                    "stream": "oia-incidents-stream",
+                    "extra_filter": "i_resolved_at_ts is empty and i_closed_at_ts is empty and i_cancelled_at_ts is empty",
+                    "ts_column": "timestamp",
+                    "column": "count_",
+                    "agg": "sum",
+                    "type": "str",
+                    "style": {
+                        "color-list": [
+                            "#FFA726"
+                        ]
+                    },
+                    "sparkline": {
+                        "interval": "4h"
+                    },
+                    "max_width": 3,
+                    "height": 4,
+                    "min_width": 3,
+                    "widget_id": "90fc33be"
+                },
+                {
+                    "title": "Cancelled Incidents",
+                    "widget_type": "custom_counter",
+                    "stream": "oia-incidents-stream",
+                    "extra_filter": "i_cancelled_at_ts is not empty",
+                    "ts_column": "timestamp",
+                    "column": "count_",
+                    "agg": "sum",
+                    "type": "int",
+                    "min_width": 3,
+                    "height": 4,
+                    "max_width": 3,
+                    "style": {
+                        "color-list": [
+                            "#4CAF50"
+                        ]
+                    },
+                    "sparkline": {
+                        "interval": "4h"
+                    },
+                    "widget_id": "02be1e23"
+                },
+                {
+                    "title": "Resolved Incidents",
+                    "widget_type": "custom_counter",
+                    "stream": "oia-incidents-stream",
+                    "extra_filter": "i_resolved_at_ts is not empty",
+                    "ts_column": "timestamp",
+                    "column": "count_",
+                    "max_width": 3,
+                    "height": 4,
+                    "min_width": 3,
+                    "style": {
+                        "color-list": [
+                            "#4CAF50"
+                        ]
+                    },
+                    "sparkline": {
+                        "interval": "4h"
+                    },
+                    "agg": "sum",
+                    "type": "str",
+                    "widget_id": "53383e25"
+                },
+                {
+                    "title": "Total Incidents",
+                    "widget_type": "custom_counter",
+                    "stream": "oia-incidents-stream",
+                    "extra_filter": "",
+                    "ts_column": "timestamp",
+                    "column": "count_",
+                    "max_width": 3,
+                    "height": 4,
+                    "min_width": 3,
+                    "agg": "sum",
+                    "type": "str",
+                    "style": {
+                        "color-list": [
+                            "#1E88E5"
+                        ]
+                    },
+                    "sparkline": {
+                        "interval": "4h"
+                    },
+                    "widget_id": "e1a7e399"
+                },
+                {
+                    "widget_type": "pie_chart",
+                    "title": "Incidents by State",
+                    "stream": "oia-incidents-stream",
+                    "extra_filter": "",
+                    "ts_column": "timestamp",
+                    "column": "count_",
+                    "max_width": 4,
+                    "height": 4,
+                    "min_width": 3,
+                    "agg": "sum",
+                    "group_by": [
+                        "i_state"
+                    ],
+                    "type": "int",
+                    "widget_id": "c9ac6704"
+                },
+                {
+                    "widget_type": "multi_bar_chart",
+                    "title": "Active Incidents by Source and Priority",
+                    "stream": "oia-incidents-stream",
+                    "ts_column": "timestamp",
+                    "column": "count_",
+                    "extra_filter": "i_resolved_at_ts is empty and i_closed_at_ts is empty and i_cancelled_at_ts is empty",
+                    "segment_filter": false,
+                    "max_width": 8,
+                    "height": 6,
+                    "min_width": 6,
+                    "chartProperties": {
+                        "yAxisLabel": null,
+                        "xAxisLabel": "",
+                        "stacked": true,
+                        "legendLocation": "right",
+                        "orientation": "horizontal"
+                    },
+                    "agg": "sum",
+                    "group_by": [
+                        "i_priority_label",
+                        "i_source"
+                    ],
+                    "type": "int",
+                    "widget_id": "c923597b"
+                },
+                {
+                    "title": "Incident Trend",
+                    "widget_type": "timeseries",
+                    "stream": "oia-incidents-stream",
+                    "ts_column": "timestamp",
+                    "extra_filter": "",
+                    "max_width": 12,
+                    "height": 6,
+                    "min_width": 12,
+                    "chartProperties": {
+                        "yAxisLabel": null,
+                        "xAxisLabel": "",
+                        "stacked": true,
+                        "legendLocation": "right",
+                        "orientation": "horizontal"
+                    },
+                    "interval": "15m",
+                    "group_by": [
+                        "i_priority_label"
+                    ],
+                    "series_spec": [
+                        {
+                            "column": "count_",
+                            "agg": "sum",
+                            "type": "int"
+                        }
+                    ],
+                    "widget_id": "35903114"
+                },
+                {
+                    "title": "Incidents",
+                    "widget_type": "tabular",
+                    "stream": "oia-incidents-stream",
+                    "extra_filter": "",
+                    "ts_column": "timestamp",
+                    "segment_filter": false,
+                    "showRowSummary": true,
+                    "min_width": 12,
+                    "height": 12,
+                    "max_width": 12,
+                    "paginated": true,
+                    "max_rows": 50,
+                    "remote_searchable": true,
+                    "remote_searchable_cols": [
+                        "_RDA_Id",
+                        "i_summary",
+                        "i_priority_label",
+                        "i_state",
+                        "incident_id",
+                        "i_itsm_ticket_number",
+                        "i_source",
+                        "node_id"
+                    ],
+                    "columns": {
+                        "_RDA_Id": {
+                            "title": "Record ID",
+                            "visible": false,
+                            "key": true,
+                            "defaultWidth": 150
+                        },
+                        "i_source_key": {
+                            "title": "Source Key",
+                            "visible": false,
+                            "defaultWidth": 150
+                        },
+                        "project_id": {
+                            "title": "Project Id",
+                            "visible": false,
+                            "hidden": false,
+                            "key": true,
+                            "defaultWidth": 150
+                        },
+                        "node_id": {
+                            "title": "Node ID",
+                            "defaultWidth": 150
+                        },
+                        "i_summary": {
+                            "title": "Summary",
+                            "formatter": "truncate",
+                            "defaultWidth": 270
+                        },
+                        "i_priority_color": {
+                            "title": "Priority Color",
+                            "visible": false,
+                            "hidden": true,
+                            "defaultWidth": 100
+                        },
+                        "i_priority_label": {
+                            "title": "Priority",
+                            "htmlTemplateForRow": "<span class='badge' style='background-color: {{'{{ row.i_priority_color }}'}}' > {{'{{ row.i_priority_label }}'}} </span>",
+                            "defaultWidth": 150
+                        },
+                        "i_state_color": {
+                            "title": "State Color",
+                            "visible": false,
+                            "hidden": true,
+                            "defaultWidth": 100
+                        },
+                        "i_state": {
+                            "title": "State",
+                            "htmlTemplateForRow": "<span class='badge' style='background-color: {{'{{ row.i_state_color }}'}}' > {{'{{ row.i_state }}'}} </span>",
+                            "defaultWidth": 150
+                        },
+                        "incident_id": {
+                            "title": "Incident ID",
+                            "key": true,
+                            "defaultWidth": 150
+                        },
+                        "i_itsm_ticket_number": {
+                            "title": "ITSM Ticket",
+                            "defaultWidth": 100
+                        },
+                        "i_source": {
+                            "title": "Source",
+                            "defaultWidth": 100
+                        },
+                        "i_cfx_incident_occurred": {
+                            "title": "Occurred At",
+                            "type": "DATETIME",
+                            "defaultWidth": 180
+                        },
+                        "i_created_ts": {
+                            "title": "Created At",
+                            "type": "DATETIME",
+                            "defaultWidth": 180
+                        },
+                        "timestamp": {
+                            "title": "Updated At",
+                            "type": "DATETIME",
+                            "defaultWidth": 180
+                        },
+                        "i_resolved_at_ts": {
+                            "title": "Resolved At",
+                            "type": "DATETIME",
+                            "defaultWidth": 180
+                        },
+                        "node_type": {
+                            "title": "Node Type",
+                            "visible": false,
+                            "defaultWidth": 150
+                        },
+                        "i_config_items": {
+                            "title": "Config Items",
+                            "visible": false,
+                            "defaultWidth": 150
+                        },
+                        "i_cfx_incident_type": {
+                            "title": "Incident Type",
+                            "defaultWidth": 180
+                        },
+                        "i_correlation_id": {
+                            "title": "Correlation ID",
+                            "visible": false,
+                            "defaultWidth": 150
+                        },
+                        "i_alert_count": {
+                            "title": "Alert Count",
+                            "type": "DOUBLE",
+                            "defaultWidth": 180
+                        },
+                        "i_resolved_by": {
+                            "title": "Resolved By",
+                            "visible": false,
+                            "defaultWidth": 150
+                        },
+                        "i_resolution_code": {
+                            "title": "Resolution Code",
+                            "visible": false,
+                            "defaultWidth": 150
+                        },
+                        "i_comments": {
+                            "title": "Comments",
+                            "visible": false,
+                            "defaultWidth": 150
+                        }
+                    },
+                    "actions": [],
+                    "widget_id": "ca37008a"
+                }
+            ]
+        }
+    ],
+    "saved_time": "2026-08-17T08:03:21.796473"
+}

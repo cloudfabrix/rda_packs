@@ -1,0 +1,527 @@
+{
+    "name": "host_os_topology2",
+    "label": "Host OS Topology",
+    "description": "Host OS Topology",
+    "enabled": true,
+    "dashboard_style": "auto",
+    "dashboard_type": "template",
+    "dashboard_folder": "Asset_Topology",
+    "dashboard_generator0": {
+        "attachment": "widget_code_generator"
+    },
+    "live_edit": true,
+    "version": "26.5.21.1",
+    "short_label": "Stack",
+    "context_label_id": "node_id",
+    "dashboard_filters": {
+        "time_filter": true
+    },
+    "computedContext": {
+        "stack_type": {
+            "defaultValue": "dynamic"
+        },
+        "stack_definition": {
+            "defaultValue": {
+                "is_dynamic": true,
+                "dynamic_nodes": {
+                    "stream": "cfx_rdaf_topology_nodes",
+                    "query": "(customer_tag is '{{CUST_TAG}}' or customer_tag is empty)",
+                    "limit": 0,
+                    "sorting": null
+                },
+                "dynamic_relationships": {
+                    "stream": "cfx_rdaf_topology_edges",
+                    "limit": 0,
+                    "sorting": null
+                }
+            }
+        },
+        "alert_source": {
+            "defaultValue": {
+                "alerts_stream": "oia-alerts-stream",
+                "limit": 1000,
+                "group_by": [
+                    "a_en_node_id",
+                    "a_severity",
+                    "a_status"
+                ],
+                "duration_hours": 3000,
+                "extra_filter": "a_source_systemname is not 'Alert Group'",
+                "ts_column": "timestamp",
+                "agg": "value_count",
+                "column": "count_",
+                "type": "int",
+                "alerts_chunk_size": 200
+            }
+        }
+    },
+    "template_variables": {
+        "CUST_TAG": {
+            "contextId": "customerTag"
+        },
+        "NODE_ID": {
+            "contextId": [
+                "navigatorSelectionContexts",
+                "secondaryListSelection",
+                "node_id"
+            ]
+        },
+        "NODE_TYPE": {
+            "contextId": [
+                "navigatorSelectionContexts",
+                "secondaryListSelection",
+                "node_type"
+            ]
+        }
+    },
+    "navigation_dashboards": {
+        "tree_data": {
+            "column_name": "node_type",
+            "display_column1": "node_type",
+            "pstream_name": "cfx_rdaf_topology_nodes",
+            "cfxql_query": "node_type in ['Host_OS','OS_Service'] and (customerTag is '{{CUST_TAG}}' or customerTag is empty or customerTag is '' or customerTag is 'None')",
+            "cfxql_query0": "timestamp is after -90d"
+        },
+        "tree_detail": {
+            "display_column": "node_label",
+            "selected_columns": {
+                "node_id": "Node Id",
+                "node_label": "Node Name"
+            },
+            "pstream_name": "cfx_rdaf_topology_nodes",
+            "cfxql_query": "node_type in ['Host_OS','OS_Service'] and (customerTag is '{{CUST_TAG}}' or customerTag is empty or customerTag is '' or customerTag is 'None')",
+            "cfxql_query0": "timestamp is after -90d"
+        },
+        "showNodeIcon": true,
+        "showSearchBox": false,
+        "autoSelectFirstItem": true
+    },
+    "dashboard_sections": [
+        {
+            "title": "Full Stack",
+            "widgets": [
+                {
+                    "title": "Full Stack",
+                    "widget_type": "topology_stack_view",
+                    "widget_template": "asv/application-stack-view",
+                    "chunk_size": 200,
+                    "layer_order": [
+                        "Virtualization",
+                        "Compute",
+                        "Storage",
+                        "Wireless",
+                        "Network"
+                    ],
+                    "stack_type": "dynamic",
+                    "stack_definition": {
+                        "is_dynamic": true,
+                        "dynamic_nodes": {
+                            "column_name": "node_type",
+                            "db_name": "cfx_rdaf_topology",
+                            "nodes_collection": "cfx_rdaf_topology_nodes",
+                            "stream": "graphdb://cfx_rdaf_topology/cfx_rdaf_topology_nodes",
+                            "query": "(customer_tag is '{{CUST_TAG}}' or customer_tag is empty)"
+                        },
+                        "dynamic_relationships": {
+                            "db_name": "cfx_rdaf_topology",
+                            "edges_collection": "cfx_rdaf_topology_edges",
+                            "graph_name": "cfx_rdaf_topology_graph",
+                            "relation_map": "rdaf_topology_relationships",
+                            "stream": "graphdb://cfx_rdaf_topology/cfx_rdaf_topology_edges",
+                            "query": "(customer_tag is '{{CUST_TAG}}' or customer_tag is empty)"
+                        }
+                    },
+                    "alert_source": {
+                        "alerts_stream": "oia-alerts-stream",
+                        "group_by": [
+                            "a_en_node_id",
+                            "a_severity",
+                            "a_status"
+                        ],
+                        "duration_hours": 3000,
+                        "extra_filter": "a_source_systemname is not 'Alert Group'",
+                        "ts_column": "timestamp",
+                        "agg": "value_count",
+                        "column": "count_",
+                        "type": "int",
+                        "alerts_chunk_size": 200
+                    },
+                    "alert_detail_columns": {
+                        "a_message": {
+                            "title": "Message",
+                            "type": "GROUPED",
+                            "formatter": "truncate",
+                            "group": {
+                                "a_source_systemname": "Source",
+                                "a_asset_ip_address": "Asset IP Address",
+                                "a_status": "Status",
+                                "a_asset_name": "Asset Name"
+                            },
+                            "color-column": "severity_color"
+                        },
+                        "severity_color": {
+                            "type": "COLOR-MAP",
+                            "source-column": "a_severity",
+                            "color-map": {
+                                "CRITICAL": "#e53935",
+                                "HIGH": "#f57c00",
+                                "LOW": "#ffd54f",
+                                "MAJOR": "#f57c00",
+                                "MINOR": "#ffa726",
+                                "MODERATE": "#ffa726",
+                                "PLANNING": "#35e535",
+                                "WARNING": "#ffd54f"
+                            }
+                        },
+                        "a_raised_ts": {
+                            "title": "Raised At",
+                            "type": "DATETIME"
+                        },
+                        "a_severity": {
+                            "title": "Severity",
+                            "htmlTemplateForRow": "{% raw %}<span class='badge' style='background-color: {{row.severity_color}}' > {{row.a_severity}} </span>{% endraw %}"
+                        }
+                    },
+                    "edge_detail_columns": {
+                        "left_id": {
+                            "key": true,
+                            "title": "Left ID"
+                        },
+                        "left_label": {
+                            "key": false,
+                            "title": "Source"
+                        },
+                        "right_id": {
+                            "key": true,
+                            "title": "Right ID"
+                        },
+                        "right_label": {
+                            "key": false,
+                            "title": "Destination"
+                        },
+                        "relation_type": {
+                            "key": false,
+                            "title": "Relation"
+                        }
+                    },
+                    "node_context_actions": [
+                        {
+                            "id": "view_summary",
+                            "icon": "mdi-eye",
+                            "title": "View Details",
+                            "selectionType": "SINGLE"
+                        },
+                        {
+                            "title": "Asset Stack View",
+                            "icon": "mdi-open-in-new",
+                            "type": "GO_TO_APP_STATE",
+                            "appName": "user-dashboard/host_os_topology_drill_down",
+                            "selectionType": "SINGLE",
+                            "identifier": "launch-action:view-dashboard"
+                        }
+                    ],
+                    "height": 12,
+                    "min_width": 12,
+                    "max_width": 12,
+                    "widget_id": "fullstack_1"
+                }
+            ]
+        },
+        {
+            "title": "Asset Map",
+            "show_filter": false,
+            "widgets": [
+                {
+                    "widget_type": "topology",
+                    "title": "Asset Map",
+                    "chartProperties": {
+                        "hasToolbar": true,
+                        "shortToolbar": false,
+                        "enableControlPanel": false,
+                        "userZoomingEnabled": true
+                    },
+                    "stack1": "cfx_rdaf_topology",
+                    "stack_type": "dynamic",
+                    "chunk_size": 200,
+                    "auto_group": true,
+                    "stack_definition": {
+                        "is_dynamic": true,
+                        "dynamic_nodes": {
+                            "column_name": "node_type",
+                            "db_name": "cfx_rdaf_topology",
+                            "nodes_collection": "cfx_rdaf_topology_nodes",
+                            "stream": "graphdb://cfx_rdaf_topology/cfx_rdaf_topology_nodes",
+                            "query": "(customer_tag is '{{CUST_TAG}}' or customer_tag is empty)"
+                        },
+                        "dynamic_relationships": {
+                            "db_name": "cfx_rdaf_topology",
+                            "edges_collection": "cfx_rdaf_topology_edges",
+                            "graph_name": "cfx_rdaf_topology_graph",
+                            "relation_map": "rdaf_topology_relationships",
+                            "stream": "graphdb://cfx_rdaf_topology/cfx_rdaf_topology_edges",
+                            "query": "(customer_tag is '{{CUST_TAG}}' or customer_tag is empty)"
+                        }
+                    },
+                    "show_alert_details": true,
+                    "has_more_data_flag": true,
+                    "alert_source": {
+                        "alerts_stream": "oia-alerts-stream",
+                        "limit": 1000,
+                        "group_by": [
+                            "a_en_node_id",
+                            "a_severity",
+                            "a_status"
+                        ],
+                        "duration_hours": 3000,
+                        "extra_filter": "a_source_systemname is not 'Alert Group'",
+                        "ts_column": "timestamp",
+                        "agg": "value_count",
+                        "column": "count_",
+                        "type": "int",
+                        "alerts_chunk_size": 200
+                    },
+                    "alert_detail_columns": {
+                        "a_message": {
+                            "title": "Message",
+                            "type": "GROUPED",
+                            "formatter": "truncate",
+                            "group": {
+                                "a_source_systemname": "Source",
+                                "a_asset_ip_address": "Asset IP Address",
+                                "a_status": "Status",
+                                "a_asset_name": "Asset Name"
+                            },
+                            "color-column": "severity_color"
+                        },
+                        "severity_color": {
+                            "type": "COLOR-MAP",
+                            "source-column": "a_severity",
+                            "color-map": {
+                                "CRITICAL": "#e53935",
+                                "HIGH": "#f57c00",
+                                "LOW": "#ffd54f",
+                                "MAJOR": "#f57c00",
+                                "MINOR": "#ffa726",
+                                "MODERATE": "#ffa726",
+                                "PLANNING": "#35e535",
+                                "WARNING": "#ffd54f"
+                            }
+                        },
+                        "a_raised_ts": {
+                            "title": "Raised At",
+                            "type": "DATETIME"
+                        },
+                        "a_severity": {
+                            "title": "Severity",
+                            "htmlTemplateForRow": "{% raw %}<span class='badge' style='background-color: {{row.severity_color}}' > {{row.a_severity}} </span>{% endraw %}"
+                        }
+                    },
+                    "nodes_report": {
+                        "reportMetaData": {
+                            "sorting": true,
+                            "filtering": true,
+                            "title": "Nodes",
+                            "remote_searchable": false,
+                            "remote_searchable_cols": [
+                                "name",
+                                "node_label",
+                                "node_id",
+                                "node_type"
+                            ],
+                            "reportColumnDefinitionList": [
+                                {
+                                    "identifier": "node_label",
+                                    "title": "Name",
+                                    "key": true
+                                },
+                                {
+                                    "identifier": "layer",
+                                    "key": false,
+                                    "title": "Layer"
+                                },
+                                {
+                                    "identifier": "node_type",
+                                    "key": false,
+                                    "title": "Node Type"
+                                },
+                                {
+                                    "identifier": "name",
+                                    "hidden": true,
+                                    "key": false
+                                },
+                                {
+                                    "identifier": "vcenter_name",
+                                    "title": "vCenter Name",
+                                    "key": false
+                                },
+                                {
+                                    "identifier": "datacenter",
+                                    "key": false,
+                                    "title": "Data Center"
+                                },
+                                {
+                                    "identifier": "esxi_cluster",
+                                    "key": false,
+                                    "title": "ESXI Cluster"
+                                },
+                                {
+                                    "identifier": "vcenter_address",
+                                    "key": false,
+                                    "title": "vCenter Address"
+                                },
+                                {
+                                    "identifier": "vcenter_object",
+                                    "key": false,
+                                    "title": "vCenter Object"
+                                },
+                                {
+                                    "identifier": "vcenter_os_type",
+                                    "key": false,
+                                    "title": "vCenter OS type"
+                                },
+                                {
+                                    "identifier": "phy_switch_name",
+                                    "key": false,
+                                    "title": "Physical Switch Name"
+                                },
+                                {
+                                    "identifier": "node_id",
+                                    "key": true,
+                                    "hidden": true
+                                }
+                            ],
+                            "actions": [
+                                {
+                                    "title": "Asset Stack View",
+                                    "icon": "mdi-open-in-new",
+                                    "type": "GO_TO_APP_STATE",
+                                    "appName": "user-dashboard/host_os_topology_drill_down",
+                                    "selectionType": "SINGLE",
+                                    "identifier": "launch-action:view-dashboard"
+                                }
+                            ]
+                        }
+                    },
+                    "edges_report": {
+                        "reportId": "rda.saas.topology.edges.report",
+                        "reportMetaData": {
+                            "sorting": true,
+                            "filtering": true,
+                            "title": "Edges",
+                            "reportColumnDefinitionList": [
+                                {
+                                    "hidden": false,
+                                    "id": "left_id",
+                                    "identifier": "left_id",
+                                    "key": true,
+                                    "title": "Left ID",
+                                    "type": "TEXT",
+                                    "visible": false
+                                },
+                                {
+                                    "hidden": false,
+                                    "id": "left_label",
+                                    "identifier": "left_label",
+                                    "key": false,
+                                    "title": "Source",
+                                    "type": "TEXT",
+                                    "visible": true
+                                },
+                                {
+                                    "hidden": false,
+                                    "id": "right_id",
+                                    "identifier": "right_id",
+                                    "key": true,
+                                    "title": "Right ID",
+                                    "type": "TEXT",
+                                    "visible": false
+                                },
+                                {
+                                    "hidden": false,
+                                    "id": "right_label",
+                                    "identifier": "right_label",
+                                    "key": false,
+                                    "title": "Destination",
+                                    "type": "TEXT",
+                                    "visible": true
+                                },
+                                {
+                                    "hidden": false,
+                                    "id": "relation_type",
+                                    "identifier": "relation_type",
+                                    "key": false,
+                                    "title": "Relation",
+                                    "type": "TEXT",
+                                    "visible": true
+                                }
+                            ],
+                            "actions": []
+                        }
+                    },
+                    "max_width": 12,
+                    "min_width": 6,
+                    "height": 12,
+                    "widget_id": "9db5a36f"
+                }
+            ]
+        },
+        {
+            "title": "Relationships",
+            "show_filter": false,
+            "widgets": [
+                {
+                    "widget_type": "graphdb",
+                    "title": "Relationships",
+                    "stack_name": "host_os",
+                    "nodes_collection1": "cfx_rdaf_topology_nodes",
+                    "edges_collection1": "cfx_rdaf_topology_edges",
+                    "graph_name1": "cfx_rdaf_topology_graph",
+                    "relation_map1": "rdaf_topology_relationships",
+                    "graph_report_extra_node_fields": [
+                        "model",
+                        "hostname"
+                    ],
+                    "node_context_actions": [
+                        {
+                            "title": "Asset Stack View",
+                            "icon": "mdi-open-in-new",
+                            "type": "GO_TO_APP_STATE",
+                            "appName": "user-dashboard/host_os_topology_drill_down",
+                            "selectionType": "SINGLE",
+                            "identifier": "launch-action:view-dashboard",
+                            "contextParamList": {
+                                "contextParams": [
+                                    {
+                                        "paramKey": "node_type",
+                                        "paramId": "node_type"
+                                    },
+                                    {
+                                        "paramKey": "node_label",
+                                        "paramId": "node_label"
+                                    },
+                                    {
+                                        "paramKey": "node_id",
+                                        "paramId": "node_id"
+                                    },
+                                    {
+                                        "paramKey": "customerTag",
+                                        "paramId": "customerTag"
+                                    },
+                                    {
+                                        "paramKey": "customerTag",
+                                        "paramId": "customer_tag"
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "widget_id": "9abca36f"
+                }
+            ]
+        }
+    ],
+    "saved_time": "2026-07-20T06:58:34.969807",
+    "menu_folder_path": [
+        "Top Level"
+    ]
+}
