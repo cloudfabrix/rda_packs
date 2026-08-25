@@ -1,0 +1,20 @@
+%% stream = no and limit = 0
+
+@c:new-block
+    --> @dm:query-persistent-stream-iterate-by-chunk name="network-devices-inventory" and batch_size="10000" and query="asset_object equals 'Chassis'"
+    --> @dm:save name="temp-cisco_device_chassis_dict" and append="yes"
+    --> @dm:gc
+
+--> @c:new-block
+    --> @dm:recall name="temp-cisco_device_chassis_dict" and return_empty="yes"
+    --> @dm:gc
+    --> @dm:skip-block-if-shape row_count=0
+    --> @dm:skip-block-if-shape column_count=1
+    --> @dm:add-missing-columns columns="sw_version,CLLI_code"
+    --> @dm:rename-columns image="sw_version" and clli_code = CLLI_code and device="hostname"
+    --> @dm:add-missing-columns columns="city,zone,image,clli_code,region,network_code,org_id,network_type"
+    --> @dm:rename-columns image="sw_version" and clli_code = CLLI_code
+    --> @dm:eval city = "city if city else (device[:4] if len(device) == 11 else 'Lab')" and clli_code = "clli_code if clli_code else (device[:6] if len(device) == 11 else 'Lab')" and region = "region if region else (device[4:6] if len(device) == 11 else 'Lab')" and network_code = "network_code if network_code else (device[6:8] if len(device) == 11 else 'Lab')" and network_type = "network_type if network_type else ('Enterprise' if network_code == 'NE' else 'FirstNet' if network_code == 'NF' else 'Consumer')" and zone = "zone if zone else (device[:4] + device[7:9] if len(device) == 11 else 'Lab')"
+    --> @dm:selectcolumns include='zone|network_type|^device$|clli_code|city|region|network_code|image|ip_address'
+    --> @dm:save name="mobility_device_mappings"
+    --> @dm:gc

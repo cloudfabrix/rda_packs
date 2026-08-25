@@ -1,0 +1,21 @@
+name: epm_trap_sender
+id: epm_trap_sender
+version: 2024041201
+category: EPM Trap Sender
+comment: EPM Trap Sender
+enabled: true
+type: Service
+provider: CloudFabrix Software, Inc.
+attrs: {}
+service_pipelines:
+    -   name: epm_trap_notification_sender
+        label: epm_trap_notification_sender
+        restart_on_pipeline_update: true
+        site: rda.*
+        version: '*'
+        site_type: regex
+        instances: 1
+        scaling_policy:
+            min_instances: 1
+            max_instances: 1
+saved_time: '2025-07-04T11:04:20.016257'

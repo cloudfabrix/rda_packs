@@ -1,0 +1,64 @@
+{
+  "name": "incident-details-activities",
+  "label": "Incident Activities",
+  "description": "OIA Activities in Incident",
+  "version": "2026.02.10.1",
+  "enabled": true,
+  "dashboard_style": "auto",
+  "status_poller": {},
+  "dashboard_type": "template",
+  "template_variables": {
+    "PROJECT_ID": {
+      "default": null,
+      "contextId": "projectid"
+    },
+    "INCIDENT_ID": {
+      "default": null,
+      "contextId": "incidentid"
+    }
+  },
+  "dashboard_filters": {
+    "time_filter": false,
+    "columns_filter": []
+  },
+  "dashboard_sections": [
+    {
+      "title": "Activities",
+      "show_filter": false,
+      "projects": [],
+      "widgets": [
+        {
+          "title": "Incident Summary",
+          "min_width": 12,
+          "height": 2,
+          "widget_type": "portal_html",
+          "widget_template": "cfx-oia/incident-summary",
+          "widget_id": "6e64b2f1"
+        },
+        {
+          "title": "Activities",
+          "widget_type": "tabular",
+          "min_width": 12,
+          "height": 12,
+          "max_width": 12,
+          "paginated": true,
+          "refreshRequired": true,
+          "timebased": false,
+          "max_rows": 100,
+          "api-endpoint": {
+            "service-name": "cfxdimensions-app-irm_service",
+            "namespace": "io.cfx.dimensions.app",
+            "version": "*",
+            "methodName": "invokeAppApi:getActivityDashboard",
+            "stringified-params": true,
+            "parse-output": true,
+            "params": [
+              {}
+            ]
+          },
+          "widget_id": "94c3fc11"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,121 @@
+%% stream = no and limit = 0
+
+@c:new-block
+    --> @dm:empty
+    --> @dm:addrow name="device_monitoring_stream"
+    --> #dm:query-persistent-stream *
+    --> @dm:add-missing-columns columns = "last_updated_time,issue_status"
+    --> @dm:save name = "temp-device_monitoring_stream"
+
+## Get latest records from mobility_device_mappings Dataset and save it in temp-mobilty_device_mappings_data dataset
+--> @c:new-block
+    --> @dm:empty
+    --> @dm:recall name = "mobility_device_mappings"
+    --> @dm:dedup columns = "ip_address"
+    --> @dm:selectcolumns exclude = "image,Latitude,Longitude,__uuid,timestamp,count_,_RDA_Id"
+    --> @dm:add-missing-columns columns = 'category' & value = 'BULKSTATS'
+    --> @dm:save name = "temp-mobilty_device_mappings_bulkstats"
+    --> @dm:eval category = "'SNMP'"
+    --> @dm:save name = "temp-mobilty_device_mappings_snmp"
+    --> @dm:eval category = "'SYSLOG'"
+    --> @dm:save name = "temp-mobilty_device_mappings_syslog"
+
+--> @c:new-block
+    --> @dm:concat names = "temp-mobilty_device_mappings_.*"
+    --> @dm:rename-columns device_ip = 'ip_address'
+    --> @dm:save name = "temp-mobilty_device_mappings_data"
+
+## Get the IP addresses of devices that have received data in the debounce interval (15 minutes)
+--> @c:new-block
+    --> @dm:empty
+    --> @dm:addrow name='mobility_new_kpi_list' and limit=0 and groupby="schema" and aggs="value_count:count_"
+    --> #dm:query-persistent-stream validation == 'Passed'
+    --> @dm:eval pstream="'mobility_kpi_metrics_data' + '_' + schema"
+    --> @dm:selectcolumns include='^pstream$'
+    --> @dm:save name='temp-get-pstream-list'
+
+--> @c:data-loop dataset ='temp-get-pstream-list' and columns='pstream'
+    --> @dm:empty
+    --> @dm:addrow name='$pstream' & groupby = "ip_address" & aggs = "cardinality:ip_address" & limit=0
+    --> #dm:query-persistent-stream timestamp is after -15mins
+    --> @dm:dedup columns = "ip_address"
+    --> @dm:rename-columns device_ip = 'ip_address'
+    --> @dm:add-missing-columns columns = 'category' & value = 'BULKSTATS'
+    --> @dm:save name = "temp-devices_with_recent_bulkstats" and append='yes'
+
+--> @c:new-block
+    --> @dm:empty
+    --> #dm:query-persistent-stream timestamp is after -15mins with-input name = "snmp_trap_event_stream" & groupby = "rda_gw_client_ip" & aggs = "cardinality:rda_gw_client_ip" & limit="0"
+    --> @dm:selectcolumns include = "^rda_gw_client_ip$"
+    --> @dm:rename-columns device_ip = 'rda_gw_client_ip'
+    --> @dm:dedup columns = "device_ip"
+    --> @dm:add-missing-columns columns = 'category' & value = 'SNMP'
+    --> @dm:save name = "temp-devices_with_recent_snmp"
+
+--> @c:new-block
+    --> @dm:empty
+    --> #dm:query-persistent-stream timestamp is after -15mins  with-input name = "syslog_udp_event_stream" & groupby = "rda_gw_client_ip" & aggs = "cardinality:rda_gw_client_ip" & limit="0"
+    --> @dm:selectcolumns include = "^rda_gw_client_ip$"
+    --> @dm:rename-columns device_ip = 'rda_gw_client_ip'
+    --> @dm:dedup columns = "device_ip"
+    --> @dm:add-missing-columns columns = 'category' & value = 'SYSLOG'
+    --> @dm:save name = "temp-devices_with_recent_syslog"
+
+--> @c:new-block
+    --> @dm:concat names = "temp-devices_with_recent_.*"
+    --> @dm:add-missing-columns columns = 'had_data' & value = 'True'
+    --> @dm:add-missing-columns columns = 'issue_status' & value = 'Clear'
+    --> @dm:save name = "temp-devices_with_recent_data"
+
+## Now figure out which of the monitored devices had issues if temp-device_monitoring_stream exists
+--> @c:new-block
+    --> @dm:recall name = "temp-device_monitoring_stream"
+    --> @dm:skip-block-if-shape row_count=0
+    --> @dm:recall name = "temp-mobilty_device_mappings_data"
+    --> @dm:add-missing-columns columns = 'had_data' & value = 'False'
+    --> @dm:enrich dict = "temp-devices_with_recent_data" & src_key_cols = "device_ip,category" and dict_key_cols = "device_ip,category" and enrich_cols = "had_data,issue_status" and return_empty_dict='yes' and return_empty_cols='yes'
+    --> @dm:add-missing-columns columns = 'had_data_x,had_data_y'
+    --> @dm:eval had_data = "had_data_x if had_data_y is None else had_data_y"
+    --> @dm:eval issue_status = "'Active' if had_data_y is None else 'Clear'"
+    --> @dm:eval last_updated_time = "utcnow().isoformat()"
+    --> @dm:enrich dict = "temp-device_monitoring_stream" & src_key_cols="device_ip,category" and dict_key_cols="device_ip,category" and enrich_cols="last_updated_time,issue_status" and return_empty_dict='yes' and return_empty_cols='yes'
+    --> @dm:add-missing-columns columns = 'issue_status_x,issue_status_y'
+    --> *dm:filter issue_status_x = 'Active' or issue_status_y is not Null
+    --> @dm:eval issue_status = "issue_status_x if issue_status_x is not None else 'Clear'"
+    --> @dm:eval last_updated_time = "last_updated_time_x if ((last_updated_time_y is None) or (issue_status_x != issue_status_y)) else last_updated_time_y"
+    --> *dm:filter issue_status != 'Clear' or last_updated_time after -10080mins
+    --> @dm:selectcolumns exclude = "^had_data|^last_updated_time_x$|^last_updated_time_y$|^issue_status_x$|^issue_status_y$|^ip_address$"
+    --> @dm:save name = "temp-device_monitoring_dataset"
+
+## Now figure out which of the monitored devices had issues if temp-device_monitoring_stream does not exists
+--> @c:new-block
+    --> @dm:recall name = "temp-device_monitoring_stream"
+    --> @dm:skip-block-if-shape row_count>0
+    --> @dm:recall name = "temp-mobilty_device_mappings_data"
+    --> @dm:add-missing-columns columns = 'had_data' & value = 'False'
+    --> @dm:enrich dict = "temp-devices_with_recent_data" & src_key_cols = "device_ip,category" and dict_key_cols = "device_ip,category" and enrich_cols = "had_data,issue_status" and return_empty_dict='yes' and return_empty_cols='yes'
+    --> @dm:add-missing-columns columns = 'had_data_x,had_data_y'
+    --> @dm:eval had_data = "had_data_x if had_data_y is None else had_data_y"
+    --> @dm:eval issue_status = "'Active' if had_data_y is None else 'Clear'"
+    --> @dm:eval last_updated_time = "utcnow().isoformat()"
+    --> @dm:enrich dict = "temp-device_monitoring_stream" & src_key_cols="device_ip,category" and dict_key_cols="device_ip,category" and enrich_cols="last_updated_time,issue_status" and return_empty_dict='yes' and return_empty_cols='yes'
+    --> @dm:add-missing-columns columns = 'issue_status,last_updated_time'
+    --> *dm:filter issue_status = 'Active' or issue_status is not Null
+    ## --> @dm:eval issue_status = "issue_status_x if issue_status_x is not None else 'Clear' else issue_status if issue_status is not None"
+    ## --> @dm:eval last_updated_time = "last_updated_time if last_updated_time is not None else last_updated_time_x if ((last_updated_time_y is None) or (issue_status_x != issue_status_y)) else last_updated_time_y"
+    --> *dm:filter issue_status != 'Clear' or last_updated_time after -10080mins
+    --> @dm:selectcolumns exclude = "^had_data|^last_updated_time_x$|^last_updated_time_y$|^issue_status_x$|^issue_status_y$|^ip_address$"
+    --> @dm:save name = "temp-device_monitoring_dataset"
+
+## Now empty the pstream
+--> @c:new-block
+    --> @dm:empty
+    --> @dm:addrow name="device_monitoring_stream"
+    --> #dm:pstream-delete-data-by-query timestamp is before -1 mins
+
+## Finally, write the latest issues list to the pstream
+--> @c:new-block
+    --> @dm:empty
+    --> @dm:recall name = "temp-device_monitoring_dataset"
+    --> @dm:selectcolumns exclude = "image,Latitude,Longitude,__uuid,timestamp,count_,_RDA_Id"
+    --> @rn:write-stream name = "device_monitoring_stream"

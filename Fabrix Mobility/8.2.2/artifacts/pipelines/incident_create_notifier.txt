@@ -1,0 +1,23 @@
+%% stream = no and limit = 0
+
+%% import_src_type = "agent,email_sender"
+
+## %% import_source = "agent,snowv2,gmail"
+## Listen to Incident-Create and create SNOW ticket and also notify via email.
+@dm:query-persistent-stream-from-bookmark name="oia-incident-inserts-stream" and bookmark="incident_create_notifier_bkmrk"
+    --> @dm:skip-block-if-shape row_count = 0
+    ## make sure to pass projectid to the stream.
+    --> @dm:add-missing-columns columns="room_id,project_id,incident_id,customer_id,i_source_key" & value=""
+    --> @dm:copy-columns from="project_id" & to="roomid"
+    --> @dm:copy-columns from="project_id" & to="room_id"
+    --> @dm:copy-columns from="project_id" & to="projectid"
+    --> @dm:copy-columns from="incident_id" & to="incidentid"
+    --> @dm:copy-columns from="customer_id" & to="customerid"
+    --> @dm:copy-columns from="i_source_key" & to="sourcekey"
+    --> @dm:copy-columns from="i_source_key" & to="source_key"
+    --> @dm:copy-columns from="i_state" & to="status"
+    ## Create ITSM Ticket
+    ## --> @exec:run-pipeline name="itsm_ticket_upsert_processor" & ignore_failures="no"
+    ## Notify via Email
+    --> @exec:run-pipeline name="send_email_on_incident_create" & ignore_failures="no"
+

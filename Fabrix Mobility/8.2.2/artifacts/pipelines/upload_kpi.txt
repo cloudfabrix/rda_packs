@@ -1,0 +1,57 @@
+%% stream = no and limit = 0
+@c:new-block
+    --> @dm:empty
+    --> @exec:get-input
+    --> @dm:save name="temp-input-dataset"
+    --> @dm:save name="temp-upload_kpi_input"
+--> @c:new-block
+    --> @dm:recall name="temp-upload_kpi_input"
+    --> @dm:to-type columns="fileUpload" and type="str"
+    --> @dm:to-type columns="replace" and type="str"
+    --> @dm:replace-data columns="fileUpload" and expr="'" and replace='"'
+    --> @dm:explode-json column="fileUpload"
+    --> @dm:eval dataset_name="'Autox_KPI_list_new'"
+    --> @dm:save name ="temp-input-dataset"
+--> @c:data-loop dataset="temp-input-dataset" and columns="dataset_name"
+    --> @dm:recall name="$dataset_name" and return_empty   ="yes"
+    --> @dm:save name ="temp-customer-old-data"
+--> @c:data-loop dataset="temp-input-dataset" and columns="bucketName,objectName,dataset_name"
+    --> @dm:recall name="temp-input-dataset"
+    --> *dm:filter replace=="True"
+    --> @dm:skip-block-if-shape row_count=0
+    --> @dm:get-from-location path="$bucketName/$objectName"
+    --> @dm:fixcolumns
+    --> @dm:rename-columns schema = Schema and sub_schema  = Sub_Schema and Schema_Original = Schema and KPI_Name = 'KPI Name'
+    --> @dm:copy-columns to="KPI_Label" & from="KPI_Name"
+    --> @dm:copy-columns to="Schema_Original" & from="schema"
+    --> @dm:manipulate-string from ="Schema_Original" and to ="Schema_Original" and func="upper"
+    --> @dm:manipulate-string from ="schema" and to ="schema" and func="lower"
+    --> @dm:check-columns must_contain="KPI_Name" and action="fail"
+    --> @dm:eval KPI_Name = "KPI_Name if KPI_Name and KPI_Name.lower().startswith('kpi_')  else 'kpi_' + KPI_Name"
+    --> @dm:eval KPI_Name = "KPI_Name.replace('-', '_').replace(' ', '_')"
+    --> @dm:eval lastupdated = 'int(time_now_as_ms())'
+    --> @dm:dedup columns="KPI_Name"
+    --> @dm:save name="temp-uploaded-file-data"
+    --> @dm:save name="$dataset_name"
+    --> @dm:skip-pipeline-if-shape row_count > 0
+--> @c:data-loop dataset="temp-input-dataset" and columns="bucketName,objectName,dataset_name"
+    --> @dm:recall name="temp-input-dataset"
+    --> *dm:filter replace=="False"
+    --> @dm:skip-block-if-shape row_count=0
+    --> @dm:get-from-location path="$bucketName/$objectName"
+    --> @dm:fixcolumns
+    --> @dm:rename-columns schema = Schema and sub_schema  = Sub_Schema and Schema_Original = Schema  and KPI_Name = 'KPI Name'
+    --> @dm:copy-columns to="KPI_Label" & from="KPI_Name"
+    --> @dm:copy-columns to="Schema_Original" & from="schema"
+    --> @dm:manipulate-string from ="Schema_Original" and to ="Schema_Original" and func="upper"
+    --> @dm:manipulate-string from ="schema" and to ="schema" and func="lower"
+    --> @dm:check-columns must_contain="KPI_Name" and action="fail"
+    --> @dm:eval KPI_Name = "KPI_Name if KPI_Name and KPI_Name.lower().startswith('kpi_')  else 'kpi_' + KPI_Name"
+    --> @dm:eval KPI_Name = "KPI_Name.replace('-', '_').replace(' ', '_')"
+    --> @dm:eval lastupdated = "int(time_now_as_ms())"
+    --> @dm:save name="temp-uploaded-file-data"
+    --> @dm:recall name ="temp-customer-old-data"
+    --> @dm:save name="temp-uploaded-file-data" and append= "yes"
+    --> @dm:recall name="temp-uploaded-file-data"
+    --> @dm:dedup columns="KPI_Name"
+    --> @dm:save name="$dataset_name"

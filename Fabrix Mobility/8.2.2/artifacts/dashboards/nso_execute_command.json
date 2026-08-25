@@ -1,0 +1,86 @@
+{
+  "name": "nso_execute_command",
+  "label": "Commands History",
+  "description": "onboarded_devices: Insights",
+  "dashboard_folder": "Default",
+  "version": "2026.02.10.1",
+  "enabled": false,
+  "live_edit": true,
+  "stream": "NSO_executed_commands",
+  "dashboard_type": "template",
+  "template_variables": {
+    "IP_ADDRESS": {
+      "contextId": "ip_address"
+    }
+  },
+  "dashboard_filters": {
+    "time_filter": true,
+    "extra_filter": "ip_address is '{{IP_ADDRESS}}'",
+    "default_time_filter_labels": [
+      "Last 24 hours"
+    ],
+    "columns_filter": [
+      {
+        "id": "timestamp",
+        "label": "Timestamp",
+        "type": "DATETIME"
+      }
+    ],
+    "group_filters": []
+  },
+  "dashboard_sections": [
+    {
+      "title": "Onboarded Devices",
+      "show_filter": true,
+      "widgets": [
+        {
+          "title": "Command History",
+          "widget_type": "tabular",
+          "max_width": 12,
+          "height": 6,
+          "min_width": 12,
+          "stream": "NSO_executed_commands",
+          "ts_column": "timestamp",
+          "columns": {
+            "device_name": {
+              "title": "Device Name",
+              "type": "TEXT",
+              "key": true,
+              "hidden": false
+            },
+            "ip_address": {
+              "title": "IP Address",
+              "type": "TEXT",
+              "key": true,
+              "hidden": false
+            },
+            "command": {
+              "title": "Command",
+              "type": "TEXT",
+              "key": true,
+              "hidden": false
+            },
+            "status": {
+              "title": "Status",
+              "type": "TEXT",
+              "key": true,
+              "hidden": false
+            },
+            "execute-any-command:output_devices_0_command-response": {
+              "title": "Response",
+              "type": "TEXT",
+              "key": true,
+              "formatter0": "truncate",
+              "hidden": false
+            },
+            "timestamp": {
+              "title": "Timestamp",
+              "type": "DATETIME"
+            }
+          },
+          "widget_id": "e60dc7c6"
+        }
+      ]
+    }
+  ]
+}

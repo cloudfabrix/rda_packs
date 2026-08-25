@@ -1,0 +1,13 @@
+%% stream = no and limit = 0
+
+@c:new-block
+    --> @exec:get-input
+    --> @dm:save name = 'temp-delete_device_data'
+
+--> @c:data-loop columns="device_ip,unique_id" and dataset="temp-delete_device_data" & return_empty = 'yes'
+    --> @dm:empty
+    --> @dm:addrow name="discovery"
+    --> #dm:pstream-delete-data-by-query unique_id is '$unique_id'
+    --> @dm:empty
+    --> @dm:addrow name="network_access_verification"
+    --> #dm:pstream-delete-data-by-query ip_address is '$device_ip'

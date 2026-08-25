@@ -1,0 +1,619 @@
+{
+  "name": "preview-{{schema}}_metrics",
+  "label": "Metrics Workbench",
+  "description": "Metrics Workbench",
+  "dashboard_folder": "Default",
+  "enabled": true,
+  "dashboard_type": "dashboard",
+  "dashboard_filters": {
+    "time_filter": true,
+    "default_time_filter_non_removable": true,
+    "show_default_time_filter": true
+  },
+  "dashboard_sections": [
+    {
+      "title": "Metrics Dashboard",
+      "show_filter": true,
+      "widgets": [
+        {
+          "title": "Time Series",
+          "widget_type": "timeseries",
+          "stream": "mobility_kpi_metrics_data",
+          "ts_column": "timestamp",
+          "ignore_extra_filter": true,
+          "duration_hours": 72000,
+          "max_width": 6,
+          "height": 6,
+          "min_width": 12,
+          "metric_source": "telegraf",
+          "chartProperties": {
+            "yAxisLabel": "",
+            "xAxisLabel": null,
+            "legendLocation": "right",
+            "mode": "selection",
+            "column-id": "timestamp"
+          },
+          "formatting": {
+            "maximumFractionDigits": 5,
+            "notation": "compact"
+          },
+          "interval": "5Min",
+          "group_by": [
+            "device"
+          ],
+          "series_spec": [
+            {
+              "column": "value",
+              "agg": "max",
+              "type": "int"
+            }
+          ],
+          "widget_id": "6cfaa3c5"
+        }
+      ]
+    }
+  ],
+  "dynamic_form": {
+    "formData": {},
+    "formDefinition": {
+      "id": "kpi.benchmark.json",
+      "refreshRequired": true,
+      "formFieldList": [
+        {
+          "fieldId": "network_type",
+          "label": "Network Type",
+          "help": "network_type",
+          "key_attribute": true,
+          "controlType": "SELECTOR_DIALOG",
+          "selectionType": "MULTIPLE",
+          "pstream": "mobility_kpi_metrics_data",
+          "query_attributes": [
+            "network_type"
+          ],
+          "server-validation": {
+            "clear_attributes": [
+              "region",
+              "city",
+              "clli_code",
+              "device",
+              "card",
+              "port"
+            ],
+            "read_attributes": [
+              "region",
+              "city",
+              "clli_code",
+              "device",
+              "card",
+              "port"
+            ]
+          }
+        },
+        {
+          "fieldId": "region",
+          "label": "Region",
+          "help": "region",
+          "key_attribute": true,
+          "controlType": "SELECTOR_DIALOG",
+          "selectionType": "MULTIPLE",
+          "pstream": "mobility_kpi_metrics_data",
+          "query_attributes": [
+            "network_type",
+            "region"
+          ],
+          "server-validation": {
+            "clear_attributes": [
+              "city",
+              "clli_code",
+              "device",
+              "card",
+              "port"
+            ],
+            "read_attributes": [
+              "city",
+              "clli_code",
+              "device",
+              "card",
+              "port"
+            ]
+          }
+        },
+        {
+          "fieldId": "city",
+          "label": "City",
+          "help": "city",
+          "key_attribute": true,
+          "controlType": "SELECTOR_DIALOG",
+          "selectionType": "MULTIPLE",
+          "pstream": "mobility_kpi_metrics_data",
+          "query_attributes": [
+            "network_type",
+            "region",
+            "city"
+          ],
+          "server-validation": {
+            "clear_attributes": [
+              "clli_code",
+              "device",
+              "card",
+              "port"
+            ],
+            "read_attributes": [
+              "clli_code",
+              "device",
+              "card",
+              "port"
+            ]
+          }
+        },
+        {
+          "fieldId": "clli_code",
+          "label": "Clli Code",
+          "help": "clli_code",
+          "key_attribute": true,
+          "controlType": "SELECTOR_DIALOG",
+          "selectionType": "MULTIPLE",
+          "pstream": "mobility_kpi_metrics_data",
+          "query_attributes": [
+            "network_type",
+            "region",
+            "city",
+            "clli_code"
+          ],
+          "server-validation": {
+            "clear_attributes": [
+              "device",
+              "card",
+              "port"
+            ],
+            "read_attributes": [
+              "device",
+              "card",
+              "port"
+            ]
+          }
+        },
+        {
+          "fieldId": "device",
+          "label": "Device",
+          "help": "device",
+          "key_attribute": true,
+          "controlType": "SELECTOR_DIALOG",
+          "selectionType": "MULTIPLE",
+          "pstream": "mobility_kpi_metrics_data",
+          "query_attributes": [
+            "network_type",
+            "region",
+            "city",
+            "clli_code",
+            "device"
+          ],
+          "server-validation": {
+            "clear_attributes": [
+              "card",
+              "port"
+            ],
+            "read_attributes": [
+              "card",
+              "port"
+            ]
+          }
+        },
+        {
+          "fieldId": "card",
+          "label": "Card",
+          "help": "card",
+          "key_attribute": true,
+          "controlType": "SELECTOR_DIALOG",
+          "selectionType": "MULTIPLE",
+          "pstream": "mobility_kpi_metrics_data",
+          "query_attributes": [
+            "network_type",
+            "region",
+            "city",
+            "clli_code",
+            "device",
+            "card"
+          ],
+          "server-validation": {
+            "clear_attributes": [
+              "port"
+            ],
+            "read_attributes": [
+              "port"
+            ]
+          }
+        },
+        {
+          "fieldId": "port",
+          "label": "Port",
+          "help": "port",
+          "key_attribute": true,
+          "controlType": "SELECTOR_DIALOG",
+          "selectionType": "MULTIPLE",
+          "pstream": "mobility_kpi_metrics_data",
+          "query_attributes": [
+            "network_type",
+            "region",
+            "city",
+            "clli_code",
+            "device",
+            "card",
+            "port"
+          ],
+          "server-validation": {
+            "clear_attributes": [],
+            "read_attributes": []
+          }
+        },
+        {
+          "fieldId": "metrics",
+          "label": "KPIs",
+          "help": "KPIs",
+          "dataType": "string",
+          "key_attribute": true,
+          "isList": true,
+          "hidden": false,
+          "editable": true,
+          "required": true,
+          "controlType": "SELECTOR_DIALOG",
+          "selectionType": "MULTIPLE",
+          "field_data": [
+            "kpi_Port_Utilization_Downlink",
+            "kpi_Port_Utilization_Uplink"
+          ],
+          "query_attributes": [
+            "metrics"
+          ],
+          "server-validation": {
+            "clear_attributes": [],
+            "read_attributes": []
+          }
+        },
+        {
+          "dataType": "string",
+          "required": false,
+          "editable": true,
+          "label": "Combine All KPIs",
+          "controlType": "BOOLEAN_FIELD",
+          "hidden": false,
+          "fieldId": "combine"
+        },
+        {
+          "fieldId": "precision",
+          "label": "Rollup Precision",
+          "help": "Rollup Precision",
+          "dataType": "string",
+          "hidden": false,
+          "editable": true,
+          "required": true,
+          "defaultValue": "device",
+          "controlType": "COMBO_BOX",
+          "lovValues": [
+            {
+              "identifier": "network_type",
+              "displayName": "network_type"
+            },
+            {
+              "identifier": "region",
+              "displayName": "region"
+            },
+            {
+              "identifier": "city",
+              "displayName": "city"
+            },
+            {
+              "identifier": "clli_code",
+              "displayName": "clli_code"
+            },
+            {
+              "identifier": "device",
+              "displayName": "device"
+            },
+            {
+              "identifier": "card",
+              "displayName": "card"
+            },
+            {
+              "identifier": "port",
+              "displayName": "port"
+            }
+          ]
+        },
+        {
+          "fieldId": "function",
+          "label": "Function",
+          "help": "Function",
+          "dataType": "string",
+          "hidden": false,
+          "editable": true,
+          "required": true,
+          "controlType": "COMBO_BOX",
+          "defaultValue": "max",
+          "lovValues": [
+            {
+              "identifier": "max",
+              "displayName": "Maximum"
+            },
+            {
+              "identifier": "min",
+              "displayName": "Minimum"
+            },
+            {
+              "identifier": "mean",
+              "displayName": "Average"
+            },
+            {
+              "identifier": "sum",
+              "displayName": "Sum"
+            }
+          ]
+        },
+        {
+          "fieldId": "interval",
+          "label": "Interval",
+          "help": "Interval",
+          "dataType": "string",
+          "hidden": false,
+          "editable": true,
+          "required": true,
+          "controlType": "COMBO_BOX",
+          "defaultValue": "auto",
+          "lovValues": [
+            {
+              "identifier": "auto",
+              "displayName": "Auto"
+            },
+            {
+              "identifier": "5Min",
+              "displayName": "5 Minutes"
+            },
+            {
+              "identifier": "15Min",
+              "displayName": "15 Minutes"
+            },
+            {
+              "identifier": "1H",
+              "displayName": "1 Hour"
+            },
+            {
+              "identifier": "24H",
+              "displayName": "1 Day"
+            }
+          ]
+        },
+        {
+          "fieldId": "duration",
+          "label": "Duration",
+          "help": "Duration",
+          "dataType": "string",
+          "hidden": false,
+          "editable": true,
+          "required": true,
+          "controlType": "COMBO_BOX",
+          "defaultValue": "`timestamp` is after -720 hours",
+          "lovValues": [
+            {
+              "identifier": "`timestamp` is after -24 hours",
+              "displayName": "1 Day"
+            },
+            {
+              "identifier": "`timestamp` is after -48 hours",
+              "displayName": "2 Days"
+            },
+            {
+              "identifier": "`timestamp` is after -168 hours",
+              "displayName": "7 Days"
+            },
+            {
+              "identifier": "`timestamp` is after -720 hours",
+              "displayName": "30 Days"
+            },
+            {
+              "identifier": "`timestamp` is after -2160 hours",
+              "displayName": "3 Months"
+            },
+            {
+              "identifier": "`timestamp` is after -4320 hours",
+              "displayName": "6 Months"
+            },
+            {
+              "identifier": "`timestamp` is after -8640 hours",
+              "displayName": "12 Months"
+            },
+            {
+              "identifier": "`timestamp` is after -175532 hours",
+              "displayName": "2 Years"
+            }
+          ]
+        }
+      ],
+      "formActionList": {
+        "formActions": [
+          {
+            "api-endpoint": {
+              "methodName": "submitForm",
+              "parse-output": false,
+              "params": [
+                {
+                  "formData": {},
+                  "formId": "kpi.benchmark.json"
+                }
+              ],
+              "service-name": "saas-reports",
+              "stringified-params": true
+            },
+            "actionLabel": "Save",
+            "type": "SUBMIT",
+            "identifier": "Submit"
+          },
+          {
+            "actionLabel": "Cancel",
+            "type": "CANCEL",
+            "identifier": "Cancel"
+          }
+        ]
+      }
+    }
+  },
+  "saved_time": "2026-05-04T05:32:05.358804",
+  "metric_field": {
+    "fieldId": "metrics",
+    "label": "KPIs",
+    "help": "KPIs",
+    "dataType": "string",
+    "key_attribute": true,
+    "isList": true,
+    "hidden": false,
+    "editable": true,
+    "required": true,
+    "controlType": "SELECTOR_DIALOG",
+    "selectionType": "MULTIPLE",
+    "field_data": "metrics",
+    "query_attributes": [
+      "metrics"
+    ],
+    "server-validation": {
+      "clear_attributes": [],
+      "read_attributes": []
+    }
+  },
+  "common_fields": [
+    {
+      "dataType": "string",
+      "required": false,
+      "editable": true,
+      "label": "Combine All KPIs",
+      "controlType": "BOOLEAN_FIELD",
+      "hidden": false,
+      "fieldId": "combine"
+    },
+    {
+      "fieldId": "precision",
+      "label": "Rollup Precision",
+      "help": "Rollup Precision",
+      "dataType": "string",
+      "hidden": false,
+      "editable": true,
+      "required": true,
+      "defaultValue": "device",
+      "controlType": "COMBO_BOX",
+      "lovValues": "filter_lovValues"
+    },
+    {
+      "fieldId": "function",
+      "label": "Function",
+      "help": "Function",
+      "dataType": "string",
+      "hidden": false,
+      "editable": true,
+      "required": true,
+      "controlType": "COMBO_BOX",
+      "defaultValue": "max",
+      "lovValues": [
+        {
+          "identifier": "max",
+          "displayName": "Maximum"
+        },
+        {
+          "identifier": "min",
+          "displayName": "Minimum"
+        },
+        {
+          "identifier": "mean",
+          "displayName": "Average"
+        },
+        {
+          "identifier": "sum",
+          "displayName": "Sum"
+        }
+      ]
+    },
+    {
+      "fieldId": "interval",
+      "label": "Interval",
+      "help": "Interval",
+      "dataType": "string",
+      "hidden": false,
+      "editable": true,
+      "required": true,
+      "controlType": "COMBO_BOX",
+      "defaultValue": "auto",
+      "lovValues": [
+        {
+          "identifier": "auto",
+          "displayName": "Auto"
+        },
+        {
+          "identifier": "5Min",
+          "displayName": "5 Minutes"
+        },
+        {
+          "identifier": "15Min",
+          "displayName": "15 Minutes"
+        },
+        {
+          "identifier": "1H",
+          "displayName": "1 Hour"
+        },
+        {
+          "identifier": "24H",
+          "displayName": "1 Day"
+        }
+      ]
+    },
+    {
+      "fieldId": "duration",
+      "label": "Duration",
+      "help": "Duration",
+      "dataType": "string",
+      "hidden": false,
+      "editable": true,
+      "required": true,
+      "controlType": "COMBO_BOX",
+      "defaultValue": "`timestamp` is after -720 hours",
+      "lovValues": [
+        {
+          "identifier": "`timestamp` is after -24 hours",
+          "displayName": "1 Day"
+        },
+        {
+          "identifier": "`timestamp` is after -48 hours",
+          "displayName": "2 Days"
+        },
+        {
+          "identifier": "`timestamp` is after -168 hours",
+          "displayName": "7 Days"
+        },
+        {
+          "identifier": "`timestamp` is after -720 hours",
+          "displayName": "30 Days"
+        },
+        {
+          "identifier": "`timestamp` is after -2160 hours",
+          "displayName": "3 Months"
+        },
+        {
+          "identifier": "`timestamp` is after -4320 hours",
+          "displayName": "6 Months"
+        },
+        {
+          "identifier": "`timestamp` is after -8640 hours",
+          "displayName": "12 Months"
+        },
+        {
+          "identifier": "`timestamp` is after -175532 hours",
+          "displayName": "2 Years"
+        }
+      ]
+    }
+  ],
+  "field": {
+    "fieldId": "{{field_name}}",
+    "label": "{{field_name}}",
+    "help": "{{field_name}}",
+    "key_attribute": true,
+    "controlType": "SELECTOR_DIALOG",
+    "selectionType": "MULTIPLE"
+  }
+}

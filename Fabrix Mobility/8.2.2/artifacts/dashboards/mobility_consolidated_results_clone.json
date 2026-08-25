@@ -1,0 +1,130 @@
+{
+  "name": "mobility_consolidated_results_clone",
+  "label": "Results",
+  "description": "Results",
+  "context_label_id": "script",
+  "live_edit": true,
+  "version": "2026.04.15.1",
+  "enabled": true,
+  "dashboard_type": "template",
+  "dashboard_filters": {
+    "time_filter": true,
+    "extra_filter": "script is '{{SCRIPT}}'",
+    "default_time_filter_labels": [
+      "Last 24 hours"
+    ]
+  },
+  "template_variables": {
+    "SCRIPT": {
+      "contextId": [
+        "script"
+      ]
+    },
+    "SCRIPT_NAME": {
+      "contextId": [
+        "script_name"
+      ]
+    },
+    "DEVICE": {
+      "contextId": [
+        "navigatorSelectionContexts",
+        "secondaryListSelection",
+        "device_hostname"
+      ]
+    },
+    "DATE": {
+      "contextId": [
+        "navigatorSelectionContexts",
+        "secondaryListSelection",
+        "date"
+      ]
+    }
+  },
+  "navigation_dashboards": {
+    "tree_data": {
+      "column_name": "script",
+      "pstream_name": "autox_results",
+      "cfxql_query": "timestamp is after -720d and script is '{{SCRIPT}}'"
+    },
+    "tree_detail": {
+      "display_column": "date",
+      "pstream_name": "autox_results",
+      "sort_by_display_column": true,
+      "sort_order": "desc",
+      "cfxql_query": "timestamp is after -720d and script is '{{SCRIPT}}'"
+    },
+    "showNodeIcon": false,
+    "showSearchBox": true
+  },
+  "dashboard_folder": "Default",
+  "dashboard_sections": [
+    {
+      "title": "Details",
+      "show_filter": true,
+      "widgets": [
+        {
+          "widget_type": "codeblock",
+          "title": "Output",
+          "context_filter": "secondaryList_script is 'Auto-x-show-interface'",
+          "visibility_on_error1": false,
+          "content": "\nPort: 6/28\r\n Port Type        : 10G Ethernet\r\n Role          : Service Port\r\n Description       : (None Set)\r\n Redundancy Mode     : Port Mode\r\n Framing Mode      : Unspecified\r\n Redundant With     : 5/28\r\n Preferred Port     : Non-Revertive\r\n Physical ifIndex    : 102498304\r\n Administrative State  : Disabled\r\n Configured Duplex    : Auto\r\n Configured Speed    : Auto\r\n Fault Unidirection Mode : 802_3ae clause 66\r\n Local Fault       : N/A\r\n Remote Fault      : N/A\r\n Laser Transmit Enabled : No\r\n Configured Flow Control : Enabled\r\n Interface MAC Address  : F4-EA-67-C7-20-4B\r\n SRP Virtual MAC Address : None\r\n Fixed MAC Address    : F4-EA-67-C7-21-7B\r\n Link State       : Down\r\n Loopback State     : Disabled\r\n Link Duplex       : n/a\r\n Link Speed       : n/a\r\n Flow Control      : Disabled\r\n Link Aggregation Group : None\r\n Logical ifIndex     : 102498305\r\n Operational State    : Down, Standby \r\n SFP Module       : Not Present",
+          "widget_id": "0c6774a0"
+        },
+        {
+          "widget_type": "codeblock",
+          "title": "Output",
+          "visibility_on_error1": false,
+          "context_filter": "secondaryList_script is 'Auto-x-health-monitor'",
+          "content": "\nActive Software:\r\n Image Version:         21.28.m10\r\n Image Build Number:       90398\r\n Image Description:       Deployment_Build\r\n Image Date:           Fri Jun 23 23:52:04 EDT 2023\r\n Boot Image:           /flash/asr5500-21.28.m10.bin.SPA\r\n Source Commit ID:        6d1528922a6140b13a24791fb12f1182dfdec5f9\r\n Kernel Version:         2.6.38-staros-v3-hw-64\r\n Kernel Machine Type:      x86_64",
+          "widget_id": "0c6774a0"
+        },
+        {
+          "widget_type": "codeblock",
+          "title": "Output",
+          "visibility_on_error1": false,
+          "context_filter": "secondaryList_script is 'Auto-x-Health-Check'",
+          "content": "",
+          "widget_id": "0c6774a0"
+        },
+        {
+          "widget_type": "codeblock",
+          "title": "Output",
+          "visibility_on_error1": false,
+          "context_filter": "secondaryList_script is 'Auto-x-clear-session'",
+          "content": "",
+          "widget_id": "0c6774a0"
+        }
+      ]
+    }
+  ],
+  "dashboard_sections1": [
+    {
+      "title": "Details",
+      "show_filter": true,
+      "widgets": [
+        {
+          "title": "Raw Output",
+          "widget_type": "tabular",
+          "stream": "autox_results",
+          "ts_column": "timestamp",
+          "timebased": false,
+          "paginated": true,
+          "columns": {
+            "script": "script",
+            "output": {
+              "title": "Output",
+              "htmlTemplateForRow": "{%raw%}<div style='overflow: auto'><pre>{{row.output}}</pre></div>{%endraw%}"
+            }
+          },
+          "ui_widget_type": "TABULAR",
+          "max_width": 4,
+          "height": 5,
+          "min_width": 4,
+          "widget_id": "182229d9",
+          "max_rows": 1,
+          "query": "device_hostname is '{{DEVICE}}' and script is '{{SCRIPT}}'"
+        }
+      ]
+    }
+  ]
+}

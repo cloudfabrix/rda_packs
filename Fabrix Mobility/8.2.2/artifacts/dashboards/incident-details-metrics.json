@@ -1,0 +1,32 @@
+{
+  "name": "incident-details-metrics",
+  "description": "Metrics",
+  "label": "Metrics",
+  "enabled": true,
+  "dashboard_type": "service-dashboard",
+  "dashboard_folder": "Default",
+  "api-endpoint": {
+    "service-name": "cfxdimensions-app-irm_service",
+    "namespace": "io.cfx.dimensions.app",
+    "version": "2026.02.10.1",
+    "methodName": "invokeAppApi:getIncidentMetricsDashboard",
+    "useReportContext": true,
+    "stringified-params": true,
+    "parse-output": true,
+    "params": [
+      {
+        "metrics_regression_stream": "ml-bulkstats-metrics-regression-train-output"
+      }
+    ]
+  },
+  "dashboard_sections": [
+    {
+      "title": "Incident Summary",
+      "min_width": 12,
+      "height": 2,
+      "widget_type": "portal_html",
+      "widget_template": "cfx-oia/incident-summary",
+      "widget_id": "6e64b2f1"
+    }
+  ]
+}

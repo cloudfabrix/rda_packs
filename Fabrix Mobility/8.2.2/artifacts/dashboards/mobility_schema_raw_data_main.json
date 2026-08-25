@@ -1,0 +1,79 @@
+{
+    "name": "mobility_schema_raw_data_main",
+    "label": "Bulkstats Ingested Data",
+    "description": "Bulkstats Ingested Data",
+    "enabled": true,
+    "version": "26.05.26.1",
+    "dashboard_type": "dashboard",
+    "dashboard_folder": "fabrix-mobility",
+    "dashboard_style": "auto",
+    "live_edit": true,
+    "dashboard_filters": {
+        "time_filter": true,
+        "default_time_filter_labels": [
+            "All Time"
+        ]
+    },
+    "template_variables": {
+        "SCHEMA_NAME": {
+            "contextId": "schema"
+        }
+    },
+    "dashboard_sections": [
+        {
+            "title": "Schemas",
+            "show_filter": true,
+            "widgets": [
+                {
+                    "title": "Schemas",
+                    "widget_type": "tabular",
+                    "stream": "mobility_new_kpi_list",
+                    "extra_filter": "validation is 'passed'",
+                    "paginated": true,
+                    "columns": {
+                        "schema": {
+                            "title": "Schema",
+                            "key": true
+                        }
+                    },
+                    "height": 10,
+                    "min_wdith": 12,
+                    "widget_id": "2ea74a7d",
+                    "pivot": {
+                        "pivot_type": "advanced",
+                        "group_by": [
+                            "schema"
+                        ],
+                        "series": [
+                            {
+                                "column": "schema",
+                                "label": "KPI Count",
+                                "agg": "value_count"
+                            }
+                        ]
+                    },
+                    "custom_columns": [
+                        {
+                            "id": "mobility_raw_data",
+                            "key": true,
+                            "visible": false
+                        }
+                    ],
+                    "actions": [
+                        {
+                            "permission": "rda:github:view",
+                            "title": "Device Details",
+                            "type": "GO_TO_APP_STATE",
+                            "identifier": "schema",
+                            "stateName": "app.featureapp",
+                            "drillDownContext1": "id",
+                            "drillDownLinkField": "schema",
+                            "appName": "user-dashboard/mobility_raw_data",
+                            "selectionType": "SINGLE"
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

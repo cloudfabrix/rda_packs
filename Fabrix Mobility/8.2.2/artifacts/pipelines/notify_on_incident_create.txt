@@ -1,0 +1,24 @@
+%% stream = no and limit = 0
+%% import_src_type = "email_sender"
+## notify_on_incident_create ### pipeline name
+@c:new-block
+    --> @dm:empty
+    --> @dm:addrow config_path="/network_config/config.json"
+    --> @files:load-content-from-file filename_column="config_path"
+    --> @dm:explode-json column="content"
+    --> @dm:selectcolumns include="tenant_id"
+    --> @dm:save name="temp-df"
+--> @c:data-loop columns="tenant_id" and dataset="temp-df"
+    --> @kafka-v2:read-stream name="$tenant_id.incident-added" and group = "pipeline_notify_on_incident_create" and offset_reset="latest"
+    --> @dm:skip-block-if-shape row_count = 0
+    --> @dm:explode-json column="payload"
+    --> @dm:head n=2
+    --> @dm:sleep seconds=2
+    --> @dm:selectcolumns include="incidentId|projectId|customerId|sourceKey|latestIncident"
+    --> @dm:save name="temp-incident-added"
+    --> @dm:eval pipeline_name="'notify_on_incident_create_email'"
+    --> @exec:run-pipeline-by-row pipeline_col="pipeline_name" & pipeline_type="Published" and save_output="yes"
+    --> @dm:explode-json column="pipeline_exec_output"
+    --> @dm:save name="temp-child-done"
+    --> @email:sendmail-bulk recipient_col="email_recipients" & subject_col="email_subject" & message_col="email_body"
+    --> @dm:save name="temp-main-done"

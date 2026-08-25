@@ -1,0 +1,21 @@
+%% stream = no and limit = 0
+@dm:empty
+    --> @exec:get-input
+    --> @dm:save name="temp-dataset"
+    --> *exec:if-condition Others is not null
+       --> @dm:selectcolumns include="Others"
+       --> @dm:eval Others="str(Others)"
+       --> @dm:replace-data columns="Others" & expr="'" & replace='"'
+       --> @dm:eval Others="json_loads(Others)"
+       --> @dm:explode-json column = 'Others'
+       --> @dm:save name="temp-dataset"
+    --> @exec:end-if
+    --> @dm:recall name="Autox_KPI_list_new"
+    --> @dm:save name="temp-Autox_KPI_list_new"
+--> @c:data-loop columns="KPI_Name" and dataset="temp-dataset"
+    --> @dm:recall name="temp-Autox_KPI_list_new"
+    --> *dm:filter KPI_Name=! "$KPI_Name"
+    --> @dm:save name="temp-Autox_KPI_list_new"
+--> @c:new-block
+    --> @dm:recall name="temp-Autox_KPI_list_new"
+    --> @dm:save name="Autox_KPI_list_new"

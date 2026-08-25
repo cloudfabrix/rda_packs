@@ -1,0 +1,72 @@
+{
+  "name": "logs",
+  "label": "Logs",
+  "description": "onboarded_devices: Insights",
+  "dashboard_folder": "Default",
+  "version": "2026.02.10.1",
+  "enabled": false,
+  "dashboard_type": "template",
+  "template_variables": {
+    "CUST_ID": {
+      "contextId": "customerId"
+    },
+    "PROJ_ID": {
+      "contextId": "projectId"
+    },
+    "CUST_TAG": {
+      "contextId": "customerTag"
+    },
+    "FILENAME": {
+      "contextId": "ingestion_id"
+    }
+  },
+  "dashboard_filters": {
+    "time_filter": true,
+    "extra_filter": "ingestion_id is '{{FILENAME}}' and source contains 'Logs'",
+    "default_time_filter_labels0": [
+      "Last 24 hours"
+    ],
+    "columns_filter": [
+      {
+        "id": "timestamp",
+        "label": "Timestamp",
+        "type": "DATETIME"
+      }
+    ],
+    "group_filters": []
+  },
+  "dashboard_sections": [
+    {
+      "title": "Onboarded Devices",
+      "show_filter": true,
+      "widgets": [
+        {
+          "title": "Discovery Logs",
+          "widget_type": "tabular",
+          "stream": "discovery_run_details",
+          "height": 4,
+          "paginated": false,
+          "max_width": 12,
+          "min_width": 12,
+          "sorting": [
+            {
+              "timestamp": "desc"
+            }
+          ],
+          "columns": {
+            "timestamp": {
+              "title": "Timestamp",
+              "type": "DATETIME"
+            },
+            "status": "Progress",
+            "ingestion_id": {
+              "title": "Ingestion ID",
+              "visible": false
+            }
+          },
+          "widget_id": "b2c8d81c"
+        }
+      ]
+    }
+  ]
+}

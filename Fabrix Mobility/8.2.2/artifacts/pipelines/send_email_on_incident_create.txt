@@ -1,0 +1,27 @@
+%% stream = no and limit = 0
+
+%% import_src_type = "agent,email_sender"
+
+## %% import_source = "agent,snowv2,gmail"
+@c:new-block
+    --> @exec:get-input
+    --> @dm:save name="temp-input-rows"
+
+--> @c:data-loop dataset="temp-input-rows" & columns="incident_id,project_id,customer_id,i_state,attrs_public_url,i_alert_count,i_summary"
+    --> @dm:recall name="temp-input-rows"
+    --> *dm:filter incident_id is '$incident_id' & project_id is '$project_id'
+    ## --> @agent:agent-irm:irmagent:getIncidentDetails roomId='$project_id' and incidentId='$incident_id'
+    --> @dm:map to="email_recipients" & func="fixed" & value="satheena@cisco.com,vepotlur@cisco.com"
+    --> @dm:map to="incident_url" & func="fixed" & value="$attrs_public_url"
+    --> @dm:save name='temp-incident_details-$incident_id'
+    --> *dm:filter email_recipients is not None
+    --> @dm:skip-block-if-shape row_count = 0
+    --> @dm:eval message=" 'IncidentId:' + str(incidentid) + ',\n<br>Alerts:' + str(i_alert_count) + ',\n<br>Summary:' + json_dumps(i_summary) + '\n<br>' + incident_url + '\n<br>Powered by CloudFabrix RDAF' "
+    --> @dm:eval subject="'Incident ' + incidentid + ' shared by CFX OIA Application'"
+    --> @dm:map to="message_mime_type" & func="fixed" & value="html"
+    --> @email:sendmail-bulk recipient_col="email_recipients" & subject_col="subject" & message_col="message"
+    --> @dm:eval notification_message="'Incident ' + incidentid + ' shared with ' +  email_recipients  + ' successfully'"
+    --> @dm:map to="notification_subject" & func="fixed" & value="Notification Message from Email-RDAPipeline"
+    --> @rn:write-stream name="oia-incident-collab-message-stream"
+    --> @dm:map to="pipeline_name" & func="fixed" & value="incident_notify_email"
+

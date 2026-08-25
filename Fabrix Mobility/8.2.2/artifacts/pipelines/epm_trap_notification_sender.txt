@@ -1,0 +1,84 @@
+%% stream = no and limit = 0
+
+## netcool_snmp_trap_sender_pipeline
+## %% stream = no and limit = 0
+@c:flex-block
+    --> @dm:empty
+    ## Function: send_snmp_trap
+    --> @exec:define-function name= "send_snmp_trap"
+       ## Logic to apply trap template and send the alert to webhook
+       --> @dm:skip-block-if-shape row_count = 0
+       --> @dm:selectcolumns include="timestamp|i_created_ts|i_updated_ts|incident_id|attrs_device_ip_or_hostname|attrs_ipAddress|i_description|i_state|i_summary|attrs_mibVersion|attrs_snmp_trap_name|i_updated_ts|attrs_snmpVersion|attrs_assetType|attrs_epm_severity_num|attrs_cisco_severity|attrs_rda_gw_client_ip|severity|attrs_severity|attrs_mapped_severity|attrs_CLLI_code|attrs_snmpTrapDescription|i_description|attrs_alarmStatus_int-|attrs_alarmStatus_def|attrs_alarmCategory|attrs_alarmCategoryDef|humanCreateTime|humanUpdateTime|humanCreateAge|humanUpdateAge|msCreateAge|msUpdateAge"
+       --> @dm:change-time-format columns="timestamp" & from_format="datetimestr" & to_format=ms
+       --> @dm:replace-data columns = 'i_state' &
+               expr = 'Open' &
+               replace = 'Active'
+       --> @dm:replace-data columns = 'i_state' &
+               expr = 'Resolved' &
+               replace = 'Cleared'
+       --> @dm:copy-columns from="i_state" and to="i_state_num"
+       --> @dm:replace-data columns = 'i_state_num' &
+               expr = 'Active' &
+               replace = '2'
+       --> @dm:replace-data columns = 'i_state_num' &
+               expr = 'Cleared' &
+               replace = '3'
+       ## According to the MIB, 0 is New 1 is Active and 2 is Deleted
+       --> @dm:copy-columns from="i_state_num" and to="attrs_alarmStatus_int"
+       --> @dm:replace-data columns = 'attrs_alarmStatus_int' &
+               expr = '2' &
+               replace = '1'
+       --> @dm:replace-data columns = 'attrs_alarmStatus_int' &
+               expr = '3' &
+               replace = '2'
+       --> @dm:copy-columns from="i_state" and to="attrs_alarmStatus_def"
+       --> @dm:replace-data columns = 'attrs_alarmStatus_def' &
+               expr = 'Active' &
+               replace = 'Updated'
+       --> @dm:replace-data columns = 'attrs_alarmStatus_def' &
+               expr = 'Clear' &
+               replace = 'Deleted'
+       ## If the created and updated timestamps are the same, it must be a new Incident.
+       --> *exec:if-condition (i_updated_ts == i_created_ts)
+          --> @dm:eval attrs_alarmStatus_int = "'0'"
+          --> @dm:eval attrs_alarmStatus_def = "'New'"
+       --> @exec:end-if
+       --> @dm:replace-data columns = 'i_summary' & expr = '"' & replace = "'"
+       --> @dm:replace-data columns = 'i_description' & expr = '"' & replace = "'"
+       --> @dm:apply-template-by-row template_name = "epm_trap_template" &
+               output_col = "trap_data"
+       --> @dm:add-missing-columns columns = 'trap_name' & value = 'ciscoEpmNotificationRev'
+       --> @dm:save name="template-oia-trap-final"
+    ## Send to webhook
+    --> @exec:end-function
+
+## oia-incidents-stream bookmark
+--> @c:new-block
+    --> @dm:query-persistent-stream-from-bookmark name="oia-incidents-stream" and
+            bookmark="oia-incidents-stream-updates-bkmrk-v2" and query="*"
+    --> @dm:save name="temp-bookmark-response"
+    --> @dm:skip-block-if-shape row_count=0
+    --> @dm:empty
+    --> @dm:recall name="temp-bookmark-response"
+    ## #####################################################
+    --> @dm:add-missing-columns columns is 'attrs_syslog_code,i_alert_sources,attrs_snmp_trap_oid'
+    --> @dm:rename-columns attrs_snmp_trap = 'attrs_snmp_trap_oid'
+    --> *dm:filter i_alert_sources in ["syslog", "Syslog", "snmp_trap", "SNMP_Traps"]
+    --> @dm:skip-block-if-shape row_count=0
+    --> @dm:add-missing-columns columns = 'humanCreateTime,humanUpdateTime,msCreateAge,msUpdateAge,humanCreateAge,humanUpdateAge,humanCreateAgeS,humanUpdateAgeS,humanCreateAgeD,humanUpdateAgeD'
+    --> @dm:eval humanCreateTime = i_created_ts
+    --> @dm:eval humanUpdateTime = i_updated_ts
+    --> @dm:eval msCreateAge = "time_now_as_ms() - i_created_ts"
+    --> @dm:eval humanCreateAgeD = "str(int(msCreateAge / 86400000))"
+    --> @dm:eval humanCreateAgeS = "msCreateAge % 86400000"
+    --> @dm:eval msUpdateAge = "time_now_as_ms() - i_updated_ts"
+    --> @dm:eval humanUpdateAgeD = "str(int(msUpdateAge / 86400000))"
+    --> @dm:eval humanUpdateAgeS = "msUpdateAge % 86400000"
+    --> @dm:change-time-format columns='humanCreateTime,humanUpdateTime' & from_format="ms" & to_format="datetimestr"
+    --> @dm:change-time-format columns='humanCreateAgeS,humanUpdateAgeS' & from_format="ms" & to_format="%H:%M:%S.%f"
+    --> @dm:eval humanCreateAge = "humanCreateAgeD + ' days, ' + humanCreateAgeS"
+    --> @dm:eval humanUpdateAge = "humanUpdateAgeD + ' days, ' + humanUpdateAgeS"
+    --> @dm:skip-block-if-shape row_count = 0
+    --> @exec:call-function name = "send_snmp_trap"
+    --> @dm:save name="template-oia-trap-final"
+    --> @snmptrap:trap-sender trap_data_column="trap_data" and  trap_name_column="trap_name" and  snmp_creds_name="ufm_snmp_trap"

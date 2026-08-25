@@ -1,0 +1,66 @@
+{
+  "name": "discovery_logs",
+  "description": "discovery_logs: Insights",
+  "version": "2026.04.15.1",
+  "dashboard_folder": "fabrix-mobility",
+  "enabled": false,
+  "stream": "discovery_logs",
+  "dashboard_type": "template",
+  "label": "{{JOB_NAME}}",
+  "live_edit": true,
+  "dashboard_filters": {
+    "time_filter": true,
+    "default_time_filter_labels": [
+      "All Time"
+    ]
+  },
+  "template_variables": {
+    "JOB_ID": {
+      "contextId": "ingestion_id"
+    },
+    "JOB_NAME": {
+      "contextId": "user_input_job_name"
+    }
+  },
+  "dashboard_sections": [
+    {
+      "title": "test_discovery",
+      "show_filter": true,
+      "widgets": [
+        {
+          "title": "Logs",
+          "widget_type": "tabular",
+          "duration_hours": 1080,
+          "max_width": 12,
+          "height": 8,
+          "min_width": 12,
+          "extra_filter": "ingestion_id is '{{JOB_ID}}' and log_type not equals 'metadata' and log_type not equals 'Upload_to_workflow_result'",
+          "stream": "discovery_logs",
+          "ts_column": "timestamp",
+          "sorting": [
+            {
+              "timestamp": "desc"
+            }
+          ],
+          "columns": {
+            "job_log": {
+              "title": "Job Log",
+              "type": "TEXT",
+              "hidden": false
+            },
+            "reason": {
+              "title": "Reason",
+              "type": "TEXT",
+              "hidden": false
+            },
+            "timestamp": {
+              "title": "Timestamp",
+              "type": "DATETIME"
+            }
+          },
+          "widget_id": "b9a5060d"
+        }
+      ]
+    }
+  ]
+}

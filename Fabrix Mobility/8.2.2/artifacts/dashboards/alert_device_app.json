@@ -1,0 +1,62 @@
+{
+  "name": "alert_device_app",
+  "label": "Device View",
+  "description": "Device View",
+  "dashboard_folder": "MSP",
+  "context_label_id": "a_asset_name",
+  "version": "2026.02.10.1",
+  "debug": true,
+  "enabled": true,
+  "dashboard_filters": {
+    "time_filter": true,
+    "columns_filter": []
+  },
+  "dashboard_sections": [
+    {
+      "title": "Device View"
+    }
+  ],
+  "dashboard_type": "app",
+  "context_enrichment": {
+    "stream": "cisco_device_inventory",
+    "enrich_columns": [
+      "device_hostname",
+      "parent_sn"
+    ],
+    "query_template": "projectId = '$project_id' and customerTag = '$customerTag' and device_ip = '$a_asset_ip_address'",
+    "defaultValues": {}
+  },
+  "dashboard_groups": {
+    "from_to": {
+      "icon": "alert.svg",
+      "label": "Alerts"
+    },
+    "topo": {
+      "icon": "topology.svg",
+      "label": "Topology"
+    }
+  },
+  "dashboard_pages": [
+    {
+      "name": "device_inventory_from_alert",
+      "label": "Inventory",
+      "context_filter0": "parent_sn is not null",
+      "icon": "alert.svg"
+    },
+    {
+      "name": "device_alerts_from_alert",
+      "label": "Alerts",
+      "icon": "alert.svg"
+    },
+    {
+      "name": "device_syslog_from_alert",
+      "label": "Syslogs",
+      "icon": "trace.svg"
+    },
+    {
+      "name": "device_SNMP_Traps_from_alerts",
+      "label": "SNMP Traps",
+      "icon": "trace.svg"
+    }
+  ]
+}

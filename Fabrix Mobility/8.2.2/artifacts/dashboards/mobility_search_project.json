@@ -1,0 +1,150 @@
+{
+    "name": "mobility_search_project",
+    "label": "Search Mobility Artifacts",
+    "description": "Mobility Artifact Unified Search",
+    "title": "{{DYNAMIC_TITLE}}",
+    "showTitle": true,
+    "version": "26.05.06.1",
+    "is_template": true,
+    "enabled": true,
+    "dashboard_type": "template",
+    "live_edit": true,
+    "dashboard_style": "auto",
+    "dashboard_filters": {
+        "time_filter": false
+    },
+    "computedContext": {
+        "KPI_Name": {
+            "expr": "'yes' if KPI_Name else 'no'",
+            "defaultValue": "yes"
+        },
+        "bulkstat_variables": {
+            "expr": "'yes' if bulkstat_variables else 'no'",
+            "defaultValue": "yes"
+        },
+        "none_selected": {
+            "expr": "'yes' if KPI_Name == 'no' and bulkstat_variables == 'no' and device_name == 'no' and incident_id == 'no' else 'no'",
+            "defaultValue": "no"
+        },
+        "DYNAMIC_TITLE": {
+            "expr": "'Search Results' if not SEARCH_TEXT else 'Search: ' + SEARCH_TEXT",
+            "defaultValue": "Search Results"
+        }
+    },
+    "template_variables": {
+        "SEARCH_TEXT": {
+            "contextId": "search_text",
+            "default": "*"
+        }
+    },
+    "dashboard_sections": [
+        {
+            "title": "",
+            "context_filter": "none_selected = 'yes'",
+            "widgets": [
+                {
+                    "widget_type": "label",
+                    "label": "<center><h3>Select at least one search category</h3></center>",
+                    "max_width": 12,
+                    "height": 4,
+                    "widget_id": "a753bc14"
+                }
+            ]
+        },
+        {
+            "title": "Search Results",
+            "show_filter": true,
+            "widgets": [
+                {
+                    "context_filter": "KPI_Name = 'yes'",
+                    "title": "KPIs",
+                    "widget_type": "tabular",
+                    "stream": "Autox_KPI_list_new",
+                    "ts_column": "timestamp",
+                    "duration_hours": 10800,
+                    "virtual_scrolling": true,
+                    "extra_filter": "(KPI_Label contains '{{SEARCH_TEXT}}' OR KPI_Name contains '{{SEARCH_TEXT}}' OR Description contains '{{SEARCH_TEXT}}' OR Formula contains '{{SEARCH_TEXT}}' or schema contains '{{SEARCH_TEXT}}')",
+                    "columns": {
+                        "schema": {
+                            "title": "Schema"
+                        },
+                        "KPI_Label": {
+                            "title": "KPI Label"
+                        },
+                        "KPI_Name": {
+                            "title": "KPI Internal Name",
+                            "hidden": true
+                        },
+                        "Formula": {
+                            "title": "Formula",
+                            "formatter": "truncate"
+                        },
+                        "Description": {
+                            "title": "Description",
+                            "formatter": "truncate"
+                        }
+                    },
+                    "widget_id": "2d278985"
+                },
+                {
+                    "context_filter": "bulkstat_variables = 'yes'",
+                    "title": "Bulkstat Variables",
+                    "widget_type": "tabular",
+                    "stream": "bulkstats_variables",
+                    "ts_column": "timestamp",
+                    "duration_hours": 10800,
+                    "paginated": true,
+                    "remote_searchable": true,
+                    "extra_filter": "(schema contains '{{SEARCH_TEXT}}' OR variable contains '{{SEARCH_TEXT}}' OR counter_type contains '{{SEARCH_TEXT}}' or data_type contains '{{SEARCH_TEXT}}' or is_key contains '{{SEARCH_TEXT}}')",
+                    "columns": {
+                        "schema": {
+                            "title": "Schema"
+                        },
+                        "variable": {
+                            "title": "Variable"
+                        },
+                        "counter_type": {
+                            "title": "Counter Type"
+                        },
+                        "data_type": {
+                            "title": "Data Type"
+                        },
+                        "is_key": {
+                            "title": "Is Key"
+                        }
+                    },
+                    "widget_id": "47df5086"
+                }
+            ]
+        }
+    ],
+    "dynamic_form": {
+        "formData": {},
+        "controlPanelFormDefinition": {
+            "title": "Search Options",
+            "buttonLabel": "Search",
+            "refreshRequired": true,
+            "openByDefault": true,
+            "formFieldList": [
+                {
+                    "fieldId": "search_text",
+                    "label": "Search Text",
+                    "controlType": "TEXT_FIELD",
+                    "required": false
+                },
+                {
+                    "fieldId": "KPI_Name",
+                    "label": "KPI",
+                    "controlType": "BOOLEAN_FIELD",
+                    "defaultValue": true
+                },
+                {
+                    "fieldId": "bulkstat_variables",
+                    "label": "Bulkstats",
+                    "controlType": "BOOLEAN_FIELD",
+                    "defaultValue": true
+                }
+            ]
+        }
+    }
+}

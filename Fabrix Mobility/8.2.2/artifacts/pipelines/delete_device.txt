@@ -1,0 +1,11 @@
+%% stream = no and limit = 0
+
+@dm:empty
+    --> @exec:get-input
+    --> @dm:save name="temp-dataset"
+
+--> @c:data-loop columns="device" and dataset="temp-dataset"
+    --> @dm:recall name="mobility_device_mappings"
+    --> *dm:filter device=! "$device"
+    --> @dm:save name="mobility_device_mappings"
+

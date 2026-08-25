@@ -1,0 +1,516 @@
+{
+    "name": "customer_syslogs",
+    "label": "Syslogs",
+    "description": "syslog_udp_event_stream: Insights",
+    "dashboard_folder": "fabrix-mobility",
+    "version": "2026.02.10.1",
+    "enabled": false,
+    "live_edit": true,
+    "stream": "syslog_udp_event_stream",
+    "dashboard_type": "dashboard",
+    "dashboard_filters": {
+        "time_filter": true,
+        "default_time_filter_labels": [
+            "Last 24 hours"
+        ],
+        "columns_filter": [
+            {
+                "id": "rda_gw_timestamp",
+                "label": "Rda GW Timestamp",
+                "type": "DATETIME"
+            },
+            {
+                "id": "timestamp",
+                "label": "Timestamp",
+                "type": "DATETIME"
+            },
+            {
+                "id": "archive_name",
+                "label": "Archive Name",
+                "type": "TEXT"
+            },
+            {
+                "id": "city",
+                "label": "City",
+                "type": "TEXT"
+            },
+            {
+                "id": "CLLI_code",
+                "label": "CLLI Code",
+                "type": "TEXT"
+            },
+            {
+                "id": "device",
+                "label": "Device",
+                "type": "TEXT"
+            },
+            {
+                "id": "event_module",
+                "label": "Event Module",
+                "type": "TEXT"
+            },
+            {
+                "id": "event_reason",
+                "label": "Event Reason",
+                "type": "TEXT"
+            },
+            {
+                "id": "facility",
+                "label": "Facility",
+                "type": "TEXT"
+            },
+            {
+                "id": "fault_code",
+                "label": "Fault Code",
+                "type": "TEXT"
+            },
+            {
+                "id": "image",
+                "label": "Image",
+                "type": "TEXT"
+            },
+            {
+                "id": "ip_address",
+                "label": "IP Address",
+                "type": "TEXT"
+            },
+            {
+                "id": "Timestamp",
+                "label": "Local Timestamp",
+                "type": "TEXT"
+            },
+            {
+                "id": "Message",
+                "label": "Message",
+                "type": "TEXT"
+            },
+            {
+                "id": "meta_grok_message",
+                "label": "Meta Grok Message",
+                "type": "TEXT"
+            },
+            {
+                "id": "network_code",
+                "label": "Network Code",
+                "type": "TEXT"
+            },
+            {
+                "id": "network_type",
+                "label": "Network Type",
+                "type": "TEXT"
+            },
+            {
+                "id": "process_name",
+                "label": "Process Name",
+                "type": "TEXT"
+            },
+            {
+                "id": "raw",
+                "label": "Raw",
+                "type": "TEXT"
+            },
+            {
+                "id": "rda_gw_client_ip",
+                "label": "RDA GW Client IP",
+                "type": "TEXT"
+            },
+            {
+                "id": "rda_gw_ep_name",
+                "label": "Rda Gw Ep Name",
+                "type": "TEXT"
+            },
+            {
+                "id": "rda_gw_ep_type",
+                "label": "Rda Gw Ep Type",
+                "type": "TEXT"
+            },
+            {
+                "id": "rda_stream",
+                "label": "Rda Stream",
+                "type": "TEXT"
+            },
+            {
+                "id": "region",
+                "label": "Region",
+                "type": "TEXT"
+            },
+            {
+                "id": "site_code",
+                "label": "Site Code",
+                "type": "TEXT"
+            },
+            {
+                "id": "stream",
+                "label": "Stream",
+                "type": "TEXT"
+            },
+            {
+                "id": "syslog_facility",
+                "label": "Syslog Facility",
+                "type": "TEXT"
+            },
+            {
+                "id": "syslog_severity",
+                "label": "Syslog Severity",
+                "type": "TEXT"
+            },
+            {
+                "id": "syslog_timestamp",
+                "label": "Syslog Timestamp",
+                "type": "TEXT"
+            },
+            {
+                "id": "zone",
+                "label": "Zone",
+                "type": "TEXT"
+            },
+            {
+                "id": "rda_gw_seq",
+                "label": "Rda Gw Seq",
+                "type": "DOUBLE"
+            },
+            {
+                "id": "syslog_facility_num",
+                "label": "Syslog Facility Number",
+                "type": "DOUBLE"
+            },
+            {
+                "id": "syslog_severity_num",
+                "label": "Syslog Severity Number",
+                "type": "DOUBLE"
+            }
+        ],
+        "group_filters": [
+            {
+                "stream": "syslog_udp_event_stream",
+                "title": "Network Type",
+                "duration_hours": 1080,
+                "limit": 200,
+                "extra_filter": null,
+                "group_by": [
+                    "network_type"
+                ],
+                "ts_column": "rda_gw_timestamp",
+                "agg": "sum",
+                "column": "count_",
+                "type": "int"
+            },
+            {
+                "stream": "syslog_udp_event_stream",
+                "title": "Device",
+                "duration_hours": 1080,
+                "limit": 200,
+                "extra_filter": null,
+                "group_by": [
+                    "device"
+                ],
+                "ts_column": "rda_gw_timestamp",
+                "agg": "sum",
+                "column": "count_",
+                "type": "int"
+            },
+            {
+                "stream": "syslog_udp_event_stream",
+                "title": "Facility",
+                "duration_hours": 1080,
+                "limit": 200,
+                "extra_filter": null,
+                "group_by": [
+                    "syslog_facility"
+                ],
+                "ts_column": "rda_gw_timestamp",
+                "agg": "sum",
+                "column": "count_",
+                "type": "int"
+            },
+            {
+                "stream": "syslog_udp_event_stream",
+                "title": "IP Address",
+                "duration_hours": 1080,
+                "limit": 200,
+                "extra_filter": null,
+                "group_by": [
+                    "ip_address"
+                ],
+                "ts_column": "rda_gw_timestamp",
+                "agg": "sum",
+                "column": "count_",
+                "type": "int"
+            },
+            {
+                "stream": "syslog_udp_event_stream",
+                "title": "Syslog Severity",
+                "duration_hours": 1080,
+                "limit": 200,
+                "extra_filter": null,
+                "group_by": [
+                    "syslog_severity"
+                ],
+                "ts_column": "rda_gw_timestamp",
+                "agg": "sum",
+                "column": "count_",
+                "type": "int"
+            }
+        ]
+    },
+    "dashboard_sections": [
+        {
+            "title": "Syslogs",
+            "show_filter": true,
+            "widgets": [
+                {
+                    "widget_type": "pie_chart",
+                    "title": "Syslogs by Hosts",
+                    "duration_hours": 1080,
+                    "stream": "syslog_udp_event_stream",
+                    "ts_column": "rda_gw_timestamp",
+                    "extra_filter": null,
+                    "column": "count_",
+                    "agg": "sum",
+                    "group_by": [
+                        "rda_gw_client_ip"
+                    ],
+                    "type": "int",
+                    "min_width": 3,
+                    "height": 4,
+                    "max_width": 6,
+                    "widget_id": "fa65de3c"
+                },
+                {
+                    "widget_type": "pie_chart",
+                    "title": "Syslogs by Severity",
+                    "duration_hours": 1080,
+                    "stream": "syslog_udp_event_stream",
+                    "ts_column": "rda_gw_timestamp",
+                    "extra_filter": null,
+                    "column": "count_",
+                    "style": {
+                        "color-map": {
+                            "ERROR": "#EF5350",
+                            "NOTICE": "#4DD0E1",
+                            "EMERGENCY": "#B71C1C",
+                            "INFORMATIONAL": "#03A9F4",
+                            "WARNING": "#FFD54F",
+                            "ALERT": "#FFA726",
+                            "CRITICAL": "#E53935",
+                            "DEBUG": "#BCAAA4"
+                        }
+                    },
+                    "agg": "sum",
+                    "group_by": [
+                        "syslog_severity"
+                    ],
+                    "type": "int",
+                    "min_width": 3,
+                    "height": 4,
+                    "max_width": 6,
+                    "widget_id": "73436249"
+                },
+                {
+                    "title": "Crash Count by Device",
+                    "widget_type": "tabular",
+                    "max_width": 6,
+                    "height": 6,
+                    "min_width": 6,
+                    "stream": "syslog_udp_event_stream",
+                    "ts_column": "timestamp",
+                    "extra_filter": "message contains 'crash'",
+                    "columns": {
+                        "device": "Device Name",
+                        "rda_gw_client_ip": "Device IP",
+                        "value": "No. of Crashes"
+                    },
+                    "pivot": {
+                        "group_by": [
+                            "rda_gw_client_ip",
+                            "device"
+                        ],
+                        "column": "message",
+                        "agg": "value_count"
+                    },
+                    "widget_id": "6ca54eaf"
+                },
+                {
+                    "title": "Details",
+                    "widget_type": "tabular",
+                    "duration_hours": 1080,
+                    "max_width": 12,
+                    "height": 8,
+                    "min_width": 12,
+                    "stream": "syslog_udp_event_stream",
+                    "stream0": "syslog_udp_event_stream",
+                    "ts_column": "rda_gw_timestamp",
+                    "extra_filter": null,
+                    "columns": {
+                        "Timestamp": {
+                            "title": "Timestamp",
+                            "type": "TEXT",
+                            "defaultWidth": 150,
+                            "visible": true
+                        },
+                        "timestamp": {
+                            "title": "Syslog Timestamp",
+                            "type": "TEXT",
+                            "defaultWidth": 150,
+                            "visible": true
+                        },
+                        "device": {
+                            "title": "Device",
+                            "type": "TEXT",
+                            "defaultWidth": 150,
+                            "visible": true
+                        },
+                        "raw": {
+                            "title": "Raw",
+                            "type": "TEXT",
+                            "visible": true,
+                            "defaultWidth": 270,
+                            "formatter": "truncate"
+                        },
+                        "Message": {
+                            "title": "Message",
+                            "type": "TEXT",
+                            "defaultWidth": 270,
+                            "visible": true
+                        },
+                        "city": {
+                            "title": "City",
+                            "type": "TEXT",
+                            "defaultWidth": 150,
+                            "visible": true
+                        },
+                        "CLLI_code": {
+                            "title": "CLLI Code",
+                            "type": "TEXT",
+                            "defaultWidth": 150,
+                            "visible": true
+                        },
+                        "event_reason": {
+                            "title": "Event Reason",
+                            "type": "TEXT",
+                            "defaultWidth": 150,
+                            "visible": true
+                        },
+                        "image": {
+                            "title": "Image",
+                            "type": "TEXT",
+                            "defaultWidth": 150,
+                            "visible": true
+                        },
+                        "ip_address": {
+                            "title": "IP Address",
+                            "type": "TEXT",
+                            "defaultWidth": 150,
+                            "visible": true
+                        },
+                        "network_code": {
+                            "title": "Network Code",
+                            "type": "TEXT",
+                            "defaultWidth": 150,
+                            "visible": true
+                        },
+                        "network_type": {
+                            "title": "Network Type",
+                            "type": "TEXT",
+                            "defaultWidth": 150,
+                            "visible": true
+                        },
+                        "rda_gw_client_ip": {
+                            "title": "Rda Gw Client IP",
+                            "type": "TEXT",
+                            "defaultWidth": 150,
+                            "visible": true
+                        },
+                        "rda_gw_ep_name": {
+                            "title": "Rda Gw Ep Name",
+                            "type": "TEXT",
+                            "defaultWidth": 150,
+                            "visible": true
+                        },
+                        "rda_gw_ep_type": {
+                            "title": "Rda Gw Ep Type",
+                            "type": "TEXT",
+                            "defaultWidth": 150,
+                            "visible": true
+                        },
+                        "rda_stream": {
+                            "title": "Rda Stream",
+                            "type": "TEXT",
+                            "defaultWidth": 150,
+                            "visible": true
+                        },
+                        "region": {
+                            "title": "Region",
+                            "type": "TEXT",
+                            "defaultWidth": 150,
+                            "visible": true
+                        },
+                        "stream": {
+                            "title": "Stream",
+                            "type": "TEXT",
+                            "defaultWidth": 150,
+                            "visible": true
+                        },
+                        "syslog_facility": {
+                            "title": "Syslog Facility",
+                            "type": "TEXT",
+                            "defaultWidth": 150,
+                            "visible": true
+                        },
+                        "a_severity_color": {
+                            "title": "Sev_2",
+                            "type": "COLOR-MAP",
+                            "source-column": "syslog_severity",
+                            "color-map": {
+                                "ERROR": "#EF5350",
+                                "NOTICE": "#4DD0E1",
+                                "EMERGENCY": "#B71C1C",
+                                "INFORMATIONAL": "#03A9F4",
+                                "WARNING": "#FFD54F",
+                                "ALERT": "#FFA726",
+                                "CRITICAL": "#E53935",
+                                "DEBUG": "#BCAAA4"
+                            }
+                        },
+                        "syslog_severity": {
+                            "title": "Severity",
+                            "htmlTemplateForRow": "<span class='badge' style='background-color: {{ row.a_severity_color}}' > {{row.syslog_severity}} </span>",
+                            "defaultWidth": 150
+                        },
+                        "zone": {
+                            "title": "Zone",
+                            "type": "TEXT",
+                            "defaultWidth": 150,
+                            "visible": true
+                        },
+                        "rda_gw_seq": {
+                            "title": "Rda Gw Seq",
+                            "type": "DOUBLE",
+                            "defaultWidth": 150,
+                            "visible": true
+                        },
+                        "syslog_facility_num": {
+                            "title": "Syslog Facility Num",
+                            "type": "DOUBLE",
+                            "defaultWidth": 150,
+                            "visible": true
+                        },
+                        "syslog_severity_num": {
+                            "title": "Syslog Severity Num",
+                            "type": "DOUBLE",
+                            "defaultWidth": 150,
+                            "visible": true
+                        },
+                        "rda_gw_timestamp": {
+                            "title": "Rda Gw Timestamp",
+                            "type": "DATETIME",
+                            "defaultWidth": 150,
+                            "visible": true
+                        }
+                    },
+                    "widget_id": "fc181ba1"
+                }
+            ]
+        }
+    ]
+}

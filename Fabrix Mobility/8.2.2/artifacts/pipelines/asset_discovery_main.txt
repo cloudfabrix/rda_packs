@@ -1,0 +1,30 @@
+%% stream = no and limit = 0
+
+## Get input (from form in discovery.json, or empty for manual run)
+@c:new-block
+    --> @exec:get-input
+    --> @dm:save name = "temp-ip-list-input"
+
+## Path 1: From form – selected devices (Others) → write to Kafka
+--> @c:new-block
+    --> @dm:recall name = "temp-ip-list-input" and return_empty = "yes"
+    --> @dm:skip-block-if-shape row_count = 0
+    --> @dm:selectcolumns include = "Others"
+    --> @dm:explode-json column = "Others"
+    ## --> @dm:add-missing-columns columns = "customer_tag,customer_id" & value = "None"
+    --> @dm:eval ip_address = "ip_address if ip_address is not None else device_ip"
+    --> *dm:filter ip_address is not empty
+    --> @dm:map attr = "ip_address" & func = 'strip'
+    --> @dm:add-missing-columns columns = "svi_ip_list" & value = ""
+    ## --> @dm:save name = "ip_list_for_collection"
+    --> @dn:write-stream name = "network_ip_address_stream"
+
+## Path 2: Manual run – no form input → credential check stream → Kafka
+--> @c:new-block
+    --> @dm:recall name = "temp-ip-list-input" and return_empty = "yes"
+    --> @dm:skip-block-if-shape row_count > 0
+    --> @dm:empty
+    --> #dm:query-persistent-stream record_type="summary" and snmp_status="Success" with-input name = 'network_access_verification' and limit = 0
+    --> @dm:selectcolumns include = "ip_address|snmp_status|ssh_status|icmp_status|discovery_scope|svi_ip_list"
+    ## --> @dm:save name = "ip_list_for_collection_1"
+    --> @dn:write-stream name = "network_ip_address_stream"

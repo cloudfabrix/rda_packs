@@ -1,0 +1,269 @@
+{
+    "name": "bulkstats_schemas",
+    "label": "Bulkstats Schemas",
+    "description": "bulkstats_variables: Insights",
+    "dashboard_folder": "fabrix-mobility",
+    "version": "26.04.28.1",
+    "enabled": false,
+    "live_edit": true,
+    "stream": "mobility_schemas",
+    "dashboard_type": "dashboard",
+    "dashboard_filters": {
+        "time_filter": false,
+        "default_time_filter_labels": [
+            "All Time"
+        ],
+        "columns_filter": [
+            {
+                "id": "timestamp",
+                "label": "Timestamp",
+                "type": "DATETIME"
+            },
+            {
+                "id": "name",
+                "label": "Name",
+                "type": "TEXT"
+            },
+            {
+                "id": "file",
+                "label": "file Name",
+                "type": "TEXT"
+            }
+        ],
+        "group_filters": []
+    },
+    "dashboard_sections": [
+        {
+            "title": "Schemas",
+            "show_filter": true,
+            "widgets": [
+                {
+                    "widget_type": "tabular",
+                    "title": "Schemas",
+                    "stream": "mobility_schemas",
+                    "min_width": 12,
+                    "height": 8,
+                    "max_width": 12,
+                    "columns": {
+                        "name": {
+                            "title": "Name",
+                            "type": "TEXT",
+                            "key": true
+                        },
+                        "file": {
+                            "title": "File Name",
+                            "type": "TEXT",
+                            "key": true
+                        },
+                        "path": {
+                            "title": "Object Path",
+                            "type": "TEXT",
+                            "key": true,
+                            "visible": false
+                        }
+                    },
+                    "custom_columns": [
+                        {
+                            "id": "config_folder",
+                            "expr": "'gw_bulk_stats_schema'",
+                            "type": "TEXT",
+                            "key": true,
+                            "visible": false
+                        },
+                        {
+                            "id": "config_file_name",
+                            "expr": "str(file)",
+                            "type": "TEXT",
+                            "key": true,
+                            "visible": false
+                        }
+                    ],
+                    "actions": [
+                        {
+                            "permission": "rda:user_dashboard:view",
+                            "title": "View",
+                            "type": "POPUP_FORM",
+                            "selectionType": "SINGLE",
+                            "identifier": "saas-service-action:add-license",
+                            "api-endpoint": {
+                                "service-name": "saas-reports",
+                                "methodName": "getForm",
+                                "stringified-params": true,
+                                "parse-output": false,
+                                "params": [
+                                    {
+                                        "formId": "rda.saas.userdashboard.config.view.json"
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "permission": "rda:github:add",
+                            "title": "Add",
+                            "type": "POPUP_FORM",
+                            "selectionType": "NONE",
+                            "identifier": "saas-service-action:userdashboard-add-yaml",
+                            "api-endpoint": {
+                                "service-name": "saas-reports",
+                                "methodName": "getForm",
+                                "stringified-params": true,
+                                "parse-output": false,
+                                "params": [
+                                    {
+                                        "formId": "rda.saas.dynamic.form",
+                                        "formActionList": {
+                                            "formActions": [
+                                                {
+                                                    "api-endpoint": {
+                                                        "methodName": "add_schema",
+                                                        "parse-output": false,
+                                                        "namespace": "io.cfx.dimensions.app",
+                                                        "params": [
+                                                            {
+                                                                "dataset_name": "mobility_schemas",
+                                                                "folder_name": "gw_bulk_stats_schema",
+                                                                "config_objName": "gw_bulkstats_config/ingestion_default_config.json"
+                                                            }
+                                                        ],
+                                                        "service-name": "rapid-ingestion-service",
+                                                        "stringified-params": false
+                                                    },
+                                                    "identifier": "Submit",
+                                                    "actionLabel": "Add"
+                                                }
+                                            ]
+                                        },
+                                        "formDefinition": {
+                                            "id": "rda.saas.dynamic.form",
+                                            "refreshRequired": true,
+                                            "formFieldList": [
+                                                {
+                                                    "help": "Enter the Schema Name to be added",
+                                                    "required": true,
+                                                    "editable": true,
+                                                    "label": "Enter the Schema Name to be added",
+                                                    "hidden": false,
+                                                    "dataType": "string",
+                                                    "controlType": "TEXT",
+                                                    "fieldId": "schema_name"
+                                                },
+                                                {
+                                                    "help": "Choose file to upload",
+                                                    "dataType": "string",
+                                                    "required": true,
+                                                    "editable": true,
+                                                    "label": "Choose file to upload",
+                                                    "controlType": "FILE_UPLOAD",
+                                                    "hidden": false,
+                                                    "fieldId": "fileUpload"
+                                                },
+                                                {
+                                                    "fieldId": "overwrite",
+                                                    "label": "Override",
+                                                    "description": "Replace existing file, if it is already exist",
+                                                    "required": false,
+                                                    "default": false,
+                                                    "dataType": "boolean",
+                                                    "hidden": false,
+                                                    "editable": true,
+                                                    "controlType": "BOOLEAN_FIELD",
+                                                    "controlPropertyList": [
+                                                        {
+                                                            "attribute": "layout-group-id",
+                                                            "value": "usertype-role"
+                                                        },
+                                                        {
+                                                            "attribute": "layout-percent",
+                                                            "value": "50"
+                                                        }
+                                                    ]
+                                                }
+                                            ]
+                                        },
+                                        "actions": []
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "permission": "rda:github:add",
+                            "title": "Update",
+                            "type": "POPUP_FORM",
+                            "selectionType": "SINGLE",
+                            "identifier": "saas-service-action:simple-json-edit",
+                            "api-endpoint": {
+                                "service-name": "saas-reports",
+                                "methodName": "getForm",
+                                "stringified-params": true,
+                                "parse-output": false,
+                                "params": [
+                                    {
+                                        "formId": "rda.saas.userdashboard.simple.edit.json.form"
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "permission": "rda:github:add",
+                            "title": "Delete",
+                            "type": "POPUP_FORM",
+                            "selectionType": "SINGLE",
+                            "identifier": "saas-service-action:userdashboard-add-yaml",
+                            "api-endpoint": {
+                                "service-name": "saas-reports",
+                                "methodName": "getForm",
+                                "stringified-params": true,
+                                "parse-output": false,
+                                "params": [
+                                    {
+                                        "formId": "rda.saas.dynamic.form",
+                                        "formActionList": {
+                                            "formActions": [
+                                                {
+                                                    "api-endpoint": {
+                                                        "methodName": "delete_schema",
+                                                        "parse-output": false,
+                                                        "namespace": "io.cfx.dimensions.app",
+                                                        "params": [
+                                                            {
+                                                                "dataset_name": "mobility_schemas",
+                                                                "folder_name": "gw_bulk_stats_schema",
+                                                                "config_objName": "gw_bulkstats_config/ingestion_default_config.json"
+                                                            }
+                                                        ],
+                                                        "service-name": "rapid-ingestion-service",
+                                                        "stringified-params": false
+                                                    },
+                                                    "identifier": "Submit",
+                                                    "actionLabel": "Delete"
+                                                }
+                                            ]
+                                        },
+                                        "formDefinition": {
+                                            "id": "rda.saas.dynamic.form",
+                                            "refreshRequired": true,
+                                            "formFieldList": [
+                                                {
+                                                    "help": "Delete this Schema",
+                                                    "dataType": "string",
+                                                    "required": true,
+                                                    "editable": false,
+                                                    "label": "Delete this Schema",
+                                                    "controlType": "TEXT",
+                                                    "hidden": false,
+                                                    "fieldId": "name"
+                                                }
+                                            ]
+                                        },
+                                        "actions": []
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "widget_id": "64833875"
+                }
+            ]
+        }
+    ]
+}

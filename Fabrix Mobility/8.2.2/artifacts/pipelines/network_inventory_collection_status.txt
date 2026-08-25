@@ -1,0 +1,17 @@
+%% stream = no and limit = 0
+
+@dn:read-stream name = 'network_inventory_collection_status_stream' & group = 'network_device_inventory_collection_status_group'
+    --> @dm:add-missing-columns columns = 'type_,collection_status'
+    --> @dm:save name = 'temp-asset_inventory_collection_status_data'
+    --> *exec:if-condition collection_status != 'Success' & type_ = 'group_status'
+       --> *dm:safe-filter * get asset_ip as 'asset_id',group as 'bot_name',bot_source_name,bot_source_type,jobid as 'network_device_job_id',jobname as 'network_device_job_name',collection_status,collection_timestamp,collection_duration,reason
+       --> @dn:write-stream name = 'asset_inventory_collection_status_stream'
+    --> @exec:end-if
+    --> *exec:if-condition collection_status = 'Success' & type_ = 'group_status'
+       --> *dm:safe-filter * get asset_ip as 'asset_id',group as 'bot_name',bot_source_name,bot_source_type,jobid as 'network_device_job_id',jobname as 'network_device_job_name',collection_status,collection_timestamp,collection_duration,reason
+       --> @dn:write-stream name = 'asset_inventory_collection_status_stream'
+    --> @exec:end-if
+    --> *exec:if-condition type_ = 'device_status'
+       --> @dm:selectcolumns exclude = '^bot_source_name$|^bot_source_type$|^target_type$|^target_os$'
+       --> @dn:write-stream name = 'network_inventory_files_stream'
+    --> @exec:end-if

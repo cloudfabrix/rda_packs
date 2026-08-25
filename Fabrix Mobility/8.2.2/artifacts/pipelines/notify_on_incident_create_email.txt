@@ -1,0 +1,42 @@
+%% stream = no and limit = 0
+%% import_src_type = "email_sender"
+## notify_on_incident_create_email ## pipeline name
+@c:new-block
+    --> @exec:get-input
+    --> @dm:eval row_key="'1'"
+    ## .
+    ## Dict Filters
+    ## .
+    --> @dm:explode-json column="latestIncident"
+    --> @dm:filter-using-dict dict="notify_on_incident_create_dict_filter" & src_key_cols="alert_sources" & dict_key_cols="source_filter" & action="include"
+    --> @dm:skip-block-if-shape row_count=0
+    --> @dm:save name="temp-incident-added-record"
+    ## .
+    ## Get public_url
+    ## .
+    --> #dm:query-persistent-stream i_source_key is '{{row.sourceKey}}' with-input name = "oia-incident-inserts-stream"
+    --> @dm:skip-block-if-shape row_count=0
+    --> @dm:selectcolumns include="i_source_key|attrs_public_url"
+    --> @dm:fixnull columns="attrs_public_url" & value=""
+    --> @dm:save name="temp-incident-url"
+    ## .
+    ## email recipients
+    ## .
+    --> @dm:recall name="notify_on_incident_create_email_recipients"
+    --> @dm:skip-block-if-shape row_count=0
+    --> @dm:eval row_key="'1'"
+    --> @dm:save name="temp-email-recipients"
+    ## .
+    ## email body and subject
+    ## .
+    --> @dm:recall name="temp-incident-added-record"
+    --> @dm:enrich dict='temp-incident-url' & dict_key_cols='i_source_key' & src_key_cols='sourceKey' & enrich_cols='attrs_public_url'
+    --> @dm:enrich dict='temp-email-recipients' & dict_key_cols='row_key' & src_key_cols='row_key' & enrich_cols='email_recipients'
+    --> @dm:save name="temp-email"
+    ## .
+    ## Create Email Body and Subject
+    ## .
+    --> @dm:apply-template-by-row template_name = 'notify-email-body' & output_col = 'email_body'
+    --> @dm:apply-template-by-row template_name = 'notify-email-subject' & output_col = 'email_subject'
+    --> @dm:map to="message_mime_type" & func="fixed" & value="html"
+    --> @dm:save name="temp-child-done"

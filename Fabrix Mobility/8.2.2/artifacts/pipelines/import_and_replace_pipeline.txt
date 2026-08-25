@@ -1,0 +1,111 @@
+%% stream = no and limit = 0
+
+@exec:get-input
+    --> @dm:save name="temp-input-dataset"
+
+--> @c:new-block
+    --> @dm:recall name="temp-input-dataset"
+    --> @dm:eval import_status ="'In Progress'"
+    --> @dm:save name="temp-input-dataset"
+    --> @dm:to-type columns="replace" and type="str"
+    --> @dm:to-type columns="run_discovery,upload_to_workflow" and type="str"
+    --> @dm:explode-json column="fileUpload"
+    --> @dm:eval dataset_name="'onboard_devices'"
+    --> @dm:save name ="temp-input-dataset"
+    --> @dm:eval job_status = "'In Progress'" and job_log  ="'Processing uploaded device file: {{row.displayName}}'" and job_name ="'Import devices'"
+     --> @dm:eval job_end_time ='int(time_now_as_ms())'
+    --> @dm:eval log_type ="'metadata'"
+    --> @rn:write-stream name="discovery_logs"
+    --> @dm:manipulate-string from="ingestion_id,job_log" and func="concat_columns" and to="unique_id"
+    --> @dm:eval log_type ="'import_device_child'"
+    --> @rn:write-stream name="discovery_logs"
+
+--> @c:new-block
+
+--> @c:data-loop dataset="temp-input-dataset" and columns="dataset_name"
+    --> @dm:recall name="temp-input-dataset"
+    --> @dm:selectcolumns include = "replace|upload_to_workflow|run_discovery|USER_ID|retryCount|retryInterval|file|ingestion_id|executed_time|access_verification_status|run_discovery_status|upload_to_workflow_status|import_status|unique_id|operation_type|user_input_job_name"
+    --> @dm:eval job_status = "'In Progress'" and job_log  ="'Fetching existing device data'" and job_name ="'Import devices'"
+    --> @dm:eval job_end_time ='int(time_now_as_ms())'
+    --> @dm:eval log_type ="'metadata'"
+    --> @rn:write-stream name="discovery_logs"
+    --> @dm:manipulate-string from="ingestion_id,job_log" and func="concat_columns" and to="unique_id"
+    --> @dm:eval log_type ="'import_device_child'"
+    --> @rn:write-stream name="discovery_logs"
+    --> @dm:recall name="$dataset_name" and return_empty	="yes"
+    --> @dm:save name ="temp-customer-old-data"
+    --> @dm:math func="row_count"
+    --> @dm:eval key="'key'"
+    --> @dm:save name="temp-uploaded-row-count"
+
+--> @c:new-block
+    --> @dm:recall name="temp-input-dataset"
+    --> @dm:enrich dict = "temp-uploaded-row-count" & src_key_cols = "key" & dict_key_cols="key" & enrich_cols = "row_count" and enrich_cols_as ="existing_device_count"
+    --> @dm:save name="temp-input-dataset"
+
+--> @c:new-block
+
+--> @c:data-loop dataset="temp-input-dataset" and columns="bucketName,objectName,dataset_name,ingestion_id"
+    --> @dm:recall name="temp-input-dataset"
+    --> *dm:filter replace=="True"
+    --> @dm:skip-block-if-shape row_count=0
+    --> @dm:get-from-location path="$bucketName/$objectName"
+    --> @dm:dedup columns="ip_address"
+    --> @dm:save name="temp-uploaded-file-data"
+    --> @dm:save name ="temp-only-uploaded-devices"
+    --> @dm:save name ="import_$ingestion_id_out"
+    --> @dm:save name="$dataset_name"
+    --> @dm:math func="row_count"
+    --> @dm:eval key="'key'"
+    --> @dm:save name="temp-uploded-device-count"
+    --> @dm:recall name="temp-input-dataset"
+    --> @dm:eval import_status ="'Completed'"
+    --> @dm:save name="temp-input-dataset"
+    --> @dm:enrich dict = "temp-uploded-device-count" & src_key_cols = "key" & dict_key_cols="key" & enrich_cols = "row_count" and enrich_cols_as ="newly_uploded_device_count"
+    --> @dm:save name="temp-input-dataset"
+    --> @dm:selectcolumns include = "replace|upload_to_workflow|run_discovery|USER_ID|retryCount|retryInterval|file|ingestion_id|executed_time|job_|existing_device_count|newly_uploded_device_count|access_verification_status|run_discovery_status|upload_to_workflow_status|import_status|unique_id|operation_type|user_input_job_name"
+    --> @dm:eval job_status = "'In Progress'" and job_log  ="'Existing {{row.existing_device_count}} devices replaced by newly added {{row.newly_uploded_device_count}} devices'" and job_name ="'Import devices'"
+    --> @dm:eval job_end_time ='int(time_now_as_ms())'
+    --> @dm:eval log_type ="'metadata'"
+    --> @rn:write-stream name="discovery_logs"
+    --> @dm:manipulate-string from="ingestion_id,job_log" and func="concat_columns" and to="unique_id"
+    --> @dm:eval log_type ="'import_device_child'"
+    --> @rn:write-stream name="discovery_logs"
+
+--> @c:new-block
+
+--> @c:data-loop dataset="temp-input-dataset" and columns="bucketName,objectName,dataset_name,ingestion_id"
+    --> @dm:recall name="temp-input-dataset"
+    --> *dm:filter replace=="False"
+    --> @dm:skip-block-if-shape row_count=0
+    --> @dm:get-from-location path="$bucketName/$objectName"
+    --> @dm:save name="temp-uploaded-file-data"
+    --> @dm:save name ="temp-only-uploaded-devices"
+    --> @dm:save name ="import_$ingestion_id_out"
+    --> @dm:recall name ="temp-customer-old-data"
+    --> @dm:save name="temp-uploaded-file-data" and append= "yes"
+    --> @dm:recall name="temp-uploaded-file-data"
+    --> @dm:dedup columns="ip_address"
+    --> @dm:save name="temp-uploaded-file-data"
+    --> @dm:save name="$dataset_name"
+    --> @dm:recall name ="temp-only-uploaded-devices"
+    --> @dm:math func="row_count"
+    --> @dm:eval key="'key'"
+    --> @dm:save name="temp-uploded-device-count"
+    --> @dm:recall name="temp-input-dataset"
+    --> @dm:eval import_status ="'Completed'"
+    --> @dm:save name="temp-input-dataset"
+    --> @dm:enrich dict = "temp-uploded-device-count" & src_key_cols = "key" & dict_key_cols="key" & enrich_cols = "row_count" and enrich_cols_as ="newly_uploded_device_count"
+    --> @dm:save name="temp-input-dataset"
+    --> @dm:selectcolumns include = "replace|upload_to_workflow|run_discovery|USER_ID|retryCount|retryInterval|file|ingestion_id|executed_time|existing_device_count|newly_uploded_device_count|access_verification_status|run_discovery_status|upload_to_workflow_status|import_status|unique_id|operation_type|user_input_job_name"
+    --> @dm:eval job_status = "'In Progress'" and job_log  ="'{{row.newly_uploded_device_count}} devices are onboarded successfully'" and job_name ="'Import devices'"
+    --> @dm:eval job_end_time ='int(time_now_as_ms())'
+    --> @dm:eval log_type ="'metadata'"
+    --> @rn:write-stream name="discovery_logs"
+    --> @dm:manipulate-string from="ingestion_id,job_log" and func="concat_columns" and to="unique_id"
+    --> @dm:eval log_type ="'import_device_child'"
+    --> @rn:write-stream name="discovery_logs"
+
+--> @c:new-block
+    --> @dm:recall name="temp-input-dataset"
+
