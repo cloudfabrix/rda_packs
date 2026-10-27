@@ -1,0 +1,1623 @@
+{
+    "name": "device_incidents_from_alerts",
+    "label": "Incidents Dashboard",
+    "description": "Incidents Dashboard",
+    "version": "2023.12.17",
+    "enabled": false,
+    "dashboard_style": "auto",
+    "dashboard_folder": "MSP",
+    "dashboard_type": "template",
+    "stream": "oia-incidents-stream",
+    "status_poller": {
+        "stream": "oia-incidents-stream",
+        "frequency": 15,
+        "columns": [
+            "timestamp"
+        ],
+        "sorting": [
+            {
+                "timestamp": "desc"
+            }
+        ],
+        "query": "timestamp is after '$timestamp'",
+        "defaults": {
+            "timestamp": "$UTCNOW"
+        },
+        "action": "refresh"
+    },
+    "template_variables": {
+        "CUST_ID": {
+            "contextId": "customerId"
+        },
+        "PROJ_ID": {
+            "contextId": "projectId"
+        },
+        "DEVICE_IP": {
+            "contextId": "device_ip"
+        },
+        "PROJ_ID_SINGLE": {
+            "contextId": "project_id"
+        },
+        "CUST_TAG": {
+            "contextId": "customerTag"
+        }
+    },
+    "dashboard_filters": {
+        "time_filter": true,
+        "extra_filter": "attrs_rda_gw_client_ip is '{{DEVICE_IP}}' and project_id in {{PROJ_ID}}",
+        "default_time_filter_non_removable": true,
+        "show_default_time_filter": false,
+        "additional_datetime_column_filters": [
+            {
+                "id": "i_created_ts",
+                "label": "Created At"
+            },
+            {
+                "id": "i_updated_ts",
+                "label": "Updated At"
+            }
+        ],
+        "group_filters": [
+            {
+                "stream": "oia-incidents-stream",
+                "title": "Alert Sources",
+                "extra_filter0": "i_state does not contains 'cancelled'  AND network_type in ['FirstNet','Consumer','Enterprise']",
+                "extra_filter": "i_state does not contains 'cancelled'",
+                "group_by": [
+                    "i_alert_sources"
+                ],
+                "ts_column": "i_updated_ts",
+                "agg": "sum",
+                "column": "count_",
+                "type": "str"
+            },
+            {
+                "stream": "oia-incidents-stream",
+                "title": "Assigned To",
+                "group_by": [
+                    "i_assigned_to"
+                ],
+                "ts_column": "i_updated_ts",
+                "agg": "sum",
+                "column": "count_",
+                "extra_filter0": "i_state does not contains 'cancelled'  AND network_type in ['FirstNet','Consumer','Enterprise']",
+                "extra_filter": "i_state does not contains 'cancelled'",
+                "type": "str"
+            },
+            {
+                "stream": "oia-incidents-stream",
+                "title": "Priority",
+                "group_by": [
+                    "i_priority_label"
+                ],
+                "ts_column": "i_updated_ts",
+                "extra_filter0": "i_state does not contains 'cancelled'  AND network_type in ['FirstNet','Consumer','Enterprise']",
+                "extra_filter": "i_state does not contains 'cancelled'",
+                "agg": "sum",
+                "column": "count_",
+                "type": "str"
+            },
+            {
+                "stream": "oia-incidents-stream",
+                "title": "State",
+                "group_by": [
+                    "i_state"
+                ],
+                "ts_column": "i_updated_ts",
+                "agg": "sum",
+                "extra_filter0": "i_state does not contains 'cancelled'  AND network_type in ['FirstNet','Consumer','Enterprise']",
+                "extra_filter": "i_state does not contains 'cancelled'",
+                "column": "count_",
+                "duration_hours": 24,
+                "type": "str"
+            },
+            {
+                "stream": "oia-incidents-stream",
+                "title": "Starred",
+                "extra_filter0": "i_state does not contains 'cancelled'  AND network_type in ['FirstNet','Consumer','Enterprise']",
+                "extra_filter": "i_state does not contains 'cancelled'",
+                "group_by": [
+                    "i_starred"
+                ],
+                "ts_column": "i_updated_ts",
+                "agg": "sum",
+                "column": "count_",
+                "duration_hours": 24,
+                "type": "str"
+            },
+            {
+                "stream": "oia-incidents-stream",
+                "title": "Device",
+                "group_by": [
+                    "attrs_device_hostname_short"
+                ],
+                "extra_filter0": "i_state does not contains 'cancelled'  AND network_type in ['FirstNet','Consumer','Enterprise']",
+                "extra_filter": "i_state does not contains 'cancelled'",
+                "ts_column": "i_updated_ts",
+                "agg": "sum",
+                "column": "count_",
+                "duration_hours": 24,
+                "type": "str"
+            }
+        ],
+        "columns_filter": [
+            {
+                "id": "incident_id",
+                "label": "Incident Id",
+                "type": "TEXT"
+            },
+            {
+                "id": "attrs_device",
+                "label": "Device",
+                "type": "TEXT"
+            },
+            {
+                "id": "attrs_ipAddress",
+                "label": "Device IP",
+                "type": "TEXT"
+            },
+            {
+                "id": "customer_id",
+                "label": "Customer Id",
+                "type": "TEXT"
+            },
+            {
+                "id": "project_id",
+                "label": "Organizations",
+                "type": "TEXT"
+            },
+            {
+                "id": "i_summary",
+                "label": "Summary",
+                "type": "TEXT"
+            },
+            {
+                "id": "i_description",
+                "label": "Description",
+                "type": "TEXT"
+            },
+            {
+                "id": "i_priority_label",
+                "label": "Priority",
+                "type": "TEXT"
+            },
+            {
+                "id": "i_state",
+                "label": "State",
+                "type": "TEXT"
+            },
+            {
+                "id": "i_starred",
+                "label": "Starred",
+                "type": "TEXT"
+            },
+            {
+                "id": "i_alert_sources",
+                "label": "Alert Sources",
+                "type": "TEXT"
+            },
+            {
+                "id": "i_source_key",
+                "label": "Source Key",
+                "type": "TEXT"
+            },
+            {
+                "id1": "i_created_ts",
+                "label": "Created",
+                "type": "DATETIME"
+            },
+            {
+                "id": "i_updated_ts",
+                "label": "Updated",
+                "type": "DATETIME"
+            },
+            {
+                "id": "i_resolved_at_ts",
+                "label": "Resolved At",
+                "type": "DATETIME"
+            },
+            {
+                "id": "i_closed_at_ts",
+                "label": "Closed At",
+                "type": "DATETIME"
+            },
+            {
+                "id": "i_assigned_to",
+                "label": "Assigned To",
+                "type": "TEXT"
+            },
+            {
+                "id": "i_resolved_by",
+                "label": "Resolved By",
+                "type": "TEXT"
+            },
+            {
+                "id": "i_resolution_code",
+                "label": "Resolution Code",
+                "type": "TEXT"
+            },
+            {
+                "id": "i_assigned_to",
+                "label": "Assigned To",
+                "type": "TEXT"
+            },
+            {
+                "id": "i_updated_by",
+                "label": "Updated By",
+                "type": "TEXT"
+            },
+            {
+                "id": "i_reported_by",
+                "label": "Reported By",
+                "type": "TEXT"
+            },
+            {
+                "id": "i_created_by",
+                "label": "Created By",
+                "type": "TEXT"
+            },
+            {
+                "id": "i_closed_by",
+                "label": "Closed By",
+                "type": "TEXT"
+            },
+            {
+                "id": "i_itsm_ticket_number",
+                "label": "ITSM Ticket",
+                "type": "TEXT"
+            },
+            {
+                "id": "i_tags",
+                "label": "Tags",
+                "type": "TEXT"
+            },
+            {
+                "id": "attrs_stack_name",
+                "label": "Stack Name",
+                "type": "TEXT"
+            },
+            {
+                "id": "attrs_node_id",
+                "label": "Node ID",
+                "type": "TEXT"
+            },
+            {
+                "id": "i_alert_count",
+                "label": "Alert Count",
+                "type": "DOUBLE"
+            }
+        ]
+    },
+    "import": [
+        {
+            "from": "oia-my-incidents",
+            "as": "myincidents"
+        }
+    ],
+    "dashboard_sections": [
+        {
+            "title": "Incidents",
+            "show_filter": true,
+            "widgets": [
+                {
+                    "widget_type1": "label",
+                    "max_width": 12,
+                    "height": 0.5,
+                    "min_width": 12,
+                    "label": "<div style='text-align:center;width:100%;'><h1><a style='text-decoration:none;color:#0066ff;' target='_blank'>Incidents</a></h1></div>",
+                    "widget_id": "33317e49"
+                },
+                {
+                    "title": "Open Incidents",
+                    "widget_type": "custom_counter",
+                    "stream": "oia-incidents-stream",
+                    "ts_column": "i_updated_ts",
+                    "extra_filter": "i_state not in ['Resolved','Closed','Cancelled'] and project_id in {{PROJ_ID}}",
+                    "column": "count_",
+                    "agg": "sum",
+                    "style": {
+                        "color-list": [
+                            "#B71C1C"
+                        ]
+                    },
+                    "sparkline": {
+                        "interval": "4h"
+                    },
+                    "max_width": 3,
+                    "height": 3,
+                    "min_width": 3,
+                    "widget_id": "90fc33be"
+                },
+                {
+                    "title": "Resolved Incidents",
+                    "widget_type": "custom_counter",
+                    "stream": "oia-incidents-stream",
+                    "ts_column": "i_updated_ts",
+                    "extra_filter": "i_state in ['Resolved','Closed']  and project_id in {{PROJ_ID}}",
+                    "column": "count_",
+                    "max_width": 3,
+                    "height": 3,
+                    "min_width": 3,
+                    "agg": "sum",
+                    "type": "str",
+                    "style": {
+                        "color-list": [
+                            "#4CAF50"
+                        ]
+                    },
+                    "sparkline": {
+                        "interval": "4h"
+                    },
+                    "widget_id": "53383e25"
+                },
+                {
+                    "title": "Total Incidents",
+                    "widget_type": "custom_counter",
+                    "stream": "oia-incidents-stream",
+                    "extra_filter": "i_state does not contains 'cancelled'and project_id in {{PROJ_ID}}",
+                    "ts_column": "i_updated_ts",
+                    "column": "count_",
+                    "max_width": 3,
+                    "height": 3,
+                    "min_width": 3,
+                    "style": {
+                        "color-list": [
+                            "#1E88E5"
+                        ]
+                    },
+                    "sparkline": {
+                        "interval": "4h"
+                    },
+                    "agg": "sum",
+                    "type": "str",
+                    "widget_id": "bdcdcfba"
+                },
+                {
+                    "widget_type": "pie_chart",
+                    "title": "Incident by State",
+                    "stream": "oia-incidents-stream",
+                    "ts_column": "i_updated_ts",
+                    "column": "count_",
+                    "max_width": 3,
+                    "extra_filter": "i_state does not contains 'cancelled'and project_id in {{PROJ_ID}}",
+                    "height": 3,
+                    "min_width": 3,
+                    "agg": "sum",
+                    "group_by": [
+                        "i_state"
+                    ],
+                    "style": {
+                        "color-map": {
+                            "Resolved": [
+                                "#4CAF50",
+                                "#ffffff"
+                            ],
+                            "Assigned": [
+                                "#FFA726",
+                                "#ffffff"
+                            ],
+                            "Open": [
+                                "#B71C1C",
+                                "#ffffff"
+                            ]
+                        }
+                    },
+                    "type": "int",
+                    "widget_id": "c9ac6704"
+                },
+                {
+                    "widget_type1": "multi_bar_chart",
+                    "title": "Open Incidents by Source and Priority",
+                    "stream": "oia-incidents-stream",
+                    "segment_filter": false,
+                    "ts_column": "i_updated_ts",
+                    "column": "count_",
+                    "description": "Values: Critical, High, Moderate, Low, Planning",
+                    "extra_filter": "i_state not in ['Resolved','Closed','Cancelled'] andand project_id in {{PROJ_ID}}",
+                    "max_width": 8,
+                    "height": 6,
+                    "min_width": 6,
+                    "agg": "sum",
+                    "group_by": [
+                        "i_priority_label",
+                        "i_alert_sources"
+                    ],
+                    "chartProperties": {
+                        "yAxisLabel": "Source",
+                        "xAxisLabel": "priority",
+                        "stacked": true,
+                        "legendLocation": "right",
+                        "orientation": "horizontal"
+                    },
+                    "style": {
+                        "color-map": {
+                            "Critical": "#B71C1C",
+                            "High": "#FFA726",
+                            "Moderate": "#90CAF9",
+                            "Low": "#FFD54F",
+                            "Planning": "#4FC3F7"
+                        }
+                    },
+                    "widget_id": "1864d88b"
+                },
+                {
+                    "title": "Incident Trend",
+                    "widget_type": "timeseries",
+                    "stream": "oia-incidents-stream",
+                    "ts_column": "i_updated_ts",
+                    "max_width": 12,
+                    "height": 4,
+                    "min_width": 12,
+                    "propagateTimeFilter": {
+                        "enabled": true,
+                        "ts_column": "i_updated_ts"
+                    },
+                    "chartProperties": {
+                        "yAxisLabel": "Alerts",
+                        "xAxisLabel": "Local Time",
+                        "legendLocation": "bottom",
+                        "mode": "selection",
+                        "column-id": "i_updated_ts"
+                    },
+                    "interval": "15m",
+                    "group_by": [
+                        "i_priority_label"
+                    ],
+                    "style": {
+                        "color-map": {
+                            "Critical": [
+                                "#B71C1C",
+                                "#ffffff"
+                            ],
+                            "High": [
+                                "#FFA726",
+                                "#ffffff"
+                            ],
+                            "Moderate": [
+                                "#90CAF9",
+                                "#ffffff"
+                            ],
+                            "Low": [
+                                "#4DD0E1",
+                                "#ffffff"
+                            ],
+                            "Planning": [
+                                "#4FC3F7",
+                                "#ffffff"
+                            ]
+                        }
+                    },
+                    "series_spec": [
+                        {
+                            "column": "count_",
+                            "agg": "sum",
+                            "type": "int"
+                        }
+                    ],
+                    "widget_id": "35903114"
+                },
+                {
+                    "extends": [
+                        "self:incident_tabular",
+                        "self:actions_lib.incidents_tabular_actions"
+                    ],
+                    "extend_vars": {
+                        "incidents_tabular_extra_filter": "attrs_rda_gw_client_ip is '{{DEVICE_IP}}' and project_id in {{PROJ_ID}}",
+                        "incidents_tabular_resolve_filter": "i_state not in ['Resolved','Closed']"
+                    },
+                    "widget_id": "94a3fc11"
+                }
+            ]
+        }
+    ],
+    "library": {
+        "widgets": {
+            "incident_tabular": {
+                "title": "Incidents",
+                "extra_filter": "$incidents_tabular_extra_filter",
+                "widget_type": "tabular",
+                "stream": "oia-incidents-stream",
+                "ts_column": "i_created_ts",
+                "min_width": 12,
+                "height": 12,
+                "max_width": 12,
+                "paginated": true,
+                "resizableColumns": false,
+                "refreshRequired": true,
+                "max_rows": 50,
+                "remote_searchable": true,
+                "timebased": false,
+                "widget_id": "ca0706d6",
+                "remote_searchable_cols": [
+                    "incident_id",
+                    "i_itsm_ticket_number",
+                    "i_summary",
+                    "i_source",
+                    "i_state",
+                    "i_source_key",
+                    "i_alert_sources",
+                    "i_assigned_to",
+                    "i_resolved_by",
+                    "i_resolution_code",
+                    "i_updated_by",
+                    "i_reported_by",
+                    "i_created_by",
+                    "i_closed_by",
+                    "attrs_stack_name",
+                    "attrs_node_id",
+                    "policy_name"
+                ],
+                "columns": {
+                    "incident_id": {
+                        "title": "Incident ID",
+                        "visible": true,
+                        "key": true,
+                        "defaultWidth": 150
+                    },
+                    "attrs_device_hostname_short": {
+                        "title": "Device",
+                        "visible": true,
+                        "key": true,
+                        "defaultWidth": 180
+                    },
+                    "attrs_rda_gw_client_ip": {
+                        "title": "Device IP",
+                        "visible": true,
+                        "key": true,
+                        "defaultWidth": 180
+                    },
+                    "project_id": {
+                        "title": "Project Id",
+                        "visible": false,
+                        "key": true,
+                        "defaultWidth": 150
+                    },
+                    "customer_id": {
+                        "title": "Customer Id",
+                        "visible": false,
+                        "key": true,
+                        "hidden": true,
+                        "defaultWidth": 150
+                    },
+                    "i_summary": {
+                        "title": "Summary",
+                        "formatter": "truncate",
+                        "defaultWidth": 270
+                    },
+                    "i_priority_color": {
+                        "type": "COLOR-MAP",
+                        "source-column": "i_priority_label",
+                        "color-map": {
+                            "Critical": "#B71C1C",
+                            "High": "#FFA726",
+                            "Moderate": "#FFD54F",
+                            "Low": "#90CAF9",
+                            "Planning": "#4FC3F7"
+                        }
+                    },
+                    "i_priority_label": {
+                        "title": "Priority",
+                        "htmlTemplateForRow": "<span class='badge' style='background-color: {{'{{ row.i_priority_color }}'}}' > {{'{{ row.i_priority_label }}'}} </span>",
+                        "defaultWidth": 150
+                    },
+                    "i_state_color": {
+                        "type": "COLOR-MAP",
+                        "source-column": "i_state",
+                        "color-map": {
+                            "Resolved": "#4CAF50",
+                            "Assigned": "#FFA726",
+                            "Open": "#B71C1C",
+                            "On Hold": "#FFA726",
+                            "Cancelled": "#4CAF50",
+                            "Closed": "#4CAF50"
+                        }
+                    },
+                    "i_state": {
+                        "title": "Status",
+                        "htmlTemplateForRow": "<span class='badge' style='background-color: {{'{{ row.i_state_color }}'}}' > {{'{{ row.i_state }}'}} </span>",
+                        "defaultWidth": 150
+                    },
+                    "i_itsm_ticket_number": {
+                        "title": "ITSM Ticket",
+                        "htmlTemplateForRow": "{% raw %}<a href=\"{{row.externalUrl}}\" target='_blank'>{{row.i_itsm_ticket_number}}</a>{% endraw %}",
+                        "defaultWidth": 150
+                    },
+                    "i_starred": {
+                        "title": "Starred",
+                        "visible": false,
+                        "defaultWidth": 150
+                    },
+                    "i_source": {
+                        "title": "Source",
+                        "defaultWidth": 150
+                    },
+                    "i_source_key": {
+                        "title": "Source_Key",
+                        "visible": false,
+                        "defaultWidth": 150
+                    },
+                    "i_alert_sources": {
+                        "title": "Alert_Source",
+                        "defaultWidth": 150
+                    },
+                    "policy_name": {
+                        "title": "Alert Policy Name",
+                        "defaultWidth": 150
+                    },
+                    "correlation_startat": {
+                        "title": "Correlation Started At",
+                        "type": "DATETIME",
+                        "defaultWidth": 180
+                    },
+                    "correlation_exipresat": {
+                        "title": "Correlation Expires At",
+                        "type": "DATETIME",
+                        "defaultWidth": 180
+                    },
+                    "i_created_ts": {
+                        "title": "Created",
+                        "key": true,
+                        "type": "DATETIME",
+                        "defaultWidth": 180
+                    },
+                    "i_updated_ts": {
+                        "title": "Updated",
+                        "type": "DATETIME",
+                        "defaultWidth": 180
+                    },
+                    "i_resolved_at_ts": {
+                        "title": "Resolved",
+                        "type": "DATETIME",
+                        "defaultWidth": 180
+                    },
+                    "i_closed_at_ts": {
+                        "title": "Closed",
+                        "visible": false,
+                        "hidden": true,
+                        "type": "DATETIME",
+                        "defaultWidth": 150
+                    },
+                    "i_assigned_to": {
+                        "title": "Assigned_To",
+                        "defaultWidth": 150
+                    },
+                    "i_config_items": {
+                        "title": "Configuration_Items",
+                        "visible": false,
+                        "defaultWidth": 150
+                    },
+                    "i_resolved_by": {
+                        "title": "Resolved_By",
+                        "visible": false,
+                        "defaultWidth": 150
+                    },
+                    "i_resolution_code": {
+                        "title": "Resolution_Code",
+                        "visible": false,
+                        "defaultWidth": 150
+                    },
+                    "i_description": {
+                        "title": "Description",
+                        "visible": false,
+                        "defaultWidth": 270
+                    },
+                    "i_updated_by": {
+                        "title": "Updated_By",
+                        "visible": false,
+                        "defaultWidth": 150
+                    },
+                    "i_reported_by": {
+                        "title": "Reported_By",
+                        "visible": false,
+                        "defaultWidth": 150
+                    },
+                    "i_created_by": {
+                        "title": "Created_By",
+                        "visible": false,
+                        "hidden": true,
+                        "defaultWidth": 150
+                    },
+                    "i_closed_by": {
+                        "title": "Closed_By",
+                        "visible": false,
+                        "defaultWidth": 150
+                    },
+                    "i_tags": {
+                        "title": "Tags",
+                        "visible": false,
+                        "defaultWidth": 150
+                    },
+                    "i_alert_count": {
+                        "title": "Alerts",
+                        "type": "Integer",
+                        "defaultWidth": 150
+                    },
+                    "i_tta_minutes": {
+                        "title": "Assigned To Minutes",
+                        "visible": false,
+                        "defaultWidth": 150
+                    },
+                    "i_ttr_minutes": {
+                        "title": "Resolved To Minutes",
+                        "visible": false,
+                        "defaultWidth": 150
+                    },
+                    "i_cluster": {
+                        "title": "Cluster",
+                        "defaultWidth": 150
+                    },
+                    "i_probability": {
+                        "title": "Probability",
+                        "defaultWidth": 150
+                    },
+                    "i_cfx_incident_occurred": {
+                        "title": "CFX Incident Occured",
+                        "visible": false,
+                        "type": "DATETIME",
+                        "key": true,
+                        "defaultWidth": 150
+                    },
+                    "i_cfx_incident_type": {
+                        "title": "Incident Type",
+                        "visible": false,
+                        "defaultWidth": 150
+                    },
+                    "i_comments": {
+                        "title": "Comments",
+                        "visible": false,
+                        "defaultWidth": 150
+                    },
+                    "i_correlation_id": {
+                        "title": "Correlation Id",
+                        "visible": false,
+                        "defaultWidth": 150
+                    },
+                    "i_service_names": {
+                        "title": "Service Name",
+                        "visible": false,
+                        "defaultWidth": 150
+                    },
+                    "attrs_stack_name": {
+                        "title": "Stack Name",
+                        "visible": false,
+                        "key": true,
+                        "defaultWidth": 150
+                    },
+                    "attrs_node_id": {
+                        "title": "Node ID",
+                        "visible": false,
+                        "key": true,
+                        "defaultWidth": 150
+                    },
+                    "timestamp": {
+                        "title": "Timestamp",
+                        "visible": false,
+                        "type": "DATETIME",
+                        "defaultWidth": 150
+                    }
+                }
+            }
+        },
+        "actions_lib": {
+            "incidents_tabular_actions": {
+                "actions": [
+                    {
+                        "title": "View Topology",
+                        "type": "POPUP_CHART",
+                        "chart-type": "GRAPH",
+                        "permission-resource": "update",
+                        "permission": "oia:incident:view",
+                        "selectionType": "SINGLE",
+                        "identifier": "saas-service-action:stack-view-topology",
+                        "api-endpoint": {
+                            "service-name": "saas-reports",
+                            "methodName": "getReport",
+                            "stringified-params": false,
+                            "parse-output": false,
+                            "params": [
+                                {
+                                    "reportId": "rda.saas.stack.view.topo",
+                                    "oia_details": {
+                                        "oia_stream": "oia-incidents-stream",
+                                        "query": "timestamp later than -12 months",
+                                        "oia_id_attribute": "incident_id",
+                                        "node_id_attribute": "attrs_node_id",
+                                        "stack_name_attribute": "attrs_stack_name",
+                                        "alert_source": {
+                                            "stream": "oia-alerts-stream",
+                                            "group_by": [
+                                                "a_en_node_id",
+                                                "a_severity",
+                                                "a_status"
+                                            ],
+                                            "incident_id_attr": "a_incident_id",
+                                            "context_incident_id_attr": "incident_id",
+                                            "extra_filter": "a_source_systemname is not 'Alert Group' ",
+                                            "ts_column": "timestamp",
+                                            "duration_hours": 9000,
+                                            "agg": "value_count",
+                                            "column": "count_",
+                                            "type": "int"
+                                        }
+                                    },
+                                    "stack_type": "OIA",
+                                    "auto_group": false
+                                }
+                            ]
+                        },
+                        "actionCondition": {
+                            "actionControl": "SHOW_IF",
+                            "conditionalField": [
+                                {
+                                    "conditionType": "IS_NOT_NULL",
+                                    "fieldId": "attrs_stack_name"
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "title": "Update State",
+                        "type": "POPUP_FORM",
+                        "permission": "oia:incident:updateState",
+                        "selectionType": "NONE",
+                        "identifier": "cfx.irm.incident.batch.updatestate",
+                        "contextParamList": {
+                            "contextParams": [
+                                {
+                                    "paramKey": "project_id",
+                                    "paramId": "projectId"
+                                },
+                                {
+                                    "paramKey": "incident_id",
+                                    "paramId": "incidentid"
+                                },
+                                {
+                                    "paramKey": "project_id",
+                                    "paramId": "roomid"
+                                },
+                                {
+                                    "paramKey": "project_id",
+                                    "paramId": "organizationId"
+                                }
+                            ]
+                        },
+                        "api-endpoint": {
+                            "service-name": "saas-reports",
+                            "methodName": "getForm",
+                            "stringified-params": true,
+                            "parse-output": false,
+                            "params": [
+                                {
+                                    "form_id": "rda.saas.dynamic.form",
+                                    "formDefinition": {
+                                        "id": "rda.saas.dynamic.form",
+                                        "refreshRequired": true,
+                                        "formFieldList": [
+                                            {
+                                                "help": "Update Incident State",
+                                                "dataType": "string",
+                                                "controlType": "SELECTOR_TABLE",
+                                                "controlPropertyList": [
+                                                    {
+                                                        "attribute": "column-key",
+                                                        "value": "incident_id"
+                                                    },
+                                                    {
+                                                        "attribute": "column-key",
+                                                        "value": "project_id"
+                                                    },
+                                                    {
+                                                        "attribute": "column-key",
+                                                        "value": "customer_id"
+                                                    },
+                                                    {
+                                                        "attribute": "selection",
+                                                        "value": "MULTIPLE"
+                                                    },
+                                                    {
+                                                        "attribute": "paginated",
+                                                        "value": true
+                                                    }
+                                                ],
+                                                "widget": {
+                                                    "extends": "self:incident_tabular",
+                                                    "populate_filters": true,
+                                                    "extend_vars": {
+                                                        "incidents_tabular_extra_filter": "$incidents_tabular_extra_filter"
+                                                    }
+                                                },
+                                                "required": true,
+                                                "editable": true,
+                                                "label": "Incidents",
+                                                "hidden": false,
+                                                "fieldId": "selectedIncidents"
+                                            }
+                                        ]
+                                    },
+                                    "api-endpoint": {
+                                        "service-name": "cfxdimensions-app-irm_service",
+                                        "namespace": "io.cfx.dimensions.app",
+                                        "methodName": "invokeAppApi:getFormById",
+                                        "params": [
+                                            "getFormById",
+                                            {
+                                                "form_id": "cfx.irm.incident.batch.updatestate",
+                                                "context": {}
+                                            }
+                                        ],
+                                        "parse-output": false,
+                                        "stringified-params": true,
+                                        "useReportContext": true
+                                    },
+                                    "actions": [
+                                        {
+                                            "type": "UPDATE_PSTREAM",
+                                            "pstreamName": "oia_bulk_action",
+                                            "collapse_json": true,
+                                            "collapsed_json_column": "payload"
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "title": "Assign",
+                        "type": "POPUP_FORM",
+                        "permission": "oia:incident:assign",
+                        "selectionType": "NONE",
+                        "identifier": "cfx.irm.incident.batch.updatestate",
+                        "contextParamList": {
+                            "contextParams": [
+                                {
+                                    "paramKey": "project_id",
+                                    "paramId": "projectId"
+                                },
+                                {
+                                    "paramKey": "incident_id",
+                                    "paramId": "incidentid"
+                                },
+                                {
+                                    "paramKey": "project_id",
+                                    "paramId": "roomid"
+                                }
+                            ]
+                        },
+                        "api-endpoint": {
+                            "service-name": "saas-reports",
+                            "methodName": "getForm",
+                            "stringified-params": true,
+                            "parse-output": false,
+                            "params": [
+                                {
+                                    "form_id": "rda.saas.dynamic.form",
+                                    "formDefinition": {
+                                        "id": "rda.saas.dynamic.form",
+                                        "refreshRequired": true,
+                                        "formFieldList": [
+                                            {
+                                                "help": "Update Incident State",
+                                                "dataType": "string",
+                                                "controlType": "SELECTOR_TABLE",
+                                                "controlPropertyList": [
+                                                    {
+                                                        "attribute": "column-key",
+                                                        "value": "incident_id"
+                                                    },
+                                                    {
+                                                        "attribute": "column-key",
+                                                        "value": "project_id"
+                                                    },
+                                                    {
+                                                        "attribute": "column-key",
+                                                        "value": "customer_id"
+                                                    },
+                                                    {
+                                                        "attribute": "selection",
+                                                        "value": "MULTIPLE"
+                                                    },
+                                                    {
+                                                        "attribute": "paginated",
+                                                        "value": true
+                                                    }
+                                                ],
+                                                "widget": {
+                                                    "extends": "self:incident_tabular",
+                                                    "populate_filters": true,
+                                                    "extend_vars": {
+                                                        "incidents_tabular_extra_filter": "$incidents_tabular_extra_filter"
+                                                    }
+                                                },
+                                                "required": true,
+                                                "editable": true,
+                                                "label": "Incidents",
+                                                "hidden": false,
+                                                "fieldId": "selectedIncidents"
+                                            }
+                                        ]
+                                    },
+                                    "api-endpoint": {
+                                        "service-name": "cfxdimensions-app-irm_service",
+                                        "namespace": "io.cfx.dimensions.app",
+                                        "methodName": "invokeAppApi:getFormById",
+                                        "params": [
+                                            "getFormById",
+                                            {
+                                                "form_id": "cfx.irm.incident.batch.updatestate",
+                                                "context": {},
+                                                "action-type": "assign"
+                                            }
+                                        ],
+                                        "parse-output": false,
+                                        "stringified-params": true,
+                                        "useReportContext": true
+                                    },
+                                    "actions": [
+                                        {
+                                            "type": "UPDATE_PSTREAM",
+                                            "pstreamName": "oia_bulk_action",
+                                            "collapse_json": true,
+                                            "collapsed_json_column": "payload"
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "title": "Resolve",
+                        "type": "POPUP_FORM",
+                        "permission": "oia:incident:resolve",
+                        "selectionType": "NONE",
+                        "identifier": "cfx.irm.incident.batch.updatestate",
+                        "contextParamList": {
+                            "contextParams": [
+                                {
+                                    "paramKey": "project_id",
+                                    "paramId": "projectId"
+                                },
+                                {
+                                    "paramKey": "incident_id",
+                                    "paramId": "incidentid"
+                                },
+                                {
+                                    "paramKey": "project_id",
+                                    "paramId": "roomid"
+                                }
+                            ]
+                        },
+                        "api-endpoint": {
+                            "service-name": "saas-reports",
+                            "methodName": "getForm",
+                            "stringified-params": true,
+                            "parse-output": false,
+                            "params": [
+                                {
+                                    "form_id": "rda.saas.dynamic.form",
+                                    "formDefinition": {
+                                        "id": "rda.saas.dynamic.form",
+                                        "refreshRequired": true,
+                                        "formFieldList": [
+                                            {
+                                                "help": "Update Incident State",
+                                                "dataType": "string",
+                                                "controlType": "SELECTOR_TABLE",
+                                                "controlPropertyList": [
+                                                    {
+                                                        "attribute": "column-key",
+                                                        "value": "incident_id"
+                                                    },
+                                                    {
+                                                        "attribute": "column-key",
+                                                        "value": "project_id"
+                                                    },
+                                                    {
+                                                        "attribute": "column-key",
+                                                        "value": "customer_id"
+                                                    },
+                                                    {
+                                                        "attribute": "selection",
+                                                        "value": "MULTIPLE"
+                                                    },
+                                                    {
+                                                        "attribute": "paginated",
+                                                        "value": true
+                                                    }
+                                                ],
+                                                "widget": {
+                                                    "extends": "self:incident_tabular",
+                                                    "populate_filters": true,
+                                                    "extend_vars": {
+                                                        "incidents_tabular_extra_filter": "$incidents_tabular_extra_filter and i_state not in ['Resolved','Closed']"
+                                                    }
+                                                },
+                                                "required": true,
+                                                "editable": true,
+                                                "label": "Incidents",
+                                                "hidden": false,
+                                                "fieldId": "selectedIncidents"
+                                            }
+                                        ]
+                                    },
+                                    "api-endpoint": {
+                                        "service-name": "cfxdimensions-app-irm_service",
+                                        "namespace": "io.cfx.dimensions.app",
+                                        "methodName": "invokeAppApi:getFormById",
+                                        "params": [
+                                            "getFormById",
+                                            {
+                                                "form_id": "cfx.irm.incident.batch.updatestate",
+                                                "context": {},
+                                                "action-type": "resolve"
+                                            }
+                                        ],
+                                        "parse-output": false,
+                                        "stringified-params": true,
+                                        "useReportContext": true
+                                    },
+                                    "actions": [
+                                        {
+                                            "type": "UPDATE_PSTREAM",
+                                            "pstreamName": "oia_bulk_action",
+                                            "collapse_json": true,
+                                            "collapsed_json_column": "payload"
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "title": "Assign to Self",
+                        "type": "POPUP_FORM",
+                        "permission": "oia:incident:assignToSelf",
+                        "selectionType": "NONE",
+                        "identifier": "cfx.irm.incident.batch.updatestate",
+                        "contextParamList": {
+                            "contextParams": [
+                                {
+                                    "paramKey": "project_id",
+                                    "paramId": "projectId"
+                                },
+                                {
+                                    "paramKey": "incident_id",
+                                    "paramId": "incidentid"
+                                },
+                                {
+                                    "paramKey": "project_id",
+                                    "paramId": "roomid"
+                                }
+                            ]
+                        },
+                        "api-endpoint": {
+                            "service-name": "saas-reports",
+                            "methodName": "getForm",
+                            "stringified-params": true,
+                            "parse-output": false,
+                            "params": [
+                                {
+                                    "form_id": "rda.saas.dynamic.form",
+                                    "formDefinition": {
+                                        "id": "rda.saas.dynamic.form",
+                                        "refreshRequired": true,
+                                        "formFieldList": [
+                                            {
+                                                "help": "Update Incident State",
+                                                "dataType": "string",
+                                                "controlType": "SELECTOR_TABLE",
+                                                "controlPropertyList": [
+                                                    {
+                                                        "attribute": "column-key",
+                                                        "value": "incident_id"
+                                                    },
+                                                    {
+                                                        "attribute": "column-key",
+                                                        "value": "project_id"
+                                                    },
+                                                    {
+                                                        "attribute": "column-key",
+                                                        "value": "customer_id"
+                                                    },
+                                                    {
+                                                        "attribute": "selection",
+                                                        "value": "MULTIPLE"
+                                                    },
+                                                    {
+                                                        "attribute": "paginated",
+                                                        "value": true
+                                                    }
+                                                ],
+                                                "widget": {
+                                                    "extends": "self:incident_tabular",
+                                                    "populate_filters": true,
+                                                    "extend_vars": {
+                                                        "incidents_tabular_extra_filter": "$incidents_tabular_extra_filter"
+                                                    }
+                                                },
+                                                "required": true,
+                                                "editable": true,
+                                                "label": "Incidents",
+                                                "hidden": false,
+                                                "fieldId": "selectedIncidents"
+                                            }
+                                        ]
+                                    },
+                                    "api-endpoint": {
+                                        "service-name": "cfxdimensions-app-irm_service",
+                                        "namespace": "io.cfx.dimensions.app",
+                                        "methodName": "invokeAppApi:getFormById",
+                                        "params": [
+                                            "getFormById",
+                                            {
+                                                "form_id": "cfx.irm.incident.batch.updatestate",
+                                                "context": {},
+                                                "action-type": "assignToSelf"
+                                            }
+                                        ],
+                                        "parse-output": false,
+                                        "stringified-params": true,
+                                        "useReportContext": true
+                                    },
+                                    "actions": [
+                                        {
+                                            "type": "UPDATE_PSTREAM",
+                                            "pstreamName": "oia_bulk_action",
+                                            "collapse_json": true,
+                                            "collapsed_json_column": "payload"
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "title": "Update State",
+                        "type": "POPUP_FORM",
+                        "permission": "oia:incident:updateState",
+                        "selectionType": "SINGLE",
+                        "identifier": "cfx.irm.incident.updatestate",
+                        "contextParamList": {
+                            "contextParams": [
+                                {
+                                    "paramKey": "project_id",
+                                    "paramId": "projectId"
+                                },
+                                {
+                                    "paramKey": "incident_id",
+                                    "paramId": "incidentid"
+                                },
+                                {
+                                    "paramKey": "project_id",
+                                    "paramId": "roomid"
+                                }
+                            ]
+                        },
+                        "api-endpoint": {
+                            "service-name": "cfxdimensions-app-irm_service",
+                            "namespace": "io.cfx.dimensions.app",
+                            "methodName": "invokeAppApi:getFormById",
+                            "stringified-params": true,
+                            "parse-output": false,
+                            "params": [
+                                {
+                                    "form_id": "cfx.irm.incident.updatestate",
+                                    "context": {}
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "title": "Assign to Self",
+                        "type": "POPUP_FORM",
+                        "permission": "oia:incident:assignToSelf",
+                        "selectionType": "SINGLE",
+                        "identifier": "cfx.irm.incident.updatestate",
+                        "contextParamList": {
+                            "contextParams": [
+                                {
+                                    "paramKey": "project_id",
+                                    "paramId": "projectId"
+                                },
+                                {
+                                    "paramKey": "incident_id",
+                                    "paramId": "incidentid"
+                                },
+                                {
+                                    "paramKey": "project_id",
+                                    "paramId": "roomid"
+                                }
+                            ]
+                        },
+                        "api-endpoint": {
+                            "service-name": "cfxdimensions-app-irm_service",
+                            "namespace": "io.cfx.dimensions.app",
+                            "methodName": "invokeAppApi:getFormById",
+                            "stringified-params": true,
+                            "parse-output": false,
+                            "params": [
+                                {
+                                    "form_id": "cfx.irm.incident.updatestate",
+                                    "context": {},
+                                    "action-type": "assignToSelf"
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "title": "Assign",
+                        "type": "POPUP_FORM",
+                        "permission": "oia:incident:assign",
+                        "selectionType": "SINGLE",
+                        "identifier": "cfx.irm.incident.updatestate",
+                        "contextParamList": {
+                            "contextParams": [
+                                {
+                                    "paramKey": "project_id",
+                                    "paramId": "projectId"
+                                },
+                                {
+                                    "paramKey": "incident_id",
+                                    "paramId": "incidentid"
+                                },
+                                {
+                                    "paramKey": "project_id",
+                                    "paramId": "roomid"
+                                }
+                            ]
+                        },
+                        "api-endpoint": {
+                            "service-name": "cfxdimensions-app-irm_service",
+                            "namespace": "io.cfx.dimensions.app",
+                            "methodName": "invokeAppApi:getFormById",
+                            "stringified-params": true,
+                            "parse-output": false,
+                            "params": [
+                                {
+                                    "form_id": "cfx.irm.incident.updatestate",
+                                    "context": {},
+                                    "action-type": "assign"
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "title": "Resolve",
+                        "type": "POPUP_FORM",
+                        "permission": "oia:incident:resolve",
+                        "selectionType": "SINGLE",
+                        "identifier": "cfx.irm.incident.updatestate",
+                        "contextParamList": {
+                            "contextParams": [
+                                {
+                                    "paramKey": "project_id",
+                                    "paramId": "projectId"
+                                },
+                                {
+                                    "paramKey": "incident_id",
+                                    "paramId": "incidentid"
+                                },
+                                {
+                                    "paramKey": "project_id",
+                                    "paramId": "roomid"
+                                }
+                            ]
+                        },
+                        "api-endpoint": {
+                            "service-name": "cfxdimensions-app-irm_service",
+                            "namespace": "io.cfx.dimensions.app",
+                            "methodName": "invokeAppApi:getFormById",
+                            "stringified-params": true,
+                            "parse-output": false,
+                            "params": [
+                                {
+                                    "form_id": "cfx.irm.incident.updatestate",
+                                    "context": {},
+                                    "action-type": "resolve"
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "title": "View Incident",
+                        "type": "GO_TO_APP_STATE",
+                        "permission": "oia:incident:view",
+                        "stateName": "app.featureapp",
+                        "appName": "user-dashboard/incident-details-app",
+                        "selectionType": "SINGLE",
+                        "identifier": "view.incident.data",
+                        "drillDownLinkField": "incident_id",
+                        "drillDownContext": "incident_id",
+                        "destinationContext": "incidentid",
+                        "displayLabelColumnId": "Incident ID",
+                        "contextParamList": {
+                            "contextParams": [
+                                {
+                                    "paramKey": "project_id",
+                                    "paramId": "projectId"
+                                },
+                                {
+                                    "paramKey": "incident_id",
+                                    "paramId": "incidentid"
+                                },
+                                {
+                                    "paramKey": "project_id",
+                                    "paramId": "roomid"
+                                },
+                                {
+                                    "paramKey": "project_id",
+                                    "paramId": "projectid"
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "title": "Edit",
+                        "type": "POPUP_FORM",
+                        "permission": "oia:incident:edit",
+                        "selectionType": "SINGLE",
+                        "identifier": "update.incident.data",
+                        "contextParamList": {
+                            "contextParams": [
+                                {
+                                    "paramKey": "project_id",
+                                    "paramId": "projectId"
+                                },
+                                {
+                                    "paramKey": "incident_id",
+                                    "paramId": "incidentid"
+                                },
+                                {
+                                    "paramKey": "project_id",
+                                    "paramId": "roomid"
+                                }
+                            ]
+                        },
+                        "api-endpoint": {
+                            "service-name": "cfxdimensions-app-irm_service",
+                            "namespace": "io.cfx.dimensions.app",
+                            "methodName": "invokeAppApi:getFormById",
+                            "stringified-params": true,
+                            "parse-output": false,
+                            "params": [
+                                {
+                                    "form_id": "cfx.irm.incident.details",
+                                    "context": {},
+                                    "action-type": "edit"
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "title": "Add To Starred",
+                        "type": "POPUP_FORM",
+                        "permission": "oia:incident:addToStarred",
+                        "selectionType": "SINGLE",
+                        "identifier": "favorite.incident.data",
+                        "contextParamList": {
+                            "contextParams": [
+                                {
+                                    "paramKey": "project_id",
+                                    "paramId": "projectId"
+                                },
+                                {
+                                    "paramKey": "incident_id",
+                                    "paramId": "incidentid"
+                                },
+                                {
+                                    "paramKey": "project_id",
+                                    "paramId": "roomid"
+                                }
+                            ]
+                        },
+                        "api-endpoint": {
+                            "service-name": "cfxdimensions-app-irm_service",
+                            "namespace": "io.cfx.dimensions.app",
+                            "methodName": "invokeAppApi:getFormById",
+                            "stringified-params": true,
+                            "parse-output": false,
+                            "params": [
+                                {
+                                    "form_id": "cfx.irm.favorite.incident",
+                                    "context": {}
+                                }
+                            ]
+                        },
+                        "actionCondition": {
+                            "actionControl": "SHOW_IF",
+                            "conditionalField": [
+                                {
+                                    "conditionType": "EQUAL",
+                                    "conditionValue": "0",
+                                    "fieldId": "i_favorite"
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "title": "Remove From Starred",
+                        "type": "POPUP_FORM",
+                        "permission": "oia:incident:removeFromStarred",
+                        "selectionType": "SINGLE",
+                        "identifier": "unfavorite.incident.data",
+                        "contextParamList": {
+                            "contextParams": [
+                                {
+                                    "paramKey": "project_id",
+                                    "paramId": "projectId"
+                                },
+                                {
+                                    "paramKey": "incident_id",
+                                    "paramId": "incidentid"
+                                },
+                                {
+                                    "paramKey": "project_id",
+                                    "paramId": "roomid"
+                                }
+                            ]
+                        },
+                        "api-endpoint": {
+                            "service-name": "cfxdimensions-app-irm_service",
+                            "namespace": "io.cfx.dimensions.app",
+                            "methodName": "invokeAppApi:getFormById",
+                            "stringified-params": true,
+                            "parse-output": false,
+                            "params": [
+                                {
+                                    "form_id": "cfx.irm.unfavorite.incident",
+                                    "context": {}
+                                }
+                            ]
+                        },
+                        "actionCondition": {
+                            "actionControl": "SHOW_IF",
+                            "conditionalField": [
+                                {
+                                    "conditionType": "EQUAL",
+                                    "conditionValue": "1",
+                                    "fieldId": "i_favorite"
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "title": "Get Public URL",
+                        "type": "POPUP_FORM",
+                        "permission": "oia:incident:incidentDetails",
+                        "selectionType": "SINGLE",
+                        "identifier": "cfx.irm.incident.publicurl",
+                        "contextParamList": {
+                            "contextParams": [
+                                {
+                                    "paramKey": "project_id",
+                                    "paramId": "projectId"
+                                },
+                                {
+                                    "paramKey": "incident_id",
+                                    "paramId": "incidentid"
+                                },
+                                {
+                                    "paramKey": "project_id",
+                                    "paramId": "roomid"
+                                }
+                            ]
+                        },
+                        "api-endpoint": {
+                            "service-name": "cfxdimensions-app-irm_service",
+                            "namespace": "io.cfx.dimensions.app",
+                            "methodName": "invokeAppApi:getFormById",
+                            "stringified-params": true,
+                            "parse-output": false,
+                            "params": [
+                                {
+                                    "form_id": "cfx.irm.incident.publicurl",
+                                    "context": {}
+                                }
+                            ]
+                        }
+                    }
+                ]
+            }
+        }
+    },
+    "saved_time": "2025-07-23T10:25:40.077533"
+}

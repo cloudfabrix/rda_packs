@@ -1,0 +1,223 @@
+{
+    "name": "alert-details-v2",
+    "label": "Alert Details V2",
+    "description": "OIA Alert Details",
+    "dashboard_folder": "AlertIncidentPack",
+    "version": "23.2.13",
+    "enabled": true,
+    "exportable": false,
+    "dashboard_style": "auto",
+    "dashboard_type": "template",
+    "template_variables": {
+        "PROJECT_ID": {
+            "default": null,
+            "contextId": "projectid"
+        },
+        "INCIDENT_ID": {
+            "default": null,
+            "contextId": "incidentid"
+        },
+        "ALERT_KEY": {
+            "default": null,
+            "contextId": "eventkey"
+        },
+        "SOURCE_SYSTEM_ID": {
+            "default": null,
+            "contextId": "sourcesystemid"
+        },
+        "SOURCE_DASHBOARD_ID": {
+            "default": "user-dashboard-incident-details-alerts",
+            "contextId": "sourceDashboardId"
+        }
+    },
+
+    "custom_context": {
+        "alert-context": true
+    },
+    "dashboard_filters": {
+        "time_filter": false,
+        "default_time_filter_non_removable": false,
+        "show_default_time_filter": false
+    },
+     "import": [
+        {
+            "from": "oia-alerts-os",
+            "as": "alerts"
+        },
+        {
+            "from": "oia-incidents-os-template",
+            "as": "incidents"
+        }
+    ],
+    "dashboard_sections": [
+        {
+            "title": "Alert Payload",
+            "show_filter": false,
+            "widgets": [
+                {
+                    "title": "Alert Payload",
+                    "widget_type": "summary",
+                    "min_width": 12,
+                    "height": 10,
+                    "refreshRequired": false,
+                    "timebased": false,
+                    "api-endpoint": {
+                        "service-name": "alert-processor",
+                        "namespace": "io.cfx.dimensions.app",
+                        "version": "*",
+                        "methodName": "invokeAppApi:viewAlertData",
+                        "stringified-params": true,
+                        "parse-output": false,
+                        "params": [
+                            {}
+                        ]
+                    },
+                    "widget_id": "alert_payload"
+                }
+            ]
+        },
+        {
+            "title": "Enrichments",
+            "show_filter": true,
+            "projects": [
+                "ACME"
+            ],
+            "widgets": [
+                {
+                    "title": "Enrichments",
+                    "widget_type": "summary",
+                    "min_width": 12,
+                    "height": 10,
+                    "refreshRequired": false,
+                    "timebased": false,
+                    "api-endpoint": {
+                        "service-name": "alert-processor",
+                        "namespace": "io.cfx.dimensions.app",
+                        "version": "*",
+                        "methodName": "invokeAppApi:getAlertAttributes",
+                        "stringified-params": true,
+                        "parse-output": false,
+                        "params": [
+                            {}
+                        ]
+                    },
+                    "widget_id": "alert_payload"
+                }
+            ]
+        },
+        {
+            "title": "Key Alert Attributes",
+            "show_filter": true,
+            "projects": [
+                "ACME"
+            ],
+            "widgets": [
+                {
+                    "title": "Key Alert Attributes",
+                    "widget_type": "summary",
+                    "min_width": 12,
+                    "height": 10,
+                    "refreshRequired": false,
+                    "timebased": false,
+                    "api-endpoint": {
+                        "service-name": "alert-processor",
+                        "namespace": "io.cfx.dimensions.app",
+                        "version": "*",
+                        "methodName": "invokeAppApi:getAlertModel",
+                        "stringified-params": true,
+                        "parse-output": false,
+                        "params": [
+                            {}
+                        ]
+                    },
+                    "widget_id": "alert_payload"
+                }
+            ]
+        },
+         {
+            "title": "Alert Mapping",
+            "show_filter": false,
+            "widgets": [
+                {
+                    "widget_type": "codeblock",
+                    "title": "Alert Mapping",
+                    "min_width": 12,
+                    "height": 10,
+                    "lang": "json",
+                    "contextParamList": {
+                        "contextParams": [
+                            {
+                                "paramKey": "a_en_mapper_id",
+                                "paramId": "mappingid"
+                            }
+                        ]
+                    },
+                    "api-endpoint": {
+                        "service-name": "configuration-service",
+                        "namespace": "io.cfx.dimensions.app",
+                        "version": "*",
+                        "methodName": "invokeAppApi:getMappingScriptForMappingId",
+                        "stringified-params": true,
+                        "parse-output": false,
+                        "params": [
+                            {}
+                        ]
+                    },
+                    "widget_id": "bf9ed9bd"
+                }
+            ]
+        },
+        {
+            "title": "Alert History",
+            "show_filter": false,
+            "widgets": [
+                {
+                    "title": "Alert Count",
+                    "widget_type": "counter",
+                    "stream": "oia-alerts-stream",
+                    "duration_hours": 86000,
+                    "timebased": false,
+                    "extra_filter": "a_alert_key is '{{ALERT_KEY}}' and project_id is '{{PROJECT_ID}}' and a_source_system_id is '{{SOURCE_SYSTEM_ID}}'",
+                    "ts_column": "a_updated_ts",
+                    "column": "a_repeat_count",
+                    "agg": "sum",
+                    "min_width": 6,
+                    "height": 2.6,
+                    "max_width": 6,
+                    "type": "str",
+                    "widget_id": "02be1e23"
+                },
+                {
+                    "title": "Incident count",
+                    "widget_type": "counter",
+                    "stream": "oia-alerts-stream",
+                    "duration_hours": 86000,
+                    "extra_filter": "a_alert_key is '{{ALERT_KEY}}' and project_id is '{{PROJECT_ID}}' and a_source_system_id is '{{SOURCE_SYSTEM_ID}}'",
+                    "ts_column": "a_updated_ts",
+                    "column": "a_incident_id",
+                    "agg": "cardinality",
+                    "min_width": 6,
+                    "height": 2.6,
+                    "max_width": 6,
+                    "type": "str",
+                    "widget_id": "4c778ab9"
+                },
+                {
+                    "extends": [
+                        "alerts:alerts_tabular",
+                        "alerts:actions_lib.alerts_tabular_actions"
+                    ],
+                    "extra_filter": "a_alert_key is '{{ALERT_KEY}}' and project_id is '{{PROJECT_ID}}' and a_source_system_id is '{{SOURCE_SYSTEM_ID}}'",
+                    "extend_vars": {
+                        "clear_alerts_extra_filter": "a_status is not 'CLEARED' and a_alert_key is '{{ALERT_KEY}}' and a_source_system_id is '{{SOURCE_SYSTEM_ID}}' and project_id is '{{PROJECT_ID}}'"
+                    },
+                    "min_width": 12,
+                    "height": 12,
+                    "max_width": 12,
+                    "widget_id": "94a3fc11"
+                }
+            ]
+        }
+    ],
+    "saved_time": "2024-04-17T06:53:37.574575"
+}

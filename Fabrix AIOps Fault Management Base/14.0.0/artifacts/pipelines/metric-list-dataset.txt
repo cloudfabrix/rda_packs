@@ -1,0 +1,154 @@
+%% import_src_type = "vrops,prometheus,dynatrace,me-appmanager"
+@dm:empty
+    --> @dm:save name='oia-meapm-metrics-list'
+
+## filter metric selection rules
+--> @c:new-block
+    --> @dm:recall name='oia-metric_selection_rules'
+    --> *dm:filter metric_source='me-apm'
+    --> @dm:selectcolumns include="^metric_filter$"
+    --> @dm:save name='temp-meapm-metric-selection-rules'
+
+## ME-APM Metric List Pipeline
+--> @c:data-loop columns="metric_filter" and dataset='temp-meapm-metric-selection-rules'
+    --> *me-apm:metric-list
+    --> @dm:eval asset_id = 'RESOURCENAME if RESOURCENAME else PARENT_RESOURCENAME if PARENT_RESOURCENAME else None'
+    --> *dm:filter asset_id is not None and asset_id != ''
+    --> @dm:dns-name-to-ip from_cols = 'asset_id' and to_cols = 'asset_id' and keep_value = 'yes'
+    --> @dm:map to = '_tmp_metric_label' & from = 'DESCRIPTION: ,DISPLAYNAME' & func='join' & sep=' : '
+    --> @dm:map to = '_tmp_metric_label_child' & from = 'PARENT_DESCRIPTION: ,CHILDMONITORS_DISPLAYNAME,CHILDMONITORINFO_DISPLAYNAME' & func='join' & sep=' : '
+    --> @dm:eval metric_label = "_tmp_metric_label_child if _type == 'CHILD' else _tmp_metric_label"
+    --> *dm:filter ($metric_filter)
+    --> @dm:map to = 'metric_label' and from = 'metric_label,Units' and func='join' and sep=' '
+    --> @dm:map to = 'unit' & from = 'Units'
+    --> @dm:fixnull columns= 'unit' & value = 'Count' & apply_for_empty = 'yes'
+    --> @dm:manipulate-string func='strip' and to='unit' and from='unit'
+    --> @dm:eval unit = "unit if (unit != '') else 'Count'"
+    --> @dm:selectcolumns include="^asset_id$|^RESOURCEID$|^AttributeID$|^metric_label$|^unit$"
+    --> @dm:save name = 'oia-meapm-metrics-list'
+
+## Prometheus Metric List Pipeline
+## filter metric selection rules
+--> @dm:empty
+    --> @dm:save name='oia-prometheus-metrics-list'
+
+--> @c:new-block
+    --> @dm:recall name='oia-metric_selection_rules'
+    --> *dm:filter metric_source='prometheus'
+    --> @dm:selectcolumns include="^metric_filter$"
+    --> @dm:save name='temp-prometheus-metric-selection-rules'
+
+--> @c:data-loop columns="metric_filter" and dataset='temp-prometheus-metric-selection-rules'
+    --> *prometheus:metric-metadata
+    --> *dm:filter ($metric_filter)
+    --> @dm:map from = 'help' and to = 'metric_label'
+    --> @dm:fixnull columns= 'unit' & value = 'Count' & apply_for_empty = 'yes'
+    --> @dm:save name is 'temp-prom-metric-meta'
+
+--> @c:new-block
+    --> *prometheus:targets
+    --> @dm:save name is 'temp-prom-targets'
+
+--> @c:new-block
+    --> @dm:empty
+    --> @dm:save name is 'temp-oia-prometheus-metrics-list'
+
+--> @c:data-loop dataset is 'temp-prom-targets' and columns is 'instance'
+    --> @dm:recall name is 'temp-prom-metric-meta'
+    --> @dm:eval asset_id = "'$instance'"
+    --> @dm:eval instance = "'$instance'"
+    --> @dm:map from = 'help' and to = 'metric_label'
+    --> @dm:map from = 'asset_id' and to = 'port' and func = 'split' and sep = ':'
+    --> @dm:eval asset_id = 'port[0]'
+    --> @dm:eval metric_id = 'metric'
+    --> @dm:selectcolumns include="^asset_id$|^instance$|^metric_id$|^metric_label$|^unit$"
+    --> @dm:save name is 'temp-oia-prometheus-metrics-list' and append is yes
+
+--> @c:new-block
+    --> @dm:recall name='temp-oia-prometheus-metrics-list'
+    --> @dm:save name='oia-prometheus-metrics-list'
+## vRops Metric List Pipeline
+--> @dm:empty
+    --> @dm:save name='oia-vrops-metrics-list'
+## vm summary
+--> @c:new-block
+    --> *vrops:vm-summary
+    --> @dm:save name='temp-vm-summary'
+
+## filter metric selection rules
+--> @c:new-block
+    --> @dm:recall name='oia-metric_selection_rules'
+    --> *dm:filter metric_source='vRops'
+    --> @dm:selectcolumns include="^metric_filter$"
+    --> @dm:save name='temp-vrops-metric-selection-rules'
+
+## metrics list
+--> @c:data-loop columns="metric_filter" and dataset='temp-vrops-metric-selection-rules'
+    --> *vrops:metric-list
+    --> *dm:filter ($metric_filter)
+    --> @dm:eval metric_id='key' and metric_name='name'
+    --> @dm:save name='temp-vrops-metrics-list' and append='yes'
+
+## create metrics list for each resource
+--> @c:data-loop columns='metric_id,metric_name,unit' and dataset='temp-vrops-metrics-list'
+    --> @dm:recall name='temp-vm-summary'
+    --> @dm:eval metric_id="'$metric_id'" and metric_label="'$metric_name'" and unit="'$unit'"
+    --> @dm:map from='identifier' and to='resource_id'
+    --> *dm:filter guest_ip_adress is not empty
+    --> @dm:map from='guest_ip_adress' and to='asset_id'
+    --> @dm:map from='name' and to='asset_name'
+    --> @dm:fixnull columns= 'unit' & value = 'Count' & apply_for_empty = 'yes'
+    --> @dm:selectcolumns include='^asset_id$|^asset_name$|^resource_id$|^metric_id$|^metric_label$|^unit$'
+    --> @dm:save name='temp-oia-vrops-metrics-list' and append='yes'
+
+## create empty dataset for vrops metrics list    
+--> @c:new-block
+    --> @dm:empty
+    --> @dm:save name='oia-vrops-metrics-list'
+
+## create final metrics list for all resources
+--> @c:new-block
+    --> @dm:recall name='temp-oia-vrops-metrics-list'
+    --> @dm:save name='oia-vrops-metrics-list'
+
+## Dynatrace Metric List Pipeline
+--> @dm:empty
+    --> @dm:save name='oia-dynatrace-metrics-list'
+    --> @dm:save name='dynatrace-metrics-list'
+
+--> @c:new-block
+    --> @dynatrace:dynatrace-entity-info
+    --> @dm:eval asset_id='entityId'
+    --> @dm:eval asset_label='displayName'
+    --> @dm:eval asset_type='type'
+    --> @dm:selectcolumns include="^asset_id$|^asset_label$|^asset_type$"
+    --> @dm:save name='dynatrace-entity-info'
+
+--> @c:new-block
+    --> *dynatrace:dynatrace-metrics
+    --> @dm:eval metric_id='metricId'
+    --> @dm:eval metric_label='displayName'
+    --> @dm:eval metric_asset_type='entityType'
+    --> @dm:selectcolumns include="^metric_id$|^metric_label$|^metric_asset_type$|^unit$"
+    --> @dm:save name='dynatrace-metrics-list-raw'
+
+--> @c:data-loop columns='asset_id,asset_label,asset_type' and dataset='dynatrace-entity-info'
+    --> @dm:recall name='dynatrace-metrics-list-raw'
+    --> *dm:filter metric_asset_type='[]' or metric_asset_type contains '$asset_type'
+    --> @dm:skip-block-if-shape row_count=0
+    --> @dm:eval asset_id="'$asset_id'"
+    --> @dm:eval asset_type="'$asset_type'"
+    --> @dm:save name='dynatrace-metrics-list'  and append='yes'
+
+## filter metric selection rules
+--> @c:new-block
+    --> @dm:recall name='oia-metric_selection_rules'
+    --> *dm:filter metric_source='dynatrace'
+    --> @dm:selectcolumns include="^metric_filter$"
+    --> @dm:save name='temp-dynatrace-metric-selection-rules'
+
+--> @c:data-loop columns="metric_filter" and dataset='temp-dynatrace-metric-selection-rules'
+    --> @dm:recall name='dynatrace-metrics-list'
+    --> *dm:filter ($metric_filter)
+    --> @dm:selectcolumns include="^asset_id$|^asset_type$|^metric_id$|^metric_label$|^unit$"
+    --> @dm:save name = 'oia-dynatrace-metrics-list' and append='yes'

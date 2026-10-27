@@ -1,0 +1,178 @@
+{
+    "name": "oia-bulk-action-details",
+    "label": "Bulk Action Details for Alerts and Incidents",
+    "description": "oia-bulk-action-batches: Insights",
+    "dashboard_folder": "default",
+    "version": "1.0.0",
+    "enabled": false,
+    "stream": "oia-bulk-action-batches",
+    "dashboard_type": "template",
+    "live_edit": false,
+    "template_variables": {
+        "ACTION_ID": {
+            "default": null,
+            "contextId": "action_run_id"
+        }
+    },
+    "dashboard_filters": {
+        "time_filter": false,
+        "extra_filter": "action_run_id is '{{ACTION_ID}}'",
+        "columns_filter": [
+            {
+                "id": "end_time",
+                "label": "End Time",
+                "type": "DATETIME"
+            },
+            {
+                "id": "last_updated_time",
+                "label": "Last Updated Time",
+                "type": "DATETIME"
+            },
+            {
+                "id": "start_time",
+                "label": "Start Time",
+                "type": "DATETIME"
+            },
+            {
+                "id": "all_records",
+                "label": "All Records",
+                "type": "TEXT"
+            },
+            {
+                "id": "failed_records",
+                "label": "Failed Records",
+                "type": "TEXT"
+            },
+            {
+                "id": "status",
+                "label": "Status",
+                "type": "TEXT"
+            },
+            {
+                "id": "successful_records",
+                "label": "Successful Records",
+                "type": "TEXT"
+            },
+            {
+                "id": "batch_num",
+                "label": "Batch Num",
+                "type": "DOUBLE"
+            },
+            {
+                "id": "failed_count",
+                "label": "Failed Count",
+                "type": "DOUBLE"
+            },
+            {
+                "id": "successful_count",
+                "label": "Successful Count",
+                "type": "DOUBLE"
+            },
+            {
+                "id": "total_count",
+                "label": "Total Count",
+                "type": "DOUBLE"
+            },
+            {
+                "id": "comments",
+                "label": "Comments",
+                "type": "TEXT"
+            }
+        ],
+        "group_filters": []
+    },
+    "dashboard_sections": [
+        {
+            "title": "Bulk Action Details for Alerts and Incidents",
+            "show_filter": true,
+            "widgets": [
+                {
+                    "title": "Details",
+                    "widget_type": "tabular",
+                    "paginated": true,
+                    "duration_hours": 1080,
+                    "max_width": 12,
+                    "height": 8,
+                    "min_width": 12,
+                    "stream": "oia-bulk-action-batches",
+                    "ts_column": "start_time",
+                    "extra_filter": null,
+                    "columns": {
+                        "action_run_id": {
+                            "title": "Action Run Id",
+                            "type": "TEXT",
+                            "hidden": true
+                        },
+                        "batch_num": {
+                            "title": "Batch Num",
+                            "type": "DOUBLE",
+                            "hidden": false
+                        },
+                        "status": {
+                            "title": "Status",
+                            "type": "TEXT",
+                            "hidden": false
+                        },
+                        "total_count": {
+                            "title": "Total Count",
+                            "type": "DOUBLE",
+                            "hidden": false
+                        },
+                        "successful_count": {
+                            "title": "Successful Count",
+                            "type": "DOUBLE",
+                            "hidden": false
+                        },
+                        "failed_count": {
+                            "title": "Failed Count",
+                            "type": "DOUBLE",
+                            "hidden": false
+                        },
+                        "start_time": {
+                            "title": "Start Time",
+                            "type": "DATETIME",
+                            "hidden": false
+                        },
+                        "last_updated_time": {
+                            "title": "Last Updated Time",
+                            "type": "DATETIME",
+                            "hidden": false
+                        },
+                        "end_time": {
+                            "title": "End Time",
+                            "type": "DATETIME",
+                            "hidden": false
+                        },
+                        "all_records": {
+                            "title": "All Records",
+                            "type": "TEXT",
+                            "hidden": false
+                        },
+                        "successful_records": {
+                            "title": "Successful Records",
+                            "type": "TEXT",
+                            "hidden": false
+                        },
+                        "failed_records": {
+                            "title": "Failed Records",
+                            "type": "TEXT",
+                            "hidden": false
+                        },
+                        "project_wise_counts": {
+                            "title": "Project Wise Counts",
+                            "type": "TEXT",
+                            "hidden": true
+                        },
+                        "comments": {
+                            "title": "Comments",
+                            "type": "TEXT",
+                            "hidden": false
+                        }
+                    },
+                    "widget_id": "8747e22a"
+                }
+            ]
+        }
+    ],
+    "saved_time": "2025-05-08T21:02:00.955765"
+}
