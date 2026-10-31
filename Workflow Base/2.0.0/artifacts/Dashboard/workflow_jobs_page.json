@@ -1,0 +1,88 @@
+{
+  "name": "workflow_jobs_page",
+  "label": "Jobs",
+  "is_template": false,
+  "description": "Workflow Jobs",
+  "version": "25.07.10.1",
+  "enabled": true,
+  "live_edit": true,
+  "dashboard_filters": {
+    "time_filter": true,
+    "columns_filter": [
+      {
+        "id": "timestamp",
+        "label": "Timestamp",
+        "type": "DATETIME"
+      }
+    ],
+    "duration": 10000
+  },
+  "dashboard_type": "dashboard",
+  "dashboard_folder": "Default",
+  "dashboard_style": "auto",
+  "dashboard_sections": [
+    {
+      "title": "Workflows",
+      "widgets": [
+        {
+          "title": "Workflow Jobs",
+          "widget_type": "tabular",
+          "stream": "rda_workflow_status",
+          "extra_filter": "workflowType == 'automation' and flow_type=='workflow'",
+          "timebased": false,
+          "remote_searchable": true,
+          "ts_column": "timestamp",
+          "paginated": true,
+          "height": 8,
+          "min_wdith": 12,
+          "columns": {
+            "workflow_name": {
+              "title": "Agent",
+              "key": true
+            },
+            "jobId": {
+              "title": "Job ID",
+              "key": true
+            },
+            "status_color": {
+              "title": "Color",
+              "type": "COLOR-MAP",
+              "source-column": "status",
+              "color-map": {
+                "Failed": "#E53935",
+                "Completed": "#3CD733",
+                "In-progress": "#03A9F4"
+              }
+            },
+            "status": {
+              "title": "Status",
+              "key": false,
+              "htmlTemplateForRow": "<span class='badge' style='background-color: {{ row.status_color }};' > {{ row.status }} </span>"
+            },
+            "failure_reason": {
+              "title": "Failure Reason",
+              "key": false
+            }
+          },
+          "actions": [
+            {
+              "permission": "rda:page:view",
+              "title": "View Details",
+              "selectionType": "SINGLE",
+              "drillDownLinkField": "job_id",
+              "identifier": "saas-service-action:workflow-job-status",
+              "appName": "user-dashboard/workflow_job_status",
+              "stateName": "app.featureapp",
+              "type": "GO_TO_APP_STATE"
+            }
+          ],
+          "refreshOptions": {
+            "refreshType": "Periodic",
+            "refreshInterval": 60000
+          },
+          "widget_id": "7c3c59f6"
+        }
+      ]
+    }
+  ]
+}

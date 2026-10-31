@@ -1,0 +1,66 @@
+{
+  "name": "ai_workflow_output",
+  "label": "Workflow Output",
+  "is_template": false,
+  "description": "AI Agent Job Details",
+  "live_edit": true,
+  "version": "25.7.8.1",
+  "enabled": true,
+  "dashboard_folder": "workflows",
+  "dashboard_type": "dashboard",
+  "dashboard_style": "tabbed",
+  "use_storyboard": false,
+  "default_storyboard": null,
+  "dashboard_generator": {
+    "attachment": "generator"
+  },
+  "template_variables": {
+    "JOB_ID": {
+      "contextId": "conversationId"
+    },
+    "FLOW_NAME": {
+      "contextId": "conversationLabel"
+    }
+  },
+  "dashboard_filters": {},
+  "dashboard_sections": [
+    {
+      "title": "Output",
+      "widgets": [
+        {
+          "title": "Workflow View",
+          "widget_type": "label",
+          "label": "attachment://agentOutput",
+          "advanced": true,
+          "uses_reporting_engine": true,
+          "fixed_variables": {
+            "agent_name": "{{FLOW_NAME}}",
+            "job_id": "{{JOB_ID}}"
+          },
+          "widget_id": "accfc497",
+          "min_width": 12,
+          "max_width": 12,
+          "height": 8
+        }
+      ]
+    }
+  ],
+  "attachments": [
+    {
+      "name": "agentOutput",
+      "value": "<div style=\"overflow: auto;\">\n\n{% if job_id is not defined or not job_id or agent_name is not defined or not agent_name %}\n    <h3 style=\"color: red;\">\u26a0\ufe0f Error: Job ID or Agent Name not found. Cannot display workflow output.</h3>\n{% else %}\n\n    {% set query = \"jobId = '\" ~ job_id ~ \"'\" %}\n    {% set ns = namespace(eval_output=\"No Evaluation Status\", agent_output=\"No Output Yet\", last_updated=\"\") %}\n\n    {% set data = engine.query_stream_data(\"agent_output_stream\", cfxql_query=query, sorting=[{\"timestamp\": \"desc\"}]) %}\n\n    {% if data and data|length > 0 %}\n        {% set ns.last_updated = data[0][\"timestamp\"] %}\n    {% endif %}\n\n    {% for row in data %}\n        {% if row.get(\"evaluation_output_0\", \"\") %}\n            {% set ns.eval_output = json_loads(row.get(\"evaluation_output_0\")\n                                                .strip(\"```\")\n                                                .lstrip(\"json\")\n                                                .strip()).get(\"agent_run\", \"\") %}\n        {% endif %}\n        {% if row.get(\"agent_output_0\", \"\") %}\n            {% set ns.agent_output = row.get(\"agent_output_0\")\n                                        .strip(\"```\")\n                                        .lstrip(\"html\") %}\n        {% endif %}\n    {% endfor %}\n\n    {% if ns.eval_output == \"Success\" %}\n        {% set ns.eval_output = \"<font style='color: #22dd22;'>\" ~ ns.eval_output ~ \"</font>\" %}\n    {% elif ns.eval_output == \"Failure\" %}\n        {% set ns.eval_output = \"<font style='color: #ff2511;'>\" ~ ns.eval_output ~ \"</font>\" %}\n    {% endif %}\n\n    <h3>{{agent_name}}</h3>\n    <h3>Last Updated: {{ns.last_updated}}</h3>\n    <h3>Status: {{ns.eval_output}}</h3>\n    <h3>Output:</h3>\n    <hr/>\n    {{ns.agent_output}}\n\n{% endif %}\n</div>\n"
+    },
+    {
+      "name": "evalOutput",
+      "value": "{%raw%}\n\n<div style=\"overflow: auto;\">\n{%- \n    set query = \"jobId = '\" + job_id + \"'\"\n-%}\n\n{%\n    set ns = namespace(eval_output=\"No Evaluation Status\", agent_output=\"No Output Yet\", last_updated=\"\")\n%}\n\n{%- \n    set data = engine.query_stream_data(\"agent_output_stream\", cfxql_query=query, sorting=[{\"timestamp\": \"desc\" }]) \n-%}\n\n{%-if len(data) > 0 -%}\n    {%- set ns.last_updated = data[0][\"timestamp\"] -%}\n{%- endif -%}\n\n{%-for row in data -%}\n    {%-if row.get(\"evaluation_output_0\", \"\") -%}\n        {%- set ns.eval_output = json_loads(row.get(\"evaluation_output_0\").strip(\"```\").lstrip(\"json\").strip(\" \")).get(\"agent_run\", \"\")  -%}\n    {%- endif -%}\n     {%-if row.get(\"agent_output_0\", \"\") -%}\n        {%- set ns.agent_output = row.get(\"agent_output_0\").strip(\"```\").lstrip(\"html\")  -%}\n    {%- endif -%}\n{%- endfor -%}\n\n{%- if ns.eval_output == \"Success\" -%}\n    {%- set ns.eval_output = \"<font style='color: #22dd22;'>\"+ns.eval_output + \"</font>\"-%}\n{%- elif ns.eval_output == \"Failure\" -%}\n    {%- set ns.eval_output = \"<font style='color: #ff2511;'>\"+ns.eval_output + \"</font>\"-%}\n{%- endif -%}\n\n<h3>{{agent_name}}</h3>\n<h3>Last Updated: {{ns.last_updated}}</h3>\n<h3>Status: {{ns.eval_output}}</h3>\n<h3>Output:</h3>\n<hr/>\n{{ns.agent_output}}\n\n</div>\n{%endraw%}"
+    },
+    {
+      "name": "generator",
+      "value": "{{ dashboard[\"dashboard_sections\"].clear() }}\n\n{% if conversationId is not defined or conversationId == \"\" %}\n    <div style=\"background-color: black; color: red; font-weight: bold; padding: 10px;\">\n        \u26a0\ufe0f Conversation ID is missing or empty. Cannot proceed further.\n    </div>\n    {%- set message = \"conversationId is missing or empty\" -%}\n    \n    {{ dashboard[\"dashboard_sections\"].append({\n        \"title\": \"No Output\",\n        \"widgets\": [{\n            \"widget_type\": \"label\",\n            \"uses_reporting_engine\": true,\n            \"fixed_variables\": {},\n            \"height\": 1,\n            \"max_width\": 12,\n            \"label\": message,\n            \"widget_id\": \"header1\",\n            \"style\": {\"background-color\": \"black\", \"color\": \"red\", \"font-weight\": \"bold\", \"padding\": \"10px\"}\n        }]\n    }) }}\n{% else %}\n    {%- set message = \"\" -%}\n\n    {%- set cfxql_query = \"conversationId = '\"+str(conversationId)+\"' and final_response = 'true' GET conversationLabel\" -%}\n\n    {%- set rows = engine.query_stream_data(\n        \"rda_chat_sessions\",\n        cfxql_query=cfxql_query,\n        limit=100,\n        max_rows=100,\n        sorting=[{\"timestamp\": \"asc\"}]\n    ) -%}\n\n    {%- if not rows -%}\n        {%- set message = \"This Conversation does not yet have any outputs\" -%}\n        {{ dashboard[\"dashboard_sections\"].append({\n            \"title\": \"No Output\",\n            \"widgets\": [{\n                \"widget_type\": \"label\",\n                \"uses_reporting_engine\": true,\n                \"fixed_variables\": {\n                    \"conversationId\": conversationId,\n                    \"conversation_id\": conversationId\n                },\n                \"height\": 1,\n                \"max_width\": 12,\n                \"label\": message,\n                \"widget_id\": \"header1\",\n                \"style\": {\"background-color\": \"black\", \"color\": \"red\", \"font-weight\": \"bold\", \"padding\": \"10px\"}\n            }]\n        }) }}\n    {%- else -%}\n        {%- for r in rows -%}\n            {{ dashboard[\"dashboard_sections\"].append({\n                \"title\": r.get(\"conversationLabel\", \"?\"),\n                \"widgets\": [{\n                    \"widget_type\": \"label\",\n                    \"uses_reporting_engine\": true,\n                    \"fixed_variables\": {\n                        \"conversationId\": conversationId,\n                        \"conversation_id\": conversationId,\n                        \"conversationLabel\": r[\"conversationLabel\"]\n                    },\n                    \"label\": \"attachment://showOutput\",\n                    \"height\": 12,\n                    \"max_width\": 12,\n                    \"widget_id\": \"label\"+str(len(dashboard[\"dashboard_sections\"]))\n                }]\n            }) }}\n        {%- endfor -%}\n    {%- endif -%}\n{% endif %}\n"
+    },
+    {
+      "name": "showOutput",
+      "value": "{%- if conversationId is not defined or conversationLabel is not defined -%}\n  <div style=\"color:red; font-weight:bold;\">\n    \u26a0\ufe0f conversationId or conversationLabel not found in context\n  </div>\n{%- else -%}\n\n  {# ---- Query messages ---- #}\n  {%- set cfxql_query = \"conversationId = '\" ~ (conversationId|default('')) ~ \"' and final_response = 'true' and conversationLabel = '\" ~ (conversationLabel|default('')) ~ \"' GET message\" -%}\n  {%- set rows = engine.query_stream_data(\"rda_chat_sessions\", cfxql_query=cfxql_query, limit=2, max_rows=2, sorting=[{\"timestamp\": \"asc\"}]) | default([], true) -%}\n\n  {%- if rows|length == 0 -%}\n    <div style=\"color:gray;\">\n      \u2139\ufe0f This Conversation does not yet have any outputs.\n    </div>\n  {%- else -%}\n    {%- set raw_message = rows[0].get(\"message\") | default(\"\", true) | string -%}\n    {%- set message_out = raw_message -%}\n\n    {# ---- Handle JSON safely ---- #}\n    {%- if raw_message is string and raw_message.strip()|length > 0 and raw_message.strip().startswith(\"json\") -%}\n      {%- set stripped = (raw_message[4:] | default(\"\", true) | string).strip() -%}\n      {%- if stripped|length > 0 -%}\n        {%- set parsed = \"\" -%}\n        {%- if stripped is string and stripped|length > 0 -%}\n          {%- set parsed = json_loads(stripped) | default(\"\", true) -%}\n        {%- endif -%}\n        {%- if parsed -%}\n          {%- set message_out = json_dumps_indent(parsed, indent=2) | default(\"\u26a0\ufe0f JSON dump failed\", true) -%}\n        {%- else -%}\n          {%- set message_out = \"\u26a0\ufe0f Failed to parse JSON content.\" -%}\n        {%- endif -%}\n      {%- else -%}\n        {%- set message_out = \"\u26a0\ufe0f Empty JSON content.\" -%}\n      {%- endif -%}\n    {%- endif -%}\n\n    {# ---- Render Output ---- #}\n    <div style=\"width:100%; height:100%; overflow:auto;\">\n      {%- if message_out is string and not message_out.strip().startswith(\"<\") -%}\n        <div style=\"white-space: pre-wrap;\">{{ message_out }}</div>\n      {%- else -%}\n        {{ message_out }}\n      {%- endif -%}\n    </div>\n  {%- endif -%}\n{%- endif -%}\n"
+    }
+  ]
+}
